@@ -7,7 +7,7 @@ export async function proxy(request: NextRequest) {
   const user = session?.user as { role?: string } | undefined
 
   // Allow public routes
-  if (pathname.startsWith('/login') || pathname.startsWith('/api/auth')) {
+  if (pathname.startsWith('/login') || pathname.startsWith('/api/auth') || pathname === '/api/setup') {
     return NextResponse.next()
   }
 
