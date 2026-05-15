@@ -1,0 +1,165 @@
+// PostgreSQL Production Schema — use with Supabase / Railway / Neon
+// To switch: copy this over schema.prisma and run npx prisma db push
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("parent")
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions  Session[]
+  students  Student[]
+}
+
+model Student {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String?
+  email       String?
+  parentName  String?
+  status      String   @default("active")
+  source      String?
+  notes       String?
+  enrolledAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  parentId    String?
+  parent      User?    @relation(fields: [parentId], references: [id])
+
+  attendances Attendance[]
+  fees        Fee[]
+  grades      Grade[]
+  schedules   ScheduleStudent[]
+}
+
+model Teacher {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  subjects  String
+  status    String   @default("active")
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courses   Course[]
+  schedules Schedule[]
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  name        String
+  subject     String
+  description String?
+  price       Float    @default(0)
+  duration    Int      @default(60)
+  maxStudents Int      @default(20)
+  status      String   @default("active")
+  teacherId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teacher   Teacher?   @relation(fields: [teacherId], references: [id])
+  schedules Schedule[]
+  fees      Fee[]
+  grades    Grade[]
+}
+
+model Schedule {
+  id          String   @id @default(cuid())
+  courseId    String
+  teacherId   String
+  roomId      String?
+  title       String
+  startTime   DateTime
+  endTime     DateTime
+  isRecurring Boolean  @default(false)
+  recurrence  String?
+  status      String   @default("scheduled")
+  notes       String?
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  course    Course  @relation(fields: [courseId], references: [id])
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
+  students  ScheduleStudent[]
+}
+
+model ScheduleStudent {
+  id         String   @id @default(cuid())
+  scheduleId String
+  studentId  String
+  createdAt  DateTime @default(now())
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+  student  Student  @relation(fields: [studentId], references: [id])
+
+  @@unique([scheduleId, studentId])
+}
+
+model Attendance {
+  id         String   @id @default(cuid())
+  studentId  String
+  scheduleId String
+  status     String   @default("present")
+  notes      String?
+  date       DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  student  Student  @relation(fields: [studentId], references: [id])
+}
+
+model Fee {
+  id        String   @id @default(cuid())
+  studentId String
+  courseId  String?
+  amount    Float
+  type      String
+  status    String   @default("pending")
+  paidAt    DateTime?
+  dueDate   DateTime?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id])
+  course  Course? @relation(fields: [courseId], references: [id])
+}
+
+model Grade {
+  id        String   @id @default(cuid())
+  studentId String
+  courseId  String?
+  score     Float
+  type      String
+  notes     String?
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id])
+  course  Course? @relation(fields: [courseId], references: [id])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
