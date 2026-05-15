@@ -1,10 +1,13 @@
+// PostgreSQL Production Schema — use with Supabase / Railway / Neon
+// To switch: copy this over schema.prisma and run npx prisma db push
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -33,9 +36,8 @@ model Student {
   enrolledAt  DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  parentId   String?
-  parent     User?     @relation(fields: [parentId], references: [id])
+  parentId    String?
+  parent      User?    @relation(fields: [parentId], references: [id])
 
   attendances Attendance[]
   fees        Fee[]
