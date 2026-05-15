@@ -1,6 +1,6 @@
 {
   "build": {
     "builder": "nixpacks",
-    "buildCommand": "npx prisma generate && npx prisma db push --skip-generate --accept-data-loss && npx next build"
+    "buildCommand": "npx prisma generate && npx next build"
   }
 }
