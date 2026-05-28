@@ -1,0 +1,2 @@
+[nixpacks]
+nixPkgs = ["nodejs_22"]

@@ -1,0 +1,19 @@
+import type { Metadata } from 'next'
+import 'katex/dist/katex.min.css'
+import { Providers } from './providers'
+import './globals.css'
+
+export const metadata: Metadata = {
+  title: '牧哲学堂 - 教育管理系统',
+  description: '教育培训机构综合管理系统',
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="zh-CN">
+      <body className="min-h-screen">
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  )
+}

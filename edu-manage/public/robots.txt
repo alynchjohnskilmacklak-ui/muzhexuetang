@@ -1,0 +1,17 @@
+User-agent: *
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /students
+Disallow: /teachers
+Disallow: /courses
+Disallow: /schedule
+Disallow: /attendance
+Disallow: /reports
+Disallow: /data-admin
+Disallow: /teacher/
+Disallow: /parent/
+Disallow: /api/
+Allow: /login
+Allow: /$
+
+Sitemap:
