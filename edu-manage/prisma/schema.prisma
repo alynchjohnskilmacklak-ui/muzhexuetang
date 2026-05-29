@@ -1119,6 +1119,11 @@ model HighSchoolInfo {
   distanceFromXinle String?
   yiTong           Int?
   tongZhao         Int
+  allocationLine   Int?
+  acceptsOtherCounty Boolean @default(false)
+  xinleAccessible   Boolean  @default(true)
+  xinleAccessibleOverride Boolean?
+  xinleAllocationId String?
   enrollment       Int?
   boardingAvail    Boolean  @default(false)
   boardingFee      String?
