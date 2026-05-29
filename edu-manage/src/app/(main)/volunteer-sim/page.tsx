@@ -54,6 +54,11 @@ interface DBSchool {
   tips: string | null
   website: string | null
   phone: string | null
+  sourceUrl: string | null
+  sourceNote: string | null
+  infoVerifiedAt: string | null
+  infoConfidence: string | null
+  acceptsOtherCounty: boolean
 }
 
 interface ProcessedSchool extends DBSchool {
@@ -126,8 +131,8 @@ export default function VolunteerSimPage() {
     return getAllocationQuotaByName(school.name, school.fullName, inputSchool)
   }
 
-  const marketRank = submitted && inputScore !== null ? getMarketRank(inputScore) : null
-  const percentile = submitted && inputScore !== null ? getMarketPercentile(inputScore) : '0.00'
+  const marketRankResult = submitted && inputScore !== null ? getMarketRank(inputScore) : null
+  const percentileResult = submitted && inputScore !== null ? getMarketPercentile(inputScore) : null
 
   const processedSchools = useMemo((): ProcessedSchool[] => {
     if (!submitted || inputScore === null) return []
@@ -142,7 +147,7 @@ export default function VolunteerSimPage() {
           inputRank ?? 9999
         )
         const gap = inputScore - school.tongZhao
-        const accessible = school.xinleAccessibleOverride ?? isXinleAccessible(school)
+        const accessible = school.xinleAccessibleOverride ?? isXinleAccessible({...school, acceptsOtherCounty: school.acceptsOtherCounty})
         return { ...school, tag, gap, quota, accessible }
       })
       .sort((a, b) => {
@@ -309,7 +314,7 @@ export default function VolunteerSimPage() {
         showIcon
         style={{ marginBottom: 20, borderRadius: 10, background: '#fdf4e3', border: '1px solid #f0dca8' }}
         message={<span style={{ color: C.warning }}>重要提示</span>}
-        description={<span style={{ color: C.inkMuted }}>本模拟基于2025年分数线（满分800分）和新乐籍分配生名额数据。每年分数线存在波动，请以当年官方公布数据为准，建议结合班主任意见综合判断。</span>}
+        description={<span style={{ color: C.inkMuted }}>本系统基于2025年公开分数线、分配名额和学校信息进行模拟，仅供志愿填报参考。全市排名基于2025年石家庄中考一分一档表估算。梯度标签基于2025年分数线静态测算，不代表2026年实际录取结果。2026年实际录取以石家庄市教育考试院、学校招生简章及最终录取结果为准。</span>}
       />
 
       {/* Input Area */}
@@ -400,14 +405,17 @@ export default function VolunteerSimPage() {
             <div>
               <Text style={{ color: C.inkSubtle, fontSize: 12 }}>全市排名</Text>
               <div style={{ fontSize: 16, fontWeight: 600, color: C.ink }}>
-                {marketRank !== null ? `约第 ${marketRank.toLocaleString()} 名` : '—'}
+                {marketRankResult?.rank != null ? `约第 ${marketRankResult.rank.toLocaleString()} 名` : '—'}
               </div>
+              {marketRankResult?.message && (
+                <Text style={{ fontSize: 10, color: C.inkSubtle, display: 'block' }}>{marketRankResult.message}</Text>
+              )}
             </div>
             <div style={{ width: 1, height: 32, background: C.hairline }} />
             <div>
               <Text style={{ color: C.inkSubtle, fontSize: 12 }}>超越全市</Text>
               <div style={{ fontSize: 16, fontWeight: 600, color: C.success }}>
-                {(100 - parseFloat(percentile)).toFixed(1)}%
+                {percentileResult?.percentile !== '—' ? `${(100 - parseFloat(percentileResult?.percentile || '0')).toFixed(1)}%` : '—'}
               </div>
             </div>
             <div style={{ width: 1, height: 32, background: C.hairline }} />
@@ -595,28 +603,33 @@ export default function VolunteerSimPage() {
                 {/* Top recommendation */}
                 {allocationTop ? (
                   (() => {
-                    const topDb = schools.find(s => s.name === allocationTop.highSchoolName || s.fullName.includes(allocationTop.highSchoolName))
+                    const topBand = allocationTop.band
+                    const topDb = schools.find(s => s.name === topBand.highSchoolName || s.fullName.includes(topBand.highSchoolName))
+                    const isFallback = allocationTop.source === 'fallback_safe'
                     return (
                       <div style={{
-                        background: C.primaryBg,
-                        border: `1px solid ${C.primary}`,
+                        background: isFallback ? '#fdf4e3' : C.primaryBg,
+                        border: `1px solid ${isFallback ? '#f0dca8' : C.primary}`,
                         borderRadius: 10,
                         padding: '14px 18px',
                         marginBottom: 12,
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                          <span style={{ fontSize: 14 }}>💡</span>
-                          <Text strong style={{ fontSize: 15, color: C.primary }}>
-                            分配生志愿首选建议：【{allocationTop.highSchoolName}】
+                          <span style={{ fontSize: 14 }}>{isFallback ? '🔶' : '💡'}</span>
+                          <Text strong style={{ fontSize: 15, color: isFallback ? C.warning : C.primary }}>
+                            {isFallback ? '稳妥选择：' : '分配生志愿首选建议：'}【{topBand.highSchoolName}】
                           </Text>
                         </div>
                         <Text style={{ fontSize: 13, color: C.inkMuted, lineHeight: 1.7 }}>
-                          你校内第{allocationTop.bandLo < allocationTop.bandHi
-                            ? `${allocationTop.bandLo}-${allocationTop.bandHi}`
-                            : allocationTop.bandLo}名，落在{allocationTop.highSchoolName}名额区间（第{allocationTop.bandLo}-{allocationTop.bandHi}名），
-                          分数{inputScore}已超分配线约{inputScore! - allocationTop.allocationLine}分，录取把握大。
-                          分配生只能填1所，建议填报此校。
+                          {isFallback
+                            ? `排名高于该档（前${topBand.bandLo - 1}名通常会竞争更好的学校），可作为稳妥选择，但可能浪费分配生机会。`
+                            : `你校内第${topBand.bandLo < topBand.bandHi ? `${topBand.bandLo}-${topBand.bandHi}` : topBand.bandLo}名，落在${topBand.highSchoolName}名额区间（第${topBand.bandLo}-${topBand.bandHi}名），分数${inputScore}已超分配线约${inputScore! - topBand.allocationLine.value}分，可重点考虑。分配生只能填1所，建议填报此校。`}
                         </Text>
+                        {topBand.allocationLine.source === 'estimated' && (
+                          <Text style={{ fontSize: 11, color: C.inkSubtle, display: 'block', marginTop: 4 }}>
+                            ※ 该分配线为系统按统招线估算，仅供参考，实际以当年招生政策和学校公布为准。
+                          </Text>
+                        )}
                         <div style={{ marginTop: 10 }}>
                           {topDb ? (
                             <Button
@@ -637,7 +650,7 @@ export default function VolunteerSimPage() {
                       </div>
                     )
                   })()
-                ) : allocationBands.some(b => b.tag === '推荐') ? (
+                ) : (
                   <div style={{
                     background: '#fdf4e3',
                     border: '1px solid #f0dca8',
@@ -646,17 +659,17 @@ export default function VolunteerSimPage() {
                     marginBottom: 12,
                   }}>
                     <Text style={{ fontSize: 13, color: C.warning }}>
-                      存在推荐学校但未匹配到数据库记录，请检查学校名称是否一致。
+                      当前分数与排名条件下，该校无可推荐或可保底的分配生选项。建议重点考虑平行统招志愿。
                     </Text>
                   </div>
-                ) : null}
+                )}
 
-                {/* 推荐组（不含首选） + 保底组 */}
-                {allocationBands.filter(b => b.tag === '推荐' && b !== allocationTop).length > 0 && (
+                {/* 推荐组（不含首选） */}
+                {allocationBands.filter(b => b.tag === '推荐' && b !== allocationTop?.band).length > 0 && (
                   <div style={{ marginBottom: 10 }}>
                     <Text strong style={{ fontSize: 13, color: C.inkMuted }}>其他匹配选项：</Text>
                     <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {allocationBands.filter(b => b.tag === '推荐' && b !== allocationTop).map(b => {
+                      {allocationBands.filter(b => b.tag === '推荐' && b !== allocationTop?.band).map(b => {
                         const db = schools.find(s => s.name === b.highSchoolName || s.fullName.includes(b.highSchoolName))
                         return (
                           <div key={b.highSchoolName} style={{
@@ -666,7 +679,8 @@ export default function VolunteerSimPage() {
                           }}>
                             <span style={{ fontSize: 13, color: C.ink }}>◎ {b.highSchoolName}</span>
                             <Text style={{ fontSize: 12, color: C.inkSubtle }}>
-                              分配线 {b.allocationLine}分 · 名额第{b.bandLo}-{b.bandHi}名
+                              {b.allocationLine.label} {b.allocationLine.value}分 · 名额第{b.bandLo}-{b.bandHi}名
+                              {b.allocationLine.source === 'estimated' && ' (估算)'}
                             </Text>
                             {db && (
                               <Button size="small" disabled={!!allocationSlot}
@@ -685,14 +699,14 @@ export default function VolunteerSimPage() {
                 {/* 保底组 */}
                 {allocationBands.filter(b => b.tag === '保底').length > 0 && (
                   <div style={{ marginBottom: 10 }}>
-                    <Text strong style={{ fontSize: 13, color: C.success }}>保底选项（排名优于该档，把握很大）：</Text>
+                    <Text strong style={{ fontSize: 13, color: C.success }}>保底选项（排名优于该档，可重点考虑）：</Text>
                     <div style={{ marginTop: 4, fontSize: 12, color: C.inkSubtle, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                       {allocationBands.filter(b => b.tag === '保底').map(b => (
                         <span key={b.highSchoolName} style={{
                           background: C.successBg, padding: '3px 8px', borderRadius: 6,
                           border: '1px solid #b6e2d2', color: C.success,
                         }}>
-                          {b.highSchoolName}（分配线{b.allocationLine}分）
+                          {b.highSchoolName}（{b.allocationLine.label}{b.allocationLine.value}分{b.allocationLine.source === 'estimated' ? '·估算' : ''}）
                         </span>
                       ))}
                     </div>
@@ -706,7 +720,7 @@ export default function VolunteerSimPage() {
                     background: '#fdf4e3', border: '1px solid #f0dca8',
                   }}>
                     <Text style={{ fontSize: 12, color: C.warning }}>
-                      ⚠️ 以下学校因本校前序排名已占满名额，难以争取：
+                      ⚠️ 以下学校存在校内排名竞争风险，难以争取：
                     </Text>
                     <div style={{ marginTop: 4, fontSize: 12, color: C.inkSubtle }}>
                       {allocationBands.filter(b => b.tag === '排名不足').map(b =>
@@ -724,7 +738,7 @@ export default function VolunteerSimPage() {
                   }}>
                     <Text style={{ fontSize: 12, color: C.inkSubtle }}>
                       以下学校分数未达分配线：{allocationBands.filter(b => b.tag === '分数不足').map(b =>
-                        `${b.highSchoolName}（需≥${b.allocationLine}分）`
+                        `${b.highSchoolName}（需≥${b.allocationLine.value}分${b.allocationLine.source === 'estimated' ? '，估算' : ''}）`
                       ).join('、')}
                     </Text>
                   </div>
@@ -736,7 +750,7 @@ export default function VolunteerSimPage() {
                   background: C.surface3, border: `1px solid ${C.hairline}`,
                 }}>
                   <Text style={{ fontSize: 11, color: C.inkSubtle, lineHeight: 1.6 }}>
-                    说明：级联模型基于"全校学生按分数优先选最好学校"的理想假设。实际中部分学生有偏好（如宁可就近上新乐一中也不去市区），会使各档边界浮动。分配线为估算值（max(统招线-50, 460)），以当年官方为准。分配生录取还要求达到分配控制线、名额用不完不顺延。最终以官方录取为准，建议结合班主任意见。
+                    说明：级联模型基于"全校学生按分数优先选最好学校"的理想假设，实际中部分学生有偏好（如宁可就近上新乐一中也不去市区），会使各档边界浮动。分配线未标"估算"的为数据库录入值，标"估算"的是系统按统招线-50推算。真实录取受考生填报意愿、分配生控制线、同校竞争、当年政策影响，最终以石家庄市教育考试院和学校官方公布为准。
                   </Text>
                 </div>
               </div>
@@ -1044,6 +1058,42 @@ export default function VolunteerSimPage() {
                     <div style={{ color: C.inkMuted, fontSize: 13, marginTop: 4, lineHeight: 1.7 }}>
                       {detailSchool.tips}
                     </div>
+                  </div>
+                )}
+
+                {/* Source info */}
+                {(detailSchool.sourceNote || detailSchool.infoVerifiedAt || detailSchool.infoConfidence) && (
+                  <div style={{
+                    marginTop: 12, padding: '10px 14px', borderRadius: 8,
+                    background: C.surface3, border: `1px solid ${C.hairline}`,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <Text strong style={{ fontSize: 12, color: C.inkSubtle }}>信息来源：</Text>
+                      {detailSchool.sourceNote && (
+                        <Text style={{ fontSize: 11, color: C.inkMuted }}>{detailSchool.sourceNote}</Text>
+                      )}
+                      {detailSchool.infoVerifiedAt && (
+                        <Text style={{ fontSize: 11, color: C.inkSubtle }}>
+                          核实时间：{new Date(detailSchool.infoVerifiedAt).toLocaleDateString('zh-CN')}
+                        </Text>
+                      )}
+                      {detailSchool.infoConfidence && (
+                        <Tag style={{ margin: 0, fontSize: 10 }} color={
+                          detailSchool.infoConfidence === 'high' ? 'success' :
+                          detailSchool.infoConfidence === 'medium' ? 'processing' :
+                          detailSchool.infoConfidence === 'low' ? 'warning' : 'default'
+                        }>
+                          可信度：{detailSchool.infoConfidence === 'high' ? '高' :
+                            detailSchool.infoConfidence === 'medium' ? '中' :
+                            detailSchool.infoConfidence === 'low' ? '低' : '未知'}
+                        </Tag>
+                      )}
+                    </div>
+                    {(detailSchool.infoConfidence === 'low' || detailSchool.infoConfidence === 'unknown') && (
+                      <Text style={{ fontSize: 11, color: C.warning, display: 'block', marginTop: 4 }}>
+                        该校部分信息暂未核实，请以学校官方招生简章为准。
+                      </Text>
+                    )}
                   </div>
                 )}
               </div>

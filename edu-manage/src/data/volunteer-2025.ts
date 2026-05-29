@@ -122,20 +122,33 @@ export const CONTROL_LINES_2025: Record<string, number> = {
   '晋州市':500,'新乐市':460,
 }
 
-export function getMarketRank(score: number): number | null {
-  if (score in SCORE_RANK_2025) return SCORE_RANK_2025[score]
-  if (score > 780) return 1
-  if (score < 300) return null
-  for (let s = score + 1; s <= 780; s++) {
-    if (s in SCORE_RANK_2025) return SCORE_RANK_2025[s]
-  }
-  return null
+export type MarketRankResult = {
+  rank: number | null
+  message?: string
 }
 
-export function getMarketPercentile(score: number): string {
-  const rank = getMarketRank(score)
-  if (rank === null) return '0.00'
-  return ((rank / TOTAL_EXAMINEES_2025) * 100).toFixed(2)
+export function getMarketRank(score: number): MarketRankResult {
+  if (score in SCORE_RANK_2025) return { rank: SCORE_RANK_2025[score] }
+  if (score > 780) return { rank: 1, message: '超出当前一分一档上限，排名仅作估算' }
+  if (score < 300) return { rank: null, message: '低于当前一分一档统计范围，无法准确估算排名' }
+  for (let s = score + 1; s <= 780; s++) {
+    if (s in SCORE_RANK_2025) return { rank: SCORE_RANK_2025[s] }
+  }
+  return { rank: null, message: '无法从一分一档表估算排名' }
+}
+
+export function getMarketPercentile(score: number): { percentile: string; message?: string } {
+  const result = getMarketRank(score)
+  if (result.rank === null) return { percentile: '—', message: result.message }
+  return { percentile: ((result.rank / TOTAL_EXAMINEES_2025) * 100).toFixed(2) }
+}
+
+// 分数梯度阈值配置（基于2025年分数线静态测算）
+export const VOLUNTEER_SCORE_THRESHOLDS = {
+  safe: 80,       // 分数高于统招线80分以上 → 保底
+  stable: 15,     // 分数高于统招线15分以上 → 稳妥
+  challenge: -20, // 分数低于统招线20分以内 → 冲刺
+  largeGap: -60,  // 分数低于统招线60分以内 → 差距较大（超出则为暂未达线）
 }
 
 // ====== 学校名称匹配 ======
@@ -145,16 +158,39 @@ function stripSuffix(n: string): string {
   return n.replace(/[(（][^)）]*[)）]\s*$/, '').trim()
 }
 
-// 两个名称是否指向同一所学校（支持模糊匹配）
-function nameMatches(dbName: string, dbFullName: string, allocKey: string): boolean {
+// 两校名是否冲突（不应匹配的对）
+const NAME_CONFLICT_PAIRS: [string, string][] = [
+  ['卓越中学东校区', '卓越中学西校区'],
+  ['石家庄实验中学', '石家庄第二实验中学'],
+  ['精英中学', '精英新华中学'],
+  ['河北正定中学', '河北正中实验中学'],
+  ['正定中学', '河北正中实验中学'],
+]
+
+function isConflictingName(a: string, b: string): boolean {
+  const sa = stripSuffix(a)
+  const sb = stripSuffix(b)
+  for (const [c1, c2] of NAME_CONFLICT_PAIRS) {
+    if ((sa === c1 && sb === c2) || (sa === c2 && sb === c1)) return true
+    if ((sa.includes(c1) && sb.includes(c2)) || (sa.includes(c2) && sb.includes(c1))) return true
+  }
+  return false
+}
+
+// 两个名称是否指向同一所学校（支持模糊匹配，含冲突检测）
+export function nameMatches(dbName: string, dbFullName: string, allocKey: string): boolean {
+  // 冲突检测：如果两校名属于已知的不同学校，直接拒绝
+  if (isConflictingName(dbName, allocKey)) return false
+  if (isConflictingName(dbFullName, allocKey)) return false
+  if (isConflictingName(stripSuffix(dbName), allocKey)) return false
   // 精确匹配
   if (dbName === allocKey) return true
   if (dbFullName === allocKey) return true
   // 去掉括号后缀后匹配
   if (stripSuffix(dbName) === allocKey) return true
   if (stripSuffix(dbFullName) === allocKey) return true
-  // 分配表 key 包含在 DB 全名中
-  if (dbFullName.includes(allocKey)) return true
+  // 分配表 key 包含在 DB 全名中（但要求长度差异不大，防止子串误匹配）
+  if (dbFullName.includes(allocKey) && dbFullName.length - allocKey.length <= 10) return true
   // DB name 以 allocKey 开头（如"新乐一中"匹配"新乐一中(新乐)"）
   if (stripSuffix(dbName).startsWith(allocKey)) return true
   return false
@@ -179,21 +215,30 @@ export function getAllocationQuotaByName(highSchoolName: string, highSchoolFullN
 // ====== 可报性判断 ======
 
 // 判断某高中新乐学生是否可报
+// 规则优先级：location含新乐 > xinleAccessibleOverride > 分配表有名额 > acceptsOtherCounty > 不判定为民办即自动可报
 export function isXinleAccessible(school: {
   name: string
   fullName: string
   location: string
   type: string
   xinleAllocationId: string | null
+  xinleAccessibleOverride?: boolean | null
+  acceptsOtherCounty?: boolean
 }): boolean {
+  // 1. 新乐本地学校
   if (school.location.includes('新乐')) return true
-  if (school.type === '民办') return true
-  // 用名称在分配表中查找（替代 xinleAllocationId）
+  // 2. 人工覆盖（管理员手动设置）
+  if (school.xinleAccessibleOverride != null) return school.xinleAccessibleOverride
+  // 3. 在分配名额表中有该高中
   for (const quotaMap of Object.values(XINLE_ALLOCATION_2025)) {
     for (const allocKey of Object.keys(quotaMap)) {
       if (nameMatches(school.name, school.fullName, allocKey)) return true
     }
   }
+  // 4. 明确标明面向其他县区/外县统招
+  if (school.acceptsOtherCounty === true) return true
+  // 5. 民办且明确面向全市招生（需 location 含"其他县区"或 fullName 含"其他县区"）
+  if (school.type === '民办' && (school.location.includes('其他县区') || school.fullName.includes('其他县区'))) return true
   return false
 }
 
@@ -219,10 +264,10 @@ export function getScoreTag(
     return '分配生机会'
   }
 
-  if (gap >= 80)        return '保底'
-  if (gap >= 15)        return '稳妥'
-  if (gap >= -20)       return '冲刺'
-  if (gap >= -60)       return '差距较大'
+  if (gap >= VOLUNTEER_SCORE_THRESHOLDS.safe)      return '保底'
+  if (gap >= VOLUNTEER_SCORE_THRESHOLDS.stable)    return '稳妥'
+  if (gap >= VOLUNTEER_SCORE_THRESHOLDS.challenge) return '冲刺'
+  if (gap >= VOLUNTEER_SCORE_THRESHOLDS.largeGap)  return '差距较大'
   return '暂未达线'
 }
 
@@ -239,21 +284,29 @@ export const SCORE_TAG_CONFIG: Record<ScoreTag, {
 
 // ====== 分配生级联推荐 ======
 
+export interface AllocationLineInfo {
+  value: number
+  source: 'db' | 'estimated'
+  label: '分配生录取线' | '估算分配线'
+}
+
 export interface AllocationBand {
   highSchoolName: string
   quota: number
   bandLo: number
   bandHi: number
   tongZhao: number
-  allocationLine: number
+  allocationLine: AllocationLineInfo
   tag: '推荐' | '保底' | '排名不足' | '分数不足'
   note: string
 }
 
-// 分配生控制线估算：优先取数据库值，否则 max(统招线-50, 460)
-function estimateAllocationLine(tongZhao: number, dbAllocationLine: number | null): number {
-  if (dbAllocationLine != null) return dbAllocationLine
-  return Math.max(tongZhao - 50, 460)
+// 分配生控制线：优先取数据库值，否则用统招线-50（不低于460）估算
+function estimateAllocationLine(tongZhao: number, dbAllocationLine: number | null): AllocationLineInfo {
+  if (dbAllocationLine != null) {
+    return { value: dbAllocationLine, source: 'db', label: '分配生录取线' }
+  }
+  return { value: Math.max(tongZhao - 50, 460), source: 'estimated', label: '估算分配线' }
 }
 
 export function getAllocationBands(
@@ -282,18 +335,18 @@ export function getAllocationBands(
 
     let tag: AllocationBand['tag']
     let note = ''
-    if (score < s.allocationLine) {
+    if (score < s.allocationLine.value) {
       tag = '分数不足'
-      note = `你的分数未达该校分配生控制线（约${s.allocationLine}分）`
+      note = `你的分数未达该校分配生控制线（${s.allocationLine.label === '估算分配线' ? '约' : ''}${s.allocationLine.value}分${s.allocationLine.source === 'estimated' ? '，该线为系统按统招线估算，仅供参考' : ''}）`
     } else if (rank > bandHi) {
       tag = '排名不足'
-      note = `该校名额对应校内前${bandHi}名，你目前第${rank}名，多半已被更高排名同学占满`
+      note = `该校名额对应校内前${bandHi}名，你目前第${rank}名，存在校内排名竞争风险`
     } else if (rank < bandLo) {
       tag = '保底'
-      note = `你的排名优于该档（前${bandLo - 1}名通常去更好的学校），此校把握很大`
+      note = `你的排名优于该档（前${bandLo - 1}名通常会竞争更好的学校），此校可重点考虑`
     } else {
       tag = '推荐'
-      note = `你的校内第${rank}名正好落在该校名额区间（第${bandLo}-${bandHi}名），分数也达标，最匹配`
+      note = `你的校内第${rank}名落在该校名额区间（第${bandLo}-${bandHi}名），分数也达标，当前模拟结果较匹配`
     }
 
     return { highSchoolName: s.name, quota: s.quota, bandLo, bandHi, tongZhao: s.tongZhao, allocationLine: s.allocationLine, tag, note }
@@ -301,12 +354,19 @@ export function getAllocationBands(
 }
 
 // 从 getAllocationBands 结果中提取首选推荐
-export function getTopRecommendation(bands: AllocationBand[]): AllocationBand | null {
+export function getTopRecommendation(bands: AllocationBand[]): { band: AllocationBand; source: 'recommended' | 'fallback_safe' } | null {
   const recommended = bands.filter(b => b.tag === '推荐')
-  if (recommended.length === 0) return null
-  // 取档次最高（统招线最高）的
-  recommended.sort((a, b) => b.tongZhao - a.tongZhao)
-  return recommended[0]
+  if (recommended.length > 0) {
+    recommended.sort((a, b) => b.tongZhao - a.tongZhao)
+    return { band: recommended[0], source: 'recommended' }
+  }
+  // 无推荐时，取保底中档位最高的作为稳妥选项
+  const safe = bands.filter(b => b.tag === '保底')
+  if (safe.length > 0) {
+    safe.sort((a, b) => b.tongZhao - a.tongZhao)
+    return { band: safe[0], source: 'fallback_safe' }
+  }
+  return null
 }
 
 // 兼容旧版 page.tsx 已有调用的导出（保留旧名供过渡）

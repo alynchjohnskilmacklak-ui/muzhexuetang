@@ -1134,6 +1134,10 @@ model HighSchoolInfo {
   tips             String?
   website          String?
   phone            String?
+  sourceUrl        String?
+  sourceNote       String?
+  infoVerifiedAt   DateTime?
+  infoConfidence   String?   @default("unknown")
   updatedAt        DateTime @updatedAt
   updatedBy        String?
 }
