@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "claude": "set DISABLE_AUTOUPDATER=1&& claude",
+    "claude:version": "set DISABLE_AUTOUPDATER=1&& claude --version"
+  },
+  "devDependencies": {
+    "@anthropic-ai/claude-code": "2.1.150"
+  }
+}
