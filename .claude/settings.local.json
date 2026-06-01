@@ -73,7 +73,8 @@
       "Bash(cat musicschool/.gitignore)",
       "Bash(git config *)",
       "Bash(git rm *)",
-      "Bash(rm -rf edu-manage/.git musicschool/.git)"
+      "Bash(rm -rf edu-manage/.git musicschool/.git)",
+      "Bash(git fetch *)"
     ]
   }
 }
