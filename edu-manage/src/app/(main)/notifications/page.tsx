@@ -5,8 +5,7 @@ import {
   Alert, Button, Card, Checkbox, Col, Drawer, Form, Input, message, Radio, Row,
   Divider, Select, Space, Statistic, Table, Tabs, Tag, Typography,
 } from 'antd'
-import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons'
-import { useRouter } from 'next/navigation'
+import { SearchOutlined } from '@ant-design/icons'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -22,7 +21,6 @@ interface StudentItem {
 }
 
 export default function AdminNotificationsPage() {
-  const router = useRouter()
   const [students, setStudents] = useState<StudentItem[]>([])
   const [grades, setGrades] = useState<string[]>([])
   const [selectedStudents, setSelectedStudents] = useState<string[]>([])
@@ -139,10 +137,6 @@ export default function AdminNotificationsPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#faf8f5', padding: 24, maxWidth: 1200, margin: '0 auto' }}>
-      <Button icon={<ArrowLeftOutlined />} type="text" style={{ marginBottom: 16, padding: 0 }} onClick={() => router.back()}>
-        返回
-      </Button>
-
       <Title level={4} style={{ marginBottom: 4 }}>消息通知</Title>
       <Text type="secondary" style={{ fontSize: 13, display: 'block', marginBottom: 20 }}>
         向家长发送系统通知或微信提醒
@@ -178,6 +172,8 @@ export default function AdminNotificationsPage() {
                     <Select
                       placeholder="按年级筛选"
                       allowClear
+                      getPopupContainer={() => document.body}
+                      listHeight={240}
                       style={{ width: '100%', marginBottom: 8 }}
                       value={gradeFilter || undefined}
                       onChange={(value) => setGradeFilter(value || '')}
@@ -197,7 +193,7 @@ export default function AdminNotificationsPage() {
                       </Button>
                       <Button size="small" onClick={() => setSelectedStudents([])}>取消全选</Button>
                     </div>
-                    <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+                    <div data-scroll-lock style={{ maxHeight: 400, overflowY: 'auto', overscrollBehavior: 'contain' }}>
                       {Object.entries(groupedFiltered).map(([grade, gradeStudents]) => {
                         const ids = gradeStudents.map((student) => student.id)
                         const allChecked = ids.every((id) => selectedStudents.includes(id))

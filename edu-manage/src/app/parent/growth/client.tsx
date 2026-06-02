@@ -1,17 +1,53 @@
 'use client'
 
-import { useState } from 'react'
-import { Alert, Card, Empty, Modal, Tag, Timeline, Typography, Row, Col, Tabs } from 'antd'
-import { HeartOutlined, TrophyOutlined, StarOutlined, RiseOutlined, BookOutlined, InfoCircleOutlined } from '@ant-design/icons'
+import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
+import { Alert, Card, Empty, Modal, Progress, Tag, Tabs, Typography } from 'antd'
+import {
+  BookOutlined,
+  HeartOutlined,
+  InfoCircleOutlined,
+  ReadOutlined,
+  RiseOutlined,
+  StarOutlined,
+  TrophyOutlined,
+} from '@ant-design/icons'
 import { format } from 'date-fns'
+import { PERFORMANCE_BADGES } from '@/lib/performance'
 
 const { Title, Text, Paragraph } = Typography
 
-const MOOD_LABELS: Record<string, { text: string; color: string }> = {
-  GREAT: { text: '很棒', color: '#1D9E75' },
-  GOOD: { text: '良好', color: '#534AB7' },
-  OKAY: { text: '一般', color: '#BA7517' },
-  NEEDS_ATTENTION: { text: '需要关注', color: '#E24B4A' },
+const MOOD_LABELS: Record<string, { text: string; color: string; bg: string }> = {
+  GREAT: { text: '很棒', color: '#1D8A66', bg: '#E8F6EF' },
+  GOOD: { text: '良好', color: '#5E5AB8', bg: '#EFEFFC' },
+  OKAY: { text: '平稳', color: '#A76616', bg: '#FFF3DC' },
+  NEEDS_ATTENTION: { text: '需关注', color: '#C84A3D', bg: '#FDECE8' },
+}
+
+const QUOTES = [
+  { text: '学而不思则罔，思而不学则殆。', source: '《论语·为政》' },
+  { text: '博观而约取，厚积而薄发。', source: '苏轼《稼说送张琥》' },
+  { text: '知之者不如好之者，好之者不如乐之者。', source: '《论语·雍也》' },
+]
+
+const TYPE_META: Record<string, { label: string; icon: ReactNode; color: string; bg: string }> = {
+  post: { label: '表现反馈', icon: <HeartOutlined />, color: '#D96F43', bg: '#FFF3EA' },
+  classroom: { label: '课堂反馈', icon: <BookOutlined />, color: '#6A5ACD', bg: '#F0EEFF' },
+  badge: { label: '闪光徽章', icon: <TrophyOutlined />, color: '#B7791F', bg: '#FFF5D8' },
+  grade: { label: '学习成绩', icon: <StarOutlined />, color: '#2476A8', bg: '#EAF5FB' },
+  highlight: { label: '高光时刻', icon: <RiseOutlined />, color: '#1D8A66', bg: '#EAF7EF' },
+}
+
+function badgeMeta(type: string) {
+  return PERFORMANCE_BADGES.find(item => item.type === type) || { type, icon: '✦', label: type }
+}
+
+function typeMeta(type: string) {
+  return TYPE_META[type] || TYPE_META.highlight
+}
+
+function shortDate(value: Date) {
+  return format(value, 'M月d日 HH:mm')
 }
 
 export function ParentGrowthClient({
@@ -29,8 +65,7 @@ export function ParentGrowthClient({
 }) {
   const [detailModal, setDetailModal] = useState<any>(null)
 
-  // Build combined timeline
-  const timeline = [
+  const timeline = useMemo(() => ([
     ...posts.map((p: any) => ({
       type: 'post',
       date: new Date(p.createdAt),
@@ -46,20 +81,24 @@ export function ParentGrowthClient({
       date: new Date(f.createdAt),
       student: '',
       teacher: f.teacher?.name,
-      content: f.summary || '课堂反馈',
+      content: f.summary || f.content || '课堂反馈',
       id: f.id,
       raw: f,
     })),
-    ...badges.map((b: any) => ({
-      type: 'badge',
-      date: new Date(b.earnedAt),
-      student: b.student?.name,
-      teacher: b.teacher?.name,
-      content: `${b.badgeType}徽章`,
-      description: b.description,
-      id: b.id,
-      raw: b,
-    })),
+    ...badges.map((b: any) => {
+      const badge = badgeMeta(b.badgeType)
+      return {
+        type: 'badge',
+        date: new Date(b.earnedAt),
+        student: b.student?.name,
+        teacher: b.teacher?.name,
+        content: `${badge.label}徽章`,
+        description: b.description,
+        badgeType: b.badgeType,
+        id: b.id,
+        raw: b,
+      }
+    }),
     ...highlights.map((h: any) => ({
       type: 'highlight',
       date: new Date(h.createdAt),
@@ -73,23 +112,50 @@ export function ParentGrowthClient({
       type: 'grade',
       date: new Date(g.createdAt),
       student: g.student?.name,
-      content: `${g.assessment?.name || ''}`,
+      content: g.assessment?.name || '学习测评',
       score: g.score,
       id: g.id,
       raw: g,
     })),
-  ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 50)
+  ]).sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 50), [posts, classroomFeedbacks, badges, grades, highlights])
 
+  const quote = QUOTES[timeline.length % QUOTES.length]
+  const earnedTypes = new Set(badges.map((badge: any) => badge.badgeType))
+  const featuredBadges = badges.slice(0, 3)
   const hasData = timeline.length > 0
+  const stats = [
+    { label: '成长记录', value: timeline.length },
+    { label: '闪光徽章', value: badges.length },
+    { label: '关联学员', value: students.length },
+  ]
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <Title level={4} style={{ marginBottom: 4 }}>成长动态</Title>
+    <div className="growth-page">
+      <section className="growth-hero">
+        <div>
+          <Text className="growth-eyebrow">家校成长记录</Text>
+          <Title level={3} className="growth-title">成长动态</Title>
+          <Text className="growth-subtitle">
+            记录孩子每一次进步与闪光时刻{filterDate ? `，当前查看 ${filterDate}` : ''}
+          </Text>
+        </div>
+        <div className="growth-quote" aria-label="励志名言">
+          <ReadOutlined />
+          <div>
+            <Paragraph className="growth-quote-text">{quote.text}</Paragraph>
+            <Text className="growth-quote-source">{quote.source}</Text>
+          </div>
+        </div>
+      </section>
+
+      <div className="growth-stats">
+        {stats.map(item => (
+          <Card key={item.label} bordered={false} className="growth-stat-card">
+            <Text>{item.label}</Text>
+            <strong>{item.value}</strong>
+          </Card>
+        ))}
       </div>
-      <Text type="secondary" style={{ fontSize: 13, display: 'block', marginBottom: 20 }}>
-        记录孩子每一次进步与闪光时刻{filterDate ? ` — ${filterDate}` : ''}
-      </Text>
 
       {highlightedFeedback && (
         <Alert
@@ -105,94 +171,123 @@ export function ParentGrowthClient({
               </Paragraph>
             </div>
           }
-          style={{ marginBottom: 16, borderRadius: 10 }}
+          className="growth-alert"
           closable
         />
       )}
 
       {!hasData ? (
-        <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', minHeight: 360, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Empty description={filterDate ? `${filterDate} 暂无忧虑反馈，请关注其他日期。` : "老师还没有发布新的成长记录，孩子的每一次努力都会被认真看见。"} image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        <Card bordered={false} className="growth-empty-card">
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={
+              <span>
+                {filterDate ? `${filterDate} 暂无成长记录。` : '老师还没有发布新的成长记录。'}
+                <br />
+                每一份努力都会被认真看见，新的闪光时刻很快会来到。
+              </span>
+            }
+          />
         </Card>
       ) : (
         <Tabs
           defaultActiveKey="timeline"
+          className="growth-tabs"
           items={[
             {
               key: 'timeline',
               label: <span><RiseOutlined /> 成长时间线</span>,
               children: (
-                <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2' }}>
-                  <Timeline
-                    items={timeline.map((item: any, i: number) => ({
-                      color: item.type === 'badge' ? 'gold' : item.type === 'classroom' ? 'purple' : item.type === 'grade' ? 'blue' : '#E8784A',
-                      dot: item.type === 'badge' ? <TrophyOutlined /> : item.type === 'classroom' ? <BookOutlined /> : item.type === 'grade' ? <StarOutlined /> : <HeartOutlined />,
-                      children: (
-                        <div key={i} style={{ cursor: item.type === 'post' || item.type === 'classroom' ? 'pointer' : 'default' }} onClick={() => (item.type === 'post' || item.type === 'classroom') && setDetailModal(item)}>
-                          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
-                            {item.student && <Text strong style={{ fontSize: 12, color: '#1F2933' }}>{item.student}</Text>}
-                            {item.teacher && <Text type="secondary" style={{ fontSize: 10 }}>· {item.teacher}老师</Text>}
-                            <Tag style={{ borderRadius: 9999, fontSize: 10 }}>
-                              {item.type === 'post' ? '表现反馈' : item.type === 'classroom' ? '课堂反馈' : item.type === 'badge' ? '徽章' : item.type === 'grade' ? '成绩' : '亮点'}
-                            </Tag>
-                            {item.mood && (
-                              <Tag color={MOOD_LABELS[item.mood]?.color} style={{ borderRadius: 9999, fontSize: 10 }}>
-                                {MOOD_LABELS[item.mood]?.text || item.mood}
-                              </Tag>
-                            )}
+                <div className="growth-content-grid">
+                  <Card bordered={false} className="growth-timeline-card">
+                    <div className="growth-timeline" data-scroll-lock>
+                      {timeline.map((item: any) => {
+                        const meta = typeMeta(item.type)
+                        const canOpen = item.type === 'post' || item.type === 'classroom'
+                        return (
+                          <button
+                            type="button"
+                            key={`${item.type}-${item.id}`}
+                            className="growth-timeline-item"
+                            onClick={() => canOpen && setDetailModal(item)}
+                            disabled={!canOpen}
+                          >
+                            <span className="growth-node" style={{ color: meta.color, background: meta.bg }}>
+                              {item.badgeType ? badgeMeta(item.badgeType).icon : meta.icon}
+                            </span>
+                            <span className="growth-record">
+                              <span className="growth-record-head">
+                                <span>
+                                  {item.student && <strong>{item.student}</strong>}
+                                  {item.teacher && <em>{item.teacher}老师</em>}
+                                </span>
+                                <Text>{shortDate(item.date)}</Text>
+                              </span>
+                              <span className="growth-tags">
+                                <Tag style={{ color: meta.color, background: meta.bg, borderColor: 'transparent' }}>{meta.label}</Tag>
+                                {item.mood && (
+                                  <Tag style={{ color: MOOD_LABELS[item.mood]?.color, background: MOOD_LABELS[item.mood]?.bg, borderColor: 'transparent' }}>
+                                    {MOOD_LABELS[item.mood]?.text || item.mood}
+                                  </Tag>
+                                )}
+                              </span>
+                              <span className="growth-record-content">{item.content}</span>
+                              {item.description && <span className="growth-note">{item.description}</span>}
+                              {item.score !== undefined && (
+                                <span className="growth-score">
+                                  <span>成绩</span>
+                                  <Progress percent={Math.min(100, Number(item.score) || 0)} size="small" showInfo={false} strokeColor="#E8784A" trailColor="#F3E2D7" />
+                                  <strong>{item.score}</strong>
+                                </span>
+                              )}
+                              {canOpen && <span className="growth-open">点击查看详情</span>}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </Card>
+
+                  <aside className="growth-side-panel">
+                    <Card bordered={false} className="growth-feature-card">
+                      <Text className="growth-panel-title">最近闪光</Text>
+                      {featuredBadges.length ? featuredBadges.map((badge: any) => {
+                        const meta = badgeMeta(badge.badgeType)
+                        return (
+                          <div key={badge.id} className="growth-feature-badge">
+                            <span>{meta.icon}</span>
+                            <div>
+                              <strong>{meta.label}</strong>
+                              <Text>{badge.student?.name || '学员'}，{badge.teacher?.name || '老师'}记录</Text>
+                            </div>
                           </div>
-                          <Text style={{ fontSize: 12, lineHeight: 1.6, color: '#4B5563' }}>{item.content}</Text>
-                          {item.score !== undefined && (
-                            <Text strong style={{ fontSize: 14, color: item.score >= 90 ? '#1D9E75' : '#E8784A' }}>
-                              成绩: {item.score}
-                            </Text>
-                          )}
-                          {item.description && (
-                            <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 2 }}>{item.description}</Text>
-                          )}
-                          {(item.type === 'post' || item.type === 'classroom') && (
-                            <div style={{ marginTop: 4 }}>
-                              <Text type="secondary" style={{ fontSize: 10 }}>
-                                {format(item.date, 'M月d日 HH:mm')} · 点击查看详情
-                              </Text>
-                            </div>
-                          )}
-                          {!(item.type === 'post' || item.type === 'classroom') && (
-                            <div style={{ marginTop: 4 }}>
-                              <Text type="secondary" style={{ fontSize: 10 }}>
-                                {format(item.date, 'M月d日 HH:mm')}
-                              </Text>
-                            </div>
-                          )}
-                        </div>
-                      ),
-                    }))}
-                  />
-                </Card>
+                        )
+                      }) : (
+                        <Text className="growth-note">暂未获得徽章，先期待下一次闪光。</Text>
+                      )}
+                    </Card>
+                  </aside>
+                </div>
               ),
             },
             {
               key: 'badges',
               label: <span><TrophyOutlined /> 徽章墙</span>,
-              children: badges.length === 0 ? (
-                <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Empty description="暂无徽章" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-                </Card>
-              ) : (
-                <Row gutter={[12, 12]}>
-                  {badges.map((b: any) => (
-                    <Col xs={12} sm={8} lg={6} key={b.id}>
-                      <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', textAlign: 'center' }}>
-                        <TrophyOutlined style={{ fontSize: 28, color: '#E8784A', marginBottom: 8 }} />
-                        <Text strong style={{ display: 'block', fontSize: 13 }}>{b.badgeType}</Text>
-                        {b.description && <Text type="secondary" style={{ fontSize: 10 }}>{b.description}</Text>}
-                        <div style={{ marginTop: 4 }}>
-                          <Text type="secondary" style={{ fontSize: 10 }}>{b.student?.name} · {format(new Date(b.earnedAt), 'M月d日')}</Text>
+              children: (
+                <Card bordered={false} className="growth-badge-wall">
+                  {PERFORMANCE_BADGES.map((badge, index) => {
+                    const earned = earnedTypes.has(badge.type)
+                    return (
+                      <div key={badge.type} className={`growth-badge-token ${earned ? 'earned' : ''} ${index % 3 === 0 ? 'wide' : ''}`}>
+                        <span>{badge.icon}</span>
+                        <div>
+                          <strong>{badge.label}</strong>
+                          <Text>{earned ? '已经点亮' : '继续积累，等待点亮'}</Text>
                         </div>
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
+                      </div>
+                    )
+                  })}
+                </Card>
               ),
             },
           ]}
@@ -208,14 +303,14 @@ export function ParentGrowthClient({
       >
         {detailModal && (
           <div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
               <Tag style={{ borderRadius: 9999 }}>
-                {detailModal.type === 'post' ? '表现反馈' : '课堂反馈'}
+                {typeMeta(detailModal.type).label}
               </Tag>
               {detailModal.teacher && <Text strong>{detailModal.teacher}老师</Text>}
-              {detailModal.student && <Text type="secondary">· {detailModal.student}</Text>}
+              {detailModal.student && <Text type="secondary">{detailModal.student}</Text>}
               {detailModal.mood && (
-                <Tag color={MOOD_LABELS[detailModal.mood]?.color} style={{ borderRadius: 9999 }}>
+                <Tag style={{ color: MOOD_LABELS[detailModal.mood]?.color, background: MOOD_LABELS[detailModal.mood]?.bg, borderColor: 'transparent' }}>
                   {MOOD_LABELS[detailModal.mood]?.text}
                 </Tag>
               )}
@@ -234,7 +329,7 @@ export function ParentGrowthClient({
             {detailModal.raw?.imageUrls?.length > 0 && (
               <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
                 {detailModal.raw.imageUrls.map((url: string, i: number) => (
-                  <img key={i} src={url} alt={`图片 ${i + 1}`} style={{ width: 160, height: 120, objectFit: 'cover', borderRadius: 8 }} />
+                  <img key={i} src={url} alt={`成长记录图片 ${i + 1}`} style={{ width: 160, height: 120, objectFit: 'cover', borderRadius: 8 }} />
                 ))}
               </div>
             )}

@@ -78,6 +78,25 @@ const menuItems: MenuProps['items'] = [
   { key: '/settings', icon: <SettingOutlined />, label: '系统设置' },
 ]
 
+function flattenMenuKeys(items: MenuProps['items']): string[] {
+  return (items || []).flatMap((item: any) => {
+    if (!item) return []
+    const ownKey = typeof item.key === 'string' && item.key.startsWith('/') ? [item.key] : []
+    return [...ownKey, ...flattenMenuKeys(item.children)]
+  })
+}
+
+function resolveActiveKey(pathname: string, keys: string[], fallback: string) {
+  const exact = keys.find(key => key === pathname)
+  if (exact) return exact
+
+  const match = keys
+    .filter(key => pathname.startsWith(`${key}/`))
+    .sort((a, b) => b.length - a.length)[0]
+
+  return match || fallback
+}
+
 export function Sidebar({
   collapsed,
   onCollapse,
@@ -97,7 +116,8 @@ export function Sidebar({
     localStorage.setItem('admin_sider_collapsed', String(collapsed))
   }, [collapsed])
 
-  const baseKey = '/' + (pathname.split('/')[1] || 'dashboard')
+  const menuKeys = useMemo(() => flattenMenuKeys(menuItems), [])
+  const baseKey = resolveActiveKey(pathname, menuKeys, '/dashboard')
   const isScheduleIntensive = pathname.startsWith('/schedule/intensive')
   const viewParam = searchParams.get('view')
   const selectedKey = isScheduleIntensive

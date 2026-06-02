@@ -52,7 +52,9 @@ export function PhETSimulator() {
 
   const subjectIcons: Record<string, string> = {
     '物理': '⚡',
+    '物理工具': '⚡',
     '化学': '⚗',
+    '化学实验室': '⚗',
     '生物': '🧬',
     '数学': '∑',
     '数学工具': '∑',
@@ -66,7 +68,7 @@ export function PhETSimulator() {
           <ExperimentOutlined style={{ fontSize: 22, color: '#E87545' }} />
           <Title level={4} style={{ margin: 0, fontSize: isMobile ? 17 : 20 }}>数字化仿真教学</Title>
         </div>
-        <Text type="secondary" style={{ fontSize: 13 }}>基于 PhET 互动仿真 · 美国科罗拉多大学 · 免费开放使用</Text>
+        <Text type="secondary" style={{ fontSize: 13 }}>整合 PhET、GeoGebra、Desmos、Falstad 与 ChemCollective · 免费开放资源 · 课堂演示与课后探究</Text>
       </div>
 
       <div style={{
@@ -81,9 +83,9 @@ export function PhETSimulator() {
         flexWrap: 'wrap',
       }}>
         <div style={{ flex: 1, minWidth: 200 }}>
-          <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 2 }}>交互式科学仿真实验室</Text>
+          <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 2 }}>交互式数学与科学仿真实验室</Text>
           <Text type="secondary" style={{ fontSize: 12, lineHeight: 1.7 }}>
-            无需下载安装，点击即可运行。涵盖 PhET 科学仿真、Desmos 图形计算器和 GeoGebra 几何工具，帮助学生通过互动实验和数学工具理解抽象概念。
+            无需下载安装，点击即可运行。涵盖 PhET 科学仿真、GeoGebra 动态数学、Desmos 计算器、Falstad 电路和 ChemCollective 化学虚拟实验，帮助学生通过互动实验理解抽象概念。
           </Text>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

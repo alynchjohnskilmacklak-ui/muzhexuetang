@@ -1,35 +1,46 @@
 ---
-version: alpha
-name: Linear
-description: "A near-black product-focused canvas built around #010102 (the deepest dark surface), light gray text (#f7f8f8), and the signature Linear lavender-blue (#5e6ad2) used as the single chromatic accent. Adapted for 牧哲学堂 education management platform."
+version: v2
+name: Muzhe Academy Warm Light
+description: "A warm, low-eye-strain education platform canvas built around #faf8f5 (warm cream), warm near-black text (#1a1201), and the signature warm orange (#E8784A) as the single chromatic accent. Designed for parents (mostly middle-aged, mobile-first, evening use) checking school options for their children."
 
 colors:
-  primary: "#5e6ad2"
+  primary: "#E8784A"
   on-primary: "#ffffff"
-  primary-hover: "#828fff"
-  primary-focus: "#5e69d1"
-  ink: "#f7f8f8"
-  ink-muted: "#d0d6e0"
-  ink-subtle: "#8a8f98"
-  ink-tertiary: "#62666d"
-  canvas: "#010102"
-  surface-1: "#0f1011"
-  surface-2: "#141516"
-  surface-3: "#18191a"
-  surface-4: "#191a1b"
-  hairline: "#23252a"
-  hairline-strong: "#34343a"
-  hairline-tertiary: "#3e3e44"
-  inverse-canvas: "#ffffff"
-  inverse-surface-1: "#f5f6f6"
-  inverse-surface-2: "#f6f7f7"
-  inverse-ink: "#000000"
+  primary-hover: "#f08a5f"
+  primary-focus: "#d0683a"
+  primary-bg: "#fff3ec"
+  ink: "#1a1201"
+  ink-muted: "#5a4e3a"
+  ink-subtle: "#9a8e7a"
+  ink-tertiary: "rgba(0,0,0,.35)"
+  canvas: "#faf8f5"
+  surface-1: "#ffffff"
+  surface-2: "#faf8f5"
+  surface-3: "#f5f2ee"
+  surface-4: "#f0ece7"
+  hairline: "rgba(0,0,0,.06)"
+  hairline-strong: "rgba(0,0,0,.1)"
+  hairline-tertiary: "rgba(0,0,0,.04)"
+  inverse-canvas: "#1a1201"
+  inverse-surface-1: "#2a2211"
+  inverse-surface-2: "#3a3221"
+  inverse-ink: "rgba(255,255,255,.9)"
   brand-secure: "#7a7fad"
-  semantic-success: "#27a644"
+  semantic-success: "#1D9E75"
+  semantic-success-bg: "#eaf7f1"
   semantic-warning: "#f5a623"
-  semantic-error: "#e03e2d"
-  semantic-info: "#5e6ad2"
+  semantic-warning-text: "#C77F00"
+  semantic-error: "#E24B4A"
+  semantic-info: "#E8784A"
   semantic-overlay: "#000000"
+
+chart:
+  series-1: "#E8784A"
+  series-2: "#1D9E75"
+  series-3: "#8892f0"
+  series-4: "#f5a623"
+  series-5: "#D4537E"
+  series-6: "#185FA5"
 
 typography:
   display-xl:
@@ -119,7 +130,6 @@ rounded:
   xl: 16px
   xxl: 24px
   pill: 9999px
-  full: 9999px
 
 spacing:
   xxs: 4px
@@ -141,300 +151,214 @@ components:
   button-primary-hover:
     backgroundColor: "{colors.primary-hover}"
     textColor: "{colors.on-primary}"
-    typography: "{typography.button}"
-    rounded: "{rounded.md}"
   button-secondary:
     backgroundColor: "{colors.surface-1}"
     textColor: "{colors.ink}"
     typography: "{typography.button}"
     rounded: "{rounded.md}"
-    padding: 8px 14px
-  button-tertiary:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.button}"
-    rounded: "{rounded.md}"
+    border: "1px solid {colors.hairline-strong}"
     padding: 8px 14px
   card-default:
     backgroundColor: "{colors.surface-1}"
     textColor: "{colors.ink}"
     typography: "{typography.body}"
     rounded: "{rounded.lg}"
+    border: "1px solid {colors.hairline}"
     padding: 24px
+    shadow: "0 8px 24px rgba(26,18,1,.04)"
   card-featured:
-    backgroundColor: "{colors.surface-2}"
+    backgroundColor: "{colors.surface-3}"
     textColor: "{colors.ink}"
     typography: "{typography.body}"
     rounded: "{rounded.lg}"
+    border: "1px solid {colors.hairline}"
     padding: 24px
   text-input:
-    backgroundColor: "{colors.surface-1}"
+    backgroundColor: "#fafafa"
     textColor: "{colors.ink}"
     typography: "{typography.body}"
     rounded: "{rounded.md}"
+    border: "1px solid #EFE3DC"
     padding: 8px 12px
   text-input-focused:
+    backgroundColor: "#fafafa"
+    textColor: "{colors.ink}"
+    border: "2px solid {colors.primary}"
+  top-nav:
     backgroundColor: "{colors.surface-1}"
     textColor: "{colors.ink}"
-    typography: "{typography.body}"
-    rounded: "{rounded.md}"
-    padding: 8px 12px
-  top-nav:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.xs}"
     height: 56px
   sidebar:
     backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink-subtle}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.xs}"
+    textColor: "{colors.ink-muted}"
+    width: 240px
   footer:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink-subtle}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.xs}"
     padding: 64px 32px
   status-badge:
-    backgroundColor: "{colors.surface-2}"
+    backgroundColor: "{colors.surface-3}"
     textColor: "{colors.ink-muted}"
-    typography: "{typography.caption}"
     rounded: "{rounded.pill}"
     padding: 2px 8px
   data-table:
     backgroundColor: "{colors.surface-1}"
     textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
     rounded: "{rounded.lg}"
+    headerBg: "{colors.canvas}"
+    headerColor: "{colors.ink-muted}"
+    rowHoverBg: "rgba(232,120,74,.04)"
   chart-container:
     backgroundColor: "{colors.surface-1}"
     textColor: "{colors.ink}"
-    typography: "{typography.body-sm}"
     rounded: "{rounded.lg}"
     padding: 24px
 ---
 
 ## Overview
 
-牧哲学堂 (Muzhe Academy) is an education management platform. The design system is adapted from Linear's dark-canvas marketing system — a near-black product-focused canvas built around `{colors.canvas}` (#010102), light gray text (`{colors.ink}` #f7f8f8), and the signature Linear lavender-blue (`{colors.primary}` #5e6ad2) as the single chromatic accent.
-
-The system reads as software-craft documentation: dense, technical, and quietly luxurious. Display type is set in Geist (Linear's recommended open-source substitute) at 500–700 with neutral tracking for a durable app interface. Cards live as charcoal panels (`{colors.surface-1}` #0f1011) with hairline borders. The accent lavender appears on the brand mark, focus rings, primary CTAs, and data visualization highlights.
+牧哲学堂 (Muzhe Academy) is an education management platform serving parents of middle-school students in Xinle city (Shijiazhuang). The design system is a warm, low-eye-strain light canvas built around `{colors.canvas}` (#faf8f5 warm cream), warm near-black text (`{colors.ink}` #1a1201), and the signature warm orange (`{colors.primary}` #E8784A) as the single chromatic accent.
 
 **Key Characteristics:**
-- Dark-canvas system — `{colors.canvas}` (#010102) is the deepest dark surface.
-- Lavender-blue brand accent (`{colors.primary}` #5e6ad2) — used scarcely on brand, primary CTAs, focus rings, and chart accents.
-- Four-step surface ladder (canvas → surface-1 → surface-2 → surface-3 → surface-4) carries hierarchy without shadow.
-- Letter spacing stays at `0` across UI tokens so Chinese and mixed Chinese/Latin labels remain stable.
-- Cards use `{rounded.lg}` 12px corners with 1px hairline borders.
-- Geist Sans as the primary typeface (substitute for Linear's proprietary custom sans).
-- Geist Mono for code, data, and monospace contexts.
+- Warm light canvas — `{colors.canvas}` (#faf8f5) is a warm cream, not pure white
+- Orange brand accent (`{colors.primary}` #E8784A) — used on primary CTAs, focus rings, selected states
+- Four-step surface ladder (canvas to surface-1/2/3/4) carries hierarchy through subtle warmth shifts
+- Cards use `{rounded.lg}` 14px corners with hairline borders and subtle warm shadow
+- System font stack with Chinese support: `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', 'Microsoft YaHei', sans-serif`
+- Geist Mono for code, data, and monospace contexts
 
 ## Colors
 
 ### Brand & Accent
-- **Primary Lavender** (`{colors.primary}` #5e6ad2): Primary CTA, brand mark, link emphasis, chart series primary.
-- **Primary Hover** (`{colors.primary-hover}` #828fff): Lighter lavender — hovered state of primary CTA.
-- **Primary Focus** (`{colors.primary-focus}` #5e69d1): Focus-ring tint — focused inputs and buttons.
+- **Primary Orange** (`{colors.primary}` #E8784A): Primary CTA, brand mark, focus rings, selected states, chart series primary.
+- **Primary Hover** (`{colors.primary-hover}` #f08a5f): Lighter orange for hover states.
+- **Primary Focus** (`{colors.primary-focus}` #d0683a): Deeper orange for active/pressed states.
+- **Primary Background** (`{colors.primary-bg}` #fff3ec): Very light orange for selected backgrounds.
 
 ### Surface Hierarchy
-- **Canvas** (`{colors.canvas}` #010102): Default page background — near-pure black with a faint blue tint.
-- **Surface 1** (`{colors.surface-1}` #0f1011): Cards, panels, table backgrounds.
-- **Surface 2** (`{colors.surface-2}` #141516): Featured cards, hovered surfaces, selected states.
-- **Surface 3** (`{colors.surface-3}` #18191a): Sub-nav, dropdown menus.
-- **Surface 4** (`{colors.surface-4}` #191a1b): Deepest lifted surface.
-- **Hairline** (`{colors.hairline}` #23252a): 1px borders on cards and dividers.
-- **Hairline Strong** (`{colors.hairline-strong}` #34343a): Stronger 1px borders.
-- **Inverse Canvas** (`{colors.inverse-canvas}` #ffffff): Pure white — for inverse elements.
+- **Canvas** (`{colors.canvas}` #faf8f5): Default page background — warm cream.
+- **Surface 1** (`{colors.surface-1}` #ffffff): Cards, panels, elevated containers.
+- **Surface 2** (`{colors.surface-2}` #faf8f5): Same as canvas, for secondary surfaces.
+- **Surface 3** (`{colors.surface-3}` #f5f2ee): Subtle warm gray for nested sections.
+- **Surface 4** (`{colors.surface-4}` #f0ece7): Deeper warm gray for hovered rows.
+- **Hairline** (`{colors.hairline}` rgba(0,0,0,.06)): Default 1px borders.
+- **Hairline Strong** (`{colors.hairline-strong}` rgba(0,0,0,.1)): Emphasized borders.
 
 ### Text
-- **Ink** (`{colors.ink}` #f7f8f8): All headlines and emphasized body type.
-- **Ink Muted** (`{colors.ink-muted}` #d0d6e0): Secondary text — meta info, descriptions.
-- **Ink Subtle** (`{colors.ink-subtle}` #8a8f98): Tertiary text — footer, labels, placeholders.
-- **Ink Tertiary** (`{colors.ink-tertiary}` #62666d): Disabled text, footnotes.
+- **Ink** (`{colors.ink}` #1a1201): All headlines and emphasized body — warm near-black, NOT #000.
+- **Ink Muted** (`{colors.ink-muted}` #5a4e3a): Secondary text — meta info, descriptions.
+- **Ink Subtle** (`{colors.ink-subtle}` #9a8e7a): Tertiary text — footnotes, placeholders.
+- **Ink Tertiary** (`{colors.ink-tertiary}` rgba(0,0,0,.35)): Disabled text.
 
 ### Semantic Colors
-- **Success** (`{colors.semantic-success}` #27a644): Success status, attendance present, payment confirmed.
-- **Warning** (`{colors.semantic-warning}` #f5a623): Warnings, pending status, payment due.
-- **Error** (`{colors.semantic-error}` #e03e2d): Errors, attendance absent, payment overdue.
-- **Info** (`{colors.semantic-info}` #5e6ad2): Information, links (reuses primary).
-
-### Data Visualization Palette (ECharts)
-For dashboards and reports, extend the primary with a data-safe palette:
-- Series 1: `#5e6ad2` (primary lavender)
-- Series 2: `#27a644` (success green)
-- Series 3: `#f5a623` (warning amber)
-- Series 4: `#e03e2d` (error red)
-- Series 5: `#828fff` (light lavender)
-- Series 6: `#7a7fad` (brand secure)
+- **Success** (`{colors.semantic-success}` #1D9E75): Positive states, safe-tier indicators, attendance present.
+- **Success BG** (`{colors.semantic-success-bg}` #eaf7f1): Subtle green background for safe-tier cards.
+- **Warning** (`{colors.semantic-warning}` #f5a623): Warnings, pending states.
+- **Warning Text** (`{colors.semantic-warning-text}` #C77F00): Warning text on light backgrounds.
+- **Error** (`{colors.semantic-error}` #E24B4A): Errors, reach-tier indicators, attendance absent.
+- **Info** (`{colors.semantic-info}` #E8784A): Reuses primary orange.
 
 ## Typography
 
-### Font Family
-- **Geist Sans** (--font-geist-sans): Primary typeface for all UI — display, body, buttons, captions. Closest open-source match to Linear's custom sans.
-- **Geist Mono** (--font-geist-mono): Monospace for code, data tables, calendar time slots, and numeric values.
-
-### Hierarchy
-
-| Token | Size | Weight | Line Height | Letter Spacing | Use |
-|---|---|---|---|---|---|
-| `{typography.display-xl}` | 80px | 600 | 1.05 | 0 | Largest hero headline |
-| `{typography.display-lg}` | 56px | 600 | 1.10 | 0 | Section opener headlines |
-| `{typography.display-md}` | 40px | 600 | 1.15 | 0 | Dashboard page titles |
-| `{typography.headline}` | 28px | 600 | 1.20 | 0 | Card group titles, modal titles |
-| `{typography.card-title}` | 22px | 500 | 1.25 | 0 | Individual card titles |
-| `{typography.subhead}` | 20px | 400 | 1.40 | 0 | Lead body, intro paragraphs |
-| `{typography.body-lg}` | 18px | 400 | 1.50 | 0 | Large body, empty state descriptions |
-| `{typography.body}` | 16px | 400 | 1.50 | 0 | Default body, form labels, table cells |
-| `{typography.body-sm}` | 14px | 400 | 1.50 | 0 | Card body, form descriptions, sidebar nav |
-| `{typography.caption}` | 12px | 400 | 1.40 | 0 | Captions, meta, status badges |
-| `{typography.button}` | 14px | 500 | 1.20 | 0 | All button labels |
-| `{typography.eyebrow}` | 13px | 500 | 1.30 | 0.4px | Section eyebrow labels |
-| `{typography.mono}` | 13px | 400 | 1.50 | 0 | Geist Mono for code, calendar, IDs |
+### Font Stack
+- **Sans**: `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', 'Microsoft YaHei', sans-serif`
+- **Mono**: `ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', monospace`
 
 ### Principles
-- Keep letter spacing at `0`; do not use negative tracking in app UI.
+- Letter spacing stays at 0 — Chinese and mixed Chinese/Latin labels remain stable.
 - Single voice from display to body — same family, narrower weights.
-- Eyebrow may use light positive tracking (+0.4px) for compact labels; all other UI text stays at `0`.
 - Mono only for data, code, and calendar contexts.
-
-## Layout
-
-### Spacing System
-- Base unit: 4px.
-- Tokens: `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 16px · `{spacing.lg}` 24px · `{spacing.xl}` 32px · `{spacing.xxl}` 48px · `{spacing.section}` 96px.
-- Card interior padding: `{spacing.lg}` 24px.
-- Dashboard grid gap: `{spacing.lg}` 24px.
-
-### Grid & Container
-- Max content width: 1280px (standard), 1440px (data-dense dashboards).
-- Dashboard: responsive grid — 3-col at 1440px, 2-col at 1024px, 1-col below 768px.
-- Card grids: 3-up at desktop, 2-up at tablet, 1-up at mobile.
-- Sidebar: 240px fixed width, collapsible to 64px (icon-only).
-
-### Whitespace Philosophy
-The dark canvas IS the whitespace. Sections separate by lift onto surface panels, not by gaps in white. Within a panel, generous `{spacing.lg}` 24px gaps between content blocks; `{spacing.section}` 96px between page sections.
-
-## Elevation & Depth
-
-| Level | Treatment | Use |
-|---|---|---|
-| 0 (flat) | No shadow, no border | Body text, hero text, footer |
-| 1 (charcoal lift) | `{colors.surface-1}` background, 1px `{colors.hairline}` border | Cards, panels, tables |
-| 2 (surface-2 lift) | `{colors.surface-2}` background, 1px `{colors.hairline-strong}` border | Featured cards, hovered cards, selected nav |
-| 3 (surface-3 lift) | `{colors.surface-3}` background | Dropdowns, popovers, sub-nav |
-| 4 (focus ring) | 2px `{colors.primary-focus}` outline at 50% opacity | Focused inputs, focused buttons |
-
-Depth is carried by surface ladder + hairline borders. Avoid drop shadows on dark surfaces.
-
-## Shapes
-
-### Border Radius Scale
-
-| Token | Value | Use |
-|---|---|---|
-| `{rounded.xs}` | 4px | Small chips, status badges |
-| `{rounded.sm}` | 6px | Inline tags |
-| `{rounded.md}` | 8px | Buttons, form inputs, menu items |
-| `{rounded.lg}` | 12px | Cards, tables, chart containers |
-| `{rounded.xl}` | 16px | Modal dialogs, large panels |
-| `{rounded.xxl}` | 24px | Oversized banners (rare) |
-| `{rounded.pill}` | 9999px | Status pills, filter chips |
-| `{rounded.full}` | 9999px | Avatar circles |
-
-## Components
-
-### Buttons
-- **button-primary**: Background `{colors.primary}`, text `{colors.on-primary}`, rounded `{rounded.md}`, padding 8px 14px.
-- **button-primary-hover**: Background shifts to `{colors.primary-hover}`.
-- **button-secondary**: Background `{colors.surface-1}`, text `{colors.ink}`, 1px `{colors.hairline}` border.
-- **button-tertiary**: Transparent on canvas, text `{colors.ink}`.
-
-### Cards
-- **card-default**: Background `{colors.surface-1}`, 1px `{colors.hairline}` border, rounded `{rounded.lg}`, padding 24px.
-- **card-featured**: Background `{colors.surface-2}`, 1px `{colors.hairline-strong}` border.
-
-### Navigation
-- **Top Nav**: Height 56px, background `{colors.canvas}`, sticky. Logo + primary links + user menu.
-- **Sidebar**: Width 240px, background `{colors.canvas}`, 1px `{colors.hairline}` right border. Collapsible.
-
-### Data Display
-- **Table**: Background `{colors.surface-1}`, header `{colors.surface-2}`, row hover `{colors.surface-2}`, border `{colors.hairline}`.
-- **Chart Container**: Background `{colors.surface-1}`, rounded `{rounded.lg}`, padding 24px.
-- **Status Badge**: Background `{colors.surface-2}`, text `{colors.ink-muted}`, rounded `{rounded.pill}`, padding 2px 8px.
-
-### Forms
-- **Text Input**: Background `{colors.surface-1}`, text `{colors.ink}`, 1px `{colors.hairline}` border, rounded `{rounded.md}`, padding 8px 12px.
-- **Text Input Focused**: Same surface, 2px `{colors.primary-focus}` outline at 50% opacity.
-
-### Calendar (FullCalendar)
-- Dark background matching `{colors.surface-1}`.
-- Current day highlight: `{colors.primary}` at 15% opacity.
-- Event blocks: `{colors.primary}` at 85% opacity with `{colors.on-primary}` text.
-- Time grid lines: `{colors.hairline}`.
 
 ## Responsive Behavior
 
 | Name | Width | Key Changes |
 |---|---|---|
-| Desktop-XL | 1440px | Full dashboard with 3-col grid |
+| Desktop-XL | 1440px | Full dashboard |
 | Desktop | 1280px | Standard layout |
-| Tablet | 1024px | Card grid 3→2, sidebar collapsed |
-| Mobile-Lg | 768px | Sidebar hidden, hamburger nav |
-| Mobile | 480px | Single column, full-width cards |
+| Tablet | 1024px | Card grid adjusts |
+| Mobile | 768px | Single column, full-width cards, sticky elements |
 
-## Do's and Don'ts
+## Design Principles
+
+### Color Strategy: Restrained
+- Canvas is warm cream (#faf8f5), never pure white
+- Orange accent at ≤10% of visible surface area
+- Neutral palette is warm-tinted, not cool gray
+- Data tiers use semantic colors (green/amber/red) sparingly as subtle backgrounds, not loud stripes
 
 ### Do
-- Reserve `{colors.canvas}` (#010102) as the system's anchor surface.
-- Use `{colors.primary}` lavender ONLY for: brand, primary CTA, focus ring, link emphasis, chart accent.
-- Use the four-step surface ladder for hierarchy. Avoid skipping levels.
-- Pair display weight 600 with body weight 400.
-- Use Geist Sans consistently — it's the single voice of the UI.
-- Keep typography compact through size, weight, and spacing; do not use negative letter-spacing.
-- Use `{rounded.md}` (8px) for interactive elements, `{rounded.lg}` (12px) for containers.
+- Reserve `{colors.canvas}` (#faf8f5) as the system's anchor surface
+- Use `{colors.primary}` orange ONLY for: primary CTA, focus ring, selected state, key emphasis
+- Use the surface ladder for hierarchy: canvas → surface-1 (white cards) → surface-3 (nested sections)
+- Keep typography warm and readable — #1a1201, not #000
+- Use `{rounded.lg}` (12-14px) for cards, `{rounded.md}` (8-10px) for interactive elements
+- Prefer subtle background tints over colored borders for tier differentiation
 
 ### Don't
-- Don't ship a light-mode page — this is a dark-only system.
-- Don't use lavender as a section background or card fill.
-- Don't introduce a second chromatic accent beyond the semantic palette.
-- Don't add atmospheric gradients or spotlight cards.
-- Don't pill-round buttons — use `{rounded.md}` 8px.
-- Don't use `#000000` true black as the canvas.
-- Don't mix light and dark surface colors in the same view.
+- Don't use side-stripe colored borders (>1px colored left/right borders on cards) — use subtle background tints instead
+- Don't use gradient text or glassmorphism effects
+- Don't use identical card grids for data with inherent hierarchy — create visual tiers
+- Don't use hero-metric templates (giant single numbers as page headers)
+- Don't use `#000000` or `#ffffff` pure black/white — always warm-tinted
+- Don't introduce a second chromatic accent beyond the semantic palette
+- Don't use em dashes or `--` in Chinese text — use Chinese punctuation (comma, period, parentheses)
+- Don't ship a dark-mode page — this is a warm-light-only system
 
-## Agent Prompt Guide
+## Design Slop Tests
+
+### AI Slop Detection
+These patterns are common in AI-generated education/SaaS UI and MUST be avoided:
+1. **Side-stripe cards**: Colored left-border stripes (>1px) on cards for tier/category indication → Use subtle background tints or status dots instead
+2. **Identical card grids**: Every card same size in a perfect grid → Vary card sizes or use list rows with hierarchy
+3. **Gradient text**: Any `background-clip: text` gradient → Flat warm colors only
+4. **Glassmorphism**: `backdrop-filter: blur()` on cards → Solid backgrounds with hairline borders
+5. **Hero metrics**: Single giant number as page hero → Contextual, comparative presentation
+6. **Education teal cliche**: White background + teal/cyan accent → Warm cream + warm orange
+7. **Emoji-heavy labels**: Using emoji as section icons in production UI → Use proper Icon component or text labels
+
+### Education Industry Template Detection
+A parent viewing the page should NOT think "this looks like every other school SaaS." Signals to avoid:
+- White (#fff) canvas with teal/blue accent
+- Rows of identical white cards with shadow
+- Large hero illustrations of generic school buildings
+- Overuse of "success green" badges everywhere
+
+## Product Register
+
+- **Product**: 教育管理系统中的志愿填报模拟 (Volunteer School Selection Simulator)
+- **Users**: 新乐市中考学生家长 (Parents of Xinle middle school students), mostly aged 35-50, mobile-first, evening usage
+- **Tone**: 可信、清晰、不浮夸 (Trustworthy, clear, understated)
+- **Anti-pattern**: NOT a generic SaaS card wall, NOT the "white bg + teal" education template
 
 ## Project Implementation
 
 This repository implements the design system in three places:
-
-- `DESIGN.md`: source of truth for agents and design decisions.
-- `src/app/globals.css`: Tailwind CSS v4 `@theme` tokens plus global utility classes.
-- `src/app/providers.tsx`: Ant Design v5 `ConfigProvider` dark theme tokens.
+- `DESIGN.md`: source of truth for agents and design decisions
+- `src/app/globals.css`: CSS custom properties (Tailwind v4 `@theme` tokens) plus global utility classes
+- `src/app/providers.tsx`: Ant Design v5 `ConfigProvider` theme tokens
 
 Implementation rules:
-
-- Prefer Ant Design components for forms, tables, cards, menus, layout, and feedback.
-- Use Tailwind tokens from `globals.css` for custom layout and spacing.
-- Reuse the semantic chart palette exactly: `#5e6ad2`, `#27a644`, `#f5a623`, `#e03e2d`, `#828fff`, `#7a7fad`.
-- Avoid gradients as page or card backgrounds. A gradient is acceptable only inside a tiny brand mark or data visualization when it does not become a second accent system.
-- Do not introduce hard-coded colors outside this file unless they are direct token values from this system.
+- Prefer Ant Design components for forms, tables, cards, menus, layout, and feedback
+- Use CSS custom properties from `globals.css` for custom layout and spacing
+- Reuse the semantic chart palette: `#E8784A`, `#1D9E75`, `#8892f0`, `#f5a623`, `#D4537E`, `#185FA5`
+- Avoid gradients as page or card backgrounds
+- Do not introduce hard-coded colors outside this file
 
 ### Quick Color Reference
-- Canvas (page bg): `#010102`
-- Surface 1 (cards): `#0f1011`
-- Primary (CTAs, links, focus): `#5e6ad2`
-- Primary Hover: `#828fff`
-- Text (headlines, body): `#f7f8f8`
-- Text Muted (secondary): `#d0d6e0`
-- Border (hairline): `#23252a`
-- Success: `#27a644`
+- Canvas (page bg): `#faf8f5`
+- Surface 1 (cards): `#ffffff`
+- Primary (CTAs, focus): `#E8784A`
+- Primary Hover: `#f08a5f`
+- Text (headlines): `#1a1201`
+- Text Muted (secondary): `#5a4e3a`
+- Text Subtle (tertiary): `#9a8e7a`
+- Border (hairline): `rgba(0,0,0,.06)`
+- Success: `#1D9E75`
 - Warning: `#f5a623`
-- Error: `#e03e2d`
+- Error: `#E24B4A`
 
 ### Ready-to-Use Prompts
-- "Build a dashboard page with metrics cards, charts, and a data table using the DESIGN.md dark-canvas system."
+- "Build a dashboard page with metrics cards, charts, and a data table using the DESIGN.md warm-light system."
 - "Create a student list page with a searchable data table, following DESIGN.md table and card styling."
-- "Style the schedule calendar following DESIGN.md's dark theme and lavender accent."
-- "Build a settings form with DESIGN.md's dark input fields and lavender primary buttons."
+- "Style the volunteer simulation page following DESIGN.md's warm-light theme and orange accent."
+- "Build a settings form with DESIGN.md's input fields and orange primary buttons."

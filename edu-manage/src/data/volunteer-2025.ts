@@ -73,6 +73,8 @@ export const SCORE_RANK_2025: Record<number, number> = {
 }
 
 export const TOTAL_EXAMINEES_2025 = 97644
+export const PUGAO_LINE = 460
+export const ALLOCATION_LINE_OFFSET = 50
 
 export interface HighSchoolData {
   schoolId: string
@@ -84,6 +86,20 @@ export interface HighSchoolData {
   type: string
   location: string
   xinleAllocationId: string | null
+}
+
+/**
+ * 分配生最低录取控制线 = 一统线(yiTong) - 50，且不低于普高线。
+ * 数据库若维护了真实 allocationLine 则优先用真实值。
+ * 无一统线表示该校不参与分配生，返回 null。
+ */
+export function getAllocationLine(school: {
+  yiTong: number | null
+  allocationLine?: number | null
+}): number | null {
+  if (school.allocationLine != null) return school.allocationLine
+  if (school.yiTong == null) return null
+  return Math.max(school.yiTong - ALLOCATION_LINE_OFFSET, PUGAO_LINE)
 }
 
 // 2025年新乐市各初中对高中的分配生名额（key=初中名称 → {高中标准名: 名额}）
@@ -301,19 +317,20 @@ export interface AllocationBand {
   note: string
 }
 
-// 分配生控制线：优先取数据库值，否则用统招线-50（不低于460）估算
-function estimateAllocationLine(tongZhao: number, dbAllocationLine: number | null): AllocationLineInfo {
-  if (dbAllocationLine != null) {
-    return { value: dbAllocationLine, source: 'db', label: '分配生录取线' }
+function getAllocationLineInfo(school: { yiTong: number | null; allocationLine?: number | null }): AllocationLineInfo | null {
+  const value = getAllocationLine(school)
+  if (value === null) return null
+  if (school.allocationLine != null) {
+    return { value, source: 'db', label: '分配生录取线' }
   }
-  return { value: Math.max(tongZhao - 50, 460), source: 'estimated', label: '估算分配线' }
+  return { value, source: 'estimated', label: '估算分配线' }
 }
 
 export function getAllocationBands(
   middleSchool: string,
   rank: number,
   score: number,
-  lineLookup: (name: string) => { tongZhao: number; allocationLine: number | null } | null
+  lineLookup: (name: string) => { yiTong: number | null; tongZhao: number; allocationLine: number | null } | null
 ): AllocationBand[] {
   const quotaMap = XINLE_ALLOCATION_2025[middleSchool] || {}
 
@@ -321,11 +338,13 @@ export function getAllocationBands(
     .filter(([, q]) => q > 0)
     .map(([name, quota]) => {
       const lines = lineLookup(name)
+      const yiTong = lines?.yiTong ?? null
       const tongZhao = lines?.tongZhao ?? 0
-      const allocationLine = estimateAllocationLine(tongZhao, lines?.allocationLine ?? null)
-      return { name, quota, tongZhao, allocationLine }
+      const allocationLine = getAllocationLineInfo({ yiTong, allocationLine: lines?.allocationLine ?? null })
+      return { name, quota, yiTong, tongZhao, allocationLine }
     })
-    .sort((a, b) => b.tongZhao - a.tongZhao)
+    .filter((school): school is { name: string; quota: number; yiTong: number | null; tongZhao: number; allocationLine: AllocationLineInfo } => school.allocationLine !== null)
+    .sort((a, b) => (b.yiTong ?? 0) - (a.yiTong ?? 0))
 
   let cum = 0
   return schools.map(s => {
@@ -337,7 +356,7 @@ export function getAllocationBands(
     let note = ''
     if (score < s.allocationLine.value) {
       tag = '分数不足'
-      note = `你的分数未达该校分配生控制线（${s.allocationLine.label === '估算分配线' ? '约' : ''}${s.allocationLine.value}分${s.allocationLine.source === 'estimated' ? '，该线为系统按统招线估算，仅供参考' : ''}）`
+      note = `你的分数未达该校分配生控制线（${s.allocationLine.label === '估算分配线' ? '约' : ''}${s.allocationLine.value}分${s.allocationLine.source === 'estimated' ? '，该线为系统按一统线减50估算，仅供参考' : ''}）`
     } else if (rank > bandHi) {
       tag = '排名不足'
       note = `该校名额对应校内前${bandHi}名，你目前第${rank}名，存在校内排名竞争风险`

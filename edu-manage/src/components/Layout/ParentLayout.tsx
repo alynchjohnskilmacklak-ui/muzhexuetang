@@ -35,6 +35,17 @@ import { MobileLayout, type MobileNavItem } from './MobileLayout'
 const { Sider, Content, Header } = Layout
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
+function resolveActiveKey(pathname: string, items: { key: string }[], fallback: string) {
+  const exact = items.find(item => item.key === pathname)
+  if (exact) return exact.key
+
+  const match = items
+    .filter(item => pathname.startsWith(`${item.key}/`))
+    .sort((a, b) => b.key.length - a.key.length)[0]
+
+  return match?.key || fallback
+}
+
 export function ParentLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()
   const pathname = usePathname()
@@ -101,7 +112,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   ]
 
   const moreItems = navItems.filter(item => !['/parent/dashboard', '/parent/schedule', '/parent/volunteer/schools', '/parent/class-feedback'].includes(item.key))
-  const currentKey = navItems.find(item => pathname.startsWith(item.key))?.key || '/parent/dashboard'
+  const currentKey = resolveActiveKey(pathname, navItems, '/parent/dashboard')
 
   const menuItems = navItems.map(item => ({
     key: item.key,

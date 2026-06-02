@@ -142,6 +142,11 @@ fi
 
 npm run build
 
+# standalone mode: sync static files
+echo "=== Sync static files for standalone output ==="
+cp -r .next/static .next/standalone/.next/static 2>/dev/null || true
+cp -r public .next/standalone/public 2>/dev/null || true
+
 echo "=== Start application with PM2 ==="
 npm install -g pm2
 pm2 delete "${APP_NAME}" >/dev/null 2>&1 || true

@@ -73,7 +73,18 @@
       "Bash(cat musicschool/.gitignore)",
       "Bash(git config *)",
       "Bash(git rm *)",
-      "Bash(rm -rf edu-manage/.git musicschool/.git)"
+      "Bash(rm -rf edu-manage/.git musicschool/.git)",
+      "Bash(git reset *)",
+      "Bash(ls edu-manage/.git)",
+      "Bash(ls musicschool/.git)",
+      "Bash(tar -cvf deploy-volunteer-v2.tar edu-manage/prisma/schema.prisma edu-manage/prisma/migrations/20260529000000_add_volunteer_fields/migration.sql 'edu-manage/src/app/\\(main\\)/volunteer-sim/page.tsx' 'edu-manage/src/app/\\(main\\)/volunteer-sim/schools/page.tsx' edu-manage/src/data/volunteer-2025.ts edu-manage/src/app/api/volunteer/schools/route.ts)",
+      "Bash(tar -tvf deploy-volunteer-v2.tar)",
+      "Bash(tar -cvf ../deploy-volunteer-v3.tar prisma/schema.prisma src/data/volunteer-2025.ts \"src/app/\\(main\\)/volunteer-sim/page.tsx\" \"src/app/\\(main\\)/volunteer-sim/schools/page.tsx\")",
+      "Bash(tar *)",
+      "Bash(npx tsx -e ' *)",
+      "Bash(npx tsx *)",
+      "Bash(git checkout *)",
+      "Bash(Select-Object -First 80)"
     ]
   }
 }
