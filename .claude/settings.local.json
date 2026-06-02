@@ -74,7 +74,8 @@
       "Bash(git config *)",
       "Bash(git rm *)",
       "Bash(rm -rf edu-manage/.git musicschool/.git)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(git merge *)"
     ]
   }
 }
