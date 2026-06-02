@@ -2,17 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Alert, Button, Divider, Form, InputNumber, Modal, Select,
+  Button, Collapse, Divider, Form, InputNumber, Modal, Select,
   Spin, Switch, Tag, Typography,
 } from 'antd'
 import {
-  ArrowLeftOutlined, SearchOutlined, TrophyOutlined,
+  ArrowLeftOutlined, TrophyOutlined,
   CloseOutlined, SwapOutlined,
 } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import {
   CONTROL_LINES_2025,
   getAllocationBands,
+  getAllocationLine,
   getAllocationQuotaByName,
   getMarketPercentile,
   getMarketRank,
@@ -71,7 +73,7 @@ interface ProcessedSchool extends DBSchool {
 const TAG_OPTIONS: ('全部' | ScoreTag)[] = ['全部', '分配生机会', '保底', '稳妥', '冲刺', '差距较大', '暂未达线']
 const TYPE_OPTIONS = ['全部', '省示范', '市重点', '县中', '民办']
 
-// Warm light theme tokens
+// Warm light theme tokens — module scope for all functions
 const C = {
   canvas: '#faf8f5',
   surface1: '#ffffff',
@@ -86,11 +88,20 @@ const C = {
   success: '#1D9E75',
   successBg: '#eaf7f1',
   warning: '#C77F00',
+  warningBg: '#fdf4e3',
+  warningBorder: '#f0dca8',
+  successBorder: '#b6e2d2',
+  primaryBorder: '#f5c9b3',
   error: '#E24B4A',
+  errorBg: '#fdeceb',
+  white: '#ffffff',
+  blue: '#1890ff',
+  purple: '#722ed1',
 }
 
 export default function VolunteerSimPage() {
   const router = useRouter()
+  const isMobile = useIsMobile() ?? false
   const [form] = Form.useForm()
 
   const [inputScore, setInputScore] = useState<number | null>(null)
@@ -139,16 +150,17 @@ export default function VolunteerSimPage() {
     return schools
       .map(school => {
         const quota = getAllocationQuota(school)
+        const allocationLine = getAllocationLine(school)
         const tag = getScoreTag(
           inputScore,
           school.tongZhao,
-          school.allocationLine,
+          allocationLine,
           quota,
           inputRank ?? 9999
         )
         const gap = inputScore - school.tongZhao
         const accessible = school.xinleAccessibleOverride ?? isXinleAccessible({...school, acceptsOtherCounty: school.acceptsOtherCounty})
-        return { ...school, tag, gap, quota, accessible }
+        return { ...school, allocationLine, tag, gap, quota, accessible }
       })
       .sort((a, b) => {
         if (a.accessible !== b.accessible) return a.accessible ? -1 : 1
@@ -202,7 +214,7 @@ export default function VolunteerSimPage() {
           school.fullName.includes(allocKey) ||
           school.name.replace(/[(（][^)）]*[)）]\s*$/, '').trim() === allocKey
         )
-        return s ? { tongZhao: s.tongZhao, allocationLine: s.allocationLine } : null
+        return s ? { yiTong: s.yiTong, tongZhao: s.tongZhao, allocationLine: s.allocationLine } : null
       }
     )
   }, [submitted, inputScore, inputSchool, inputRank, schools])
@@ -309,12 +321,15 @@ export default function VolunteerSimPage() {
         </div>
       </div>
 
-      <Alert
-        type="warning"
-        showIcon
-        style={{ marginBottom: 20, borderRadius: 10, background: '#fdf4e3', border: '1px solid #f0dca8' }}
-        message={<span style={{ color: C.warning }}>重要提示</span>}
-        description={<span style={{ color: C.inkMuted }}>本系统基于2025年公开分数线、分配名额和学校信息进行模拟，仅供志愿填报参考。全市排名基于2025年石家庄中考一分一档表估算。梯度标签基于2025年分数线静态测算，不代表2026年实际录取结果。2026年实际录取以石家庄市教育考试院、学校招生简章及最终录取结果为准。</span>}
+      <Collapse
+        ghost
+        size="small"
+        style={{ marginBottom: 20 }}
+        items={[{
+          key: 'disclaimer',
+          label: <span style={{ color: C.warning, fontSize: 13, fontWeight: 500 }}>重要提示：本系统仅供模拟参考，非官方录取结果</span>,
+          children: <span style={{ color: C.inkMuted, fontSize: 13, lineHeight: 1.8 }}>本系统基于2025年公开分数线、分配名额和学校信息进行模拟，仅供志愿填报参考。全市排名基于2025年石家庄中考一分一档表估算。梯度标签基于2025年分数线静态测算，不代表2026年实际录取结果。2026年实际录取以石家庄市教育考试院、学校招生简章及最终录取结果为准。</span>,
+        }]}
       />
 
       {/* Input Area */}
@@ -326,27 +341,48 @@ export default function VolunteerSimPage() {
           padding: 24,
           marginBottom: 20,
         }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: C.ink, marginBottom: 16 }}>
-            <SearchOutlined style={{ marginRight: 8, color: C.primary }} />
-            输入学生信息
-          </div>
           <Spin spinning={!schoolsReady} tip="正在加载学校数据...">
             <Form form={form} layout="vertical">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 20px' }}>
+              {/* Score — hero input */}
+              <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                <Text style={{ display: 'block', fontSize: 14, color: C.inkMuted, fontWeight: 500, marginBottom: 12 }}>
+                  请输入学生中考成绩
+                </Text>
                 <Form.Item
                   name="score"
-                  label={<span style={{ color: C.inkMuted, fontWeight: 500 }}>中考总分 <Text style={{ fontSize: 12, color: C.inkSubtle }}>（满分800分）</Text></span>}
+                  noStyle
                   rules={[
                     { required: true, message: '请输入分数' },
                     { type: 'number', min: 0, max: 800, message: '分数范围 0 - 800' },
                   ]}
                 >
-                  <InputNumber style={{ width: '100%' }} placeholder="例：678" min={0} max={800} size="large" />
+                  <InputNumber
+                    placeholder="678"
+                    min={0}
+                    max={800}
+                    size="large"
+                    style={{
+                      width: '100%',
+                      maxWidth: 320,
+                      fontSize: 32,
+                      fontWeight: 700,
+                      fontFamily: 'var(--font-geist-sans)',
+                    }}
+                    className="score-hero-input"
+                  />
                 </Form.Item>
+                <Text style={{ display: 'block', fontSize: 13, color: C.inkSubtle, marginTop: 8 }}>
+                  满分 800 分
+                </Text>
+              </div>
+
+              {/* Secondary inputs */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px', maxWidth: 480, margin: '0 auto' }}>
                 <Form.Item
                   name="schoolName"
-                  label={<span style={{ color: C.inkMuted, fontWeight: 500 }}>就读初中 <Text style={{ fontSize: 12, color: C.inkSubtle }}>（新乐市范围）</Text></span>}
+                  label={<span style={{ color: C.inkMuted, fontWeight: 500 }}>就读初中</span>}
                   rules={[{ required: true, message: '请选择初中' }]}
+                  style={{ marginBottom: 0 }}
                 >
                   <Select
                     placeholder="选择新乐初中"
@@ -360,25 +396,28 @@ export default function VolunteerSimPage() {
                 </Form.Item>
                 <Form.Item
                   name="schoolRank"
-                  label={<span style={{ color: C.inkMuted, fontWeight: 500 }}>本校排名 <Text style={{ fontSize: 12, color: C.inkSubtle }}>（第几名）</Text></span>}
+                  label={<span style={{ color: C.inkMuted, fontWeight: 500 }}>本校排名</span>}
                   rules={[
                     { required: true, message: '请输入排名' },
                     { type: 'number', min: 1, message: '至少第1名' },
                   ]}
+                  style={{ marginBottom: 0 }}
                 >
                   <InputNumber style={{ width: '100%' }} placeholder="例：5" min={1} size="large" />
                 </Form.Item>
               </div>
-              <Button
-                type="primary"
-                size="large"
-                icon={<SearchOutlined />}
-                onClick={handleSimulate}
-                loading={loading}
-                style={{ background: C.primary, borderColor: C.primary, minWidth: 160 }}
-              >
-                开始模拟
-              </Button>
+
+              <div style={{ textAlign: 'center', marginTop: 24 }}>
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={handleSimulate}
+                  loading={loading}
+                  style={{ background: C.primary, borderColor: C.primary, minWidth: 200, height: 48, fontSize: 16, fontWeight: 600 }}
+                >
+                  开始模拟
+                </Button>
+              </div>
             </Form>
           </Spin>
         </div>
@@ -434,126 +473,35 @@ export default function VolunteerSimPage() {
       )}
 
       {submitted && (
-        <div id="sim-result" style={{ display: 'flex', gap: 20 }}>
-          {/* Left sidebar */}
-          <div style={{
-            width: 180,
-            flexShrink: 0,
-            background: C.surface1,
-            border: `1px solid ${C.hairline}`,
-            borderRadius: 14,
-            padding: '16px 14px',
-            height: 'fit-content',
-            position: 'sticky',
-            top: 80,
-          }}>
-            <Text strong style={{ color: C.ink, fontSize: 13 }}>分数匹配</Text>
-            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {TAG_OPTIONS.map(t => {
-                const cfg = t === '全部' ? null : SCORE_TAG_CONFIG[t]
-                return (
-                  <div
-                    key={t}
-                    onClick={() => setFilterTag(t)}
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: 8,
-                      cursor: 'pointer',
-                      fontSize: 13,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      background: filterTag === t ? C.primaryBg : 'transparent',
-                      color: filterTag === t ? C.primary : C.inkMuted,
-                      fontWeight: filterTag === t ? 600 : 400,
-                      transition: 'background .15s',
-                    }}
-                  >
-                    <span>{t}</span>
-                    <span style={{ fontSize: 11, color: C.inkSubtle, minWidth: 18, textAlign: 'right' }}>
-                      {tagCounts[t] ?? 0}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-
-            <Divider style={{ margin: '12px 0', borderColor: C.hairline }} />
-
-            <Text strong style={{ color: C.ink, fontSize: 13 }}>学校类型</Text>
-            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {TYPE_OPTIONS.map(t => (
-                <div
-                  key={t}
-                  onClick={() => setFilterType(t)}
-                  style={{
-                    padding: '6px 10px',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    fontSize: 13,
-                    background: filterType === t ? C.primaryBg : 'transparent',
-                    color: filterType === t ? C.primary : C.inkMuted,
-                    fontWeight: filterType === t ? 600 : 400,
-                  }}
-                >
-                  {t}
-                </div>
-              ))}
-            </div>
-
-            <Divider style={{ margin: '12px 0', borderColor: C.hairline }} />
-
-            <Text strong style={{ color: C.ink, fontSize: 13 }}>地区</Text>
-            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div
-                onClick={() => setFilterLocation('全部')}
-                style={{
-                  padding: '6px 10px',
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  background: filterLocation === '全部' ? C.primaryBg : 'transparent',
-                  color: filterLocation === '全部' ? C.primary : C.inkMuted,
-                  fontWeight: filterLocation === '全部' ? 600 : 400,
-                }}
-              >
-                全部
-              </div>
-              {locations.map(l => (
-                <div
-                  key={l}
-                  onClick={() => setFilterLocation(l)}
-                  style={{
-                    padding: '6px 10px',
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    fontSize: 13,
-                    background: filterLocation === l ? C.primaryBg : 'transparent',
-                    color: filterLocation === l ? C.primary : C.inkMuted,
-                    fontWeight: filterLocation === l ? 600 : 400,
-                  }}
-                >
-                  {l}
-                </div>
-              ))}
-            </div>
-
-            <Divider style={{ margin: '12px 0', borderColor: C.hairline }} />
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text style={{ fontSize: 12, color: C.inkSubtle }}>仅新乐可报</Text>
-              <Switch
-                size="small"
-                checked={onlyAccessible}
-                onChange={setOnlyAccessible}
-                checkedChildren="仅新乐可报"
-                unCheckedChildren="显示全部"
-              />
-            </div>
-            <Text style={{ fontSize: 11, color: C.inkSubtle, display: 'block', marginTop: 4 }}>
-              关闭后显示全部学校（含新乐暂不可报，仅供参考扩展）
-            </Text>
-          </div>
+        <div id="sim-result" style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 12 : 20 }}>
+          {/* Filters — sidebar on desktop, horizontal chips on mobile */}
+          {isMobile ? (
+            <MobileFilterBar
+              tagCounts={tagCounts}
+              filterTag={filterTag}
+              setFilterTag={setFilterTag}
+              filterType={filterType}
+              setFilterType={setFilterType}
+              filterLocation={filterLocation}
+              setFilterLocation={setFilterLocation}
+              locations={locations}
+              onlyAccessible={onlyAccessible}
+              setOnlyAccessible={setOnlyAccessible}
+            />
+          ) : (
+            <DesktopFilterSidebar
+              tagCounts={tagCounts}
+              filterTag={filterTag}
+              setFilterTag={setFilterTag}
+              filterType={filterType}
+              setFilterType={setFilterType}
+              filterLocation={filterLocation}
+              setFilterLocation={setFilterLocation}
+              locations={locations}
+              onlyAccessible={onlyAccessible}
+              setOnlyAccessible={setOnlyAccessible}
+            />
+          )}
 
           {/* Main content */}
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -608,8 +556,8 @@ export default function VolunteerSimPage() {
                     const isFallback = allocationTop.source === 'fallback_safe'
                     return (
                       <div style={{
-                        background: isFallback ? '#fdf4e3' : C.primaryBg,
-                        border: `1px solid ${isFallback ? '#f0dca8' : C.primary}`,
+                        background: isFallback ? C.warningBg : C.primaryBg,
+                        border: `1px solid ${isFallback ? C.warningBorder : C.primary}`,
                         borderRadius: 10,
                         padding: '14px 18px',
                         marginBottom: 12,
@@ -627,7 +575,7 @@ export default function VolunteerSimPage() {
                         </Text>
                         {topBand.allocationLine.source === 'estimated' && (
                           <Text style={{ fontSize: 11, color: C.inkSubtle, display: 'block', marginTop: 4 }}>
-                            ※ 该分配线为系统按统招线估算，仅供参考，实际以当年招生政策和学校公布为准。
+                            ※ 该分配线为系统按一统线减50估算，且不低于普高线460分，仅供参考，实际以当年招生政策和学校公布为准。
                           </Text>
                         )}
                         <div style={{ marginTop: 10 }}>
@@ -652,8 +600,8 @@ export default function VolunteerSimPage() {
                   })()
                 ) : (
                   <div style={{
-                    background: '#fdf4e3',
-                    border: '1px solid #f0dca8',
+                    background: C.warningBg,
+                    border: `1px solid ${C.warningBorder}`,
                     borderRadius: 10,
                     padding: '12px 18px',
                     marginBottom: 12,
@@ -704,7 +652,7 @@ export default function VolunteerSimPage() {
                       {allocationBands.filter(b => b.tag === '保底').map(b => (
                         <span key={b.highSchoolName} style={{
                           background: C.successBg, padding: '3px 8px', borderRadius: 6,
-                          border: '1px solid #b6e2d2', color: C.success,
+                          border: `1px solid ${C.successBorder}`, color: C.success,
                         }}>
                           {b.highSchoolName}（{b.allocationLine.label}{b.allocationLine.value}分{b.allocationLine.source === 'estimated' ? '·估算' : ''}）
                         </span>
@@ -717,7 +665,7 @@ export default function VolunteerSimPage() {
                 {allocationBands.filter(b => b.tag === '排名不足').length > 0 && (
                   <div style={{
                     padding: '10px 14px', borderRadius: 8, marginBottom: 8,
-                    background: '#fdf4e3', border: '1px solid #f0dca8',
+                    background: C.warningBg, border: `1px solid ${C.warningBorder}`,
                   }}>
                     <Text style={{ fontSize: 12, color: C.warning }}>
                       ⚠️ 以下学校存在校内排名竞争风险，难以争取：
@@ -750,7 +698,7 @@ export default function VolunteerSimPage() {
                   background: C.surface3, border: `1px solid ${C.hairline}`,
                 }}>
                   <Text style={{ fontSize: 11, color: C.inkSubtle, lineHeight: 1.6 }}>
-                    说明：级联模型基于"全校学生按分数优先选最好学校"的理想假设，实际中部分学生有偏好（如宁可就近上新乐一中也不去市区），会使各档边界浮动。分配线未标"估算"的为数据库录入值，标"估算"的是系统按统招线-50推算。真实录取受考生填报意愿、分配生控制线、同校竞争、当年政策影响，最终以石家庄市教育考试院和学校官方公布为准。
+                    说明：级联模型基于"全校学生按分数优先选最好学校"的理想假设，实际中部分学生有偏好（如宁可就近上新乐一中也不去市区），会使各档边界浮动。分配线未标"估算"的为数据库录入值，标"估算"的是系统按一统线减50推算，且不低于普高线460分。真实录取受考生填报意愿、分配生控制线、同校竞争、当年政策影响，最终以石家庄市教育考试院和学校官方公布为准。
                   </Text>
                 </div>
               </div>
@@ -759,7 +707,7 @@ export default function VolunteerSimPage() {
             {/* No allocation data warning */}
             {allocationBands && allocationBands.length === 0 && (
               <div style={{
-                background: '#fdf4e3', border: '1px solid #f0dca8',
+                background: C.warningBg, border: `1px solid ${C.warningBorder}`,
                 borderRadius: 10, padding: '12px 16px', marginBottom: 16,
               }}>
                 <Text style={{ fontSize: 13, color: C.warning }}>
@@ -801,7 +749,7 @@ export default function VolunteerSimPage() {
               })}
             </div>
 
-            {/* School cards */}
+            {/* School cards — grouped by tier */}
             {filteredSchools.length === 0 ? (
               <div style={{
                 textAlign: 'center', padding: 60, color: C.inkSubtle,
@@ -812,131 +760,16 @@ export default function VolunteerSimPage() {
                 <div style={{ fontSize: 13, marginTop: 4 }}>请调整筛选条件或修改分数后重试</div>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {filteredSchools.map(school => {
-                  const cfg = SCORE_TAG_CONFIG[school.tag]
-                  const inBasket = isInBasket(school.schoolId)
-                  const allocFull = !!allocationSlot
-                  const tongzhaoFull = tongzhaoFilled >= 6
-                  const isAllocCandidate = school.tag === '分配生机会'
-
-                  return (
-                    <div
-                      key={school.schoolId}
-                      style={{
-                        background: school.accessible ? C.surface1 : C.surface3,
-                        border: `1px solid ${C.hairline}`,
-                        borderLeft: `4px solid ${cfg.color}`,
-                        borderRadius: 12,
-                        padding: '16px 20px',
-                        cursor: 'pointer',
-                        opacity: school.accessible ? 1 : 0.7,
-                        transition: 'border-color .15s, background .15s',
-                      }}
-                      onClick={() => setDetailSchool({ ...school, tag: school.tag, gap: school.gap, quota: school.quota, accessible: school.accessible })}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                          <Tag style={{
-                            background: cfg.bg, color: cfg.color,
-                            border: `1px solid ${cfg.border}`, margin: 0, fontSize: 12,
-                          }}>
-                            {cfg.label}
-                          </Tag>
-                          <Tag style={{ margin: 0, fontSize: 11, background: 'transparent', color: C.inkMuted, border: `1px solid ${C.hairline}` }}>
-                            {school.type}
-                          </Tag>
-                          <Tag style={{ margin: 0, fontSize: 11, background: 'transparent', color: C.inkMuted, border: `1px solid ${C.hairline}` }}>
-                            {school.location}
-                          </Tag>
-                          {school.accessible ? (
-                            <Tag style={{ margin: 0, fontSize: 11, background: C.successBg, color: C.success, border: '1px solid #b6e2d2' }}>
-                              ✓ 新乐可报
-                            </Tag>
-                          ) : (
-                            <Tag style={{ margin: 0, fontSize: 11, background: C.surface3, color: C.inkSubtle, border: `1px solid ${C.hairline}` }}>
-                              ⊘ 新乐暂不可报
-                            </Tag>
-                          )}
-                        </div>
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
-                          {isAllocCandidate && school.accessible && (
-                            allocFull && allocationSlot?.schoolId === school.schoolId ? (
-                              <Button size="small" disabled style={{ fontSize: 12 }}>✓ 已选</Button>
-                            ) : (
-                              <Button
-                                size="small"
-                                disabled={allocFull}
-                                style={{
-                                  fontSize: 12,
-                                  borderColor: C.primary,
-                                  color: C.primary,
-                                }}
-                                onClick={() => addToAllocation(school)}
-                              >
-                                +加入分配生
-                              </Button>
-                            )
-                          )}
-                          {inBasket && tongzhaoSlots.some(s => s?.schoolId === school.schoolId) ? (
-                            <Button size="small" disabled style={{ fontSize: 12 }}>✓ 已选</Button>
-                          ) : (
-                            school.accessible && (
-                              <Button
-                                size="small"
-                                disabled={tongzhaoFull}
-                                style={{ fontSize: 12 }}
-                                onClick={() => addToTongzhao(school)}
-                              >
-                                {tongzhaoFull ? '统招已满' : '+加入统招'}
-                              </Button>
-                            )
-                          )}
-                          {!school.accessible && (
-                            <Button size="small" disabled style={{ fontSize: 12 }}>+加入统招</Button>
-                          )}
-                        </div>
-                      </div>
-
-                      <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
-                        <div>
-                          <Text strong style={{ fontSize: 16, color: C.ink }}>{school.name}</Text>
-                          <Text style={{ fontSize: 12, color: C.inkSubtle, marginLeft: 8 }}>{school.fullName}</Text>
-                          {!school.accessible && (
-                            <Text style={{ fontSize: 11, color: C.inkSubtle, marginLeft: 8 }}>
-                              该校未面向新乐招生，仅供了解
-                            </Text>
-                          )}
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                          {school.yiTong && (
-                            <Text style={{ fontSize: 12, color: C.inkSubtle, display: 'block' }}>
-                              一统线：<Text strong style={{ color: C.inkMuted }}>{school.yiTong}</Text>分
-                            </Text>
-                          )}
-                          <Text style={{ fontSize: 14 }}>
-                            统招线：
-                            <Text strong style={{ color: school.gap >= 0 ? C.success : C.error, fontSize: 16 }}>
-                              {school.tongZhao}
-                            </Text>
-                            分
-                            <Text style={{ fontSize: 12, marginLeft: 4, color: school.gap >= 0 ? C.success : C.error }}>
-                              ({school.gap >= 0 ? `高出${school.gap}分` : `差${Math.abs(school.gap)}分`})
-                            </Text>
-                          </Text>
-                        </div>
-                      </div>
-
-                      <div style={{ marginTop: 8, display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, color: C.inkSubtle }}>
-                        {school.keyFeature && <span>{school.keyFeature}</span>}
-                        {school.gaokaoRate && <span>升学率：{school.gaokaoRate}</span>}
-                        {school.boardingAvail && <span>可住宿</span>}
-                        {school.tuitionFee && <span>{school.tuitionFee}</span>}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+              <TieredSchoolList
+                schools={filteredSchools}
+                isInBasket={isInBasket}
+                allocationSlot={allocationSlot}
+                tongzhaoSlots={tongzhaoSlots}
+                tongzhaoFilled={tongzhaoFilled}
+                addToAllocation={addToAllocation}
+                addToTongzhao={addToTongzhao}
+                onDetail={setDetailSchool}
+              />
             )}
           </div>
         </div>
@@ -963,7 +796,7 @@ export default function VolunteerSimPage() {
                   {cfg.label}
                 </Tag>
                 {detailSchool.accessible ? (
-                  <Tag style={{ margin: 0, background: C.successBg, color: C.success, border: '1px solid #b6e2d2' }}>
+                  <Tag style={{ margin: 0, background: C.successBg, color: C.success, border: `1px solid ${C.successBorder}` }}>
                     ✓ 新乐可报
                   </Tag>
                 ) : (
@@ -1019,7 +852,7 @@ export default function VolunteerSimPage() {
                   padding: '10px 14px',
                   borderRadius: 8,
                   background: C.primaryBg,
-                  border: `1px solid #f5c9b3`,
+                  border: `1px solid ${C.primaryBorder}`,
                   color: C.primary,
                   fontSize: 13,
                 }}>
@@ -1130,7 +963,7 @@ export default function VolunteerSimPage() {
         })()}
       </Modal>
 
-      {/* Bottom sticky volunteer basket */}
+      {/* Bottom sticky volunteer basket — safe area for mobile */}
       {submitted && (
         <div style={{
           position: 'sticky',
@@ -1140,6 +973,7 @@ export default function VolunteerSimPage() {
           borderTop: `1px solid ${C.hairline}`,
           borderLeft: `1px solid ${C.hairline}`,
           borderRight: `1px solid ${C.hairline}`,
+          paddingBottom: isMobile ? 'calc(12px + env(safe-area-inset-bottom, 0px))' : undefined,
           borderRadius: '14px 14px 0 0',
           padding: '16px 24px',
           zIndex: 50,
@@ -1232,8 +1066,8 @@ export default function VolunteerSimPage() {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <Text style={{ fontSize: 12, color: '#9a8e7a' }}>{label}</Text>
-      <div style={{ fontSize: 13, color: '#5a4e3a' }}>{value}</div>
+      <Text style={{ fontSize: 12, color: C.inkSubtle }}>{label}</Text>
+      <div style={{ fontSize: 13, color: C.inkMuted }}>{value}</div>
     </div>
   )
 }
@@ -1241,15 +1075,13 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function ScoreBlock({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div style={{
-      padding: '10px 14px',
-      borderRadius: 8,
-      background: '#f5f2ee',
-      border: '1px solid rgba(0,0,0,.06)',
+      padding: '10px 14px', borderRadius: 8,
+      background: C.surface3, border: `1px solid ${C.hairline}`,
       textAlign: 'center',
     }}>
-      <div style={{ fontSize: 12, color: '#9a8e7a' }}>{label}</div>
-      <div style={{ fontSize: 18, fontWeight: 700, color: '#1a1201' }}>{value}</div>
-      {sub && <div style={{ fontSize: 11, color: '#9a8e7a' }}>{sub}</div>}
+      <div style={{ fontSize: 12, color: C.inkSubtle }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 700, color: C.ink }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: C.inkSubtle }}>{sub}</div>}
     </div>
   )
 }
@@ -1257,8 +1089,8 @@ function ScoreBlock({ label, value, sub }: { label: string; value: string; sub?:
 function FeatureSection({ label, content }: { label: string; content: string }) {
   return (
     <div>
-      <Text strong style={{ color: '#5a4e3a', fontSize: 13 }}>{label}</Text>
-      <div style={{ color: '#5a4e3a', fontSize: 13, marginTop: 2 }}>{content}</div>
+      <Text strong style={{ color: C.inkMuted, fontSize: 13 }}>{label}</Text>
+      <div style={{ color: C.inkMuted, fontSize: 13, marginTop: 2 }}>{content}</div>
     </div>
   )
 }
@@ -1277,24 +1109,21 @@ function SlotItem({
   if (school) {
     return (
       <div style={{
-        width: 130,
-        padding: '10px 12px',
-        borderRadius: 10,
-        background: '#f5f2ee',
-        border: '1px solid rgba(0,0,0,.06)',
+        width: 130, padding: '10px 12px', borderRadius: 10,
+        background: C.surface3, border: `1px solid ${C.hairline}`,
         position: 'relative',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#1a1201' }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>
               {school.name.length > 6 ? school.name.slice(0, 6) + '…' : school.name}
             </div>
-            <div style={{ fontSize: 11, color: '#9a8e7a' }}>{school.tongZhao}分</div>
+            <div style={{ fontSize: 11, color: C.inkSubtle }}>{school.tongZhao}分</div>
           </div>
-          <CloseOutlined style={{ color: '#9a8e7a', fontSize: 12, cursor: 'pointer' }} onClick={onRemove} />
+          <CloseOutlined style={{ color: C.inkSubtle, fontSize: 12, cursor: 'pointer' }} onClick={onRemove} />
         </div>
         <div style={{ marginTop: 6, display: 'flex', gap: 4 }}>
-          <Text style={{ fontSize: 10, color: '#E8784A' }}>统招{['①','②','③','④','⑤','⑥'][index]}</Text>
+          <Text style={{ fontSize: 10, color: C.primary }}>统招{['①','②','③','④','⑤','⑥'][index]}</Text>
           {swapping ? (
             <div style={{ display: 'flex', gap: 2 }}>
               {allSlots.map((_, i) => (
@@ -1303,11 +1132,11 @@ function SlotItem({
                   onClick={() => { onSwap(i); setSwapping(false) }}
                   style={{
                     width: 16, height: 16, borderRadius: 3,
-                    background: i === index ? '#E8784A' : '#ffffff',
-                    border: '1px solid rgba(0,0,0,.06)',
+                    background: i === index ? C.primary : C.surface1,
+                    border: `1px solid ${C.hairline}`,
                     cursor: i === index ? 'default' : 'pointer',
                     fontSize: 9, textAlign: 'center', lineHeight: '14px',
-                    color: '#9a8e7a',
+                    color: C.inkSubtle,
                   }}
                 >
                   {i + 1}
@@ -1316,7 +1145,7 @@ function SlotItem({
             </div>
           ) : (
             <SwapOutlined
-              style={{ fontSize: 10, color: '#9a8e7a', cursor: 'pointer', marginLeft: 4 }}
+              style={{ fontSize: 10, color: C.inkSubtle, cursor: 'pointer', marginLeft: 4 }}
               onClick={() => setSwapping(!swapping)}
             />
           )}
@@ -1327,16 +1156,345 @@ function SlotItem({
 
   return (
     <div style={{
-      width: 130,
-      padding: '10px 12px',
-      borderRadius: 10,
-      background: '#f5f2ee',
-      border: '1px dashed rgba(0,0,0,.12)',
-      color: '#9a8e7a',
-      fontSize: 13,
-      textAlign: 'center',
+      width: 130, padding: '10px 12px', borderRadius: 10,
+      background: C.surface3, border: `1px dashed ${C.hairlineStrong}`,
+      color: C.inkSubtle, fontSize: 13, textAlign: 'center',
     }}>
       空位{['①','②','③','④','⑤','⑥'][index]}
+    </div>
+  )
+}
+
+// === Tiered School List ===
+
+const TIER_ORDER: ScoreTag[] = ['分配生机会', '冲刺', '稳妥', '保底', '差距较大', '暂未达线']
+
+const TIER_SECTION_LABELS: Record<string, string> = {
+  '分配生机会': '分配生候选',
+  '冲刺': '冲刺',
+  '稳妥': '稳妥',
+  '保底': '保底',
+  '差距较大': '差距较大',
+  '暂未达线': '暂未达线',
+}
+
+const TIER_SECTION_SUBTLE: Record<string, string> = {
+  '分配生机会': '分数达到分配线，可争取分配生名额',
+  '冲刺': '分数接近或略低于统招线，需冲刺',
+  '稳妥': '分数超出统招线，录取把握较大',
+  '保底': '分数远超统招线，作为安全选择',
+  '差距较大': '与统招线差距明显',
+  '暂未达线': '暂未达到统招线要求',
+}
+
+function TieredSchoolList({
+  schools, isInBasket, allocationSlot, tongzhaoSlots, tongzhaoFilled,
+  addToAllocation, addToTongzhao, onDetail,
+}: {
+  schools: ProcessedSchool[]
+  isInBasket: (id: string) => boolean
+  allocationSlot: DBSchool | null
+  tongzhaoSlots: (DBSchool | null)[]
+  tongzhaoFilled: number
+  addToAllocation: (s: DBSchool) => void
+  addToTongzhao: (s: DBSchool) => void
+  onDetail: (s: ProcessedSchool) => void
+}) {
+  const grouped = useMemo(() => {
+    const map = new Map<string, ProcessedSchool[]>()
+    for (const t of TIER_ORDER) {
+      const group = schools.filter(s => s.tag === t)
+      if (group.length > 0) map.set(t, group)
+    }
+    return map
+  }, [schools])
+
+  const allocFull = !!allocationSlot
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {Array.from(grouped.entries()).map(([tier, tierSchools]) => {
+        const cfg = SCORE_TAG_CONFIG[tier as ScoreTag]
+        const isAllocGroup = tier === '分配生机会'
+        return (
+          <div key={tier}>
+            {/* Section header */}
+            <div style={{
+              display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 10,
+              paddingBottom: 8, borderBottom: `1px solid ${C.hairline}`,
+            }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: cfg.color, flexShrink: 0,
+              }} />
+              <Text strong style={{ fontSize: 14, color: C.ink }}>
+                {TIER_SECTION_LABELS[tier] || tier}
+              </Text>
+              <Text style={{ fontSize: 12, color: C.inkSubtle }}>
+                {TIER_SECTION_SUBTLE[tier] || ''}
+              </Text>
+              <Text style={{ fontSize: 11, color: C.inkSubtle, marginLeft: 'auto' }}>
+                {tierSchools.length}所
+              </Text>
+            </div>
+
+            {/* Cards */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {tierSchools.map(school => {
+                const inBasket = isInBasket(school.schoolId)
+                const tongzhaoFull = tongzhaoFilled >= 6
+
+                return (
+                  <div
+                    key={school.schoolId}
+                    style={{
+                      background: school.accessible ? cfg.bg : C.surface3,
+                      border: `1px solid ${cfg.border}`,
+                      borderRadius: 12,
+                      padding: '14px 18px',
+                      cursor: 'pointer',
+                      opacity: school.accessible ? 1 : 0.7,
+                      transition: 'border-color .15s, background .15s',
+                    }}
+                    onClick={() => onDetail(school)}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                        <Tag style={{
+                          background: cfg.bg, color: cfg.color,
+                          border: `1px solid ${cfg.border}`, margin: 0, fontSize: 11,
+                          fontWeight: 600,
+                        }}>
+                          {cfg.label}
+                        </Tag>
+                        <Text style={{ fontSize: 11, color: C.inkSubtle }}>{school.type}</Text>
+                        <Text style={{ fontSize: 11, color: C.inkSubtle }}>{school.location}</Text>
+                        {!school.accessible && (
+                          <Text style={{ fontSize: 11, color: C.inkSubtle }}>新乐暂不可报</Text>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
+                        {isAllocGroup && school.accessible && (
+                          allocFull && allocationSlot?.schoolId === school.schoolId ? (
+                            <Button size="small" disabled style={{ fontSize: 11 }}>已选</Button>
+                          ) : (
+                            <Button size="small" disabled={allocFull}
+                              style={{ fontSize: 11, borderColor: C.primary, color: C.primary }}
+                              onClick={() => addToAllocation(school)}>
+                              +分配生
+                            </Button>
+                          )
+                        )}
+                        {inBasket && tongzhaoSlots.some(s => s?.schoolId === school.schoolId) ? (
+                          <Button size="small" disabled style={{ fontSize: 11 }}>已选</Button>
+                        ) : (
+                          school.accessible && (
+                            <Button size="small" disabled={tongzhaoFull}
+                              style={{ fontSize: 11 }}
+                              onClick={() => addToTongzhao(school)}>
+                              {tongzhaoFull ? '已满' : '+统招'}
+                            </Button>
+                          )
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
+                      <div>
+                        <Text strong style={{ fontSize: 15, color: C.ink }}>{school.name}</Text>
+                        <Text style={{ fontSize: 11, color: C.inkSubtle, marginLeft: 6 }}>{school.fullName}</Text>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        {school.yiTong && (
+                          <Text style={{ fontSize: 11, color: C.inkSubtle, marginRight: 12 }}>
+                            一统{school.yiTong}分
+                          </Text>
+                        )}
+                        <Text style={{ fontSize: 13 }}>
+                          统招
+                          <Text strong style={{ color: school.gap >= 0 ? C.success : C.error, fontSize: 15, margin: '0 2px' }}>
+                            {school.tongZhao}
+                          </Text>
+                          分
+                          <Text style={{ fontSize: 11, marginLeft: 3, color: school.gap >= 0 ? C.success : C.error }}>
+                            ({school.gap >= 0 ? `高${school.gap}` : `差${Math.abs(school.gap)}`})
+                          </Text>
+                        </Text>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// === Filter Components ===
+
+function DesktopFilterSidebar({
+  tagCounts, filterTag, setFilterTag, filterType, setFilterType,
+  filterLocation, setFilterLocation, locations, onlyAccessible, setOnlyAccessible,
+}: {
+  tagCounts: Record<string, number>
+  filterTag: string; setFilterTag: (v: string) => void
+  filterType: string; setFilterType: (v: string) => void
+  filterLocation: string; setFilterLocation: (v: string) => void
+  locations: string[]
+  onlyAccessible: boolean; setOnlyAccessible: (v: boolean) => void
+}) {
+  return (
+    <div style={{
+      width: 180, flexShrink: 0,
+      background: C.surface1,
+      border: `1px solid ${C.hairline}`,
+      borderRadius: 14, padding: '16px 14px',
+      height: 'fit-content', position: 'sticky', top: 80,
+    }}>
+      <Text strong style={{ color: C.ink, fontSize: 13 }}>分数匹配</Text>
+      <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {TAG_OPTIONS.map(t => {
+          const cfg = t === '全部' ? null : SCORE_TAG_CONFIG[t]
+          return (
+            <div key={t} onClick={() => setFilterTag(t)} style={{
+              padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              background: filterTag === t ? C.primaryBg : 'transparent',
+              color: filterTag === t ? C.primary : C.inkMuted,
+              fontWeight: filterTag === t ? 600 : 400,
+              transition: 'background .15s', minHeight: 36,
+            }}>
+              <span>{t}</span>
+              <span style={{ fontSize: 11, color: C.inkSubtle, minWidth: 18, textAlign: 'right' }}>
+                {tagCounts[t] ?? 0}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+
+      <Divider style={{ margin: '12px 0', borderColor: C.hairline }} />
+
+      <Text strong style={{ color: C.ink, fontSize: 13 }}>学校类型</Text>
+      <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {TYPE_OPTIONS.map(t => (
+          <div key={t} onClick={() => setFilterType(t)} style={{
+            padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
+            background: filterType === t ? C.primaryBg : 'transparent',
+            color: filterType === t ? C.primary : C.inkMuted,
+            fontWeight: filterType === t ? 600 : 400, minHeight: 36,
+          }}>
+            {t}
+          </div>
+        ))}
+      </div>
+
+      <Divider style={{ margin: '12px 0', borderColor: C.hairline }} />
+
+      <Text strong style={{ color: C.ink, fontSize: 13 }}>地区</Text>
+      <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div onClick={() => setFilterLocation('全部')} style={{
+          padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
+          background: filterLocation === '全部' ? C.primaryBg : 'transparent',
+          color: filterLocation === '全部' ? C.primary : C.inkMuted,
+          fontWeight: filterLocation === '全部' ? 600 : 400, minHeight: 36,
+        }}>
+          全部
+        </div>
+        {locations.map(l => (
+          <div key={l} onClick={() => setFilterLocation(l)} style={{
+            padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
+            background: filterLocation === l ? C.primaryBg : 'transparent',
+            color: filterLocation === l ? C.primary : C.inkMuted,
+            fontWeight: filterLocation === l ? 600 : 400, minHeight: 36,
+          }}>
+            {l}
+          </div>
+        ))}
+      </div>
+
+      <Divider style={{ margin: '12px 0', borderColor: C.hairline }} />
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 12, color: C.inkSubtle }}>仅新乐可报</Text>
+        <Switch size="small" checked={onlyAccessible} onChange={setOnlyAccessible} />
+      </div>
+    </div>
+  )
+}
+
+function MobileFilterBar({
+  tagCounts, filterTag, setFilterTag, filterType, setFilterType,
+  filterLocation, setFilterLocation, locations, onlyAccessible, setOnlyAccessible,
+}: {
+  tagCounts: Record<string, number>
+  filterTag: string; setFilterTag: (v: string) => void
+  filterType: string; setFilterType: (v: string) => void
+  filterLocation: string; setFilterLocation: (v: string) => void
+  locations: string[]
+  onlyAccessible: boolean; setOnlyAccessible: (v: boolean) => void
+}) {
+  return (
+    <div style={{
+      background: C.surface1,
+      border: `1px solid ${C.hairline}`,
+      borderRadius: 12, padding: '10px 12px',
+      position: 'sticky', top: 76, zIndex: 40,
+    }}>
+      {/* Score match chips — horizontal scroll */}
+      <div style={{
+        display: 'flex', gap: 6, overflowX: 'auto',
+        paddingBottom: 4, WebkitOverflowScrolling: 'touch',
+      }}>
+        {TAG_OPTIONS.map(t => {
+          const cfg = t === '全部' ? null : SCORE_TAG_CONFIG[t]
+          return (
+            <div key={t} onClick={() => setFilterTag(t)} style={{
+              padding: '6px 12px', borderRadius: 20, cursor: 'pointer',
+              fontSize: 12, fontWeight: filterTag === t ? 600 : 400,
+              whiteSpace: 'nowrap', flexShrink: 0,
+              background: filterTag === t ? (cfg?.bg ?? C.primaryBg) : C.surface3,
+              border: `1px solid ${filterTag === t ? (cfg?.border ?? C.hairlineStrong) : C.hairline}`,
+              color: filterTag === t ? (cfg?.color ?? C.primary) : C.inkMuted,
+              minHeight: 32, display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+              {t}
+              <span style={{ fontSize: 10, color: C.inkSubtle }}>{tagCounts[t] ?? 0}</span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Type + Location + Switch row */}
+      <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Select
+          size="small"
+          value={filterType || undefined}
+          onChange={v => setFilterType(v || '全部')}
+          style={{ width: 90, minHeight: 32 }}
+          options={[
+            { label: '全部类型', value: '全部' },
+            ...TYPE_OPTIONS.filter(t => t !== '全部').map(t => ({ label: t, value: t })),
+          ]}
+        />
+        <Select
+          size="small"
+          value={filterLocation || undefined}
+          onChange={v => setFilterLocation(v || '全部')}
+          style={{ width: 90, minHeight: 32 }}
+          options={[
+            { label: '全部地区', value: '全部' },
+            ...locations.map(l => ({ label: l, value: l })),
+          ]}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
+          <Text style={{ fontSize: 11, color: C.inkSubtle }}>仅新乐可报</Text>
+          <Switch size="small" checked={onlyAccessible} onChange={setOnlyAccessible} />
+        </div>
+      </div>
     </div>
   )
 }

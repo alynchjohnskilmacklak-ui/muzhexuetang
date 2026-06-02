@@ -1,147 +1,247 @@
 'use client'
 
-import { Card, Tag, Typography } from 'antd'
+import { Tag, Typography, Divider } from 'antd'
 import {
   CarOutlined, DollarOutlined, HomeOutlined, PhoneOutlined,
+  EnvironmentOutlined,
 } from '@ant-design/icons'
+import { getAllocationLine } from '@/data/volunteer-2025'
 
 const { Text, Paragraph } = Typography
 
 interface SchoolInfo {
-  id: string; schoolId: string; name: string; type: string; location: string
+  id: string; schoolId: string; name: string; fullName?: string; type: string; location: string
   address: string | null; distanceFromXinle: string | null
-  yiTong: number | null; tongZhao: number; enrollment: number | null
+  yiTong: number | null; tongZhao: number; allocationLine?: number | null; enrollment: number | null
   boardingAvail: boolean; boardingFee: string | null; tuitionFee: string | null
   keyFeature: string | null; gaokaoRate: string | null
   intro: string | null; tips: string | null
   website: string | null; phone: string | null
+  xinleAccessible?: boolean
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  '省示范': '#ff4d4f', '市重点': '#fa8c16', '县中': '#1890ff', '民办': '#722ed1',
+// Warm light tokens
+const C = {
+  surface1: '#ffffff',
+  surface3: '#f5f2ee',
+  hairline: 'rgba(0,0,0,.06)',
+  ink: '#1a1201',
+  inkMuted: '#5a4e3a',
+  inkSubtle: '#9a8e7a',
+  primary: '#E8784A',
+  primaryBg: '#fff3ec',
+  success: '#1D9E75',
+  warning: '#C77F00',
+  error: '#E24B4A',
+}
+
+const TYPE_TAG: Record<string, { color: string; bg: string }> = {
+  '省示范': { color: '#E8784A', bg: '#fff3ec' },
+  '市重点': { color: '#C77F00', bg: '#fdf4e3' },
+  '县中': { color: '#185FA5', bg: '#eaf1f9' },
+  '民办': { color: '#722ed1', bg: '#f9f0ff' },
 }
 
 interface SchoolCardProps {
   school: SchoolInfo
   compact?: boolean
+  onClick?: () => void
 }
 
-export function SchoolCard({ school, compact = false }: SchoolCardProps) {
+export function SchoolCard({ school, compact = false, onClick }: SchoolCardProps) {
+  const allocationLine = getAllocationLine(school)
+
   if (compact) {
+    const typeMeta = TYPE_TAG[school.type] || { color: '#9a8e7a', bg: '#f5f2ee' }
+
     return (
-      <Card
-        style={{ borderRadius: 12, height: '100%' }}
-        styles={{ body: { padding: '14px 16px' } }}
-        hoverable
+      <div
+        onClick={onClick}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 12,
+          padding: '14px 18px',
+          background: C.surface1,
+          border: `1px solid ${C.hairline}`,
+          borderRadius: 12,
+          cursor: onClick ? 'pointer' : 'default',
+          transition: 'border-color .15s, box-shadow .15s',
+        }}
+        onMouseEnter={onClick ? (e) => {
+          (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(232,120,74,.3)'
+          ;(e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(26,18,1,.06)'
+        } : undefined}
+        onMouseLeave={onClick ? (e) => {
+          (e.currentTarget as HTMLDivElement).style.borderColor = C.hairline
+          ;(e.currentTarget as HTMLDivElement).style.boxShadow = 'none'
+        } : undefined}
       >
-        <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-          <Tag style={{
-            backgroundColor: `${TYPE_COLORS[school.type]}18`,
-            color: TYPE_COLORS[school.type],
-            border: `1px solid ${TYPE_COLORS[school.type]}30`,
-            margin: 0, fontSize: 11,
+        {/* Left: info */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+          {/* Type badge */}
+          <span style={{
+            display: 'inline-block',
+            padding: '2px 8px',
+            borderRadius: 6,
+            background: typeMeta.bg,
+            color: typeMeta.color,
+            fontSize: 11,
+            fontWeight: 600,
+            flexShrink: 0,
+            lineHeight: '20px',
           }}>
             {school.type}
-          </Tag>
-          <Tag style={{ margin: 0, fontSize: 11 }}>{school.location}</Tag>
-          {school.boardingAvail && (
-            <Tag color="success" style={{ margin: 0, fontSize: 11 }}>可住宿</Tag>
-          )}
-        </div>
+          </span>
 
-        <Text strong style={{ fontSize: 15, display: 'block', marginBottom: 6 }}>
-          {school.name}
-        </Text>
-
-        {school.keyFeature && (
-          <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8, lineHeight: 1.5 }}>
-            {school.keyFeature}
-          </Text>
-        )}
-
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          {school.yiTong && (
-            <Text style={{ fontSize: 12 }}>
-              一统线：<Text strong style={{ color: '#ff4d4f' }}>{school.yiTong}</Text>
+          {/* School name + location */}
+          <div style={{ minWidth: 0 }}>
+            <Text strong style={{ fontSize: 14, color: C.ink, whiteSpace: 'nowrap' }}>
+              {school.name}
             </Text>
-          )}
-          <Text style={{ fontSize: 12 }}>
-            统招线：<Text strong style={{ color: '#1890ff' }}>{school.tongZhao}</Text>
-          </Text>
+            <Text style={{ fontSize: 11, color: C.inkSubtle, marginLeft: 6, whiteSpace: 'nowrap' }}>
+              {school.location}
+            </Text>
+          </div>
+
+          {/* Chips */}
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            {school.boardingAvail && (
+              <span style={{
+                padding: '1px 6px', borderRadius: 4,
+                background: '#eaf7f1', color: C.success, fontSize: 10, fontWeight: 500,
+                border: '1px solid #b6e2d2', flexShrink: 0,
+              }}>
+                住宿
+              </span>
+            )}
+            {school.keyFeature && (
+              <Text
+                ellipsis={{ tooltip: school.keyFeature }}
+                style={{ fontSize: 12, color: C.inkSubtle, maxWidth: 200 }}
+              >
+                {school.keyFeature}
+              </Text>
+            )}
+          </div>
         </div>
-      </Card>
+
+        {/* Right: cutoff lines — aligned for comparison */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 16,
+          flexShrink: 0, textAlign: 'right',
+        }}>
+          {school.yiTong && (
+            <div style={{ textAlign: 'center' }}>
+              <Text style={{ fontSize: 10, color: C.inkSubtle, display: 'block' }}>一统线</Text>
+              <Text strong style={{ fontSize: 15, color: C.inkMuted, lineHeight: 1.2 }}>{school.yiTong}</Text>
+              <Text style={{ fontSize: 10, color: C.inkSubtle }}>分</Text>
+            </div>
+          )}
+          <div style={{ textAlign: 'center' }}>
+            <Text style={{ fontSize: 10, color: C.inkSubtle, display: 'block' }}>统招线</Text>
+            <Text strong style={{ fontSize: 16, color: C.ink, lineHeight: 1.2 }}>{school.tongZhao}</Text>
+            <Text style={{ fontSize: 10, color: C.inkSubtle }}>分</Text>
+          </div>
+          {allocationLine !== null && (
+            <div style={{ textAlign: 'center' }}>
+              <Text style={{ fontSize: 10, color: C.inkSubtle, display: 'block' }}>分配线</Text>
+              <Text strong style={{ fontSize: 15, color: C.primary, lineHeight: 1.2 }}>{allocationLine}</Text>
+              <Text style={{ fontSize: 10, color: C.inkSubtle }}>分</Text>
+            </div>
+          )}
+        </div>
+      </div>
     )
   }
 
+  // Full detail view (used in modal)
   return (
     <div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-        <Tag style={{
-          backgroundColor: `${TYPE_COLORS[school.type]}18`,
-          color: TYPE_COLORS[school.type],
-          border: `1px solid ${TYPE_COLORS[school.type]}30`,
-          fontSize: 12,
-        }}>
-          {school.type}
-        </Tag>
-        <Tag style={{ fontSize: 12 }}>{school.location}</Tag>
+      {/* Type + location row */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        {((): React.ReactNode => {
+          const tm = TYPE_TAG[school.type] || { color: '#9a8e7a', bg: '#f5f2ee' }
+          return (
+            <span style={{
+              padding: '3px 10px', borderRadius: 8,
+              background: tm.bg, color: tm.color,
+              fontSize: 12, fontWeight: 600,
+              border: `1px solid ${tm.color}30`,
+            }}>
+              {school.type}
+            </span>
+          )
+        })()}
+        <span style={{ fontSize: 12, color: C.inkSubtle, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <EnvironmentOutlined /> {school.location}
+        </span>
         {school.boardingAvail && (
-          <Tag color="success" style={{ fontSize: 12 }}>可住宿</Tag>
+          <span style={{
+            padding: '1px 8px', borderRadius: 4,
+            background: '#eaf7f1', color: C.success, fontSize: 11, fontWeight: 500,
+          }}>
+            可住宿
+          </span>
         )}
       </div>
 
+      {/* Key feature highlight */}
       {school.keyFeature && (
         <div style={{
           padding: '10px 14px', borderRadius: 10, marginBottom: 14,
-          backgroundColor: 'rgba(232,117,69,.06)',
-          border: '1px solid rgba(232,117,69,.15)',
+          backgroundColor: C.primaryBg,
+          border: `1px solid rgba(232,120,74,.15)`,
         }}>
-          <Text style={{ fontSize: 13, color: '#5a4e3a', fontWeight: 500 }}>
+          <Text style={{ fontSize: 13, color: C.inkMuted, fontWeight: 500, lineHeight: 1.7 }}>
             {school.keyFeature}
           </Text>
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
-        {[
-          { label: '统招线', value: `${school.tongZhao}分`, color: '#1890ff' },
-          { label: '一统线', value: school.yiTong ? `${school.yiTong}分` : '无（非省示范）', color: '#ff4d4f' },
-          { label: '年招生', value: school.enrollment ? `约${school.enrollment}人` : '待更新', color: '#27a644' },
-          { label: '高考表现', value: school.gaokaoRate || '待更新', color: '#722ed1' },
-        ].map((item, i) => (
-          <div key={i} style={{
-            padding: '8px 12px', borderRadius: 8,
-            backgroundColor: `${item.color}0d`,
-            border: `1px solid ${item.color}20`,
-          }}>
-            <Text style={{ fontSize: 11, color: '#9a8e7a', display: 'block' }}>{item.label}</Text>
-            <Text style={{ fontSize: 13, fontWeight: 600, color: item.color }}>{item.value}</Text>
-          </div>
-        ))}
+      {/* Score block: lines aligned for comparison */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: school.yiTong ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)',
+        gap: 10,
+        marginBottom: 14,
+      }}>
+        {school.yiTong && (
+          <ScoreCell label="一统线" value={`${school.yiTong}分`} sub="一次统招线" />
+        )}
+        <ScoreCell label="统招线" value={`${school.tongZhao}分`} sub="二次统招/实录线" />
+        <ScoreCell label="分配线" value={allocationLine !== null ? `${allocationLine}分` : '无'} sub={allocationLine !== null ? '一统线减50' : '无一统线'} />
+        <ScoreCell label="年招生" value={school.enrollment ? `约${school.enrollment}人` : '待更新'} />
+        <ScoreCell label="高考表现" value={school.gaokaoRate || '待更新'} />
       </div>
 
+      <Divider style={{ margin: '12px 0', borderColor: C.hairline }} />
+
+      {/* Details */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
         {school.distanceFromXinle && (
-          <Text style={{ fontSize: 13 }}>
-            <CarOutlined style={{ marginRight: 6, color: '#9a8e7a' }} />
+          <Text style={{ fontSize: 13, color: C.inkMuted }}>
+            <CarOutlined style={{ marginRight: 6, color: C.inkSubtle }} />
             {school.distanceFromXinle}
           </Text>
         )}
         {school.tuitionFee && (
-          <Text style={{ fontSize: 13 }}>
-            <DollarOutlined style={{ marginRight: 6, color: '#9a8e7a' }} />
+          <Text style={{ fontSize: 13, color: C.inkMuted }}>
+            <DollarOutlined style={{ marginRight: 6, color: C.inkSubtle }} />
             {school.tuitionFee}
           </Text>
         )}
         {school.boardingAvail && school.boardingFee && (
-          <Text style={{ fontSize: 13 }}>
-            <HomeOutlined style={{ marginRight: 6, color: '#9a8e7a' }} />
+          <Text style={{ fontSize: 13, color: C.inkMuted }}>
+            <HomeOutlined style={{ marginRight: 6, color: C.inkSubtle }} />
             住宿：{school.boardingFee}
           </Text>
         )}
         {school.phone && (
-          <Text style={{ fontSize: 13 }}>
-            <PhoneOutlined style={{ marginRight: 6, color: '#9a8e7a' }} />
+          <Text style={{ fontSize: 13, color: C.inkMuted }}>
+            <PhoneOutlined style={{ marginRight: 6, color: C.inkSubtle }} />
             招生电话：{school.phone}
           </Text>
         )}
@@ -149,10 +249,10 @@ export function SchoolCard({ school, compact = false }: SchoolCardProps) {
 
       {school.intro && (
         <div style={{ marginBottom: 14 }}>
-          <Text style={{ fontSize: 12, fontWeight: 600, color: '#5a4e3a', display: 'block', marginBottom: 4 }}>
+          <Text style={{ fontSize: 12, fontWeight: 600, color: C.inkMuted, display: 'block', marginBottom: 4 }}>
             学校简介
           </Text>
-          <Paragraph style={{ fontSize: 13, color: '#7a6e60', marginBottom: 0, lineHeight: 1.8 }}>
+          <Paragraph style={{ fontSize: 13, color: C.inkMuted, marginBottom: 0, lineHeight: 1.8 }}>
             {school.intro}
           </Paragraph>
         </div>
@@ -161,15 +261,31 @@ export function SchoolCard({ school, compact = false }: SchoolCardProps) {
       {school.tips && (
         <div style={{
           padding: '10px 14px', borderRadius: 10,
-          backgroundColor: 'rgba(24,144,255,.05)',
-          border: '1px solid rgba(24,144,255,.15)',
+          backgroundColor: 'rgba(232,120,74,.05)',
+          border: `1px solid rgba(232,120,74,.15)`,
         }}>
-          <Text style={{ fontSize: 12, fontWeight: 600, color: '#1890ff', display: 'block', marginBottom: 4 }}>
+          <Text style={{ fontSize: 12, fontWeight: 600, color: C.primary, display: 'block', marginBottom: 4 }}>
             新乐学生报考建议
           </Text>
-          <Text style={{ fontSize: 13, color: '#3a5a7a', lineHeight: 1.8 }}>{school.tips}</Text>
+          <Text style={{ fontSize: 13, color: C.inkMuted, lineHeight: 1.8 }}>{school.tips}</Text>
         </div>
       )}
+    </div>
+  )
+}
+
+function ScoreCell({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div style={{
+      padding: '10px 12px',
+      borderRadius: 10,
+      background: C.surface3,
+      border: `1px solid ${C.hairline}`,
+      textAlign: 'center',
+    }}>
+      <Text style={{ fontSize: 11, color: C.inkSubtle, display: 'block' }}>{label}</Text>
+      <Text strong style={{ fontSize: 18, color: C.ink, lineHeight: 1.3 }}>{value}</Text>
+      {sub && <Text style={{ fontSize: 10, color: C.inkSubtle, display: 'block' }}>{sub}</Text>}
     </div>
   )
 }
