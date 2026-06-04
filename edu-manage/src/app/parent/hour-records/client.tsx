@@ -111,6 +111,7 @@ export function ParentHourRecordsClient({ students, records }: { students: any[]
             rowKey="id"
             dataSource={filteredRecords}
             pagination={{ pageSize: 12 }}
+            scroll={{ x: 640 }}
             locale={{ emptyText: '暂无扣课记录' }}
             columns={[
               { title: '日期', key: 'date', render: (_: unknown, record: any) => new Date(recordMeta(record).date).toLocaleDateString('zh-CN') },

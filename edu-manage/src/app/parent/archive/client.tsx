@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, Col, Row, Statistic, Table, Tag, Typography, Empty, Tabs } from 'antd'
+import { Card, Col, Row, Statistic, Tag, Typography, Empty, Tabs } from 'antd'
 import { FileTextOutlined, TrophyOutlined, CheckCircleOutlined, BookOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
+import { ResponsiveTable } from '@/components/Layout/ResponsiveTable'
 
 const { Title, Text } = Typography
 
@@ -45,12 +46,32 @@ export function ParentArchiveClient({
                 <Empty description="暂无学习档案，老师会在课后持续更新孩子的成长记录。" image={Empty.PRESENTED_IMAGE_SIMPLE} />
               </Card>
             ) : (
-              <Table
+              <ResponsiveTable
                 dataSource={examPapers}
                 rowKey="id"
                 size="small"
                 pagination={{ pageSize: 10 }}
+                scroll={{ x: 760 }}
                 style={{ background: '#fff', borderRadius: 12 }}
+                mobileEmptyText="暂无试卷记录"
+                renderMobileItem={(paper: any) => {
+                  const mastered = paper.questions?.filter((q: any) => q.mastery === 'MASTERED').length || 0
+                  const total = paper.questions?.length || 0
+                  return (
+                    <div key={paper.id} className="responsive-record-card" onClick={() => router.push(`/parent/archive/${paper.id}`)} style={{ cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start', marginBottom: 8 }}>
+                        <Text strong style={{ color: '#E8784A', fontSize: 15 }}>{paper.title}</Text>
+                        <Tag style={{ margin: 0 }}>{paper.subject}</Tag>
+                      </div>
+                      <div style={{ display: 'grid', gap: 5, color: '#5a4e3a', fontSize: 13 }}>
+                        <span>学生：{paper.student?.name || '-'}</span>
+                        <span>教师：{paper.teacher?.name || '-'}</span>
+                        <span>日期：{format(new Date(paper.paperDate), 'yyyy-MM-dd')}</span>
+                        <span>状态：{total > 0 ? `已批改 ${mastered}/${total}` : paper.status}</span>
+                      </div>
+                    </div>
+                  )
+                }}
                 onRow={(record) => ({
                   onClick: () => router.push(`/parent/archive/${record.id}`),
                   style: { cursor: 'pointer' },
@@ -86,12 +107,27 @@ export function ParentArchiveClient({
                 <Empty description="暂无成绩记录" image={Empty.PRESENTED_IMAGE_SIMPLE} />
               </Card>
             ) : (
-              <Table
+              <ResponsiveTable
                 dataSource={gradeRecords}
                 rowKey="id"
                 size="small"
                 pagination={{ pageSize: 10 }}
+                scroll={{ x: 640 }}
                 style={{ background: '#fff', borderRadius: 12 }}
+                mobileEmptyText="暂无成绩记录"
+                renderMobileItem={(grade: any) => (
+                  <div key={grade.id} className="responsive-record-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start', marginBottom: 8 }}>
+                      <Text strong style={{ fontSize: 15 }}>{grade.assessment?.name || '考试'}</Text>
+                      <Text strong style={{ color: Number(grade.score) >= 90 ? '#1D9E75' : Number(grade.score) >= 60 ? '#E8784A' : '#E24B4A', fontSize: 18 }}>{grade.score}</Text>
+                    </div>
+                    <div style={{ display: 'grid', gap: 5, color: '#5a4e3a', fontSize: 13 }}>
+                      <span>学生：{grade.student?.name || '-'}</span>
+                      <span>类型：{ASSESS_TYPE_LABELS[grade.assessment?.type] || grade.assessment?.type || '-'}</span>
+                      <span>日期：{format(new Date(grade.createdAt), 'yyyy-MM-dd')}</span>
+                    </div>
+                  </div>
+                )}
                 columns={[
                   { title: '考试', dataIndex: ['assessment', 'name'], key: 'assessment' },
                   { title: '学生', dataIndex: ['student', 'name'], key: 'student', width: 80 },

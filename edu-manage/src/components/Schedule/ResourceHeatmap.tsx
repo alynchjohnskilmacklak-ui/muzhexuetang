@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Card, Typography } from 'antd'
 import dynamic from 'next/dynamic'
@@ -30,7 +30,7 @@ export function ResourceHeatmap() {
     grid: { top: 10, right: 20, bottom: 30, left: 70 },
     xAxis: { type: 'category', data: hours, splitArea: { show: true }, axisLabel: { fontSize: 11 } },
     yAxis: { type: 'category', data: rooms, splitArea: { show: true }, axisLabel: { fontSize: 11 } },
-    visualMap: { min: 0, max: 10, calculable: true, orient: 'horizontal', left: 'center', bottom: 0, inRange: { color: ['#1a1a2e', '#2d2d5e', '#5e6ad2', '#828fff', '#bae0ff'] } },
+    visualMap: { min: 0, max: 10, calculable: true, orient: 'horizontal', left: 'center', bottom: 0, inRange: { color: ['#1a1a2e', '#2d2d5e', '#E8784A', '#828fff', '#bae0ff'] } },
     series: [{
       type: 'heatmap',
       data: data,

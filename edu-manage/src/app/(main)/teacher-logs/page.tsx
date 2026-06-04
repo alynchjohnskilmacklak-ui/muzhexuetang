@@ -1,10 +1,13 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Table, Tag, Statistic, Row, Col, Button } from 'antd'
+import { Card, Tag, Statistic, Row, Col, Button, Typography } from 'antd'
 import { useRouter } from 'next/navigation'
 import { UserOutlined, CheckCircleOutlined, WarningOutlined, CloseCircleOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
+import { ResponsiveTable } from '@/components/Layout/ResponsiveTable'
+
+const { Text } = Typography
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -66,7 +69,40 @@ export default function TeacherLogsPage() {
         </Col>
       </Row>
       <Card bordered={false}>
-        <Table columns={columns} dataSource={data?.teachers || []} rowKey="teacherId" loading={isLoading} pagination={false} scroll={{ x: 800 }} />
+        <ResponsiveTable
+          columns={columns}
+          dataSource={data?.teachers || []}
+          rowKey="teacherId"
+          loading={isLoading}
+          pagination={false}
+          scroll={{ x: 920 }}
+          mobileEmptyText="暂无教师行为日志"
+          renderMobileItem={(teacher: any) => (
+            <div key={teacher.teacherId} className="responsive-record-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start', marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 16, background: 'rgba(232,120,74,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <UserOutlined style={{ color: '#E8784A', fontSize: 14 }} />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <Text strong style={{ fontSize: 15 }}>{teacher.teacherName}</Text>
+                    <div style={{ color: '#5a4e3a', fontSize: 12 }}>{teacher.subjects || '未设置科目'}</div>
+                  </div>
+                </div>
+                <Tag color={STATUS_MAP[teacher.status]?.color} style={{ margin: 0 }}>{STATUS_MAP[teacher.status]?.label}</Tag>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8, color: '#5a4e3a', fontSize: 13 }}>
+                <span>考勤：{teacher.attendanceStatus}</span>
+                <span>已提交：{teacher.submittedCount}</span>
+                <span>试卷：{teacher.papersToday}</span>
+                <span>表现：{teacher.postsToday}</span>
+                <span>留言：{teacher.commentRepliesToday}</span>
+                <span>最后：{teacher.lastAction ? ACTION_LABELS[teacher.lastAction] || teacher.lastAction : '-'}</span>
+              </div>
+              <Button size="small" type="link" style={{ paddingLeft: 0, marginTop: 8 }} onClick={() => router.push(`/teacher-logs/${teacher.teacherId}`)}>查看详情</Button>
+            </div>
+          )}
+        />
       </Card>
     </PageLayout>
   )

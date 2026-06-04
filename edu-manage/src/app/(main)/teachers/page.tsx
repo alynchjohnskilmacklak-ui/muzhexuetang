@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { Row, Col, Input, Select, Button, Space, Empty, Spin, Card, Statistic } from 'antd'
@@ -53,7 +53,7 @@ export default function TeachersPage() {
   const actions = !isMobile ? (
     <Space>
       <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditData(null); setFormOpen(true) }}
-        style={{ background: '#5e6ad2', borderColor: '#5e6ad2' }}>添加教师</Button>
+        style={{ background: '#E8784A', borderColor: '#E8784A' }}>添加教师</Button>
     </Space>
   ) : null
 
@@ -64,7 +64,7 @@ export default function TeachersPage() {
           <Statistic title="在职教师" value={stats.total} prefix={<TeamOutlined style={{ color: '#27a644' }} />} valueStyle={{ color: '#1F2329' }} />
         </Card></Col>
         <Col xs={12} sm={6}><Card bordered style={{ borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
-          <Statistic title="全职 / 兼职" value={`${stats.fullTime} / ${stats.partTime}`} prefix={<ClockCircleOutlined style={{ color: '#5e6ad2' }} />} valueStyle={{ color: '#1F2329', fontSize: 20 }} />
+          <Statistic title="全职 / 兼职" value={`${stats.fullTime} / ${stats.partTime}`} prefix={<ClockCircleOutlined style={{ color: '#E8784A' }} />} valueStyle={{ color: '#1F2329', fontSize: 20 }} />
         </Card></Col>
         <Col xs={12} sm={6}><Card bordered style={{ borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
           <Statistic title="平均满意度" value={stats.avgRating} prefix={<TrophyOutlined style={{ color: '#f5a623' }} />} suffix="⭐" valueStyle={{ color: '#1F2329' }} />

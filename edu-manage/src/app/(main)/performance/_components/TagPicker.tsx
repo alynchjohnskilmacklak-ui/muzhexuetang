@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Input, Space, Tag } from 'antd'
 import { useState } from 'react'
@@ -31,7 +31,7 @@ export function TagPicker({ value, onChange }: { value: string[]; onChange: (val
                 cursor: 'pointer',
                 border: 'none',
                 padding: '5px 12px',
-                background: active ? '#5e6ad2' : '#202226',
+                background: active ? '#E8784A' : '#202226',
                 color: active ? '#fff' : '#d0d6e0',
               }}
             >

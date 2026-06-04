@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
@@ -137,7 +137,7 @@ function FeedCard({ post, mutate }: { post: ParentPost; mutate: () => void }) {
         <div style={{ background: mood.color, borderRadius: 999 }} />
         <div>
           <Space align="center" style={{ marginBottom: 12 }}>
-            <Avatar src={normalizeUploadUrl(post.teacher?.avatar) || undefined} icon={<UserOutlined />} style={{ background: '#5e6ad2' }} />
+            <Avatar src={normalizeUploadUrl(post.teacher?.avatar) || undefined} icon={<UserOutlined />} style={{ background: '#E8784A' }} />
             <div>
               <div style={{ color: '#1F2329', fontWeight: 700 }}>{post.teacher?.name || '老师'}</div>
               <div style={{ color: '#98A2B3', fontSize: 12 }}>{new Date(post.createdAt).toLocaleString('zh-CN')}</div>
@@ -171,7 +171,7 @@ function FeedCard({ post, mutate }: { post: ParentPost; mutate: () => void }) {
             <Button type="primary" loading={sending} onClick={submitComment}>发送</Button>
           </Space.Compact>}
           {!!post.comments.length && <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {post.comments.slice(0, 3).map((comment) => <div key={comment.id} style={{ padding: 10, borderRadius: 8, background: '#FCFBF9', color: '#5B6472' }}>{comment.author?.name || '家长'}：{comment.content}</div>)}
+            {post.comments.slice(0, 3).map((comment) => <div key={comment.id} style={{ padding: 10, borderRadius: 8, background: '#FCFBF9', color: '#5a4e3a' }}>{comment.author?.name || '家长'}：{comment.content}</div>)}
           </div>}
         </div>
       </div>
@@ -197,7 +197,7 @@ export default function PerformanceClient({ student, initialPosts }: { student: 
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
         <Space align="center" size={16}>
-          <Avatar size={56} icon={<UserOutlined />} style={{ background: '#5e6ad2' }} />
+          <Avatar size={56} icon={<UserOutlined />} style={{ background: '#E8784A' }} />
           <div>
             <div style={{ color: '#1F2329', fontSize: 20, fontWeight: 700 }}>{student.name}</div>
             <div style={{ color: '#98A2B3' }}>{student.grade || '未设年级'} · {student.mainTeacher?.name || '未分配老师'}</div>

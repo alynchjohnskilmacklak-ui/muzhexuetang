@@ -45,6 +45,7 @@ const menuItems: MenuProps['items'] = [
     children: [
       { key: '/teachers', label: '教师档案' },
       { key: '/teacher-logs', icon: <ClockCircleOutlined />, label: '行为日志' },
+      { key: '/teacher-salary', icon: <DollarOutlined />, label: '薪资管理' },
     ],
   },
   { key: '/courses', icon: <BookOutlined />, label: '课程管理' },
@@ -125,7 +126,7 @@ export function Sidebar({
     : baseKey === '/schedule' && viewParam
     ? `/schedule?view=${viewParam}`
     : baseKey
-  const defaultOpenKeys = (baseKey === '/teachers' || baseKey === '/teacher-logs')
+  const defaultOpenKeys = (baseKey === '/teachers' || baseKey === '/teacher-logs' || baseKey === '/teacher-salary')
     ? ['teacher-group']
     : (baseKey === '/schedule' || isScheduleIntensive)
     ? ['schedule-group']

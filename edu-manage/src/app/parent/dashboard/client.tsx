@@ -1,7 +1,7 @@
 'use client'
 
 import { Row, Col, Card, Tag, Typography, Button, Space } from 'antd'
-import { BellOutlined, ClockCircleOutlined, HeartOutlined, TeamOutlined, EnvironmentOutlined, IdcardOutlined, BookOutlined, BulbOutlined } from '@ant-design/icons'
+import { BellOutlined, ClockCircleOutlined, HeartOutlined, TeamOutlined, EnvironmentOutlined, IdcardOutlined, BookOutlined, BulbOutlined, FileTextOutlined, StarOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -18,6 +18,19 @@ const MOOD_COLORS: Record<string, { bg: string; color: string; label: string }> 
   GOOD: { bg: '#EEEDFE', color: '#534AB7', label: '好' },
   OKAY: { bg: '#FAEEDA', color: '#BA7517', label: '一般' },
   NEEDS_ATTENTION: { bg: '#FCEBEB', color: '#E24B4A', label: '关注' },
+}
+
+const NOTIFICATION_META: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
+  EXAM_PAPER: { label: '试卷', icon: <FileTextOutlined />, color: '#2476A8', bg: '#EAF5FB' },
+  PAPER_PUBLISHED: { label: '试卷', icon: <FileTextOutlined />, color: '#2476A8', bg: '#EAF5FB' },
+  CLASSROOM_FEEDBACK: { label: '反馈', icon: <BookOutlined />, color: '#6A5ACD', bg: '#F0EEFF' },
+  PERFORMANCE_FEEDBACK: { label: '表现', icon: <StarOutlined />, color: '#D96F43', bg: '#FFF3EA' },
+  ATTENDANCE: { label: '考勤', icon: <ClockCircleOutlined />, color: '#BA7517', bg: '#FAEEDA' },
+  SYSTEM: { label: '通知', icon: <BellOutlined />, color: '#5A4E3A', bg: '#F5F2EE' },
+}
+
+function notificationMeta(n: any) {
+  return NOTIFICATION_META[n.relatedType] || NOTIFICATION_META[n.type] || NOTIFICATION_META.SYSTEM
 }
 
 function getLessonStatus(l: { startTime: string; endTime: string; attendanceSubmittedAt?: string | null }): { text: string; color: string } {
@@ -140,6 +153,14 @@ export function ParentDashboardClient({
   const goCalendarDay = (day: number) => {
     const d = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     router.push(`/parent/growth?date=${d}`)
+  }
+
+  const openNotification = (n: any) => {
+    if (n.relatedType === 'EXAM_PAPER' && n.relatedId) {
+      router.push(`/parent/archive?paperId=${n.relatedId}`)
+      return
+    }
+    router.push(n.href || `/parent/notifications/${n.id}`)
   }
 
   // Latest feedback
@@ -276,7 +297,7 @@ export function ParentDashboardClient({
               {dailyQuote.text}
             </Text>
             <Text style={{ fontSize: 11, color: '#c4895a', display: 'block', marginTop: 8 }}>
-              — 每日语录 第 {dailyQuote.index} 条 · {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })}
+              ——{dailyQuote.source} · 每日语录第 {dailyQuote.index} 条 · {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })}
             </Text>
           </div>
         </div>
@@ -404,29 +425,36 @@ export function ParentDashboardClient({
             {notifications.length === 0 ? (
               <Text type="secondary" style={{ display: 'block', padding: '24px 0', textAlign: 'center' }}>暂无通知</Text>
             ) : (
-              notifications.slice(0, 3).map((n: any) => (
+              notifications.slice(0, 3).map((n: any) => {
+                const meta = notificationMeta(n)
+                return (
                 <div key={n.id} style={{
-                  padding: '10px 0', borderBottom: '1px solid #FBF0EA',
+                  padding: isMobile ? '9px 0' : '10px 0', borderBottom: '1px solid #FBF0EA',
                   display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer',
-                }} onClick={() => router.push(n.href || `/parent/notifications/${n.id}`)}>
+                }} onClick={() => openNotification(n)}>
                   <div style={{
                     width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-                    background: n.read ? '#f5f5f5' : 'rgba(232,120,74,.1)',
+                    background: n.read ? '#f5f5f5' : meta.bg,
+                    color: n.read ? '#98A2B3' : meta.color,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <BellOutlined style={{ color: n.read ? '#98A2B3' : '#E8784A', fontSize: 14 }} />
+                    {meta.icon}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
                       <Text strong style={{ fontSize: 12, color: n.read ? '#7A869A' : '#1F2933' }} ellipsis>{n.title}</Text>
                       {!n.read && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E8784A', marginTop: 5, flexShrink: 0 }} />}
                     </div>
-                    <div style={{ fontSize: 10, color: '#98A2B3', marginTop: 2 }}>
-                      {new Date(n.createdAt).toLocaleString('zh-CN')}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', marginTop: 3, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 10, color: '#98A2B3' }}>
+                        {new Date(n.createdAt).toLocaleString('zh-CN')}
+                      </span>
+                      <span style={{ fontSize: 11, color: '#E8784A', fontWeight: 600 }}>查看详情</span>
                     </div>
                   </div>
                 </div>
-              ))
+                )
+              })
             )}
           </Card>
         </Col>

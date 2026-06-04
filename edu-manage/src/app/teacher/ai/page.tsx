@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { AIChatPanel } from '@/components/AI/AIChatPanel'
 import { MODEL_CONFIG } from '@/data/ai-prompts'
@@ -29,7 +29,7 @@ export default function TeacherAIPage() {
             AI 教学助手
           </div>
           <div style={{ fontSize: 13.5, color: 'rgba(255,255,255,.75)', lineHeight: 1.9, marginBottom: 16 }}>
-            专为牧哲学堂教师设计，支持<span style={{ color: '#5e6ad2', fontWeight: 600 }}>出题组卷、题目分析、教学设计、作文批改</span>，
+            专为牧哲学堂教师设计，支持<span style={{ color: '#E8784A', fontWeight: 600 }}>出题组卷、题目分析、教学设计、作文批改</span>，
             熟悉河北省中考考纲（2025年新版），助力高效备课。
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>

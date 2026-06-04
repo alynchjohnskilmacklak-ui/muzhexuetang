@@ -1,4 +1,4 @@
-export type SimulationProvider = 'phet' | 'desmos' | 'geogebra' | 'external'
+﻿export type SimulationProvider = 'phet' | 'desmos' | 'geogebra' | 'external'
 
 export interface PhETSim {
   id: string
@@ -49,7 +49,7 @@ export const SUBJECT_SIM_COLORS: Record<string, { bg: string; text: string; bord
   '化学实验室': { bg: 'rgba(114,46,209,.08)', text: '#722ed1', border: 'rgba(114,46,209,.2)' },
   '生物': { bg: 'rgba(19,194,194,.08)', text: '#13c2c2', border: 'rgba(19,194,194,.2)' },
   '数学': { bg: 'rgba(232,117,69,.08)', text: '#E87545', border: 'rgba(232,117,69,.2)' },
-  '数学工具': { bg: 'rgba(94,106,210,.08)', text: '#5e6ad2', border: 'rgba(94,106,210,.2)' },
+  '数学工具': { bg: 'rgba(232,120,74,.08)', text: '#E8784A', border: 'rgba(232,120,74,.2)' },
   '地理': { bg: 'rgba(82,196,26,.08)', text: '#52c41a', border: 'rgba(82,196,26,.2)' },
 }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonWhere } from '@/lib/teacher-portal'
+import { triggerFeedbackBonus } from '@/lib/teacher-salary'
 
 export const dynamic = 'force-dynamic'
 
@@ -133,6 +134,10 @@ export async function POST(req: NextRequest) {
 
       return created
     })
+
+    if (status === 'PUBLISHED') {
+      await triggerFeedbackBonus(feedback.id)
+    }
 
     revalidatePath('/teacher/dashboard')
     revalidatePath('/parent/grades')

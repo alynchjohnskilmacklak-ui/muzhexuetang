@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Button, Popconfirm, Space, Switch, Tag } from 'antd'
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
@@ -54,11 +54,11 @@ export function StepList({
                 padding: 10,
                 borderRadius: 8,
                 cursor: 'pointer',
-                border: `1px solid ${active ? '#5e6ad2' : empty ? '#e03e2d66' : '#23252a'}`,
-                background: active ? 'rgba(94,106,210,0.12)' : '#0f1011',
+                border: `1px solid ${active ? '#E8784A' : empty ? '#e03e2d66' : '#23252a'}`,
+                background: active ? 'rgba(232,120,74,0.12)' : '#0f1011',
               }}
             >
-              <div style={{ width: 24, height: 24, borderRadius: '50%', background: active ? '#5e6ad2' : '#141516', display: 'grid', placeItems: 'center', color: '#1F2329', fontSize: 12 }}>{step.order}</div>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', background: active ? '#E8784A' : '#141516', display: 'grid', placeItems: 'center', color: '#1F2329', fontSize: 12 }}>{step.order}</div>
               <div style={{ minWidth: 0 }}>
                 <div style={{ color: '#1F2329', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{step.title}</div>
                 <Space size={4} wrap>

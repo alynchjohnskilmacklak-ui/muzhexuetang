@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Button, Popconfirm, Space, Upload } from 'antd'
 import { FileTextOutlined, UploadOutlined, DeleteOutlined } from '@ant-design/icons'
@@ -22,7 +22,7 @@ export function DocManager({ documents, onChanged }: { documents: Doc[]; onChang
           <div key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: 8, borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
             <Space style={{ minWidth: 0 }}>
               <FileTextOutlined />
-              <a href={doc.fileUrl} target="_blank" style={{ color: '#5B6472', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 150 }}>{doc.name}</a>
+              <a href={doc.fileUrl} target="_blank" style={{ color: '#5a4e3a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 150 }}>{doc.name}</a>
             </Space>
             <Popconfirm title="删除附件？" okText="删除" cancelText="取消" onConfirm={() => remove(doc.id)}>
               <Button size="small" danger type="text" icon={<DeleteOutlined />} />

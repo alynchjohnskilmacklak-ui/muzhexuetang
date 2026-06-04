@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 import { Tag } from 'antd'
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  LEAD: { label: '潜客', color: '#5e6ad2' },
+  LEAD: { label: '潜客', color: '#E8784A' },
   TRIAL: { label: '试听', color: '#f5a623' },
   ACTIVE: { label: '在读', color: '#27a644' },
   COMPLETED: { label: '结课', color: '#828fff' },

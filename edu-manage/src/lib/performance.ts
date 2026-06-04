@@ -1,9 +1,9 @@
-import { prisma } from '@/lib/prisma'
+﻿import { prisma } from '@/lib/prisma'
 import { chineseToPinyin } from '@/lib/pinyin'
 
 export const MOOD_META = {
   GREAT: { label: '非常棒', icon: '😄', color: '#27a644' },
-  GOOD: { label: '不错', icon: '🙂', color: '#5e6ad2' },
+  GOOD: { label: '不错', icon: '🙂', color: '#E8784A' },
   OKAY: { label: '一般', icon: '😐', color: '#f5a623' },
   NEEDS_ATTENTION: { label: '需关注', icon: '😟', color: '#e03e2d' },
 } as const

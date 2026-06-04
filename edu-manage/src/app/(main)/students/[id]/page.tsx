@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
@@ -49,7 +49,7 @@ export default function StudentDetailPage() {
         </Descriptions>
         <div style={{ marginTop: 18 }}>
           <div style={{ color: '#98A2B3', marginBottom: 6 }}>课时进度</div>
-          <Progress percent={totalHours ? Math.round((usedHours / totalHours) * 100) : 0} strokeColor="#5e6ad2" />
+          <Progress percent={totalHours ? Math.round((usedHours / totalHours) * 100) : 0} strokeColor="#E8784A" />
         </div>
       </Card>
 

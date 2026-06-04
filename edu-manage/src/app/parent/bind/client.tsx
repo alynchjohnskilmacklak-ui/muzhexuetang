@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Button, Card, Typography, Spin, Alert, Modal, message } from 'antd'
@@ -103,7 +103,7 @@ export function BindWxClient({ bound, userName }: { bound: boolean; userName: st
           </>
         ) : (
           <>
-            <WechatOutlined style={{ fontSize: 56, color: '#5e6ad2', marginBottom: 16 }} />
+            <WechatOutlined style={{ fontSize: 56, color: '#E8784A', marginBottom: 16 }} />
             <Title level={4} style={{ marginBottom: 8 }}>微信未绑定</Title>
             <Text type="secondary" style={{ display: 'block', marginBottom: 24, lineHeight: 1.8 }}>
               绑定后，老师发送课堂反馈或平安回家通知时<br />
@@ -128,7 +128,7 @@ export function BindWxClient({ bound, userName }: { bound: boolean; userName: st
                 block
                 loading={loading}
                 onClick={getQrcode}
-                style={{ background: '#5e6ad2', borderColor: '#5e6ad2', height: 42 }}
+                style={{ background: '#E8784A', borderColor: '#E8784A', height: 42 }}
               >
                 立即绑定
               </Button>
@@ -142,7 +142,7 @@ export function BindWxClient({ bound, userName }: { bound: boolean; userName: st
                   二维码有效期30分钟，过期请刷新页面重新获取
                 </Text>
                 <Button block loading={checking} onClick={checkBound}
-                  style={{ borderColor: '#5e6ad2', color: '#5e6ad2' }}>
+                  style={{ borderColor: '#E8784A', color: '#E8784A' }}>
                   已完成扫码，检查绑定状态
                 </Button>
                 <Button type="link" block style={{ marginTop: 8, color: '#8a8f98' }}

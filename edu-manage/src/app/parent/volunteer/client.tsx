@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Alert, Button, Card, Collapse, Empty, Image, Input, Space, Table, Tag } from 'antd'
+import { Alert, Button, Card, Collapse, Empty, Image, Input, Space, Tag } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { DownloadOutlined, LinkOutlined, MessageOutlined, ReadOutlined, SearchOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { ResponsiveTable } from '@/components/Layout/ResponsiveTable'
 
 type Step = { id: string; order: number; title: string; content: string; tipContent?: string | null; imageUrl?: string | null; batchTags: string[] }
 type Quota = { id: string; schoolName: string; district: string; allocQuota: number; normalQuota: number; totalQuota: number; note?: string | null }
@@ -80,9 +81,9 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <section style={{ borderRadius: isMobile ? 12 : 8, padding: isMobile ? 16 : 24, background: 'linear-gradient(135deg, rgba(94,106,210,0.34), rgba(245,166,35,0.10))', border: '1px solid #34343a' }}>
+      <section style={{ borderRadius: isMobile ? 12 : 8, padding: isMobile ? 16 : 24, background: 'linear-gradient(135deg, rgba(232,120,74,0.16), rgba(245,166,35,0.10))', border: '1px solid #F0DDD2' }}>
         <h1 style={{ margin: 0, color: '#1F2329', fontSize: isMobile ? 16 : 28 }}>{currentGuide.title}</h1>
-        <div style={{ color: '#5B6472', marginTop: 8 }}>牧哲学堂整理 · {currentGuide.year}年版 · {currentGuide.subtitle}</div>
+        <div style={{ color: '#5a4e3a', marginTop: 8 }}>牧哲学堂整理 · {currentGuide.year}年版 · {currentGuide.subtitle}</div>
         <Space wrap style={{ marginTop: 18 }}>
           <Button icon={<ReadOutlined />} href="/parent/volunteer/guide">填报指南</Button>
           <Button icon={<LinkOutlined />} href="http://www.sjzjyksxx.com.cn/" target="_blank">官网直达</Button>
@@ -95,7 +96,7 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
       <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : `repeat(${Math.max(steps.length, 1)}, minmax(84px, 1fr))`, gap: 8 }}>
           {steps.map((item, index) => (
-            <button key={item.id} onClick={() => selectStep(index)} style={{ border: `1px solid ${index === current ? '#5e6ad2' : index < current ? '#1D9E75' : '#23252a'}`, background: index === current ? 'rgba(94,106,210,0.18)' : '#141516', color: '#1F2329', borderRadius: 8, padding: 10, cursor: 'pointer' }}>
+            <button key={item.id} onClick={() => selectStep(index)} style={{ border: `1px solid ${index === current ? '#E8784A' : index < current ? '#1D9E75' : '#EEE7E1'}`, background: index === current ? 'rgba(232,120,74,0.12)' : '#FCFBF9', color: '#1F2329', borderRadius: 8, padding: 10, cursor: 'pointer' }}>
               <div style={{ fontWeight: 700 }}>第{item.order}步</div>
               <div style={{ fontSize: 12, color: '#98A2B3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</div>
             </button>
@@ -107,9 +108,9 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
         <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 480px', gap: 20 }}>
             <div>
-              <Tag color="#5e6ad2">第{step.order}步</Tag>
+              <Tag color="#E8784A">第{step.order}步</Tag>
               <h2 style={{ color: '#1F2329', marginTop: 10, fontSize: isMobile ? 16 : undefined }}>{step.title}</h2>
-              <div style={{ color: '#5B6472', lineHeight: isMobile ? 1.6 : 1.9, whiteSpace: 'pre-wrap', fontSize: isMobile ? 14 : undefined }}>{step.content}</div>
+              <div style={{ color: '#5a4e3a', lineHeight: isMobile ? 1.6 : 1.9, whiteSpace: 'pre-wrap', fontSize: isMobile ? 14 : undefined }}>{step.content}</div>
               {!!step.batchTags.length && <Space wrap style={{ marginTop: 14 }}>{step.batchTags.map((tag) => <Tag key={tag} color="blue">{tag}</Tag>)}</Space>}
               {step.tipContent && <Alert style={{ marginTop: 16 }} type="info" showIcon message="温馨提示" description={step.tipContent} />}
               <Space style={{ marginTop: 18 }}>
@@ -132,7 +133,26 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
 
       <Card id="volunteer-quota" title="分配生名额查询" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
         <Input.Search placeholder="搜索学校或区县" value={quotaQ} onChange={(event) => setQuotaQ(event.target.value)} style={{ maxWidth: 320, marginBottom: 12 }} />
-        <Table rowKey="id" columns={columns} dataSource={quotas} pagination={{ pageSize: 8 }} scroll={{ x: 720 }} />
+        <ResponsiveTable
+          rowKey="id"
+          columns={columns}
+          dataSource={quotas}
+          pagination={{ pageSize: 8 }}
+          scroll={{ x: 720 }}
+          mobileEmptyText="暂无分配生名额"
+          renderMobileItem={(quota) => (
+            <div key={quota.id} className="responsive-record-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start', marginBottom: 8 }}>
+                <strong style={{ color: '#1F2329' }}>{quota.schoolName}</strong>
+                <Tag style={{ margin: 0 }} color="orange">{quota.allocQuota} 个名额</Tag>
+              </div>
+              <div style={{ display: 'grid', gap: 5, color: '#5a4e3a', fontSize: 13 }}>
+                <span>区县：{quota.district}</span>
+                <span>生源初中：{quota.note || '-'}</span>
+              </div>
+            </div>
+          )}
+        />
       </Card>
 
       <Card id="volunteer-docs" title="文件下载" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
@@ -147,7 +167,7 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
 
       <Card id="volunteer-consult" title="在线咨询" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
         <Space direction="vertical" style={{ width: '100%' }} size={12}>
-          {consultations.map((item: Record<string, unknown>) => <div key={item.id as string} style={{ padding: 12, borderRadius: 8, background: '#FCFBF9' }}><div style={{ color: '#1F2329' }}>问：{item.question as string}</div>{item.reply ? <div style={{ color: '#5B6472', marginTop: 8 }}>答：{item.reply as string}</div> : <Tag color="orange" style={{ marginTop: 8 }}>等待回复</Tag>}</div>)}
+          {consultations.map((item: Record<string, unknown>) => <div key={item.id as string} style={{ padding: 12, borderRadius: 8, background: '#FCFBF9' }}><div style={{ color: '#1F2329' }}>问：{item.question as string}</div>{item.reply ? <div style={{ color: '#5a4e3a', marginTop: 8 }}>答：{item.reply as string}</div> : <Tag color="orange" style={{ marginTop: 8 }}>等待回复</Tag>}</div>)}
           <Input.TextArea value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={500} showCount autoSize={{ minRows: 3, maxRows: 6 }} placeholder="把您的志愿填报问题写在这里..." />
           <Button type="primary" onClick={submitQuestion}>提交我的问题</Button>
         </Space>

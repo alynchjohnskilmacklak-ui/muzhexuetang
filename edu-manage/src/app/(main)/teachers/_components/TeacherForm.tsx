@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, DatePicker, Upload } from 'antd'
@@ -135,8 +135,8 @@ export function TeacherForm({
         <Space>
           <Button onClick={onClose}>取消</Button>
           {current > 0 && <Button onClick={() => setCurrent(value => value - 1)}>上一步</Button>}
-          {current < 2 && <Button type="primary" onClick={handleNext} style={{ background: '#5e6ad2', borderColor: '#5e6ad2' }}>下一步</Button>}
-          {current === 2 && <Button type="primary" onClick={handleFinish} loading={loading} style={{ background: '#5e6ad2', borderColor: '#5e6ad2' }}>{mode === 'edit' ? '保存' : '添加教师'}</Button>}
+          {current < 2 && <Button type="primary" onClick={handleNext} style={{ background: '#E8784A', borderColor: '#E8784A' }}>下一步</Button>}
+          {current === 2 && <Button type="primary" onClick={handleFinish} loading={loading} style={{ background: '#E8784A', borderColor: '#E8784A' }}>{mode === 'edit' ? '保存' : '添加教师'}</Button>}
         </Space>
       }
     >

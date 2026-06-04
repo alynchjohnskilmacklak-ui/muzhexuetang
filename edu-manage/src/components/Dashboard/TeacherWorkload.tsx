@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Card, Empty, List, Typography } from 'antd'
 import dynamic from 'next/dynamic'
@@ -30,7 +30,7 @@ export function TeacherWorkloadCard({ data }: { data: TeacherWorkload[] }) {
       barWidth: 16,
       itemStyle: {
         borderRadius: [0, 4, 4, 0],
-        color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: '#5e6ad2' }, { offset: 1, color: '#828fff' }] },
+        color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: '#E8784A' }, { offset: 1, color: '#828fff' }] },
       },
       label: { show: true, position: 'right', fontSize: 12, color: '#d0d6e0' },
     }],

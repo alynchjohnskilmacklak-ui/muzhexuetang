@@ -33,6 +33,9 @@ export const POST = apiHandler(async (_req: NextRequest, { params }: { params: P
           title: `${paper.teacher.name}老师上传了新试卷`,
           content: `${paper.subject} · ${paper.title}`,
           link: '/parent/grades',
+          relatedType: 'EXAM_PAPER',
+          relatedId: paper.id,
+          href: `/parent/archive?paperId=${paper.id}`,
         },
       })
     }

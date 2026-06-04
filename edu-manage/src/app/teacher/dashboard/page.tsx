@@ -71,6 +71,7 @@ interface DashboardData {
     pendingAttendance: number
     pendingFeedback: number
     pendingPapers: number
+    pendingLeave: number
     totalTodos: number
   }
   todayLessons: DashboardLesson[]
@@ -84,7 +85,7 @@ interface DashboardData {
     performance: CompletionItem
   }
   monthlyStats: { totalStudents: number; monthlyHours: number }
-  pendingTasks: { unreadParentComments: number }
+  pendingTasks: { unreadParentComments: number; pendingLeave: number }
   quickActions: Array<{ label: string; desc: string; href: string; tone: Tone }>
 }
 
@@ -108,7 +109,7 @@ const tagColor: Record<Tone, string> = {
   dark: 'default',
 }
 
-const quickIcons = [<CheckCircleOutlined key="attendance" />, <UploadOutlined key="paper" />, <FileDoneOutlined key="classroom" />, <MessageOutlined key="performance" />, <TeamOutlined key="students" />, <RobotOutlined key="ai" />]
+const quickIcons = [<CheckCircleOutlined key="attendance" />, <CalendarOutlined key="leave" />, <UploadOutlined key="paper" />, <FileDoneOutlined key="classroom" />, <MessageOutlined key="performance" />, <TeamOutlined key="students" />, <RobotOutlined key="ai" />]
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 function getGreeting() {
@@ -163,6 +164,7 @@ export default function TeacherDashboardPage() {
     { label: '今日课次', value: heroStats.todayLessons, color: '#2F6FED', suffix: '节' },
     { label: '待考勤', value: heroStats.pendingAttendance, color: '#E87545', suffix: '节' },
     { label: '待发反馈', value: heroStats.pendingFeedback, color: '#6F55D9', suffix: '条' },
+    { label: '待批请假', value: heroStats.pendingLeave, color: '#BA7517', suffix: '条' },
     { label: '待推送试卷', value: heroStats.pendingPapers, color: '#1D9E75', suffix: '份' },
   ]
 

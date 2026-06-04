@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useCallback } from 'react'
 import { Card, message, Dropdown } from 'antd'
@@ -17,7 +17,7 @@ const FullCalendar = dynamic(() => import('@fullcalendar/react'), {
   ),
 })
 
-const colors = ['#5e6ad2', '#27a644', '#ff85c0', '#b37feb', '#f5a623', '#13c2c2', '#e03e2d', '#828fff']
+const colors = ['#E8784A', '#27a644', '#ff85c0', '#b37feb', '#f5a623', '#13c2c2', '#e03e2d', '#828fff']
 
 const initialEvents: EventInput[] = [
   { id: '1', title: '钢琴基础班\n王老师 | 琴房A | 8人', start: '2026-05-15T08:30:00', end: '2026-05-15T10:00:00', backgroundColor: colors[0], extendedProps: { teacher: '王老师', room: '琴房A', subject: '音乐', students: 8 } },

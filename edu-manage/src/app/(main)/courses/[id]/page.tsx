@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
@@ -174,7 +174,7 @@ export default function CourseGroupDetailPage() {
       <Card bordered={false} style={{ borderRadius: 8, marginBottom: 16, background: '#ffffff', border: '1px solid #EEE7E1' }}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <div style={{ color: '#98A2B3' }}>课程进度</div>
-          <Progress percent={total ? Math.round((completed / total) * 100) : 0} strokeColor="#5e6ad2" />
+          <Progress percent={total ? Math.round((completed / total) * 100) : 0} strokeColor="#E8784A" />
         </Space>
       </Card>
 

@@ -128,6 +128,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
           </div>
         ) : <Table
           rowKey="id" size="small" pagination={{ pageSize: 15 }}
+          scroll={{ x: 680 }}
           dataSource={filteredRecords.map((r: any) => ({ ...r, key: r.id }))}
           locale={{ emptyText: '暂无考勤记录' }}
           columns={[

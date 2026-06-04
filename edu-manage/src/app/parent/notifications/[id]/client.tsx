@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, Descriptions, Empty, Tag, Typography } from 'antd'
+import { Alert, Button, Card, Descriptions, Tag, Typography } from 'antd'
 import { ArrowLeftOutlined, BookOutlined, StarOutlined, FileTextOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
@@ -34,6 +34,14 @@ export function NotificationDetailClient({
   const router = useRouter()
   const typeLabel = TYPE_LABELS[notification.type] || notification.type || '通知'
   const typeIcon = TYPE_ICONS[notification.type] || null
+  const hasMissingRelated = notification.relatedType && notification.relatedId && !relatedData
+  const fallbackAction = notification.relatedType === 'EXAM_PAPER'
+    ? { label: '去学习档案查看试卷', href: '/parent/archive' }
+    : notification.relatedType === 'CLASSROOM_FEEDBACK'
+      ? { label: '去课堂反馈查看', href: '/parent/class-feedback' }
+      : notification.relatedType === 'PERFORMANCE_FEEDBACK'
+        ? { label: '去成长动态查看', href: '/parent/growth' }
+        : null
 
   return (
     <div>
@@ -128,6 +136,33 @@ export function NotificationDetailClient({
               </div>
             )}
           </div>
+        )}
+
+        {hasMissingRelated && (
+          <Alert
+            type="info"
+            showIcon
+            style={{ marginTop: 16, borderRadius: 10, background: '#FFFBF7', border: '1px solid #F0DDD2' }}
+            message="关联内容暂不可查看"
+            description={
+              <div>
+                <Text style={{ color: '#7A6A5A' }}>
+                  这条通知本身已完整展示。关联的试卷或反馈可能已删除、尚未发布，或暂未匹配到当前家长账号。
+                </Text>
+                {fallbackAction && (
+                  <div style={{ marginTop: 12 }}>
+                    <Button
+                      size="small"
+                      style={{ borderRadius: 8 }}
+                      onClick={() => router.push(fallbackAction.href)}
+                    >
+                      {fallbackAction.label}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            }
+          />
         )}
 
         {notification.href && (

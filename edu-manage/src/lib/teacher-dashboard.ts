@@ -48,6 +48,7 @@ export async function getTeacherDashboardData(teacherId: string) {
     recentDraftPapers,
     unreadPaperComments,
     unreadPostComments,
+    pendingLeaveRequests,
   ] = await Promise.all([
     prisma.classLesson.findMany({
       where: { ...lessonWhere, lessonDate: { gte: today, lt: todayEnd } },
@@ -126,6 +127,18 @@ export async function getTeacherDashboardData(teacherId: string) {
     }),
     prisma.paperComment.count({ where: { isRead: false, author: { role: 'parent' }, paper: { teacherId } } }),
     prisma.postComment.count({ where: { isRead: false, author: { role: 'parent' }, post: { teacherId, deletedAt: null } } }),
+    prisma.leaveRequest.findMany({
+      where: {
+        status: 'pending',
+        student: studentWhere,
+      },
+      include: {
+        student: { select: { id: true, name: true } },
+        schedule: { select: { startTime: true, course: { select: { name: true } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 4,
+    }),
   ])
 
   const decoratedTodayLessons = todayLessons.map((lesson) => {
@@ -196,6 +209,16 @@ export async function getTeacherDashboardData(teacherId: string) {
       tone: 'green',
       actionLabel: '推送家长',
       href: '/teacher/papers',
+    })),
+    ...pendingLeaveRequests.map((request) => ({
+      id: `leave-${request.id}`,
+      type: 'leave',
+      title: `${request.student.name} 请假申请`,
+      description: `${request.schedule?.course?.name || '未指定课程'} · ${request.reason}`,
+      status: '待审批',
+      tone: 'brown',
+      actionLabel: '去审批',
+      href: '/teacher/leave',
     })),
   ].slice(0, 8)
 
@@ -332,6 +355,7 @@ export async function getTeacherDashboardData(teacherId: string) {
       pendingAttendance: pendingAttendanceLessons.length,
       pendingFeedback: pendingFeedbackLessons.length,
       pendingPapers: recentDraftPapers.length,
+      pendingLeave: pendingLeaveRequests.length,
       totalTodos: todos.length + unreadParentComments,
     },
     todayLessons: decoratedTodayLessons,
@@ -346,6 +370,7 @@ export async function getTeacherDashboardData(teacherId: string) {
     },
     quickActions: [
       { label: '提交今日考勤', desc: '完成课后考勤与课时结算', href: '/teacher/attendance', tone: 'orange' },
+      { label: '处理请假审批', desc: '批准或驳回家长请假申请', href: '/teacher/leave', tone: 'brown' },
       { label: '上传试卷', desc: '上传试卷并推送给家长', href: '/teacher/papers', tone: 'green' },
       { label: '发布课堂反馈', desc: '记录课堂内容与作业建议', href: '/teacher/classroom-feedback', tone: 'purple' },
       { label: '发布表现反馈', desc: '同步学生近期学习状态', href: '/teacher/performance', tone: 'blue' },
@@ -356,6 +381,7 @@ export async function getTeacherDashboardData(teacherId: string) {
       unsubmittedAttendance: pendingAttendanceLessons.length,
       unpublishedPapers: recentDraftPapers.length,
       unreadParentComments,
+      pendingLeave: pendingLeaveRequests.length,
     },
     monthlyStats: {
       totalStudents: students.length,

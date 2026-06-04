@@ -1,4 +1,4 @@
-export const GRADE_SUBJECTS: Record<string, string[]> = {
+﻿export const GRADE_SUBJECTS: Record<string, string[]> = {
   '初一': ['语文', '数学', '英语', '生物', '地理', '历史', '政治'],
   '初二': ['语文', '数学', '英语', '生物', '地理', '历史', '政治', '物理'],
   '初三': ['语文', '数学', '英语', '生物', '地理', '历史', '政治', '物理', '化学'],
@@ -9,7 +9,7 @@ export const ALL_SUBJECTS = ['语文', '数学', '英语', '生物', '地理', '
 
 export const SUBJECT_COLORS: Record<string, string> = {
   '语文': '#E87545',
-  '数学': '#5e6ad2',
+  '数学': '#E8784A',
   '英语': '#27a644',
   '物理': '#1890ff',
   '化学': '#722ed1',

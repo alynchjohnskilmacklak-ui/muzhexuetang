@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
@@ -140,7 +140,7 @@ export default function CommunicationsPage() {
                   style={{ borderBlockEnd: '1px solid #F0E7DE' }}
                 >
                   <List.Item.Meta
-                    avatar={<Avatar style={{ background: fromParent ? '#E8784A' : '#5E6AD2' }}>{(item.author?.name || item.author?.label || '?').charAt(0)}</Avatar>}
+                    avatar={<Avatar style={{ background: fromParent ? '#E8784A' : '#E8784A' }}>{(item.author?.name || item.author?.label || '?').charAt(0)}</Avatar>}
                     title={
                       <Space wrap>
                         <Text strong>{item.author?.name || item.author?.label || '未知用户'}</Text>

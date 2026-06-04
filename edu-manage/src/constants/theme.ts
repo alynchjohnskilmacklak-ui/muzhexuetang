@@ -1,4 +1,4 @@
-// 牧哲学堂 Unified Design Tokens
+﻿// 牧哲学堂 Unified Design Tokens
 // Warm, bright, education-focused theme
 
 export const COLORS = {
@@ -17,7 +17,7 @@ export const COLORS = {
   // Text
   textPrimary: '#1F2329',
   textSecondary: '#374151',
-  textBody: '#5B6472',
+  textBody: '#5a4e3a',
   textMuted: '#98A2B3',
 
   // Borders

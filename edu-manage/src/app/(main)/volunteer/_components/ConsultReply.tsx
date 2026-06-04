@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Button, Input, Popconfirm, Space, Tag } from 'antd'
 import { useState } from 'react'
@@ -37,7 +37,7 @@ export function ConsultReply({ item, onReplied }: { item: Consultation; onReplie
         <span style={{ color: '#1F2329', fontWeight: 700 }}>{item.parent?.name || '家长'}</span>
         <Tag color={item.isReplied ? 'green' : 'orange'}>{item.isReplied ? '已回复' : '待回复'}</Tag>
       </Space>
-      <div style={{ color: '#5B6472', marginBottom: 10 }}>{item.question}</div>
+      <div style={{ color: '#5a4e3a', marginBottom: 10 }}>{item.question}</div>
       <Input.TextArea value={reply} onChange={(event) => setReply(event.target.value)} autoSize={{ minRows: 2, maxRows: 4 }} maxLength={300} />
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
         <Popconfirm title="删除这条咨询？" okText="删除" cancelText="取消" onConfirm={remove}>

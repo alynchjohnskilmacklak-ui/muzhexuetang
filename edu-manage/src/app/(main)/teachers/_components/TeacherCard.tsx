@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Card, Typography, Button, Space, Tag } from 'antd'
 import { EditOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons'
@@ -7,7 +7,7 @@ import { SUBJECT_COLORS } from '@/constants/subjects'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 
 const { Text } = Typography
-const AVATAR_COLORS = ['#5e6ad2', '#27a644', '#b37feb', '#f5a623', '#828fff', '#e03e2d']
+const AVATAR_COLORS = ['#E8784A', '#27a644', '#b37feb', '#f5a623', '#828fff', '#e03e2d']
 function getAvatarColor(name: string) { return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length] }
 
 type Teacher = {
@@ -28,7 +28,7 @@ export function TeacherCard({ teacher, onEdit, onDelete }: {
   const initials = teacher.name.charAt(0)
   const subjects = (teacher.subjects || '').split(',').filter(Boolean)
   const typeBadge = teacher.employmentType === 'FULL_TIME'
-    ? { label: '全职', color: '#5e6ad2' }
+    ? { label: '全职', color: '#E8784A' }
     : { label: '兼职', color: '#f5a623' }
 
   return (
@@ -44,7 +44,7 @@ export function TeacherCard({ teacher, onEdit, onDelete }: {
             <Text strong style={{ fontSize: 16, color: '#1F2329' }}>{teacher.name}</Text>
             <Tag style={{ borderRadius: 9999, border: 'none', fontWeight: 600, fontSize: 11, background: typeBadge.color + '22', color: typeBadge.color }}>{typeBadge.label}</Tag>
           </div>
-          <Text style={{ fontSize: 13, color: '#5B6472', display: 'block', marginTop: 2 }}>
+          <Text style={{ fontSize: 13, color: '#5a4e3a', display: 'block', marginTop: 2 }}>
             {[teacher.education, teacher.university, teacher.major].filter(Boolean).join(' · ') || '待完善教育背景'}
           </Text>
         </div>
@@ -60,9 +60,9 @@ export function TeacherCard({ teacher, onEdit, onDelete }: {
       )}
 
       <div style={{ display: 'flex', gap: 20, marginBottom: 12 }}>
-        <div><Text style={{ color: '#5B6472', fontSize: 12 }}>月课时 </Text><Text strong style={{ color: '#1F2329' }}>{teacher.monthlyHours}</Text></div>
-        <div><Text style={{ color: '#5B6472', fontSize: 12 }}>学员 </Text><Text strong style={{ color: '#1F2329' }}>{teacher._count?.students || 0}</Text></div>
-        <div><Text style={{ color: '#5B6472', fontSize: 12 }}>评分 </Text><Text strong style={{ color: '#f5a623' }}>{'⭐'.repeat(Math.round(teacher.rating || 0)) || '-'}</Text></div>
+        <div><Text style={{ color: '#5a4e3a', fontSize: 12 }}>月课时 </Text><Text strong style={{ color: '#1F2329' }}>{teacher.monthlyHours}</Text></div>
+        <div><Text style={{ color: '#5a4e3a', fontSize: 12 }}>学员 </Text><Text strong style={{ color: '#1F2329' }}>{teacher._count?.students || 0}</Text></div>
+        <div><Text style={{ color: '#5a4e3a', fontSize: 12 }}>评分 </Text><Text strong style={{ color: '#f5a623' }}>{'⭐'.repeat(Math.round(teacher.rating || 0)) || '-'}</Text></div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

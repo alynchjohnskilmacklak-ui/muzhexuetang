@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useState } from 'react'
 import {
@@ -107,7 +107,7 @@ export default function SchoolsManagePage() {
         <div style={{ fontSize: 13 }}>
           {row.yiTong && <div>一统线：<Text strong style={{ color: '#E87545' }}>{row.yiTong}</Text></div>}
           <div>统招线：<Text strong>{row.tongZhao}</Text></div>
-          {row.allocationLine && <div>分配线：<Text strong style={{ color: '#5e6ad2' }}>{row.allocationLine}</Text></div>}
+          {row.allocationLine && <div>分配线：<Text strong style={{ color: '#E8784A' }}>{row.allocationLine}</Text></div>}
         </div>
       ),
     },

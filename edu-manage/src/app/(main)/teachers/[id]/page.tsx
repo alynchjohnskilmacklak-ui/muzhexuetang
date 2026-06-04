@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
@@ -55,14 +55,14 @@ export default function TeacherDetailPage() {
         <Col xs={24} lg={12}>
           <Card title={<span style={{ color: '#1F2329' }}><TeamOutlined /> 关联学员</span>} bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
             {teacher.students?.length ? teacher.students.map((student: Record<string, unknown>) => (
-              <div key={student.id as string} style={{ color: '#5B6472', padding: '8px 0', borderBottom: '1px solid #EEE7E1' }}>{student.name as string}</div>
+              <div key={student.id as string} style={{ color: '#5a4e3a', padding: '8px 0', borderBottom: '1px solid #EEE7E1' }}>{student.name as string}</div>
             )) : <Empty description="暂无关联学员" image={Empty.PRESENTED_IMAGE_SIMPLE} />}
           </Card>
         </Col>
         <Col xs={24} lg={12}>
           <Card title={<span style={{ color: '#1F2329' }}><CalendarOutlined /> 对应班级课程</span>} bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
             {teacher.classGroups?.length ? teacher.classGroups.map((group: Record<string, unknown>) => (
-              <div key={group.id as string} style={{ color: '#5B6472', padding: '8px 0', borderBottom: '1px solid #EEE7E1' }}>
+              <div key={group.id as string} style={{ color: '#5a4e3a', padding: '8px 0', borderBottom: '1px solid #EEE7E1' }}>
                 <div style={{ color: '#1F2329' }}>{group.name as string}</div>
                 <div style={{ color: '#98A2B3', fontSize: 12 }}>
                   {(group.course as Record<string, unknown> | undefined)?.name as string || '-'} · 学员 {((group.enrollments as unknown[]) || []).length} 人

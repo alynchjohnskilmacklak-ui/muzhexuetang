@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Layout, Input, Badge, Avatar, Dropdown, Space } from 'antd'
 import { BellOutlined, SearchOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons'
@@ -54,7 +54,7 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
       />
       <Space size={20}>
         <Badge count={5} size="small">
-          <BellOutlined style={{ fontSize: 18, cursor: 'pointer', color: '#5B6472' }} />
+          <BellOutlined style={{ fontSize: 18, cursor: 'pointer', color: '#5a4e3a' }} />
         </Badge>
         <Dropdown menu={userMenu} placement="bottomRight">
           <Space style={{ cursor: 'pointer' }}>

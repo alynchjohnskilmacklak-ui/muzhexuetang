@@ -60,7 +60,7 @@ export function ParentFeesClient({
             ))}
             {!filtered.length && <div style={{ textAlign: 'center', padding: 20 }}><Text type="secondary">暂无缴费记录</Text></div>}
           </div>
-        ) : <Table dataSource={filtered} rowKey="key" pagination={false} size="small"
+        ) : <Table dataSource={filtered} rowKey="key" pagination={false} size="small" scroll={{ x: 820 }}
           locale={{ emptyText: '暂无缴费记录' }}
           columns={[
             { title: '学员', dataIndex: 'student', key: 'student', render: (v: string) => <Tag color="blue">{v}</Tag> },

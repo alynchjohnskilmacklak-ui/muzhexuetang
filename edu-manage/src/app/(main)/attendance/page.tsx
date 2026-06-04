@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo } from 'react'
 import useSWR from 'swr'
@@ -258,7 +258,7 @@ export default function AttendancePage() {
                               <div style={{
                                 width: 32, height: 32, borderRadius: '50%', background: '#FCFBF9',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 13, fontWeight: 600, color: '#5B6472',
+                                fontSize: 13, fontWeight: 600, color: '#5a4e3a',
                               }}>{(s.studentName as string)?.[0] || '?'}</div>
                               <div style={{ fontSize: 13, color: '#1F2329' }}>{s.studentName as string}</div>
                             </div>

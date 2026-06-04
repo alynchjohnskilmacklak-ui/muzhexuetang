@@ -1,11 +1,11 @@
-export const funnelOption = {
+﻿export const funnelOption = {
   tooltip: { trigger: 'item' as const },
   series: [{
     type: 'funnel' as const, left: '10%', top: 20, bottom: 20, width: '80%',
     sort: 'descending' as const, gap: 2,
     label: { show: true, position: 'inside' as const, fontSize: 13 },
     data: [
-      { value: 320, name: '潜客咨询', itemStyle: { color: '#5e6ad2' } },
+      { value: 320, name: '潜客咨询', itemStyle: { color: '#E8784A' } },
       { value: 180, name: '预约试听', itemStyle: { color: '#828fff' } },
       { value: 95, name: '报名缴费', itemStyle: { color: '#bae0ff' } },
       { value: 62, name: '续费留存', itemStyle: { color: '#e6f0ff' } },
@@ -34,7 +34,7 @@ export const pieOption = {
     itemStyle: { borderRadius: 8, borderColor: '#010102', borderWidth: 4 },
     label: { show: true, position: 'outside' as const, formatter: '{b}\n{d}%', color: '#d0d6e0' },
     data: [
-      { value: 280, name: '音乐', itemStyle: { color: '#5e6ad2' } },
+      { value: 280, name: '音乐', itemStyle: { color: '#E8784A' } },
       { value: 210, name: '数学', itemStyle: { color: '#27a644' } },
       { value: 180, name: '英语', itemStyle: { color: '#ff85c0' } },
       { value: 120, name: '编程', itemStyle: { color: '#b37feb' } },
@@ -53,7 +53,7 @@ export const teacherBarOption = {
     label: { show: true, position: 'right' as const, fontSize: 12, color: '#d0d6e0' },
     itemStyle: { borderRadius: [0, 4, 4, 0],
       color: { type: 'linear' as const, x: 0, y: 0, x2: 1, y2: 0,
-        colorStops: [{ offset: 0, color: '#5e6ad2' }, { offset: 1, color: '#828fff' }] } },
+        colorStops: [{ offset: 0, color: '#E8784A' }, { offset: 1, color: '#828fff' }] } },
   }],
 }
 
@@ -66,7 +66,7 @@ export const financeOption = {
   series: [
     { name: '收入', type: 'line' as const, data: [98000, 112000, 125000, 138000, 145000, 156800], smooth: true, lineStyle: { width: 3, color: '#27a644' }, itemStyle: { color: '#27a644' } },
     { name: '支出', type: 'line' as const, data: [45000, 48000, 52000, 55000, 58000, 62000], smooth: true, lineStyle: { width: 3, color: '#e03e2d' }, itemStyle: { color: '#e03e2d' } },
-    { name: '利润', type: 'line' as const, data: [53000, 64000, 73000, 83000, 87000, 94800], smooth: true, lineStyle: { width: 3, color: '#5e6ad2' }, itemStyle: { color: '#5e6ad2' } },
+    { name: '利润', type: 'line' as const, data: [53000, 64000, 73000, 83000, 87000, 94800], smooth: true, lineStyle: { width: 3, color: '#E8784A' }, itemStyle: { color: '#E8784A' } },
   ],
 }
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
@@ -292,7 +292,7 @@ export default function AdminNotificationsPage() {
                       loading={sending}
                       onClick={handleSend}
                       disabled={selectedStudents.length === 0 || (pushType !== 'system' && hasUnboundSelected)}
-                      style={{ background: '#5e6ad2', borderColor: '#5e6ad2', borderRadius: 8, height: 40 }}
+                      style={{ background: '#E8784A', borderColor: '#E8784A', borderRadius: 8, height: 40 }}
                     >
                       {selectedStudents.length > 0 ? `发送通知（${selectedStudents.length}人）` : '发送通知'}
                     </Button>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { Card, Col, Empty, Modal, Row, Skeleton, Tag, Typography } from 'antd'
@@ -102,9 +102,9 @@ export default function ParentMaterialsPage() {
               borderRadius: 20,
               cursor: 'pointer',
               fontSize: 13,
-              backgroundColor: !selectedSubject ? '#5e6ad2' : 'rgba(0,0,0,.04)',
+              backgroundColor: !selectedSubject ? '#E8784A' : 'rgba(0,0,0,.04)',
               color: !selectedSubject ? '#fff' : '#5a4e3a',
-              border: !selectedSubject ? '1px solid #5e6ad2' : '1px solid rgba(0,0,0,.08)',
+              border: !selectedSubject ? '1px solid #E8784A' : '1px solid rgba(0,0,0,.08)',
               transition: 'all 0.2s',
             }}
           >
@@ -119,9 +119,9 @@ export default function ParentMaterialsPage() {
                 borderRadius: 20,
                 cursor: 'pointer',
                 fontSize: 13,
-                backgroundColor: selectedSubject === subject ? (SUBJECT_COLORS[subject] || '#5e6ad2') : 'rgba(0,0,0,.04)',
+                backgroundColor: selectedSubject === subject ? (SUBJECT_COLORS[subject] || '#E8784A') : 'rgba(0,0,0,.04)',
                 color: selectedSubject === subject ? '#fff' : '#5a4e3a',
-                border: selectedSubject === subject ? `1px solid ${SUBJECT_COLORS[subject] || '#5e6ad2'}` : '1px solid rgba(0,0,0,.08)',
+                border: selectedSubject === subject ? `1px solid ${SUBJECT_COLORS[subject] || '#E8784A'}` : '1px solid rgba(0,0,0,.08)',
                 transition: 'all 0.2s',
               }}
             >

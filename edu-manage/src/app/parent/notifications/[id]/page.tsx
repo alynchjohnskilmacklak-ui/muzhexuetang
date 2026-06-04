@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { notFound, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { NotificationDetailClient } from './client'
 import {
   parentLinkedStudentWhere,
@@ -77,14 +77,10 @@ export default async function NotificationDetailPage({ params }: { params: Promi
     }
   }
 
-  if (notification.relatedType && notification.relatedId && !relatedData) {
-    notFound()
-  }
-
   return (
     <NotificationDetailClient
       notification={JSON.parse(JSON.stringify(notification))}
-      relatedData={JSON.parse(JSON.stringify(relatedData))}
+      relatedData={relatedData ? JSON.parse(JSON.stringify(relatedData)) : null}
     />
   )
 }

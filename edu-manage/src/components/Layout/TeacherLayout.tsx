@@ -11,6 +11,7 @@ import {
   CheckSquareOutlined,
   CoffeeOutlined,
   DashboardOutlined,
+  DollarOutlined,
   EllipsisOutlined,
   ExperimentOutlined,
   FileImageOutlined,
@@ -41,6 +42,7 @@ type NavItem = MobileNavItem & { badgeKey?: keyof TeacherData['badges'] | null }
 
 const navItems: NavItem[] = [
   { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
+  { key: '/teacher/leave', icon: <CalendarOutlined />, label: '请假审批' },
   { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '我的课表' },
   { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
   { key: '/teacher/meals', icon: <CoffeeOutlined />, label: '就餐上报' },
@@ -50,6 +52,7 @@ const navItems: NavItem[] = [
   { key: '/teacher/performance', icon: <StarOutlined />, label: '表现反馈', badgeKey: 'unread' },
   { key: '/teacher/students', icon: <TeamOutlined />, label: '我的学员' },
   { key: '/teacher/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
+  { key: '/teacher/salary', icon: <DollarOutlined />, label: '我的薪资' },
   { key: '/teacher/ai', icon: <MessageFilled />, label: 'AI 助手' },
 ]
 

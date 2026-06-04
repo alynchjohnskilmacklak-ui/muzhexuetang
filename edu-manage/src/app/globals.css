@@ -1,4 +1,4 @@
-@import 'tailwindcss' source(none);
+﻿@import 'tailwindcss' source(none);
 @source '../**/*.{ts,tsx}';
 
 /* ==============================================
@@ -55,7 +55,7 @@
   /* ---- Brand Colors ---- */
   --color-brand-orange: #E8784A;
   --color-brand-teal: #1D9E75;
-  --color-brand-purple: #5e6ad2;
+  --color-brand-purple: #E8784A;
   --color-brand-gold: #f5a623;
 
   /* ---- Admin Theme (warm light, matches canvas) ---- */
@@ -448,7 +448,7 @@ body {
   margin-bottom: 16px;
   padding: 6px 10px;
   border-radius: 8px;
-  background: rgba(94, 106, 210, 0.14);
+  background: rgba(232,120,74, 0.14);
   color: #828fff;
   font-size: 13px;
   font-weight: 600;
@@ -734,6 +734,49 @@ body {
 
   .ant-select-selector {
     min-height: 42px !important;
+  }
+
+  .mobile-page-content h1,
+  .mobile-page-content h2,
+  .mobile-page-content h3,
+  .mobile-page-content h4 {
+    line-height: 1.3 !important;
+  }
+
+  .mobile-page-content .parent-card .ant-card-head-title,
+  .mobile-page-content .ant-card-head-title {
+    font-size: 15px !important;
+  }
+
+  .mobile-page-content .ant-card-head {
+    padding-inline: 12px !important;
+  }
+
+  .mobile-page-content .ant-list-item {
+    padding-block: 10px !important;
+  }
+
+  .mobile-page-content .ant-typography {
+    overflow-wrap: anywhere;
+  }
+
+  .parent-notifications-page .ant-list-item {
+    min-height: 64px;
+  }
+
+  .responsive-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .responsive-record-card {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.06);
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 }
 /* 手机端防止双击缩放 */

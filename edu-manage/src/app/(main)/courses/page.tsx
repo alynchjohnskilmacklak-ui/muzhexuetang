@@ -43,7 +43,7 @@ type CourseType = 'GROUP' | 'ONE_ON_ONE' | 'SMALL_GROUP'
 const SUBJECTS = ['语文', '数学', '英语', '物理', '化学', '生物', '地理', '历史', '政治']
 const SUBJECT_COLOR: Record<string, string> = {
   语文: '#e8784a',
-  数学: '#5e6ad2',
+  数学: '#E8784A',
   英语: '#2f80ed',
   物理: '#7c5cff',
   化学: '#20a779',
@@ -437,7 +437,7 @@ export default function CoursesPage() {
         {[
           { label: '进行中班级', value: stats.activeGroups, color: '#27a644' },
           { label: '待开班', value: stats.waitingGroups, color: '#f5a623' },
-          { label: '本月课耗', value: stats.monthlyHours, color: '#5e6ad2' },
+          { label: '本月课耗', value: stats.monthlyHours, color: '#E8784A' },
           { label: '续报预警', value: stats.renewalWarnings, color: '#e03e2d' },
         ].map((item) => (
           <Col xs={12} lg={6} key={item.label}>
@@ -748,7 +748,7 @@ export default function CoursesPage() {
                     <Tag
                       key={day}
                       onClick={() => setCreateData((prev) => ({ ...prev, recurringDays: active ? days.filter((item) => item !== day) : [...days, day] }))}
-                      style={{ cursor: 'pointer', borderRadius: 999, padding: '5px 14px', border: 'none', background: active ? '#5e6ad2' : '#202226', color: active ? '#fff' : '#98A2B3' }}
+                      style={{ cursor: 'pointer', borderRadius: 999, padding: '5px 14px', border: 'none', background: active ? '#E8784A' : '#202226', color: active ? '#fff' : '#98A2B3' }}
                     >
                       {DAY_LABELS[day]}
                     </Tag>

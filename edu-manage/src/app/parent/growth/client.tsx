@@ -14,6 +14,7 @@ import {
 } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { PERFORMANCE_BADGES } from '@/lib/performance'
+import { getDailyQuote } from '@/data/daily-quotes'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -23,12 +24,6 @@ const MOOD_LABELS: Record<string, { text: string; color: string; bg: string }> =
   OKAY: { text: '平稳', color: '#A76616', bg: '#FFF3DC' },
   NEEDS_ATTENTION: { text: '需关注', color: '#C84A3D', bg: '#FDECE8' },
 }
-
-const QUOTES = [
-  { text: '学而不思则罔，思而不学则殆。', source: '《论语·为政》' },
-  { text: '博观而约取，厚积而薄发。', source: '苏轼《稼说送张琥》' },
-  { text: '知之者不如好之者，好之者不如乐之者。', source: '《论语·雍也》' },
-]
 
 const TYPE_META: Record<string, { label: string; icon: ReactNode; color: string; bg: string }> = {
   post: { label: '表现反馈', icon: <HeartOutlined />, color: '#D96F43', bg: '#FFF3EA' },
@@ -119,7 +114,7 @@ export function ParentGrowthClient({
     })),
   ]).sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 50), [posts, classroomFeedbacks, badges, grades, highlights])
 
-  const quote = QUOTES[timeline.length % QUOTES.length]
+  const quote = getDailyQuote()
   const earnedTypes = new Set(badges.map((badge: any) => badge.badgeType))
   const featuredBadges = badges.slice(0, 3)
   const hasData = timeline.length > 0
@@ -143,7 +138,7 @@ export function ParentGrowthClient({
           <ReadOutlined />
           <div>
             <Paragraph className="growth-quote-text">{quote.text}</Paragraph>
-            <Text className="growth-quote-source">{quote.source}</Text>
+            <Text className="growth-quote-source">——{quote.source}</Text>
           </div>
         </div>
       </section>

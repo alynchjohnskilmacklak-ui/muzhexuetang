@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Card, Empty, Image, Tag, Typography } from 'antd'
@@ -17,7 +17,7 @@ const SUBJECT_STYLES: Record<string, { bg: string; color: string }> = {
   '生物': { bg: '#EAF3DE', color: '#27500A' },
   '政治': { bg: '#F5E8F5', color: '#6B2B6B' },
 }
-const DEFAULT_STYLE = { bg: '#FCFBF9', color: '#5B6472' }
+const DEFAULT_STYLE = { bg: '#FCFBF9', color: '#5a4e3a' }
 
 interface TeacherInfo {
   id: string; name: string; gender: string | null; avatar: string | null

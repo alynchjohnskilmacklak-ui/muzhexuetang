@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonWhere, todayRange } from '@/lib/teacher-portal'
 import { calculateAttendanceDeductHours } from '@/lib/attendance-hours'
+import { triggerLessonPay } from '@/lib/teacher-salary'
 
 export const dynamic = 'force-dynamic'
 
@@ -198,6 +199,10 @@ export async function POST(request: NextRequest) {
               : null,
         },
       })
+
+      if (!alreadyDeducted) {
+        await triggerLessonPay(lessonId)
+      }
 
       await tx.activityLog.create({
         data: {

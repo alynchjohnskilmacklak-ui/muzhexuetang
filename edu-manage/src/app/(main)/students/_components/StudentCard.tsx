@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Button, Space, Tooltip, Typography } from 'antd'
 import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
@@ -8,7 +8,7 @@ import { formatHours } from '@/lib/format'
 
 const { Text } = Typography
 
-const AVATAR_COLORS = ['#5e6ad2', '#27a644', '#b37feb', '#f5a623', '#828fff', '#e03e2d']
+const AVATAR_COLORS = ['#E8784A', '#27a644', '#b37feb', '#f5a623', '#828fff', '#e03e2d']
 const TYPE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
   ONE_ON_ONE: { bg: '#EEEDFE', text: '#3C3489', label: '一对一' },
   ONE_ON_TWO: { bg: '#E6F1FB', text: '#185FA5', label: '一对二' },

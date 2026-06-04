@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Card, Empty, Input, Modal, Select, Space, Spin, Typography, message } from 'antd'
@@ -284,7 +284,7 @@ export default function StudentsPage() {
             </Space>
             <Space>
               <Button icon={<ImportOutlined />} onClick={() => setImportOpen(true)}>导入</Button>
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditData(null); setFormOpen(true) }} style={{ background: '#E87545', borderColor: '#5e6ad2' }}>添加学员</Button>
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditData(null); setFormOpen(true) }} style={{ background: '#E87545', borderColor: '#E8784A' }}>添加学员</Button>
             </Space>
           </Space>
 

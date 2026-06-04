@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Image from 'next/image'
 import { Avatar, Button, Card, Image as AntImage, Popconfirm, Rate, Space, Tag } from 'antd'
@@ -37,7 +37,7 @@ export function FeedItem({ post, onDelete }: { post: FeedPost; onDelete?: (id: s
         <div style={{ minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
             <Space align="center">
-              <Avatar src={normalizeUploadUrl(post.teacher?.avatar) || undefined} icon={<UserOutlined />} style={{ background: '#5e6ad2' }} />
+              <Avatar src={normalizeUploadUrl(post.teacher?.avatar) || undefined} icon={<UserOutlined />} style={{ background: '#E8784A' }} />
               <div>
                 <div style={{ color: '#1F2329', fontWeight: 700 }}>{post.teacher?.name || '老师'}</div>
                 <div style={{ color: '#98A2B3', fontSize: 12 }}>
@@ -104,7 +104,7 @@ export function FeedItem({ post, onDelete }: { post: FeedPost; onDelete?: (id: s
           )}
 
           {latestComment && (
-            <div style={{ marginTop: 12, padding: 10, borderRadius: 8, background: '#FCFBF9', color: '#5B6472', fontSize: 13 }}>
+            <div style={{ marginTop: 12, padding: 10, borderRadius: 8, background: '#FCFBF9', color: '#5a4e3a', fontSize: 13 }}>
               家长留言：{latestComment.content}
             </div>
           )}

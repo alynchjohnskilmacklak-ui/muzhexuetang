@@ -2,6 +2,7 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
+import { requireCurrentTeacher, teacherStudentWhere } from '@/lib/teacher-portal'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
@@ -15,8 +16,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const limit = parseInt(searchParams.get('limit') || '20')
   const skip = (page - 1) * limit
 
+  const role = (session.user as any).role
   const where: any = {}
   if (status) where.status = status
+  if (role === 'teacher') {
+    const { teacher } = await requireCurrentTeacher()
+    where.student = teacherStudentWhere(teacher.id)
+  }
 
   const [records, total] = await Promise.all([
     prisma.leaveRequest.findMany({

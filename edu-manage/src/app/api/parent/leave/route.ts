@@ -34,9 +34,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
       scheduleId: scheduleId || null,
       reason,
       leaveDate: new Date(leaveDate),
-      status: 'approved',
-      replyNote: '已收到请假通知',
-      repliedAt: new Date(),
+      status: 'pending',
+      replyNote: '已提交，等待老师审批',
     },
     include: {
       student: { select: { name: true } },
