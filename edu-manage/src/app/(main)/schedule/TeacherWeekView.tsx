@@ -5,7 +5,7 @@ import { format, addDays, startOfWeek } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { Spin, Empty, Select, Typography } from 'antd'
 import useSWR from 'swr'
-import { SCHEDULE_PERIODS, PERIOD_HEIGHTS, PERIOD_BG, CLASS_PERIODS_ONLY } from '@/lib/schedule-periods'
+import { SCHEDULE_PERIODS, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
 
 const { Text } = Typography
 
@@ -32,6 +32,21 @@ const TYPE_LABELS: Record<string, string> = {
 
 const fetcher = (url: string) => fetch(url).then(r => r.ok ? r.json() : Promise.reject('load error'))
 
+function findBestPeriodId(startTime: string): string | null {
+  const exact = SCHEDULE_PERIODS.find(p => p.type === 'CLASS' && p.start === startTime)
+  if (exact) return exact.id
+
+  const [hour, minute = 0] = startTime.split(':').map(Number)
+  const startMin = hour * 60 + minute
+  const within = SCHEDULE_PERIODS.find(p => {
+    if (p.type !== 'CLASS') return false
+    const [periodHour, periodMinute = 0] = p.start.split(':').map(Number)
+    const [endHour, endMinute = 0] = p.end.split(':').map(Number)
+    return periodHour * 60 + periodMinute <= startMin && startMin < endHour * 60 + endMinute
+  })
+  return within?.id || null
+}
+
 export function TeacherWeekView({
   onLessonClick,
 }: {
@@ -53,26 +68,28 @@ export function TeacherWeekView({
     shouldFetch ? `/api/schedules/teacher-week?teacherId=${selectedTeacherId}&weekStart=${weekStartStr}` : null,
     fetcher
   )
-  const lessons: Record<string, unknown>[] = Array.isArray(weekData?.lessons) ? weekData.lessons : []
+  const lessons: Record<string, unknown>[] = useMemo(() => Array.isArray(weekData?.lessons) ? weekData.lessons : [], [weekData])
 
   // Secondary frontend filter by teacherId (safety net)
   const filteredLessons = useMemo(() => {
     if (!selectedTeacherId) return []
     return lessons.filter(l => {
       const tId = (l.teacher as Record<string, unknown> | undefined)?.id || l.teacherId
-      return String(tId) === selectedTeacherId
+      const assignments = ((l.group as Record<string, unknown> | undefined)?.teacherAssignments || []) as Record<string, unknown>[]
+      return String(tId) === selectedTeacherId || assignments.some((assignment) => assignment.teacherId === selectedTeacherId)
     })
   }, [lessons, selectedTeacherId])
 
   const lessonsByDayPeriod = useMemo(() => {
-    const map: Record<string, Record<string, Record<string, unknown>>> = {}
+    const map: Record<string, Record<string, Record<string, unknown>[]>> = {}
     filteredLessons.forEach((l: Record<string, unknown>) => {
       const dateKey = format(new Date(l.lessonDate as string), 'yyyy-MM-dd')
       const startTime = l.startTime as string
-      const period = SCHEDULE_PERIODS.find(p => p.type === 'CLASS' && p.start === startTime)
-      if (period) {
+      const periodId = findBestPeriodId(startTime)
+      if (periodId) {
         if (!map[dateKey]) map[dateKey] = {}
-        map[dateKey][period.id] = l
+        if (!map[dateKey][periodId]) map[dateKey][periodId] = []
+        map[dateKey][periodId].push(l)
       }
     })
     return map
@@ -186,7 +203,7 @@ export function TeacherWeekView({
 
                   {weekDates.map((date, dayIdx) => {
                     const dateKey = format(date, 'yyyy-MM-dd')
-                    const lesson = lessonsByDayPeriod[dateKey]?.[period.id]
+                    const cellLessons = lessonsByDayPeriod[dateKey]?.[period.id] || []
                     return (
                       <div key={dayIdx} style={{
                         height: displayHeight,
@@ -195,29 +212,43 @@ export function TeacherWeekView({
                         borderBottom: '0.5px solid var(--color-border, #EEE7E1)',
                         padding: period.type === 'CLASS' ? 3 : 0,
                       }}>
-                        {period.type === 'CLASS' && lesson ? (
-                          <div
-                            onClick={() => onLessonClick(lesson!)}
-                            style={{
-                              height: '100%', borderRadius: 4, padding: '3px 6px',
-                              background: `${teacherColor}15`,
-                              borderLeft: `3px solid ${teacherColor}`,
-                              cursor: 'pointer',
-                              display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                            }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 2 }}>
-                              <span style={{ fontSize: 12, fontWeight: 600, color: teacherColor, lineHeight: 1.3 }}>
-                                {(lesson.group as any)?.course?.name || '-'}
-                              </span>
-                              {(lesson.group as any)?.course?.type && (lesson.group as any).course.type !== 'GROUP' && (
-                                <span style={{ fontSize: 8, background: 'rgba(83,74,183,.12)', color: '#534AB7', padding: '0 3px', borderRadius: 2, fontWeight: 500, whiteSpace: 'nowrap' }}>
-                                  {TYPE_LABELS[(lesson.group as any).course.type] || (lesson.group as any).course.type}
-                                </span>
-                              )}
-                            </div>
-                            <div style={{ fontSize: 10, color: teacherColor, opacity: .8, lineHeight: 1.3 }}>
-                              {(lesson.group as any)?.room?.name || '-'} · {(lesson.group as any)?.enrollments?.length || 0}人
-                            </div>
+                        {period.type === 'CLASS' && cellLessons.length > 0 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, height: '100%', overflow: 'hidden' }}>
+                            {cellLessons.map((lesson: Record<string, unknown>) => {
+                              const group = lesson.group as Record<string, unknown> | undefined
+                              const course = group?.course as Record<string, unknown> | undefined
+                              const enrollments = Array.isArray(group?.enrollments) ? group.enrollments : []
+                              const courseType = (course?.type || 'GROUP') as string
+                              const isOneOnOne = courseType !== 'GROUP'
+                              const cellColor = isOneOnOne ? '#534AB7' : teacherColor
+                              return (
+                                <div
+                                  key={lesson.id as string}
+                                  onClick={() => onLessonClick(lesson)}
+                                  style={{
+                                    flex: 1, borderRadius: 4, padding: '2px 5px',
+                                    background: `${cellColor}15`,
+                                    borderLeft: `3px solid ${cellColor}`,
+                                    cursor: 'pointer', overflow: 'hidden',
+                                    display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginBottom: 1 }}>
+                                    <span style={{ fontSize: 11, fontWeight: 600, color: cellColor, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {course?.name as string || '-'}
+                                    </span>
+                                    {isOneOnOne && (
+                                      <span style={{ fontSize: 8, background: 'rgba(83,74,183,.12)', color: '#534AB7', padding: '0 3px', borderRadius: 2, fontWeight: 500, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                                        {TYPE_LABELS[courseType] || courseType}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div style={{ fontSize: 10, color: cellColor, opacity: .8, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {(lesson.startTime as string)} · {enrollments.length}人
+                                  </div>
+                                </div>
+                              )
+                            })}
                           </div>
                         ) : null}
                       </div>

@@ -17,6 +17,8 @@ export const POST = apiHandler(async (
   const { id } = await params
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const role = (session.user as { role?: string }).role
+  if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const student = await prisma.student.findUnique({ where: { id } })
   if (!student) return NextResponse.json({ error: '学员不存在' }, { status: 404 })

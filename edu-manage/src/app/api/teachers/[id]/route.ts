@@ -49,6 +49,8 @@ async function getEffectiveTeacherStudents(teacherId: string) {
 export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await requireSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const role = (session.user as { role?: string }).role
+  if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const { id } = await params
   const teacher = await prisma.teacher.findUnique({
@@ -93,6 +95,8 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const role = (session.user as { role?: string }).role
+  if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const { id } = await params
   const body = await req.json()

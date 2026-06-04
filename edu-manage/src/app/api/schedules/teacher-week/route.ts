@@ -30,6 +30,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       OR: [
         { teacherId },
         { group: { teacherId } },
+        { group: { teacherAssignments: { some: { teacherId } } } },
       ],
     },
     include: {
@@ -39,6 +40,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
           course: { select: { id: true, name: true, subject: true, grade: true, type: true } },
           room: { select: { id: true, name: true } },
           enrollments: { where: activeEnrollmentWhere, select: { id: true } },
+          teacherAssignments: { select: { teacherId: true, subject: true } },
         },
       },
     },

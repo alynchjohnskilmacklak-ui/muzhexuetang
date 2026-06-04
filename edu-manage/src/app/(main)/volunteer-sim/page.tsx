@@ -22,7 +22,6 @@ import {
   getTopRecommendation,
   isXinleAccessible,
   SCORE_TAG_CONFIG,
-  TOTAL_EXAMINEES_2025,
   XINLE_ALLOCATION_2025,
   type ScoreTag,
 } from '@/data/volunteer-2025'
@@ -137,10 +136,10 @@ export default function VolunteerSimPage() {
     return Array.from(set).sort()
   }, [schools])
 
-  function getAllocationQuota(school: DBSchool): number {
+  const getAllocationQuota = useCallback((school: DBSchool): number => {
     if (!inputSchool) return 0
     return getAllocationQuotaByName(school.name, school.fullName, inputSchool)
-  }
+  }, [inputSchool])
 
   const marketRankResult = submitted && inputScore !== null ? getMarketRank(inputScore) : null
   const percentileResult = submitted && inputScore !== null ? getMarketPercentile(inputScore) : null
@@ -169,7 +168,7 @@ export default function VolunteerSimPage() {
         if (pa !== pb) return pa - pb
         return b.tongZhao - a.tongZhao
       })
-  }, [schools, submitted, inputScore, inputSchool, inputRank])
+  }, [schools, submitted, inputScore, inputRank, getAllocationQuota])
 
   const filteredSchools = useMemo(() => {
     return processedSchools.filter(s => {
@@ -328,7 +327,7 @@ export default function VolunteerSimPage() {
         items={[{
           key: 'disclaimer',
           label: <span style={{ color: C.warning, fontSize: 13, fontWeight: 500 }}>重要提示：本系统仅供模拟参考，非官方录取结果</span>,
-          children: <span style={{ color: C.inkMuted, fontSize: 13, lineHeight: 1.8 }}>本系统基于2025年公开分数线、分配名额和学校信息进行模拟，仅供志愿填报参考。全市排名基于2025年石家庄中考一分一档表估算。梯度标签基于2025年分数线静态测算，不代表2026年实际录取结果。2026年实际录取以石家庄市教育考试院、学校招生简章及最终录取结果为准。</span>,
+          children: <span style={{ color: C.inkMuted, fontSize: 13, lineHeight: 1.8 }}>本系统基于2025年公开分数线、分配名额和学校信息进行模拟，仅供志愿填报参考。全市排名基于2025年石家庄中考一分一档表测算。梯度标签基于2025年分数线静态测算，不代表2026年实际录取结果。2026年实际录取以石家庄市教育考试院、学校招生简章及最终录取结果为准。</span>,
         }]}
       />
 
@@ -573,11 +572,6 @@ export default function VolunteerSimPage() {
                             ? `排名高于该档（前${topBand.bandLo - 1}名通常会竞争更好的学校），可作为稳妥选择，但可能浪费分配生机会。`
                             : `你校内第${topBand.bandLo < topBand.bandHi ? `${topBand.bandLo}-${topBand.bandHi}` : topBand.bandLo}名，落在${topBand.highSchoolName}名额区间（第${topBand.bandLo}-${topBand.bandHi}名），分数${inputScore}已超分配线约${inputScore! - topBand.allocationLine.value}分，可重点考虑。分配生只能填1所，建议填报此校。`}
                         </Text>
-                        {topBand.allocationLine.source === 'estimated' && (
-                          <Text style={{ fontSize: 11, color: C.inkSubtle, display: 'block', marginTop: 4 }}>
-                            ※ 该分配线为系统按一统线减50估算，且不低于普高线460分，仅供参考，实际以当年招生政策和学校公布为准。
-                          </Text>
-                        )}
                         <div style={{ marginTop: 10 }}>
                           {topDb ? (
                             <Button
@@ -628,7 +622,6 @@ export default function VolunteerSimPage() {
                             <span style={{ fontSize: 13, color: C.ink }}>◎ {b.highSchoolName}</span>
                             <Text style={{ fontSize: 12, color: C.inkSubtle }}>
                               {b.allocationLine.label} {b.allocationLine.value}分 · 名额第{b.bandLo}-{b.bandHi}名
-                              {b.allocationLine.source === 'estimated' && ' (估算)'}
                             </Text>
                             {db && (
                               <Button size="small" disabled={!!allocationSlot}
@@ -654,7 +647,7 @@ export default function VolunteerSimPage() {
                           background: C.successBg, padding: '3px 8px', borderRadius: 6,
                           border: `1px solid ${C.successBorder}`, color: C.success,
                         }}>
-                          {b.highSchoolName}（{b.allocationLine.label}{b.allocationLine.value}分{b.allocationLine.source === 'estimated' ? '·估算' : ''}）
+                          {b.highSchoolName}（{b.allocationLine.label}{b.allocationLine.value}分）
                         </span>
                       ))}
                     </div>
@@ -686,7 +679,7 @@ export default function VolunteerSimPage() {
                   }}>
                     <Text style={{ fontSize: 12, color: C.inkSubtle }}>
                       以下学校分数未达分配线：{allocationBands.filter(b => b.tag === '分数不足').map(b =>
-                        `${b.highSchoolName}（需≥${b.allocationLine.value}分${b.allocationLine.source === 'estimated' ? '，估算' : ''}）`
+                        `${b.highSchoolName}（需≥${b.allocationLine.value}分）`
                       ).join('、')}
                     </Text>
                   </div>
@@ -698,7 +691,7 @@ export default function VolunteerSimPage() {
                   background: C.surface3, border: `1px solid ${C.hairline}`,
                 }}>
                   <Text style={{ fontSize: 11, color: C.inkSubtle, lineHeight: 1.6 }}>
-                    说明：级联模型基于"全校学生按分数优先选最好学校"的理想假设，实际中部分学生有偏好（如宁可就近上新乐一中也不去市区），会使各档边界浮动。分配线未标"估算"的为数据库录入值，标"估算"的是系统按一统线减50推算，且不低于普高线460分。真实录取受考生填报意愿、分配生控制线、同校竞争、当年政策影响，最终以石家庄市教育考试院和学校官方公布为准。
+                    说明：级联模型基于“全校学生按分数优先选最好学校”的理想假设，实际中部分学生有偏好（如宁可就近上新乐一中也不去市区），会使各档边界浮动。分配线仅使用数据库录入的官方分配生录取线；未录入时页面不展示分配线。真实录取受考生填报意愿、分配生控制线、同校竞争、当年政策影响，最终以石家庄市教育考试院和学校官方公布为准。
                   </Text>
                 </div>
               </div>
@@ -815,8 +808,8 @@ export default function VolunteerSimPage() {
               <div style={{
                 marginTop: 20,
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '8px 24px',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                gap: isMobile ? '6px' : '8px 24px',
                 padding: '16px',
                 background: C.surface3,
                 borderRadius: 10,
@@ -834,11 +827,11 @@ export default function VolunteerSimPage() {
               <div style={{
                 marginTop: 12,
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
+                gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr',
                 gap: 10,
               }}>
                 {detailSchool.yiTong && (
-                  <ScoreBlock label="一统线" value={`${detailSchool.yiTong}分`} />
+                  <ScoreBlock label={detailSchool.type === '民办' ? '市区统招分' : '一统线'} value={`${detailSchool.yiTong}分`} />
                 )}
                 <ScoreBlock label="统招线" value={`${detailSchool.tongZhao}分`} sub={`距统招线 ${detailSchool.gap >= 0 ? `高出${detailSchool.gap}` : `差${Math.abs(detailSchool.gap)}`}分`} />
                 {detailSchool.allocationLine && (
@@ -990,15 +983,15 @@ export default function VolunteerSimPage() {
             </div>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: isMobile ? 12 : 20, flexDirection: isMobile ? 'column' : 'row' }}>
             {/* Allocation slot */}
-            <div style={{ flexShrink: 0 }}>
+            <div style={{ flexShrink: 0, width: isMobile ? '100%' : undefined }}>
               <Text style={{ fontSize: 12, color: C.inkSubtle, display: 'block', marginBottom: 6 }}>
                 分配生志愿
               </Text>
               {allocationSlot ? (
                 <div style={{
-                  width: 130,
+                  width: isMobile ? '100%' : 130,
                   padding: '10px 12px',
                   borderRadius: 10,
                   background: C.primaryBg,
@@ -1021,7 +1014,7 @@ export default function VolunteerSimPage() {
                 </div>
               ) : (
                 <div style={{
-                  width: 130,
+                  width: isMobile ? '100%' : 130,
                   padding: '10px 12px',
                   borderRadius: 10,
                   background: C.surface3,
@@ -1036,7 +1029,7 @@ export default function VolunteerSimPage() {
             </div>
 
             {/* Divider */}
-            <div style={{ width: 1, background: C.hairline, alignSelf: 'stretch', flexShrink: 0 }} />
+            {!isMobile && <div style={{ width: 1, background: C.hairline, alignSelf: 'stretch', flexShrink: 0 }} />}
 
             {/* Tongzhao slots */}
             <div style={{ flex: 1 }}>
@@ -1263,7 +1256,7 @@ function TieredSchoolList({
                         <Tag style={{
                           background: cfg.bg, color: cfg.color,
                           border: `1px solid ${cfg.border}`, margin: 0, fontSize: 11,
-                          fontWeight: 600,
+                          fontWeight: 600, flexShrink: 0,
                         }}>
                           {cfg.label}
                         </Tag>
@@ -1307,7 +1300,7 @@ function TieredSchoolList({
                       <div style={{ textAlign: 'right' }}>
                         {school.yiTong && (
                           <Text style={{ fontSize: 11, color: C.inkSubtle, marginRight: 12 }}>
-                            一统{school.yiTong}分
+                            {school.type === '民办' ? '市区' : '一统'}{school.yiTong}分
                           </Text>
                         )}
                         <Text style={{ fontSize: 13 }}>
@@ -1357,7 +1350,6 @@ function DesktopFilterSidebar({
       <Text strong style={{ color: C.ink, fontSize: 13 }}>分数匹配</Text>
       <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
         {TAG_OPTIONS.map(t => {
-          const cfg = t === '全部' ? null : SCORE_TAG_CONFIG[t]
           return (
             <div key={t} onClick={() => setFilterTag(t)} style={{
               padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13,

@@ -264,6 +264,7 @@ body {
   .ant-modal-mobile .ant-modal-content {
     border-radius: 0 !important;
     min-height: 100vh;
+    min-height: 100dvh;
   }
 
   .ant-modal-mobile .ant-col-12 {
@@ -295,7 +296,7 @@ body {
   .ant-input, .ant-input-affix-wrapper { min-height: 42px !important; font-size: 14px !important; }
   .ant-select-selector { min-height: 42px !important; }
   .ant-modal { margin: 0 !important; max-width: 100vw !important; top: 0 !important; }
-  .ant-modal-content { border-radius: 0 !important; min-height: 100vh; }
+  .ant-modal-content { border-radius: 0 !important; min-height: 100vh; min-height: 100dvh; }
   .ant-modal-body { padding: 16px !important; }
   .ant-drawer-close { padding: 12px !important; }
   .ant-statistic-content-value { font-size: 22px !important; }
@@ -307,6 +308,7 @@ body {
 /* ---- Login page ---- */
 .login-container {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   background: #0e0e16;
 }
@@ -314,6 +316,7 @@ body {
 .login-left {
   flex: 0 0 50%;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -711,6 +714,7 @@ body {
   .ant-modal-content {
     border-radius: 0 !important;
     min-height: 100vh;
+    min-height: 100dvh;
   }
 
   .ant-modal-body {
@@ -779,6 +783,12 @@ body {
     overflow-wrap: anywhere;
   }
 }
+
+:root {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --mobile-bottom-space: calc(72px + var(--safe-bottom));
+}
 /* 手机端防止双击缩放 */
 button, [role="button"], a, input, select, textarea, label {
   touch-action: manipulation;
@@ -822,6 +832,28 @@ img { -webkit-touch-callout: none; pointer-events: auto; }
 .ant-layout-sider,
 [data-scroll-lock],
 .scroll-area {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile dropdown scroll containment */
+.ant-select-dropdown,
+.ant-picker-dropdown,
+.ant-dropdown {
+  touch-action: none;
+}
+
+.rc-virtual-list-holder {
+  touch-action: pan-y !important;
+  overscroll-behavior: contain;
+}
+
+.ant-select-dropdown .rc-virtual-list-holder-inner {
+  touch-action: pan-y;
+}
+
+.ant-select-dropdown,
+.ant-picker-panel-container {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
@@ -1155,5 +1187,23 @@ img { -webkit-touch-callout: none; pointer-events: auto; }
 
   .growth-side-panel {
     position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .ant-select-dropdown {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  body:has(.ant-select-open) {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .rc-virtual-list-holder {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 }

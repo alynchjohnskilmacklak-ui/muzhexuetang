@@ -15,7 +15,7 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     where: { id },
     include: {
       mainTeacher: true,
-      parent: true,
+      parent: { select: { id: true, name: true, email: true, role: true, status: true, wxpusherUid: true } },
       schedules: { include: { schedule: { include: { course: { select: { id: true, name: true, teacherId: true } }, teacher: { select: { id: true, name: true } } } } } },
       enrollments: {
         where: {
@@ -49,6 +49,8 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const role = (session.user as { role?: string }).role
+  if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const { id } = await params
   const body = await req.json()
@@ -84,11 +86,18 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   try {
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: '请重新登录后再办理离校' }, { status: 401 })
+    const role = (session.user as { role?: string }).role
+    if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
     const { id } = await params
 
     // Find student with parent link
-    const student = await prisma.student.findUnique({ where: { id }, include: { parent: true } })
+    const student = await prisma.student.findUnique({
+      where: { id },
+      include: {
+        parent: { select: { id: true, name: true, email: true, role: true, status: true } },
+      },
+    })
     if (!student) return NextResponse.json({ error: '学员不存在' }, { status: 404 })
 
     // Deactivate student

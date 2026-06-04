@@ -4,15 +4,19 @@ import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { addDays, subDays } from 'date-fns'
-import { Spin, Empty, Tag, Modal, Select, Input, message, Typography } from 'antd'
-import { UserOutlined, EnvironmentOutlined } from '@ant-design/icons'
+import { Spin, Empty, Modal, Select, Input, message, Typography } from 'antd'
 import useSWR from 'swr'
+import { MobileSelect } from '@/components/MobileSelect'
 import { SCHEDULE_PERIODS } from '@/lib/schedule-periods'
 
 const { Text } = Typography
 
 const INTENSIVE_COLOR = '#534AB7'
 const SLOT_HEIGHT = 72
+
+const asRecord = (value: unknown): Record<string, unknown> => (
+  value && typeof value === 'object' ? value as Record<string, unknown> : {}
+)
 
 const HOURLY_SLOTS = [
   { id:'h08', start:'08:00', end:'09:00', label:'08:00–09:00' },
@@ -43,20 +47,70 @@ export default function IntensiveSchedulePage() {
 
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
   const { data: daily, isLoading, mutate } = useSWR(`/api/schedules/daily?date=${dateStr}&courseType=SMALL`, fetcher, { refreshInterval: 60_000 })
+  // 额外获取 ClassLesson 中的一对一/小组课数据
+  const { data: classLessonsData } = useSWR(
+    `/api/class-lessons?startDate=${dateStr}&endDate=${dateStr}&courseType=ONE_ON_ONE`,
+    fetcher, { refreshInterval: 60_000 }
+  )
+  const { data: smallGroupData } = useSWR(
+    `/api/class-lessons?startDate=${dateStr}&endDate=${dateStr}&courseType=SMALL_GROUP`,
+    fetcher, { refreshInterval: 60_000 }
+  )
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
   const { data: teachersData } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
   const { data: studentsData } = useSWR('/api/students?limit=500', fetcher)
 
-  const matrix = (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown>>>
-  const allRooms: Record<string, unknown>[] = Array.isArray(roomsData) ? roomsData : []
+  const matrix = useMemo(() => (
+    (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown>>>
+  ), [daily?.matrix])
+  const allRooms: Record<string, unknown>[] = useMemo(() => (
+    Array.isArray(roomsData) ? roomsData : []
+  ), [roomsData])
   const teacherList: Record<string, unknown>[] = Array.isArray(teachersData?.teachers) ? teachersData.teachers : Array.isArray(teachersData) ? teachersData : []
   const studentList: Record<string, unknown>[] = Array.isArray(studentsData?.students) ? studentsData.students : Array.isArray(studentsData) ? studentsData : []
 
   // Only ONE_ON_ONE rooms (desks/spots)
-  const spots = allRooms.filter(r => {
-    const t = (r.type as string) || ''
-    return t.includes('一对一') || t.includes('ONE_ON_ONE')
-  })
+  const spots = useMemo(() => allRooms.filter(r => {
+    const t = (r.type as string || '').toLowerCase()
+    const u = (r.usageType as string || '').toLowerCase()
+    return t.includes('一对一') || t.includes('one_on_one')
+      || u.includes('one_on_one') || u.includes('一对一')
+  }), [allRooms])
+
+  // 合并 ClassLesson 数据到 classLessonGrid
+  const classLessons: Record<string, unknown>[] = useMemo(() => [
+    ...(Array.isArray(classLessonsData) ? classLessonsData : []),
+    ...(Array.isArray(smallGroupData) ? smallGroupData : []),
+  ], [classLessonsData, smallGroupData])
+
+  const classLessonGrid = useMemo(() => {
+    const g: Record<string, Record<string, Record<string, unknown>>> = {}
+    classLessons.forEach((l: Record<string, unknown>) => {
+      const group = asRecord(l.group)
+      const room = asRecord(group.room)
+      const teacher = asRecord(l.teacher)
+      const course = asRecord(group.course)
+      const enrollments = Array.isArray(group.enrollments) ? group.enrollments : []
+      const roomId = String(room.id || '')
+      if (!roomId) return
+      const start = l.startTime as string || ''
+      const sh = parseInt(start.split(':')[0])
+      const slot = HOURLY_SLOTS.find(s => parseInt(s.start.split(':')[0]) === sh)
+      if (!slot) return
+      if (!g[roomId]) g[roomId] = {}
+      g[roomId][slot.id] = {
+        lessonId: l.id,
+        teacherName: teacher.name || '',
+        teacherId: teacher.id || l.teacherId,
+        courseName: course.name || '',
+        subject: (l.subject as string) || course.subject || '',
+        courseType: course.type || 'ONE_ON_ONE',
+        headcount: enrollments.length,
+        startTime: start,
+      }
+    })
+    return g
+  }, [classLessons])
 
   // Build spot × hour grid
   const grid = useMemo(() => {
@@ -126,7 +180,7 @@ export default function IntensiveSchedulePage() {
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) {
         if (payload.conflicts?.length) {
-          setConflictMsg(payload.conflicts.map((c: any) => c.detail || c.message).join('；'))
+          setConflictMsg(payload.conflicts.map((c: Record<string, unknown>) => c.detail || c.message).join('；'))
         } else {
           setConflictMsg(payload.error || '创建失败')
         }
@@ -202,6 +256,7 @@ export default function IntensiveSchedulePage() {
 
                 {spots.map(spot => {
                   const lesson = grid[spot.id as string]?.[slot.id]
+                    || classLessonGrid[spot.id as string]?.[slot.id]
                   const courseType = (lesson?.courseType as string) || 'ONE_ON_ONE'
                   const cfg = TYPE_CONFIG[courseType] || TYPE_CONFIG.ONE_ON_ONE
                   return (
@@ -266,16 +321,14 @@ export default function IntensiveSchedulePage() {
           </div>
           <div>
             <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>老师 *</Text>
-            <Select showSearch placeholder="选择老师" style={{ width: '100%' }}
+            <MobileSelect placeholder="选择老师" style={{ width: '100%' }}
               value={createData.teacherId || undefined} onChange={v => setCreateData(p => ({ ...p, teacherId: v }))}
-              filterOption={(input, option) => (option?.label as string || '').includes(input)}
               options={teacherList.map((t: Record<string, unknown>) => ({ label: t.name as string, value: t.id as string }))} />
           </div>
           <div>
             <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>学员 *</Text>
-            <Select showSearch placeholder="选择学员" style={{ width: '100%' }}
+            <MobileSelect placeholder="选择学员" style={{ width: '100%' }}
               value={createData.studentId || undefined} onChange={v => setCreateData(p => ({ ...p, studentId: v }))}
-              filterOption={(input, option) => (option?.label as string || '').includes(input)}
               options={studentList.map((s: Record<string, unknown>) => ({ label: `${s.name}${s.grade ? ` (${s.grade})` : ''}`, value: s.id as string }))} />
           </div>
           <div>

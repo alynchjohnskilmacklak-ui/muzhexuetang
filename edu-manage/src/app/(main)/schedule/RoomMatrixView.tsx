@@ -36,16 +36,16 @@ export function RoomMatrixView({
   onNewCourseClick?: () => void
 }) {
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
-  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}&courseType=GROUP`, fetcher, { refreshInterval: 60_000 })
+  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}`, fetcher, { refreshInterval: 60_000 })
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
 
-  const matrix = (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown>>>
+  const matrix = (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown> | Record<string, unknown>[]>>
   const allRooms: Record<string, unknown>[] = Array.isArray(roomsData) ? roomsData : []
-
-  // Only show CLASSROOM type rooms (not ONE_ON_ONE desks)
   const rooms = allRooms.filter(r => {
-    const t = (r.type as string) || ''
-    return !t.includes('一对一') && !t.includes('ONE_ON_ONE')
+    const t = (r.type as string || '').toLowerCase()
+    const u = (r.usageType as string || '').toLowerCase()
+    return !t.includes('一对一') && !t.includes('one_on_one')
+      && !u.includes('one_on_one') && !u.includes('一对一')
   })
 
   return (
@@ -66,7 +66,7 @@ export function RoomMatrixView({
         {onNewCourseClick && (
           <button onClick={onNewCourseClick}
             style={{ marginLeft: 'auto', padding: '7px 18px', borderRadius: 6, background: '#E8784A', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            + 精品班课排课
+            + 排课
           </button>
         )}
       </div>
@@ -90,7 +90,7 @@ export function RoomMatrixView({
                 background: 'var(--color-background-secondary, #faf8f5)',
               }}>
                 <div style={{ fontSize: 13, fontWeight: 600 }}>{room.name as string}</div>
-                <div style={{ fontSize: 9, color: '#E8784A', marginTop: 2, fontWeight: 500 }}>精品班课</div>
+                <div style={{ fontSize: 9, color: '#E8784A', marginTop: 2, fontWeight: 500 }}>课表</div>
               </div>
             ))}
             {SCHEDULE_PERIODS.map(period => (
@@ -115,17 +115,25 @@ export function RoomMatrixView({
                   )}
                 </div>
                 {rooms.map(room => {
-                  const lesson = matrix[room.id as string]?.[period.id]
+                  const cellItems: Record<string, unknown>[] = (() => {
+                    const val = matrix[room.id as string]?.[period.id]
+                    if (!val) return []
+                    return Array.isArray(val) ? val : [val]
+                  })()
                   return (
                     <div key={room.id as string} style={{
                       minHeight: PERIOD_HEIGHTS[period.type], background: PERIOD_BG[period.type],
                       borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)',
                       padding: period.type === 'CLASS' ? '4px' : 0, cursor: period.type === 'CLASS' ? 'pointer' : 'default',
                     }} onClick={() => { if (period.type === 'CLASS') onCellClick(room, period) }}>
-                      {period.type === 'CLASS' && lesson && (
-                        <LessonCard lesson={lesson} onClick={() => onLessonClick(lesson)} />
+                      {period.type === 'CLASS' && cellItems.length > 0 && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, height: '100%', overflow: 'hidden' }}>
+                          {cellItems.map((item: Record<string, unknown>, index: number) => (
+                            <LessonCard key={`${item.lessonId || index}`} lesson={item} onClick={() => onLessonClick(item)} />
+                          ))}
+                        </div>
                       )}
-                      {period.type === 'CLASS' && !lesson && (
+                      {period.type === 'CLASS' && cellItems.length === 0 && (
                         <EmptyCell onClick={() => onCellClick(room, period)} />
                       )}
                     </div>
@@ -145,18 +153,20 @@ function LessonCard({ lesson, onClick }: { lesson: Record<string, unknown>; onCl
   const color = getCourseColor(courseType)
   return (
     <div onClick={(e) => { e.stopPropagation(); onClick() }} style={{
-      width: '100%', height: '100%', minHeight: 72, borderRadius: 6, padding: '6px 8px',
+      width: '100%', flex: 1, minHeight: 34, borderRadius: 6, padding: '3px 6px',
       background: `${color}12`, borderLeft: `4px solid ${color}`, cursor: 'pointer',
-      display: 'flex', flexDirection: 'column', justifyContent: 'center',
+      display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden',
     }}>
-      <div style={{ marginBottom: 3 }}>
-        <span style={{ fontSize: 8, fontWeight: 600, padding: '1px 5px', borderRadius: 3, background: `${color}20`, color, whiteSpace: 'nowrap' }}>
-          {TYPE_LABELS[courseType] || courseType}
-        </span>
+      <div style={{ fontSize: 11, fontWeight: 600, color, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {lesson.teacherName as string}·{lesson.subject as string}
       </div>
-      <div style={{ fontSize: 12, fontWeight: 600, color, lineHeight: 1.3, marginBottom: 2 }}>{lesson.teacherName as string}</div>
-      <div style={{ fontSize: 10, color, opacity: .85, lineHeight: 1.3 }}>{lesson.courseName as string}</div>
-      <div style={{ fontSize: 9, color, opacity: .7, lineHeight: 1.3 }}>{lesson.grade as string || ''} · {lesson.headcount as number}人</div>
+      {courseType === 'GROUP' ? (
+        <div style={{ fontSize: 10, color, opacity: .8, lineHeight: 1.2 }}>{lesson.headcount as number}人</div>
+      ) : (
+        <div style={{ fontSize: 9, background: `${color}20`, color, padding: '0 3px', borderRadius: 2, display: 'inline-block', width: 'fit-content', marginTop: 2 }}>
+          {TYPE_LABELS[courseType] || courseType}
+        </div>
+      )}
     </div>
   )
 }

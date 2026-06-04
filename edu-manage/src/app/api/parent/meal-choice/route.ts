@@ -27,7 +27,7 @@ export const GET = apiHandler(async () => {
   const menu = dayOfWeek >= 1 && dayOfWeek <= 6 ? await getEffectiveMealMenuForDate(today) : null
 
   const students = await prisma.student.findMany({
-    where: { parentId: userId },
+    where: { OR: [{ parentId: userId }, { parentUserId: userId }] },
     select: { id: true, name: true },
     orderBy: { name: 'asc' },
   })
@@ -65,7 +65,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   const student = await prisma.student.findUnique({ where: { id: studentId } })
-  if (!student || student.parentId !== userId) {
+  const isOwner = student?.parentId === userId || student?.parentUserId === userId
+  if (!student || !isOwner) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

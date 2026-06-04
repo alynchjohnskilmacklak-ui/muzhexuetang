@@ -73,9 +73,6 @@ export const SCORE_RANK_2025: Record<number, number> = {
 }
 
 export const TOTAL_EXAMINEES_2025 = 97644
-export const PUGAO_LINE = 460
-export const ALLOCATION_LINE_OFFSET = 50
-
 export interface HighSchoolData {
   schoolId: string
   name: string
@@ -89,17 +86,15 @@ export interface HighSchoolData {
 }
 
 /**
- * 分配生最低录取控制线 = 一统线(yiTong) - 50，且不低于普高线。
- * 数据库若维护了真实 allocationLine 则优先用真实值。
- * 无一统线表示该校不参与分配生，返回 null。
+ * 分配生录取线只使用数据库录入值。
+ * 未录入时返回 null，避免用一统线推算误导志愿判断。
  */
 export function getAllocationLine(school: {
   yiTong: number | null
   allocationLine?: number | null
 }): number | null {
   if (school.allocationLine != null) return school.allocationLine
-  if (school.yiTong == null) return null
-  return Math.max(school.yiTong - ALLOCATION_LINE_OFFSET, PUGAO_LINE)
+  return null
 }
 
 // 2025年新乐市各初中对高中的分配生名额（key=初中名称 → {高中标准名: 名额}）
@@ -145,12 +140,12 @@ export type MarketRankResult = {
 
 export function getMarketRank(score: number): MarketRankResult {
   if (score in SCORE_RANK_2025) return { rank: SCORE_RANK_2025[score] }
-  if (score > 780) return { rank: 1, message: '超出当前一分一档上限，排名仅作估算' }
-  if (score < 300) return { rank: null, message: '低于当前一分一档统计范围，无法准确估算排名' }
+  if (score > 780) return { rank: 1, message: '超出当前一分一档上限，排名仅作测算' }
+  if (score < 300) return { rank: null, message: '低于当前一分一档统计范围，无法准确测算排名' }
   for (let s = score + 1; s <= 780; s++) {
     if (s in SCORE_RANK_2025) return { rank: SCORE_RANK_2025[s] }
   }
-  return { rank: null, message: '无法从一分一档表估算排名' }
+  return { rank: null, message: '无法从一分一档表测算排名' }
 }
 
 export function getMarketPercentile(score: number): { percentile: string; message?: string } {
@@ -302,8 +297,8 @@ export const SCORE_TAG_CONFIG: Record<ScoreTag, {
 
 export interface AllocationLineInfo {
   value: number
-  source: 'db' | 'estimated'
-  label: '分配生录取线' | '估算分配线'
+  source: 'db'
+  label: '分配生录取线'
 }
 
 export interface AllocationBand {
@@ -320,10 +315,7 @@ export interface AllocationBand {
 function getAllocationLineInfo(school: { yiTong: number | null; allocationLine?: number | null }): AllocationLineInfo | null {
   const value = getAllocationLine(school)
   if (value === null) return null
-  if (school.allocationLine != null) {
-    return { value, source: 'db', label: '分配生录取线' }
-  }
-  return { value, source: 'estimated', label: '估算分配线' }
+  return { value, source: 'db', label: '分配生录取线' }
 }
 
 export function getAllocationBands(
@@ -356,7 +348,7 @@ export function getAllocationBands(
     let note = ''
     if (score < s.allocationLine.value) {
       tag = '分数不足'
-      note = `你的分数未达该校分配生控制线（${s.allocationLine.label === '估算分配线' ? '约' : ''}${s.allocationLine.value}分${s.allocationLine.source === 'estimated' ? '，该线为系统按一统线减50估算，仅供参考' : ''}）`
+      note = `你的分数未达该校分配生录取线（${s.allocationLine.value}分）`
     } else if (rank > bandHi) {
       tag = '排名不足'
       note = `该校名额对应校内前${bandHi}名，你目前第${rank}名，存在校内排名竞争风险`

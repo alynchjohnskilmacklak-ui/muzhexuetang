@@ -3,11 +3,12 @@
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
-import { Alert, Button, Card, Col, Empty, Input, InputNumber, message, Modal, Popconfirm, Progress, Row, Select, Space, Spin, Statistic, Table, Tag } from 'antd'
-import { ArrowLeftOutlined, CalendarOutlined, DeleteOutlined, PlusOutlined, ReloadOutlined, TeamOutlined } from '@ant-design/icons'
+import { Alert, Button, Card, Col, Dropdown, Empty, Input, InputNumber, message, Modal, Popconfirm, Progress, Row, Select, Space, Spin, Statistic, Table, Tag } from 'antd'
+import { ArrowLeftOutlined, CalendarOutlined, DeleteOutlined, MoreOutlined, PlusOutlined, ReloadOutlined, TeamOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { PageLayout } from '@/components/Layout/PageLayout'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
@@ -18,6 +19,7 @@ const fetcher = async (url: string) => {
 export default function CourseGroupDetailPage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
+  const isMobile = useIsMobile() ?? false
   const [enrollOpen, setEnrollOpen] = useState(false)
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
   const [studentGrade, setStudentGrade] = useState('')
@@ -29,8 +31,8 @@ export default function CourseGroupDetailPage() {
   const { data: group, mutate, isLoading } = useSWR(params.id ? `/api/class-groups/${params.id}` : null, fetcher)
   const { data: studentsData } = useSWR(enrollOpen ? `/api/students?limit=200&q=${encodeURIComponent(studentSearch)}` : null, fetcher)
 
-  const lessons = Array.isArray(group?.classLessons) ? group.classLessons : []
-  const enrollments = Array.isArray(group?.enrollments) ? group.enrollments : []
+  const lessons = useMemo(() => Array.isArray(group?.classLessons) ? group.classLessons : [], [group])
+  const enrollments = useMemo(() => Array.isArray(group?.enrollments) ? group.enrollments : [], [group])
   const students = Array.isArray(studentsData?.students) ? studentsData.students : []
   const enrolledStudentIds = useMemo(() => new Set(enrollments.map((item: Record<string, unknown>) => (item.student as Record<string, unknown>)?.id)), [enrollments])
   const availableStudents = students.filter((student: Record<string, unknown>) => !enrolledStudentIds.has(student.id))
@@ -41,6 +43,9 @@ export default function CourseGroupDetailPage() {
   })
   const completed = Number(group?.completedLessons || lessons.filter((lesson: Record<string, unknown>) => lesson.status === 'COMPLETED').length)
   const total = Number(group?.totalLessons || lessons.length)
+  const todayStr = format(new Date(), 'yyyy-MM-dd')
+  const todayLessons = lessons.filter((lesson: Record<string, unknown>) => String(lesson.lessonDate || '').slice(0, 10) === todayStr)
+  const visibleLessons = todayLessons.length > 0 ? todayLessons : lessons.slice(0, 5)
   const teacherTeam = Array.isArray(group?.teacherAssignments) && group.teacherAssignments.length
     ? group.teacherAssignments.map((item: Record<string, unknown>) => (item.teacher as Record<string, unknown>)?.name).filter(Boolean).join('、')
     : group?.teacher?.name
@@ -152,7 +157,35 @@ export default function CourseGroupDetailPage() {
     <PageLayout
       title={group.name}
       subtitle={`${group.course?.name || ''} / 授课团队：${teacherTeam || '未分配'} / ${group.room?.name || '未分配教室'}`}
-      actions={
+      actions={isMobile ? (
+        <Dropdown
+          trigger={['click']}
+          menu={{
+            items: [
+              { key: 'regenerate', icon: <ReloadOutlined />, label: '重新生成课表', onClick: handleRegenerateLessons },
+              { key: 'back', icon: <ArrowLeftOutlined />, label: '返回课程管理', onClick: () => router.push('/courses') },
+              {
+                key: 'delete',
+                icon: <DeleteOutlined />,
+                label: '删除班级',
+                danger: true,
+                onClick: () => {
+                  Modal.confirm({
+                    title: '确定删除这个班级？',
+                    content: '删除后班级会归档，不再出现在课程和排课列表。',
+                    okText: '确认删除',
+                    cancelText: '取消',
+                    okButtonProps: { danger: true },
+                    onOk: handleDeleteGroup,
+                  })
+                },
+              },
+            ],
+          }}
+        >
+          <Button icon={<MoreOutlined />} />
+        </Dropdown>
+      ) : (
         <Space wrap>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a' }}>添加学员</Button>
           {group.status === 'WAITING' && <Button type="primary" loading={starting} onClick={handleStartGroup} style={{ background: '#27a644' }}>开班并通知家长</Button>}
@@ -162,8 +195,15 @@ export default function CourseGroupDetailPage() {
           </Popconfirm>
           <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/courses')}>返回课程管理</Button>
         </Space>
-      }
+      )}
     >
+      {isMobile && (
+        <Space.Compact block style={{ marginBottom: 16 }}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a', flex: 1 }}>添加学员</Button>
+          {group.status === 'WAITING' && <Button type="primary" loading={starting} onClick={handleStartGroup} style={{ background: '#27a644', flex: 1 }}>开班通知</Button>}
+        </Space.Compact>
+      )}
+
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={12} lg={6}><Metric title="在读人数" value={enrollments.length} /></Col>
         <Col xs={12} lg={6}><Metric title="总课次" value={total} /></Col>
@@ -194,7 +234,7 @@ export default function CourseGroupDetailPage() {
                     <div key={enrollment.id as string} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #EEE7E1' }}>
                       <div>
                         <div style={{ color: '#1F2329' }}>{student?.name as string}</div>
-                        <div style={{ color: '#98A2B3', fontSize: 12 }}>{student?.grade as string || '-'} / 剩余 {String(enrollment.remainHours ?? 0)} 课时</div>
+                        <div style={{ color: '#98A2B3', fontSize: 12 }}>{student?.grade as string || '-'} / 剩余 {Number(enrollment.remainHours ?? 0).toFixed(1)} 课时</div>
                       </div>
                       <Popconfirm title="确定把该学员移出班级？" onConfirm={() => handleRemoveStudent(enrollment.id as string)}>
                         <Button size="small" danger type="text">移出</Button>
@@ -207,12 +247,17 @@ export default function CourseGroupDetailPage() {
           </Card>
         </Col>
         <Col xs={24} lg={14}>
-          <Card title={<span style={{ color: '#1F2329' }}><CalendarOutlined /> 课次列表</span>} bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
+          <Card
+            title={<span style={{ color: '#1F2329' }}><CalendarOutlined /> {todayLessons.length > 0 ? '今日课次' : '近期课次'}</span>}
+            extra={<Tag color={todayLessons.length > 0 ? 'orange' : 'blue'}>{todayLessons.length > 0 ? `${todayLessons.length} 节` : '前 5 节'}</Tag>}
+            bordered={false}
+            style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}
+          >
             <Table
               rowKey="id"
               size="small"
               pagination={{ pageSize: 10 }}
-              dataSource={lessons}
+              dataSource={visibleLessons}
               columns={[
                 { title: '日期', dataIndex: 'lessonDate', render: (value: string) => format(new Date(value), 'yyyy-MM-dd EEEE', { locale: zhCN }) },
                 { title: '时间', render: (_, row: Record<string, unknown>) => `${row.startTime}-${row.endTime}` },

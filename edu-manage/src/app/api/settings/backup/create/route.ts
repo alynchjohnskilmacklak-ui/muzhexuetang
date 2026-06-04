@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 export const POST = apiHandler(async () => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const [students, teachers, courses, classGroups, fees, enrollments, attendances, examPapers, makeups] =
     await Promise.all([

@@ -1,9 +1,10 @@
 'use client'
 
-import { Alert, Button, Card, Input, Radio, Select, Space } from 'antd'
+import { Alert, Button, Card, Input, Radio, Space } from 'antd'
 import useSWR from 'swr'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { MobileSelect } from '@/components/MobileSelect'
 import { BadgePicker } from './BadgePicker'
 import { ImageUploader } from './ImageUploader'
 import { MoodPicker, MoodValue } from './MoodPicker'
@@ -114,8 +115,7 @@ export function PostComposer({ onPublished }: { onPublished?: (studentId?: strin
             action={<Space><Button size="small" onClick={loadDraft}>恢复</Button><Button size="small" onClick={reset}>清除</Button></Space>}
           />
         )}
-        <Select
-          showSearch
+        <MobileSelect
           placeholder="选择学员"
           value={studentId || undefined}
           onChange={setStudentId}
@@ -123,7 +123,6 @@ export function PostComposer({ onPublished }: { onPublished?: (studentId?: strin
             label: `${student.name}${student.grade ? ` / ${student.grade}` : ''}`,
             value: student.id as string,
           }))}
-          optionFilterProp="label"
           style={{ width: '100%' }}
         />
         <Radio.Group value={visibility} onChange={(event) => setVisibility(event.target.value)}>

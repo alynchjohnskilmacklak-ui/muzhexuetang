@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async () => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const students = await prisma.student.findMany({
     include: { enrollments: { include: { group: { include: { course: true } } } }, fees: true },

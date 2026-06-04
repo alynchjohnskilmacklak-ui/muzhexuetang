@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import useSWR from 'swr'
 import { Modal, Select, Input, message, Typography } from 'antd'
+import { MobileSelect } from '@/components/MobileSelect'
 import { SCHEDULE_PERIODS } from '@/lib/schedule-periods'
 
 const { Text } = Typography
@@ -48,14 +49,6 @@ export function OneOnOneModal({
   const teacherList: Record<string, unknown>[] = Array.isArray(teachersData?.teachers) ? teachersData.teachers : Array.isArray(teachersData) ? teachersData : []
   const studentList: Record<string, unknown>[] = Array.isArray(studentsData?.students) ? studentsData.students : Array.isArray(studentsData) ? studentsData : []
   const roomList: Record<string, unknown>[] = Array.isArray(roomsData) ? roomsData : []
-
-  const handlePeriodSelect = (periodLabel: string) => {
-    const period = CLASS_PERIOD_TIMES.find(p => p.label === periodLabel)
-    if (period) {
-      setStartTime(period.start)
-      setEndTime(period.end)
-    }
-  }
 
   const resetForm = () => {
     setTeacherId('')
@@ -138,13 +131,11 @@ export function OneOnOneModal({
         {/* Teacher */}
         <div>
           <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>老师 *</Text>
-          <Select
-            showSearch
+          <MobileSelect
             placeholder="选择老师"
             style={{ width: '100%' }}
             value={teacherId || undefined}
             onChange={v => { setTeacherId(v); setConflicts([]) }}
-            filterOption={(input, option) => (option?.label as string || '').includes(input)}
             options={teacherList.map((t: Record<string, unknown>) => ({ label: t.name as string, value: t.id as string }))}
           />
         </div>
@@ -152,13 +143,11 @@ export function OneOnOneModal({
         {/* Student */}
         <div>
           <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>学员 *</Text>
-          <Select
-            showSearch
+          <MobileSelect
             placeholder="选择学员"
             style={{ width: '100%' }}
             value={studentId || undefined}
             onChange={v => { setStudentId(v); setConflicts([]) }}
-            filterOption={(input, option) => (option?.label as string || '').includes(input)}
             options={studentList.map((s: Record<string, unknown>) => ({ label: `${s.name}${s.grade ? ` (${s.grade})` : ''}`, value: s.id as string }))}
           />
         </div>

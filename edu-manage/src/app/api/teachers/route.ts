@@ -99,6 +99,9 @@ export async function POST(req: NextRequest) {
       console.error('[teachers:create] unauthorized request')
       return NextResponse.json({ error: '请重新登录后再添加教师' }, { status: 401 })
     }
+    if ((session.user as { role?: string }).role !== 'admin') {
+      return NextResponse.json({ error: '无权限' }, { status: 403 })
+    }
 
     const body = await req.json()
     const name = typeof body.name === 'string' ? body.name.trim() : ''

@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
+import { AttStatus } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -80,6 +81,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
 
   try {
     const body = await req.json()
@@ -100,7 +104,13 @@ export async function POST(req: NextRequest) {
     })
     if (!schedule) return NextResponse.json({ error: '排课不存在或已取消' }, { status: 404 })
 
-    const validStatuses = ['present', 'leave', 'absent', 'late']
+    const statusMap: Record<string, AttStatus> = {
+      present: AttStatus.PRESENT,
+      leave: AttStatus.LEAVE,
+      absent: AttStatus.ABSENT,
+      late: AttStatus.PRESENT,
+    }
+    const validStatuses = Object.keys(statusMap)
     for (const rec of records) {
       if (!validStatuses.includes(rec.status)) {
         return NextResponse.json({ error: `无效的考勤状态: ${rec.status}` }, { status: 400 })
@@ -116,6 +126,7 @@ export async function POST(req: NextRequest) {
 
     // Upsert each record
     for (const rec of records) {
+      const status = statusMap[rec.status]
       await prisma.attendance.upsert({
         where: {
           scheduleId_studentId: {
@@ -124,12 +135,12 @@ export async function POST(req: NextRequest) {
           },
         },
         update: {
-          status: rec.status as any,
+          status,
         },
         create: {
           scheduleId,
           studentId: rec.studentId,
-          status: rec.status as any,
+          status,
         },
       })
     }

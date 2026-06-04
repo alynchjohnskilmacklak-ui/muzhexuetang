@@ -809,6 +809,7 @@ model MealTemplate {
   dinner    String?
   snack     String?
   note      String?
+  allowDouble Boolean @default(true)
   isActive  Boolean   @default(true)
   startDate DateTime?
   endDate   DateTime?

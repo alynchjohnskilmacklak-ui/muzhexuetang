@@ -44,6 +44,7 @@ function parseDateRange(searchParams: URLSearchParams): { from: Date; to: Date }
 export const GET = apiHandler(async (request: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const { from, to } = parseDateRange(request.nextUrl.searchParams)
 
@@ -63,7 +64,6 @@ export const GET = apiHandler(async (request: NextRequest) => {
     parentCommentCount,
     consultationTotal,
     consultationReplied,
-    feeIncome,
     attendanceStatusCounts,
     makeupStatusCounts,
     guideActions,
@@ -83,7 +83,6 @@ export const GET = apiHandler(async (request: NextRequest) => {
     prisma.paperComment.count({ where: { createdAt: { gte: from, lt: to }, author: { role: 'parent' } } }),
     prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to } } }),
     prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to }, isReplied: true } }),
-    prisma.fee.aggregate({ _sum: { amount: true }, where: { paidAt: { gte: from, lt: to }, status: 'paid' } }),
     prisma.attendance.groupBy({ by: ['status'], _count: true, where: { createdAt: { gte: from, lt: to } } }),
     prisma.makeupRequest.groupBy({ by: ['status'], _count: true, where: { createdAt: { gte: from, lt: to } } }),
     prisma.guideViewLog.groupBy({ by: ['action'], _count: true, where: { createdAt: { gte: from, lt: to } } }),
@@ -115,8 +114,6 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const mkPending = makeupStatusCounts.find((m) => m.status === 'PENDING')?._count ?? 0
   const mkTotal = mkCompleted + mkArranged + mkPending
   const makeupCompleteRate = mkTotal > 0 ? Math.round((mkCompleted / mkTotal) * 100) : 0
-
-  const income = feeIncome._sum.amount ?? 0
 
   // Monthly finance: group fees by month within the range
   const monthlyFees = await prisma.fee.findMany({

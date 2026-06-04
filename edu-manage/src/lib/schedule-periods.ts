@@ -34,18 +34,24 @@ export const PERIOD_BG: Record<PeriodType, string> = {
 
 export const CLASS_PERIODS_ONLY = SCHEDULE_PERIODS.filter(p => p.type === 'CLASS')
 
-// One-on-one hourly periods (60min blocks)
+// One-on-one / small-group hourly periods (60min blocks, 08:00-24:00)
 export const HOURLY_PERIODS = [
   { id:'h08', name:'08:00', start:'08:00', end:'09:00' },
   { id:'h09', name:'09:00', start:'09:00', end:'10:00' },
   { id:'h10', name:'10:00', start:'10:00', end:'11:00' },
   { id:'h11', name:'11:00', start:'11:00', end:'12:00' },
+  { id:'h12', name:'12:00', start:'12:00', end:'13:00' },
+  { id:'h13', name:'13:00', start:'13:00', end:'14:00' },
   { id:'h14', name:'14:00', start:'14:00', end:'15:00' },
   { id:'h15', name:'15:00', start:'15:00', end:'16:00' },
   { id:'h16', name:'16:00', start:'16:00', end:'17:00' },
   { id:'h17', name:'17:00', start:'17:00', end:'18:00' },
+  { id:'h18', name:'18:00', start:'18:00', end:'19:00' },
   { id:'h19', name:'19:00', start:'19:00', end:'20:00' },
   { id:'h20', name:'20:00', start:'20:00', end:'21:00' },
+  { id:'h21', name:'21:00', start:'21:00', end:'22:00' },
+  { id:'h22', name:'22:00', start:'22:00', end:'23:00' },
+  { id:'h23', name:'23:00', start:'23:00', end:'24:00' },
 ]
 
 export function getPeriodId(startTime: string): string | null {

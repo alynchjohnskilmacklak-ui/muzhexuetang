@@ -25,7 +25,7 @@ export function TeacherPapersClient() {
   const [previewUrl, setPreviewUrl] = useState('')
   const [expandedPaper, setExpandedPaper] = useState<string | null>(null)
 
-  const { data: papers, mutate } = useSWR('/api/teacher/papers', fetcher, { refreshInterval: 30_000 })
+  const { data: papers, mutate } = useSWR('/api/teacher/papers', fetcher, { refreshInterval: 300_000 })
   const { data: studentsData } = useSWR('/api/teacher/students', fetcher)
   const students = Array.isArray(studentsData?.students) ? studentsData.students : Array.isArray(studentsData) ? studentsData : []
 

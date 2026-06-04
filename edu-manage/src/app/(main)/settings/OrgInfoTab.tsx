@@ -4,10 +4,12 @@ import useSWR from 'swr'
 import { Card, Form, Input, InputNumber, Button, Upload, Spin, message } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
 import { useState } from 'react'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 export function OrgInfoTab() {
+  const isMobile = useIsMobile() ?? false
   const [form] = Form.useForm()
   const [saving, setSaving] = useState(false)
 
@@ -41,7 +43,7 @@ export function OrgInfoTab() {
         initialValues={initial}
         onFinish={handleSave}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px', maxWidth: 640 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 0 : '0 24px', maxWidth: 640 }}>
           <Form.Item label="机构名称" name="orgName" rules={[{ required: true, message: '请输入机构名称' }]}>
             <Input />
           </Form.Item>

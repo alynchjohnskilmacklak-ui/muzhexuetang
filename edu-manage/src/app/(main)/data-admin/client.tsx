@@ -36,6 +36,7 @@ import {
 } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { DATA_ADMIN_ENTITIES, type EntityKey } from '@/lib/data-admin/entities'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const { Text } = Typography
 
@@ -272,6 +273,7 @@ function HourAdjustmentModal({
 }
 
 export function DataAdminClient() {
+  const isMobile = useIsMobile() ?? false
   const [activeTab, setActiveTab] = useState<EntityKey | 'health'>('students')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
@@ -501,7 +503,8 @@ export function DataAdminClient() {
   }, [records, def])
 
   const tableColumns = useMemo(() => {
-    const cols: Record<string, unknown>[] = columnKeys.map((k) => ({
+    const displayColumnKeys = isMobile ? columnKeys.slice(0, 3) : columnKeys
+    const cols: Record<string, unknown>[] = displayColumnKeys.map((k) => ({
       title: k,
       dataIndex: k,
       key: k,
@@ -557,7 +560,7 @@ export function DataAdminClient() {
     })
 
     return cols
-  }, [columnKeys, entityKey, def, restoringId, isDeletedRecord, handleViewDetail, handleEdit, handleRestore])
+  }, [columnKeys, entityKey, def, restoringId, isDeletedRecord, handleViewDetail, handleEdit, handleRestore, isMobile])
 
   const handleExport = async () => {
     try {
@@ -596,12 +599,12 @@ export function DataAdminClient() {
       subtitle="用于查看、筛选、维护系统核心业务数据。请谨慎修改，重要操作会记录日志。"
       actions={
         isHealthTab ? (
-          <Space>
+          <Space style={{ flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center' }}>
             <Button icon={<ReloadOutlined />} onClick={() => healthMutate()}>刷新检查</Button>
             <Button icon={<DownloadOutlined />} onClick={handleExportHealth}>导出问题</Button>
           </Space>
         ) : (
-          <Space>
+          <Space style={{ flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center' }}>
             <Button icon={<ReloadOutlined />} onClick={() => mutate()}>刷新</Button>
             <Button icon={<ExportOutlined />} onClick={handleExport}>导出</Button>
             {entityKey === 'enrollments' && (
@@ -618,20 +621,22 @@ export function DataAdminClient() {
         style={{ marginBottom: 16 }}
       />
 
-      <Tabs
-        activeKey={activeTab}
-        onChange={(k) => setActiveTab(k as EntityKey | 'health')}
-        items={ENTITY_TABS.map((t) => ({
-          key: t.key,
-          label: (
-            <span>
-              {t.key === 'health' ? <SafetyOutlined style={{ marginRight: 6 }} /> : null}
-              {t.label}
-            </span>
-          ),
-        }))}
-        style={{ marginBottom: 0 }}
-      />
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: 0 }}>
+        <Tabs
+          activeKey={activeTab}
+          onChange={(k) => setActiveTab(k as EntityKey | 'health')}
+          items={ENTITY_TABS.map((t) => ({
+            key: t.key,
+            label: (
+              <span>
+                {t.key === 'health' ? <SafetyOutlined style={{ marginRight: 6 }} /> : null}
+                {t.label}
+              </span>
+            ),
+          }))}
+          style={{ minWidth: isMobile ? `${ENTITY_TABS.length * 70}px` : undefined, marginBottom: 0 }}
+        />
+      </div>
 
       {isHealthTab ? (
         <div>
@@ -675,13 +680,13 @@ export function DataAdminClient() {
       ) : (
         <div>
           {/* Search & Filter bar */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: isMobile ? 'stretch' : 'center' }}>
             <Input
               placeholder={`搜索${def?.label || ''}...`}
               prefix={<SearchOutlined />}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ width: 240 }}
+              style={{ width: isMobile ? '100%' : 240 }}
               allowClear
             />
             {STATUS_FILTER_MAP[entityKey] && (
@@ -689,7 +694,7 @@ export function DataAdminClient() {
                 value={statusFilter}
                 onChange={setStatusFilter}
                 options={STATUS_FILTER_MAP[entityKey]}
-                style={{ width: 140 }}
+                style={{ width: isMobile ? '100%' : 140 }}
               />
             )}
             <Button
@@ -763,7 +768,7 @@ export function DataAdminClient() {
             columns={tableColumns}
             loading={isLoading}
             size="small"
-            scroll={{ x: 'max-content' }}
+            scroll={{ x: isMobile ? 400 : 'max-content' }}
             pagination={false}
             locale={{ emptyText: <Empty description="暂无数据" /> }}
           />

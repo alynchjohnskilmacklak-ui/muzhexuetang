@@ -54,13 +54,13 @@ export function StepList({
                 padding: 10,
                 borderRadius: 8,
                 cursor: 'pointer',
-                border: `1px solid ${active ? '#E8784A' : empty ? '#e03e2d66' : '#23252a'}`,
-                background: active ? 'rgba(232,120,74,0.12)' : '#0f1011',
+                border: `1px solid ${active ? '#E8784A' : empty ? '#e03e2d66' : '#EEE7E1'}`,
+                background: active ? 'rgba(232,120,74,0.12)' : '#F5F2EE',
               }}
             >
-              <div style={{ width: 24, height: 24, borderRadius: '50%', background: active ? '#E8784A' : '#141516', display: 'grid', placeItems: 'center', color: '#1F2329', fontSize: 12 }}>{step.order}</div>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', background: active ? '#E8784A' : '#fff', display: 'grid', placeItems: 'center', color: active ? '#fff' : '#1F2329', fontSize: 12 }}>{step.order}</div>
               <div style={{ minWidth: 0 }}>
-                <div style={{ color: '#1F2329', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{step.title}</div>
+                <div style={{ color: active ? '#E8784A' : '#1F2329', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{step.title}</div>
                 <Space size={4} wrap>
                   <Tag color={step.isPublished ? 'green' : 'default'}>{step.isPublished ? '已发布' : '草稿'}</Tag>
                   {empty && <Tag color="red">内容为空</Tag>}

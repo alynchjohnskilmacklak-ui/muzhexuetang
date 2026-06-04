@@ -3,16 +3,17 @@
 import { useCallback, useEffect, useState } from 'react'
 import useSWR from 'swr'
 import {
-  Button, Card, Col, DatePicker, Empty, Input, InputNumber, message, Modal,
-  Popconfirm, Row, Select, Space, Spin, Tag, Upload,
+  Button, Card, Col, Empty, Input, InputNumber, message,
+  Popconfirm, Row, Select, Space, Tag, Upload,
 } from 'antd'
 import {
   CheckCircleOutlined, CloseCircleOutlined, DeleteOutlined, EditOutlined,
-  EyeOutlined, InboxOutlined, PlusOutlined, QuestionCircleOutlined,
+  InboxOutlined, PlusOutlined,
   SendOutlined, WarningOutlined,
 } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { PageLayout } from '@/components/Layout/PageLayout'
+import { MobileSelect } from '@/components/MobileSelect'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 
 const SUBJECTS = ['数学', '英语', '物理', '化学', '语文']
@@ -205,14 +206,12 @@ export default function GradesPage() {
         <Col xs={24} lg={6}>
           <Card bordered={false} style={{ borderRadius: 8, marginBottom: 16, background: '#ffffff', border: '1px solid rgba(0,0,0,0.06)' }}>
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
-              <Select
-                showSearch
+              <MobileSelect
                 allowClear
                 placeholder="选择学员"
                 style={{ width: '100%' }}
                 value={studentId || undefined}
                 onChange={(v) => { setStudentId(v || ''); setSelectedPaperId(''); }}
-                filterOption={(input, option) => String(option?.label || '').toLowerCase().includes(input.toLowerCase())}
                 options={students.map((s: Record<string, unknown>) => ({ label: `${s.name}${s.grade ? ` / ${s.grade}` : ''}`, value: s.id as string }))}
               />
               <Select

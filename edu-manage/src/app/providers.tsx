@@ -20,7 +20,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <SWRConfig value={swrConfig}>
       <AntdRegistry>
         <ConfigProvider
-        getPopupContainer={() => document.getElementById('mobile-root') ?? document.body}
+        getPopupContainer={() =>
+          document.getElementById('mobile-root') ??
+          document.getElementById('admin-root') ??
+          document.body
+        }
         locale={zhCN}
         theme={{
           token: {

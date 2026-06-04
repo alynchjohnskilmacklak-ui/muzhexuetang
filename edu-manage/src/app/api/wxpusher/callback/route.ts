@@ -11,12 +11,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ code: 400, msg: '参数缺失' }, { status: 400 })
     }
 
+    const appToken = body?.data?.appToken || body?.appToken
+    if (!appToken || appToken !== process.env.WXPUSHER_APP_TOKEN) {
+      return NextResponse.json({ code: 403, msg: '签名无效' }, { status: 403 })
+    }
+
     await prisma.user.update({
       where: { id: extra },
       data: { wxpusherUid: uid },
     })
 
-    console.log(`[wxpusher:callback] 用户 ${extra} 绑定 uid: ${uid}`)
     return NextResponse.json({ code: 1000, msg: 'success' })
   } catch (e) {
     console.error('[wxpusher:callback] error', e)

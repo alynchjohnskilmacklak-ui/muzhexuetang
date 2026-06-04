@@ -10,6 +10,7 @@ import { ConsultReply } from './_components/ConsultReply'
 import { DocManager } from './_components/DocManager'
 import { StepEditor } from './_components/StepEditor'
 import { StepList } from './_components/StepList'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const fetcher = (url: string) => fetch(url).then((res) => {
   if (!res.ok) throw new Error('加载失败')
@@ -17,6 +18,7 @@ const fetcher = (url: string) => fetch(url).then((res) => {
 })
 
 export default function VolunteerAdminPage() {
+  const isMobile = useIsMobile() ?? false
   const { data, mutate, isLoading } = useSWR('/api/volunteer', fetcher)
   const { data: consultData, mutate: mutateConsults } = useSWR('/api/volunteer/consultation', fetcher)
   const steps = Array.isArray(data?.steps) ? data.steps : []
@@ -55,7 +57,7 @@ export default function VolunteerAdminPage() {
       actions={<Button icon={<ReadOutlined />} href="/volunteer/guide">填报指南</Button>}
     >
       {isLoading ? <div style={{ textAlign: 'center', padding: 80 }}><Spin /></div> : (
-        <div style={{ display: 'grid', gridTemplateColumns: '280px minmax(0, 1fr)', gap: 16, alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '280px minmax(0, 1fr)', gap: 16, alignItems: 'start' }}>
           <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
             <StepList
               steps={steps}

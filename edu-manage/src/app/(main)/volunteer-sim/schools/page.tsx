@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Card, Table, Button, Modal, Form, Input, InputNumber,
-  Select, Switch, Typography, Tag, Space, message,
+  Select, Switch, Typography, Tag, message,
 } from 'antd'
 import { EditOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
@@ -105,7 +105,7 @@ export default function SchoolsManagePage() {
       title: '分数线', width: 160,
       render: (_: unknown, row: SchoolInfo) => (
         <div style={{ fontSize: 13 }}>
-          {row.yiTong && <div>一统线：<Text strong style={{ color: '#E87545' }}>{row.yiTong}</Text></div>}
+          {row.yiTong && <div>{row.type === '民办' ? '市区统招分' : '一统线'}：<Text strong style={{ color: '#E87545' }}>{row.yiTong}</Text></div>}
           <div>统招线：<Text strong>{row.tongZhao}</Text></div>
           {row.allocationLine && <div>分配线：<Text strong style={{ color: '#E8784A' }}>{row.allocationLine}</Text></div>}
         </div>
@@ -184,7 +184,7 @@ export default function SchoolsManagePage() {
             <Form.Item name="location" label="所在地" rules={[{ required: true }]}>
               <Select options={LOCATION_OPTIONS.map(l => ({ label: l, value: l }))} />
             </Form.Item>
-            <Form.Item name="yiTong" label="一统线">
+            <Form.Item name="yiTong" label="一统线 / 市区统招分">
               <InputNumber style={{ width: '100%' }} placeholder="省示范填写" />
             </Form.Item>
             <Form.Item name="tongZhao" label="统招线" rules={[{ required: true }]}>

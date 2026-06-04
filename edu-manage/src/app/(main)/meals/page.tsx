@@ -6,24 +6,12 @@ import {
   Button, Card, Col, DatePicker, Form, Input, Modal, Row, Statistic, Switch,
   Table, Tabs, Tag, Typography, message,
 } from 'antd'
-import { DownloadOutlined, EditOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons'
+import { DownloadOutlined, EditOutlined } from '@ant-design/icons'
 import dayjs, { Dayjs } from 'dayjs'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 const { Title, Text } = Typography
-const { TextArea } = Input
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六']
-
-type MealMenu = {
-  id: string | null
-  weekStart: string
-  dayOfWeek: number
-  mainDish: string
-  sideDish: string | null
-  allowDouble: boolean
-  notes: string | null
-  source?: 'date' | 'template'
-}
 
 type MealTemplate = {
   id: string
@@ -34,6 +22,7 @@ type MealTemplate = {
   dinner: string | null
   snack: string | null
   note: string | null
+  allowDouble?: boolean
 }
 
 type MealReport = {
@@ -63,33 +52,17 @@ function mondayOf(value: Dayjs) {
   return value.startOf('day').subtract(offset, 'day')
 }
 
-function weekNumber(value: Dayjs) {
-  const firstDay = dayjs(`${value.year()}-01-01`).startOf('day')
-  const elapsed = value.startOf('day').diff(firstDay, 'day')
-  return Math.ceil((elapsed + firstDay.day() + 1) / 7)
-}
-
 export default function MealsPage() {
   const isMobile = useIsMobile() ?? false
-  const [weekStart, setWeekStart] = useState(() => mondayOf(dayjs()))
   const [historyWeek, setHistoryWeek] = useState(() => mondayOf(dayjs()))
-  const [menus, setMenus] = useState<MealMenu[]>([])
   const [templates, setTemplates] = useState<MealTemplate[]>([])
   const [reports, setReports] = useState<MealReport[]>([])
   const [historyReports, setHistoryReports] = useState<MealReport[]>([])
   const [summary, setSummary] = useState<MealSummary>({ totalCount: 0, singleCount: 0, doubleCount: 0, unreportedTeachers: [] })
-  const [editing, setEditing] = useState<{ dayOfWeek: number; menu?: MealMenu } | null>(null)
   const [templateEditing, setTemplateEditing] = useState<{ weekday: number; template?: MealTemplate } | null>(null)
   const [saving, setSaving] = useState(false)
-  const [form] = Form.useForm()
   const [templateForm] = Form.useForm()
   const today = dayjs().format('YYYY-MM-DD')
-
-  const fetchMenus = useCallback(async () => {
-    const res = await fetch(`/api/meals/menu?weekStart=${weekStart.format('YYYY-MM-DD')}`)
-    const data = await res.json()
-    setMenus(data.menus || [])
-  }, [weekStart])
 
   const fetchTemplates = useCallback(async () => {
     const res = await fetch('/api/admin/meal-templates')
@@ -115,56 +88,19 @@ export default function MealsPage() {
     setHistoryReports(payloads.flatMap((payload) => payload.reports || []))
   }, [historyWeek])
 
-  useEffect(() => { fetchMenus() }, [fetchMenus])
   useEffect(() => { fetchTemplates() }, [fetchTemplates])
   useEffect(() => { fetchToday() }, [fetchToday])
   useEffect(() => { fetchHistory() }, [fetchHistory])
 
-  const menuMap = useMemo(() => new Map(menus.map((menu) => [menu.dayOfWeek, menu])), [menus])
   const templateMap = useMemo(() => new Map(templates.map((template) => [template.weekday, template])), [templates])
-  const rangeText = `${weekStart.format('YYYY年')}第${weekNumber(weekStart)}周 ${weekStart.format('MM-DD')} ~ ${weekStart.add(5, 'day').format('MM-DD')}`
-
-  const openEditor = (dayOfWeek: number, menu?: MealMenu) => {
-    setEditing({ dayOfWeek, menu })
-    form.setFieldsValue({
-      mainDish: menu?.mainDish,
-      sideDish: menu?.sideDish,
-      allowDouble: menu?.allowDouble || false,
-      notes: menu?.notes,
-    })
-  }
 
   const openTemplateEditor = (weekday: number, template?: MealTemplate) => {
     setTemplateEditing({ weekday, template })
     templateForm.setFieldsValue({
-      title: template?.title,
-      breakfast: template?.breakfast,
       lunch: template?.lunch,
-      dinner: template?.dinner,
-      snack: template?.snack,
+      allowDouble: template?.allowDouble !== false,
       note: template?.note,
     })
-  }
-
-  const saveMenu = async () => {
-    const values = await form.validateFields()
-    setSaving(true)
-    try {
-      const res = await fetch(editing?.menu ? `/api/meals/menu/${editing.menu.id}` : '/api/meals/menu', {
-        method: editing?.menu ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...values, weekStart: weekStart.format('YYYY-MM-DD'), dayOfWeek: editing?.dayOfWeek }),
-      })
-      if (!res.ok) throw new Error('save failed')
-      message.success('菜单已保存')
-      setEditing(null)
-      form.resetFields()
-      fetchMenus()
-    } catch {
-      message.error('菜单保存失败')
-    } finally {
-      setSaving(false)
-    }
   }
 
   const saveTemplate = async () => {
@@ -181,7 +117,6 @@ export default function MealsPage() {
       setTemplateEditing(null)
       templateForm.resetFields()
       fetchTemplates()
-      fetchMenus()
     } catch {
       message.error('周期菜单保存失败')
     } finally {
@@ -220,50 +155,6 @@ export default function MealsPage() {
       <Title level={4} style={{ marginTop: 0 }}>就餐管理</Title>
       <Tabs items={[
         {
-          key: 'menus',
-          label: '本周菜单',
-          children: (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: 16 }}>
-                <Text strong>{rangeText}</Text>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <Button icon={<LeftOutlined />} onClick={() => setWeekStart((value) => value.subtract(7, 'day'))}>上一周</Button>
-                  <Button onClick={() => setWeekStart(mondayOf(dayjs()))}>本周</Button>
-                  <Button icon={<RightOutlined />} onClick={() => setWeekStart((value) => value.add(7, 'day'))}>下一周</Button>
-                </div>
-              </div>
-              <Row gutter={[12, 12]}>
-                {WEEKDAYS.map((weekday, index) => {
-                  const dayOfWeek = index + 1
-                  const menu = menuMap.get(dayOfWeek)
-                  const date = weekStart.add(index, 'day')
-                  return (
-                    <Col key={weekday} xs={24} md={8} xl={4}>
-                      <Card style={{ minHeight: 220, borderRadius: 12 }} styles={{ body: { padding: 16 } }}>
-                        <Text type="secondary">{weekday} {date.format('M/D')}</Text>
-                        {menu ? (
-                          <>
-                            {menu.source === 'template' && <Tag color="blue">周期菜单</Tag>}
-                            <div style={{ fontSize: 24, fontWeight: 700, margin: '12px 0 8px' }}>{menu.mainDish}</div>
-                            <Text type="secondary" style={{ display: 'block', minHeight: 42 }}>{menu.sideDish || '未填写菜品'}</Text>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '12px 0' }}>
-                              <Text>允许双份</Text>
-                              <Switch checked={menu.allowDouble} disabled />
-                            </div>
-                            <Button icon={<EditOutlined />} onClick={() => openEditor(dayOfWeek, menu.id ? menu : undefined)}>编辑</Button>
-                          </>
-                        ) : (
-                          <Button style={{ marginTop: 48 }} onClick={() => openEditor(dayOfWeek)}>点击设置</Button>
-                        )}
-                      </Card>
-                    </Col>
-                  )
-                })}
-              </Row>
-            </>
-          ),
-        },
-        {
           key: 'templates',
           label: '周期菜单',
           children: (
@@ -277,13 +168,17 @@ export default function MealsPage() {
                       <Text type="secondary">{weekday}</Text>
                       {template ? (
                         <>
-                          <div style={{ fontSize: 20, fontWeight: 700, margin: '12px 0 8px' }}>{template.title || template.lunch || '周期菜单'}</div>
-                          <Text style={{ display: 'block' }}>早餐：{template.breakfast || '暂未设置'}</Text>
-                          <Text style={{ display: 'block' }}>午餐：{template.lunch || '暂未设置'}</Text>
-                          <Text style={{ display: 'block' }}>晚餐：{template.dinner || '暂未设置'}</Text>
-                          <Text style={{ display: 'block' }}>加餐：{template.snack || '暂未设置'}</Text>
-                          <Text type="secondary" style={{ display: 'block', minHeight: 36, marginTop: 8 }}>{template.note || '无备注'}</Text>
-                          <Button icon={<EditOutlined />} style={{ marginTop: 12 }} onClick={() => openTemplateEditor(dayOfWeek, template)}>编辑</Button>
+                          <div style={{ fontSize: 18, fontWeight: 700, margin: '10px 0 6px', color: '#1F2329' }}>
+                            {template.lunch || '未设置米饭配菜'}
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '10px 0' }}>
+                            <Text style={{ fontSize: 13 }}>可选双倍米饭</Text>
+                            <Tag color={template.allowDouble !== false ? 'green' : 'default'}>
+                              {template.allowDouble !== false ? '允许' : '不允许'}
+                            </Tag>
+                          </div>
+                          <Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 10 }}>{template.note || ''}</Text>
+                          <Button size="small" icon={<EditOutlined />} onClick={() => openTemplateEditor(dayOfWeek, template)}>编辑</Button>
                         </>
                       ) : (
                         <Button style={{ marginTop: 48 }} onClick={() => openTemplateEditor(dayOfWeek)}>点击设置</Button>
@@ -365,42 +260,16 @@ export default function MealsPage() {
         },
       ]} />
 
-      <Modal title="编辑菜单" open={!!editing} onCancel={() => setEditing(null)} onOk={saveMenu} confirmLoading={saving}>
-        <Form form={form} layout="vertical">
-          <Form.Item name="mainDish" label="主食" rules={[{ required: true, message: '请输入主食' }]}>
-            <Input placeholder="如：米饭 / 面条 / 饺子" />
-          </Form.Item>
-          <Form.Item name="sideDish" label="菜品">
-            <TextArea rows={3} placeholder="如：红烧肉、炒青菜、番茄蛋汤" />
-          </Form.Item>
-          <Form.Item name="allowDouble" label="是否允许双份主食" valuePropName="checked">
-            <Switch />
-          </Form.Item>
-          <Form.Item name="notes" label="备注">
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
-
       <Modal title="设置周期菜单" open={!!templateEditing} onCancel={() => setTemplateEditing(null)} onOk={saveTemplate} confirmLoading={saving}>
         <Form form={templateForm} layout="vertical">
-          <Form.Item name="title" label="标题">
-            <Input placeholder="如：暑假固定菜单" />
+          <Form.Item name="lunch" label="午餐菜品（如：红烧肉）" rules={[{ required: true, message: '请填写午餐' }]}>
+            <Input placeholder="填写今日菜品" />
           </Form.Item>
-          <Form.Item name="breakfast" label="早餐">
-            <Input />
-          </Form.Item>
-          <Form.Item name="lunch" label="午餐" rules={[{ required: true, message: '请填写午餐' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="dinner" label="晚餐">
-            <Input />
-          </Form.Item>
-          <Form.Item name="snack" label="加餐">
-            <Input />
+          <Form.Item name="allowDouble" label="是否允许双倍米饭" valuePropName="checked">
+            <Switch checkedChildren="允许" unCheckedChildren="不允许" />
           </Form.Item>
           <Form.Item name="note" label="备注">
-            <TextArea rows={3} />
+            <Input.TextArea rows={2} placeholder="可选备注" />
           </Form.Item>
         </Form>
       </Modal>

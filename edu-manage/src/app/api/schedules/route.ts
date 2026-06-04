@@ -15,7 +15,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const start = searchParams.get('startDate')
   const end = searchParams.get('endDate')
   const teacherId = searchParams.get('teacherId')
-  const courseType = searchParams.get('courseType')
   const classType = searchParams.get('classType')
   const includeCancelled = searchParams.get('includeCancelled') === 'true'
 
@@ -138,6 +137,9 @@ async function checkScheduleConflicts({
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
 
   try {
     const body = await req.json()

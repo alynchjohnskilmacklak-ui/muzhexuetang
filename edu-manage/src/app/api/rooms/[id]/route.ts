@@ -8,6 +8,9 @@ export const dynamic = 'force-dynamic'
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
   const { id } = await params
   try {
     const body = await req.json()
@@ -22,6 +25,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
   const { id } = await params
   const count = await prisma.schedule.count({ where: { roomId: id, status: 'scheduled' } })
   if (count > 0) {

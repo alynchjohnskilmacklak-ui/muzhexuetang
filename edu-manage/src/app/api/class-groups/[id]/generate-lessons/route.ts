@@ -81,7 +81,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     : [{ teacherId: group.teacherId, subject: group.course.subject }]
   const dailyTemplate = scheduleTemplate.length
     ? scheduleTemplate
-    : assignments.map((assignment) => ({
+    : assignments.slice(0, 1).map((assignment) => ({
         teacherId: assignment.teacherId,
         subject: assignment.subject || group.course.subject,
         startTime,

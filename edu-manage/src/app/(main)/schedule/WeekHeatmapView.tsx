@@ -36,13 +36,19 @@ export function WeekHeatmapView({
     `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=GROUP`, fetcher, { refreshInterval: 120_000 }
   )
   // Get SMALL lessons for intensive summary
-  const { data: smallData } = useSWR(
+  const { data: smallGroupData } = useSWR(
     `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=SMALL_GROUP`, fetcher, { refreshInterval: 120_000 }
+  )
+  const { data: oneOnOneData } = useSWR(
+    `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=ONE_ON_ONE`, fetcher, { refreshInterval: 120_000 }
   )
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
 
   const groupLessons: Record<string, unknown>[] = Array.isArray(groupData) ? groupData : []
-  const smallLessons: Record<string, unknown>[] = Array.isArray(smallData) ? smallData : []
+  const smallLessons: Record<string, unknown>[] = [
+    ...(Array.isArray(smallGroupData) ? smallGroupData : []),
+    ...(Array.isArray(oneOnOneData) ? oneOnOneData : []),
+  ]
   const allRooms: Record<string, unknown>[] = Array.isArray(roomsData) ? roomsData : []
   const classrooms = allRooms.filter(r => { const t = (r.type as string) || ''; return !t.includes('一对一') && !t.includes('ONE_ON_ONE') })
 
@@ -188,16 +194,42 @@ export function WeekHeatmapView({
             {weekDates.map((date, dayIdx) => {
               const dateKey = format(date, 'yyyy-MM-dd')
               const summary = intensiveByDay[dateKey]
+              // 获取该日的详细课次
+              const dayLessons = smallLessons.filter((l: Record<string, unknown>) =>
+                format(new Date(l.lessonDate as string), 'yyyy-MM-dd') === dateKey
+              )
+              const uniqueTeachers = [...new Map(
+                dayLessons.map((l: Record<string, unknown>) => [
+                  (l.teacher as any)?.id || l.teacherId,
+                  { id: (l.teacher as any)?.id || l.teacherId, name: (l.teacher as any)?.name || '', subject: (l.subject as string) || '' }
+                ])
+              ).values()]
+
               return (
                 <div key={dayIdx} style={{ padding: 4, minHeight: 80, cursor: 'pointer',
-                  borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)',
+                  borderRight: '0.5px solid var(--color-border, #EEE7E1)',
+                  borderBottom: '0.5px solid var(--color-border, #EEE7E1)',
                   background: 'rgba(83,74,183,.015)',
                 }} onClick={() => router.push(`/schedule/intensive?date=${dateKey}`)}>
                   {summary ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, justifyContent: 'center', height: '100%' }}>
-                      <div style={{ fontSize: 10, fontWeight: 600, color: '#534AB7' }}>已排 {summary.total} 节</div>
-                      {summary.types.ONE_ON_ONE > 0 && <div style={{ fontSize: 9, color: '#3C3489' }}>1对1 × {summary.types.ONE_ON_ONE}</div>}
-                      {summary.types.SMALL_GROUP > 0 && <div style={{ fontSize: 9, color: '#72243E' }}>1对3 × {summary.types.SMALL_GROUP}</div>}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <div style={{ fontSize: 10, fontWeight: 600, color: '#534AB7', marginBottom: 1 }}>
+                        {summary.total}节
+                      </div>
+                      {uniqueTeachers.slice(0, 3).map(t => {
+                        const color = getTeacherColor(t.id || '')
+                        return (
+                          <div key={t.id} style={{ borderRadius: 3, padding: '1px 4px', background: `${color}15`, display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <div style={{ width: 4, height: 4, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                            <span style={{ fontSize: 9, color, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {t.name}·{t.subject}
+                            </span>
+                          </div>
+                        )
+                      })}
+                      {uniqueTeachers.length > 3 && (
+                        <span style={{ fontSize: 9, color: '#98A2B3' }}>+{uniqueTeachers.length - 3}位教师</span>
+                      )}
                     </div>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', height: '100%', minHeight: 68, justifyContent: 'center' }}>

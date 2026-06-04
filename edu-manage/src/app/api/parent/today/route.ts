@@ -36,6 +36,7 @@ export const GET = apiHandler(async () => {
     },
     orderBy: { name: 'asc' },
   })
+  const studentIds = students.map((student) => student.id)
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -45,18 +46,18 @@ export const GET = apiHandler(async () => {
   const day = today.getDay()
   weekStart.setDate(today.getDate() - (day === 0 ? 6 : day - 1))
 
-  const results = await Promise.all(students.map(async (student) => {
-    const [todaySchedules, todayClassLessons, attendance, unreadCount, leaveRequests] = await Promise.all([
+  const [scheduleRows, classLessonRows, attendanceRows, notificationRows, leaveRows] = await Promise.all([
       prisma.schedule.findMany({
         where: {
           ...visibleScheduleWhere,
           startTime: { gte: today, lt: tomorrow },
-          students: { some: { studentId: student.id } },
+          students: { some: { studentId: { in: studentIds } } },
         },
         include: {
           course: { select: { name: true, subject: true } },
           room: { select: { name: true } },
           teacher: { select: { name: true } },
+          students: { where: { studentId: { in: studentIds } }, select: { studentId: true } },
         },
         orderBy: { startTime: 'asc' },
       }),
@@ -69,7 +70,7 @@ export const GET = apiHandler(async () => {
             teacher: visibleTeacherWhere,
             enrollments: {
               some: {
-                studentId: student.id,
+                studentId: { in: studentIds },
                 ...parentActiveEnrollmentWhere(userId),
               },
             },
@@ -82,6 +83,10 @@ export const GET = apiHandler(async () => {
               course: { select: { name: true, subject: true } },
               teacher: { select: { name: true } },
               room: { select: { name: true } },
+              enrollments: {
+                where: { studentId: { in: studentIds }, ...parentActiveEnrollmentWhere(userId) },
+                select: { studentId: true },
+              },
             },
           },
         },
@@ -89,28 +94,71 @@ export const GET = apiHandler(async () => {
       }),
       prisma.attendance.findMany({
         where: {
-          studentId: student.id,
+          studentId: { in: studentIds },
           createdAt: { gte: today, lt: tomorrow },
         },
         orderBy: { createdAt: 'desc' },
       }),
-      prisma.notification.count({
+      prisma.notification.findMany({
         where: {
           userId,
           read: false,
-          studentId: student.id,
+          studentId: { in: studentIds },
           createdAt: { gte: today },
           ...visibleNotificationWhere,
         },
+        select: { studentId: true },
       }),
       prisma.leaveRequest.findMany({
         where: {
-          studentId: student.id,
+          studentId: { in: studentIds },
           leaveDate: { gte: weekStart },
         },
+        select: { studentId: true },
         orderBy: { leaveDate: 'desc' },
       }),
     ])
+
+  const schedulesByStudent = new Map<string, typeof scheduleRows>()
+  scheduleRows.forEach((schedule) => {
+    schedule.students.forEach(({ studentId }) => {
+      const items = schedulesByStudent.get(studentId) || []
+      items.push(schedule)
+      schedulesByStudent.set(studentId, items)
+    })
+  })
+
+  const classLessonsByStudent = new Map<string, typeof classLessonRows>()
+  classLessonRows.forEach((lesson) => {
+    lesson.group.enrollments.forEach(({ studentId }) => {
+      const items = classLessonsByStudent.get(studentId) || []
+      items.push(lesson)
+      classLessonsByStudent.set(studentId, items)
+    })
+  })
+
+  const attendanceByStudent = new Map<string, typeof attendanceRows>()
+  attendanceRows.forEach((attendance) => {
+    const items = attendanceByStudent.get(attendance.studentId) || []
+    items.push(attendance)
+    attendanceByStudent.set(attendance.studentId, items)
+  })
+
+  const unreadCounts = new Map<string, number>()
+  notificationRows.forEach(({ studentId }) => {
+    if (studentId) unreadCounts.set(studentId, (unreadCounts.get(studentId) || 0) + 1)
+  })
+
+  const leaveCounts = new Map<string, number>()
+  leaveRows.forEach(({ studentId }) => {
+    leaveCounts.set(studentId, (leaveCounts.get(studentId) || 0) + 1)
+  })
+
+  const results = students.map((student) => {
+    const todaySchedules = schedulesByStudent.get(student.id) || []
+    const todayClassLessons = classLessonsByStudent.get(student.id) || []
+    const attendance = attendanceByStudent.get(student.id) || []
+    const unreadCount = unreadCounts.get(student.id) || 0
 
     const scheduleItems = todaySchedules.map((schedule) => ({
       id: schedule.id,
@@ -147,9 +195,9 @@ export const GET = apiHandler(async () => {
         createdAt: item.createdAt.toISOString(),
       })),
       unreadNotifications: unreadCount,
-      leaveThisWeek: leaveRequests.length,
+      leaveThisWeek: leaveCounts.get(student.id) || 0,
     }
-  }))
+  })
 
   return NextResponse.json({ today: today.toISOString(), students: results })
 })

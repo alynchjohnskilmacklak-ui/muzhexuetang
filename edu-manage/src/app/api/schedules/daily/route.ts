@@ -1,8 +1,8 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
-import { getPeriodId } from '@/lib/schedule-periods'
-import { activeEnrollmentWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
+import { CLASS_PERIODS_ONLY, getPeriodId } from '@/lib/schedule-periods'
+import { activeEnrollmentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -13,7 +13,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   const { searchParams } = new URL(req.url)
   const dateStr = searchParams.get('date') || new Date().toISOString().slice(0, 10)
-  const courseType = searchParams.get('courseType') || 'GROUP'
+  const courseType = searchParams.get('courseType') || ''
 
   const dayStart = new Date(`${dateStr}T00:00:00`)
   const dayEnd = new Date(`${dateStr}T23:59:59`)
@@ -43,16 +43,27 @@ export const GET = apiHandler(async (req: NextRequest) => {
     orderBy: [{ startTime: 'asc' }],
   })
 
-  const matrix: Record<string, Record<string, unknown>> = {}
+  const matrix: Record<string, Record<string, Record<string, unknown>[]>> = {}
 
   for (const lesson of lessons) {
     const roomId = lesson.group?.room?.id || 'unknown'
-    const periodId = getPeriodId(lesson.startTime)
+    let periodId = getPeriodId(lesson.startTime)
+    if (!periodId) {
+      const [lessonHour, lessonMinute = 0] = lesson.startTime.split(':').map(Number)
+      const startMin = lessonHour * 60 + lessonMinute
+      const within = CLASS_PERIODS_ONLY.find((period) => {
+        const [periodHour, periodMinute = 0] = period.start.split(':').map(Number)
+        const [endHour, endMinute = 0] = period.end.split(':').map(Number)
+        return periodHour * 60 + periodMinute <= startMin && startMin < endHour * 60 + endMinute
+      })
+      if (within) periodId = within.id
+    }
     if (!periodId) continue
 
     if (!matrix[roomId]) matrix[roomId] = {}
+    if (!matrix[roomId][periodId]) matrix[roomId][periodId] = []
 
-    matrix[roomId][periodId] = {
+    matrix[roomId][periodId].push({
       lessonId: lesson.id,
       teacherName: lesson.teacher?.name || '未分配',
       teacherId: lesson.teacherId,
@@ -61,7 +72,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
       grade: lesson.group?.course?.grade || '',
       courseType: lesson.group?.course?.type || 'GROUP',
       headcount: lesson.group?.enrollments?.length || 0,
-    }
+      startTime: lesson.startTime,
+    })
   }
 
   return NextResponse.json({ date: dateStr, matrix })

@@ -13,7 +13,6 @@ export const DEFAULT_ONE_ON_ONE_RATES: Record<string, number> = {
 export const DEFAULT_FEEDBACK_RATE_GROUP = 0.5
 export const DEFAULT_FEEDBACK_RATE_ONE_ONE = 1.0
 
-const JUNIOR_GRADES = ['初一', '初二', '初三']
 const SENIOR_GRADES = ['高一', '高二', '高三']
 const GRADE_ALIASES: Array<[string, string[]]> = [
   ['初一', ['初一', '七年级', '7年级', '七上', '七下', '初中一年级']],
@@ -166,7 +165,15 @@ export async function triggerFeedbackBonus(feedbackId: string): Promise<void> {
   }
 
   const cfg = await getTeacherSalaryConfig(teacherId)
-  const isOneOnOne = lesson?.group.course.type === 'ONE_ON_ONE'
+  // 优先从关联课次判断课程类型；无关联课次时，检查该教师是否存在活跃一对一班级
+  let isOneOnOne = lesson?.group.course.type === 'ONE_ON_ONE'
+  if (!lesson) {
+    const hasOneOnOne = await prisma.classGroup.findFirst({
+      where: { teacherId, status: 'ACTIVE', course: { type: 'ONE_ON_ONE' } },
+      select: { id: true },
+    })
+    if (hasOneOnOne) isOneOnOne = true
+  }
   const headCount = feedback.studentIds.length
   const rate = isOneOnOne ? cfg.feedbackRateOneOne : cfg.feedbackRateGroup
   const amount = Number((headCount * rate).toFixed(4))

@@ -21,6 +21,7 @@ export const GET = apiHandler(async () => {
 export const POST = apiHandler(async (request: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const body = await request.json()
   const { name, color, textColor } = body

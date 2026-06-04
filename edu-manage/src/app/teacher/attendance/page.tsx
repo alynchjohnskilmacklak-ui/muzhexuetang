@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { Button, Card, Empty, List, message, Space, Tag, Typography } from 'antd'
-import { CheckCircleOutlined, ClockCircleOutlined, EnvironmentOutlined, TeamOutlined } from '@ant-design/icons'
+import { CheckCircleOutlined, ClockCircleOutlined, EnvironmentOutlined } from '@ant-design/icons'
 import { formatHours } from '@/lib/format'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -18,39 +18,69 @@ const STATUS_CONFIG: Record<string, { border: string; bg: string; badge: string;
 }
 const ATT_CYCLE = ['none', 'PRESENT', 'LEAVE', 'ABSENT'] as const
 type AttStatus = 'none' | 'PRESENT' | 'LEAVE' | 'ABSENT'
+type TeacherLesson = {
+  id: string
+  groupName?: string
+  courseName?: string
+  time?: string
+  startTime?: string
+  lessonDate?: string
+  room?: string
+  attendanceCount?: number
+  status?: string
+}
+type AttendanceStudent = {
+  studentId: string
+  enrollmentId?: string
+  status?: AttStatus
+  name?: string
+  remainHours?: number
+}
 
 const STUDENT_COLORS = ['#E8784A','#1D9E75','#534AB7','#D4537E','#BA7517','#185FA5','#27500A','#72243E']
 function getStudentBg(id: string) { return STUDENT_COLORS[(id || '').split('').reduce((a,c) => a + c.charCodeAt(0), 0) % STUDENT_COLORS.length] }
 
+function attendanceTimeHint(lesson: Record<string, unknown> | undefined) {
+  const startTime = (lesson?.startTime as string) || String(lesson?.time || '').slice(0, 5)
+  const lessonDate = (lesson?.lessonDate as string) || new Date().toISOString()
+  const dateStr = lessonDate.substring(0, 10)
+  if (!startTime || !dateStr) return null
+  const lessonStart = new Date(`${dateStr}T${startTime}:00`)
+  const earliestAllowed = new Date(lessonStart.getTime() - 30 * 60 * 1000)
+  if (new Date() >= earliestAllowed) return null
+  return (
+    <div style={{ fontSize: 12, color: '#98A2B3', textAlign: 'center', padding: '4px 0', marginBottom: 4 }}>
+      {startTime} 开课，最早 {earliestAllowed.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} 可考勤
+    </div>
+  )
+}
+
 export default function TeacherAttendancePage() {
   const isMobile = useIsMobile() ?? false
   const { data: dashboard, mutate: mutateDashboard } = useSWR('/api/teacher/dashboard', fetcher)
-  const lessons = (dashboard?.todayLessons || []) as any[]
+  const lessons = useMemo(() => (dashboard?.todayLessons || []) as TeacherLesson[], [dashboard?.todayLessons])
   const [selectedLessonId, setSelectedLessonId] = useState('')
-  const [students, setStudents] = useState<any[]>([])
+  const [students, setStudents] = useState<AttendanceStudent[]>([])
   const [attMap, setAttMap] = useState<Map<string, AttStatus>>(new Map())
-  const [loadingStudents, setLoadingStudents] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [summary, setSummary] = useState({ present: 0, leave: 0, absent: 0, unmarked: 0 })
 
-  const selectedLesson = lessons.find((l: any) => l.id === selectedLessonId) || lessons[0]
+  const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId) || lessons[0]
 
   useEffect(() => { if (!selectedLessonId && lessons[0]?.id) setSelectedLessonId(lessons[0].id) }, [lessons, selectedLessonId])
 
   useEffect(() => {
     if (!selectedLesson?.id) return
-    setLoadingStudents(true)
     fetch(`/api/teacher/attendance?lessonId=${selectedLesson.id}`)
       .then(res => res.json())
       .then(payload => {
-        const list = payload.students || []
+        const list = (payload.students || []) as AttendanceStudent[]
         setStudents(list)
         const m = new Map<string, AttStatus>()
-        list.forEach((s: any) => m.set(s.studentId, (s.status as AttStatus) || 'none'))
+        list.forEach((student) => m.set(student.studentId, (student.status as AttStatus) || 'none'))
         setAttMap(m)
       })
       .catch(() => message.error('学员列表加载失败'))
-      .finally(() => setLoadingStudents(false))
   }, [selectedLesson?.id])
 
   // Recalc summary whenever attMap changes
@@ -84,7 +114,21 @@ export default function TeacherAttendancePage() {
   const [submitted, setSubmitted] = useState(false)
 
   const submitAttendance = async () => {
+    if (submitting) return
     if (!selectedLesson?.id) return
+    const startTime = (selectedLesson.startTime as string) || String(selectedLesson.time || '').slice(0, 5)
+    const lessonDate = (selectedLesson.lessonDate as string) || new Date().toISOString()
+    if (startTime && lessonDate) {
+      const dateStr = typeof lessonDate === 'string'
+        ? lessonDate.substring(0, 10)
+        : new Date(lessonDate).toISOString().substring(0, 10)
+      const lessonStart = new Date(`${dateStr}T${startTime}:00`)
+      const earliestAllowed = new Date(lessonStart.getTime() - 30 * 60 * 1000)
+      if (new Date() < earliestAllowed) {
+        message.warning(`未到考勤时间，课程 ${startTime} 开始，最早 30 分钟前可提交考勤`)
+        return
+      }
+    }
     const records = students.map(s => ({
       studentId: s.studentId, enrollmentId: s.enrollmentId,
       status: attMap.get(s.studentId) || 'PRESENT',
@@ -103,10 +147,10 @@ export default function TeacherAttendancePage() {
     fetch(`/api/teacher/attendance?lessonId=${selectedLesson.id}`)
       .then(r => r.json())
       .then(payload => {
-        const list = payload.students || []
+        const list = (payload.students || []) as AttendanceStudent[]
         setStudents(list)
         const m = new Map<string, AttStatus>()
-        list.forEach((s: any) => m.set(s.studentId, (s.status as AttStatus) || 'none'))
+        list.forEach((student) => m.set(student.studentId, (student.status as AttStatus) || 'none'))
         setAttMap(m)
       })
       .catch(() => {})
@@ -117,8 +161,6 @@ export default function TeacherAttendancePage() {
       message.success(`✅ 考勤已提交，本次课次状态已更新`, 4)
     }
   }
-
-  const total = summary.present + summary.leave + summary.absent + summary.unmarked
 
   return (
     <div>
@@ -131,9 +173,9 @@ export default function TeacherAttendancePage() {
             dataSource={lessons}
             locale={{ emptyText: '今日暂无课次' }}
             style={isMobile ? { display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 } : undefined}
-            renderItem={(lesson: any) => {
+            renderItem={(lesson: TeacherLesson) => {
               const selected = selectedLesson?.id === lesson.id
-              const done = lesson.attendanceCount > 0 || lesson.status === 'COMPLETED'
+              const done = Number(lesson.attendanceCount || 0) > 0 || lesson.status === 'COMPLETED'
               return (
                 <List.Item onClick={() => setSelectedLessonId(lesson.id)} style={{
                   cursor: 'pointer', border: selected ? '1px solid #E8784A' : '1px solid #f0e7de',
@@ -175,6 +217,7 @@ export default function TeacherAttendancePage() {
             <Space>
               <Tag color="blue" style={{ borderRadius: 9999 }}>{students.length}人</Tag>
               <Button icon={<CheckCircleOutlined />} onClick={handleAllPresent} style={{ borderColor: '#1D9E75', color: '#1D9E75' }}>一键全勤</Button>
+              {attendanceTimeHint(selectedLesson)}
               <Button type="primary" loading={submitting} onClick={submitAttendance} style={{ background: '#E8784A' }}>{submitted ? '已提交 ✓' : '提交考勤'}</Button>
             </Space>
           ) : null}>
@@ -186,6 +229,7 @@ export default function TeacherAttendancePage() {
                   <Button type="primary" loading={submitting} onClick={submitAttendance} style={{ width: '100%', background: '#E8784A' }}>{submitted ? '已提交 ✓' : '提交考勤'}</Button>
                 </div>
               )}
+              {isMobile && attendanceTimeHint(selectedLesson)}
               {/* Progress bar */}
               <div style={{ background: 'var(--color-background-secondary, #faf8f5)', borderRadius: 8, padding: '8px 12px', marginBottom: 12, display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
@@ -206,7 +250,7 @@ export default function TeacherAttendancePage() {
 
               {/* Student grid */}
               <div className="teacher-attendance-student-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, 1fr)', gap: 6 }}>
-                {students.map((s: any) => {
+                {students.map((s) => {
                   const status: AttStatus = attMap.get(s.studentId) || 'none'
                   const cfg = STATUS_CONFIG[status]
                   return (

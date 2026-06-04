@@ -37,6 +37,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     dinner: clean(body.dinner),
     snack: clean(body.snack),
     note: clean(body.note),
+    allowDouble: body.allowDouble !== false,
   }
   const template = existing
     ? await prisma.mealTemplate.update({ where: { id: existing.id }, data })

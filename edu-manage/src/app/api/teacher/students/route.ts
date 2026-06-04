@@ -60,14 +60,20 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     })
 
-    const lastPosts = await prisma.performancePost.findMany({
-      where: { teacherId: teacher.id, studentId: { in: students.map((student) => student.id) }, deletedAt: null },
+    const lastFeedbacks = await prisma.classroomFeedback.findMany({
+      where: {
+        teacherId: teacher.id,
+        status: 'PUBLISHED',
+        studentIds: { isEmpty: false },
+      },
       orderBy: { createdAt: 'desc' },
-      select: { studentId: true, createdAt: true },
+      select: { studentIds: true, createdAt: true },
     })
     const lastFeedbackMap = new Map<string, Date>()
-    for (const post of lastPosts) {
-      if (!lastFeedbackMap.has(post.studentId)) lastFeedbackMap.set(post.studentId, post.createdAt)
+    for (const feedback of lastFeedbacks) {
+      for (const studentId of feedback.studentIds) {
+        if (!lastFeedbackMap.has(studentId)) lastFeedbackMap.set(studentId, feedback.createdAt)
+      }
     }
 
     return NextResponse.json(students.map((student) => {
@@ -81,6 +87,11 @@ export async function GET() {
       const attendanceTotal = student.attendances.length
       const present = student.attendances.filter((attendance) => attendance.status === 'PRESENT').length
       const lastFeedback = lastFeedbackMap.get(student.id) || null
+      const primaryCourseType = activeEnrollments.some((enrollment) => enrollment.group?.course?.type === 'ONE_ON_ONE')
+        ? 'ONE_ON_ONE'
+        : activeEnrollments.some((enrollment) => enrollment.group?.course?.type === 'SMALL_GROUP')
+          ? 'SMALL_GROUP'
+          : 'GROUP'
       return {
         ...student,
         enrollments: activeEnrollments,
@@ -89,6 +100,7 @@ export async function GET() {
         attendanceRate: attendanceTotal ? Math.round((present / attendanceTotal) * 100) : 100,
         lastFeedback,
         daysSinceLastFeedback: lastFeedback ? differenceInDays(now, lastFeedback) : 999,
+        primaryCourseType,
       }
     }))
   } catch {

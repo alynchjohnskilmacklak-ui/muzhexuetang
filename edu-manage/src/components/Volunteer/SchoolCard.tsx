@@ -1,6 +1,6 @@
 'use client'
 
-import { Tag, Typography, Divider } from 'antd'
+import { Typography, Divider } from 'antd'
 import {
   CarOutlined, DollarOutlined, HomeOutlined, PhoneOutlined,
   EnvironmentOutlined,
@@ -135,7 +135,7 @@ export function SchoolCard({ school, compact = false, onClick }: SchoolCardProps
         }}>
           {school.yiTong && (
             <div style={{ textAlign: 'center' }}>
-              <Text style={{ fontSize: 10, color: C.inkSubtle, display: 'block' }}>一统线</Text>
+              <Text style={{ fontSize: 10, color: C.inkSubtle, display: 'block' }}>{school.type === '民办' ? '市区统招分' : '一统线'}</Text>
               <Text strong style={{ fontSize: 15, color: C.inkMuted, lineHeight: 1.2 }}>{school.yiTong}</Text>
               <Text style={{ fontSize: 10, color: C.inkSubtle }}>分</Text>
             </div>
@@ -209,10 +209,10 @@ export function SchoolCard({ school, compact = false, onClick }: SchoolCardProps
         marginBottom: 14,
       }}>
         {school.yiTong && (
-          <ScoreCell label="一统线" value={`${school.yiTong}分`} sub="一次统招线" color={C.primary} />
+          <ScoreCell label={school.type === '民办' ? '市区统招分' : '一统线'} value={`${school.yiTong}分`} sub={school.type === '民办' ? '民办市区统招分数' : '一次统招线'} color={C.primary} />
         )}
         <ScoreCell label="统招线" value={`${school.tongZhao}分`} sub="二次统招/实录线" color="#185FA5" />
-        <ScoreCell label="分配线" value={allocationLine !== null ? `${allocationLine}分` : '无'} sub={allocationLine !== null ? '一统线减50' : '无一统线'} color={C.success} />
+        <ScoreCell label="分配线" value={allocationLine !== null ? `${allocationLine}分` : '无'} sub={allocationLine !== null ? '数据库录入' : '未录入'} color={C.success} />
         <ScoreCell label="年招生" value={school.enrollment ? `约${school.enrollment}人` : '待更新'} sub="计划人数" color={C.inkSubtle} />
       </div>
 
@@ -240,7 +240,7 @@ export function SchoolCard({ school, compact = false, onClick }: SchoolCardProps
       )}
 
       <Text style={{ fontSize: 11, color: C.inkSubtle, display: 'block', lineHeight: 1.6, marginBottom: 14 }}>
-        一统线为一次统招门槛，统招线为回收名额后的最终统招线，分配线为有名额且校内排名靠前时的参考控制线。
+        一统线为公办学校一次统招门槛，民办学校显示市区统招分；统招线为最终统招线，分配线为数据库录入的官方分配生录取控制线。
       </Text>
 
       <Divider style={{ margin: '12px 0', borderColor: C.hairline }} />

@@ -19,7 +19,7 @@ function asStringArray(value: unknown) {
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
-  const user = session?.user as { id?: string; role?: string } | undefined
+  const user = session?.user as { id?: string; email?: string | null; name?: string | null; role?: string } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (!['admin', 'teacher', 'parent'].includes(user.role || '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
@@ -50,6 +50,17 @@ export const GET = apiHandler(async (req: NextRequest) => {
     if (!childIds.length) return NextResponse.json({ posts: [], total: 0, page, limit })
     if (studentId && !childIds.includes(studentId)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     Object.assign(where, parentVisiblePerformancePostWhere(user.id), { studentId: studentId || { in: childIds } })
+  }
+
+  if (user.role === 'teacher') {
+    const resolved = await resolveTeacherForUser({
+      id: user.id || '',
+      email: user.email as string,
+      name: user.name as string,
+      role: user.role,
+    })
+    if (!resolved) return NextResponse.json({ posts: [], total: 0, page, limit })
+    Object.assign(where, { teacherId: resolved.id })
   }
 
   const [posts, total] = await Promise.all([

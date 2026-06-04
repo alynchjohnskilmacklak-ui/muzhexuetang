@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { LessonStatus } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
 
@@ -22,7 +23,7 @@ export async function GET(req: NextRequest) {
       where: {
         ...teacherLessonWhere(teacher.id),
         lessonDate: { gte: start, lte: end },
-        ...(status ? { status: status as any } : { status: { not: 'CANCELLED' as const } }),
+        ...(status ? { status: status as LessonStatus } : { status: { not: 'CANCELLED' as const } }),
       },
       include: {
         group: {
@@ -50,9 +51,13 @@ export async function GET(req: NextRequest) {
       subject: lesson.group.teacherAssignments[0]?.subject || lesson.subject || lesson.group.course.subject,
       groupName: lesson.group.name,
       courseName: lesson.group.course.name,
+      courseType: lesson.group.course.type,
       room: lesson.group.room?.name || '-',
       studentCount: lesson.group.enrollments.length,
       attendanceCount: lesson.attendances.length,
+      oneOnOneStudentName: lesson.group.course.type === 'ONE_ON_ONE'
+        ? lesson.group.enrollments[0]?.student?.name || ''
+        : '',
       students: lesson.group.enrollments.map((enrollment) => ({
         enrollmentId: enrollment.id,
         ...enrollment.student,

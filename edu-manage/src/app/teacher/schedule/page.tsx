@@ -231,9 +231,9 @@ export default function TeacherSchedulePage() {
                         const items = groupGrid[`${dayIdx}-${period.id}`] || []
                         const hasItem = items.length > 0 && period.type === 'CLASS'
                         return (
-                          <div key={dayIdx} style={{ minHeight: h, borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', padding: 3, background: PERIOD_BG[period.type] }}>
+                          <div key={dayIdx} style={{ minHeight: h, overflow: 'hidden', borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', padding: 3, background: PERIOD_BG[period.type] }}>
                             {hasItem ? items.map((l: any) => (
-                              <div key={l.id} style={{ borderLeft: '3px solid #E8784A', background: 'rgba(232,120,74,.1)', borderRadius: 5, padding: '5px 7px', height: '100%', minHeight: 58, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                              <div key={l.id} style={{ borderLeft: '3px solid #E8784A', background: 'rgba(232,120,74,.1)', borderRadius: 5, padding: '5px 7px', minHeight: 58, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                 <div style={{ fontSize: 11, fontWeight: 500, color: '#E8784A', lineHeight: 1.3 }}>{l.group?.course?.name || l.group?.name || '-'}</div>
                                 <div style={{ fontSize: 10, color: '#993C1D', lineHeight: 1.3 }}><EnvironmentOutlined style={{ fontSize: 9 }} /> {l.group?.room?.name || '-'}</div>
                                 <div style={{ fontSize: 10, color: '#993C1D', lineHeight: 1.3 }}><TeamOutlined style={{ fontSize: 9 }} /> {l.group?.enrollments?.length || 0}人</div>
@@ -280,13 +280,13 @@ export default function TeacherSchedulePage() {
                         if (isNoon) return <div key={dayIdx} style={{ minHeight: h, borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', background: 'rgba(29,158,117,.02)' }} />
                         const items = intensiveGrid[`${dayIdx}-${slot.id}`] || []
                         return (
-                          <div key={dayIdx} style={{ minHeight: h, borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', padding: 3 }}>
+                          <div key={dayIdx} style={{ minHeight: h, overflow: 'hidden', borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', padding: 3 }}>
                             {items.length ? items.map((l: any) => {
                               const ct = l.group?.course?.type || 'ONE_ON_ONE'
                               const cfg = INTENSIVE_CONFIG[ct] || INTENSIVE_CONFIG.ONE_ON_ONE
                               const studentName = l.group?.enrollments?.[0]?.student?.name || ''
                               return (
-                                <div key={l.id} style={{ borderLeft: `3px solid ${cfg.color}`, background: cfg.bg, borderRadius: 5, padding: '5px 7px', height: '100%', minHeight: 56, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                <div key={l.id} style={{ borderLeft: `3px solid ${cfg.color}`, background: cfg.bg, borderRadius: 5, padding: '5px 7px', minHeight: 56, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                   <div style={{ fontSize: 9, fontWeight: 500, color: cfg.color, background: `${cfg.color}18`, padding: '0 4px', borderRadius: 3, alignSelf: 'flex-start', marginBottom: 3 }}>{cfg.label}</div>
                                   <div style={{ fontSize: 11, fontWeight: 600, color: cfg.color, lineHeight: 1.3 }}>{l.teacher?.name || l.teacherId || '-'}</div>
                                   <div style={{ fontSize: 11, color: cfg.color, lineHeight: 1.3 }}><UserOutlined style={{ fontSize: 10 }} /> {studentName}</div>

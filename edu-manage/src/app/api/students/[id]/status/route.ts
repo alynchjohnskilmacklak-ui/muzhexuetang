@@ -9,6 +9,8 @@ export const dynamic = 'force-dynamic'
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const role = (session.user as { role?: string }).role
+  if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const { id } = await params
   const { status, reason } = await req.json()

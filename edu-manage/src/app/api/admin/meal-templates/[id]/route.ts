@@ -31,6 +31,7 @@ export const PUT = apiHandler(async (req: NextRequest, context: { params: Promis
       dinner: clean(body.dinner),
       snack: clean(body.snack),
       note: clean(body.note),
+      allowDouble: body.allowDouble !== false,
       isActive: true,
     },
   })

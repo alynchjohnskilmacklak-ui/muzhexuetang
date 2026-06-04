@@ -15,7 +15,10 @@ const fetcher = (url: string) => fetch(url).then(r => { if (!r.ok) throw new Err
 type AttStatus = 'present' | 'leave' | 'absent' | 'late'
 
 const CLASS_TYPE_LABELS: Record<string, string> = {
-  ONE_ON_ONE: '一对一', SMALL_CLASS: '小班课',
+  ONE_ON_ONE: '一对一',
+  SMALL_GROUP: '小班课',
+  GROUP: '班课',
+  SMALL_CLASS: '小班课',
 }
 
 const STATUS_TAG: Record<string, { label: string; color: string }> = {
@@ -37,22 +40,67 @@ function formatTime(iso: string): string {
   } catch { return iso }
 }
 
+function toLocalStatus(status: unknown): AttStatus {
+  const value = String(status || '').toUpperCase()
+  if (value === 'LEAVE') return 'leave'
+  if (value === 'ABSENT') return 'absent'
+  return 'present'
+}
+
+function toApiStatus(status: AttStatus) {
+  if (status === 'leave') return 'LEAVE'
+  if (status === 'absent') return 'ABSENT'
+  return 'PRESENT'
+}
+
+function buildTimeIso(date: string, time: unknown) {
+  const value = String(time || '00:00').slice(0, 5)
+  return `${date}T${value}:00`
+}
+
 export default function AttendancePage() {
   const isMobile = useIsMobile() ?? false
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [filterTeacherId, setFilterTeacherId] = useState('')
   const [filterType, setFilterType] = useState('')
 
-  const query = `/api/attendance?date=${selectedDate}${filterTeacherId ? `&teacherId=${filterTeacherId}` : ''}${filterType ? `&classType=${filterType}` : ''}`
-  const { data: schedules, mutate: mutateData, isLoading } = useSWR(query, fetcher, { refreshInterval: 60_000 })
+  const query = `/api/attendance/today?date=${selectedDate}${filterTeacherId ? `&teacherId=${filterTeacherId}` : ''}`
+  const { data: lessonsRaw, mutate: mutateData, isLoading } = useSWR(query, fetcher, { refreshInterval: 60_000 })
   const { data: teachersData } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
 
   const [selectedSchedule, setSelectedSchedule] = useState<Record<string, unknown> | null>(null)
   const [attMap, setAttMap] = useState<Map<string, AttStatus>>(new Map())
   const [submitting, setSubmitting] = useState(false)
+  const [attendanceDrawerOpen, setAttendanceDrawerOpen] = useState(false)
 
   const teacherList: Record<string, unknown>[] = Array.isArray(teachersData?.teachers) ? teachersData.teachers : Array.isArray(teachersData) ? teachersData : []
-  const allSchedules: Record<string, unknown>[] = Array.isArray(schedules) ? schedules : []
+  const schedules: Record<string, unknown>[] = Array.isArray(lessonsRaw) ? lessonsRaw.map((lesson: Record<string, unknown>) => {
+    const group = lesson.group as Record<string, unknown> | undefined
+    const students: Record<string, unknown>[] = (Array.isArray(lesson.students) ? lesson.students as Record<string, unknown>[] : []).map((student) => ({
+      ...student,
+      status: toLocalStatus(student.status),
+    }))
+    const lessonDate = String(lesson.lessonDate || selectedDate).slice(0, 10)
+    const classType = group?.type as string || ''
+    return {
+      id: lesson.id,
+      lessonId: lesson.id,
+      title: `${group?.courseName || ''} ${group?.name || ''}`.trim(),
+      classType,
+      startTime: buildTimeIso(lessonDate, lesson.startTime),
+      endTime: buildTimeIso(lessonDate, lesson.endTime),
+      teacherName: group?.teacherName || '-',
+      roomName: group?.roomName || '未分配',
+      studentCount: lesson.totalStudents || students.length,
+      attendanceStatus: Number(lesson.attendanceCount || 0) > 0 ? 'done' : 'pending',
+      students,
+      attendances: students.filter((student) => student.status).map((student) => ({
+        studentId: student.studentId,
+        status: student.status,
+      })),
+    }
+  }) : []
+  const allSchedules = filterType ? schedules.filter((schedule) => schedule.classType === filterType) : schedules
 
   const groupedSchedules = useMemo(() => {
     const groups: Record<string, Record<string, unknown>[]> = { '上午': [], '下午': [], '晚上': [] }
@@ -64,6 +112,17 @@ export default function AttendancePage() {
   }, [allSchedules])
 
   const handleSelectSchedule = (schedule: Record<string, unknown>) => {
+    const startTimeStr = ((schedule.startTime as string) || '').substring(11, 16)
+    const dateStr = ((schedule.startTime as string) || '').substring(0, 10)
+    if (startTimeStr && dateStr) {
+      const [hour, minute] = startTimeStr.split(':').map(Number)
+      const lessonStart = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`)
+      const earliestAllowed = new Date(lessonStart.getTime() - 30 * 60 * 1000)
+      if (new Date() < earliestAllowed) {
+        message.warning(`未到考勤时间，${startTimeStr} 开课，最早 ${earliestAllowed.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} 可开始考勤`)
+        return
+      }
+    }
     setSelectedSchedule(schedule)
     const students = (schedule.students as Array<Record<string, unknown>>) || []
     const existingAtts = (schedule.attendances as Array<Record<string, unknown>>) || []
@@ -73,6 +132,9 @@ export default function AttendancePage() {
       newMap.set(stu.studentId as string, (existing?.status as AttStatus) || 'present')
     })
     setAttMap(newMap)
+    if (isMobile) {
+      setAttendanceDrawerOpen(true)
+    }
   }
 
   const setAllPresent = () => {
@@ -103,13 +165,14 @@ export default function AttendancePage() {
     setSubmitting(true)
     const records = students.map(s => ({
       studentId: s.studentId,
-      status: attMap.get(s.studentId as string) || 'present',
+      status: toApiStatus(attMap.get(s.studentId as string) || 'present'),
     }))
     try {
-      const res = await fetch('/api/attendance', {
+      const lessonId = (selectedSchedule.lessonId || selectedSchedule.id) as string
+      const res = await fetch('/api/admin/attendance/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scheduleId: selectedSchedule.id, records }),
+        body: JSON.stringify({ lessonId, records }),
       })
       if (!res.ok) throw new Error((await res.json()).error || '提交失败')
       message.success(`考勤提交成功，共 ${records.length} 人`)
@@ -142,9 +205,13 @@ export default function AttendancePage() {
           <Input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} style={{ width: 160 }} />
           <Select allowClear placeholder="按教师筛选" style={{ width: 160 }}
             value={filterTeacherId || undefined} onChange={v => setFilterTeacherId(v || '')}
+            virtual={false}
+            getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
             options={teacherList.map((t: Record<string, unknown>) => ({ label: t.name as string, value: t.id as string }))} />
           <Select allowClear placeholder="按班型筛选" style={{ width: 130 }}
             value={filterType || undefined} onChange={v => setFilterType(v || '')}
+            virtual={false}
+            getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
             options={[
               { label: '一对一', value: 'ONE_ON_ONE' },
               { label: '小班课', value: 'SMALL_CLASS' },
@@ -294,6 +361,116 @@ export default function AttendancePage() {
             })()}
           </div>
         </div>
+      )}
+      {/* 手机端考勤 Drawer */}
+      {isMobile && (
+        <Drawer
+          open={attendanceDrawerOpen}
+          onClose={() => setAttendanceDrawerOpen(false)}
+          placement="bottom"
+          height="90vh"
+          title={selectedSchedule ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontWeight: 700 }}>{selectedSchedule.title as string}</span>
+              <Tag color={selectedSchedule.classType === 'ONE_ON_ONE' ? 'purple' : 'orange'} style={{ borderRadius: 9999, fontSize: 10 }}>
+                {CLASS_TYPE_LABELS[selectedSchedule.classType as string] || String(selectedSchedule.classType || '')}
+              </Tag>
+            </div>
+          ) : '考勤'}
+          styles={{ body: { padding: 0, overflowY: 'auto' } }}
+          destroyOnClose={false}
+        >
+          {selectedSchedule && (() => {
+            const students = (selectedSchedule.students as Array<Record<string, unknown>>) || []
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                {/* 课程信息 */}
+                <div style={{ padding: '12px 16px', background: '#FCFBF9', borderBottom: '1px solid #EEE7E1' }}>
+                  <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 12, color: '#98A2B3' }}>
+                      <UserOutlined style={{ marginRight: 4 }} />{selectedSchedule.teacherName as string}
+                    </span>
+                    <span style={{ fontSize: 12, color: '#98A2B3' }}>
+                      <EnvironmentOutlined style={{ marginRight: 4 }} />{selectedSchedule.roomName as string}
+                    </span>
+                    <span style={{ fontSize: 12, color: '#98A2B3' }}>
+                      <ClockCircleOutlined style={{ marginRight: 4 }} />{formatTime(selectedSchedule.startTime as string)}-{formatTime(selectedSchedule.endTime as string)}
+                    </span>
+                    <span style={{ fontSize: 12, color: '#98A2B3' }}>
+                      <TeamOutlined style={{ marginRight: 4 }} />{students.length}人
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+                    <Button size="small" onClick={setAllPresent}>全部出勤</Button>
+                  </div>
+                </div>
+
+                {/* 学生列表 */}
+                <div style={{ flex: 1, overflowY: 'auto', padding: '8px 16px' }}>
+                  {students.map((s: Record<string, unknown>) => {
+                    const status = attMap.get(s.studentId as string) || 'present'
+                    const statusColors = {
+                      present: { bg: 'rgba(39,166,68,0.12)', color: '#27a644' },
+                      leave:   { bg: 'rgba(245,166,35,0.12)', color: '#f5a623' },
+                      absent:  { bg: 'rgba(224,62,45,0.12)',  color: '#e03e2d' },
+                      late:    { bg: 'rgba(100,100,220,0.12)',color: '#6464dc' },
+                    } as const
+                    return (
+                      <div key={s.studentId as string} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '10px 0', borderBottom: '1px solid #F5F2EE',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{
+                            width: 36, height: 36, borderRadius: '50%', background: '#FCFBF9',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 14, fontWeight: 600, color: '#5a4e3a', flexShrink: 0,
+                          }}>{(s.studentName as string)?.[0] || '?'}</div>
+                          <span style={{ fontSize: 14, color: '#1F2329' }}>{s.studentName as string}</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          {(['present', 'leave', 'absent', 'late'] as AttStatus[]).map(t => (
+                            <button key={t}
+                              onClick={() => setStudentStatus(s.studentId as string, t)}
+                              style={{
+                                padding: '5px 8px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
+                                border: `1px solid ${status === t ? statusColors[t].color : 'transparent'}`,
+                                background: status === t ? statusColors[t].bg : 'transparent',
+                                color: status === t ? statusColors[t].color : '#98A2B3',
+                                fontWeight: status === t ? 600 : 400,
+                              }}>
+                              {statusColors[t].color === '#27a644' ? '出勤' : t === 'leave' ? '请假' : t === 'absent' ? '旷课' : '迟到'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* 汇总 + 提交 */}
+                <div style={{
+                  padding: '12px 16px', background: '#fff',
+                  borderTop: '1px solid #EEE7E1',
+                  paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: 14 }}>
+                      <span style={{ fontSize: 13, color: '#27a644' }}>出勤 {summary.present}</span>
+                      <span style={{ fontSize: 13, color: '#f5a623' }}>请假 {summary.leave}</span>
+                      <span style={{ fontSize: 13, color: '#e03e2d' }}>旷课 {summary.absent}</span>
+                    </div>
+                    <Button type="primary" loading={submitting} onClick={async () => { await handleSubmit(); setAttendanceDrawerOpen(false) }}
+                      style={{ background: '#E8784A', borderColor: '#E8784A' }}
+                      icon={<CheckCircleOutlined />}>
+                      提交考勤
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
+        </Drawer>
       )}
     </PageLayout>
   )

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { BATCH_TAGS } from '@/lib/volunteer-shared'
 import { normalizeUploadUrl } from '@/lib/upload-url'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 type Step = {
   id: string
@@ -18,6 +19,7 @@ type Step = {
 }
 
 export function StepEditor({ step, onSaved }: { step?: Step; onSaved: () => void }) {
+  const isMobile = useIsMobile() ?? false
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [tipContent, setTipContent] = useState('')
@@ -58,7 +60,7 @@ export function StepEditor({ step, onSaved }: { step?: Step; onSaved: () => void
   return (
     <Space direction="vertical" size={16} style={{ width: '100%' }}>
       <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="步骤标题" />
-      <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '220px 1fr', gap: 16 }}>
         <div style={{ border: '1px solid #EEE7E1', borderRadius: 8, minHeight: 132, background: '#FCFBF9', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
           {imageUrl ? <Image src={normalizeUploadUrl(imageUrl)} alt="步骤截图" width={220} height={132} style={{ objectFit: 'cover', borderRadius: 4 }} fallback="/file.svg" /> : <span style={{ color: '#98A2B3' }}>暂无截图</span>}
         </div>

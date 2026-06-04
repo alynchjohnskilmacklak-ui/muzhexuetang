@@ -306,8 +306,8 @@ export function MobileLayout({
         style={{
           paddingTop: 'calc(52px + env(safe-area-inset-top, 0px))',
           paddingBottom: hasBottomTabs
-            ? `calc(${TAB_BAR_HEIGHT + 26}px + env(safe-area-inset-bottom, 0px))`
-            : 'calc(24px + env(safe-area-inset-bottom, 0px))',
+            ? `calc(${TAB_BAR_HEIGHT + 26}px + max(env(safe-area-inset-bottom, 0px), 8px))`
+            : 'calc(24px + max(env(safe-area-inset-bottom, 0px), 8px))',
           minHeight: '100dvh',
           maxWidth: '100vw',
           overflowX: 'hidden',
@@ -324,7 +324,8 @@ export function MobileLayout({
           position: 'fixed',
           inset: 'auto 0 0',
           zIndex: 300,
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 4px)',
+          minHeight: 'calc(56px + env(safe-area-inset-bottom, 0px))',
           display: 'flex',
           background: '#ffffff',
           borderTop: '1px solid rgba(0,0,0,.06)',

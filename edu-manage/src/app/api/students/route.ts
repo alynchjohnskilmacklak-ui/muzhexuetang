@@ -7,9 +7,18 @@ import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
+const normalizeCourseTypeFilter = (courseType: string) => {
+  if (courseType === 'ONE_ON_TWO' || courseType === 'ONE_ON_THREE') return 'SMALL_GROUP'
+  if (courseType === 'GROUP' || courseType === 'ONE_ON_ONE' || courseType === 'SMALL_GROUP') return courseType
+  return null
+}
+
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const role = (session.user as { role?: string }).role
+  if (role === 'teacher') return NextResponse.json({ error: '请使用教师端查看学员' }, { status: 403 })
+  if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const { searchParams } = new URL(req.url)
   const status = searchParams.get('status')
@@ -31,6 +40,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (grade && grade !== 'all') where.grade = grade
   if (lowHours) where.status = 'ACTIVE'
   if (courseType && courseType !== 'all') {
+    const normalizedCourseType = normalizeCourseTypeFilter(courseType)
+    if (!normalizedCourseType) {
+      return NextResponse.json({ error: '无效课程类型' }, { status: 400 })
+    }
     where.enrollments = {
       some: {
         status: 'ACTIVE',
@@ -38,7 +51,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
           status: { not: 'ARCHIVED' },
           course: {
             isActive: true,
-            type: courseType === 'ONE_ON_THREE' ? 'SMALL_GROUP' : courseType,
+            type: normalizedCourseType,
           },
         },
       },
@@ -93,7 +106,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     prisma.student.count({ where }),
   ])
 
-  let normalized = students.map((student) => {
+  const normalized = students.map((student) => {
     const activeEnrollments = student.enrollments.filter((enrollment) => (
       enrollment.status === 'ACTIVE'
       && enrollment.group?.status !== 'ARCHIVED'
@@ -132,6 +145,8 @@ export async function POST(req: NextRequest) {
       console.error('[students:create] unauthorized request')
       return NextResponse.json({ error: '请重新登录后再添加学员' }, { status: 401 })
     }
+    const role = (session.user as { role?: string }).role
+    if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
     const body = await req.json()
     const name = typeof body.name === 'string' ? body.name.trim() : ''

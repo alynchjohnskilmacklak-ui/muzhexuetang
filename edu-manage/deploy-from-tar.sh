@@ -4,6 +4,9 @@ set -e
 # 用法：将 tar 包上传到 /tmp/，然后执行此脚本
 # scp deploy-xxx.tar root@112.124.67.56:/tmp/
 # ssh root@112.124.67.56 "bash /opt/edu-manage/deploy-from-tar.sh deploy-xxx.tar"
+#
+# 步骤：备份.env → 解压 → 恢复.env → npm install → prisma → 构建 →
+#       复制static到standalone（关键！） → 重启PM2
 
 TAR_NAME="${1:-deploy.tar}"
 PROJECT_DIR="/opt/edu-manage"
@@ -54,18 +57,14 @@ fi
 
 echo "[6/7] 构建成功"
 
-# ---- 6b. 清理旧构建中残留的孤儿路由（预防 404） ----
-# standalone 模式：如果 .next/server/app 下有旧路由文件而新构建没有，
-# next start 可能仍会尝试加载它们。清理整个 server/app 确保干净。
-# 这是可选的，因为 rm -rf .next 已经处理了，但保留作为安全措施。
-echo "[6/7] 验证构建产物中包含新路由"
-if grep -q "volunteer-sim" "${BUILD_LOG}"; then
-  echo "       ✓ /volunteer-sim 路由已收录"
-fi
+# ---- 6b. 复制 static 到 standalone（关键！Next.js 不会自动复制） ----
+echo "[6/7] 复制客户端静态文件到 standalone 目录"
+cp -r .next/static .next/standalone/.next/static
 
 # ---- 7. 重启 ----
 echo "[7/7] 重启 PM2 服务"
-pm2 restart edu-manage --update-env
+pm2 delete edu-manage 2>/dev/null || true
+pm2 start node --name edu-manage -- .next/standalone/server.js
 pm2 save
 
 echo ""

@@ -15,7 +15,7 @@ export const POST = apiHandler(async (_req: NextRequest, { params }: { params: P
   const { id } = await params
   const paper = await prisma.examPaper.findUnique({
     where: { id },
-    include: { student: { select: { id: true, name: true, parentId: true } }, teacher: { select: { name: true } } },
+    include: { student: { select: { id: true, name: true, parentId: true, parentUserId: true } }, teacher: { select: { name: true } } },
   })
   if (!paper) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
 
@@ -25,10 +25,11 @@ export const POST = apiHandler(async (_req: NextRequest, { params }: { params: P
       data: { status: 'PUBLISHED', notifySent: true, updatedAt: new Date() },
     })
 
-    if (paper.student.parentId) {
+    const notifyParentId = paper.student.parentId || paper.student.parentUserId
+    if (notifyParentId) {
       await tx.notification.create({
         data: {
-          userId: paper.student.parentId,
+          userId: notifyParentId,
           type: 'EXAM_PAPER',
           title: `${paper.teacher.name}老师上传了新试卷`,
           content: `${paper.subject} · ${paper.title}`,

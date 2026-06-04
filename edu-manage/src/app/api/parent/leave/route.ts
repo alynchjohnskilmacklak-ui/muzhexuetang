@@ -24,7 +24,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
     where: { id: studentId },
     include: { mainTeacher: { select: { id: true, name: true } } },
   })
-  if (!student || student.parentId !== userId) {
+  const isOwner = student?.parentId === userId || student?.parentUserId === userId
+  if (!student || !isOwner) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

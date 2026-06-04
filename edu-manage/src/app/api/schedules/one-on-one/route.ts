@@ -9,12 +9,11 @@ export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   try {
     const body = await req.json()
     const { teacherId, studentId, subject, date, startTime, endTime, roomId, note } = body
-
-    console.log('[one-on-one:create] 收到参数:', { teacherId, studentId, subject, date, startTime, endTime, roomId })
 
     if (!teacherId || !studentId || !subject || !date || !startTime || !endTime) {
       return NextResponse.json({ error: '缺少必填字段（老师/学员/科目/日期/时间）' }, { status: 400 })
@@ -23,7 +22,6 @@ export async function POST(req: NextRequest) {
     // Validate teacher exists
     const teacher = await prisma.teacher.findUnique({ where: { id: teacherId } })
     if (!teacher) return NextResponse.json({ error: '教师不存在' }, { status: 400 })
-    console.log('[one-on-one:create] 教师验证通过:', teacher.name, '(id:', teacher.id, ')')
 
     // Validate student exists
     const student = await prisma.student.findUnique({ where: { id: studentId } })

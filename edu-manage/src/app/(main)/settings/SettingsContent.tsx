@@ -19,6 +19,7 @@ import { LogsTab } from './LogsTab'
 import { AdminsTab } from './AdminsTab'
 import { TeacherAccountsTab } from './TeacherAccountsTab'
 import { ParentAccountsTab } from './ParentAccountsTab'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const tabs = [
   { key: 'info', icon: <BankOutlined />, label: '机构信息' },
@@ -37,17 +38,45 @@ const tabs = [
 function SettingsTabs({ currentUserId }: { currentUserId: string }) {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const isMobile = useIsMobile() ?? false
   const activeTab = searchParams.get('tab') || 'info'
 
   return (
-    <div style={{ display: 'flex', gap: 24 }}>
-      <Menu
-        mode="inline"
-        selectedKeys={[activeTab]}
-        items={tabs}
-        style={{ width: 180, borderRadius: 10, flexShrink: 0 }}
-        onClick={({ key }) => router.push(`/settings?tab=${key}`)}
-      />
+    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 16 : 24 }}>
+      {isMobile ? (
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <div style={{ display: 'flex', gap: 4, paddingBottom: 4, minWidth: `${tabs.length * 72}px` }}>
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => router.push(`/settings?tab=${tab.key}`)}
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  whiteSpace: 'nowrap',
+                  border: `1px solid ${activeTab === tab.key ? '#E8784A' : '#EEE7E1'}`,
+                  background: activeTab === tab.key ? 'rgba(232,120,74,.08)' : '#fff',
+                  color: activeTab === tab.key ? '#E8784A' : '#5a4e3a',
+                  fontWeight: activeTab === tab.key ? 600 : 400,
+                  cursor: 'pointer',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <Menu
+          mode="inline"
+          selectedKeys={[activeTab]}
+          items={tabs}
+          style={{ width: 180, borderRadius: 10, flexShrink: 0 }}
+          onClick={({ key }) => router.push(`/settings?tab=${key}`)}
+        />
+      )}
       <div style={{ flex: 1, minWidth: 0 }}>
         {activeTab === 'info' && <OrgInfoTab />}
         {activeTab === 'subjects' && <SubjectsTab />}

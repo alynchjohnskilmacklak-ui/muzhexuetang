@@ -8,7 +8,8 @@ import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Button, Card, Empty, Input, List, message, Rate, Select, Space, Tag, Typography, Upload } from 'antd'
-import { DeleteOutlined, HolderOutlined, PlusOutlined, SaveOutlined, SendOutlined, UploadOutlined } from '@ant-design/icons'
+import { CheckCircleOutlined, DeleteOutlined, HolderOutlined, PlusOutlined, SaveOutlined, SendOutlined, UploadOutlined } from '@ant-design/icons'
+import { MobileSelect } from '@/components/MobileSelect'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -21,6 +22,39 @@ const DEFAULT_POINTS = ['新知识讲解', '错题订正', '课堂练习', '阅�
 const FILE_TYPES = ['练习题', '板书', '作业', '试卷']
 
 type HomeworkItem = { id: string; order: number; content: string }
+type LessonStudent = {
+  id: string
+  name?: string | null
+  grade?: string | null
+}
+type TeacherLesson = {
+  id: string
+  lessonDate: string | Date
+  startTime?: string
+  courseType?: string
+  oneOnOneStudentName?: string
+  groupName?: string
+  subject?: string
+  courseName?: string
+  studentCount?: number
+  students?: LessonStudent[]
+}
+type FeedbackHistoryItem = {
+  id: string
+  createdAt: string | Date
+  status?: string
+  knowledgePoints?: string[]
+  homework?: unknown[]
+  imageUrls?: string[]
+  summary?: string | null
+  classLesson?: { group?: { name?: string | null } | null } | null
+}
+type UploadRequest = {
+  file: unknown
+  onSuccess?: (body?: unknown) => void
+  onError?: (error: Error) => void
+  onProgress?: (event: { percent: number }) => void
+}
 
 function createHomeworkId() {
   return `homework-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -41,7 +75,7 @@ function ClassroomFeedbackPageInner() {
   const isMobile = useIsMobile() ?? false
   const searchParams = useSearchParams()
   const preselectStudentId = searchParams.get('studentId') || ''
-  const { data: lessons = [] } = useSWR('/api/teacher/lessons?days=7', fetcher)
+  const { data: allLessons = [] } = useSWR('/api/teacher/lessons?days=30', fetcher)
   const { data: subjects = [] } = useSWR('/api/settings/subjects', fetcher)
   const { data: history, mutate } = useSWR('/api/teacher/classroom-feedback?limit=10', fetcher)
   const [classLessonId, setClassLessonId] = useState('')
@@ -55,11 +89,54 @@ function ClassroomFeedbackPageInner() {
   const [imageTypes, setImageTypes] = useState<Record<string, string>>({})
   const [ratings, setRatings] = useState<Record<string, number>>({})
   const [saving, setSaving] = useState(false)
+  const [publishDone, setPublishDone] = useState(false)
 
-  const selectedLesson = lessons.find((lesson: any) => lesson.id === classLessonId)
+  const lessonGroups = useMemo(() => {
+    const now = new Date()
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const tomorrowStart = new Date(todayStart)
+    tomorrowStart.setDate(todayStart.getDate() + 1)
+    const weekStart = new Date(todayStart)
+    weekStart.setDate(todayStart.getDate() - todayStart.getDay() + (todayStart.getDay() === 0 ? -6 : 1))
+
+    const lessons = (Array.isArray(allLessons) ? allLessons : []) as TeacherLesson[]
+    const sorted = [...lessons].sort((a, b) =>
+      new Date(b.lessonDate).getTime() - new Date(a.lessonDate).getTime()
+      || String(b.startTime || '').localeCompare(String(a.startTime || ''))
+    )
+    const toOption = (lesson: TeacherLesson) => {
+      const isSmall = lesson.courseType === 'ONE_ON_ONE' || lesson.courseType === 'SMALL_GROUP'
+      const typeLabel = lesson.courseType === 'ONE_ON_ONE' ? '一对一' : lesson.courseType === 'SMALL_GROUP' ? '小组课' : '班课'
+      const dateLabel = new Date(lesson.lessonDate).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })
+      const title = isSmall
+        ? `【${typeLabel}】${lesson.oneOnOneStudentName || lesson.groupName} · ${lesson.subject || lesson.courseName} · ${dateLabel} ${lesson.startTime}`
+        : `【班课】${lesson.groupName} · ${lesson.subject || lesson.courseName} · ${dateLabel} ${lesson.startTime} (${lesson.studentCount || 0}人)`
+      return { label: title, value: lesson.id, lesson }
+    }
+
+    const todays = sorted.filter((lesson) => {
+      const date = new Date(lesson.lessonDate)
+      return date >= todayStart && date < tomorrowStart
+    })
+    const weeks = sorted.filter((lesson) => {
+      const date = new Date(lesson.lessonDate)
+      return date >= weekStart && date < todayStart
+    })
+    const older = sorted.filter((lesson) => new Date(lesson.lessonDate) < weekStart)
+
+    return [
+      ...(todays.length ? [{ label: '今日课次', options: todays.map(toOption) }] : []),
+      ...(weeks.length ? [{ label: '本周课次', options: weeks.map(toOption) }] : []),
+      ...(older.length ? [{ label: '历史课次', options: older.map(toOption) }] : []),
+    ]
+  }, [allLessons])
+
+  const selectedLesson = ((Array.isArray(allLessons) ? allLessons : []) as TeacherLesson[]).find((lesson) => lesson.id === classLessonId)
   const students = selectedLesson?.students || []
   const pointOptions = useMemo(() => {
-    const names = Array.isArray(subjects) ? subjects.map((item: any) => item.name).filter(Boolean) : []
+    const names = Array.isArray(subjects)
+      ? subjects.map((item: { name?: string }) => item.name).filter((name): name is string => !!name)
+      : []
     return Array.from(new Set([...names, ...DEFAULT_POINTS]))
   }, [subjects])
 
@@ -81,7 +158,7 @@ function ClassroomFeedbackPageInner() {
     setCustomPoint('')
   }
 
-  const handleUploadFile = async ({ file, onSuccess, onError, onProgress }: any) => {
+  const handleUploadFile = async ({ file, onSuccess, onError, onProgress }: UploadRequest) => {
     if (!(file instanceof File)) {
       onError?.(new Error('无效文件'))
       return
@@ -129,10 +206,16 @@ function ClassroomFeedbackPageInner() {
 
   const save = async (status: 'DRAFT' | 'PUBLISHED') => {
     setSaving(true)
+    setPublishDone(false)
+    if (status === 'PUBLISHED' && !classLessonId) {
+      message.warning('发布前请先选择关联课次，否则无法正确结算反馈奖励')
+      setSaving(false)
+      return
+    }
     const payload = {
       classLessonId,
       targetType,
-      studentIds: targetType === 'CLASS' ? students.map((student: any) => student.id) : studentIds,
+      studentIds: targetType === 'CLASS' ? students.map((student) => student.id) : studentIds,
       knowledgePoints,
       summary,
       homework: homework.filter((item) => item.content.trim()).map(({ order, content }) => ({ order, content })),
@@ -147,13 +230,20 @@ function ClassroomFeedbackPageInner() {
       body: JSON.stringify(payload),
     })
     const data = await res.json().catch(() => ({}))
-    setSaving(false)
     if (!res.ok) {
       message.error(data.error || '保存失败')
+      setSaving(false)
       return
     }
-    message.success(status === 'PUBLISHED' ? '已发布并同步家长' : '草稿已保存')
+    if (status === 'PUBLISHED') {
+      setPublishDone(true)
+      message.success('已发布并同步家长通知', 3)
+      setTimeout(() => setPublishDone(false), 3000)
+    } else {
+      message.success('草稿已保存')
+    }
     mutate()
+    setSaving(false)
   }
 
   return (
@@ -163,13 +253,16 @@ function ClassroomFeedbackPageInner() {
         <Space direction="vertical" size={16} style={{ width: '100%' }}>
           <Card title="基本信息" bordered={false} style={{ borderRadius: 10 }}>
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
-              <Select
-                showSearch
-                placeholder="关联课次"
+              <MobileSelect
+                allowClear
+                placeholder="关联课次（今日课次优先显示）"
                 value={classLessonId || undefined}
-                onChange={(value) => { setClassLessonId(value); setStudentIds([]); setTargetType('CLASS') }}
-                options={lessons.map((lesson: any) => ({ label: `${lesson.groupName} · ${lesson.subject || lesson.courseName} · ${new Date(lesson.lessonDate).toLocaleDateString('zh-CN')} ${lesson.startTime}`, value: lesson.id }))}
+                onChange={(value) => { setClassLessonId(value || ''); setStudentIds([]); setTargetType('CLASS') }}
+                options={lessonGroups}
                 style={{ width: '100%' }}
+                listHeight={280}
+                popupMatchSelectWidth={false}
+                dropdownStyle={{ maxWidth: isMobile ? '95vw' : 480 }}
               />
               <div style={isMobile ? { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 } : undefined}>
                 <Button type={targetType === 'CLASS' ? 'primary' : 'default'} onClick={() => setTargetType('CLASS')}>全班</Button>
@@ -181,7 +274,7 @@ function ClassroomFeedbackPageInner() {
                   placeholder="选择学员"
                   value={studentIds}
                   onChange={setStudentIds}
-                  options={students.map((student: any) => ({ label: `${student.name} / ${student.grade || '-'}`, value: student.id }))}
+                  options={students.map((student) => ({ label: `${student.name} / ${student.grade || '-'}`, value: student.id }))}
                   style={{ width: '100%' }}
                 />
               )}
@@ -263,7 +356,7 @@ function ClassroomFeedbackPageInner() {
 
           <Card title="学员课堂表现快评" bordered={false} style={{ borderRadius: 10 }}>
             {students.length ? (
-              <List dataSource={students} renderItem={(student: any) => (
+              <List dataSource={students} renderItem={(student: LessonStudent) => (
                 <List.Item style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 6 : 12, alignItems: isMobile ? 'flex-start' : 'center' }}>
                   <Text>{student.name}</Text>
                   <Rate style={{ fontSize: isMobile ? 18 : undefined }} value={ratings[student.id] || 5} onChange={(value) => setRatings((current) => ({ ...current, [student.id]: value }))} />
@@ -274,7 +367,20 @@ function ClassroomFeedbackPageInner() {
 
           <Card bordered={false} style={{ borderRadius: 10 }}>
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'auto auto', gap: 8 }}>
-              <Button type="primary" icon={<SendOutlined />} loading={saving} onClick={() => save('PUBLISHED')} style={{ background: '#E8784A', width: isMobile ? '100%' : undefined }}>发布 · 同步家长</Button>
+              <Button
+                type="primary"
+                icon={publishDone ? <CheckCircleOutlined /> : <SendOutlined />}
+                loading={saving}
+                onClick={() => save('PUBLISHED')}
+                style={{
+                  background: publishDone ? '#1D9E75' : '#E8784A',
+                  borderColor: publishDone ? '#1D9E75' : '#E8784A',
+                  width: isMobile ? '100%' : undefined,
+                  transition: 'background 0.3s',
+                }}
+              >
+                {publishDone ? '已发布' : '发布 · 同步家长'}
+              </Button>
               <Button icon={<SaveOutlined />} loading={saving} onClick={() => save('DRAFT')} style={{ width: isMobile ? '100%' : undefined }}>保存草稿</Button>
             </div>
           </Card>
@@ -285,21 +391,45 @@ function ClassroomFeedbackPageInner() {
             <Text type="secondary">发布后会给所选学员家长发送通知，并在家长端学习档案中展示课堂反馈卡片。</Text>
           </Card>
           <Card title="历史记录" bordered={false} style={{ borderRadius: 10 }}>
-            <List
-              dataSource={history?.feedbacks || []}
-              locale={{ emptyText: '暂无课堂反馈' }}
-              renderItem={(item: any) => (
-                <List.Item>
-                  <div style={{ width: '100%' }}>
-                    <Space wrap>{item.knowledgePoints?.slice(0, 3).map((point: string) => <Tag key={point}>{point}</Tag>)}</Space>
-                    <div style={{ marginTop: 6, color: '#8d806f', fontSize: 12 }}>
-                      {item.homework?.length ? '有作业' : '无作业'} · {item.imageUrls?.length || 0}张资料 · <Tag color={item.status === 'PUBLISHED' ? 'green' : 'orange'}>{item.status === 'PUBLISHED' ? '已发布' : '草稿'}</Tag>
-                    </div>
-                    <Text type="secondary" style={{ fontSize: 12 }}>{new Date(item.createdAt).toLocaleString('zh-CN')}</Text>
-                  </div>
-                </List.Item>
-              )}
-            />
+            {!(history?.feedbacks?.length) ? (
+              <Empty description="暂无课堂反馈" />
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {((history.feedbacks || []) as FeedbackHistoryItem[])
+                  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                  .map((item) => {
+                    const dateStr = new Date(item.createdAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })
+                    const timeStr = new Date(item.createdAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+                    const isPublished = item.status === 'PUBLISHED'
+                    const lessonName = item.classLesson?.group?.name || ''
+                    return (
+                      <div key={item.id} style={{
+                        padding: '10px 12px', borderRadius: 8,
+                        background: isPublished ? '#f0fdf4' : '#fafafa',
+                        border: `1px solid ${isPublished ? '#d1fae5' : '#EEE7E1'}`,
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, gap: 8 }}>
+                          <span style={{ fontSize: 12, color: '#8d806f' }}>{dateStr} {timeStr}{lessonName ? ` · ${lessonName}` : ''}</span>
+                          <Tag color={isPublished ? 'green' : 'orange'} style={{ borderRadius: 9999, fontSize: 10, margin: 0 }}>
+                            {isPublished ? '已发布' : '草稿'}
+                          </Tag>
+                        </div>
+                        <Space wrap size={4} style={{ marginBottom: 4 }}>
+                          {item.knowledgePoints?.slice(0, 4).map((point: string) => (
+                            <Tag key={point} style={{ fontSize: 11, borderRadius: 9999, margin: 0 }}>{point}</Tag>
+                          ))}
+                        </Space>
+                        <div style={{ fontSize: 11, color: '#98A2B3', marginTop: 4 }}>
+                          {item.homework?.length ? `${item.homework.length}条作业` : '无作业'}
+                          {' · '}
+                          {item.imageUrls?.length ? `${item.imageUrls.length}张资料` : '无资料'}
+                          {item.summary ? ' · 有小结' : ''}
+                        </div>
+                      </div>
+                    )
+                  })}
+              </div>
+            )}
           </Card>
         </Space>
       </div>

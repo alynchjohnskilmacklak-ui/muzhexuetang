@@ -19,12 +19,12 @@ import {
   Select,
   Space,
   Spin,
-  Steps,
   Tag,
 } from 'antd'
 import {
   BookOutlined,
   CalendarOutlined,
+  CheckOutlined,
   ClockCircleOutlined,
   CopyOutlined,
   EnvironmentOutlined,
@@ -36,9 +36,19 @@ import {
 import { addDays, format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { PageLayout } from '@/components/Layout/PageLayout'
-import { CLASS_PERIODS_ONLY } from '@/lib/schedule-periods'
+import { MobileSelect } from '@/components/MobileSelect'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import { CLASS_PERIODS_ONLY, HOURLY_PERIODS } from '@/lib/schedule-periods'
 
 type CourseType = 'GROUP' | 'ONE_ON_ONE' | 'SMALL_GROUP'
+type ScheduleTemplateRow = {
+  periodId: string
+  periodName: string
+  startTime: string
+  endTime: string
+  teacherId: string
+  subject: string
+}
 
 const SUBJECTS = ['语文', '数学', '英语', '物理', '化学', '生物', '地理', '历史', '政治']
 const SUBJECT_COLOR: Record<string, string> = {
@@ -95,6 +105,18 @@ function generatePreview(startDate: string, recurringDays: string[], totalLesson
   return dates
 }
 
+function buildScheduleTemplate(type: CourseType): ScheduleTemplateRow[] {
+  if (type !== 'GROUP') return []
+  return CLASS_PERIODS_ONLY.map(p => ({
+    periodId: p.id,
+    periodName: p.name,
+    startTime: p.start,
+    endTime: p.end,
+    teacherId: '',
+    subject: '',
+  }))
+}
+
 export default function CoursesPage() {
   const router = useRouter()
   const { data: groups, mutate: mutateGroups, isLoading } = useSWR('/api/class-groups', fetcher)
@@ -124,14 +146,29 @@ export default function CoursesPage() {
   const [startingGroupId, setStartingGroupId] = useState('')
   const [regeneratingGroupId, setRegeneratingGroupId] = useState('')
   const [deletingGroupId, setDeletingGroupId] = useState('')
+  const isMobile = useIsMobile() ?? false
 
-  const groupList = Array.isArray(groups) ? groups : []
+  const groupList = useMemo(() => Array.isArray(groups) ? groups : [], [groups])
   const courseList = (Array.isArray(courses) ? courses : []).filter((course: Record<string, unknown>) =>
     SUBJECTS.includes(course.subject as string)
   )
   const teacherList = Array.isArray(teachers?.teachers) ? teachers.teachers : Array.isArray(teachers) ? teachers : []
   const roomList = Array.isArray(rooms) ? rooms : []
   const { data: drawerLessons } = useSWR(drawerGroupId ? `/api/class-groups/${drawerGroupId}/lessons` : null, fetcher)
+  const drawerLessonList = useMemo(() => {
+    const lessons = Array.isArray(drawerLessons) ? drawerLessons as Record<string, unknown>[] : []
+    const today = format(new Date(), 'yyyy-MM-dd')
+    const sorted = [...lessons].sort((a, b) => {
+      const aDate = `${a.lessonDate || ''} ${a.startTime || ''}`
+      const bDate = `${b.lessonDate || ''} ${b.startTime || ''}`
+      return aDate.localeCompare(bDate)
+    })
+    const todayLessons = sorted.filter((lesson) => String(lesson.lessonDate || '').slice(0, 10) === today)
+    if (todayLessons.length > 0) return todayLessons
+    return sorted
+      .filter((lesson) => String(lesson.lessonDate || '').slice(0, 10) >= today && lesson.status !== 'CANCELLED')
+      .slice(0, 8)
+  }, [drawerLessons])
 
   const filteredGroups = useMemo(() => groupList.filter((group: Record<string, unknown>) => {
     const course = group.course as Record<string, unknown> | undefined
@@ -169,21 +206,51 @@ export default function CoursesPage() {
 
   const openCreate = () => {
     setCreateStep(0)
+    setCreateLoading(false)
+    const initialType: CourseType = courseTab === 'SMALL' ? 'ONE_ON_ONE' : 'GROUP'
+    const isHourly = initialType !== 'GROUP'
     setCreateData({
-      type: courseTab === 'SMALL' ? 'ONE_ON_ONE' : 'GROUP',
+      type: initialType,
       subjects: [] as string[],
-      lessonMinutes: 40,
+      lessonMinutes: isHourly ? 60 : 40,
       totalLessons: 16,
       startDate: todayString(),
       lessonStartTime: '08:00',
       recurringDays: ['MON', 'WED', 'FRI'],
-      maxStudents: 20,
+      maxStudents: initialType === 'ONE_ON_ONE' ? 1 : 20,
       teacherAssignments: [{ teacherId: '', subject: '' }],
-      scheduleTemplate: CLASS_PERIODS_ONLY.map(p => ({
-        periodId: p.id, periodName: p.name, startTime: p.start, endTime: p.end, teacherId: '', subject: '',
-      })),
+      scheduleSlots: [] as string[],
+      scheduleTemplate: buildScheduleTemplate(initialType),
     })
     setCreateOpen(true)
+  }
+
+  const resolveCreateScheduleTemplate = (templateOverride?: Record<string, unknown>[]) => {
+    const isHourly = (createData.type as string) !== 'GROUP'
+    const sourceTemplate = templateOverride ?? (Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : [])
+    const rawTemplate = sourceTemplate
+      .filter(row => row.teacherId && row.subject && row.startTime && row.endTime)
+
+    if (!isHourly) {
+      return rawTemplate.filter(row => !!(row.teacherId && row.subject))
+    }
+
+    if (rawTemplate.length > 0) return rawTemplate
+
+    const selectedSlots = (createData.scheduleSlots as string[]) || []
+    const validAssignments = (Array.isArray(createData.teacherAssignments) ? createData.teacherAssignments as Record<string, unknown>[] : [])
+      .filter((item) => item.teacherId && item.subject)
+
+    return HOURLY_PERIODS
+      .filter((period) => selectedSlots.includes(period.id))
+      .flatMap((period) => validAssignments.map((assignment) => ({
+        periodId: period.id,
+        periodName: period.name,
+        startTime: period.start,
+        endTime: period.end,
+        teacherId: assignment.teacherId,
+        subject: assignment.subject,
+      })))
   }
 
   const handleNextStep = () => {
@@ -231,7 +298,7 @@ export default function CoursesPage() {
     return coursePayload.id as string
   }
 
-  const handleCreate = async () => {
+  const doCreate = async () => {
     const recurringDays = (createData.recurringDays as string[]) || []
     if (!recurringDays.length) {
       message.error('请选择至少一个上课日')
@@ -244,6 +311,32 @@ export default function CoursesPage() {
 
     setCreateLoading(true)
     try {
+      // 一对一/小组课：如果 scheduleTemplate 为空但 scheduleSlots 有值，重建
+      const isHourly = (createData.type as string) !== 'GROUP'
+      let scheduleTemplateOverride: Record<string, unknown>[] | undefined
+      if (isHourly) {
+        const currentTemplate = (Array.isArray(createData.scheduleTemplate)
+          ? createData.scheduleTemplate as Record<string, unknown>[]
+          : []
+        ).filter(row => row.teacherId && row.subject)
+
+        const selectedSlots = (createData.scheduleSlots as string[]) || []
+        if (currentTemplate.length === 0 && selectedSlots.length > 0) {
+          const validAssignments = (
+            (createData.teacherAssignments as Record<string, unknown>[]) || []
+          ).filter(a => a.teacherId && a.subject)
+          const rebuilt = HOURLY_PERIODS
+            .filter(p => selectedSlots.includes(p.id))
+            .flatMap(p => validAssignments.map(a => ({
+              periodId: p.id, periodName: p.name,
+              startTime: p.start, endTime: p.end,
+              teacherId: a.teacherId, subject: a.subject,
+            })))
+          setCreateData(prev => ({ ...prev, scheduleTemplate: rebuilt }))
+          scheduleTemplateOverride = rebuilt
+        }
+      }
+
       const courseId = await createCourseIfNeeded()
       const teacherAssignments = (Array.isArray(createData.teacherAssignments) ? createData.teacherAssignments as Record<string, unknown>[] : [])
         .filter((item) => item.teacherId && item.subject)
@@ -265,7 +358,7 @@ export default function CoursesPage() {
         recurringDays,
         lessonStartTime: createData.lessonStartTime || '19:00',
         lessonMinutes: createData.lessonMinutes || 90,
-        totalLessons: createData.totalLessons || 16,
+        totalLessons: Number(createData.totalLessons) || 16,
       }
 
       const groupRes = await fetch('/api/class-groups', {
@@ -276,8 +369,13 @@ export default function CoursesPage() {
       const group = await groupRes.json().catch(() => ({}))
       if (!groupRes.ok) throw new Error(group.error || '班级创建失败')
 
-      const scheduleTemplate = (Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : [])
-        .filter(row => row.teacherId && row.subject && row.startTime && row.endTime)
+      const scheduleTemplate = resolveCreateScheduleTemplate(scheduleTemplateOverride)
+
+      if (!scheduleTemplate.length) {
+        message.error(isHourly ? '请至少选择一个上课时间段' : '请至少为一个节次选择老师科目')
+        setCreateLoading(false)
+        return
+      }
 
       const lessonRes = await fetch(`/api/class-groups/${group.id}/generate-lessons`, {
         method: 'POST',
@@ -294,10 +392,90 @@ export default function CoursesPage() {
       setCreateStep(0)
       setCreateData({})
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '创建失败')
+      console.error('[handleCreate]', error)
+      message.error(error instanceof Error ? error.message : '创建失败，请查看浏览器控制台')
     } finally {
       setCreateLoading(false)
     }
+  }
+
+  const handleCreate = async () => {
+    // 前置检查：scheduleTemplate 有效条目数
+    const validSlots = (Array.isArray(createData.scheduleTemplate)
+      ? createData.scheduleTemplate as Record<string, unknown>[]
+      : []
+    ).filter(row => row.teacherId && row.subject && row.startTime && row.endTime)
+
+    const isHourly = (createData.type as string) !== 'GROUP'
+    const selectedSlots = (createData.scheduleSlots as string[]) || []
+
+    if (isHourly && selectedSlots.length === 0 && validSlots.length === 0) {
+      message.error('请至少选择一个上课时间段')
+      return
+    }
+
+    const recurringDays = (createData.recurringDays as string[]) || []
+    if (!recurringDays.length) {
+      message.error('请选择至少一个上课日')
+      return
+    }
+    if (!previewDates.length) {
+      message.error('无法生成课次，请检查开班日期、上课日和总课次数')
+      return
+    }
+
+    const scheduleTemplate = resolveCreateScheduleTemplate()
+      .filter(row => row.teacherId && row.startTime && row.endTime)
+    const startDateStr = (createData.startDate as string) || todayString()
+
+    if (scheduleTemplate.length > 0 && recurringDays.length > 0) {
+      const checkDates = generatePreview(startDateStr, recurringDays, Math.min(2, Number(createData.totalLessons || 1)))
+      const conflictMessages: string[] = []
+
+      for (const date of checkDates.slice(0, 2)) {
+        const dateStr = format(date, 'yyyy-MM-dd')
+        for (const row of scheduleTemplate) {
+          const res = await fetch('/api/class-groups/check-teacher-conflict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              teacherId: row.teacherId,
+              date: dateStr,
+              startTime: row.startTime,
+              endTime: row.endTime,
+            }),
+          })
+          const payload = await res.json().catch(() => ({}))
+          if (payload.conflict) {
+            const teacherName = teacherList.find((teacher: Record<string, unknown>) => teacher.id === row.teacherId)?.name || '该教师'
+            conflictMessages.push(`${teacherName} 在 ${dateStr} ${row.startTime}-${row.endTime} 已有课次安排，${payload.conflictDetail || ''}`)
+          }
+        }
+      }
+
+      if (conflictMessages.length > 0) {
+        Modal.confirm({
+          title: '教师时间冲突',
+          content: (
+            <div>
+              <div style={{ marginBottom: 8, color: '#98A2B3', fontSize: 13 }}>检测到以下教师在开班后的近期有时间冲突，是否仍要继续创建？</div>
+              {conflictMessages.map((msg, index) => (
+                <div key={index} style={{ color: '#E24B4A', fontSize: 13, marginBottom: 4 }}>• {msg}</div>
+              ))}
+            </div>
+          ),
+          okText: '忽略冲突，继续创建',
+          cancelText: '返回修改',
+          okButtonProps: { danger: true },
+          onOk: async () => {
+            await doCreate()
+          },
+        })
+        return
+      }
+    }
+
+    await doCreate()
   }
 
   const handleCopy = async () => {
@@ -588,32 +766,79 @@ export default function CoursesPage() {
         </Row>
       )}
 
-      <Modal title="新建班级" open={createOpen} onCancel={() => setCreateOpen(false)} footer={null} width={760} destroyOnClose>
-        <Steps
-          current={createStep}
-          size="small"
-          style={{ marginBottom: 24 }}
-          items={[{ title: '课程信息' }, { title: '班级设置' }, { title: '排课预览' }]}
-        />
+      <Modal
+        title="新建班级"
+        open={createOpen}
+        onCancel={() => {
+          setCreateOpen(false)
+          setCreateLoading(false)
+        }}
+        footer={null}
+        width={isMobile ? '100%' : 760}
+        style={isMobile ? { top: 0, margin: 0, padding: 0, maxWidth: '100vw' } : undefined}
+        styles={isMobile ? { body: { padding: '12px 16px', minHeight: 'calc(100dvh - 56px)', overflowY: 'auto' } } : undefined}
+        destroyOnClose
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 20 }}>
+          {(['课程信息', '班级设置', '排课配置'] as const).map((label, index) => {
+            const done = createStep > index
+            const active = createStep === index
+            return (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', flex: index < 2 ? 1 : 'none', minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  <div style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%',
+                    display: 'grid',
+                    placeItems: 'center',
+                    background: done ? '#1D9E75' : active ? '#E8784A' : '#EEE7E1',
+                    color: (done || active) ? '#fff' : '#98A2B3',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}>
+                    {done ? <CheckOutlined style={{ fontSize: 11 }} /> : index + 1}
+                  </div>
+                  <span style={{
+                    fontSize: isMobile ? 11 : 12,
+                    fontWeight: active ? 600 : 400,
+                    color: active ? '#1F2329' : done ? '#1D9E75' : '#98A2B3',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {label}
+                  </span>
+                </div>
+                {index < 2 && (
+                  <div style={{ flex: 1, height: 1, background: createStep > index ? '#1D9E75' : '#EEE7E1', margin: '0 8px' }} />
+                )}
+              </div>
+            )
+          })}
+        </div>
 
         {createStep === 0 && (
           <Space direction="vertical" size={14} style={{ width: '100%' }}>
-            <Select
-              showSearch
+            <MobileSelect
               allowClear
               placeholder="可选：从已有课程继承"
               style={{ width: '100%' }}
               value={(createData.courseId as string) || undefined}
               onChange={(value) => {
                 const course = courseList.find((item: Record<string, unknown>) => item.id === value)
+                const nextType = (course?.type || createData.type || 'GROUP') as CourseType
+                const isHourly = nextType !== 'GROUP'
                 setCreateData((prev) => ({
                   ...prev,
                   courseId: value,
                   courseName: course?.name || prev.courseName,
                   grade: course?.grade || prev.grade,
-                  type: course?.type || prev.type || 'GROUP',
-                  lessonMinutes: course?.lessonMinutes || prev.lessonMinutes || 90,
+                  type: nextType,
+                  lessonMinutes: course?.lessonMinutes || (isHourly ? 60 : 40),
                   totalLessons: course?.totalLessons || prev.totalLessons || 16,
+                  maxStudents: nextType === 'ONE_ON_ONE' ? 1 : (prev.maxStudents === 1 ? 20 : prev.maxStudents),
+                  scheduleSlots: [] as string[],
+                  scheduleTemplate: buildScheduleTemplate(nextType),
                 }))
               }}
               options={courseList.map((course: Record<string, unknown>) => ({
@@ -621,25 +846,70 @@ export default function CoursesPage() {
                 value: course.id as string,
               }))}
             />
-            <Row gutter={12}>
-              <Col span={16}>
+            <Row gutter={[12, 10]}>
+              <Col xs={24} sm={16}>
                 <Input placeholder="课程名称，例如：高一全科同步提高" value={(createData.courseName as string) || ''} onChange={(event) => setCreateData((prev) => ({ ...prev, courseName: event.target.value, courseId: undefined }))} />
               </Col>
-              <Col span={8}>
+              <Col xs={24} sm={8}>
                 <Input placeholder="年级，例如：高一" value={(createData.grade as string) || ''} onChange={(event) => setCreateData((prev) => ({ ...prev, grade: event.target.value, courseId: undefined }))} />
               </Col>
             </Row>
-            <Select
-              style={{ width: 180 }}
-              value={(createData.type as CourseType) || 'GROUP'}
-              onChange={(value) => setCreateData((prev) => ({ ...prev, type: value }))}
-              options={[
-                { label: '班课', value: 'GROUP' },
-                { label: '1对1', value: 'ONE_ON_ONE' },
-                { label: '小组课', value: 'SMALL_GROUP' },
-              ]}
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div>
+              <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 6 }}>课程类型</div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {([
+                  { value: 'GROUP', label: '班课', sub: '每节40分', icon: '班' },
+                  { value: 'ONE_ON_ONE', label: '1对1', sub: '每节60分', icon: '1' },
+                  { value: 'SMALL_GROUP', label: '小组课', sub: '每节60分', icon: '组' },
+                ] as { value: CourseType; label: string; sub: string; icon: string }[]).map((option) => {
+                  const active = ((createData.type as CourseType) || 'GROUP') === option.value
+                  return (
+                    <div
+                      key={option.value}
+                      onClick={() => {
+                        const isHourly = option.value !== 'GROUP'
+                        setCreateData((prev) => ({
+                          ...prev,
+                          type: option.value,
+                          lessonMinutes: isHourly ? 60 : 40,
+                          maxStudents: option.value === 'ONE_ON_ONE' ? 1 : (Number(prev.maxStudents) === 1 ? 20 : prev.maxStudents),
+                          scheduleSlots: [] as string[],
+                          scheduleTemplate: buildScheduleTemplate(option.value),
+                        }))
+                      }}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: 8,
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        border: `1.5px solid ${active ? '#E8784A' : '#EEE7E1'}`,
+                        background: active ? '#fff3ec' : '#fff',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 2,
+                        minWidth: 74,
+                      }}
+                    >
+                      <span style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: '50%',
+                        display: 'grid',
+                        placeItems: 'center',
+                        background: active ? '#E8784A' : '#F5F2EE',
+                        color: active ? '#fff' : '#8D806F',
+                        fontSize: 12,
+                        fontWeight: 700,
+                      }}>{option.icon}</span>
+                      <span style={{ fontSize: 13, fontWeight: active ? 700 : 400, color: active ? '#E8784A' : '#1F2329' }}>{option.label}</span>
+                      <span style={{ fontSize: 11, color: '#98A2B3' }}>{option.sub}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16, paddingTop: 12, borderTop: '1px solid #EEE7E1' }}>
               <Button type="primary" onClick={handleNextStep}>下一步</Button>
             </div>
           </Space>
@@ -655,13 +925,11 @@ export default function CoursesPage() {
               </div>
               <Space direction="vertical" size={8} style={{ width: '100%' }}>
                 {(((createData.teacherAssignments as Record<string, unknown>[]) || [{ teacherId: '', subject: '' }])).map((assignment, index) => {
-                  const assignments = (createData.teacherAssignments as Record<string, unknown>[]) || []
                   const subjectOptions = SUBJECTS.map((subject) => ({ label: subject, value: subject }))
                   return (
                     <Row gutter={8} key={index} align="middle">
-                      <Col span={10}>
-                        <Select
-                          showSearch
+                      <Col xs={11} sm={10}>
+                        <MobileSelect
                           placeholder="选择授课老师"
                           style={{ width: '100%' }}
                           value={(assignment.teacherId as string) || undefined}
@@ -677,9 +945,8 @@ export default function CoursesPage() {
                           }))}
                         />
                       </Col>
-                      <Col span={10}>
-                        <Select
-                          showSearch
+                      <Col xs={11} sm={10}>
+                        <MobileSelect
                           placeholder="选择负责科目"
                           style={{ width: '100%' }}
                           value={(assignment.subject as string) || undefined}
@@ -692,7 +959,7 @@ export default function CoursesPage() {
                           options={subjectOptions}
                         />
                       </Col>
-                      <Col span={4}>
+                      <Col xs={2} sm={4}>
                         {index > 0 && (
                           <Button
                             block
@@ -724,19 +991,30 @@ export default function CoursesPage() {
               </div>
             </div>
             <Select allowClear placeholder="教室" style={{ width: '100%' }} value={(createData.roomId as string) || undefined} onChange={(value) => setCreateData((prev) => ({ ...prev, roomId: value }))} options={roomList.map((room: Record<string, unknown>) => ({ label: `${room.name} / ${room.capacity || 0}人`, value: room.id as string }))} />
-            <Row gutter={12}>
-              <Col span={8}><Input type="date" value={(createData.startDate as string) || todayString()} onChange={(event) => setCreateData((prev) => ({ ...prev, startDate: event.target.value }))} /></Col>
-              <Col span={8}><InputNumber min={1} max={100} addonBefore="限额" addonAfter="人" style={{ width: '100%' }} value={Number(createData.maxStudents || 20)} onChange={(value) => setCreateData((prev) => ({ ...prev, maxStudents: value || 20 }))} /></Col>
-              <Col span={8}><InputNumber min={1} max={120} addonBefore="课次" style={{ width: '100%' }} value={Number(createData.totalLessons || 16)} onChange={(value) => setCreateData((prev) => ({ ...prev, totalLessons: value || 16 }))} /></Col>
+            <Row gutter={[12, 10]}>
+              <Col xs={24} sm={8}>
+                <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 4 }}>开班日期</div>
+                <Input type="date" value={(createData.startDate as string) || todayString()} onChange={(event) => setCreateData((prev) => ({ ...prev, startDate: event.target.value }))} style={{ width: '100%' }} />
+              </Col>
+              <Col xs={12} sm={8}><InputNumber min={1} max={100} addonBefore="限额" addonAfter="人" style={{ width: '100%' }} value={Number(createData.maxStudents || 20)} onChange={(value) => setCreateData((prev) => ({ ...prev, maxStudents: value || 20 }))} /></Col>
+              <Col xs={12} sm={8}><InputNumber min={1} max={120} addonBefore="课次" style={{ width: '100%' }} value={Number(createData.totalLessons || 16)} onChange={(value) => setCreateData((prev) => ({ ...prev, totalLessons: value || 16 }))} /></Col>
             </Row>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, paddingTop: 12, borderTop: '1px solid #EEE7E1' }}>
               <Button onClick={() => setCreateStep(0)}>上一步</Button>
               <Button type="primary" onClick={handleNextStep}>下一步</Button>
             </div>
           </Space>
         )}
 
-        {createStep === 2 && (
+        {createStep === 2 && (() => {
+          const isHourly = (createData.type as string) !== 'GROUP'
+          const selectedSlots = (createData.scheduleSlots as string[]) || []
+          const validAssignments = ((createData.teacherAssignments as Record<string, unknown>[]) || [])
+            .filter(assignment => assignment.teacherId && assignment.subject)
+          const scheduledCount = (Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : [])
+            .filter(row => row.teacherId && row.subject && row.startTime && row.endTime).length
+
+          return (
           <Space direction="vertical" size={16} style={{ width: '100%' }}>
             <div>
               <div style={{ color: '#98A2B3', marginBottom: 10 }}>选择上课日</div>
@@ -748,7 +1026,17 @@ export default function CoursesPage() {
                     <Tag
                       key={day}
                       onClick={() => setCreateData((prev) => ({ ...prev, recurringDays: active ? days.filter((item) => item !== day) : [...days, day] }))}
-                      style={{ cursor: 'pointer', borderRadius: 999, padding: '5px 14px', border: 'none', background: active ? '#E8784A' : '#202226', color: active ? '#fff' : '#98A2B3' }}
+                      style={{
+                        cursor: 'pointer',
+                        borderRadius: 999,
+                        padding: isMobile ? '8px 16px' : '5px 14px',
+                        fontSize: isMobile ? 14 : 13,
+                        border: 'none',
+                        background: active ? '#E8784A' : '#202226',
+                        color: active ? '#fff' : '#98A2B3',
+                        userSelect: 'none',
+                        WebkitTapHighlightColor: 'transparent',
+                      }}
                     >
                       {DAY_LABELS[day]}
                     </Tag>
@@ -759,56 +1047,108 @@ export default function CoursesPage() {
 
             {/* Daily schedule template */}
             <div>
-              <div style={{ color: '#98A2B3', marginBottom: 10 }}>每日上课时间段（与排课系统同步）</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '100px 180px 100px 80px 80px', gap: 8, color: '#8D806F', fontSize: 11, marginBottom: 8 }}>
-                <div>节次</div><div>老师 / 科目</div><div>科目</div><div>开始</div><div>结束</div>
+              <div style={{ color: '#98A2B3', marginBottom: 10, fontSize: 13 }}>
+                {isHourly ? '每天上课时间段（可多选）' : '每日节次安排（空节次不会排课）'}
               </div>
-              {(Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : []).map((row, index) => {
-                const assignments = (Array.isArray(createData.teacherAssignments) ? createData.teacherAssignments as Record<string, unknown>[] : [])
-                return (
-                  <div key={index} style={{ display: 'grid', gridTemplateColumns: '100px 180px 100px 80px 80px', gap: 8, alignItems: 'center', marginBottom: 6 }}>
-                    <span style={{ fontSize: 12, fontWeight: 500, color: '#E8784A' }}>{row.periodName as string}</span>
-                    <Select
-                      size="small"
-                      placeholder="老师科目"
-                      value={row.teacherId && row.subject ? `${row.teacherId}::${row.subject}` : undefined}
-                      onChange={v => {
-                        const [tid, subj] = String(v).split('::')
-                        const template = [...(Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : [])]
-                        template[index] = { ...template[index], teacherId: tid, subject: subj }
-                        setCreateData(prev => ({ ...prev, scheduleTemplate: template }))
-                      }}
-                      options={assignments.filter(a => a.teacherId && a.subject).map(a => ({
-                        label: `${teacherList.find((t: Record<string, unknown>) => t.id === a.teacherId)?.name || '老师'} / ${a.subject}`,
-                        value: `${a.teacherId}::${a.subject}`,
-                      }))}
-                    />
-                    <Select
-                      size="small"
-                      placeholder="科目"
-                      value={(row.subject as string) || undefined}
-                      onChange={v => {
-                        const template = [...(Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : [])]
-                        template[index] = { ...template[index], subject: v }
-                        setCreateData(prev => ({ ...prev, scheduleTemplate: template }))
-                      }}
-                      options={SUBJECTS.map(s => ({ label: s, value: s }))}
-                    />
-                    <Input size="small" type="time" value={(row.startTime as string) || ''} readOnly style={{ background: '#f5f5f5' }} />
-                    <Input size="small" type="time" value={(row.endTime as string) || ''} readOnly style={{ background: '#f5f5f5' }} />
+              {isHourly ? (
+                <div>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(4, 1fr)' : 'repeat(8, 1fr)', gap: 8 }}>
+                    {HOURLY_PERIODS.map(period => {
+                      const selected = selectedSlots.includes(period.id)
+                      return (
+                        <div
+                          key={period.id}
+                          onClick={() => {
+                            const nextSlots = selected
+                              ? selectedSlots.filter(slot => slot !== period.id)
+                              : [...selectedSlots, period.id]
+                            const nextTemplate = HOURLY_PERIODS
+                              .filter(item => nextSlots.includes(item.id))
+                              .flatMap(item => validAssignments.map(assignment => ({
+                                periodId: item.id,
+                                periodName: item.name,
+                                startTime: item.start,
+                                endTime: item.end,
+                                teacherId: assignment.teacherId as string,
+                                subject: assignment.subject as string,
+                              })))
+                            setCreateData(prev => ({ ...prev, scheduleSlots: nextSlots, scheduleTemplate: nextTemplate }))
+                          }}
+                          style={{
+                            padding: '8px 4px',
+                            borderRadius: 8,
+                            cursor: 'pointer',
+                            textAlign: 'center',
+                            border: `1.5px solid ${selected ? '#E8784A' : '#EEE7E1'}`,
+                            background: selected ? '#fff3ec' : '#FCFBF9',
+                            userSelect: 'none',
+                            WebkitTapHighlightColor: 'transparent',
+                          }}
+                        >
+                          <div style={{ fontSize: 13, fontWeight: selected ? 700 : 400, color: selected ? '#E8784A' : '#1F2329' }}>{period.name}</div>
+                          <div style={{ fontSize: 10, color: '#C4BAB0' }}>{period.end}</div>
+                        </div>
+                      )
+                    })}
                   </div>
-                )
-              })}
+                  {selectedSlots.length === 0 && (
+                    <div style={{ fontSize: 12, color: '#E24B4A', marginTop: 6 }}>请至少选择一个时间段</div>
+                  )}
+                  {selectedSlots.length > 0 && (
+                    <div style={{ fontSize: 12, color: '#E8784A', marginTop: 6 }}>已选 {selectedSlots.length} 个时间段，每节 60 分钟</div>
+                  )}
+                </div>
+              ) : (
+                <Space direction="vertical" size={6} style={{ width: '100%' }}>
+                  {(Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : []).map((row, index) => {
+                    const assignments = (Array.isArray(createData.teacherAssignments) ? createData.teacherAssignments as Record<string, unknown>[] : [])
+                    const filled = !!(row.teacherId && row.subject)
+                    return (
+                      <div key={index} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '8px 10px',
+                        borderRadius: 8,
+                        background: filled ? '#FCFBF9' : '#fff',
+                        border: `1px solid ${filled ? '#E8784A33' : '#EEE7E1'}`,
+                      }}>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: '#E8784A', width: 58, flexShrink: 0 }}>{row.periodName as string}</span>
+                        <span style={{ fontSize: 11, color: '#C4BAB0', width: 90, flexShrink: 0 }}>{row.startTime as string}-{row.endTime as string}</span>
+                        <Select
+                          size="small"
+                          allowClear
+                          placeholder="老师科目（空=不排课）"
+                          style={{ flex: 1 }}
+                          value={row.teacherId && row.subject ? `${row.teacherId}::${row.subject}` : undefined}
+                          onChange={v => {
+                            const template = [...(Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : [])]
+                            if (v) {
+                              const [tid, subj] = String(v).split('::')
+                              template[index] = { ...template[index], teacherId: tid, subject: subj }
+                            } else {
+                              template[index] = { ...template[index], teacherId: '', subject: '' }
+                            }
+                            setCreateData(prev => ({ ...prev, scheduleTemplate: template }))
+                          }}
+                          options={assignments.filter(a => a.teacherId && a.subject).map(a => ({
+                            label: `${teacherList.find((teacher: Record<string, unknown>) => teacher.id === a.teacherId)?.name || '老师'} / ${a.subject}`,
+                            value: `${a.teacherId}::${a.subject}`,
+                          }))}
+                        />
+                      </div>
+                    )
+                  })}
+                </Space>
+              )}
             </div>
 
-            <Row gutter={12}>
-              <Col span={8}><InputNumber min={30} max={240} step={5} addonBefore="课时" addonAfter="分钟" style={{ width: '100%' }} value={Number(createData.lessonMinutes || 40)} onChange={(value) => setCreateData((prev) => ({ ...prev, lessonMinutes: value || 40 }))} /></Col>
-              <Col span={8}><InputNumber min={1} max={120} addonBefore="总天次" style={{ width: '100%' }} value={Number(createData.totalLessons || 16)} onChange={(value) => setCreateData((prev) => ({ ...prev, totalLessons: value || 16 }))} /></Col>
+            <Row gutter={[12, 10]}>
+              <Col xs={12} sm={8}><InputNumber min={isHourly ? 60 : 30} max={isHourly ? 120 : 240} step={isHourly ? 60 : 5} addonBefore="课时" addonAfter="分钟" style={{ width: '100%' }} value={Number(createData.lessonMinutes || (isHourly ? 60 : 40))} disabled={isHourly} onChange={(value) => setCreateData((prev) => ({ ...prev, lessonMinutes: value || (isHourly ? 60 : 40) }))} /></Col>
+              <Col xs={12} sm={8}><InputNumber min={1} max={120} addonBefore="总天次" style={{ width: '100%' }} value={Number(createData.totalLessons || 16)} onChange={(value) => setCreateData((prev) => ({ ...prev, totalLessons: value || 16 }))} /></Col>
             </Row>
             <div style={{ background: '#FCFBF9', border: '1px solid #EEE7E1', borderRadius: 8, padding: 14, minHeight: 104 }}>
-              <div style={{ color: '#1F2329', fontWeight: 700, marginBottom: 8 }}>课次预览（共{previewDates.length}天，每天{
-                (Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : []).filter(r => r.teacherId).length
-              }节，合计{previewDates.length * (Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : []).filter(r => r.teacherId).length}节）</div>
+              <div style={{ color: '#1F2329', fontWeight: 700, marginBottom: 8 }}>课次预览（共{previewDates.length}天，每天{scheduledCount}节，合计{previewDates.length * scheduledCount}节）</div>
               {previewDates.length ? previewDates.slice(0, 6).map((date, index) => (
                 <div key={date.toISOString()} style={{ color: '#98A2B3', fontSize: 12, lineHeight: '22px' }}>
                   第{index + 1}天 · {format(date, 'yyyy-MM-dd EEEE', { locale: zhCN })}
@@ -816,35 +1156,38 @@ export default function CoursesPage() {
               )) : <div style={{ color: '#98A2B3' }}>请选择上课日后生成预览</div>}
               {previewDates.length > 6 && <div style={{ color: '#98A2B3', fontSize: 12 }}>... 还有 {previewDates.length - 6} 天</div>}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, paddingTop: 12, borderTop: '1px solid #EEE7E1' }}>
               <Button onClick={() => setCreateStep(1)}>上一步</Button>
               <Button type="primary" loading={createLoading} onClick={handleCreate} style={{ background: '#e8784a' }}>
                 确认创建并生成课表
               </Button>
             </div>
           </Space>
-        )}
+          )
+        })()}
       </Modal>
 
       <Modal title="批量复制班次" open={copyOpen} onCancel={() => setCopyOpen(false)} onOk={handleCopy} confirmLoading={copyLoading} okText="确认复制">
         <Space direction="vertical" style={{ width: '100%' }}>
-          <Select showSearch placeholder="选择原班级" style={{ width: '100%' }} value={copySource || undefined} onChange={(value) => setCopySource(value)} options={filteredGroups.map((group: Record<string, unknown>) => ({ label: group.name as string, value: group.id as string }))} />
+          <MobileSelect placeholder="选择原班级" style={{ width: '100%' }} value={copySource || undefined} onChange={(value) => setCopySource(value)} options={filteredGroups.map((group: Record<string, unknown>) => ({ label: group.name as string, value: group.id as string }))} />
           <Input placeholder="新班级名称" value={copyName} onChange={(event) => setCopyName(event.target.value)} />
           <Input type="date" value={copyStartDate} onChange={(event) => setCopyStartDate(event.target.value)} />
         </Space>
       </Modal>
 
-      <Drawer title="课次管理" open={drawerOpen} onClose={() => setDrawerOpen(false)} width={420}>
+      <Drawer title="课次管理" open={drawerOpen} onClose={() => setDrawerOpen(false)} width={isMobile ? '100%' : 420}>
         {drawerLessons ? (
           <Space direction="vertical" style={{ width: '100%' }}>
-            {drawerLessons.map((lesson: Record<string, unknown>) => {
+            {drawerLessonList.length === 0 && <Empty description="暂无待处理课次" image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+            {drawerLessonList.map((lesson: Record<string, unknown>) => {
               const isCompleted = lesson.status === 'COMPLETED'
               const isCancelled = lesson.status === 'CANCELLED'
               return (
-                <div key={lesson.id as string} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FCFBF9', border: '1px solid #EEE7E1', borderRadius: 8, padding: 12, opacity: isCancelled ? 0.55 : 1 }}>
-                  <div>
-                    <div style={{ color: '#1F2329', fontWeight: 600 }}>{format(new Date(lesson.lessonDate as string), 'M月d日 EEEE', { locale: zhCN })}</div>
-                    <div style={{ color: '#98A2B3', fontSize: 12 }}>{lesson.startTime as string}-{lesson.endTime as string}</div>
+                <div key={lesson.id as string} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, background: '#FCFBF9', border: '1px solid #EEE7E1', borderRadius: 8, padding: 12, opacity: isCancelled ? 0.55 : 1 }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ color: '#1F2329', fontWeight: 700, marginBottom: 4 }}>{format(new Date(lesson.lessonDate as string), 'M月d日 EEEE', { locale: zhCN })}</div>
+                    <div style={{ color: '#98A2B3', fontSize: 12, marginBottom: 4 }}>{lesson.startTime as string}-{lesson.endTime as string}</div>
+                    <div style={{ color: '#6B7280', fontSize: 12 }}>{String(lesson.subject || '')}</div>
                   </div>
                   {isCompleted ? <Tag color="green">已完成</Tag> : isCancelled ? <Tag color="red">已取消</Tag> : (
                     <Dropdown menu={{ items: [

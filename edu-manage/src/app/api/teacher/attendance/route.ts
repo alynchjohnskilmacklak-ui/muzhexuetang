@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
 import { requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonWhere, todayRange } from '@/lib/teacher-portal'
 import { calculateAttendanceDeductHours } from '@/lib/attendance-hours'
 import { triggerLessonPay } from '@/lib/teacher-salary'
@@ -94,17 +95,53 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, teacher } = await requireCurrentTeacher()
     const body = await request.json()
     const lessonId = typeof body.lessonId === 'string' ? body.lessonId : ''
     const records = Array.isArray(body.records) ? body.records : []
     if (!lessonId || !records.length) return NextResponse.json({ error: '无效数据' }, { status: 400 })
 
+    const session = await auth()
+    if (!session?.user) return NextResponse.json({ error: '无权限' }, { status: 401 })
+
+    let user = { id: session.user.id }
+    let teacher: { id: string; name?: string | null }
+    let lessonWhere: Record<string, unknown>
+
+    if (session.user.role === 'admin') {
+      const lessonForAdmin = await prisma.classLesson.findUnique({
+        where: { id: lessonId },
+        include: {
+          teacher: { select: { id: true, name: true } },
+          group: { include: { teacher: { select: { id: true, name: true } } } },
+        },
+      })
+      if (!lessonForAdmin) return NextResponse.json({ error: '课次不存在' }, { status: 404 })
+      const lessonTeacher = lessonForAdmin.teacher || lessonForAdmin.group.teacher
+      teacher = { id: lessonTeacher.id, name: lessonTeacher.name }
+      lessonWhere = { id: lessonId }
+    } else {
+      const result = await requireCurrentTeacher()
+      user = { id: result.user.id }
+      teacher = { id: result.teacher.id, name: result.teacher.name }
+      lessonWhere = { id: lessonId, ...teacherLessonWhere(teacher.id) }
+    }
+
     const lesson = await prisma.classLesson.findFirst({
-      where: { id: lessonId, ...teacherLessonWhere(teacher.id) },
+      where: lessonWhere,
       include: { group: { include: { course: true } } },
     })
     if (!lesson) return NextResponse.json({ error: '不可操作' }, { status: 403 })
+
+    const [lessonHour, lessonMinute = 0] = (lesson.startTime || '00:00').split(':').map(Number)
+    const lessonStart = new Date(lesson.lessonDate)
+    lessonStart.setHours(lessonHour, lessonMinute, 0, 0)
+    const earliestAllowed = new Date(lessonStart.getTime() - 30 * 60 * 1000)
+    if (new Date() < earliestAllowed) {
+      return NextResponse.json(
+        { error: `未到考勤时间，课程 ${lesson.startTime} 开始，最早 30 分钟前可提交` },
+        { status: 400 }
+      )
+    }
 
     const group = lesson.group
     const counts = { PRESENT: 0, LEAVE: 0, ABSENT: 0, MAKEUP: 0 }
@@ -121,7 +158,13 @@ export async function POST(request: NextRequest) {
         const studentId = typeof rec.studentId === 'string' ? rec.studentId : ''
         const status = VALID_STATUS.has(rec.status) ? rec.status as keyof typeof counts : 'PRESENT'
         const enrollment = await tx.enrollment.findFirst({
-          where: { studentId, groupId: group.id, status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
+          where: {
+            studentId,
+            groupId: group.id,
+            status: 'ACTIVE',
+            student: { status: { not: 'INACTIVE' } },
+            group: { course: { type: group.course.type } },
+          },
         })
         if (!enrollment) continue
         counts[status] += 1
@@ -200,10 +243,6 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      if (!alreadyDeducted) {
-        await triggerLessonPay(lessonId)
-      }
-
       await tx.activityLog.create({
         data: {
           userId: user.id,
@@ -216,6 +255,11 @@ export async function POST(request: NextRequest) {
         },
       })
     })
+
+    // 在 transaction 提交成功后触发薪资发放，与考勤事务解耦（幂等，不会重复）
+    if (!alreadyDeducted) {
+      await triggerLessonPay(lessonId)
+    }
 
     const msg = alreadyDeducted
       ? `考勤已更新（未重复扣课时）：出勤${counts.PRESENT}/请假${counts.LEAVE}/旷课${counts.ABSENT}`

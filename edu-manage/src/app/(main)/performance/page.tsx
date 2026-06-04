@@ -6,6 +6,7 @@ import { Button, Card, Empty, Input, Select, Space, Spin } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { PageLayout } from '@/components/Layout/PageLayout'
+import { MobileSelect } from '@/components/MobileSelect'
 import { MOOD_META } from '@/lib/performance'
 import { BadgeWall } from './_components/BadgeWall'
 import { FeedItem } from './_components/FeedItem'
@@ -83,9 +84,8 @@ export default function PerformancePage() {
           <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
             <Space wrap style={{ width: '100%', justifyContent: 'space-between' }}>
               <Space wrap>
-                <Select
+                <MobileSelect
                   allowClear
-                  showSearch
                   placeholder="按学员筛选"
                   value={studentId || undefined}
                   onChange={(value) => setStudentId(value || '')}
@@ -93,7 +93,6 @@ export default function PerformancePage() {
                     label: `${student.name}${student.grade ? ` / ${student.grade}` : ''}`,
                     value: student.id as string,
                   }))}
-                  optionFilterProp="label"
                   style={{ width: 220 }}
                 />
                 <Select
