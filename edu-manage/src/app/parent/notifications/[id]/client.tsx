@@ -4,6 +4,7 @@ import { Alert, Button, Card, Descriptions, Tag, Typography } from 'antd'
 import { ArrowLeftOutlined, BookOutlined, StarOutlined, FileTextOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
+import { normalizeUploadUrl } from '@/lib/upload-url'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -129,7 +130,7 @@ export function NotificationDetailClient({
                 {relatedData.imageUrls?.length > 0 && (
                   <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
                     {relatedData.imageUrls.map((url: string, i: number) => (
-                      <img key={i} src={url} alt={`试卷 ${i + 1}`} style={{ width: 120, height: 160, objectFit: 'cover', borderRadius: 8, border: '1px solid #F0DDD2' }} />
+                      <img key={i} src={normalizeUploadUrl(url)} alt={`试卷 ${i + 1}`} style={{ width: 120, height: 160, objectFit: 'cover', borderRadius: 8, border: '1px solid #F0DDD2' }} />
                     ))}
                   </div>
                 )}

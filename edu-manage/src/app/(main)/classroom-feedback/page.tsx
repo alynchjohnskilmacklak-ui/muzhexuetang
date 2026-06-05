@@ -6,9 +6,10 @@ import { Button, Card, Col, Empty, Input, Row, Select, Spin, Tag, Typography } f
 import { ReloadOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { normalizeUploadUrl } from '@/lib/upload-url'
 
 const { Paragraph } = Typography
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = (url: string) => fetch(url).then((res) => { if (!res.ok) throw new Error('加载失败'); return res.json() })
 
 type AdminFeedback = {
   id: string
@@ -190,8 +191,8 @@ export default function ClassroomFeedbackAdminPage() {
                     <span style={{ fontSize: 12, color: '#98A2B3', marginBottom: 4, display: 'block' }}>课堂资料（{images.length}张）：</span>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                       {images.slice(0, 4).map((url, index) => (
-                        <a key={`${url}-${index}`} href={url} target="_blank" rel="noopener noreferrer">
-                          <img src={url} alt="课堂资料" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid #EEE7E1' }} />
+                        <a key={`${url}-${index}`} href={normalizeUploadUrl(url)} target="_blank" rel="noopener noreferrer">
+                          <img src={normalizeUploadUrl(url)} alt="课堂资料" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid #EEE7E1' }} />
                         </a>
                       ))}
                       {images.length > 4 && <div style={{ width: 56, height: 56, borderRadius: 6, background: '#f5f2ee', display: 'grid', placeItems: 'center', fontSize: 12, color: '#98A2B3' }}>+{images.length - 4}</div>}

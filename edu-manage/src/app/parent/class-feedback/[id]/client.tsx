@@ -5,6 +5,7 @@ import { ArrowLeftOutlined, BookOutlined, ClockCircleOutlined, EnvironmentOutlin
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { normalizeUploadUrl } from '@/lib/upload-url'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -103,7 +104,7 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
                 {feedback.imageUrls.map((url: string, i: number) => (
                   <Image
                     key={i}
-                    src={url}
+                    src={normalizeUploadUrl(url)}
                     alt={`资料 ${i + 1}`}
                     width="100%"
                     height={isMobile ? 120 : 140}

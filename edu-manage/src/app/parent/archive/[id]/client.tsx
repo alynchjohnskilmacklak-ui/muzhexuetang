@@ -4,6 +4,7 @@ import { Card, Descriptions, Empty, Image, Tag, Typography, Button } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
+import { normalizeUploadUrl } from '@/lib/upload-url'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -68,7 +69,7 @@ export function PaperDetailClient({ paper }: { paper: any }) {
                 {paper.imageUrls.map((url: string, i: number) => (
                   <Image
                     key={i}
-                    src={url}
+                    src={normalizeUploadUrl(url)}
                     alt={`试卷 ${i + 1}`}
                     width={200}
                     height={260}

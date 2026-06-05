@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Alert, Button, Card, Empty, Image, Input, Progress, Space, Tag, Typography } from 'antd'
-import { HeartOutlined, HeartFilled, MessageOutlined, EyeOutlined } from '@ant-design/icons'
+import { Button, Card, Image, Input, Space, Tag, Typography } from 'antd'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { toast } from 'sonner'
@@ -11,7 +10,7 @@ import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 
-const { Title, Text } = Typography
+const { Text } = Typography
 
 type Paper = {
   id: string; title: string; subject: string; paperDate: string; imageUrls: string[];
@@ -118,51 +117,46 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
       <ChildSwitcher />
-      {/* Hero stats */}
-      <Card style={{
-        borderRadius: 12,
-        background: 'linear-gradient(135deg, rgba(232,120,74,.12), rgba(232,120,74,.04))',
-        border: '1px solid rgba(232,120,74,.2)',
-      }}>
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 16 }}>
-          {[
-            { label: '已收试卷', value: stats.totalPapers, unit: '份' },
-            { label: '总题目数', value: stats.totalQuestions, unit: '题' },
-            { label: '已掌握率', value: `${stats.masteredRate}%`, unit: null },
-            { label: '需加强', value: stats.needsPractice, unit: '题' },
-          ].map((item) => (
-            <div key={item.label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: isMobile ? 18 : 28, fontWeight: 700, color: '#E8784A' }}>{item.value}</div>
-              <div style={{ fontSize: 13, color: '#1a1201', marginTop: 4 }}>{item.label}</div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Weak topics */}
-      {weakTopics.length > 0 && (
-        <Card title="待加强知识点 TOP 5" size="small" style={{ borderRadius: 12, background: '#fff', border: '0.5px solid rgba(0,0,0,.08)' }}>
-          <Progress
-            percent={100}
-            success={{ percent: stats.masteredRate, strokeColor: '#1D9E75' }}
-            strokeColor="#E24B4A"
-            format={() => null}
-          />
-          <Space wrap style={{ marginTop: 8 }}>
-            {weakTopics.map(([topic, count]) => (
-              <Tag key={topic} color="red" style={{ borderRadius: 99 }}>
-                {topic} ×{count}
-              </Tag>
+      {/* 统计摘要条 */}
+      {stats.totalPapers > 0 && (
+        <div style={{
+          background: 'linear-gradient(135deg, #E8784A 0%, #D4693A 100%)',
+          borderRadius: 16, padding: isMobile ? '16px 18px' : '18px 24px',
+          marginBottom: 16, marginTop: 16, color: '#fff',
+        }}>
+          <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 10 }}>学习档案总览</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            {[
+              { label: '试卷数', value: stats.totalPapers },
+              { label: '掌握率', value: `${stats.masteredRate}%` },
+              { label: '待突破', value: stats.needsPractice },
+            ].map(item => (
+              <div key={item.label} style={{ textAlign: 'center', background: 'rgba(255,255,255,.15)', borderRadius: 10, padding: '10px 6px' }}>
+                <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 800, lineHeight: 1 }}>{item.value}</div>
+                <div style={{ fontSize: 11, opacity: 0.75, marginTop: 4 }}>{item.label}</div>
+              </div>
             ))}
-          </Space>
-        </Card>
+          </div>
+          {weakTopics.length > 0 && (
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,.2)' }}>
+              <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6 }}>需重点练习：</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                {weakTopics.map(([topic, count]) => (
+                  <span key={topic} style={{ fontSize: 11, background: 'rgba(255,255,255,.2)', padding: '2px 10px', borderRadius: 9999 }}>
+                    {topic} ×{count}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
-      {/* Paper cards */}
+      {/* 课堂反馈 */}
       {feedbacks.length > 0 && (
-        <Card title="课堂反馈" style={{ borderRadius: 12, background: '#fff', border: '0.5px solid rgba(0,0,0,.08)' }}>
+        <Card title="课堂反馈" style={{ borderRadius: 12, background: '#fff', border: '0.5px solid rgba(0,0,0,.08)', marginBottom: 16 }}>
           <Space direction="vertical" style={{ width: '100%' }}>
             {feedbacks.map((item) => (
               <div key={item.id} style={{ padding: 12, borderRadius: 10, background: '#faf8f5' }}>
@@ -174,7 +168,7 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
                 {Array.isArray(item.homework) && item.homework.length > 0 && (
                   <div style={{ marginTop: 8 }}>
                     <Text strong>课后作业：</Text>
-                    {item.homework.map((hw: any) => <div key={hw.order} style={{ fontSize: 13 }}>{hw.order}. {hw.content}</div>)}
+                    {item.homework.map((hw: any, i: number) => <div key={i} style={{ fontSize: 13 }}>{i + 1}. {hw.content || hw.title || ''}</div>)}
                   </div>
                 )}
                 {item.imageUrls?.length > 0 && (
@@ -190,157 +184,214 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
       )}
 
       {papers.length === 0 ? (
-        <Card style={{ borderRadius: 12, textAlign: 'center', padding: 60, background: '#fff', border: '0.5px solid rgba(0,0,0,.08)' }}>
-          <Empty description="老师还没有推送试卷" />
-        </Card>
+        <div style={{ textAlign: 'center', padding: '48px 0', color: '#98A2B3' }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
+          <div style={{ fontSize: 15, fontWeight: 600 }}>暂无试卷记录</div>
+          <div style={{ fontSize: 13, marginTop: 6 }}>老师批改后会在这里显示</div>
+        </div>
       ) : (
-        papers.map((paper) => {
-          const isExpanded = expandedId === paper.id
-          const hasReacted = paper.reactions.some((r) => r.userId === parentId)
-          const subjectColor = SUBJECT_COLORS[paper.subject] || '#E8784A'
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {papers.map(paper => {
+            const isExpanded = expandedId === paper.id
+            const subjectColor = SUBJECT_COLORS[paper.subject] || '#8D806F'
+            const mastered = paper.questions.filter(q => q.mastery === 'MASTERED').length
+            const total = paper.questions.length
+            const masteredPct = total ? Math.round((mastered / total) * 100) : 0
+            const hasReacted = paper.reactions.some(r => r.type === 'HEART' && r.userId === parentId)
 
-          return (
-            <Card
-              key={paper.id}
-              style={{ borderRadius: 12, background: '#fff', border: '0.5px solid rgba(0,0,0,.08)' }}
-              title={
-                <Space>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 8,
-                    background: `${subjectColor}22`, color: subjectColor,
-                    display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: 16,
-                  }}>
-                    {paper.subject[0]}
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 600, color: '#1a1201' }}>{paper.title}</div>
-                    <div style={{ fontSize: 12, color: '#9a8e7a' }}>
-                      {paper.teacher.name} · {format(new Date(paper.paperDate), 'yyyy年M月d日', { locale: zhCN })}
+            return (
+              <div key={paper.id} style={{
+                background: '#fff',
+                borderRadius: 14,
+                border: `1px solid ${isExpanded ? subjectColor + '40' : '#EEE7E1'}`,
+                overflow: 'hidden',
+                boxShadow: isExpanded ? `0 4px 20px ${subjectColor}15` : 'none',
+                transition: 'all 0.2s',
+              }}>
+                {/* 卡片头部 */}
+                <div
+                  onClick={() => handleExpand(paper.id)}
+                  style={{ padding: '14px 16px', cursor: 'pointer' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                    <div style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
+                      <div style={{ fontWeight: 700, fontSize: 15, color: '#1F2329', marginBottom: 4, lineHeight: 1.3 }}>
+                        {paper.title}
+                        {!paper.isReadByParent && <Tag color="red" style={{ borderRadius: 9999, marginLeft: 8, fontSize: 10 }}>新</Tag>}
+                      </div>
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: subjectColor, background: `${subjectColor}15`, padding: '2px 10px', borderRadius: 9999 }}>
+                          {paper.subject}
+                        </span>
+                        <span style={{ fontSize: 11, color: '#C4BAB0' }}>
+                          {paper.teacher.name}
+                        </span>
+                        {paper.paperDate && (
+                          <span style={{ fontSize: 11, color: '#C4BAB0' }}>
+                            {format(new Date(paper.paperDate), 'M月d日', { locale: zhCN })}
+                          </span>
+                        )}
+                      </div>
                     </div>
+                    {total > 0 && (
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontSize: 22, fontWeight: 800, color: masteredPct >= 70 ? '#1D9E75' : masteredPct >= 40 ? '#E87545' : '#E24B4A', lineHeight: 1 }}>
+                          {masteredPct}%
+                        </div>
+                        <div style={{ fontSize: 11, color: '#98A2B3' }}>掌握率</div>
+                      </div>
+                    )}
                   </div>
-                  {!paper.isReadByParent && <Tag color="red" style={{ borderRadius: 99 }}>新试卷</Tag>}
-                </Space>
-              }
-            >
-              {/* Tags */}
-              {paper.tags.length > 0 && (
-                <Space wrap size={[4, 4]} style={{ marginBottom: 12 }}>
-                  {paper.tags.map((tag) => <Tag key={tag} style={{ borderRadius: 99 }}>{tag}</Tag>)}
-                </Space>
-              )}
 
-              {/* Image preview */}
-              {paper.imageUrls.length > 0 && (
-                <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-                  {paper.imageUrls.slice(0, 3).map((url, i) => (
-                    <Image key={i} src={normalizeUploadUrl(url)} alt={`${paper.title} page ${i + 1}`} width={120} height={90} style={{ objectFit: 'cover', borderRadius: 8, background: '#f5f5f5' }} />
-                  ))}
-                  <Button icon={<EyeOutlined />} size="small" onClick={() => handleExpand(paper.id)}>
-                    {isExpanded ? '收起详情' : `查看全部 (${paper.imageUrls.length}张)`}
-                  </Button>
-                </div>
-              )}
+                  {/* 进度条 */}
+                  {total > 0 && (
+                    <div style={{ height: 6, borderRadius: 9999, background: '#F5F2EE', overflow: 'hidden', marginBottom: 8 }}>
+                      <div style={{
+                        height: '100%', borderRadius: 9999, width: `${masteredPct}%`,
+                        background: `linear-gradient(90deg, #1D9E75, ${masteredPct >= 70 ? '#1D9E75' : '#E87545'})`,
+                        transition: 'width 0.6s ease',
+                      }} />
+                    </div>
+                  )}
 
-              {/* Expanded: all images + questions */}
-              {isExpanded && (
-                <div style={{ marginTop: 12, padding: 16, borderRadius: 10, background: '#faf8f5' }}>
-                  {paper.imageUrls.length > 3 && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8, marginBottom: 16 }}>
-                      {paper.imageUrls.slice(3).map((url, i) => (
-                        <Image key={i} src={normalizeUploadUrl(url)} alt={`page ${i + 4}`} style={{ borderRadius: 8, objectFit: 'cover', aspectRatio: '4/3', background: '#e8e4de' }} />
+                  {/* 知识点预览 */}
+                  {paper.tags.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                      {paper.tags.slice(0, 5).map(tag => (
+                        <span key={tag} style={{ fontSize: 11, padding: '1px 8px', borderRadius: 9999, background: '#F5F2EE', color: '#8D806F' }}>{tag}</span>
                       ))}
+                      {paper.tags.length > 5 && <span style={{ fontSize: 11, color: '#98A2B3' }}>+{paper.tags.length - 5}</span>}
                     </div>
                   )}
+                </div>
 
-                  {/* Questions */}
-                  {paper.questions.length > 0 && (
-                    <div style={{ marginBottom: 14 }}>
-                      <Text strong style={{ color: '#1a1201' }}>题目标注</Text>
-                      <Space direction="vertical" size={6} style={{ width: '100%', marginTop: 8 }}>
-                        {paper.questions.map((q) => {
-                          const badge = MASTERY_BADGE[q.mastery] || MASTERY_BADGE.NEEDS_REVIEW
-                          return (
-                            <div key={q.order} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '8px 12px', borderRadius: 8, background: '#fff', border: '0.5px solid rgba(0,0,0,.06)' }}>
-                              <span style={{ color: '#9a8e7a', fontSize: 12, minWidth: 30 }}>#{q.order}</span>
-                              <span style={{ color: '#1a1201', fontWeight: 500, minWidth: 100 }}>{q.topic}</span>
-                              <span style={{ color: '#5a4e3a', fontSize: 13, flex: 1 }}>{q.teacherNote}</span>
-                              <Tag color={badge.color} style={{ borderRadius: 99, fontSize: 11 }}>{badge.label}</Tag>
+                {/* 展开内容 */}
+                {isExpanded && (
+                  <div style={{ borderTop: '1px solid #F5F2EE' }}>
+                    {/* 总评语 */}
+                    {paper.overallComment && (
+                      <div style={{ padding: '12px 16px', background: '#FFFBF6', borderLeft: '4px solid #E8784A' }}>
+                        <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 4 }}>老师评语</div>
+                        <div style={{ fontSize: 14, color: '#1F2329', lineHeight: 1.6 }}>{paper.overallComment}</div>
+                      </div>
+                    )}
+
+                    {/* 题目掌握情况 */}
+                    {paper.questions.length > 0 && (
+                      <div style={{ padding: '12px 16px' }}>
+                        <div style={{ display: 'flex', gap: 12, marginBottom: 10, flexWrap: 'wrap' }}>
+                          {[
+                            { count: mastered, label: '已掌握', color: '#1D9E75' },
+                            { count: paper.questions.filter(q => q.mastery === 'NEEDS_REVIEW').length, label: '需巩固', color: '#f5a623' },
+                            { count: paper.questions.filter(q => q.mastery === 'NEEDS_PRACTICE').length, label: '需重点练习', color: '#E24B4A' },
+                          ].map(item => item.count > 0 && (
+                            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, display: 'inline-block' }} />
+                              <span style={{ fontSize: 12, color: item.color }}>{item.label} {item.count}题</span>
                             </div>
-                          )
-                        })}
-                      </Space>
+                          ))}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {paper.questions.map(q => {
+                            const m = MASTERY_BADGE[q.mastery] || MASTERY_BADGE.NEEDS_REVIEW
+                            return (
+                              <div key={q.order} style={{
+                                display: 'flex', gap: 10, alignItems: 'flex-start',
+                                padding: '8px 10px', borderRadius: 8,
+                                background: `${m.color}08`, border: `1px solid ${m.color}20`,
+                              }}>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: m.color, minWidth: 32, flexShrink: 0 }}>#{q.order}</span>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: 13, fontWeight: 600, color: '#1F2329' }}>{q.topic}</div>
+                                  {q.teacherNote && (
+                                    <div style={{ fontSize: 12, color: '#8D806F', marginTop: 2 }}>{q.teacherNote}</div>
+                                  )}
+                                </div>
+                                <span style={{ fontSize: 11, color: m.color, background: `${m.color}15`, padding: '2px 8px', borderRadius: 9999, flexShrink: 0 }}>
+                                  {m.label}
+                                </span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 试卷图片 */}
+                    {paper.imageUrls.length > 0 && (
+                      <div style={{ padding: '0 16px 12px' }}>
+                        <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 8 }}>试卷原图</div>
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                          <Image.PreviewGroup>
+                            {paper.imageUrls.map((url, i) => (
+                              <Image key={i} src={normalizeUploadUrl(url)} alt={`第${i + 1}页`}
+                                width={isMobile ? 80 : 100} height={isMobile ? 100 : 130}
+                                style={{ objectFit: 'cover', borderRadius: 8, border: '1px solid #EEE7E1' }} />
+                            ))}
+                          </Image.PreviewGroup>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 底部操作 */}
+                    <div style={{ padding: '10px 16px', borderTop: '1px solid #F5F2EE', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                      <button onClick={() => react(paper.id)} style={{
+                        display: 'flex', alignItems: 'center', gap: 4, padding: '6px 14px', borderRadius: 9999,
+                        background: hasReacted ? '#FFF3EC' : '#F5F2EE',
+                        border: `1px solid ${hasReacted ? '#E8784A' : 'transparent'}`,
+                        cursor: 'pointer', color: hasReacted ? '#E8784A' : '#8D806F', fontSize: 13,
+                      }}>
+                        {hasReacted ? '❤️' : '🤍'} {hasReacted ? '已感谢' : '感谢老师'}
+                      </button>
+                      <button onClick={() => {
+                        if (commentingId === paper.id) {
+                          setCommentingId(null)
+                          setCommentText('')
+                        } else {
+                          setCommentingId(paper.id)
+                          setExpandedId(paper.id)
+                          setCommentText('')
+                        }
+                      }} style={{
+                        display: 'flex', alignItems: 'center', gap: 4, padding: '6px 14px', borderRadius: 9999,
+                        background: '#F5F2EE', border: 'none', cursor: 'pointer', color: '#8D806F', fontSize: 13,
+                      }}>
+                        留言{paper.comments.length > 0 ? `（${paper.comments.length}）` : ''}
+                      </button>
                     </div>
-                  )}
 
-                  {/* Teacher comment */}
-                  {paper.overallComment && (
-                    <Alert
-                      type="warning"
-                      message="老师评语"
-                      description={paper.overallComment}
-                      style={{ marginBottom: 12, borderRadius: 8 }}
-                    />
-                  )}
-                </div>
-              )}
-
-              {/* Action bar */}
-              <div style={{ display: 'flex', gap: 8, marginTop: 12, borderTop: '1px solid rgba(0,0,0,.06)', paddingTop: 12 }}>
-                <Button
-                  icon={hasReacted ? <HeartFilled style={{ color: '#E24B4A' }} /> : <HeartOutlined />}
-                  onClick={() => react(paper.id)}
-                  size="small"
-                  type={hasReacted ? 'primary' : 'default'}
-                  style={hasReacted ? { background: 'rgba(226,75,74,.1)', borderColor: 'rgba(226,75,74,.3)', color: '#E24B4A' } : {}}
-                >
-                  感谢老师
-                </Button>
-                <Button
-                  icon={<MessageOutlined />}
-                  size="small"
-                  onClick={() => setCommentingId(commentingId === paper.id ? null : paper.id)}
-                >
-                  回复老师
-                </Button>
-                <Button icon={<EyeOutlined />} size="small" onClick={() => handleExpand(paper.id)}>
-                  查看详情
-                </Button>
+                    {/* 留言区 */}
+                    {commentingId === paper.id && (
+                      <div style={{ padding: '0 16px 14px' }}>
+                        {paper.comments.map(c => (
+                          <div key={c.id} style={{
+                            padding: '8px 12px', marginBottom: 6, borderRadius: 8,
+                            background: c.author.role === 'parent' ? '#FFF3EC' : '#F0FDF4',
+                            border: `1px solid ${c.author.role === 'parent' ? '#F5C9A3' : '#BBF7D0'}`,
+                          }}>
+                            <div style={{ fontSize: 11, color: '#98A2B3', marginBottom: 4 }}>
+                              {c.author.name} · {new Date(c.createdAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                            </div>
+                            <div style={{ fontSize: 13, color: '#1F2329' }}>{c.content}</div>
+                          </div>
+                        ))}
+                        <Space.Compact style={{ width: '100%' }}>
+                          <Input value={commentText} onChange={e => setCommentText(e.target.value)}
+                            placeholder="写下你的留言..." maxLength={200}
+                            onPressEnter={() => { if (commentText.trim()) submitComment(paper.id) }} />
+                          <Button type="primary" style={{ background: '#E8784A', borderColor: '#E8784A' }}
+                            onClick={() => { if (commentText.trim()) submitComment(paper.id) }}>
+                            发送
+                          </Button>
+                        </Space.Compact>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-
-              {/* Comments */}
-              {paper.comments.length > 0 && (
-                <div style={{ marginTop: 10 }}>
-                  {paper.comments.map((c) => (
-                    <div key={c.id} style={{ padding: '6px 10px', borderRadius: 6, background: '#faf8f5', marginBottom: 4 }}>
-                      <Text strong style={{ fontSize: 12, color: c.author.role === 'parent' ? '#E8784A' : '#5a4e3a' }}>
-                        {c.author.name}
-                      </Text>
-                      <Text style={{ fontSize: 13, color: '#1a1201', marginLeft: 8 }}>{c.content}</Text>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Comment input */}
-              {commentingId === paper.id && (
-                <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
-                  <Input.TextArea
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="给老师留言..."
-                    autoSize={{ minRows: 2, maxRows: 4 }}
-                    maxLength={300}
-                    showCount
-                    style={{ flex: 1 }}
-                  />
-                  <Button type="primary" onClick={() => submitComment(paper.id)} style={{ background: '#E8784A' }}>
-                    发送
-                  </Button>
-                </div>
-              )}
-            </Card>
-          )
-        })
+            )
+          })}
+        </div>
       )}
     </div>
   )
