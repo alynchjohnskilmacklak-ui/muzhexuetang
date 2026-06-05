@@ -9,6 +9,7 @@ import { zhCN } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 
 const { Title, Text } = Typography
 
@@ -38,7 +39,7 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
   const isMobile = useIsMobile() ?? false
   const { data } = useSWR('/api/exam-papers?mine=true', fetcher, {
     fallbackData: { papers: initialPapers },
-    refreshInterval: 30_000,
+    refreshInterval: 300_000,
   })
   const papers: Paper[] = Array.isArray(data?.papers) ? data.papers : initialPapers
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -118,6 +119,7 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <ChildSwitcher />
       {/* Hero stats */}
       <Card style={{
         borderRadius: 12,

@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { MOOD_META, PERFORMANCE_BADGES, RATING_LABELS } from '@/lib/performance'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { formatHours } from '@/lib/format'
+import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 
 type ParentPost = {
   id: string
@@ -183,7 +184,7 @@ export default function PerformanceClient({ student, initialPosts }: { student: 
   const [visibleLimit, setVisibleLimit] = useState(10)
   const { data, mutate, isLoading } = useSWR(student ? `/api/performance?studentId=${student.id}&limit=${visibleLimit}` : null, fetcher, {
     fallbackData: { posts: initialPosts },
-    refreshInterval: 30_000,
+    refreshInterval: 300_000,
   })
   const posts: ParentPost[] = Array.isArray(data?.posts) ? data.posts : []
   const totalPosts = Number(data?.total || posts.length)
@@ -195,6 +196,7 @@ export default function PerformanceClient({ student, initialPosts }: { student: 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <ChildSwitcher />
       <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
         <Space align="center" size={16}>
           <Avatar size={56} icon={<UserOutlined />} style={{ background: '#E8784A' }} />

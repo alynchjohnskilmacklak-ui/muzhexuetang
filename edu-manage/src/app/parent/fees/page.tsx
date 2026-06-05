@@ -6,14 +6,19 @@ import { parentActiveStudentWhere } from '@/lib/business-visibility'
 
 export const dynamic = 'force-dynamic'
 
-export default async function ParentFeesPage() {
+export default async function ParentFeesPage({ searchParams }: { searchParams?: Promise<{ childId?: string }> }) {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
   const userId = (session.user as { id: string }).id
+  const params = await searchParams
+  const childId = params?.childId || ''
+  const studentWhere = childId
+    ? { ...parentActiveStudentWhere(userId), id: childId }
+    : parentActiveStudentWhere(userId)
 
   const fees = await prisma.fee.findMany({
-    where: { student: parentActiveStudentWhere(userId), OR: [{ courseId: null }, { course: { isActive: true } }] },
+    where: { student: studentWhere, OR: [{ courseId: null }, { course: { isActive: true } }] },
     include: { student: true, course: true },
     orderBy: { createdAt: 'desc' },
   })

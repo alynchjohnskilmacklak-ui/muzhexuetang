@@ -13,6 +13,7 @@ interface UserAccount {
   status: AccountStatus
   lastLoginAt: string | null
   createdAt: string
+  students?: { id: string; name: string; grade?: string | null; status?: string }[]
 }
 
 interface AccountsResponse {
@@ -56,6 +57,24 @@ export function ParentAccountsTab() {
   const columns = [
     { title: '姓名', dataIndex: 'name', key: 'name', width: 140 },
     { title: '邮箱', dataIndex: 'email', key: 'email', width: 240 },
+    {
+      title: '名下孩子',
+      key: 'students',
+      width: 260,
+      render: (_: unknown, record: UserAccount) => {
+        const kids = record.students || []
+        if (!kids.length) return <Tag color="orange">暂无绑定</Tag>
+        return (
+          <Space wrap size={4}>
+            {kids.map((student) => (
+              <Tag key={student.id} style={{ borderRadius: 9999 }}>
+                {student.name}{student.grade ? ` · ${student.grade}` : ''}
+              </Tag>
+            ))}
+          </Space>
+        )
+      },
+    },
     { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: statusTag },
     { title: '最近登录', dataIndex: 'lastLoginAt', key: 'lastLoginAt', width: 180, render: formatDate },
     {

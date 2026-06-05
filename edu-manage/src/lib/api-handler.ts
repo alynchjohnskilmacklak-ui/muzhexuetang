@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit } from './api-rate-limit'
 
 type Handler = (...args: any[]) => Promise<Response>
 
@@ -9,6 +10,20 @@ type Handler = (...args: any[]) => Promise<Response>
 export function apiHandler<T extends Handler>(handler: T): T {
   return (async (...args: Parameters<T>) => {
     try {
+      const req = args[0] as NextRequest | undefined
+      if (req?.url) {
+        const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+          || req.headers.get('x-real-ip')
+          || '0.0.0.0'
+        const path = new URL(req.url).pathname
+        const { allowed, retryAfter } = checkRateLimit(ip, path)
+        if (!allowed) {
+          return NextResponse.json(
+            { error: '请求过于频繁，请稍后重试' },
+            { status: 429, headers: retryAfter ? { 'Retry-After': String(retryAfter) } : {} }
+          )
+        }
+      }
       return await handler(...args)
     } catch (err) {
       const isDev = process.env.NODE_ENV !== 'production'

@@ -107,6 +107,41 @@ export const GET = apiHandler(async (req: NextRequest) => {
         take: limit,
       })
 
+  const notificationRows = source === 'post' || source === 'paper'
+    ? []
+    : await prisma.notification.findMany({
+        where: {
+          status: 'ACTIVE',
+          ...(source === 'feedback' ? { relatedType: 'CLASSROOM_FEEDBACK' } : {}),
+          ...(unreadOnly ? { read: false } : {}),
+          ...(q ? {
+            OR: [
+              { title: { contains: q } },
+              { content: { contains: q } },
+              { student: { name: { contains: q } } },
+            ],
+          } : {}),
+        },
+        include: {
+          user: { select: { id: true, name: true, role: true } },
+          sender: { select: { id: true, name: true, role: true } },
+          student: { select: { id: true, name: true, parentName: true, parentPhone: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+      })
+
+  const feedbackIds = [...new Set(notificationRows
+    .filter((item) => item.relatedType === 'CLASSROOM_FEEDBACK' && item.relatedId)
+    .map((item) => item.relatedId as string))]
+  const feedbackTeachers = feedbackIds.length
+    ? await prisma.classroomFeedback.findMany({
+        where: { id: { in: feedbackIds } },
+        select: { id: true, teacher: { select: { id: true, name: true } } },
+      })
+    : []
+  const feedbackTeacherMap = new Map(feedbackTeachers.map((item) => [item.id, item.teacher]))
+
   const items = [
     ...postComments.map((comment) => ({
       id: comment.id,
@@ -134,6 +169,27 @@ export const GET = apiHandler(async (req: NextRequest) => {
       teacher: comment.paper.teacher,
       targetTitle: `${comment.paper.subject} · ${comment.paper.title}`,
     })),
+    ...notificationRows.map((notification) => ({
+      id: notification.id,
+      type: 'notification',
+      targetId: notification.id,
+      scene: notification.relatedType === 'CLASSROOM_FEEDBACK' ? '课堂反馈通知' : '直接通知',
+      content: notification.content,
+      isRead: notification.read,
+      createdAt: notification.createdAt,
+      author: {
+        id: notification.sender?.id || 'system',
+        name: notification.sender?.name || '系统通知',
+        role: notification.sender?.role || 'admin',
+        label: roleLabel(notification.sender?.role || 'admin'),
+      },
+      parentUserId: notification.userId,
+      parent: notification.user,
+      student: notification.student,
+      teacher: notification.relatedId ? feedbackTeacherMap.get(notification.relatedId) || null : null,
+      targetTitle: notification.title,
+      href: notification.href || notification.link,
+    })),
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, limit)
 
   const unreadCount = items.filter((item) => item.author.role === 'parent' && !item.isRead).length
@@ -145,10 +201,33 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
-  const type = body.type === 'paper' ? 'paper' : 'post'
+  const type = body.type === 'paper' ? 'paper' : body.type === 'notification' ? 'notification' : 'post'
   const targetId = typeof body.targetId === 'string' ? body.targetId : ''
   const content = typeof body.content === 'string' ? body.content.trim() : ''
   if (!targetId || !content) return NextResponse.json({ error: '请填写回复内容' }, { status: 400 })
+
+  if (type === 'notification') {
+    const target = await prisma.notification.findUnique({
+      where: { id: targetId },
+      select: { userId: true, studentId: true, title: true },
+    })
+    if (!target) return NextResponse.json({ error: '通知不存在' }, { status: 404 })
+    const notification = await prisma.notification.create({
+      data: {
+        userId: target.userId,
+        studentId: target.studentId,
+        senderId: user.id,
+        type: 'INFO',
+        relatedType: 'ADMIN_REPLY',
+        relatedId: targetId,
+        title: `管理端回复：${target.title}`.slice(0, 80),
+        content,
+        href: '/parent/notifications',
+      },
+    })
+    revalidatePath('/parent/notifications')
+    return NextResponse.json(notification, { status: 201 })
+  }
 
   if (type === 'paper') {
     const paper = await prisma.examPaper.findFirst({ where: { id: targetId, status: { not: 'DELETED' } }, select: { id: true } })
@@ -178,11 +257,13 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
-  const type = body.type === 'paper' ? 'paper' : 'post'
+  const type = body.type === 'paper' ? 'paper' : body.type === 'notification' ? 'notification' : 'post'
   const id = typeof body.id === 'string' ? body.id : ''
   if (!id) return NextResponse.json({ error: '缺少留言ID' }, { status: 400 })
 
-  if (type === 'paper') {
+  if (type === 'notification') {
+    await prisma.notification.update({ where: { id }, data: { read: true, readAt: new Date() } })
+  } else if (type === 'paper') {
     await prisma.paperComment.update({ where: { id }, data: { isRead: true } })
   } else {
     await prisma.postComment.update({ where: { id }, data: { isRead: true } })
@@ -195,12 +276,15 @@ export const DELETE = apiHandler(async (req: NextRequest) => {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = req.nextUrl
-  const type = searchParams.get('type') === 'paper' ? 'paper' : 'post'
+  const type = searchParams.get('type') === 'paper' ? 'paper' : searchParams.get('type') === 'notification' ? 'notification' : 'post'
   const id = searchParams.get('id') || ''
   const targetId = searchParams.get('targetId') || ''
   if (!id && !targetId) return NextResponse.json({ error: '缺少留言ID' }, { status: 400 })
 
-  if (type === 'paper') {
+  if (type === 'notification') {
+    await prisma.notification.updateMany({ where: targetId ? { id: targetId } : { id }, data: { status: 'DELETED' } })
+    revalidatePath('/parent/notifications')
+  } else if (type === 'paper') {
     await prisma.paperComment.deleteMany({ where: targetId ? { paperId: targetId } : { id } })
     revalidatePath('/parent/grades')
   } else {

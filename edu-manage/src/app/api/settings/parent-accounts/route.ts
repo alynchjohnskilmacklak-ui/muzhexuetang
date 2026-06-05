@@ -16,7 +16,7 @@ export const GET = apiHandler(async () => {
   if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 
   const accounts = await prisma.user.findMany({
-    where: { role: 'parent' },
+    where: { role: 'parent', status: { not: 'deleted' } },
     select: {
       id: true,
       email: true,
@@ -24,8 +24,13 @@ export const GET = apiHandler(async () => {
       status: true,
       lastLoginAt: true,
       createdAt: true,
+      students: {
+        where: { status: { not: 'INACTIVE' } },
+        select: { id: true, name: true, grade: true, status: true },
+        orderBy: { name: 'asc' },
+      },
     },
-    orderBy: { createdAt: 'asc' },
+    orderBy: { createdAt: 'desc' },
   })
 
   return NextResponse.json({ accounts })

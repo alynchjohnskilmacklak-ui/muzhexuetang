@@ -6,13 +6,19 @@ import { parentActiveStudentWhere, parentVisiblePerformancePostWhere } from '@/l
 
 export const dynamic = 'force-dynamic'
 
-export default async function ParentPerformancePage() {
+export default async function ParentPerformancePage({ searchParams }: { searchParams?: Promise<{ childId?: string }> }) {
   const session = await auth()
   const userId = (session?.user as { id?: string } | undefined)?.id
   if (!userId) redirect('/login')
+  const params = await searchParams
+  const childId = params?.childId || ''
+
+  const studentWhere = childId
+    ? { ...parentActiveStudentWhere(userId), id: childId }
+    : parentActiveStudentWhere(userId)
 
   const student = await prisma.student.findFirst({
-    where: parentActiveStudentWhere(userId),
+    where: studentWhere,
     include: {
       mainTeacher: { select: { id: true, name: true } },
       achievementBadges: { include: { teacher: { select: { name: true } } }, orderBy: { earnedAt: 'desc' } },

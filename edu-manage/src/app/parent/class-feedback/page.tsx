@@ -6,10 +6,12 @@ import { parentLinkedStudentWhere, visibleClassroomFeedbackWhere, visibleTeacher
 
 export const dynamic = 'force-dynamic'
 
-export default async function ClassFeedbackPage() {
+export default async function ClassFeedbackPage({ searchParams }: { searchParams?: Promise<{ childId?: string }> }) {
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
+  const params = await searchParams
+  const childId = params?.childId || ''
 
   const studentIds = (
     await prisma.student.findMany({
@@ -17,11 +19,12 @@ export default async function ClassFeedbackPage() {
       select: { id: true },
     })
   ).map(s => s.id)
+  const scopedStudentIds = childId && studentIds.includes(childId) ? [childId] : studentIds
 
   const feedbacks = await prisma.classroomFeedback.findMany({
     where: {
       ...visibleClassroomFeedbackWhere,
-      studentIds: { hasSome: studentIds },
+      studentIds: { hasSome: scopedStudentIds },
       teacher: visibleTeacherWhere,
     },
     include: {

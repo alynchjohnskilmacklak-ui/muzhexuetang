@@ -44,6 +44,8 @@ interface DashboardLesson {
   statusLabel: string
   statusTone: Tone
   hasFeedback: boolean
+  lessonId?: string
+  feedbackId?: string | null
 }
 
 interface StudentWarning {
@@ -150,7 +152,7 @@ function CompletionRow({ label, item, color }: { label: string; item: Completion
 export default function TeacherDashboardPage() {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
-  const { data, isLoading } = useSWR<DashboardData>('/api/teacher/dashboard', fetcher, { refreshInterval: 120_000 })
+  const { data, isLoading } = useSWR<DashboardData>('/api/teacher/dashboard', fetcher, { refreshInterval: 180_000 })
 
   useEffect(() => {
     fetch('/api/teacher/dashboard', { method: 'POST' }).catch(() => {})
@@ -234,7 +236,20 @@ export default function TeacherDashboardPage() {
                       </div>
                       <Space wrap style={{ width: isMobile ? '100%' : undefined, flexWrap: 'wrap' }}>
                         <Tag color={tagColor[lesson.statusTone]}>{lesson.statusLabel}</Tag>
-                        <Button size="small" onClick={() => router.push(lesson.statusLabel === '待考勤' ? '/teacher/attendance' : '/teacher/classroom-feedback')}>
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            if (lesson.statusLabel === '待考勤') {
+                              router.push('/teacher/attendance')
+                              return
+                            }
+                            if (lesson.hasFeedback && lesson.feedbackId) {
+                              router.push(`/teacher/classroom-feedback?viewId=${lesson.feedbackId}`)
+                              return
+                            }
+                            router.push(lesson.lessonId ? `/teacher/classroom-feedback?lessonId=${lesson.lessonId}` : '/teacher/classroom-feedback')
+                          }}
+                        >
                           {lesson.statusLabel === '待考勤' ? '考勤' : lesson.hasFeedback ? '查看' : '反馈'}
                         </Button>
                       </Space>

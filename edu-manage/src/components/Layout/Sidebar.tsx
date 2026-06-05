@@ -63,6 +63,7 @@ const menuItems: MenuProps['items'] = [
   { key: '/attendance', icon: <CheckSquareOutlined />, label: '考勤管理' },
   { key: '/meals', icon: <CoffeeOutlined />, label: '就餐管理' },
   { key: '/performance', icon: <StarOutlined />, label: '在校表现' },
+  { key: '/classroom-feedback', icon: <MessageOutlined />, label: '课堂反馈' },
   { key: '/communications', icon: <MessageOutlined />, label: '家校沟通' },
   { key: '/volunteer', icon: <ReadOutlined />, label: '志愿填报' },
   { key: '/fees', icon: <DollarOutlined />, label: '收费管理' },
@@ -110,7 +111,7 @@ export function Sidebar({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { data: alerts } = useSWR('/api/teacher-logs/alerts', fetcher, { refreshInterval: 120_000 })
+  const { data: alerts } = useSWR('/api/teacher-logs/alerts', fetcher, { refreshInterval: 300_000 })
   const alertCount = Array.isArray(alerts) ? alerts.filter((a: any) => !a.isResolved).length : 0
 
   useEffect(() => {

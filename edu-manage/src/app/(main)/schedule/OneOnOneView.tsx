@@ -34,7 +34,7 @@ export function OneOnOneView({
   onLessonClick: (lesson: Record<string, unknown>) => void
 }) {
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
-  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}`, fetcher, { refreshInterval: 60_000 })
+  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}`, fetcher, { refreshInterval: 180_000 })
 
   const matrix = (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown>>>
 

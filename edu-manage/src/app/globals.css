@@ -1202,8 +1202,13 @@ img { -webkit-touch-callout: none; pointer-events: auto; }
     touch-action: none;
   }
 
-  .rc-virtual-list-holder {
+.rc-virtual-list-holder {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
   }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
 }

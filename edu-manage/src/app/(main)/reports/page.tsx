@@ -97,7 +97,7 @@ export default function ReportsPage() {
     queryParams.set('to', customRange[1])
   }
 
-  const { data, isLoading } = useSWR(`/api/reports/summary?${queryParams}`, fetcher, { refreshInterval: 60_000 })
+  const { data, isLoading } = useSWR(`/api/reports/summary?${queryParams}`, fetcher, { refreshInterval: 600_000 })
 
   const funnelOption = useMemo(() => data ? buildFunnelOption(data.funnel) : {}, [data])
   const masteryOption = useMemo(() => data ? buildPaperMasteryOption(data.paperMastery) : {}, [data])

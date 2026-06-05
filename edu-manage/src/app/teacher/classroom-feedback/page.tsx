@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo, useState } from 'react'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
@@ -49,6 +49,18 @@ type FeedbackHistoryItem = {
   summary?: string | null
   classLesson?: { group?: { name?: string | null } | null } | null
 }
+type ViewFeedback = {
+  id: string
+  lessonName?: string
+  lessonDate?: string | null
+  lessonTime?: string | null
+  knowledgePoints?: string[]
+  summary?: string | null
+  homework?: unknown
+  imageUrls?: string[]
+  students?: LessonStudent[]
+  createdAt?: string
+}
 type UploadRequest = {
   file: unknown
   onSuccess?: (body?: unknown) => void
@@ -74,11 +86,15 @@ function SortableHomework({ item, onChange, onRemove, isMobile = false }: { item
 function ClassroomFeedbackPageInner() {
   const isMobile = useIsMobile() ?? false
   const searchParams = useSearchParams()
+  const router = useRouter()
   const preselectStudentId = searchParams.get('studentId') || ''
+  const preselectLessonId = searchParams.get('lessonId') || ''
+  const viewId = searchParams.get('viewId') || ''
   const { data: allLessons = [] } = useSWR('/api/teacher/lessons?days=30', fetcher)
   const { data: subjects = [] } = useSWR('/api/settings/subjects', fetcher)
   const { data: history, mutate } = useSWR('/api/teacher/classroom-feedback?limit=10', fetcher)
-  const [classLessonId, setClassLessonId] = useState('')
+  const { data: viewFeedbackData } = useSWR<ViewFeedback>(viewId ? `/api/teacher/classroom-feedback/${viewId}` : null, fetcher)
+  const [classLessonId, setClassLessonId] = useState(preselectLessonId)
   const [targetType, setTargetType] = useState<'CLASS' | 'STUDENT'>(preselectStudentId ? 'STUDENT' : 'CLASS')
   const [studentIds, setStudentIds] = useState<string[]>(preselectStudentId ? [preselectStudentId] : [])
   const [knowledgePoints, setKnowledgePoints] = useState<string[]>([])
@@ -249,6 +265,56 @@ function ClassroomFeedbackPageInner() {
   return (
     <div>
       <Title level={4} style={{ marginTop: 0 }}>课堂反馈</Title>
+      {viewFeedbackData && (
+        <Card
+          bordered={false}
+          style={{
+            background: '#FCFBF9',
+            border: '1.5px solid rgba(232,120,74,.2)',
+            borderRadius: 12,
+            marginBottom: 20,
+          }}
+          bodyStyle={{ padding: isMobile ? 14 : '16px 18px' }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
+            <div style={{ minWidth: 0 }}>
+              <span style={{ fontSize: 15, fontWeight: 700, color: '#1F2329' }}>{viewFeedbackData.lessonName || '课堂反馈'}</span>
+              {viewFeedbackData.lessonDate && (
+                <span style={{ fontSize: 12, color: '#98A2B3', marginLeft: 8 }}>
+                  {new Date(viewFeedbackData.lessonDate).toLocaleDateString('zh-CN')}
+                  {viewFeedbackData.lessonTime ? ` ${viewFeedbackData.lessonTime}` : ''}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => router.replace('/teacher/classroom-feedback')}
+              aria-label="关闭反馈详情"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#98A2B3', fontSize: 18, lineHeight: 1 }}
+            >
+              ×
+            </button>
+          </div>
+          {viewFeedbackData.summary && (
+            <p style={{ fontSize: 13, color: '#1F2329', marginBottom: 10, lineHeight: 1.7 }}>{viewFeedbackData.summary}</p>
+          )}
+          {!!viewFeedbackData.knowledgePoints?.length && (
+            <div style={{ marginBottom: 8 }}>
+              <span style={{ fontSize: 12, color: '#98A2B3' }}>知识点：</span>
+              {viewFeedbackData.knowledgePoints.map((point) => (
+                <Tag key={point} style={{ borderRadius: 9999, background: '#FFF3EC', color: '#E8784A', border: 'none' }}>{point}</Tag>
+              ))}
+            </div>
+          )}
+          {!!viewFeedbackData.students?.length && (
+            <div>
+              <span style={{ fontSize: 12, color: '#98A2B3' }}>反馈学员：</span>
+              {viewFeedbackData.students.map((student) => (
+                <Tag key={student.id} style={{ borderRadius: 9999 }}>{student.name}{student.grade ? ` · ${student.grade}` : ''}</Tag>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(520px, 1fr) 360px', gap: 16, alignItems: 'start' }}>
         <Space direction="vertical" size={16} style={{ width: '100%' }}>
           <Card title="基本信息" bordered={false} style={{ borderRadius: 10 }}>

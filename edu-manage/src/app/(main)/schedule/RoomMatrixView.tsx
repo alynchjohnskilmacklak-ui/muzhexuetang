@@ -36,7 +36,7 @@ export function RoomMatrixView({
   onNewCourseClick?: () => void
 }) {
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
-  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}`, fetcher, { refreshInterval: 60_000 })
+  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}`, fetcher, { refreshInterval: 180_000 })
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
 
   const matrix = (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown> | Record<string, unknown>[]>>

@@ -65,7 +65,7 @@ export default function AttendancePage() {
   const [filterType, setFilterType] = useState('')
 
   const query = `/api/attendance/today?date=${selectedDate}${filterTeacherId ? `&teacherId=${filterTeacherId}` : ''}`
-  const { data: lessonsRaw, mutate: mutateData, isLoading } = useSWR(query, fetcher, { refreshInterval: 60_000 })
+  const { data: lessonsRaw, mutate: mutateData, isLoading } = useSWR(query, fetcher, { refreshInterval: 120_000 })
   const { data: teachersData } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
 
   const [selectedSchedule, setSelectedSchedule] = useState<Record<string, unknown> | null>(null)

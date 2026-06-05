@@ -4,6 +4,7 @@ import { Card, Empty, Tag, Typography } from 'antd'
 import { BookOutlined, ClockCircleOutlined, TeamOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
+import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -12,6 +13,7 @@ export function ClassFeedbackClient({ feedbacks }: { feedbacks: any[] }) {
 
   return (
     <div>
+      <ChildSwitcher />
       <div style={{ marginBottom: 20 }}>
         <Title level={4} style={{ marginBottom: 4 }}>课堂反馈</Title>
         <Text type="secondary" style={{ fontSize: 13 }}>

@@ -6,6 +6,7 @@ import { getModelCapability } from '@/lib/ai/models'
 import { normalizeAIAnswer } from '@/lib/ai/normalize-answer'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 30
 
 type MessageContent = string | Array<{ type: string; [key: string]: unknown }>
 

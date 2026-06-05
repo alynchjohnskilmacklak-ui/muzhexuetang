@@ -247,6 +247,7 @@ model ClassLesson {
   classroomFeedbacks ClassroomFeedback[]
 
   @@index([lessonDate, status])
+  @@index([status, lessonDate])
   @@index([teacherId, lessonDate])
   @@index([groupId, lessonDate])
 }
@@ -276,6 +277,7 @@ model Enrollment {
   @@index([status, remainHours])
   @@index([groupId, status])
   @@index([studentId, status])
+  @@index([studentId, status, remainHours])
 }
 
 model HourTransaction {
@@ -327,6 +329,8 @@ model Attendance {
   @@unique([scheduleId, studentId])
   @@unique([lessonId, studentId], name: "attendance_lesson_student_unique")
   @@index([lessonId, status])
+  @@index([enrollmentId])
+  @@index([studentId, lessonId])
   @@index([studentId, createdAt])
   @@index([createdAt])
 }
@@ -558,6 +562,7 @@ model Notification {
   sender  User?    @relation("SenderNotifications", fields: [senderId], references: [id])
 
   @@index([userId, read, createdAt])
+  @@index([userId, read])
   @@index([relatedType, relatedId])
   @@index([studentId, createdAt])
 }
@@ -609,6 +614,7 @@ model PerformancePost {
   badges    PostBadge[]
 
   @@index([studentId, createdAt])
+  @@index([studentId, deletedAt])
   @@index([teacherId, createdAt])
   @@index([deletedAt])
 }
@@ -633,6 +639,7 @@ model ClassroomFeedback {
   updatedAt       DateTime     @updatedAt
 
   @@index([teacherId, createdAt])
+  @@index([teacherId, status, createdAt])
   @@index([classLessonId])
   @@index([status])
 }

@@ -28,6 +28,11 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   outputFileTracingRoot: process.cwd(),
   distDir: process.env.NEXT_DIST_DIR || '.next',
+  poweredByHeader: false,
+  compress: true,
+  experimental: {
+    optimizePackageImports: ['antd', '@ant-design/icons', 'lodash', 'date-fns'],
+  },
   images: {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [375, 750, 828, 1080, 1200],
@@ -39,6 +44,24 @@ const nextConfig: NextConfig = {
       {
         source: '/:path*',
         headers: securityHeaders,
+      },
+      {
+        source: '/images/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/people/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400' },
+        ],
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+        ],
       },
     ]
   },

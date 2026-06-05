@@ -1,8 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, Empty, Select, Table, Tag, Typography } from 'antd'
 import { ClockCircleOutlined } from '@ant-design/icons'
+import { useSearchParams } from 'next/navigation'
+import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatHours } from '@/lib/format'
 
@@ -17,7 +19,9 @@ const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> =
 
 export function ParentAttendanceClient({ records, students }: { records: any[]; students: any[] }) {
   const isMobile = useIsMobile() ?? false
-  const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || '')
+  const searchParams = useSearchParams()
+  const childId = searchParams.get('childId') || ''
+  const [selectedStudentId, setSelectedStudentId] = useState<string>(childId || students[0]?.id || '')
   const today = new Date()
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
 
@@ -25,6 +29,10 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
     selectedStudentId ? records.filter((r: any) => r.student?.id === selectedStudentId) : records,
     [records, selectedStudentId]
   )
+
+  useEffect(() => {
+    if (childId) setSelectedStudentId(childId)
+  }, [childId])
 
   const stats = useMemo(() => ({
     present: filteredRecords.filter((r: any) => r.status === 'PRESENT').length,
@@ -47,6 +55,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
 
   return (
     <div>
+      <ChildSwitcher />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <div>
           <Title level={4} style={{ margin: 0 }}>考勤记录</Title>

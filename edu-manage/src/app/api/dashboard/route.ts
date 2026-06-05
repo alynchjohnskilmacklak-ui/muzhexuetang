@@ -10,13 +10,6 @@ import {
 
 export const dynamic = 'force-dynamic'
 
-type MonthTrendRow = {
-  month: Date
-  totalStudents: number
-  newStudents: number
-  classHours: number
-}
-
 function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }
@@ -70,7 +63,6 @@ export const GET = apiHandler(async () => {
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1)
   const today = startOfDay(now)
   const todayEnd = addDays(today, 1)
-  const trendStart = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
   const [
     totalStudents,
@@ -80,9 +72,6 @@ export const GET = apiHandler(async () => {
     todaySchedules,
     todayClassLessons,
     activityLogs,
-    trendStudents,
-    trendSchedules,
-    trendClassLessons,
     activeGroups,
     waitingGroups,
     renewalWarnings,
@@ -144,25 +133,6 @@ export const GET = apiHandler(async () => {
       orderBy: { createdAt: 'desc' },
       include: { user: true, teacher: true },
     }),
-    prisma.student.findMany({
-      where: { createdAt: { gte: trendStart }, ...visibleStudentWhere },
-      select: { createdAt: true },
-      orderBy: { createdAt: 'asc' },
-    }),
-    prisma.schedule.findMany({
-      where: { startTime: { gte: trendStart }, status: { not: 'cancelled' }, course: { isActive: true } },
-      select: { startTime: true, endTime: true },
-      orderBy: { startTime: 'asc' },
-    }),
-    prisma.classLesson.findMany({
-      where: {
-        lessonDate: { gte: trendStart },
-        status: { notIn: ['CANCELLED', 'POSTPONED'] },
-        group: visibleClassGroupWhere,
-      },
-      select: { lessonDate: true, group: { select: { lessonMinutes: true } } },
-      orderBy: { lessonDate: 'asc' },
-    }),
     prisma.classGroup.count({ where: { status: 'ACTIVE', course: { isActive: true } } }),
     prisma.classGroup.count({ where: { status: 'WAITING', course: { isActive: true } } }),
     prisma.enrollment.count({ where: { remainHours: { lte: 5 }, totalHours: { gt: 0 }, ...activeEnrollmentWhere } }),
@@ -223,36 +193,6 @@ export const GET = apiHandler(async () => {
     .map((item) => ({ name: item.name, hours: roundHours(item.hours), students: item.students.size }))
     .sort((a, b) => b.hours - a.hours)
     .slice(0, 8)
-
-  const months: MonthTrendRow[] = Array.from({ length: 6 }, (_, index) => {
-    const month = new Date(now.getFullYear(), now.getMonth() - 5 + index, 1)
-    return { month, totalStudents: 0, newStudents: 0, classHours: 0 }
-  })
-
-  const monthlyStudentTotals = await Promise.all(
-    months.map((row) => {
-      const nextMonth = new Date(row.month.getFullYear(), row.month.getMonth() + 1, 1)
-      return prisma.student.count({ where: { ...visibleStudentWhere, createdAt: { lt: nextMonth } } })
-    })
-  )
-  months.forEach((row, index) => {
-    row.totalStudents = monthlyStudentTotals[index]
-  })
-
-  for (const student of trendStudents) {
-    const row = months.find((item) => item.month.getFullYear() === student.createdAt.getFullYear() && item.month.getMonth() === student.createdAt.getMonth())
-    if (row) row.newStudents += 1
-  }
-
-  for (const schedule of trendSchedules) {
-    const row = months.find((item) => item.month.getFullYear() === schedule.startTime.getFullYear() && item.month.getMonth() === schedule.startTime.getMonth())
-    if (row) row.classHours += hoursBetween(schedule.startTime, schedule.endTime)
-  }
-
-  for (const lesson of trendClassLessons) {
-    const row = months.find((item) => item.month.getFullYear() === lesson.lessonDate.getFullYear() && item.month.getMonth() === lesson.lessonDate.getMonth())
-    if (row) row.classHours += lesson.group.lessonMinutes / 60
-  }
 
   const classLessonSchedules = todayClassLessons.map((lesson) => {
     const start = combineLessonDateTime(lesson.lessonDate, lesson.startTime)
@@ -318,10 +258,10 @@ export const GET = apiHandler(async () => {
       performancePostsToday,
     },
     growthData: {
-      months: months.map((row) => row.month.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit' })),
-      newStudents: months.map((row) => row.newStudents),
-      totalStudents: months.map((row) => row.totalStudents),
-      classHours: months.map((row) => roundHours(row.classHours)),
+      months: [],
+      newStudents: [],
+      totalStudents: [],
+      classHours: [],
     },
     schedules,
     operatingHighlights: [

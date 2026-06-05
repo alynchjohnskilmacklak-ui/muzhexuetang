@@ -46,15 +46,15 @@ export default function IntensiveSchedulePage() {
   const [conflictMsg, setConflictMsg] = useState('')
 
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
-  const { data: daily, isLoading, mutate } = useSWR(`/api/schedules/daily?date=${dateStr}&courseType=SMALL`, fetcher, { refreshInterval: 60_000 })
+  const { data: daily, isLoading, mutate } = useSWR(`/api/schedules/daily?date=${dateStr}&courseType=SMALL`, fetcher, { refreshInterval: 180_000 })
   // 额外获取 ClassLesson 中的一对一/小组课数据
   const { data: classLessonsData } = useSWR(
     `/api/class-lessons?startDate=${dateStr}&endDate=${dateStr}&courseType=ONE_ON_ONE`,
-    fetcher, { refreshInterval: 60_000 }
+    fetcher, { refreshInterval: 180_000 }
   )
   const { data: smallGroupData } = useSWR(
     `/api/class-lessons?startDate=${dateStr}&endDate=${dateStr}&courseType=SMALL_GROUP`,
-    fetcher, { refreshInterval: 60_000 }
+    fetcher, { refreshInterval: 180_000 }
   )
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
   const { data: teachersData } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)

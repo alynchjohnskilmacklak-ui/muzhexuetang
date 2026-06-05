@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Card, Typography, Table, Tag, Select, Statistic, Row, Col, Button, message } from 'antd'
 import { CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 
 const { Title, Text } = Typography
 
@@ -28,6 +29,7 @@ export function ParentFeesClient({
 
   return (
     <div>
+      <ChildSwitcher />
       <Title level={4} style={{ marginBottom: 16 }}>缴费记录</Title>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>

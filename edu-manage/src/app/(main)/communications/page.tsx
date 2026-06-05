@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Avatar, Button, Card, Empty, Input, List, Popconfirm, Select, Space, Spin, Tag, Typography, message } from 'antd'
+import { useRouter } from 'next/navigation'
+import { Avatar, Button, Card, Col, Empty, Input, List, Popconfirm, Row, Select, Space, Spin, Tag, Typography, message } from 'antd'
 import { CheckOutlined, DeleteOutlined, MessageOutlined, ReloadOutlined, SendOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const { Text, Paragraph } = Typography
 
@@ -15,6 +17,8 @@ const fetcher = async (url: string) => {
 }
 
 export default function CommunicationsPage() {
+  const router = useRouter()
+  const isMobile = useIsMobile() ?? false
   const [source, setSource] = useState('all')
   const [unread, setUnread] = useState(false)
   const [q, setQ] = useState('')
@@ -74,19 +78,26 @@ export default function CommunicationsPage() {
       subtitle="统一查看学习档案、在校表现中的家长留言，管理端可回复、标记和清理"
       actions={<Button icon={<ReloadOutlined />} onClick={() => mutate()}>刷新</Button>}
     >
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
         {[
-          ['全部沟通', stats.total, '#1F2329'],
-          ['家长留言', stats.parent, '#E8784A'],
-          ['未读待处理', stats.unread, '#D4537E'],
-          ['老师/管理回复', stats.staff, '#27A644'],
-        ].map(([label, value, color]) => (
-          <Card key={label as string} bordered={false} style={{ borderRadius: 8, border: '1px solid #EEE7E1' }}>
-            <div style={{ color: '#8D806F', fontSize: 13 }}>{label}</div>
-            <div style={{ color: color as string, fontSize: 28, fontWeight: 700, marginTop: 4 }}>{value as number}</div>
-          </Card>
+          { label: '全部沟通', value: stats.total, color: '#1F2329', bg: '#fff' },
+          { label: '家长留言', value: stats.parent, color: '#E8784A', bg: '#fff3ec' },
+          { label: '未读待处理', value: stats.unread, color: '#D4537E', bg: '#fdf2f8', urgent: stats.unread > 0 },
+          { label: '老师/管理回复', value: stats.staff, color: '#27A644', bg: '#f0fdf4' },
+        ].map((card) => (
+          <Col xs={12} sm={6} key={card.label}>
+            <Card
+              bordered={false}
+              style={{ borderRadius: 10, border: `1px solid ${card.urgent ? '#F9A8D4' : '#EEE7E1'}`, background: card.bg, cursor: 'pointer' }}
+              bodyStyle={{ padding: 14 }}
+              onClick={() => card.label === '未读待处理' ? setUnread(true) : setUnread(false)}
+            >
+              <div style={{ fontSize: 11, color: '#98A2B3' }}>{card.label}</div>
+              <div style={{ fontSize: 26, fontWeight: 800, color: card.color, marginTop: 4 }}>{card.value}</div>
+            </Card>
+          </Col>
         ))}
-      </div>
+      </Row>
 
       <Card bordered={false} style={{ borderRadius: 8, border: '1px solid #EEE7E1', marginBottom: 16 }}>
         <Space wrap style={{ width: '100%', justifyContent: 'space-between' }}>
@@ -99,6 +110,7 @@ export default function CommunicationsPage() {
                 { label: '全部来源', value: 'all' },
                 { label: '表现反馈', value: 'post' },
                 { label: '学习档案', value: 'paper' },
+                { label: '课堂反馈通知', value: 'feedback' },
               ]}
             />
             <Select
@@ -111,7 +123,17 @@ export default function CommunicationsPage() {
               ]}
             />
           </Space>
-          <Input.Search allowClear placeholder="搜索学生、老师、内容" value={q} onChange={(event) => setQ(event.target.value)} style={{ width: 260 }} />
+          <Space wrap style={{ width: isMobile ? '100%' : undefined }}>
+            <Input.Search allowClear placeholder="搜索学生、老师、内容" value={q} onChange={(event) => setQ(event.target.value)} style={{ width: isMobile ? '100%' : 260 }} />
+            <Button
+              type="primary"
+              icon={<SendOutlined />}
+              style={{ background: '#E8784A', borderColor: '#E8784A' }}
+              onClick={() => router.push('/notifications')}
+            >
+              发送新通知
+            </Button>
+          </Space>
         </Space>
       </Card>
 
@@ -149,7 +171,16 @@ export default function CommunicationsPage() {
                         {unreadParent && <Tag color="red">未读</Tag>}
                       </Space>
                     }
-                    description={`${item.student?.name || '-'} · ${item.teacher?.name || '-'} · ${new Date(item.createdAt).toLocaleString('zh-CN')}`}
+                    description={
+                      <div style={{ fontSize: 12 }}>
+                        <span style={{ color: '#98A2B3' }}>{item.student?.name ? `学员：${item.student.name}` : '学员：-'}</span>
+                        {item.teacher?.name && <span style={{ color: '#98A2B3', marginLeft: 8 }}>老师：{item.teacher.name}</span>}
+                        {item.parent?.name && <span style={{ color: '#98A2B3', marginLeft: 8 }}>家长：{item.parent.name}</span>}
+                        <span style={{ color: '#C4BAB0', marginLeft: 8 }}>
+                          {new Date(item.createdAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    }
                   />
                   <div style={{ paddingLeft: 48 }}>
                     <div style={{ color: '#8D806F', fontSize: 12, marginBottom: 6 }}>关联内容：{item.targetTitle || '-'}</div>

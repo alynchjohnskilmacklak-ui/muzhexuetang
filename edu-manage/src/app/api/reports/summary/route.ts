@@ -164,5 +164,9 @@ export const GET = apiHandler(async (request: NextRequest) => {
     finance,
     attendance: { attendanceRate, makeupCompleteRate },
     guideUsage: guideActions.map((g) => ({ action: g.action, count: g._count })),
+  }, {
+    headers: {
+      'Cache-Control': 'private, max-age=300, stale-while-revalidate=60',
+    },
   })
 })

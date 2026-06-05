@@ -64,6 +64,9 @@ export async function getParentDashboardData(userId: string) {
     endTime: schedule.endTime.toISOString(),
     teacherName: schedule.teacher?.name || null,
     roomName: schedule.room?.name || null,
+    studentIds: schedule.students
+      .filter((item) => item.student.parentId === userId || item.student.parentUserId === userId)
+      .map((item) => item.student.id),
     studentNames: schedule.students
       .filter((item) => item.student.parentId === userId || item.student.parentUserId === userId)
       .map((item) => item.student.name),
@@ -113,6 +116,7 @@ export async function getParentDashboardData(userId: string) {
     endTime: lesson.endTime,
     teacherName: lesson.teacher?.name || lesson.group?.teacher?.name || null,
     roomName: lesson.group?.room?.name || null,
+    studentIds: lesson.group?.enrollments?.map((enrollment) => enrollment.student?.id).filter(Boolean) || [],
     studentNames: lesson.group?.enrollments?.map((enrollment) => enrollment.student?.name).filter(Boolean) || [],
     startTimeRaw: lesson.lessonDate ? `${new Date(lesson.lessonDate).toISOString().slice(0, 10)}T${lesson.startTime}` : null,
     endTimeRaw: lesson.lessonDate ? `${new Date(lesson.lessonDate).toISOString().slice(0, 10)}T${lesson.endTime}` : null,
@@ -126,10 +130,10 @@ export async function getParentDashboardData(userId: string) {
     monthMoods,
     monthClassroomFeedbacks,
     monthAttendances,
-    badgeCount,
+    badgeRows,
     todayAttendances,
-    todayFeedbackCount,
-    todayPaperCount,
+    todayFeedbackRows,
+    todayPaperRows,
   ] = await Promise.all([
     prisma.notification.findMany({
       where: { userId, ...visibleNotificationWhere },
@@ -162,7 +166,7 @@ export async function getParentDashboardData(userId: string) {
         teacher: visibleTeacherWhere,
         createdAt: { gte: monthStart, lt: monthEnd },
       },
-      select: { id: true, createdAt: true, summary: true },
+      select: { id: true, createdAt: true, summary: true, studentIds: true },
       orderBy: { createdAt: 'asc' },
     }),
     prisma.attendance.findMany({
@@ -170,9 +174,12 @@ export async function getParentDashboardData(userId: string) {
         student: parentLinkedStudentWhere(userId),
         createdAt: { gte: monthStart, lt: monthEnd },
       },
-      select: { status: true },
+      select: { status: true, studentId: true },
     }),
-    prisma.achievementBadge.count({ where: { student: parentLinkedStudentWhere(userId) } }),
+    prisma.achievementBadge.findMany({
+      where: { student: parentLinkedStudentWhere(userId) },
+      select: { studentId: true },
+    }),
     prisma.attendance.findMany({
       where: {
         student: parentLinkedStudentWhere(userId),
@@ -181,27 +188,42 @@ export async function getParentDashboardData(userId: string) {
           { schedule: { startTime: { gte: todayStart, lt: todayEnd } } },
         ],
       },
-      select: { id: true, status: true, hoursDeducted: true, createdAt: true, lessonId: true, scheduleId: true },
+      select: { id: true, status: true, hoursDeducted: true, createdAt: true, lessonId: true, scheduleId: true, studentId: true },
     }),
-    prisma.classroomFeedback.count({
+    prisma.classroomFeedback.findMany({
       where: {
         ...visibleClassroomFeedbackWhere,
         studentIds: { hasSome: studentIds },
         teacher: visibleTeacherWhere,
         createdAt: { gte: todayStart, lt: todayEnd },
       },
+      select: { id: true, studentIds: true },
     }),
-    prisma.examPaper.count({
+    prisma.examPaper.findMany({
       where: {
         ...parentVisibleExamPaperWhere(userId),
         createdAt: { gte: todayStart, lt: todayEnd },
       },
+      select: { id: true, studentId: true },
     }),
   ])
 
   const presentCount = monthAttendances.filter((attendance) => attendance.status === 'PRESENT').length
   const totalCount = monthAttendances.length
   const attendanceRate = totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 100
+  const badgeCount = badgeRows.length
+  const todayFeedbackCount = todayFeedbackRows.length
+  const todayPaperCount = todayPaperRows.length
+  const studentStats = Object.fromEntries(studentIds.map((studentId) => {
+    const studentAttendances = monthAttendances.filter((attendance) => attendance.studentId === studentId)
+    const studentPresentCount = studentAttendances.filter((attendance) => attendance.status === 'PRESENT').length
+    return [studentId, {
+      attendanceRate: studentAttendances.length > 0 ? Math.round((studentPresentCount / studentAttendances.length) * 100) : 100,
+      badgeCount: badgeRows.filter((badge) => badge.studentId === studentId).length,
+      todayFeedbackCount: todayFeedbackRows.filter((feedback) => feedback.studentIds.includes(studentId)).length,
+      todayPaperCount: todayPaperRows.filter((paper) => paper.studentId === studentId).length,
+    }]
+  }))
   const todayMeal = await getEffectiveMealMenuForDate(today)
 
   return {
@@ -216,6 +238,7 @@ export async function getParentDashboardData(userId: string) {
     monthClassroomFeedbacks,
     attendanceRate,
     badgeCount,
+    studentStats,
     todayAttendances,
     todayFeedbackCount,
     todayPaperCount,

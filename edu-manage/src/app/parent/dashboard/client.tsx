@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useMemo, useState } from 'react'
 import { Row, Col, Card, Tag, Typography, Button, Space } from 'antd'
 import { BellOutlined, ClockCircleOutlined, HeartOutlined, TeamOutlined, EnvironmentOutlined, IdcardOutlined, BookOutlined, BulbOutlined, FileTextOutlined, StarOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
@@ -51,7 +52,7 @@ export function ParentDashboardClient({
   students, studentTeachers, todaySchedules, todayClassLessons,
   notifications, latestPost, latestClassroomFeedback,
   monthMoods, monthClassroomFeedbacks, attendanceRate, badgeCount,
-  todayAttendances = [], todayFeedbackCount = 0, todayPaperCount = 0, todayMeal = null,
+  studentStats = {}, todayAttendances = [], todayFeedbackCount = 0, todayPaperCount = 0, todayMeal = null,
 }: {
   students: any[]
   studentTeachers: Record<string, string[]>
@@ -64,6 +65,7 @@ export function ParentDashboardClient({
   monthClassroomFeedbacks: any[]
   attendanceRate: number
   badgeCount: number
+  studentStats?: Record<string, { attendanceRate: number; badgeCount: number; todayFeedbackCount: number; todayPaperCount: number }>
   todayAttendances?: any[]
   todayFeedbackCount?: number
   todayPaperCount?: number
@@ -75,6 +77,25 @@ export function ParentDashboardClient({
   const today = new Date()
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
   const dailyQuote = getDailyQuote()
+  const childIdFromUrl = searchParams.get('childId') || ''
+  const [activeChildId, setActiveChildId] = useState(childIdFromUrl || students[0]?.id || '')
+
+  useEffect(() => {
+    if (childIdFromUrl) setActiveChildId(childIdFromUrl)
+    else if (!activeChildId && students[0]?.id) setActiveChildId(students[0].id)
+  }, [activeChildId, childIdFromUrl, students])
+
+  const activeStudent = useMemo(
+    () => students.find((student: any) => student.id === activeChildId) || students[0],
+    [activeChildId, students]
+  )
+
+  const selectChild = (childId: string) => {
+    setActiveChildId(childId)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('childId', childId)
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }
 
   // Build mood map
   const moodMap: Record<number, { mood: string; ids: string[] }> = {}
@@ -92,10 +113,16 @@ export function ParentDashboardClient({
   // Collect all teacher names across all students
   const allTeacherNames = new Set<string>()
   Object.values(studentTeachers).forEach(names => names.forEach(n => allTeacherNames.add(n)))
+  const activeTeacherNames = activeStudent?.id ? (studentTeachers[activeStudent.id] || []) : [...allTeacherNames]
+  const activeStats = activeChildId ? studentStats[activeChildId] : null
+  const activeAttendanceRate = activeStats?.attendanceRate ?? attendanceRate
+  const activeBadgeCount = activeStats?.badgeCount ?? badgeCount
+  const activeTodayFeedbackCount = activeStats?.todayFeedbackCount ?? todayFeedbackCount
+  const activeTodayPaperCount = activeStats?.todayPaperCount ?? todayPaperCount
 
   // Merge schedule + classlesson into unified today list
   // studentNames are already filtered to only current parent's children
-  const todayLessons = [
+  const rawTodayLessons = [
     ...todaySchedules.map((s: any) => ({
       id: s.id,
       title: s.title,
@@ -103,6 +130,7 @@ export function ParentDashboardClient({
       endTime: s.endTime ? new Date(s.endTime).toTimeString().slice(0, 5) : '',
       teacherName: s.teacherName,
       roomName: s.roomName,
+      studentIds: s.studentIds || [],
       studentNames: s.studentNames || [],
       startTimeRaw: s.startTime,
       endTimeRaw: s.endTime,
@@ -115,12 +143,28 @@ export function ParentDashboardClient({
       endTime: l.endTime || '',
       teacherName: l.teacherName,
       roomName: l.roomName,
+      studentIds: l.studentIds || [],
       studentNames: l.studentNames || [],
       startTimeRaw: l.startTimeRaw,
       endTimeRaw: l.endTimeRaw,
       attendanceSubmittedAt: l.attendanceSubmittedAt,
     })),
   ].sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
+  const todayLessons = rawTodayLessons.filter((lesson) => (
+    students.length <= 1 || !activeChildId || lesson.studentIds.includes(activeChildId)
+  ))
+  const activeNotifications = students.length <= 1 || !activeChildId
+    ? notifications
+    : notifications.filter((notification: any) => !notification.studentId || notification.studentId === activeChildId)
+  const activeLatestPost = students.length <= 1 || !activeChildId || latestPost?.student?.id === activeChildId
+    ? latestPost
+    : null
+  const activeLatestClassroomFeedback = students.length <= 1 || !activeChildId || latestClassroomFeedback?.studentIds?.includes?.(activeChildId)
+    ? latestClassroomFeedback
+    : null
+  const activeTodayAttendances = students.length <= 1 || !activeChildId
+    ? todayAttendances
+    : todayAttendances.filter((attendance: any) => attendance.studentId === activeChildId)
   const completedAttendanceCount = todayLessons.filter((lesson) => lesson.attendanceSubmittedAt).length
   const pendingConfirmCount = todayLessons.filter((lesson) => getLessonStatus(lesson).text === '待老师确认').length
   const activeLesson = todayLessons.find((lesson) => getLessonStatus(lesson).text === '上课中')
@@ -137,18 +181,17 @@ export function ParentDashboardClient({
             ? '今日课程已完成'
             : '待老师确认'
   const latestTimes = [
-    latestPost?.createdAt,
-    latestClassroomFeedback?.createdAt,
-    notifications[0]?.createdAt,
-    ...todayAttendances.map((attendance: any) => attendance.createdAt),
+    activeLatestPost?.createdAt,
+    activeLatestClassroomFeedback?.createdAt,
+    activeNotifications[0]?.createdAt,
+    ...activeTodayAttendances.map((attendance: any) => attendance.createdAt),
   ].filter(Boolean).map((value) => new Date(value).getTime())
   const latestUpdate = latestTimes.length ? new Date(Math.max(...latestTimes)).toLocaleString('zh-CN') : '暂无更新'
   const todayTeachers = [...new Set(todayLessons.map((lesson) => lesson.teacherName).filter(Boolean))]
   const todayRooms = [...new Set(todayLessons.map((lesson) => lesson.roomName).filter(Boolean))]
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
-  const primaryStudent = students[0]
-  const heroStudentName = primaryStudent?.name || '同学'
+  const heroStudentName = activeStudent?.name || '同学'
 
   const goCalendarDay = (day: number) => {
     const d = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
@@ -165,25 +208,25 @@ export function ParentDashboardClient({
 
   // Latest feedback
   const latestFeedbackItems: { type: string; teacherName: string; studentName: string; content: string; date: Date; mood?: string; id: string }[] = []
-  if (latestPost) {
+  if (activeLatestPost) {
     latestFeedbackItems.push({
       type: '表现反馈',
-      teacherName: latestPost.teacher?.name || '老师',
-      studentName: latestPost.student?.name || '',
-      content: latestPost.content,
-      date: new Date(latestPost.createdAt),
-      mood: latestPost.mood,
-      id: latestPost.id,
+      teacherName: activeLatestPost.teacher?.name || '老师',
+      studentName: activeLatestPost.student?.name || '',
+      content: activeLatestPost.content,
+      date: new Date(activeLatestPost.createdAt),
+      mood: activeLatestPost.mood,
+      id: activeLatestPost.id,
     })
   }
-  if (latestClassroomFeedback) {
+  if (activeLatestClassroomFeedback) {
     latestFeedbackItems.push({
       type: '课堂反馈',
-      teacherName: latestClassroomFeedback.teacher?.name || '老师',
+      teacherName: activeLatestClassroomFeedback.teacher?.name || '老师',
       studentName: '',
-      content: latestClassroomFeedback.summary || '课堂资料已更新',
-      date: new Date(latestClassroomFeedback.createdAt),
-      id: latestClassroomFeedback.id,
+      content: activeLatestClassroomFeedback.summary || '课堂资料已更新',
+      date: new Date(activeLatestClassroomFeedback.createdAt),
+      id: activeLatestClassroomFeedback.id,
     })
   }
   latestFeedbackItems.sort((a, b) => b.date.getTime() - a.date.getTime())
@@ -214,13 +257,32 @@ export function ParentDashboardClient({
               <div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
                   {heroStudentName}
-                  {students.length > 1 && <span style={{ fontSize: 14, fontWeight: 400, opacity: .8, marginLeft: 8 }}>
-                    {students.slice(1).map((s: any) => s.name).join('、')}等{students.length}人
-                  </span>}
                 </div>
+                {students.length > 1 && (
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                    {students.map((student: any) => (
+                      <button
+                        key={student.id}
+                        onClick={() => selectChild(student.id)}
+                        style={{
+                          padding: '4px 14px',
+                          borderRadius: 20,
+                          border: `1.5px solid ${student.id === activeChildId ? '#fff' : 'rgba(255,255,255,.4)'}`,
+                          background: student.id === activeChildId ? 'rgba(255,255,255,.25)' : 'transparent',
+                          color: '#fff',
+                          fontSize: 13,
+                          fontWeight: student.id === activeChildId ? 700 : 400,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {student.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div style={{ fontSize: 13, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>
-                  {primaryStudent?.grade ? `${primaryStudent.grade} · ` : ''}
-                  负责老师：{allTeacherNames.size > 0 ? [...allTeacherNames].join('、') : '暂未分配'}
+                  {activeStudent?.grade ? `${activeStudent.grade} · ` : ''}
+                  负责老师：{activeTeacherNames.length > 0 ? activeTeacherNames.join('、') : '暂未分配'}
                 </div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,.86)', marginTop: 8 }}>
                   今日状态：<strong>{todayStatus}</strong> · 最近更新：{latestUpdate}
@@ -249,9 +311,9 @@ export function ParentDashboardClient({
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 10, marginTop: 20 }}>
           {[
             { val: todayLessons.length, label: '今日课次' },
-            { val: formatPercent(attendanceRate), label: '本月出勤率' },
-            { val: badgeCount, label: '已获徽章', icon: true },
-            { val: notifications.filter((n: any) => !n.read).length, label: '待处理通知' },
+            { val: formatPercent(activeAttendanceRate), label: '本月出勤率' },
+            { val: activeBadgeCount, label: '已获徽章', icon: true },
+            { val: activeNotifications.filter((n: any) => !n.read).length, label: '待处理通知' },
           ].map(({ val, label, icon }) => (
             <div key={label} style={{
               background: 'rgba(255,255,255,.15)', backdropFilter: 'blur(4px)',
@@ -319,7 +381,7 @@ export function ParentDashboardClient({
                 ['待老师确认', `${pendingConfirmCount}节`],
                 ['负责老师', todayTeachers.join('、') || '暂未分配'],
                 ['今日教室', todayRooms.join('、') || '暂未分配'],
-                ['课时扣除', todayAttendances.length ? '已记录' : '待确认'],
+                ['课时扣除', activeTodayAttendances.length ? '已记录' : '待确认'],
               ].map(([label, value]) => (
                 <div key={label} style={{ background: '#FFFBF7', borderRadius: 10, padding: 10, minWidth: 0 }}>
                   <div style={{ fontSize: 11, color: '#9A8E7A' }}>{label}</div>
@@ -343,9 +405,9 @@ export function ParentDashboardClient({
               {[
                 ['课程', `${todayLessons.length}节`],
                 ['考勤', `${completedAttendanceCount}节`],
-                ['反馈', `${todayFeedbackCount}条`],
-                ['试卷/资料', `${todayPaperCount}份`],
-                ['通知', `${notifications.filter((n: any) => new Date(n.createdAt).toDateString() === today.toDateString()).length}条`],
+                ['反馈', `${activeTodayFeedbackCount}条`],
+                ['试卷/资料', `${activeTodayPaperCount}份`],
+                ['通知', `${activeNotifications.filter((n: any) => new Date(n.createdAt).toDateString() === today.toDateString()).length}条`],
                 ['就餐', todayMeal ? '已发布' : '未发布'],
               ].map(([label, value]) => (
                 <div key={label} style={{ background: '#FAF8F5', borderRadius: 10, padding: 10, textAlign: 'center' }}>
@@ -422,10 +484,10 @@ export function ParentDashboardClient({
             title={<span style={{ fontSize: 15, fontWeight: 600 }}>待办与通知</span>}
             extra={<a onClick={() => router.push('/parent/notifications')} style={{ fontSize: 12, color: '#E8784A' }}>查看全部 →</a>}
           >
-            {notifications.length === 0 ? (
+            {activeNotifications.length === 0 ? (
               <Text type="secondary" style={{ display: 'block', padding: '24px 0', textAlign: 'center' }}>暂无通知</Text>
             ) : (
-              notifications.slice(0, 3).map((n: any) => {
+              activeNotifications.slice(0, 3).map((n: any) => {
                 const meta = notificationMeta(n)
                 return (
                 <div key={n.id} style={{

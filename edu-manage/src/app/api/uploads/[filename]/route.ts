@@ -6,6 +6,8 @@ import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
+// If Nginx serves /uploads directly, this route is kept only for old links and fallback compatibility.
+
 const CONTENT_TYPES: Record<string, string> = {
   avif: 'image/avif',
   gif: 'image/gif',

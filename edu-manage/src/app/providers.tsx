@@ -11,6 +11,12 @@ const swrConfig = {
   revalidateOnFocus: false,
   revalidateOnReconnect: true,
   dedupingInterval: 10_000,
+  errorRetryCount: 2,
+  errorRetryInterval: 5000,
+  fetcher: (url: string) => fetch(url).then((res) => {
+    if (!res.ok) throw new Error(String(res.status))
+    return res.json()
+  }),
   // 移除全局 30s 轮询，改为各页面按需设置
   // 避免所有 SWR 同时刷新导致界面卡顿
 }

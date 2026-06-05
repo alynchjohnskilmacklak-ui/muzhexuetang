@@ -2,9 +2,9 @@
 
 import { Suspense, useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Avatar, Button, Card, Input, List, message, Rate, Space, Tag, Typography } from 'antd'
-import { MessageOutlined, SendOutlined, StarFilled, UserOutlined } from '@ant-design/icons'
+import { CheckCircleOutlined, MessageOutlined, SendOutlined, StarFilled, UserOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 const { Title, Text, Paragraph } = Typography
@@ -30,8 +30,10 @@ function getStudentColor(id: string) { return STUDENT_COLORS[(id || '').split(''
 
 function TeacherPerformancePageInner() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const preselectStudentId = searchParams.get('studentId') || ''
   const isMobile = useIsMobile()
+  const [activeView, setActiveView] = useState<'today' | 'compose'>('today')
   const [selectedStudents, setSelectedStudents] = useState<string[]>(
     preselectStudentId ? [preselectStudentId] : []
   )
@@ -51,7 +53,10 @@ function TeacherPerformancePageInner() {
   const { data: dashboard } = useSWR('/api/teacher/dashboard', fetcher)
   const teacherId = dashboard?.teacher?.id
   const { data, mutate } = useSWR(teacherId ? `/api/performance?teacherId=${teacherId}&limit=10` : null, fetcher)
+  const { data: todayFeedbackData } = useSWR('/api/teacher/classroom-feedback/today-status', fetcher)
   const posts = data?.posts || []
+  const pendingStudents: Array<{ key?: string; id: string; name: string; grade?: string | null; lessonId?: string; lessonName?: string }> = Array.isArray(todayFeedbackData?.pendingStudents) ? todayFeedbackData.pendingStudents : []
+  const completedCount = Number(todayFeedbackData?.completedCount || 0)
 
   const toggleStudent = (id: string) => {
     setSelectedStudents(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id])
@@ -119,6 +124,75 @@ function TeacherPerformancePageInner() {
   return (
     <div>
       <Title level={4} style={{ marginTop: 0 }}>表现反馈</Title>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+        <button
+          onClick={() => setActiveView('today')}
+          style={{
+            padding: '6px 16px',
+            borderRadius: 20,
+            cursor: 'pointer',
+            background: activeView === 'today' ? '#E8784A' : '#fff',
+            color: activeView === 'today' ? '#fff' : '#5a4e3a',
+            border: `1px solid ${activeView === 'today' ? '#E8784A' : '#EEE7E1'}`,
+            fontWeight: activeView === 'today' ? 700 : 400,
+          }}
+        >
+          今日反馈状态
+        </button>
+        <button
+          onClick={() => setActiveView('compose')}
+          style={{
+            padding: '6px 16px',
+            borderRadius: 20,
+            cursor: 'pointer',
+            background: activeView === 'compose' ? '#E8784A' : '#fff',
+            color: activeView === 'compose' ? '#fff' : '#5a4e3a',
+            border: `1px solid ${activeView === 'compose' ? '#E8784A' : '#EEE7E1'}`,
+            fontWeight: activeView === 'compose' ? 700 : 400,
+          }}
+        >
+          发布表现反馈
+        </button>
+      </div>
+
+      {activeView === 'today' && (
+        <Card bordered={false} style={{ borderRadius: 12, border: '1px solid #EEE7E1', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 15, fontWeight: 700 }}>今日课堂反馈</span>
+            <Tag color="green">已完成 {completedCount} 节</Tag>
+            {pendingStudents.length > 0 && <Tag color="orange">待反馈 {pendingStudents.length} 位学员</Tag>}
+          </div>
+          {pendingStudents.length > 0 ? (
+            <>
+              <div style={{ fontSize: 13, color: '#98A2B3', marginBottom: 8 }}>以下学员今日已上课但尚未发布课堂反馈：</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+                {pendingStudents.map((student) => (
+                  <div key={student.key || `${student.lessonId}-${student.id}`} style={{ padding: '6px 12px', borderRadius: 10, background: '#FFF3EC', border: '1px solid rgba(232,120,74,.2)', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E8784A' }} />
+                    <span style={{ fontSize: 13, color: '#1F2329', fontWeight: 500 }}>{student.name}</span>
+                    {student.grade && <span style={{ fontSize: 11, color: '#98A2B3' }}>{student.grade}</span>}
+                    <span style={{ fontSize: 11, color: '#C4BAB0' }}>· {student.lessonName || '课堂'}</span>
+                  </div>
+                ))}
+              </div>
+              <Button
+                type="primary"
+                style={{ background: '#E8784A', borderColor: '#E8784A' }}
+                onClick={() => router.push(pendingStudents[0]?.lessonId ? `/teacher/classroom-feedback?lessonId=${pendingStudents[0].lessonId}` : '/teacher/classroom-feedback')}
+              >
+                去填写课堂反馈
+              </Button>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '20px 0', color: '#1D9E75' }}>
+              <CheckCircleOutlined style={{ fontSize: 28, marginBottom: 8 }} />
+              <div style={{ fontWeight: 600 }}>今日所有学员的课堂反馈均已完成</div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {activeView === 'compose' && (
       <div style={{
         display: 'grid',
         gridTemplateColumns: (isMobile ?? false) ? '1fr' : 'minmax(420px, 480px) minmax(0, 1fr)',
@@ -293,6 +367,7 @@ function TeacherPerformancePageInner() {
           />
         </Card>
       </div>
+      )}
     </div>
   )
 }

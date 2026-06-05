@@ -157,7 +157,9 @@ export async function getTeacherDashboardData(teacherId: string) {
       statusLabel: status.label,
       statusTone: status.tone,
       attendanceSubmittedAt: lesson.attendanceSubmittedAt,
+      lessonId: lesson.id,
       hasFeedback: lesson.classroomFeedbacks.length > 0,
+      feedbackId: lesson.classroomFeedbacks[0]?.id || null,
     }
   })
 
@@ -198,7 +200,7 @@ export async function getTeacherDashboardData(teacherId: string) {
       status: '待发反馈',
       tone: 'purple',
       actionLabel: '发布反馈',
-      href: '/teacher/classroom-feedback',
+      href: `/teacher/classroom-feedback?lessonId=${lesson.id}`,
     })),
     ...recentDraftPapers.slice(0, 3).map((paper) => ({
       id: `paper-${paper.id}`,
@@ -303,7 +305,7 @@ export async function getTeacherDashboardData(teacherId: string) {
       description: `${lesson.startTime}-${lesson.endTime} · ${lesson.group.course.name}`,
       tone: 'purple',
       actionLabel: '发布课堂反馈',
-      href: '/teacher/classroom-feedback',
+      href: `/teacher/classroom-feedback?lessonId=${lesson.id}`,
     })),
     ...recentDraftPapers.slice(0, 4).map((paper) => ({
       id: `draft-paper-${paper.id}`,

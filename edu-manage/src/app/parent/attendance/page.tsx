@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ParentAttendanceClient } from './client'
+import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +18,7 @@ export default async function ParentAttendancePage() {
 
   const records = await prisma.attendance.findMany({
     where: {
-      student: { parentId: userId, status: 'ACTIVE' },
+      student: parentLinkedStudentWhere(userId),
       createdAt: { gte: monthStart, lt: monthEnd },
     },
     include: {
@@ -28,7 +29,7 @@ export default async function ParentAttendancePage() {
   })
 
   const students = await prisma.student.findMany({
-    where: { parentId: userId, status: 'ACTIVE' },
+    where: parentLinkedStudentWhere(userId),
     select: { id: true, name: true },
   })
 
