@@ -91,10 +91,7 @@ export function ParentDashboardClient({
   )
 
   const selectChild = (childId: string) => {
-    setActiveChildId(childId)
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('childId', childId)
-    router.replace(`?${params.toString()}`, { scroll: false })
+    window.location.href = `/parent/dashboard?childId=${childId}`
   }
 
   // Build mood map
@@ -259,24 +256,22 @@ export function ParentDashboardClient({
                   {heroStudentName}
                 </div>
                 {students.length > 1 && (
-                  <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
                     {students.map((student: any) => (
-                      <button
+                      <a
                         key={student.id}
-                        onClick={() => selectChild(student.id)}
+                        href={`/parent/dashboard?childId=${student.id}`}
                         style={{
-                          padding: '4px 14px',
-                          borderRadius: 20,
+                          padding: '5px 14px', borderRadius: 20, textDecoration: 'none',
                           border: `1.5px solid ${student.id === activeChildId ? '#fff' : 'rgba(255,255,255,.4)'}`,
                           background: student.id === activeChildId ? 'rgba(255,255,255,.25)' : 'transparent',
-                          color: '#fff',
-                          fontSize: 13,
+                          color: '#fff', fontSize: 13,
                           fontWeight: student.id === activeChildId ? 700 : 400,
-                          cursor: 'pointer',
+                          whiteSpace: 'nowrap', flexShrink: 0,
                         }}
                       >
                         {student.name}
-                      </button>
+                      </a>
                     ))}
                   </div>
                 )}
@@ -328,7 +323,7 @@ export function ParentDashboardClient({
         </div>
       </div>
 
-      <TodayStatus />
+      <TodayStatus activeChildId={students.length > 1 ? activeChildId : undefined} />
       <WeeklyReport />
 
       <div style={{
@@ -401,26 +396,32 @@ export function ParentDashboardClient({
             style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', height: '100%' }}
             title={<span style={{ fontSize: 15, fontWeight: 600 }}>今日成长简报</span>}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
               {[
-                ['课程', `${todayLessons.length}节`],
-                ['考勤', `${completedAttendanceCount}节`],
-                ['反馈', `${activeTodayFeedbackCount}条`],
-                ['试卷/资料', `${activeTodayPaperCount}份`],
-                ['通知', `${activeNotifications.filter((n: any) => new Date(n.createdAt).toDateString() === today.toDateString()).length}条`],
-                ['就餐', todayMeal ? '已发布' : '未发布'],
-              ].map(([label, value]) => (
-                <div key={label} style={{ background: '#FAF8F5', borderRadius: 10, padding: 10, textAlign: 'center' }}>
+                { label: '课程', value: `${todayLessons.length}节`, href: '/parent/schedule', emoji: '📅' },
+                { label: '考勤', value: `${completedAttendanceCount}节`, href: '/parent/attendance', emoji: '✅' },
+                { label: '反馈', value: `${activeTodayFeedbackCount}条`, href: '/parent/class-feedback', emoji: '💬' },
+                { label: '试卷/资料', value: `${activeTodayPaperCount}份`, href: '/parent/archive', emoji: '📋' },
+                { label: '通知', value: `${activeNotifications.filter((n: any) => new Date(n.createdAt).toDateString() === today.toDateString()).length}条`, href: '/parent/notifications', emoji: '🔔' },
+                { label: '就餐', value: todayMeal ? '已发布' : '未发布', href: '/parent/meals', emoji: '🍱' },
+              ].map(({ label, value, href, emoji }) => (
+                <button
+                  key={label}
+                  onClick={() => router.push(href)}
+                  style={{
+                    background: '#FAF8F5', borderRadius: 10, padding: '10px 6px',
+                    textAlign: 'center', border: '1px solid transparent', cursor: 'pointer',
+                    transition: 'all 0.15s', WebkitTapHighlightColor: 'transparent',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.border = '1px solid #E8784A40')}
+                  onMouseLeave={e => (e.currentTarget.style.border = '1px solid transparent')}
+                >
+                  <div style={{ fontSize: 14, marginBottom: 2 }}>{emoji}</div>
                   <div style={{ color: '#E8784A', fontWeight: 800, fontSize: 16 }}>{value}</div>
                   <div style={{ color: '#9A8E7A', fontSize: 11 }}>{label}</div>
-                </div>
+                </button>
               ))}
             </div>
-            <Space wrap>
-              <Button size={isMobile ? 'middle' : 'small'} onClick={() => router.push(`/parent/growth?date=${todayStr}`)}>查看成长动态</Button>
-              <Button size={isMobile ? 'middle' : 'small'} onClick={() => router.push('/parent/class-feedback')}>查看课堂反馈</Button>
-              <Button size={isMobile ? 'middle' : 'small'} onClick={() => router.push('/parent/archive')}>查看学习档案</Button>
-            </Space>
           </Card>
         </Col>
         <Col xs={24}>

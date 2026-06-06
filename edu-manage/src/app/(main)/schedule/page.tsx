@@ -8,6 +8,7 @@ import { PageLayout } from '@/components/Layout/PageLayout'
 import { RoomMatrixView } from './RoomMatrixView'
 import { TeacherWeekView } from './TeacherWeekView'
 import { WeekHeatmapView } from './WeekHeatmapView'
+import { MobileRoomView } from './MobileRoomView'
 import { OneOnOneModal } from './OneOnOneModal'
 import { ScheduleDetailPanel } from './_components/ScheduleDetailPanel'
 import { ScheduleFormModal } from './_components/ScheduleFormModal'
@@ -143,16 +144,19 @@ function SchedulePageInner() {
         </div>
       </Card>
 
-      <div className={isMobile ? 'mobile-scroll-x' : undefined} style={{ overflowX: isMobile ? 'auto' : undefined, maxWidth: '100%' }}>
-        {viewMode === 'room-matrix' && (
-          <RoomMatrixView selectedDate={selectedDate} setSelectedDate={setSelectedDate}
-            onCellClick={handleRoomCellClick} onLessonClick={handleLessonClick}
-            onNewCourseClick={() => setScheduleFormOpen(true)} />
-        )}
-        {viewMode === 'teacher-week' && (
+      <div style={{ maxWidth: '100%' }}>
+        {viewMode === 'room-matrix' && isMobile ? (
+          <MobileRoomView selectedDate={selectedDate} setSelectedDate={setSelectedDate}
+            onNewCourseClick={() => setScheduleFormOpen(true)} onLessonClick={handleLessonClick} />
+        ) : viewMode === 'room-matrix' ? (
+          <div style={{ overflowX: 'auto' }}>
+            <RoomMatrixView selectedDate={selectedDate} setSelectedDate={setSelectedDate}
+              onCellClick={handleRoomCellClick} onLessonClick={handleLessonClick}
+              onNewCourseClick={() => setScheduleFormOpen(true)} />
+          </div>
+        ) : viewMode === 'teacher-week' ? (
           <TeacherWeekView onLessonClick={handleLessonClick} />
-        )}
-        {viewMode === 'week-heatmap' && (
+        ) : (
           <WeekHeatmapView weekStart={weekStart} setWeekStart={setWeekStart} onCellClick={handleHeatmapCellClick} />
         )}
       </div>

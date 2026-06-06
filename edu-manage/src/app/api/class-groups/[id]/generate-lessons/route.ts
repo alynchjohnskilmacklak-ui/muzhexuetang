@@ -2,7 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { visibleClassGroupWhere } from '@/lib/business-visibility'
-import { addDays } from 'date-fns'
+import { addDays, format } from 'date-fns'
 import { apiHandler } from '@/lib/api-handler'
 
 const WEEK_DAYS = new Set(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'])
@@ -89,17 +89,24 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         order: 1,
       }))
 
-  await prisma.classLesson.createMany({
-    data: dates.flatMap((d) => dailyTemplate.map((slot) => ({
-      groupId: id,
-      teacherId: slot.teacherId,
-      subject: slot.subject,
-      lessonDate: d,
-      startTime: slot.startTime,
-      endTime: slot.endTime,
-      status: 'SCHEDULED' as const,
-    }))),
-  })
+  // 分批创建，每批最多50条，防止数据库超时
+  const allData = dates.flatMap((d) => dailyTemplate.map((slot) => ({
+    groupId: id,
+    teacherId: slot.teacherId,
+    subject: slot.subject,
+    lessonDate: d,
+    startTime: slot.startTime,
+    endTime: slot.endTime,
+    status: 'SCHEDULED' as const,
+  })))
+
+  const BATCH_SIZE = 50
+  let created = 0
+  for (let i = 0; i < allData.length; i += BATCH_SIZE) {
+    const batch = allData.slice(i, i + BATCH_SIZE)
+    await prisma.classLesson.createMany({ data: batch, skipDuplicates: true })
+    created += batch.length
+  }
 
   await prisma.classGroup.update({
     where: { id },
@@ -111,10 +118,5 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     data: { userId: user.id, action: '生成课次', detail: `${group.name} 共${dates.length}节` },
   })
 
-  const lessons = await prisma.classLesson.findMany({
-    where: { groupId: id, group: visibleClassGroupWhere },
-    orderBy: { lessonDate: 'asc' },
-  })
-
-  return NextResponse.json({ lessons, count: lessons.length })
+  return NextResponse.json({ count: created, dates: dates.map(d => format(d, 'yyyy-MM-dd')) })
 })

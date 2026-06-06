@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { ParentLeaveClient } from './client'
 
 export const dynamic = 'force-dynamic'
@@ -11,23 +12,52 @@ export default async function ParentLeavePage() {
   const userId = (session.user as { id: string }).id
 
   const students = await prisma.student.findMany({
-    where: { parentId: userId },
+    where: parentLinkedStudentWhere(userId),
     select: { id: true, name: true },
   })
 
   const now = new Date()
+  now.setHours(0, 0, 0, 0)
   const twoWeeksLater = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
 
-  const upcomingSchedules = await prisma.schedule.findMany({
+  const childStudentIds = students.map(s => s.id)
+
+  const upcomingLessons = await prisma.classLesson.findMany({
     where: {
-      startTime: { gte: now, lte: twoWeeksLater },
-      students: { some: { student: { parentId: userId } } },
+      lessonDate: { gte: now, lte: twoWeeksLater },
+      status: { in: ['SCHEDULED', 'IN_PROGRESS'] },
+      group: {
+        enrollments: {
+          some: {
+            studentId: { in: childStudentIds },
+            status: 'ACTIVE',
+          },
+        },
+      },
     },
     include: {
-      course: { select: { name: true } },
-      students: { include: { student: { select: { id: true } } } },
+      group: {
+        include: {
+          course: { select: { name: true, subject: true } },
+          enrollments: {
+            where: { studentId: { in: childStudentIds }, status: 'ACTIVE' },
+            select: { studentId: true },
+          },
+        },
+      },
     },
-    orderBy: { startTime: 'asc' },
+    orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
+    take: 30,
+  })
+
+  // 去重：同一天同科目只保留一条
+  const seenKeys = new Set<string>()
+  const deduped = upcomingLessons.filter(lesson => {
+    const subject = lesson.group.course?.subject || lesson.group.course?.name || ''
+    const key = `${lesson.lessonDate.toISOString().slice(0, 10)}_${subject}_${lesson.startTime}`
+    if (seenKeys.has(key)) return false
+    seenKeys.add(key)
+    return true
   })
 
   const leaveRequests = await prisma.leaveRequest.findMany({
@@ -43,12 +73,18 @@ export default async function ParentLeavePage() {
   return (
     <ParentLeaveClient
       students={students}
-      upcomingSchedules={upcomingSchedules.map(s => ({
-        id: s.id,
-        title: s.course?.name || s.title,
-        startTime: s.startTime.toISOString(),
-        studentIds: s.students.map(ss => ss.student.id),
-      }))}
+      upcomingSchedules={deduped.map(lesson => {
+        const subject = lesson.group.course?.subject || lesson.group.course?.name || '课程'
+        const dateStr = lesson.lessonDate.toISOString().slice(0, 10)
+        const mmdd = dateStr.slice(5).replace('-', '/')
+        const fullTime = lesson.startTime.length === 5 ? lesson.startTime + ':00' : lesson.startTime
+        return {
+          id: lesson.id,
+          title: `${subject} ${lesson.startTime}-${lesson.endTime}（${mmdd}）`,
+          startTime: new Date(dateStr + 'T' + fullTime).toISOString(),
+          studentIds: lesson.group.enrollments.map(e => e.studentId),
+        }
+      })}
       leaveRequests={leaveRequests.map(lr => ({
         id: lr.id,
         studentName: lr.student.name,

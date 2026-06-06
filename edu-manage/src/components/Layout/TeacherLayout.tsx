@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Avatar, Badge, Dropdown, Layout, Menu, Spin, Tooltip } from 'antd'
 import {
-  BookOutlined,
   CalendarOutlined,
   CheckSquareOutlined,
   CoffeeOutlined,
@@ -20,7 +19,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MessageFilled,
-  StarOutlined,
+  MessageOutlined,
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons'
@@ -47,9 +46,8 @@ const navItems: NavItem[] = [
   { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
   { key: '/teacher/meals', icon: <CoffeeOutlined />, label: '就餐上报' },
   { key: '/teacher/papers', icon: <FileImageOutlined />, label: '试卷上传' },
-  { key: '/teacher/classroom-feedback', icon: <BookOutlined />, label: '课堂反馈', badgeKey: 'unpublished' },
+  { key: '/teacher/feedback', icon: <MessageOutlined />, label: '成长反馈', badgeKey: 'unpublished' },
   { key: '/teacher/materials', icon: <FolderOutlined />, label: '学习资料' },
-  { key: '/teacher/performance', icon: <StarOutlined />, label: '表现反馈', badgeKey: 'unread' },
   { key: '/teacher/students', icon: <TeamOutlined />, label: '我的学员' },
   { key: '/teacher/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
   { key: '/teacher/salary', icon: <DollarOutlined />, label: '我的薪资' },
@@ -103,10 +101,10 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
     { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '课表' },
     { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤', badgeKey: 'unsubmitted' },
-    { key: '/teacher/classroom-feedback', icon: <BookOutlined />, label: '反馈', badgeKey: 'unpublished' },
+    { key: '/teacher/feedback', icon: <MessageOutlined />, label: '反馈', badgeKey: 'unpublished' },
   ], data)
   teacherBottomTabs.push({ key: '__more', icon: <EllipsisOutlined />, label: '更多' })
-  const teacherMoreItems = mobileNavItems.filter(item => !['/teacher/dashboard', '/teacher/schedule', '/teacher/attendance', '/teacher/classroom-feedback'].includes(item.key))
+  const teacherMoreItems = mobileNavItems.filter(item => !['/teacher/dashboard', '/teacher/schedule', '/teacher/attendance', '/teacher/feedback'].includes(item.key))
 
   const menuItems = navItems.map((item) => ({
     key: item.key,

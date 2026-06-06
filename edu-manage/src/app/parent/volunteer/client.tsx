@@ -3,12 +3,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { Alert, Button, Card, Collapse, Empty, Image, Input, Space, Tag } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
 import { DownloadOutlined, LinkOutlined, MessageOutlined, ReadOutlined, SearchOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { ResponsiveTable } from '@/components/Layout/ResponsiveTable'
 
 type Step = { id: string; order: number; title: string; content: string; tipContent?: string | null; imageUrl?: string | null; batchTags: string[] }
 type Quota = { id: string; schoolName: string; district: string; allocQuota: number; normalQuota: number; totalQuota: number; note?: string | null }
@@ -36,6 +34,7 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
   const steps = currentGuide?.steps || []
   const [current, setCurrent] = useState(0)
   const [quotaQ, setQuotaQ] = useState('')
+  const [expandedSchool, setExpandedSchool] = useState<string | null>(null)
   const [question, setQuestion] = useState('')
   const { data: consultData, mutate: mutateConsults } = useSWR('/api/volunteer/consultation', fetcher)
   const consultations = Array.isArray(consultData?.consultations) ? consultData.consultations : []
@@ -57,12 +56,31 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
     return list.filter((item) => `${item.schoolName} ${item.district} ${item.note || ''}`.includes(quotaQ.trim()))
   }, [currentGuide, quotaQ])
 
-  const columns: ColumnsType<Quota> = [
-    { title: '目标高中', dataIndex: 'schoolName' },
-    { title: '区县', dataIndex: 'district', width: 140 },
-    { title: '生源初中', dataIndex: 'note', width: 150 },
-    { title: '分配名额', dataIndex: 'allocQuota', width: 120 },
-  ]
+  const quotaBySchool = useMemo(() => {
+    const filtered = quotas.filter((q) =>
+      !quotaQ.trim() ||
+      String(q.schoolName || '').includes(quotaQ.trim()) ||
+      String(q.district || '').includes(quotaQ.trim()) ||
+      String(q.note || '').includes(quotaQ.trim())
+    )
+    const map = new Map<string, { schoolName: string; district: string; totalQuota: number; items: Quota[] }>()
+    filtered.forEach((q) => {
+      const key = String(q.schoolName || '未知学校')
+      const existing = map.get(key)
+      if (existing) {
+        existing.totalQuota += Number(q.allocQuota || 0)
+        existing.items.push(q)
+      } else {
+        map.set(key, {
+          schoolName: key,
+          district: String(q.district || ''),
+          totalQuota: Number(q.allocQuota || 0),
+          items: [q],
+        })
+      }
+    })
+    return Array.from(map.values()).sort((a, b) => b.totalQuota - a.totalQuota)
+  }, [quotas, quotaQ])
 
   const submitQuestion = async () => {
     if (!question.trim()) return toast.error('请输入问题')
@@ -132,27 +150,64 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
       </Card>
 
       <Card id="volunteer-quota" title="分配生名额查询" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
-        <Input.Search placeholder="搜索学校或区县" value={quotaQ} onChange={(event) => setQuotaQ(event.target.value)} style={{ maxWidth: 320, marginBottom: 12 }} />
-        <ResponsiveTable
-          rowKey="id"
-          columns={columns}
-          dataSource={quotas}
-          pagination={{ pageSize: 8 }}
-          scroll={{ x: 720 }}
-          mobileEmptyText="暂无分配生名额"
-          renderMobileItem={(quota) => (
-            <div key={quota.id} className="responsive-record-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start', marginBottom: 8 }}>
-                <strong style={{ color: '#1F2329' }}>{quota.schoolName}</strong>
-                <Tag style={{ margin: 0 }} color="orange">{quota.allocQuota} 个名额</Tag>
-              </div>
-              <div style={{ display: 'grid', gap: 5, color: '#5a4e3a', fontSize: 13 }}>
-                <span>区县：{quota.district}</span>
-                <span>生源初中：{quota.note || '-'}</span>
-              </div>
-            </div>
-          )}
+        <Input.Search
+          placeholder="搜索目标学校或区县"
+          value={quotaQ}
+          onChange={(event) => setQuotaQ(event.target.value)}
+          style={{ maxWidth: 320, marginBottom: 14 }}
+          allowClear
         />
+        {quotaBySchool.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '24px 0', color: '#98A2B3' }}>暂无分配生名额数据</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {quotaBySchool.map(group => {
+              const isExpanded = expandedSchool === group.schoolName
+              return (
+                <div key={group.schoolName} style={{ borderRadius: 10, border: `1px solid ${isExpanded ? '#E8784A50' : '#EEE7E1'}`, overflow: 'hidden' }}>
+                  <div
+                    onClick={() => setExpandedSchool(isExpanded ? null : group.schoolName)}
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', cursor: 'pointer', background: isExpanded ? '#FFF8F4' : '#FCFBF9' }}
+                  >
+                    <div>
+                      <span style={{ fontWeight: 700, fontSize: 15, color: '#1F2329' }}>{group.schoolName}</span>
+                      <span style={{ fontSize: 12, color: '#98A2B3', marginLeft: 8 }}>{group.district}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#E8784A', background: '#FFF3EC', padding: '3px 10px', borderRadius: 9999 }}>
+                        共 {group.totalQuota} 个名额
+                      </span>
+                      <span style={{ fontSize: 12, color: '#C4BAB0' }}>{group.items.length}条 {isExpanded ? '▲' : '▼'}</span>
+                    </div>
+                  </div>
+                  {isExpanded && (
+                    <div style={{ borderTop: '1px solid #F5EDE8' }}>
+                      {group.items.map((item, i) => (
+                        <div key={String(item.id || i)} style={{
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          padding: '10px 16px', borderBottom: i < group.items.length - 1 ? '1px solid #F5EDE8' : 'none',
+                          background: '#fff',
+                        }}>
+                          <div>
+                            <div style={{ fontSize: 13, color: '#5a4e3a', fontWeight: 500 }}>
+                              生源初中：{String(item.note || '-')}
+                            </div>
+                            <div style={{ fontSize: 12, color: '#98A2B3', marginTop: 2 }}>
+                              区县：{String(item.district || '-')}
+                            </div>
+                          </div>
+                          <span style={{ fontSize: 14, fontWeight: 800, color: '#E8784A', background: '#FFF3EC', padding: '4px 12px', borderRadius: 9999, flexShrink: 0 }}>
+                            {Number(item.allocQuota || 0)} 个名额
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
       </Card>
 
       <Card id="volunteer-docs" title="文件下载" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>

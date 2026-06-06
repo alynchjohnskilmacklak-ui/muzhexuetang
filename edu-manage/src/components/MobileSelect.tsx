@@ -13,6 +13,7 @@ export type MobileSelectOptions = Array<MobileSelectOption | MobileSelectGroup>
 interface MobileSelectProps {
   value?: string
   onChange?: (value: string) => void
+  onClear?: () => void
   options: MobileSelectOptions
   placeholder?: string
   allowClear?: boolean
@@ -33,6 +34,7 @@ const labelMatches = (label: string, keyword: string) => label.toLowerCase().inc
 export function MobileSelect({
   value,
   onChange,
+  onClear,
   options,
   placeholder = '请选择',
   allowClear,
@@ -73,6 +75,7 @@ export function MobileSelect({
         disabled={disabled}
         value={value || undefined}
         onChange={(nextValue) => onChange?.(nextValue || '')}
+        onClear={() => { onChange?.(''); onClear?.() }}
         filterOption={(input, option) =>
           String(option?.label || '').toLowerCase().includes(input.toLowerCase())
         }
@@ -102,6 +105,11 @@ export function MobileSelect({
         size={size}
         disabled={disabled}
         value={value || undefined}
+        onClear={() => {
+          onChange?.('')
+          setSearchText('')
+          onClear?.()
+        }}
         onChange={(nextValue) => {
           onChange?.(nextValue || '')
           setSearchText('')

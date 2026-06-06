@@ -149,9 +149,13 @@ export default function CoursesPage() {
   const isMobile = useIsMobile() ?? false
 
   const groupList = useMemo(() => Array.isArray(groups) ? groups : [], [groups])
-  const courseList = (Array.isArray(courses) ? courses : []).filter((course: Record<string, unknown>) =>
-    SUBJECTS.includes(course.subject as string)
-  )
+  const courseList = (Array.isArray(courses) ? courses : []).filter((course: Record<string, unknown>) => {
+    if (!SUBJECTS.includes(course.subject as string)) return false
+    const type = course.type as string
+    if (courseTab === 'GROUP') return type === 'GROUP'
+    if (courseTab === 'SMALL') return type === 'ONE_ON_ONE' || type === 'SMALL_GROUP'
+    return true
+  })
   const teacherList = Array.isArray(teachers?.teachers) ? teachers.teachers : Array.isArray(teachers) ? teachers : []
   const roomList = Array.isArray(rooms) ? rooms : []
   const { data: drawerLessons } = useSWR(drawerGroupId ? `/api/class-groups/${drawerGroupId}/lessons` : null, fetcher)
@@ -422,6 +426,21 @@ export default function CoursesPage() {
     if (!previewDates.length) {
       message.error('无法生成课次，请检查开班日期、上课日和总课次数')
       return
+    }
+
+    // 防止班课生成过多课次导致超时（每天最多6节 × 总天数 ≤ 150节）
+    if (!isHourly) {
+      const validSlotCount = (Array.isArray(createData.scheduleTemplate)
+        ? createData.scheduleTemplate as Record<string, unknown>[]
+        : []
+      ).filter(row => row.teacherId && row.subject).length
+      const totalLessonsCount = Number(createData.totalLessons) || 16
+      const estimatedTotal = validSlotCount * totalLessonsCount
+      if (estimatedTotal > 150) {
+        message.error(`课次总数 ${estimatedTotal} 节过多（每天${validSlotCount}节×${totalLessonsCount}天），建议减少节次或总天数，系统限制单次创建不超过150节`)
+        setCreateLoading(false)
+        return
+      }
     }
 
     const scheduleTemplate = resolveCreateScheduleTemplate()
@@ -1130,6 +1149,31 @@ export default function CoursesPage() {
                               template[index] = { ...template[index], teacherId: '', subject: '' }
                             }
                             setCreateData(prev => ({ ...prev, scheduleTemplate: template }))
+                            // 实时冲突检查
+                            const days = (createData.recurringDays as string[] || [])
+                            const start = createData.startDate
+                            const total = createData.totalLessons
+                            setTimeout(async () => {
+                              const currentTemplate = template.filter(r => r.teacherId && r.subject)
+                              if (currentTemplate.length === 0) return
+                              if (!days.length) return
+                              try {
+                                const res = await fetch('/api/class-groups/check-teacher-conflict', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    scheduleTemplate: currentTemplate,
+                                    recurringDays: days,
+                                    startDate: start,
+                                    totalLessons: total,
+                                  }),
+                                })
+                                const result = await res.json()
+                                if (result.conflicts?.length > 0) {
+                                  message.warning(`⚠️ 时间冲突：${result.conflicts.map((c: Record<string, string>) => `${c.teacherName} 在 ${c.day} ${c.time}`).join('；')}`)
+                                }
+                              } catch { /* 静默，不影响主流程 */ }
+                            }, 200)
                           }}
                           options={assignments.filter(a => a.teacherId && a.subject).map(a => ({
                             label: `${teacherList.find((teacher: Record<string, unknown>) => teacher.id === a.teacherId)?.name || '老师'} / ${a.subject}`,

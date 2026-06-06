@@ -145,6 +145,9 @@ export async function triggerFeedbackBonus(feedbackId: string): Promise<void> {
   })
   if (!feedback || !isPayableFeedback(feedback)) return
 
+  // 管理端创建的反馈不发放奖励
+  if ((feedback as any).source === 'admin') return
+
   const lesson = feedback.classLesson
   const teacherId = feedback.teacherId
   if (lesson?.id) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import {
   Button, Input, InputNumber, message,
@@ -46,9 +46,26 @@ export default function GradesPage() {
   const [selectedPaperId, setSelectedPaperId] = useState('')
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
+  const [filterGrade, setFilterGrade] = useState('')
 
   const { data: studentsData } = useSWR('/api/students?status=ACTIVE&limit=200', fetcher)
   const students = Array.isArray(studentsData?.students) ? studentsData.students : []
+
+  const gradeOptions = useMemo(() => {
+    const set = new Set<string>()
+    ;(students as Record<string, unknown>[]).forEach(s => { if (s.grade) set.add(String(s.grade)) })
+    const gradeOrder = ['初一','初二','初三','高一','高二','高三']
+    return [...set].sort((a, b) => {
+      const ia = gradeOrder.indexOf(a), ib = gradeOrder.indexOf(b)
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib)
+    })
+  }, [students])
+
+  const filteredStudents = useMemo(() => {
+    return (students as Record<string, unknown>[]).filter(s =>
+      !filterGrade || s.grade === filterGrade
+    )
+  }, [students, filterGrade])
   const { data: paperListData, mutate: mutatePapers } = useSWR(
     studentId ? `/api/exam-papers?studentId=${studentId}${filterSubject ? `&subject=${filterSubject}` : ''}` : null,
     fetcher
@@ -224,13 +241,32 @@ export default function GradesPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #EEE7E1', padding: 14 }}>
             <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 8, fontWeight: 600 }}>选择学员</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+              <button
+                onClick={() => { setFilterGrade(''); setStudentId(''); setSelectedPaperId('') }}
+                style={{ padding: '5px 12px', borderRadius: 9999, fontSize: 12, cursor: 'pointer', border: 'none',
+                  background: !filterGrade ? '#E8784A' : '#F5F2EE',
+                  color: !filterGrade ? '#fff' : '#5a4e3a', fontWeight: !filterGrade ? 700 : 400 }}>
+                全部
+              </button>
+              {gradeOptions.map(grade => (
+                <button key={grade}
+                  onClick={() => { setFilterGrade(grade); setStudentId(''); setSelectedPaperId('') }}
+                  style={{ padding: '5px 12px', borderRadius: 9999, fontSize: 12, cursor: 'pointer', border: 'none',
+                    background: filterGrade === grade ? '#E8784A' : '#F5F2EE',
+                    color: filterGrade === grade ? '#fff' : '#5a4e3a', fontWeight: filterGrade === grade ? 700 : 400 }}>
+                  {grade}
+                </button>
+              ))}
+            </div>
             <MobileSelect
-              allowClear placeholder="搜索学员姓名"
+              allowClear
+              placeholder={filterGrade ? `选择${filterGrade}学员（${filteredStudents.length}人）` : '请先选择年级'}
               style={{ width: '100%', marginBottom: 8 }}
               value={studentId || undefined}
               onChange={(v) => { setStudentId(v || ''); setSelectedPaperId('') }}
-              options={students.map((s: Record<string, unknown>) => ({
-                label: `${s.name}${s.grade ? ` / ${s.grade}` : ''}`,
+              options={filteredStudents.map((s) => ({
+                label: `${s.name as string}${s.grade ? ` / ${s.grade}` : ''}`,
                 value: s.id as string,
               }))}
             />
@@ -253,6 +289,28 @@ export default function GradesPage() {
           ) : papers.length === 0 ? (
             <div style={{ background: '#FCFBF9', borderRadius: 12, border: '1px dashed #EEE7E1', padding: 24, textAlign: 'center', color: '#98A2B3', fontSize: 13 }}>
               该学员暂无试卷，点击"新建"开始添加
+            </div>
+          ) : isMobile ? (
+            <div style={{ overflowX: 'auto', display: 'flex', gap: 8, paddingBottom: 4 }}>
+              {papers.map((p: Record<string, unknown>) => {
+                const pId = p.id as string
+                const isSelected = selectedPaperId === pId
+                const pSubject = p.subject as string
+                const subjectColor = SUBJECT_COLORS[pSubject] || '#8D806F'
+                return (
+                  <div key={pId} onClick={() => selectPaper(pId)}
+                    style={{ flexShrink: 0, width: 130, padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
+                      background: isSelected ? '#FFF3EC' : '#fff',
+                      border: `1.5px solid ${isSelected ? '#E8784A' : '#EEE7E1'}` }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#1F2329', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.title as string}
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: subjectColor, background: `${subjectColor}15`, padding: '1px 6px', borderRadius: 9999 }}>
+                      {pSubject}
+                    </span>
+                  </div>
+                )
+              })}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

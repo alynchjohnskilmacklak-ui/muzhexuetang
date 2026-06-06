@@ -27,6 +27,7 @@ export default function CourseGroupDetailPage() {
   const [totalHours, setTotalHours] = useState<number | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [starting, setStarting] = useState(false)
+  const [syncingHours, setSyncingHours] = useState(false)
 
   const { data: group, mutate, isLoading } = useSWR(params.id ? `/api/class-groups/${params.id}` : null, fetcher)
   const { data: studentsData } = useSWR(enrollOpen ? `/api/students?limit=200&q=${encodeURIComponent(studentSearch)}` : null, fetcher)
@@ -145,6 +146,20 @@ export default function CourseGroupDetailPage() {
     }
   }
 
+  const syncInsertedStudentHours = async () => {
+    if (!confirm('将把课时明显偏高（比班级平均值高30%以上）的学员课时自动对齐到班级平均值。确认操作？')) return
+    setSyncingHours(true)
+    try {
+      const res = await fetch(`/api/class-groups/${params.id}/sync-hours`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) { message.error(data.error || '同步失败'); return }
+      message.success(data.message || `已同步 ${data.updated} 位学员课时`)
+      mutate()
+    } finally {
+      setSyncingHours(false)
+    }
+  }
+
   if (isLoading) {
     return <PageLayout title="班级管理"><div style={{ padding: 80, textAlign: 'center' }}><Spin size="large" /></div></PageLayout>
   }
@@ -222,7 +237,7 @@ export default function CourseGroupDetailPage() {
         <Col xs={24} lg={10}>
           <Card
             title={<span style={{ color: '#1F2329' }}><TeamOutlined /> 学员名单</span>}
-            extra={<Button size="small" icon={<PlusOutlined />} onClick={() => setEnrollOpen(true)}>添加</Button>}
+            extra={<Space size={8}><Button size="small" loading={syncingHours} onClick={syncInsertedStudentHours}>同步插班生课时</Button><Button size="small" icon={<PlusOutlined />} onClick={() => setEnrollOpen(true)}>添加</Button></Space>}
             bordered={false}
             style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}
           >
@@ -320,10 +335,13 @@ export default function CourseGroupDetailPage() {
               value: student.id as string,
             }))}
           />
+          <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 8, padding: '6px 10px', background: '#F5F2EE', borderRadius: 6 }}>
+            插班生将自动获得班级现有学员的平均剩余课时；如需自定义，请在下方输入。
+          </div>
           <InputNumber
             min={0}
             precision={1}
-            placeholder={`购买课时，留空则按班级总课时 ${((group.totalLessons || 0) * (group.lessonMinutes || 0)) / 60} 自动计算`}
+            placeholder={`购买课时，留空则按班级现有学员平均课时自动计算`}
             value={totalHours}
             onChange={(value) => setTotalHours(value)}
             style={{ width: '100%' }}

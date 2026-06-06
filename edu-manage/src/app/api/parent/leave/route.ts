@@ -32,7 +32,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const leaveRequest = await prisma.leaveRequest.create({
     data: {
       studentId,
-      scheduleId: scheduleId || null,
+      scheduleId: null, // ClassLesson ID not applicable to deprecated Schedule FK
       reason,
       leaveDate: new Date(leaveDate),
       status: 'pending',

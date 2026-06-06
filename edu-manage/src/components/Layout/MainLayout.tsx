@@ -19,7 +19,6 @@ import {
   ReadOutlined,
   SafetyOutlined,
   SettingOutlined,
-  StarOutlined,
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons'
@@ -39,9 +38,7 @@ const adminNavItems = [
   { key: '/courses', icon: <BookOutlined />, label: '课程管理' },
   { key: '/schedule', icon: <CalendarOutlined />, label: '排课系统' },
   { key: '/attendance', icon: <CheckSquareOutlined />, label: '考勤管理' },
-  { key: '/performance', icon: <StarOutlined />, label: '在校表现' },
-  { key: '/classroom-feedback', icon: <MessageOutlined />, label: '课堂反馈' },
-  { key: '/communications', icon: <MessageFilled />, label: '家校沟通' },
+  { key: '/feedback', icon: <MessageOutlined />, label: '成长反馈' },
   { key: '/meals', icon: <CoffeeOutlined />, label: '就餐管理' },
   { key: '/fees', icon: <DollarOutlined />, label: '收费管理' },
   { key: '/grades', icon: <FileTextOutlined />, label: '学习档案' },

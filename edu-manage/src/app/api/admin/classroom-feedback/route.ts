@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { isPayableFeedback } from '@/lib/teacher-salary'
 
@@ -78,5 +80,70 @@ export async function GET(req: NextRequest) {
     })
   } catch {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await auth()
+    const user = session?.user as { id: string; role: string; name?: string | null } | undefined
+    if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+
+    const body = await req.json()
+    const { teacherId, studentIds, knowledgePoints, summary, homework, imageUrls, source = 'admin', status = 'DRAFT' } = body
+
+    if (!teacherId) return NextResponse.json({ error: '缺少 teacherId' }, { status: 400 })
+    if (!Array.isArray(studentIds) || !studentIds.length) return NextResponse.json({ error: '请选择学员' }, { status: 400 })
+
+    const teacher = await prisma.teacher.findUnique({ where: { id: teacherId }, select: { id: true, name: true } })
+    if (!teacher) return NextResponse.json({ error: '教师不存在' }, { status: 404 })
+
+    const studentsData = await prisma.student.findMany({
+      where: { id: { in: studentIds } },
+      select: { id: true, name: true, parentId: true, parentUserId: true },
+    })
+
+    const feedback = await prisma.$transaction(async (tx) => {
+      const created = await tx.classroomFeedback.create({
+        data: {
+          teacherId,
+          source,
+          targetType: 'CLASS',
+          studentIds,
+          knowledgePoints: Array.isArray(knowledgePoints) ? knowledgePoints : [],
+          summary: summary || null,
+          homework: Array.isArray(homework) ? homework : [],
+          imageUrls: Array.isArray(imageUrls) ? imageUrls : [],
+          status,
+          notifySent: status === 'PUBLISHED',
+        },
+      })
+
+      if (status === 'PUBLISHED') {
+        for (const student of studentsData) {
+          const parentUserId = student.parentId || student.parentUserId
+          if (!parentUserId) continue
+          await tx.notification.create({
+            data: {
+              userId: parentUserId,
+              type: 'CLASSROOM_FEEDBACK',
+              title: `${teacher.name}老师发布了课堂反馈`,
+              content: `${student.name}: ${summary || knowledgePoints?.join('、') || '课堂资料已更新'}`.slice(0, 80),
+              link: '/parent/growth',
+              relatedType: 'CLASSROOM_FEEDBACK',
+              relatedId: created.id,
+              href: `/parent/growth?feedbackId=${created.id}`,
+            },
+          })
+        }
+      }
+      return created
+    })
+
+    revalidatePath('/teacher/dashboard')
+    revalidatePath('/parent/growth')
+    return NextResponse.json(feedback, { status: 201 })
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : '创建失败' }, { status: 500 })
   }
 }

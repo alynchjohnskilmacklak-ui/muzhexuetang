@@ -74,7 +74,21 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   })
   if (existing?.status === 'ACTIVE') return NextResponse.json({ error: '该学员已在此班级中' }, { status: 409 })
 
-  const hours = totalHours > 0 ? roundHours(totalHours) : minutesToHours(group.totalLessons * group.lessonMinutes)
+  let hours: number
+  if (totalHours > 0) {
+    hours = roundHours(totalHours)
+  } else {
+    const existingEnrollments = await prisma.enrollment.findMany({
+      where: { groupId: id, status: 'ACTIVE', studentId: { not: studentId } },
+      select: { remainHours: true },
+    })
+    if (existingEnrollments.length > 0) {
+      const avgRemain = existingEnrollments.reduce((sum, e) => sum + Number(e.remainHours || 0), 0) / existingEnrollments.length
+      hours = roundHours(Math.max(0, avgRemain))
+    } else {
+      hours = minutesToHours(group.totalLessons * group.lessonMinutes)
+    }
+  }
   const enrollment = await prisma.$transaction(async (tx) => {
     const created = existing
       ? await tx.enrollment.update({

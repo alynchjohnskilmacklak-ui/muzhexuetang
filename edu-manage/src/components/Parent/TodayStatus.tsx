@@ -33,7 +33,7 @@ function formatTime(value: string) {
   return new Date(value).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
 }
 
-export function TodayStatus() {
+export function TodayStatus({ activeChildId }: { activeChildId?: string }) {
   const [data, setData] = useState<{ today: string; students: StudentToday[] } | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -61,7 +61,11 @@ export function TodayStatus() {
         <Text type="secondary" style={{ fontSize: 12 }}>{dateStr}</Text>
       </div>
 
-      {data.students.map(item => {
+      {(() => {
+        const displayStudents = activeChildId
+          ? data.students.filter(item => item.student.id === activeChildId)
+          : data.students
+        return displayStudents.map(item => {
         const latestAttendance = item.attendance[0]
         const hasClass = item.todaySchedules.length > 0
         const nextClass = item.todaySchedules.find(schedule => new Date(schedule.startTime) > now)
@@ -202,7 +206,7 @@ export function TodayStatus() {
             </div>
           </Card>
         )
-      })}
+      })})()}
 
       <style>{`
         @keyframes parent-today-pulse {

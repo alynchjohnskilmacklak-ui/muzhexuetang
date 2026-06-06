@@ -634,6 +634,15 @@ model ClassroomFeedback {
   imageTypes      Json?
   studentRatings  Json?
   status          String       @default("DRAFT")
+  source          String       @default("teacher")
+  mood            String?
+  tags            String[]
+  badge           String?
+  overallComment  String?      @db.Text
+  parentReply     String?      @db.Text
+  parentRepliedAt DateTime?
+  adminReply      String?      @db.Text
+  adminRepliedAt  DateTime?
   notifySent      Boolean      @default(false)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -642,6 +651,8 @@ model ClassroomFeedback {
   @@index([teacherId, status, createdAt])
   @@index([classLessonId])
   @@index([status])
+  @@index([source, createdAt])
+  @@index([teacherId, source, status])
 }
 
 model PostReaction {

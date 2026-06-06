@@ -40,6 +40,11 @@ export default async function ParentGrowthPage({ searchParams }: { searchParams:
     }
   }
 
+  // Build today filter for default-only queries
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const todayEnd = new Date(todayStart.getTime() + 86400000)
+
   // Performance posts
   const postsWhere: any = {
     studentId: { in: studentIds },
@@ -50,6 +55,8 @@ export default async function ParentGrowthPage({ searchParams }: { searchParams:
     const d = new Date(sp.date + 'T00:00:00')
     const nextD = new Date(d.getTime() + 86400000)
     postsWhere.createdAt = { gte: d, lt: nextD }
+  } else if (!sp.feedbackId) {
+    postsWhere.createdAt = { gte: todayStart, lt: todayEnd }
   }
   const posts = await prisma.performancePost.findMany({
     where: postsWhere,
@@ -64,6 +71,8 @@ export default async function ParentGrowthPage({ searchParams }: { searchParams:
     const d = new Date(sp.date + 'T00:00:00')
     const nextD = new Date(d.getTime() + 86400000)
     cfWhere.createdAt = { gte: d, lt: nextD }
+  } else if (!sp.feedbackId) {
+    cfWhere.createdAt = { gte: todayStart, lt: todayEnd }
   }
   const classroomFeedbacks = await prisma.classroomFeedback.findMany({
     where: cfWhere,
@@ -78,6 +87,8 @@ export default async function ParentGrowthPage({ searchParams }: { searchParams:
     const d = new Date(sp.date + 'T00:00:00')
     const nextD = new Date(d.getTime() + 86400000)
     badgesWhere.earnedAt = { gte: d, lt: nextD }
+  } else if (!sp.feedbackId) {
+    badgesWhere.earnedAt = { gte: todayStart, lt: todayEnd }
   }
   const badges = await prisma.achievementBadge.findMany({
     where: badgesWhere,
@@ -92,6 +103,8 @@ export default async function ParentGrowthPage({ searchParams }: { searchParams:
     const d = new Date(sp.date + 'T00:00:00')
     const nextD = new Date(d.getTime() + 86400000)
     gradesWhere.createdAt = { gte: d, lt: nextD }
+  } else if (!sp.feedbackId) {
+    gradesWhere.createdAt = { gte: todayStart, lt: todayEnd }
   }
   const grades = await prisma.gradeRecord.findMany({
     where: gradesWhere,
@@ -106,6 +119,8 @@ export default async function ParentGrowthPage({ searchParams }: { searchParams:
     const d = new Date(sp.date + 'T00:00:00')
     const nextD = new Date(d.getTime() + 86400000)
     highlightsWhere.createdAt = { gte: d, lt: nextD }
+  } else if (!sp.feedbackId) {
+    highlightsWhere.createdAt = { gte: todayStart, lt: todayEnd }
   }
   const highlights = await prisma.classHighlight.findMany({
     where: highlightsWhere,

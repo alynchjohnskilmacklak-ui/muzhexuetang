@@ -218,7 +218,9 @@ export function TeacherPapersClient() {
             <Input placeholder="如：期中数学试卷" />
           </Form.Item>
           <Form.Item name="studentIds" label="选择学生" rules={[{ required: true, message: '请选择学生' }]}>
-            <Select mode="multiple" placeholder="选择学生" options={
+            <Select mode="multiple" placeholder="选择学生" showSearch={false} virtual={false}
+              getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+              options={
               students.map((s: any) => ({ label: s.name, value: s.id }))
             } />
           </Form.Item>

@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Col, Empty, Input, Row, Select, Spin, Tag, Typography } from 'antd'
-import { ReloadOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons'
+import { Button, Card, Col, Drawer, Empty, Form, Input, message, Row, Select, Spin, Tag, Upload } from 'antd'
+import { PlusOutlined, ReloadOutlined, SearchOutlined, SendOutlined, WarningOutlined } from '@ant-design/icons'
+import { Image as AntImage } from 'antd'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 
-const { Paragraph } = Typography
 const fetcher = (url: string) => fetch(url).then((res) => { if (!res.ok) throw new Error('加载失败'); return res.json() })
 
 type AdminFeedback = {
@@ -26,6 +26,56 @@ type AdminFeedback = {
   createdAt: string
 }
 
+function FeedbackItemCard({ item, isMobile: _isMobile }: { item: AdminFeedback; isMobile: boolean }) {
+  const students = Array.isArray(item.students) ? item.students : []
+  const points = Array.isArray(item.knowledgePoints) ? item.knowledgePoints : []
+  const images = Array.isArray(item.imageUrls) ? item.imageUrls : []
+  const homework = Array.isArray(item.homework) ? item.homework : []
+  return (
+    <Card bordered={false} style={{ borderRadius: 10, border: '1px solid #EEE7E1', background: '#fff' }} styles={{ body: { padding: '12px 14px' } }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, flexWrap: 'wrap', gap: 4 }}>
+        <span style={{ fontWeight: 600, fontSize: 14, color: '#1F2329' }}>{item.teacherName}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Tag color={item.status === 'PUBLISHED' ? 'green' : 'orange'} style={{ borderRadius: 9999, fontSize: 10, margin: 0 }}>
+            {item.status === 'PUBLISHED' ? '已发布' : '草稿'}
+          </Tag>
+          <span style={{ fontSize: 11, color: '#C4BAB0' }}>
+            {new Date(item.createdAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </div>
+      </div>
+      {students.length > 0 && (
+        <div style={{ marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+          {students.map(s => <Tag key={s.id} style={{ borderRadius: 9999, fontSize: 11, margin: 0 }}>{s.name}{s.grade ? ` · ${s.grade}` : ''}</Tag>)}
+        </div>
+      )}
+      {points.length > 0 && (
+        <div style={{ marginBottom: 6 }}>
+          {points.map(p => <Tag key={p} style={{ borderRadius: 9999, fontSize: 11, background: '#FFF3EC', color: '#E8784A', border: 'none', margin: '0 3px 2px 0' }}>{p}</Tag>)}
+        </div>
+      )}
+      {item.summary && (
+        <div style={{ padding: '6px 10px', background: '#FCFBF9', borderRadius: 6, borderLeft: '3px solid #E8784A', fontSize: 13, color: '#1F2329', lineHeight: 1.6 }}>
+          {item.summary}
+        </div>
+      )}
+      {homework.length > 0 && (
+        <div style={{ marginTop: 4, fontSize: 12, color: '#98A2B3' }}>
+          作业 {homework.length} 项
+        </div>
+      )}
+      {images.length > 0 && (
+        <div style={{ marginTop: 6, display: 'flex', gap: 4 }}>
+          {images.slice(0, 4).map((url, i) => (
+            <img key={i} src={normalizeUploadUrl(url)} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid #EEE7E1' }} />
+          ))}
+          {images.length > 4 && <div style={{ width: 48, height: 48, borderRadius: 6, background: '#f5f2ee', display: 'grid', placeItems: 'center', fontSize: 11, color: '#98A2B3' }}>+{images.length - 4}</div>}
+        </div>
+      )}
+    </Card>
+  )
+}
+
 export default function ClassroomFeedbackAdminPage() {
   const isMobile = useIsMobile() ?? false
   const today = new Date().toISOString().slice(0, 10)
@@ -33,6 +83,20 @@ export default function ClassroomFeedbackAdminPage() {
   const [teacherFilter, setTeacherFilter] = useState('')
   const [q, setQ] = useState('')
   const [viewAll, setViewAll] = useState(false)
+  const [groupByClass, setGroupByClass] = useState(true)
+
+  // Compose drawer state
+  const [composeOpen, setComposeOpen] = useState(false)
+  const [composeForm] = Form.useForm()
+  const [composeImages, setComposeImages] = useState<string[]>([])
+  const [submitting, setSubmitting] = useState(false)
+  const [composeTeacherId, setComposeTeacherId] = useState('')
+  const { data: composeStudentsData } = useSWR(
+    composeTeacherId ? `/api/students?status=ACTIVE&limit=200` : null,
+    fetcher
+  )
+  const composeStudents: Array<{ id: string; name: string; grade?: string }> =
+    Array.isArray(composeStudentsData?.students) ? composeStudentsData.students : []
 
   const params = new URLSearchParams({ date, limit: '200' })
   if (teacherFilter) params.set('teacherId', teacherFilter)
@@ -51,11 +115,71 @@ export default function ClassroomFeedbackAdminPage() {
       || feedback.knowledgePoints?.some((point) => point.includes(keyword))
   })
 
+  const groupedByClass = useMemo(() => {
+    if (!groupByClass) return null
+    const groups = new Map<string, { className: string; subject: string; items: AdminFeedback[] }>()
+    filtered.forEach(item => {
+      const key = item.lessonName || item.courseName || '未关联班级'
+      const existing = groups.get(key)
+      if (existing) {
+        existing.items.push(item)
+      } else {
+        groups.set(key, { className: key, subject: item.subject || '-', items: [item] })
+      }
+    })
+    return Array.from(groups.values()).sort((a, b) => a.className.localeCompare(b.className))
+  }, [filtered, groupByClass])
+
+  const submitOnBehalf = async (status: 'DRAFT' | 'PUBLISHED') => {
+    const values = await composeForm.validateFields().catch(() => null)
+    if (!values) return
+    if (!composeTeacherId) { message.error('请选择代发老师'); return }
+    if (!values.studentIds?.length) { message.error('请选择学员'); return }
+    if (!values.summary?.trim() && !values.knowledgePoints?.length) { message.error('请填写评语或知识点'); return }
+
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/admin/classroom-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teacherId: composeTeacherId,
+          studentIds: values.studentIds,
+          knowledgePoints: (values.knowledgePoints || []),
+          summary: values.summary || '',
+          homework: values.homework ? [{ order: 1, content: values.homework }] : [],
+          imageUrls: composeImages,
+          source: 'admin',
+          status,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) { message.error(data.error || '提交失败'); return }
+      message.success(status === 'PUBLISHED' ? '已代发并通知家长' : '草稿已保存')
+      setComposeOpen(false)
+      composeForm.resetFields()
+      setComposeImages([])
+      setComposeTeacherId('')
+      mutate()
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <PageLayout
       title="课堂反馈总览"
       subtitle="查看所有老师的课堂反馈，追踪今日反馈提交情况"
-      actions={<Button icon={<ReloadOutlined />} onClick={() => mutate()}>刷新</Button>}
+      actions={
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button type="primary" icon={<PlusOutlined />}
+            style={{ background: '#E8784A', borderColor: '#E8784A' }}
+            onClick={() => setComposeOpen(true)}>
+            替老师发反馈
+          </Button>
+          <Button icon={<ReloadOutlined />} onClick={() => mutate()}>刷新</Button>
+        </div>
+      }
     >
       <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
         <Col xs={12} sm={8} md={6}>
@@ -100,6 +224,13 @@ export default function ClassroomFeedbackAdminPage() {
           >
             {viewAll ? '恢复按日查看' : '查看全部历史'}
           </Button>
+          <Button
+            type={groupByClass ? 'primary' : 'default'}
+            onClick={() => setGroupByClass(v => !v)}
+            style={groupByClass ? { background: '#534AB7', borderColor: '#534AB7' } : undefined}
+          >
+            {groupByClass ? '按班级分组' : '时间列表'}
+          </Button>
         </div>
       </Card>
 
@@ -121,89 +252,110 @@ export default function ClassroomFeedbackAdminPage() {
         <Card bordered={false} style={{ borderRadius: 10, border: '1px solid #EEE7E1' }}>
           <Empty description={viewAll ? '暂无反馈记录' : `${date} 暂无课堂反馈`} />
         </Card>
+      ) : groupByClass && groupedByClass ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {groupedByClass.map(group => (
+            <div key={group.className}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <div style={{ width: 4, height: 18, borderRadius: 2, background: '#E8784A', flexShrink: 0 }} />
+                <span style={{ fontWeight: 700, fontSize: 15, color: '#1F2329' }}>{group.className}</span>
+                <span style={{ fontSize: 12, padding: '1px 8px', borderRadius: 9999, background: '#FFF3EC', color: '#E8784A' }}>
+                  {group.subject}
+                </span>
+                <span style={{ fontSize: 12, color: '#98A2B3' }}>{group.items.length} 条反馈</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 14, borderLeft: '2px solid #F5EDE8' }}>
+                {group.items.map(item => <FeedbackItemCard key={item.id} item={item} isMobile={isMobile} />)}
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {filtered.map((item) => {
-            const students = Array.isArray(item.students) ? item.students : []
-            const points = Array.isArray(item.knowledgePoints) ? item.knowledgePoints : []
-            const images = Array.isArray(item.imageUrls) ? item.imageUrls : []
-            const homework = Array.isArray(item.homework) ? item.homework : []
-            return (
-              <Card key={item.id} bordered={false} style={{ borderRadius: 12, border: '1px solid #EEE7E1', background: '#fff' }} bodyStyle={{ padding: '14px 16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, flexWrap: 'wrap', gap: 6 }}>
-                  <div>
-                    <span style={{ fontWeight: 700, fontSize: 15, color: '#1F2329', marginRight: 8 }}>{item.teacherName}</span>
-                    <Tag color="blue" style={{ borderRadius: 9999 }}>{item.courseName || item.lessonName || '-'}</Tag>
-                    {item.subject && item.subject !== '-' && <Tag style={{ borderRadius: 9999 }}>{item.subject}</Tag>}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Tag color={item.status === 'PUBLISHED' ? 'green' : 'orange'} style={{ borderRadius: 9999 }}>
-                      {item.status === 'PUBLISHED' ? '已发布' : '草稿'}
-                    </Tag>
-                    <span style={{ fontSize: 11, color: '#98A2B3' }}>
-                      {new Date(item.createdAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                </div>
-
-                {students.length > 0 && (
-                  <div style={{ marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, color: '#98A2B3', marginRight: 6 }}>反馈学员（{students.length}人）：</span>
-                    <span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 4 }}>
-                      {students.map((student) => (
-                        <Tag key={student.id} style={{ borderRadius: 9999, fontSize: 11, margin: 0 }}>
-                          {student.name}{student.grade ? ` · ${student.grade}` : ''}
-                        </Tag>
-                      ))}
-                    </span>
-                  </div>
-                )}
-
-                {points.length > 0 && (
-                  <div style={{ marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, color: '#98A2B3', marginRight: 6 }}>知识点：</span>
-                    {points.map((point) => (
-                      <Tag key={point} style={{ borderRadius: 9999, fontSize: 11, background: '#FFF3EC', color: '#E8784A', border: 'none', margin: '0 3px 3px 0' }}>{point}</Tag>
-                    ))}
-                  </div>
-                )}
-
-                {item.summary && (
-                  <div style={{ marginBottom: 8, padding: '8px 12px', background: '#FCFBF9', borderRadius: 8, borderLeft: '3px solid #E8784A' }}>
-                    <span style={{ fontSize: 12, color: '#98A2B3' }}>课堂小结：</span>
-                    <Paragraph style={{ margin: 0, fontSize: 13, color: '#1F2329', marginTop: 4, lineHeight: 1.6 }}>{item.summary}</Paragraph>
-                  </div>
-                )}
-
-                {homework.length > 0 && (
-                  <div style={{ marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, color: '#98A2B3' }}>布置作业（{homework.length}项）：</span>
-                    {homework.map((row: unknown, index: number) => (
-                      <div key={index} style={{ fontSize: 12, color: '#5a4e3a', marginLeft: 8, marginTop: 2 }}>
-                        {index + 1}. {typeof row === 'string' ? row : (row as { content?: string })?.content || JSON.stringify(row)}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {images.length > 0 && (
-                  <div style={{ marginTop: 8 }}>
-                    <span style={{ fontSize: 12, color: '#98A2B3', marginBottom: 4, display: 'block' }}>课堂资料（{images.length}张）：</span>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      {images.slice(0, 4).map((url, index) => (
-                        <a key={`${url}-${index}`} href={normalizeUploadUrl(url)} target="_blank" rel="noopener noreferrer">
-                          <img src={normalizeUploadUrl(url)} alt="课堂资料" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid #EEE7E1' }} />
-                        </a>
-                      ))}
-                      {images.length > 4 && <div style={{ width: 56, height: 56, borderRadius: 6, background: '#f5f2ee', display: 'grid', placeItems: 'center', fontSize: 12, color: '#98A2B3' }}>+{images.length - 4}</div>}
-                    </div>
-                  </div>
-                )}
-              </Card>
-            )
-          })}
+          {filtered.map(item => <FeedbackItemCard key={item.id} item={item} isMobile={isMobile} />)}
         </div>
       )}
+
+      {/* Compose drawer */}
+      <Drawer
+        open={composeOpen}
+        onClose={() => { setComposeOpen(false); composeForm.resetFields(); setComposeTeacherId('') }}
+        title="代老师发布成长反馈"
+        width={isMobile ? '100%' : 520}
+        placement={isMobile ? 'bottom' : 'right'}
+        height={isMobile ? '90vh' : undefined}
+        footer={
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <Button onClick={() => submitOnBehalf('DRAFT')} loading={submitting}>保存草稿</Button>
+            <Button type="primary" icon={<SendOutlined />} loading={submitting}
+              style={{ background: '#E8784A', borderColor: '#E8784A' }}
+              onClick={() => submitOnBehalf('PUBLISHED')}>
+              发布并通知家长
+            </Button>
+          </div>
+        }
+        styles={{ body: { paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))' } }}
+      >
+        <div style={{ color: '#98A2B3', fontSize: 12, marginBottom: 16, padding: '8px 12px', background: '#FFF7ED', borderRadius: 8, border: '1px solid #FED7AA' }}>
+          管理端代发不计入教师薪资奖励
+        </div>
+        <Form form={composeForm} layout="vertical" size="middle">
+          <Form.Item label="代发老师" required>
+            <Select
+              showSearch
+              placeholder="选择老师"
+              value={composeTeacherId || undefined}
+              onChange={v => { setComposeTeacherId(v || ''); composeForm.setFieldValue('studentIds', []) }}
+              options={teachers.map((t: { id: string; name: string }) => ({ label: t.name, value: t.id }))}
+              filterOption={(input, option) => String(option?.label || '').includes(input)}
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          <Form.Item name="studentIds" label={`选择学员${composeStudents.length ? `（${composeStudents.length}位可选）` : ''}`} required>
+            <Select
+              mode="multiple"
+              placeholder={composeTeacherId ? '选择要反馈的学员' : '请先选择老师'}
+              disabled={!composeTeacherId}
+              style={{ width: '100%' }}
+              options={composeStudents.map(s => ({ label: `${s.name}${s.grade ? ` · ${s.grade}` : ''}`, value: s.id }))}
+            />
+          </Form.Item>
+
+          <Form.Item name="knowledgePoints" label="知识点">
+            <Select mode="tags" placeholder="输入知识点后回车" style={{ width: '100%' }}
+              options={['新知识讲解', '错题订正', '课堂练习', '复习巩固', '测验讲评'].map(v => ({ label: v, value: v }))} />
+          </Form.Item>
+
+          <Form.Item name="summary" label="课堂小结/评语">
+            <Input.TextArea rows={4} placeholder="本次课程的整体点评，家长将直接看到..." maxLength={400} showCount style={{ borderRadius: 8 }} />
+          </Form.Item>
+
+          <Form.Item name="homework" label="作业布置（可选）">
+            <Input placeholder="简要描述本次作业" style={{ borderRadius: 8 }} />
+          </Form.Item>
+
+          <Form.Item label="课堂资料（可选）">
+            {composeImages.length > 0 && (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                <AntImage.PreviewGroup>
+                  {composeImages.map((url, i) => (
+                    <div key={i} style={{ position: 'relative' }}>
+                      <AntImage src={normalizeUploadUrl(url)} width={60} height={60} style={{ objectFit: 'cover', borderRadius: 6 }} />
+                      <button onClick={() => setComposeImages(prev => prev.filter((_, j) => j !== i))}
+                        style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#E24B4A', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11, display: 'grid', placeItems: 'center' }}>×</button>
+                    </div>
+                  ))}
+                </AntImage.PreviewGroup>
+              </div>
+            )}
+            <Upload name="file" action="/api/upload" accept="image/*" multiple maxCount={9} showUploadList={false}
+              onChange={info => { if (info.file.status === 'done') { const url = (info.file.response as { url?: string })?.url; if (url) setComposeImages(prev => [...prev, url]) } }}>
+              <Button icon={<PlusOutlined />}>上传图片</Button>
+            </Upload>
+          </Form.Item>
+        </Form>
+      </Drawer>
     </PageLayout>
   )
 }
