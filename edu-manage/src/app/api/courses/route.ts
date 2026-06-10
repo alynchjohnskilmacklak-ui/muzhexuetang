@@ -11,14 +11,13 @@ export const GET = apiHandler(async () => {
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
 
   const courses = await prisma.course.findMany({
-    where: {
-      isActive: true,
-      classGroups: { some: visibleClassGroupWhere },
-    },
+    where: { isActive: true },
     orderBy: { createdAt: 'desc' },
     include: { teacher: { select: { id: true, name: true } } },
   })
-  return NextResponse.json(courses)
+  return NextResponse.json(courses, {
+    headers: { 'Cache-Control': 'public, max-age=120, stale-while-revalidate=60' },
+  })
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {

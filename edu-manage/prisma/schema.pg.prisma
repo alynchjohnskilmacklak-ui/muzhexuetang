@@ -626,13 +626,22 @@ model ClassroomFeedback {
   classLessonId   String?
   classLesson     ClassLesson? @relation(fields: [classLessonId], references: [id])
   targetType      String       @default("CLASS")
+  source          String       @default("teacher")
   studentIds      String[]
   knowledgePoints String[]
   summary         String?      @db.Text
+  mood            String?
+  tags            String[]     @default([])
+  badge           String?
+  overallComment  String?
   homework        Json?
   imageUrls       String[]
   imageTypes      Json?
   studentRatings  Json?
+  parentReply     String?
+  parentRepliedAt DateTime?
+  adminReply      String?
+  adminRepliedAt  DateTime?
   status          String       @default("DRAFT")
   notifySent      Boolean      @default(false)
   createdAt       DateTime     @default(now())
@@ -642,6 +651,8 @@ model ClassroomFeedback {
   @@index([teacherId, status, createdAt])
   @@index([classLessonId])
   @@index([status])
+  @@index([source, createdAt])
+  @@index([teacherId, source, status])
 }
 
 model PostReaction {

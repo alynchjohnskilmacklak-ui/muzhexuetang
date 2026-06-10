@@ -31,5 +31,7 @@ export const GET = apiHandler(async () => {
     }),
   ])
 
-  return NextResponse.json({ papers, posts, notifications })
+  return NextResponse.json({ papers, posts, notifications }, {
+    headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
+  })
 })

@@ -38,6 +38,17 @@ export function ClassFeedbackClient({ feedbacks }: { feedbacks: any[] }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
                 <BookOutlined style={{ color: '#534AB7', fontSize: 16 }} />
                 <Text strong style={{ fontSize: 15 }}>{f.teacher?.name || '老师'}</Text>
+                {(() => {
+                  const lessonSubject = f.classLesson?.subject as string | undefined
+                  const assignedSubject = (f.classLesson?.group?.teacherAssignments as any[])
+                    ?.find((a: any) => a.teacherId === f.teacher?.id)?.subject
+                  const subject = lessonSubject || assignedSubject || f.classLesson?.group?.course?.subject
+                  return subject ? (
+                    <Tag style={{ borderRadius: 9999, fontSize: 10, background: '#F0EEFF', color: '#534AB7', border: 'none' }}>
+                      {subject}
+                    </Tag>
+                  ) : null
+                })()}
                 <Tag color="purple" style={{ borderRadius: 9999, fontSize: 10 }}>课堂反馈</Tag>
                 <Text type="secondary" style={{ fontSize: 11, marginLeft: 'auto' }}>
                   {format(new Date(f.createdAt), 'yyyy-MM-dd HH:mm')}

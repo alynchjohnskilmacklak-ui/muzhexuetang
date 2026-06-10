@@ -5,11 +5,13 @@ import { requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonWhere, todayRa
 import { calculateAttendanceDeductHours } from '@/lib/attendance-hours'
 import { triggerLessonPay } from '@/lib/teacher-salary'
 
+import { apiHandler } from '@/lib/api-handler'
+
 export const dynamic = 'force-dynamic'
 
 const VALID_STATUS = new Set(['PRESENT', 'LEAVE', 'ABSENT', 'MAKEUP'])
 
-export async function GET(request: NextRequest) {
+export const GET = apiHandler(async (request: NextRequest) => {
   try {
     const { teacher } = await requireCurrentTeacher()
     const { start: today, end: todayEnd } = todayRange()
@@ -88,12 +90,13 @@ export async function GET(request: NextRequest) {
       allPresent: lesson.attendances.length > 0 && lesson.attendances.every((attendance) => attendance.status === 'PRESENT'),
       hoursDeducted: !!lesson.hoursDeductedAt,
     })))
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  } catch (err) {
+    console.error('[teacher:attendance:GET]', err instanceof Error ? err.message : err)
+    return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
-}
+})
 
-export async function POST(request: NextRequest) {
+export const POST = apiHandler(async (request: NextRequest) => {
   try {
     const body = await request.json()
     const lessonId = typeof body.lessonId === 'string' ? body.lessonId : ''
@@ -272,4 +275,4 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ error: error instanceof Error ? error.message : '提交失败' }, { status: 500 })
   }
-}
+})

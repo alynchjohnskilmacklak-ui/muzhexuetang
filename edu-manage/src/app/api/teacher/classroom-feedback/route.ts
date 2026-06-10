@@ -24,8 +24,9 @@ export async function GET(req: NextRequest) {
       take: limit,
     })
     return NextResponse.json({ feedbacks })
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  } catch (err) {
+    console.error('[teacher:classroom-feedback:GET]', err instanceof Error ? err.message : err)
+    return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
 }
 
@@ -43,6 +44,9 @@ export async function POST(req: NextRequest) {
     const homework = Array.isArray(body.homework) ? body.homework : []
     const imageTypes = body.imageTypes && typeof body.imageTypes === 'object' ? body.imageTypes : {}
     const studentRatings = body.studentRatings && typeof body.studentRatings === 'object' ? body.studentRatings : {}
+    
+    // New fields
+    const { mood, tags, badge, overallComment } = body
 
     if (!summary && !knowledgePoints.length && !homework.length && !imageUrls.length) {
       return NextResponse.json({ error: '请至少填写课堂内容、作业或上传资料' }, { status: 400 })
@@ -89,9 +93,14 @@ export async function POST(req: NextRequest) {
           teacherId: teacher.id,
           classLessonId,
           targetType,
+          source: 'teacher',
           studentIds: students.map((student) => student.id),
           knowledgePoints,
           summary: summary || null,
+          mood: mood || null,
+          tags: Array.isArray(tags) ? tags : [],
+          badge: badge || null,
+          overallComment: overallComment || null,
           homework,
           imageUrls,
           imageTypes,

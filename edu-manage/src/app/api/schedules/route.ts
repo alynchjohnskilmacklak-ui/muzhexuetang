@@ -32,24 +32,32 @@ export const GET = apiHandler(async (req: NextRequest) => {
     if (end) (where.startTime as Record<string, unknown>).lte = new Date(end)
   }
 
-  const schedules = await prisma.schedule.findMany({
-    where,
-    include: {
-      course: { select: { id: true, name: true, subject: true, type: true } },
-      teacher: { select: { id: true, name: true } },
-      room: { select: { id: true, name: true, type: true, usageType: true } },
-      students: {
-        where: { student: visibleStudentWhere },
-        include: { student: { select: { id: true, name: true } } },
-      },
-      attendances: {
-        select: { id: true, studentId: true, status: true },
-      },
-    },
-    orderBy: { startTime: 'asc' },
-  })
+  const page = Math.max(1, Number(searchParams.get('page') || 1))
+  const limit = Math.min(200, Math.max(1, Number(searchParams.get('limit') || 50)))
 
-  return NextResponse.json(schedules)
+  const [schedules, total] = await Promise.all([
+    prisma.schedule.findMany({
+      where,
+      include: {
+        course: { select: { id: true, name: true, subject: true, type: true } },
+        teacher: { select: { id: true, name: true } },
+        room: { select: { id: true, name: true, type: true, usageType: true } },
+        students: {
+          where: { student: visibleStudentWhere },
+          include: { student: { select: { id: true, name: true } } },
+        },
+        attendances: {
+          select: { id: true, studentId: true, status: true },
+        },
+      },
+      orderBy: { startTime: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.schedule.count({ where }),
+  ])
+
+  return NextResponse.json({ schedules, total, page, limit })
 })
 
 async function checkScheduleConflicts({
@@ -134,7 +142,7 @@ async function checkScheduleConflicts({
   return conflicts
 }
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if ((session.user as { role?: string }).role !== 'admin') {
@@ -245,4 +253,4 @@ export async function POST(req: NextRequest) {
     console.error('[schedules:create]', e)
     return NextResponse.json({ error: '创建排课失败' }, { status: 500 })
   }
-}
+})

@@ -51,6 +51,10 @@ const nextConfig = read('next.config.ts')
 assertCheck('security headers configured', /X-Frame-Options/.test(nextConfig) && /X-Content-Type-Options/.test(nextConfig) && /Permissions-Policy/.test(nextConfig))
 assertCheck('hsts production only', /NODE_ENV\s*===\s*['"]production['"]/.test(nextConfig) && /Strict-Transport-Security/.test(nextConfig))
 
+// New environment and database safety checks
+assertCheck('no production .env in root', !existsSync(join(root, '.env')))
+assertCheck('no local sqlite dev.db in prisma', !existsSync(join(root, 'prisma/dev.db')))
+
 const failed = checks.filter((check) => !check.pass)
 for (const check of checks) {
   console.log(`${check.pass ? 'PASS' : 'FAIL'} ${check.name}${check.detail ? ` - ${check.detail}` : ''}`)

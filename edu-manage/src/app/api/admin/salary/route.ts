@@ -21,12 +21,18 @@ export async function GET(req: NextRequest) {
       ? { teacherId, createdAt: { gte: since } }
       : { createdAt: { gte: since } }
 
-    const [transactions, teachers] = await Promise.all([
+    const page = Math.max(1, Number(req.nextUrl.searchParams.get('page') || 1))
+    const limit = Math.min(200, Math.max(1, Number(req.nextUrl.searchParams.get('limit') || 50)))
+
+    const [transactions, total, teachers] = await Promise.all([
       prisma.teacherSalaryTransaction.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         include: { teacher: { select: { id: true, name: true, avatar: true } } },
+        skip: (page - 1) * limit,
+        take: limit,
       }),
+      prisma.teacherSalaryTransaction.count({ where }),
       prisma.teacher.findMany({
         where: { status: 'ACTIVE' },
         select: { id: true, name: true, avatar: true },
@@ -57,6 +63,9 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       period,
+      total,
+      page,
+      limit,
       summary,
       transactions: transactions.map((item) => ({
         id: item.id,

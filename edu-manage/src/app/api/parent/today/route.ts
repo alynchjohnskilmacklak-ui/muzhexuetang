@@ -199,5 +199,7 @@ export const GET = apiHandler(async () => {
     }
   })
 
-  return NextResponse.json({ today: today.toISOString(), students: results })
+  return NextResponse.json({ today: today.toISOString(), students: results }, {
+    headers: { 'Cache-Control': 'private, max-age=60, stale-while-revalidate=120' },
+  })
 })

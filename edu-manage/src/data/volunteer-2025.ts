@@ -166,6 +166,7 @@ export const VOLUNTEER_SCORE_THRESHOLDS = {
 
 // 去掉学校名末尾的括号后缀，如「(其他县区)」「(市)」「(正定)」
 function stripSuffix(n: string): string {
+  if (!n) return ''
   return n.replace(/[(（][^)）]*[)）]\s*$/, '').trim()
 }
 

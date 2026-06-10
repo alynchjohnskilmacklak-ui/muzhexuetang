@@ -97,100 +97,101 @@ export function calcLessonPay(opts: {
   return Number((ratePerHour * lessonMinutes / 60).toFixed(4))
 }
 
-export async function triggerLessonPay(lessonId: string): Promise<void> {
-  const lesson = await prisma.classLesson.findUnique({
-    where: { id: lessonId },
-    include: { group: { include: { course: true } } },
-  })
-  const teacherId = lesson?.teacherId || lesson?.group.teacherId
-  if (!lesson || !teacherId) return
+export async function triggerLessonPay(lessonId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const lesson = await prisma.classLesson.findUnique({
+      where: { id: lessonId },
+      include: { group: { include: { course: true } } },
+    })
+    const teacherId = lesson?.teacherId || lesson?.group.teacherId
+    if (!lesson || !teacherId) return { success: false, error: '课次或教师不存在' }
 
-  const existing = await prisma.teacherSalaryTransaction.findFirst({
-    where: { lessonId, type: 'LESSON_PAY' },
-    select: { id: true },
-  })
-  if (existing) return
+    const existing = await prisma.teacherSalaryTransaction.findFirst({
+      where: { lessonId, type: 'LESSON_PAY' },
+      select: { id: true },
+    })
+    if (existing) return { success: true }
 
-  const cfg = await getTeacherSalaryConfig(teacherId)
-  const grade = inferGrade(lesson.group.course.grade, lesson.group.name, lesson.group.course.name)
-  const amount = calcLessonPay({
-    courseType: lesson.group.course.type,
-    grade,
-    lessonMinutes: lesson.group.lessonMinutes,
-    groupRateJunior: cfg.groupRateJunior,
-    groupRateSenior: cfg.groupRateSenior,
-    oneOnOneRates: cfg.oneOnOneRates,
-  })
+    const cfg = await getTeacherSalaryConfig(teacherId)
+    const grade = inferGrade(lesson.group.course.grade, lesson.group.name, lesson.group.course.name)
+    const amount = calcLessonPay({
+      courseType: lesson.group.course.type,
+      grade,
+      lessonMinutes: lesson.group.lessonMinutes,
+      groupRateJunior: cfg.groupRateJunior,
+      groupRateSenior: cfg.groupRateSenior,
+      oneOnOneRates: cfg.oneOnOneRates,
+    })
 
-  const rateLabel = lesson.group.course.type === 'ONE_ON_ONE'
-    ? `${cfg.oneOnOneRates[grade || ''] ?? 25}元/小时`
-    : `${isSeniorGrade(grade) ? cfg.groupRateSenior : cfg.groupRateJunior}元/小时`
+    const rateLabel = lesson.group.course.type === 'ONE_ON_ONE'
+      ? `${cfg.oneOnOneRates[grade || ''] ?? 25}元/小时`
+      : `${isSeniorGrade(grade) ? cfg.groupRateSenior : cfg.groupRateJunior}元/小时`
 
-  await prisma.teacherSalaryTransaction.create({
-    data: {
-      teacherId,
-      type: 'LESSON_PAY',
-      amount,
-      lessonId,
-      lessonDate: lesson.lessonDate,
-      description: `${lesson.group.name}（${lesson.group.lessonMinutes}分钟 x ${rateLabel}）`,
-    },
-  })
+    await prisma.teacherSalaryTransaction.create({
+      data: {
+        teacherId,
+        type: 'LESSON_PAY',
+        amount,
+        lessonId,
+        lessonDate: lesson.lessonDate,
+        description: `${lesson.group.name}（${lesson.group.lessonMinutes}分钟 x ${rateLabel}）`,
+      },
+    })
+    return { success: true }
+  } catch (err) {
+    console.error('[salary] triggerLessonPay failed:', lessonId, err instanceof Error ? err.message : err)
+    return { success: false, error: err instanceof Error ? err.message : '薪资计算失败' }
+  }
 }
 
-export async function triggerFeedbackBonus(feedbackId: string): Promise<void> {
-  const feedback = await prisma.classroomFeedback.findUnique({
-    where: { id: feedbackId },
-    include: { classLesson: { include: { group: { include: { course: true } } } } },
-  })
-  if (!feedback || !isPayableFeedback(feedback)) return
-
-  // 管理端创建的反馈不发放奖励
-  if ((feedback as any).source === 'admin') return
-
-  const lesson = feedback.classLesson
-  const teacherId = feedback.teacherId
-  if (lesson?.id) {
-    const existing = await prisma.teacherSalaryTransaction.findFirst({
-      where: { lessonId: lesson.id, type: 'FEEDBACK_BONUS' },
-      select: { id: true },
+export async function triggerFeedbackBonus(feedbackId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const feedback = await prisma.classroomFeedback.findUnique({
+      where: { id: feedbackId },
+      include: { classLesson: { include: { group: { include: { course: true } } } } },
     })
-    if (existing) return
-  } else {
-    const start = new Date()
-    start.setHours(0, 0, 0, 0)
-    const end = new Date(start.getTime() + 86400000)
-    const existing = await prisma.teacherSalaryTransaction.findFirst({
-      where: { teacherId, type: 'FEEDBACK_BONUS', createdAt: { gte: start, lt: end } },
-      select: { id: true },
+    if (!feedback || !isPayableFeedback(feedback)) return { success: false, error: '反馈不可发放奖励' }
+
+    const lesson = feedback.classLesson
+    const teacherId = feedback.teacherId
+    if (lesson?.id) {
+      const existing = await prisma.teacherSalaryTransaction.findFirst({
+        where: { lessonId: lesson.id, type: 'FEEDBACK_BONUS' },
+        select: { id: true },
+      })
+      if (existing) return { success: true }
+    } else {
+      const start = new Date()
+      start.setHours(0, 0, 0, 0)
+      const end = new Date(start.getTime() + 86400000)
+      const existing = await prisma.teacherSalaryTransaction.findFirst({
+        where: { teacherId, type: 'FEEDBACK_BONUS', createdAt: { gte: start, lt: end } },
+        select: { id: true },
+      })
+      if (existing) return { success: true }
+    }
+
+    const cfg = await getTeacherSalaryConfig(teacherId)
+    const isOneOnOne = lesson?.group?.course?.type === 'ONE_ON_ONE'
+    const headCount = feedback.studentIds.length
+    const rate = isOneOnOne ? cfg.feedbackRateOneOne : cfg.feedbackRateGroup
+    const amount = Number((headCount * rate).toFixed(4))
+    if (amount <= 0) return { success: false, error: '金额为零' }
+
+    await prisma.teacherSalaryTransaction.create({
+      data: {
+        teacherId,
+        type: 'FEEDBACK_BONUS',
+        amount,
+        feedbackId,
+        lessonId: lesson?.id ?? null,
+        lessonDate: lesson?.lessonDate ?? new Date(),
+        description: `课堂反馈奖励（${headCount}人 x ${rate}元）`,
+      },
     })
-    if (existing) return
+    return { success: true }
+  } catch (err) {
+    console.error('[salary] triggerFeedbackBonus failed:', feedbackId, err instanceof Error ? err.message : err)
+    return { success: false, error: err instanceof Error ? err.message : '反馈奖励计算失败' }
   }
-
-  const cfg = await getTeacherSalaryConfig(teacherId)
-  // 优先从关联课次判断课程类型；无关联课次时，检查该教师是否存在活跃一对一班级
-  let isOneOnOne = lesson?.group.course.type === 'ONE_ON_ONE'
-  if (!lesson) {
-    const hasOneOnOne = await prisma.classGroup.findFirst({
-      where: { teacherId, status: 'ACTIVE', course: { type: 'ONE_ON_ONE' } },
-      select: { id: true },
-    })
-    if (hasOneOnOne) isOneOnOne = true
-  }
-  const headCount = feedback.studentIds.length
-  const rate = isOneOnOne ? cfg.feedbackRateOneOne : cfg.feedbackRateGroup
-  const amount = Number((headCount * rate).toFixed(4))
-  if (amount <= 0) return
-
-  await prisma.teacherSalaryTransaction.create({
-    data: {
-      teacherId,
-      type: 'FEEDBACK_BONUS',
-      amount,
-      feedbackId,
-      lessonId: lesson?.id ?? null,
-      lessonDate: lesson?.lessonDate ?? new Date(),
-      description: `课堂反馈奖励（${headCount}人 x ${rate}元）`,
-    },
-  })
 }

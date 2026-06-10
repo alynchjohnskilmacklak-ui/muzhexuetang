@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
+import { apiHandler } from '@/lib/api-handler'
 import { AI_PROMPTS, SCIENCE_ANSWER_RULES, type AIRole, type ModelId } from '@/data/ai-prompts'
 import { AIProviderError, createSSEFromText, fetchWithTimeout } from '@/lib/ai/client'
 import { getModelCapability } from '@/lib/ai/models'
@@ -209,7 +210,7 @@ function mapProviderError(modelId: ModelId, responseStatus: number, detail: stri
   }
 }
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -338,4 +339,4 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ error: `${modelId} 网络错误，请检查服务器连接或稍后重试` }, { status: 500 })
   }
-}
+})

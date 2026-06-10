@@ -12,7 +12,6 @@ import {
   Empty,
   Input,
   InputNumber,
-  message,
   Modal,
   Progress,
   Row,
@@ -21,6 +20,7 @@ import {
   Spin,
   Tag,
 } from 'antd'
+import { toast } from 'sonner'
 import {
   BookOutlined,
   CalendarOutlined,
@@ -146,11 +146,11 @@ export default function CoursesPage() {
   const [startingGroupId, setStartingGroupId] = useState('')
   const [regeneratingGroupId, setRegeneratingGroupId] = useState('')
   const [deletingGroupId, setDeletingGroupId] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState<{id:string;name:string}|null>(null)
   const isMobile = useIsMobile() ?? false
 
   const groupList = useMemo(() => Array.isArray(groups) ? groups : [], [groups])
   const courseList = (Array.isArray(courses) ? courses : []).filter((course: Record<string, unknown>) => {
-    if (!SUBJECTS.includes(course.subject as string)) return false
     const type = course.type as string
     if (courseTab === 'GROUP') return type === 'GROUP'
     if (courseTab === 'SMALL') return type === 'ONE_ON_ONE' || type === 'SMALL_GROUP'
@@ -260,7 +260,7 @@ export default function CoursesPage() {
   const handleNextStep = () => {
     if (createStep === 0) {
       if (!createData.courseId && !createData.courseName) {
-        message.error('请选择已有课程，或填写课程名称')
+        toast.error('请选择已有课程，或填写课程名称')
         return
       }
     }
@@ -268,7 +268,7 @@ export default function CoursesPage() {
       const teacherAssignments = Array.isArray(createData.teacherAssignments) ? createData.teacherAssignments as Record<string, unknown>[] : []
       const validAssignments = teacherAssignments.filter((item) => item.teacherId && item.subject)
       if (!createData.name || !validAssignments.length || !createData.startDate) {
-        message.error('请填写班级名称、授课教师、负责科目和开班日期')
+        toast.error('请填写班级名称、授课教师、负责科目和开班日期')
         return
       }
     }
@@ -305,11 +305,11 @@ export default function CoursesPage() {
   const doCreate = async () => {
     const recurringDays = (createData.recurringDays as string[]) || []
     if (!recurringDays.length) {
-      message.error('请选择至少一个上课日')
+      toast.error('请选择至少一个上课日')
       return
     }
     if (!previewDates.length) {
-      message.error('无法生成课次，请检查开班日期、上课日和总课次数')
+      toast.error('无法生成课次，请检查开班日期、上课日和总课次数')
       return
     }
 
@@ -346,7 +346,7 @@ export default function CoursesPage() {
         .filter((item) => item.teacherId && item.subject)
         .map((item) => ({ teacherId: item.teacherId, subject: item.subject }))
       if (!teacherAssignments.length) {
-        message.error('请至少选择一位老师和对应科目')
+        toast.error('请至少选择一位老师和对应科目')
         setCreateLoading(false)
         return
       }
@@ -376,7 +376,7 @@ export default function CoursesPage() {
       const scheduleTemplate = resolveCreateScheduleTemplate(scheduleTemplateOverride)
 
       if (!scheduleTemplate.length) {
-        message.error(isHourly ? '请至少选择一个上课时间段' : '请至少为一个节次选择老师科目')
+        toast.error(isHourly ? '请至少选择一个上课时间段' : '请至少为一个节次选择老师科目')
         setCreateLoading(false)
         return
       }
@@ -389,7 +389,7 @@ export default function CoursesPage() {
       const lessonPayload = await lessonRes.json().catch(() => ({}))
       if (!lessonRes.ok) throw new Error(lessonPayload.error || '课表生成失败')
 
-      message.success(`「${createData.name}」已创建，并生成 ${lessonPayload.count || previewDates.length} 节课`)
+      toast.success(`「${createData.name}」已创建，并生成 ${lessonPayload.count || previewDates.length} 节课`)
       mutateGroups()
       mutateDashboard()
       setCreateOpen(false)
@@ -397,7 +397,7 @@ export default function CoursesPage() {
       setCreateData({})
     } catch (error) {
       console.error('[handleCreate]', error)
-      message.error(error instanceof Error ? error.message : '创建失败，请查看浏览器控制台')
+      toast.error(error instanceof Error ? error.message : '创建失败，请查看浏览器控制台')
     } finally {
       setCreateLoading(false)
     }
@@ -414,21 +414,21 @@ export default function CoursesPage() {
     const selectedSlots = (createData.scheduleSlots as string[]) || []
 
     if (isHourly && selectedSlots.length === 0 && validSlots.length === 0) {
-      message.error('请至少选择一个上课时间段')
+      toast.error('请至少选择一个上课时间段')
       return
     }
 
     const recurringDays = (createData.recurringDays as string[]) || []
     if (!recurringDays.length) {
-      message.error('请选择至少一个上课日')
+      toast.error('请选择至少一个上课日')
       return
     }
     if (!previewDates.length) {
-      message.error('无法生成课次，请检查开班日期、上课日和总课次数')
+      toast.error('无法生成课次，请检查开班日期、上课日和总课次数')
       return
     }
 
-    // 防止班课生成过多课次导致超时（每天最多6节 × 总天数 ≤ 150节）
+    // 防止班课生成过多课次导致超时（每天最多8节 × 总天数 ≤ 200节）
     if (!isHourly) {
       const validSlotCount = (Array.isArray(createData.scheduleTemplate)
         ? createData.scheduleTemplate as Record<string, unknown>[]
@@ -436,8 +436,8 @@ export default function CoursesPage() {
       ).filter(row => row.teacherId && row.subject).length
       const totalLessonsCount = Number(createData.totalLessons) || 16
       const estimatedTotal = validSlotCount * totalLessonsCount
-      if (estimatedTotal > 150) {
-        message.error(`课次总数 ${estimatedTotal} 节过多（每天${validSlotCount}节×${totalLessonsCount}天），建议减少节次或总天数，系统限制单次创建不超过150节`)
+      if (estimatedTotal > 250) {
+        toast.error(`课次总数 ${estimatedTotal} 节过多（每天${validSlotCount}节×${totalLessonsCount}天），请控制在250节以内`)
         setCreateLoading(false)
         return
       }
@@ -499,7 +499,7 @@ export default function CoursesPage() {
 
   const handleCopy = async () => {
     if (!copySource || !copyStartDate) {
-      message.error('请选择原班级和新开班日期')
+      toast.error('请选择原班级和新开班日期')
       return
     }
 
@@ -511,11 +511,11 @@ export default function CoursesPage() {
         body: JSON.stringify({ newStartDate: copyStartDate, name: copyName || undefined }),
       })
       if (!res.ok) throw new Error('复制失败')
-      message.success('班级复制成功')
+      toast.success('班级复制成功')
       mutateGroups()
       setCopyOpen(false)
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '复制失败')
+      toast.error(error instanceof Error ? error.message : '复制失败')
     } finally {
       setCopyLoading(false)
     }
@@ -535,7 +535,7 @@ export default function CoursesPage() {
           body: JSON.stringify({ status: 'CANCELLED' }),
         })
         if (!res.ok) throw new Error('停课失败')
-        message.success('课次已取消')
+        toast.success('课次已取消')
         mutateGroups()
       },
     })
@@ -548,10 +548,10 @@ export default function CoursesPage() {
       body: JSON.stringify({ lessonId: postponeLessonId, offsetDays: postponeDays }),
     })
     if (!res.ok) {
-      message.error('后移失败')
+      toast.error('后移失败')
       return
     }
-    message.success(`已后移 ${postponeDays} 天`)
+    toast.success(`已后移 ${postponeDays} 天`)
     setPostponeOpen(false)
   }
 
@@ -561,40 +561,18 @@ export default function CoursesPage() {
       const res = await fetch(`/api/class-groups/${groupId}/start`, { method: 'POST' })
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(payload.error || '开班失败')
-      message.success(payload.alreadyActive ? '班级已经是进行中' : `开班成功，已通知 ${payload.notifiedParents || 0} 位家长`)
+      toast.success(payload.alreadyActive ? '班级已经是进行中' : `开班成功，已通知 ${payload.notifiedParents || 0} 位家长`)
       mutateGroups()
       mutateDashboard()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '开班失败')
+      toast.error(error instanceof Error ? error.message : '开班失败')
     } finally {
       setStartingGroupId('')
     }
   }
 
   const handleDeleteGroup = (groupId: string, groupName: string) => {
-    Modal.confirm({
-      title: '删除班级',
-      content: `确定删除「${groupName}」吗？系统会先备份班级及相关课次、报名、考勤、测评数据，然后从业务数据库中清除。`,
-      okText: '备份并删除',
-      okButtonProps: { danger: true },
-      cancelText: '取消',
-      onOk: async () => {
-        setDeletingGroupId(groupId)
-        try {
-          const res = await fetch(`/api/class-groups/${groupId}`, { method: 'DELETE' })
-          const payload = await res.json().catch(() => ({}))
-          if (!res.ok) throw new Error(payload.error || '删除失败')
-          message.success('已备份并删除班级')
-          mutateGroups()
-          mutateDashboard()
-        } catch (error) {
-          message.error(error instanceof Error ? error.message : '删除失败')
-          throw error
-        } finally {
-          setDeletingGroupId('')
-        }
-      },
-    })
+    setDeleteTarget({ id: groupId, name: groupName })
   }
 
   const handleRegenerateLessons = async (groupId: string) => {
@@ -607,11 +585,11 @@ export default function CoursesPage() {
       })
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(payload.error || '重新生成失败')
-      message.success(`课表已重新生成，共 ${payload.count || 0} 节课`)
+      toast.success(`课表已重新生成，共 ${payload.count || 0} 节课`)
       mutateGroups()
       mutateDashboard()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '重新生成失败')
+      toast.error(error instanceof Error ? error.message : '重新生成失败')
     } finally {
       setRegeneratingGroupId('')
     }
@@ -1170,7 +1148,7 @@ export default function CoursesPage() {
                                 })
                                 const result = await res.json()
                                 if (result.conflicts?.length > 0) {
-                                  message.warning(`⚠️ 时间冲突：${result.conflicts.map((c: Record<string, string>) => `${c.teacherName} 在 ${c.day} ${c.time}`).join('；')}`)
+                                  toast.warning(`⚠️ 时间冲突：${result.conflicts.map((c: Record<string, string>) => `${c.teacherName} 在 ${c.day} ${c.time}`).join('；')}`)
                                 }
                               } catch { /* 静默，不影响主流程 */ }
                             }, 200)
@@ -1203,7 +1181,7 @@ export default function CoursesPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, paddingTop: 12, borderTop: '1px solid #EEE7E1' }}>
               <Button onClick={() => setCreateStep(1)}>上一步</Button>
               <Button type="primary" loading={createLoading} onClick={handleCreate} style={{ background: '#e8784a' }}>
-                确认创建并生成课表
+                {createLoading ? '正在创建...' : '确认创建并生成课表'}
               </Button>
             </div>
           </Space>
@@ -1254,6 +1232,34 @@ export default function CoursesPage() {
           <InputNumber min={1} max={90} value={postponeDays} onChange={(value) => setPostponeDays(value || 7)} />
           <span>天</span>
         </Space>
+      </Modal>
+
+      <Modal
+        title="删除班级"
+        open={!!deleteTarget}
+        okText="备份并删除"
+        okButtonProps={{ danger: true, loading: deletingGroupId === deleteTarget?.id }}
+        cancelText="取消"
+        onCancel={() => setDeleteTarget(null)}
+        onOk={async () => {
+          if (!deleteTarget) return
+          setDeletingGroupId(deleteTarget.id)
+          try {
+            const res = await fetch(`/api/class-groups/${deleteTarget.id}`, { method: 'DELETE' })
+            const payload = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(payload.error || '删除失败')
+            toast.success('已备份并删除班级')
+            mutateGroups()
+            mutateDashboard()
+            setDeleteTarget(null)
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : '删除失败')
+          } finally {
+            setDeletingGroupId('')
+          }
+        }}
+      >
+        确定删除「{deleteTarget?.name}」吗？系统会先备份班级及相关课次、报名、考勤、测评数据，然后从业务数据库中清除。
       </Modal>
     </PageLayout>
   )

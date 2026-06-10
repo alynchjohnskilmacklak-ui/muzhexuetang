@@ -16,7 +16,9 @@ export async function GET() {
       .filter((name) => /\.(png|jpe?g|webp)$/i.test(name))
       .map((name) => ({ name, url: `/people/${name}` }))
       .sort((a, b) => a.name.localeCompare(b.name))
-    return NextResponse.json({ photos })
+    return NextResponse.json({ photos }, {
+      headers: { 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=3600' },
+    })
   } catch {
     return NextResponse.json({ photos: [] })
   }

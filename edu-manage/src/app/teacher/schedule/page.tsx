@@ -169,26 +169,33 @@ export default function TeacherSchedulePage() {
                           const courseType = lesson.group?.course?.type
                           const intensiveCfg = INTENSIVE_CONFIG[courseType || 'ONE_ON_ONE'] || INTENSIVE_CONFIG.ONE_ON_ONE
                           const accent = scheduleType === 'group' ? '#E8784A' : intensiveCfg.color
-                          const title = scheduleType === 'group'
-                            ? (lesson.group?.course?.name || lesson.group?.name || '-')
-                            : (lesson.group?.name || lesson.teacher?.name || lesson.teacherId || '-')
+                          const lessonSubject = lesson.subject || lesson.group?.course?.subject
                           return (
-                            <div key={lesson.id} style={{ border: '1px solid #EEE7E1', borderLeft: `4px solid ${accent}`, borderRadius: 10, padding: 10, background: '#fff', minWidth: 0 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
-                                <div style={{ minWidth: 0 }}>
-                                  <div style={{ color: accent, fontWeight: 700, fontSize: 13, marginBottom: 4 }}>
-                                    <ClockCircleOutlined /> {lesson.startTime || '-'}{lesson.endTime ? `-${lesson.endTime}` : ''}
-                                  </div>
-                                  <div style={{ fontWeight: 700, color: '#1F2329', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
-                                </div>
-                                <Tag color={lesson.status === 'COMPLETED' ? 'green' : 'orange'} style={{ marginInlineEnd: 0, flexShrink: 0 }}>
+                            <div key={lesson.id} style={{ border: '1px solid #EEE7E1', borderLeft: `4px solid ${accent}`, borderRadius: 10, padding: '10px 12px', background: '#fff', minWidth: 0 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                <span style={{ color: accent, fontWeight: 700, fontSize: 13 }}>
+                                  {lesson.startTime || '-'}{lesson.endTime ? `–${lesson.endTime}` : ''}
+                                </span>
+                                <Tag color={lesson.status === 'COMPLETED' ? 'green' : 'orange'}
+                                  style={{ marginInlineEnd: 0, fontSize: 11 }}>
                                   {lesson.status === 'COMPLETED' ? '已完成' : '待上课'}
                                 </Tag>
                               </div>
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, color: '#8D806F', fontSize: 12, marginTop: 8 }}>
-                                <span><EnvironmentOutlined /> {lesson.group?.room?.name || lesson.room?.name || '-'}</span>
+                              <div style={{ fontWeight: 700, color: '#1F2329', fontSize: 14, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {lesson.group?.name || lesson.group?.course?.name || '-'}
+                              </div>
+                              {lessonSubject && (
+                                <span style={{ fontSize: 11, padding: '1px 8px', borderRadius: 9999,
+                                  background: `${accent}18`, color: accent, marginBottom: 4, display: 'inline-block' }}>
+                                  {lessonSubject}
+                                </span>
+                              )}
+                              <div style={{ display: 'flex', gap: 12, color: '#8D806F', fontSize: 12, marginTop: 4 }}>
+                                <span><EnvironmentOutlined /> {lesson.group?.room?.name || '-'}</span>
                                 <span><TeamOutlined /> {lesson.group?.enrollments?.length || 0}人</span>
-                                {scheduleType === 'intensive' && <span><UserOutlined /> {lesson.group?.enrollments?.[0]?.student?.name || '-'}</span>}
+                                {scheduleType === 'intensive' && (
+                                  <span><UserOutlined /> {lesson.group?.enrollments?.[0]?.student?.name || '-'}</span>
+                                )}
                               </div>
                             </div>
                           )

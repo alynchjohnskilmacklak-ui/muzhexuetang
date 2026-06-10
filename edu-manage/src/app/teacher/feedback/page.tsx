@@ -3,8 +3,9 @@
 import { Suspense, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Button, Image as AntImage, Input, message, Spin, Upload } from 'antd'
-import { DeleteOutlined, PlusOutlined, SendOutlined } from '@ant-design/icons'
+import { Button, Image as AntImage, Input, Spin, Upload } from 'antd'
+import { CheckCircleOutlined, DeleteOutlined, PlusOutlined, SendOutlined } from '@ant-design/icons'
+import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { MobileSelect } from '@/components/MobileSelect'
@@ -29,6 +30,7 @@ function FeedbackPageInner() {
   const [hwInput, setHwInput] = useState('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
+  const [submitDone, setSubmitDone] = useState(false)
 
   const { data: lessonsData } = useSWR('/api/teacher/lessons?days=30', fetcher)
   const allLessons: any[] = Array.isArray(lessonsData) ? lessonsData : []
@@ -93,12 +95,12 @@ function FeedbackPageInner() {
 
   const submit = async (status: 'DRAFT' | 'PUBLISHED') => {
     if (!overallComment.trim() && !summary.trim() && !kps.length && !imageUrls.length) {
-      message.warning('请至少填写评语、知识点或上传资料')
+      toast.warning('请至少填写评语、知识点或上传资料')
       return
     }
     const targetStudents = selectedStudentIds.length ? selectedStudentIds : lessonStudents.map((s: any) => s.id)
     if (!targetStudents.length && !lessonId) {
-      message.warning('请关联课次或选择学员')
+      toast.warning('请关联课次或选择学员')
       return
     }
     setSaving(true)
@@ -117,12 +119,16 @@ function FeedbackPageInner() {
         }),
       })
       const data = await res.json()
-      if (!res.ok) { message.error(data.error || '提交失败'); return }
-      message.success(status === 'PUBLISHED' ? '✅ 反馈已发布，家长已收到通知' : '草稿已保存')
+      if (!res.ok) { toast.error(`发布失败：${data.error || '请检查网络后重试'}`, { duration: 5000 }); return }
       if (status === 'PUBLISHED') {
+        toast.success('反馈已发布，家长会立即收到通知 ✅', { duration: 4000 })
+        setSubmitDone(true)
+        setTimeout(() => setSubmitDone(false), 3000)
         setLessonId(''); setSelectedStudentIds([]); setMood('GOOD'); setTags([]); setKps([])
         setBadge(''); setSummary(''); setOverallComment(''); setHomework([]); setImageUrls([])
         mutate()
+      } else {
+        toast.success('草稿已保存', { duration: 2000 })
       }
     } finally {
       setSaving(false)
@@ -147,14 +153,14 @@ function FeedbackPageInner() {
             options={lessonGroups.flatMap(g => g.options)}
           />
           {selectedLesson && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
-              <span style={{ fontSize: 12, color: '#98A2B3' }}>
+            <div style={{ marginTop: 6 }}>
+              <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 4 }}>
                 {selectedLesson.startTime} · {lessonStudents.length}位学员已自动关联
-              </span>
-              <button
-                onClick={() => { setLessonId(''); setSelectedStudentIds([]) }}
-                style={{ fontSize: 11, color: '#E24B4A', background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px' }}
-              >
+              </div>
+              <button onClick={() => { setLessonId(''); setSelectedStudentIds([]) }}
+                style={{ fontSize: 12, color: '#E24B4A', background: '#FFF0EE',
+                  border: '1px solid #FFD0CC', borderRadius: 6, padding: '3px 10px',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
                 ✕ 取消关联
               </button>
             </div>
@@ -319,9 +325,13 @@ function FeedbackPageInner() {
         {/* Submit buttons */}
         <div style={{ display: 'flex', gap: 10, paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))' }}>
           <Button block onClick={() => submit('DRAFT')} loading={saving} style={{ flex: 1 }}>保存草稿</Button>
-          <Button block type="primary" icon={<SendOutlined />} onClick={() => submit('PUBLISHED')} loading={saving}
-            style={{ flex: 2, background: '#E8784A', borderColor: '#E8784A', fontWeight: 700 }}>
-            发布 · 同步家长 💰
+          <Button block type="primary" icon={submitDone ? <CheckCircleOutlined /> : <SendOutlined />}
+            onClick={() => submit('PUBLISHED')} loading={saving}
+            style={{ flex: 2,
+              background: submitDone ? '#1D9E75' : '#E8784A',
+              borderColor: submitDone ? '#1D9E75' : '#E8784A',
+              fontWeight: 700, transition: 'background .3s' }}>
+            {submitDone ? '已发布 ✓' : saving ? '发布中...' : '发布 · 同步家长 💰'}
           </Button>
         </div>
       </div>

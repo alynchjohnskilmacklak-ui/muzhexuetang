@@ -111,6 +111,7 @@ export default function VolunteerSimPage() {
   const [schools, setSchools] = useState<DBSchool[]>([])
   const [loading, setLoading] = useState(false)
   const [schoolsReady, setSchoolsReady] = useState(false)
+  const [schoolsError, setSchoolsError] = useState(false)
 
   const [filterTag, setFilterTag] = useState<string>('全部')
   const [filterType, setFilterType] = useState<string>('全部')
@@ -125,8 +126,8 @@ export default function VolunteerSimPage() {
   useEffect(() => {
     fetch('/api/volunteer/schools')
       .then(r => r.json())
-      .then(d => setSchools(d.schools || []))
-      .catch(() => {})
+      .then(d => setSchools(Array.isArray(d?.schools) ? d.schools : []))
+      .catch(() => { setSchoolsError(true) })
       .finally(() => setSchoolsReady(true))
   }, [])
 
@@ -207,12 +208,15 @@ export default function VolunteerSimPage() {
     return getAllocationBands(
       inputSchool, inputRank, inputScore,
       (allocKey) => {
-        const s = schools.find(school =>
-          school.name === allocKey ||
-          school.fullName === allocKey ||
-          school.fullName.includes(allocKey) ||
-          school.name.replace(/[(（][^)）]*[)）]\s*$/, '').trim() === allocKey
-        )
+        const s = schools.find(school => {
+          if (!school?.name || !school?.fullName) return false
+          return (
+            school.name === allocKey ||
+            school.fullName === allocKey ||
+            school.fullName.includes(allocKey) ||
+            school.name.replace(/[(（][^)）]*[)）]\s*$/, '').trim() === allocKey
+          )
+        })
         return s ? { yiTong: s.yiTong, tongZhao: s.tongZhao, allocationLine: s.allocationLine } : null
       }
     )
@@ -311,6 +315,7 @@ export default function VolunteerSimPage() {
           icon={<ArrowLeftOutlined />}
           onClick={() => router.back()}
           style={{ color: C.inkSubtle }}
+          aria-label="返回上一页"
         />
         <div>
           <Title level={4} style={{ margin: 0, fontSize: 18, color: C.ink }}>志愿模拟填报</Title>
@@ -341,6 +346,11 @@ export default function VolunteerSimPage() {
           marginBottom: 20,
         }}>
           <Spin spinning={!schoolsReady} tip="正在加载学校数据...">
+            {schoolsError && (
+              <div style={{ background: C.errorBg, border: `1px solid ${C.error}`, borderRadius: 8, padding: '8px 14px', marginBottom: 16, color: C.error, fontSize: 13 }}>
+                学校数据加载失败，请刷新页面重试
+              </div>
+            )}
             <Form form={form} layout="vertical">
               {/* Score — hero input */}
               <div style={{ textAlign: 'center', marginBottom: 24 }}>

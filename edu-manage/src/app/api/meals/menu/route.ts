@@ -40,6 +40,8 @@ export const GET = apiHandler(async (request: NextRequest) => {
   return NextResponse.json({
     weekStart: weekStart.toISOString(),
     menus: [...menuMap.values()].sort((a, b) => a.dayOfWeek - b.dayOfWeek),
+  }, {
+    headers: { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=120' },
   })
 })
 

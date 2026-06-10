@@ -138,7 +138,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   return NextResponse.json({ students: normalized, total, page, limit })
 })
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   try {
     const session = await auth()
     if (!session?.user) {
@@ -220,4 +220,4 @@ export async function POST(req: NextRequest) {
     console.error('[students:create] failed', error)
     return NextResponse.json({ error: '添加学员失败，请查看服务器日志' }, { status: 500 })
   }
-}
+})

@@ -10,6 +10,29 @@ function isApiRequest(pathname: string) {
   return pathname.startsWith('/api/')
 }
 
+type CachedSession = { currentSessionToken: string | null; status: string }
+const sessionCache = new Map<string, { data: CachedSession | null; ts: number }>()
+const SESSION_CACHE_TTL = 5_000
+
+function getCachedSession(userId: string): CachedSession | null | undefined {
+  const entry = sessionCache.get(userId)
+  if (entry && Date.now() - entry.ts < SESSION_CACHE_TTL) return entry.data
+  if (entry) sessionCache.delete(userId)
+  return undefined
+}
+
+function setCachedSession(userId: string, data: CachedSession | null) {
+  sessionCache.set(userId, { data, ts: Date.now() })
+  if (sessionCache.size > 5_000) {
+    for (const [k, v] of sessionCache) {
+      if (Date.now() - v.ts > SESSION_CACHE_TTL) sessionCache.delete(k)
+    }
+  }
+}
+
+let failCount = 0
+let failCountResetAt = 0
+
 export async function proxy(request: NextRequest) {
   const session = await auth()
   const { pathname } = request.nextUrl
@@ -27,7 +50,8 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/images/') ||
     pathname.startsWith('/UI_picture/') ||
     pathname.startsWith('/volunteer/picture/') ||
-    pathname.startsWith('/volunteer/docs/')
+    pathname.startsWith('/volunteer/docs/') ||
+    pathname === '/api/volunteer/schools'
   ) {
     return NextResponse.next()
   }
@@ -37,12 +61,20 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  // Reset fail counter after 60s of successful DB queries
+  if (Date.now() - failCountResetAt > 60_000) { failCount = 0; failCountResetAt = Date.now() }
+
   if (user.id && user.sessionMark) {
     try {
-      const dbUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { currentSessionToken: true, status: true },
-      })
+      let dbUser = getCachedSession(user.id)
+      if (dbUser === undefined) {
+        const row = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { currentSessionToken: true, status: true },
+        })
+        dbUser = row ? { currentSessionToken: row.currentSessionToken, status: row.status } : null
+        setCachedSession(user.id, dbUser)
+      }
 
       if (dbUser?.status === 'disabled') {
         if (apiRequest) return jsonUnauthorized('账号已停用')
@@ -53,8 +85,14 @@ export async function proxy(request: NextRequest) {
         if (apiRequest) return jsonUnauthorized('账号已在其他设备登录，请重新登录')
         return NextResponse.redirect(new URL('/login?reason=kicked', request.url))
       }
-    } catch {
-      // Do not block access when the database is temporarily unavailable.
+    } catch (err) {
+      console.error('[proxy] session validation DB error:', err instanceof Error ? err.message : err)
+      // Fail closed after 3 consecutive DB errors to prevent security bypass during outages
+      failCount += 1
+      if (failCount >= 3) {
+        if (apiRequest) return jsonUnauthorized('服务暂时不可用，请稍后重试')
+        return NextResponse.redirect(new URL('/login?reason=db-error', request.url))
+      }
     }
   }
 

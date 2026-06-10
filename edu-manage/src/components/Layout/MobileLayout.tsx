@@ -27,6 +27,7 @@ export function MobileLayout({
   bottomTabs = [],
   moreItems,
   showBottomTabs,
+  drawerHeaderExtra,
 }: {
   children: React.ReactNode
   navItems: MobileNavItem[]
@@ -35,6 +36,7 @@ export function MobileLayout({
   bottomTabs?: MobileNavItem[]
   moreItems?: MobileNavItem[]
   showBottomTabs?: boolean
+  drawerHeaderExtra?: React.ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const { data: session } = useSession()
@@ -223,6 +225,11 @@ export function MobileLayout({
             </div>
           </div>
         </div>
+
+        {/* Extra header content (mark all read, todo summary, etc.) */}
+        {drawerHeaderExtra && (
+          <div style={{ padding: '0 10px 8px' }}>{drawerHeaderExtra}</div>
+        )}
 
         {/* Navigation items */}
         <nav style={{ flex: 1, overflowY: 'auto', padding: '10px 10px', WebkitOverflowScrolling: 'touch' }}>

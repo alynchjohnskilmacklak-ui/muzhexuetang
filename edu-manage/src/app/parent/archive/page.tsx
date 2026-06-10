@@ -2,7 +2,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ParentArchiveClient } from './client'
-import { parentActiveStudentWhere } from '@/lib/business-visibility'
+import type { Prisma } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,10 +11,17 @@ export default async function ParentArchivePage() {
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
 
+  // Basic ownership check: find all active students linked to this parent
+  // We use the simplest possible filter to avoid Prisma "Unknown argument" issues
+  const linkedStudentWhere: Prisma.StudentWhereInput = {
+    OR: [{ parentId: userId }, { parentUserId: userId }],
+    status: { not: 'INACTIVE' },
+  }
+
   // Grade records for the parent's students
   const gradeRecords = await prisma.gradeRecord.findMany({
     where: {
-      student: parentActiveStudentWhere(userId),
+      student: linkedStudentWhere,
     },
     include: {
       student: { select: { id: true, name: true } },
@@ -28,7 +35,7 @@ export default async function ParentArchivePage() {
   const examPapers = await prisma.examPaper.findMany({
     where: {
       status: 'PUBLISHED',
-      student: parentActiveStudentWhere(userId),
+      student: linkedStudentWhere,
     },
     include: {
       student: { select: { id: true, name: true } },
@@ -45,7 +52,7 @@ export default async function ParentArchivePage() {
 
   const monthAttendances = await prisma.attendance.findMany({
     where: {
-      student: parentActiveStudentWhere(userId),
+      student: linkedStudentWhere,
       createdAt: { gte: monthStart, lt: monthEnd },
     },
     select: { studentId: true, status: true },

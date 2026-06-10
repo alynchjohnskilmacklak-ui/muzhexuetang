@@ -86,7 +86,20 @@
       "Bash(npx tsx -e ' *)",
       "Bash(npx tsx *)",
       "Bash(git checkout *)",
-      "Bash(Select-Object -First 80)"
+      "Bash(Select-Object -First 80)",
+      "Bash(Get-ChildItem *)",
+      "Read(//opt/edu-manage/.next/standalone/.next/static/chunks/**)",
+      "Read(//opt/edu-manage/.next/standalone/.next/static/**)",
+      "Bash(Select-Object -First 60)",
+      "Bash(npx ts-prune *)",
+      "PowerShell(main *)",
+      "Bash(git *)",
+      "Bash(Select-Object -First 300)",
+      "Bash(Select-Object -First 30)",
+      "Bash(openssl rand *)",
+      "Bash(Write-Output *)",
+      "Bash(Select-Object Name, LastWriteTime, Length)",
+      "PowerShell(Remove-Item *)"
     ]
   }
 }

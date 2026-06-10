@@ -76,45 +76,47 @@ export function TodayStatus({ activeChildId }: { activeChildId?: string }) {
         return (
           <Card
             key={item.student.id}
-            style={{ marginBottom: 10, borderRadius: 14, overflow: 'hidden' }}
+            style={{ 
+              marginBottom: 12, 
+              borderRadius: 16, 
+              overflow: 'hidden', 
+              border: '1px solid #F0EBE5',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
+            }}
             styles={{ body: { padding: 0 } }}
           >
             <div style={{
-              padding: '12px 16px',
-              background: 'linear-gradient(135deg, rgba(232,117,69,.12) 0%, rgba(232,117,69,.04) 100%)',
-              borderBottom: '1px solid rgba(232,117,69,.1)',
+              padding: '14px 16px',
+              background: 'linear-gradient(135deg, #FFFBF9 0%, #FDFCFB 100%)',
+              borderBottom: '1px solid #F5F2EE',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 12,
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
                 <div style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: '50%',
-                  backgroundColor: '#E87545',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 700,
-                  fontSize: 15,
-                  flexShrink: 0,
+                  width: 40, height: 40, borderRadius: 12,
+                  background: 'linear-gradient(135deg, #E8784A 0%, #F08A54 100%)',
+                  color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 18, fontWeight: 700, flexShrink: 0,
+                  boxShadow: '0 4px 10px rgba(232,120,74,0.2)'
                 }}>
-                  {item.student.name.slice(-1)}
+                  {item.student.name[0]}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <Text strong style={{ fontSize: 15 }}>{item.student.name}</Text>
-                  <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
-                    {item.student.grade || '-'} · 主教师：{item.student.mainTeacherName}
-                  </Text>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: '#1F2329', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.student.name}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#8D806F', marginTop: 2 }}>
+                    {item.student.grade || '学员'} · 主讲老师：{item.student.mainTeacherName || '未分配'}
+                  </div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
                 {item.unreadNotifications > 0 && (
-                  <Badge count={item.unreadNotifications} size="small">
-                    <BellOutlined style={{ fontSize: 16, color: '#E87545' }} />
+                  <Badge count={item.unreadNotifications} size="small" offset={[2, 2]}>
+                    <BellOutlined style={{ fontSize: 18, color: '#98A2B3', cursor: 'pointer' }} />
                   </Badge>
                 )}
                 {latestAttendance && (
@@ -183,20 +185,29 @@ export function TodayStatus({ activeChildId }: { activeChildId?: string }) {
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginTop: 8 }}>
                     {item.todaySchedules.map(schedule => {
                       const isPast = new Date(schedule.endTime) < now
                       const isCurrent = new Date(schedule.startTime) <= now && new Date(schedule.endTime) >= now
+                      const isNext = nextClass?.id === schedule.id
                       return (
                         <div key={schedule.id} style={{
-                          padding: '5px 10px',
-                          borderRadius: 8,
-                          fontSize: 12,
-                          backgroundColor: isCurrent ? 'rgba(39,166,68,.1)' : isPast ? 'rgba(0,0,0,.04)' : 'rgba(232,117,69,.06)',
-                          color: isCurrent ? '#27a644' : isPast ? '#c0b8ae' : '#E87545',
-                          border: `1px solid ${isCurrent ? 'rgba(39,166,68,.2)' : isPast ? 'rgba(0,0,0,.06)' : 'rgba(232,117,69,.15)'}`,
+                          padding: '10px 12px',
+                          borderRadius: 10,
+                          background: isPast ? 'rgba(0,0,0,.04)' : isCurrent ? 'rgba(39,166,68,.08)' : 'rgba(232,117,69,.06)',
+                          border: `1px solid ${isPast ? 'rgba(0,0,0,.08)' : isCurrent ? 'rgba(39,166,68,.25)' : 'rgba(232,117,69,.2)'}`,
                         }}>
-                          {schedule.courseName} {formatTime(schedule.startTime)}{isPast && ' 完成'}
+                          <div style={{ fontSize: 11, fontWeight: 600,
+                            color: isPast ? '#c0b8ae' : isCurrent ? '#27a644' : '#E87545' }}>
+                            {isPast ? '已完成' : isCurrent ? '上课中 🟢' : isNext ? '下节课' : '待上课'}
+                          </div>
+                          <div style={{ fontSize: 13, fontWeight: 500, color: isPast ? '#c0b8ae' : '#1a1201', marginTop: 2 }}>
+                            {schedule.courseName}
+                          </div>
+                          <div style={{ fontSize: 11, color: '#9a8e7a', marginTop: 1 }}>
+                            {formatTime(schedule.startTime)}
+                            {isPast ? ' 完成' : ''}
+                          </div>
                         </div>
                       )
                     })}

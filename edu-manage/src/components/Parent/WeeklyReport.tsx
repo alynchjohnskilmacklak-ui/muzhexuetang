@@ -25,19 +25,22 @@ interface WeeklyReportData {
   }>
 }
 
-export function WeeklyReport() {
+export function WeeklyReport({ activeChildId }: { activeChildId?: string }) {
   const [data, setData] = useState<WeeklyReportData | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/parent/weekly-report')
+    const url = activeChildId
+      ? `/api/parent/weekly-report?childId=${activeChildId}`
+      : '/api/parent/weekly-report'
+    fetch(url)
       .then(response => response.json())
       .then(result => {
         setData(result)
         setLoading(false)
       })
       .catch(() => setLoading(false))
-  }, [])
+  }, [activeChildId])
 
   if (loading) return <Skeleton active paragraph={{ rows: 4 }} />
   if (!data || data.reports.length === 0) return null

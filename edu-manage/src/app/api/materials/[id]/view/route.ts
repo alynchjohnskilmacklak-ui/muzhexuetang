@@ -62,7 +62,14 @@ export const GET = apiHandler(async (
 
   const download = new URL(req.url).searchParams.get('download') === '1'
   const relativePath = material.fileUrl.replace(/^\/+/, '')
+  if (relativePath.includes('..') || path.isAbsolute(relativePath)) {
+    return NextResponse.json({ error: '无效的文件路径' }, { status: 400 })
+  }
   const filePath = path.join(process.cwd(), 'public', relativePath)
+  const publicRoot = path.resolve(process.cwd(), 'public')
+  if (!path.resolve(filePath).startsWith(publicRoot + path.sep) && path.resolve(filePath) !== publicRoot) {
+    return NextResponse.json({ error: '无效的文件路径' }, { status: 400 })
+  }
 
   if (material.fileType === 'word' && !download) {
     await prisma.studyMaterial.update({

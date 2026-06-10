@@ -76,7 +76,20 @@ export default async function ParentGrowthPage({ searchParams }: { searchParams:
   }
   const classroomFeedbacks = await prisma.classroomFeedback.findMany({
     where: cfWhere,
-    include: { teacher: { select: { name: true } } },
+    include: {
+      teacher: { select: { id: true, name: true } },
+      classLesson: {
+        select: {
+          subject: true,
+          group: {
+            select: {
+              course: { select: { subject: true } },
+              teacherAssignments: { select: { teacherId: true, subject: true } },
+            },
+          },
+        },
+      },
+    },
     orderBy: { createdAt: 'desc' },
     take: sp.date ? 50 : 30,
   })

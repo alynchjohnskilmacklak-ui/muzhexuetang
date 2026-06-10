@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
+import { apiHandler } from '@/lib/api-handler'
 import { activeEnrollmentWhere, attendanceEligibleLessonWhere, visibleStudentWhere } from '@/lib/business-visibility'
 import { TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 import { calculateAttendanceDeductHours } from '@/lib/attendance-hours'
@@ -14,7 +15,9 @@ function isAttendanceStatus(status: string): status is AttendanceStatus {
   return ATTENDANCE_STATUSES.has(status)
 }
 
-export async function POST(req: NextRequest) {
+const submittingLessons = new Set<string>()
+
+export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
@@ -28,6 +31,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '缺少课次ID或考勤记录' }, { status: 400 })
   }
 
+  if (submittingLessons.has(lessonId)) {
+    return NextResponse.json({ error: '该课次正在提交中，请勿重复操作' }, { status: 409 })
+  }
+  submittingLessons.add(lessonId)
+  try {
+
   const lesson = await prisma.classLesson.findFirst({
     where: { id: lessonId, ...attendanceEligibleLessonWhere },
     include: { group: { include: { course: true } } },
@@ -40,8 +49,7 @@ export async function POST(req: NextRequest) {
   })
   const alreadyDeducted = !!lesson.hoursDeductedAt || existingDeductedCount > 0
 
-  try {
-    let processedCount = 0
+  let processedCount = 0
     let deductedCount = 0
     await prisma.$transaction(async (tx) => {
       const deductedByStudent = new Map<string, number>()
@@ -227,5 +235,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '没有有效考勤记录，请检查学生是否仍在班级中' }, { status: 400 })
     }
     return NextResponse.json({ error: err instanceof Error ? err.message : '考勤提交失败' }, { status: 500 })
+  } finally {
+    submittingLessons.delete(lessonId)
   }
-}
+})

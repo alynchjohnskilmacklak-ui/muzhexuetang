@@ -29,7 +29,7 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
     },
     include: {
       teacher: { select: { id: true, name: true } },
-      classLesson: { include: { group: { include: { course: true } } } },
+      classLesson: { include: { group: { include: { course: true, teacherAssignments: { select: { teacherId: true, subject: true } } } } } },
     },
     orderBy: { createdAt: 'desc' },
     take: 50,

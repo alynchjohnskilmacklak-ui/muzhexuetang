@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
@@ -14,17 +14,19 @@ import {
 
 export const dynamic = 'force-dynamic'
 
-export const GET = apiHandler(async () => {
+export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const userId = (session.user as { id: string }).id
+  const childId = req.nextUrl.searchParams.get('childId') || ''
 
   const students = await prisma.student.findMany({
     where: parentLinkedStudentWhere(userId),
     select: { id: true, name: true, grade: true },
     orderBy: { name: 'asc' },
   })
-  const studentIds = students.map((student) => student.id)
+  const allStudentIds = students.map((student) => student.id)
+  const studentIds = childId && allStudentIds.includes(childId) ? [childId] : allStudentIds
 
   const now = new Date()
   const weekStart = new Date(now)

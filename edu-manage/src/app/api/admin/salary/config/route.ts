@@ -41,8 +41,9 @@ export async function GET(req: NextRequest) {
       feedbackRateOneOne: cfg?.feedbackRateOneOne ?? DEFAULT_FEEDBACK_RATE_ONE_ONE,
       isDefault: !cfg,
     })
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  } catch (err) {
+    console.error('[admin:salary:config]', err instanceof Error ? err.message : err)
+    return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
 }
 
@@ -72,7 +73,8 @@ export async function PUT(req: NextRequest) {
     })
 
     return NextResponse.json({ success: true, config: cfg })
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  } catch (err) {
+    console.error('[admin:salary:config]', err instanceof Error ? err.message : err)
+    return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
 }

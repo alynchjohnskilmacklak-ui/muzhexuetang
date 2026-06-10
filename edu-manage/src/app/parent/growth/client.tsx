@@ -77,6 +77,10 @@ export function ParentGrowthClient({
       date: new Date(f.createdAt),
       id: f.id,
       teacherName: f.teacher?.name,
+      teacherSubject: f.classLesson?.subject
+        || f.classLesson?.group?.teacherAssignments?.find((a: any) => a.teacherId === f.teacher?.id)?.subject
+        || f.classLesson?.group?.course?.subject
+        || null,
       mood: f.mood,
       overallComment: f.overallComment,
       summary: f.summary,
@@ -315,7 +319,18 @@ export function ParentGrowthClient({
                                 <span>
                                   {item.student && <strong>{item.student}</strong>}
                                   {item.studentName && <strong>{item.studentName}</strong>}
-                                  {item.teacherName && <em>{item.teacherName}老师</em>}
+                                  {item.teacherName && (
+                                    <em>
+                                      {item.teacherName}老师
+                                      {item.teacherSubject && (
+                                        <span style={{ fontSize: 10, marginLeft: 4, padding: '0 6px',
+                                          borderRadius: 9999, background: '#F0EEFF', color: '#534AB7',
+                                          fontStyle: 'normal', verticalAlign: 'middle' }}>
+                                          {item.teacherSubject}
+                                        </span>
+                                      )}
+                                    </em>
+                                  )}
                                   {item.teacher && <em>{item.teacher}老师</em>}
                                 </span>
                                 <Text>{shortDate(item.date)}</Text>
@@ -433,7 +448,17 @@ export function ParentGrowthClient({
               <Tag style={{ borderRadius: 9999 }}>
                 {typeMeta(detailModal.type).label}
               </Tag>
-              {detailModal.teacherName && <Text strong>{detailModal.teacherName}老师</Text>}
+              {detailModal.teacherName && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <Text strong>{detailModal.teacherName}老师</Text>
+                  {detailModal.teacherSubject && (
+                    <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#F0EEFF',
+                      color: '#534AB7', border: 'none' }}>
+                      {detailModal.teacherSubject}
+                    </Tag>
+                  )}
+                </div>
+              )}
               {detailModal.studentName && <Text type="secondary">{detailModal.studentName}</Text>}
               {detailModal.mood && (
                 <Tag style={{ color: MOOD_LABELS[detailModal.mood]?.color, background: MOOD_LABELS[detailModal.mood]?.bg, borderColor: 'transparent' }}>

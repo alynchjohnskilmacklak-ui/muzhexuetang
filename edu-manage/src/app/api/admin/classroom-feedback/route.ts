@@ -5,9 +5,11 @@ import { auth } from '@/lib/auth'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { isPayableFeedback } from '@/lib/teacher-salary'
 
+import { apiHandler } from '@/lib/api-handler'
+
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest) {
+export const GET = apiHandler(async (req: NextRequest) => {
   try {
     await requireAdminUser()
     const sp = req.nextUrl.searchParams
@@ -34,6 +36,26 @@ export async function GET(req: NextRequest) {
       },
       orderBy: { createdAt: 'desc' },
       take: limit,
+    })
+
+    const allLessons = await prisma.classLesson.findMany({
+      where: {
+        lessonDate: { gte: dayStart, lt: dayEnd },
+        status: { not: 'CANCELLED' },
+      },
+      include: {
+        teacher: { select: { id: true, name: true } },
+        group: {
+          include: {
+            course: { select: { name: true, subject: true } },
+            enrollments: {
+              where: { status: 'ACTIVE' },
+              include: { student: { select: { id: true, name: true, grade: true } } },
+            },
+          },
+        },
+        classroomFeedbacks: { select: { id: true } },
+      },
     })
 
     const allStudentIds = [...new Set(feedbacks.flatMap((feedback) => feedback.studentIds))]
@@ -76,21 +98,37 @@ export async function GET(req: NextRequest) {
         studentRatings: feedback.studentRatings,
         createdAt: feedback.createdAt.toISOString(),
       })),
+      lessons: allLessons.map((lesson) => ({
+        id: lesson.id,
+        teacherId: lesson.teacherId,
+        teacherName: lesson.teacher?.name || '未分配',
+        groupName: lesson.group.name,
+        courseName: lesson.group.course.name,
+        subject: lesson.group.course.subject,
+        time: `${lesson.startTime}-${lesson.endTime}`,
+        hasFeedback: lesson.classroomFeedbacks.length > 0,
+        students: lesson.group.enrollments.map((e) => e.student).filter(Boolean),
+      })),
       teachersWithoutFeedback: teachersWithoutFeedback.map((teacher) => ({ id: teacher.id, name: teacher.name })),
     })
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  } catch (err) {
+    console.error('[admin:classroom-feedback:GET]', err instanceof Error ? err.message : err)
+    return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
-}
+})
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   try {
     const session = await auth()
     const user = session?.user as { id: string; role: string; name?: string | null } | undefined
     if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
     const body = await req.json()
-    const { teacherId, studentIds, knowledgePoints, summary, homework, imageUrls, source = 'admin', status = 'DRAFT' } = body
+    const { 
+      teacherId, studentIds, knowledgePoints, summary, homework, imageUrls, 
+      source = 'admin', status = 'DRAFT',
+      mood, tags, badge, overallComment, classLessonId
+    } = body
 
     if (!teacherId) return NextResponse.json({ error: '缺少 teacherId' }, { status: 400 })
     if (!Array.isArray(studentIds) || !studentIds.length) return NextResponse.json({ error: '请选择学员' }, { status: 400 })
@@ -107,6 +145,7 @@ export async function POST(req: NextRequest) {
       const created = await tx.classroomFeedback.create({
         data: {
           teacherId,
+          classLessonId: classLessonId || null,
           source,
           targetType: 'CLASS',
           studentIds,
@@ -114,6 +153,10 @@ export async function POST(req: NextRequest) {
           summary: summary || null,
           homework: Array.isArray(homework) ? homework : [],
           imageUrls: Array.isArray(imageUrls) ? imageUrls : [],
+          mood: mood || null,
+          tags: Array.isArray(tags) ? tags : [],
+          badge: badge || null,
+          overallComment: overallComment || null,
           status,
           notifySent: status === 'PUBLISHED',
         },
@@ -146,4 +189,4 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : '创建失败' }, { status: 500 })
   }
-}
+})

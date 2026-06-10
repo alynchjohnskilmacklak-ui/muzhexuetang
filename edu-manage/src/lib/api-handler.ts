@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit } from './api-rate-limit'
+import { ValidationError } from './api-validate'
 
 type Handler = (...args: any[]) => Promise<Response>
 
@@ -23,9 +24,20 @@ export function apiHandler<T extends Handler>(handler: T): T {
             { status: 429, headers: retryAfter ? { 'Retry-After': String(retryAfter) } : {} }
           )
         }
+
+        const contentLength = req.headers.get('content-length')
+        if (contentLength && parseInt(contentLength) > 5 * 1024 * 1024) {
+          return NextResponse.json(
+            { error: '请求体过大，最大支持 5MB' },
+            { status: 413 }
+          )
+        }
       }
       return await handler(...args)
     } catch (err) {
+      if (err instanceof ValidationError) {
+        return NextResponse.json({ error: err.message }, { status: 400 })
+      }
       const isDev = process.env.NODE_ENV !== 'production'
       const message = isDev && err instanceof Error ? err.message : '服务器错误，请稍后重试'
       const req = args[0] as NextRequest | undefined

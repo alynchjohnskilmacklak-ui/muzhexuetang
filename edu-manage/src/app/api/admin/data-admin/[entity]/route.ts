@@ -11,22 +11,10 @@ import {
 
 const ALLOWED_ENTITIES = Object.keys(DATA_ADMIN_ENTITIES)
 
-function guard(req: NextRequest) {
-  if (process.env.NODE_ENV === 'development') {
-    const token = req.cookies.get('authjs.session-token')
-    if (!token) {
-      return new NextResponse(JSON.stringify({ error: '无权限' }), { status: 403 })
-    }
-  }
-  return null
-}
-
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ entity: string }> },
 ) {
-  const devGuard = guard(req)
-  if (devGuard) return devGuard
 
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') {
@@ -114,8 +102,6 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ entity: string }> },
 ) {
-  const devGuard = guard(req)
-  if (devGuard) return devGuard
 
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') {

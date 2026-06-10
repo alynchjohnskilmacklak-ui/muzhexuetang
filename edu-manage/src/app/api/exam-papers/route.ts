@@ -45,7 +45,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
     orderBy: { paperDate: 'desc' },
   })
 
-  return NextResponse.json({ papers })
+  return NextResponse.json({ papers }, {
+    headers: { 'Cache-Control': 'private, max-age=60, stale-while-revalidate=120' },
+  })
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {

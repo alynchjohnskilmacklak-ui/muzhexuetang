@@ -87,7 +87,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
     }
   }
 
-  return NextResponse.json({ posts, total, page, limit })
+  return NextResponse.json({ posts, total, page, limit }, {
+    headers: { 'Cache-Control': 'private, max-age=60, stale-while-revalidate=120' },
+  })
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {

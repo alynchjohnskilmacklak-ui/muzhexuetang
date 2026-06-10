@@ -59,6 +59,9 @@ export const activeEnrollmentWhere = {
   group: visibleClassGroupWhere,
 } satisfies Prisma.EnrollmentWhereInput
 
+/**
+ * Basic student link check (Parent context)
+ */
 export function parentLinkedStudentWhere(parentId: string): Prisma.StudentWhereInput {
   return {
     OR: [{ parentId }, { parentUserId: parentId }],
@@ -66,6 +69,10 @@ export function parentLinkedStudentWhere(parentId: string): Prisma.StudentWhereI
   }
 }
 
+/**
+ * Filter for active students belonging to a parent.
+ * Note: This model (Student) does NOT have a 'deletedAt' field.
+ */
 export function parentActiveStudentWhere(parentId: string): Prisma.StudentWhereInput {
   return {
     ...parentLinkedStudentWhere(parentId),
@@ -73,6 +80,9 @@ export function parentActiveStudentWhere(parentId: string): Prisma.StudentWhereI
   }
 }
 
+/**
+ * Filter for active enrollments belonging to a parent's students.
+ */
 export function parentActiveEnrollmentWhere(parentId: string): Prisma.EnrollmentWhereInput {
   return {
     ...activeEnrollmentWhere,
@@ -80,6 +90,9 @@ export function parentActiveEnrollmentWhere(parentId: string): Prisma.Enrollment
   }
 }
 
+/**
+ * Filter for lessons visible to a parent (based on their children's active enrollments).
+ */
 export function parentVisibleLessonWhere(parentId: string): Prisma.ClassLessonWhereInput {
   return {
     ...visibleClassLessonWhere,
@@ -91,6 +104,10 @@ export function parentVisibleLessonWhere(parentId: string): Prisma.ClassLessonWh
   }
 }
 
+/**
+ * PerformancePost filter for parents.
+ * Explicitly includes 'deletedAt: null' because the PerformancePost model has this field.
+ */
 export function parentVisiblePerformancePostWhere(parentId: string): Prisma.PerformancePostWhereInput {
   return {
     deletedAt: null,
@@ -103,6 +120,10 @@ export function parentVisiblePerformancePostWhere(parentId: string): Prisma.Perf
   }
 }
 
+/**
+ * ExamPaper filter for parents.
+ * Note: This model (ExamPaper) does NOT have a 'deletedAt' field.
+ */
 export function parentVisibleExamPaperWhere(parentId: string): Prisma.ExamPaperWhereInput {
   return {
     ...visibleExamPaperWhere,

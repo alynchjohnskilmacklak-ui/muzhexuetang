@@ -40,23 +40,32 @@ export const GET = apiHandler(async (req: NextRequest) => {
     visibilityWhere = teacherVisibleMaterialWhere(teacher.id, user.id)
   }
 
-  const materials = await prisma.studyMaterial.findMany({
-    where: {
-      ...visibilityWhere,
-      ...(grade ? { grade } : {}),
-      ...(subject ? { subject } : {}),
-      ...(audience && role === 'admin' ? { audience: audience as MaterialAudience } : {}),
-      ...(source && role === 'admin' ? { source: source as MaterialSource } : {}),
-      ...(teacherId && role === 'admin' ? { teacherId } : {}),
-    },
-    include: {
-      uploader: { select: { name: true } },
-      teacher: { select: { id: true, name: true } },
-    },
-    orderBy: [{ isPinned: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
-  })
+  const page = Math.max(1, Number(searchParams.get('page') || 1))
+  const limit = Math.min(200, Math.max(1, Number(searchParams.get('limit') || 20)))
+  const where = {
+    ...visibilityWhere,
+    ...(grade ? { grade } : {}),
+    ...(subject ? { subject } : {}),
+    ...(audience && role === 'admin' ? { audience: audience as MaterialAudience } : {}),
+    ...(source && role === 'admin' ? { source: source as MaterialSource } : {}),
+    ...(teacherId && role === 'admin' ? { teacherId } : {}),
+  }
 
-  return NextResponse.json({ materials })
+  const [materials, total] = await Promise.all([
+    prisma.studyMaterial.findMany({
+      where,
+      include: {
+        uploader: { select: { name: true } },
+        teacher: { select: { id: true, name: true } },
+      },
+      orderBy: [{ isPinned: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.studyMaterial.count({ where }),
+  ])
+
+  return NextResponse.json({ materials, total, page, limit })
 })
 
 export const DELETE = apiHandler(async (req: NextRequest) => {

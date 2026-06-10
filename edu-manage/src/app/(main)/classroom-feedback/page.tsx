@@ -91,12 +91,7 @@ export default function ClassroomFeedbackAdminPage() {
   const [composeImages, setComposeImages] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [composeTeacherId, setComposeTeacherId] = useState('')
-  const { data: composeStudentsData } = useSWR(
-    composeTeacherId ? `/api/students?status=ACTIVE&limit=200` : null,
-    fetcher
-  )
-  const composeStudents: Array<{ id: string; name: string; grade?: string }> =
-    Array.isArray(composeStudentsData?.students) ? composeStudentsData.students : []
+  const [composeLessonId, setComposeLessonId] = useState('')
 
   const params = new URLSearchParams({ date, limit: '200' })
   if (teacherFilter) params.set('teacherId', teacherFilter)
@@ -106,7 +101,56 @@ export default function ClassroomFeedbackAdminPage() {
   const teachers = Array.isArray(teachersData?.teachers) ? teachersData.teachers : []
 
   const feedbacks: AdminFeedback[] = Array.isArray(data?.feedbacks) ? data.feedbacks : []
+  const allLessons: any[] = Array.isArray(data?.lessons) ? data.lessons : []
+  const missingLessons = allLessons.filter(l => !l.hasFeedback)
   const noFeedback: Array<{ id: string; name: string }> = Array.isArray(data?.teachersWithoutFeedback) ? data.teachersWithoutFeedback : []
+  
+  const { data: composeStudentsData } = useSWR(
+    composeTeacherId && !composeLessonId ? `/api/students?status=ACTIVE&limit=200` : null,
+    fetcher
+  )
+  const composeStudents: Array<{ id: string; name: string; grade?: string }> = useMemo(() => {
+    if (composeLessonId) {
+      const lesson = allLessons.find(l => l.id === composeLessonId)
+      return lesson?.students || []
+    }
+    return Array.isArray(composeStudentsData?.students) ? composeStudentsData.students : []
+  }, [composeLessonId, allLessons, composeStudentsData])
+
+  const handleLessonChange = (lessonId: string) => {
+    setComposeLessonId(lessonId)
+    if (lessonId) {
+      const lesson = allLessons.find(l => l.id === lessonId)
+      if (lesson) {
+        setComposeTeacherId(lesson.teacherId)
+        composeForm.setFieldsValue({
+          teacherId: lesson.teacherId,
+          studentIds: lesson.students.map((s: any) => s.id)
+        })
+      }
+    } else {
+      setComposeTeacherId('')
+      composeForm.setFieldsValue({ teacherId: undefined, studentIds: [] })
+    }
+  }
+
+  const handleTeacherChange = (teacherId: string) => {
+    setComposeTeacherId(teacherId)
+    setComposeLessonId('')
+    composeForm.setFieldsValue({ lessonId: undefined, studentIds: [] })
+  }
+
+  const openCompose = (teacherId?: string, lessonId?: string) => {
+    setComposeOpen(true)
+    if (lessonId) {
+      handleLessonChange(lessonId)
+      composeForm.setFieldValue('lessonId', lessonId)
+    } else if (teacherId) {
+      handleTeacherChange(teacherId)
+      composeForm.setFieldValue('teacherId', teacherId)
+    }
+  }
+
   const filtered = feedbacks.filter((feedback) => {
     const keyword = q.trim()
     if (!keyword) return true
@@ -144,6 +188,7 @@ export default function ClassroomFeedbackAdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           teacherId: composeTeacherId,
+          classLessonId: composeLessonId || null,
           studentIds: values.studentIds,
           knowledgePoints: (values.knowledgePoints || []),
           summary: values.summary || '',
@@ -160,6 +205,7 @@ export default function ClassroomFeedbackAdminPage() {
       composeForm.resetFields()
       setComposeImages([])
       setComposeTeacherId('')
+      setComposeLessonId('')
       mutate()
     } finally {
       setSubmitting(false)
@@ -168,14 +214,14 @@ export default function ClassroomFeedbackAdminPage() {
 
   return (
     <PageLayout
-      title="课堂反馈总览"
-      subtitle="查看所有老师的课堂反馈，追踪今日反馈提交情况"
+      title="成长反馈管理"
+      subtitle="查看所有老师的反馈，可为家长回复或替老师补发（不计薪资）"
       actions={
         <div style={{ display: 'flex', gap: 8 }}>
           <Button type="primary" icon={<PlusOutlined />}
-            style={{ background: '#E8784A', borderColor: '#E8784A' }}
-            onClick={() => setComposeOpen(true)}>
-            替老师发反馈
+            style={{ background: '#E8784A', borderColor: '#E8784A', fontWeight: 600 }}
+            onClick={() => openCompose()}>
+            代发反馈
           </Button>
           <Button icon={<ReloadOutlined />} onClick={() => mutate()}>刷新</Button>
         </div>
@@ -184,7 +230,7 @@ export default function ClassroomFeedbackAdminPage() {
       <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
         <Col xs={12} sm={8} md={6}>
           <Card bordered={false} style={{ borderRadius: 10, background: 'linear-gradient(135deg,#fff3ec,#fff)', border: '1px solid #EEE7E1' }}>
-            <div style={{ fontSize: 11, color: '#98A2B3', marginBottom: 4 }}>已反馈</div>
+            <div style={{ fontSize: 11, color: '#98A2B3', marginBottom: 4 }}>今日已反馈</div>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#1D9E75' }}>{feedbacks.length}</div>
           </Card>
         </Col>
@@ -211,25 +257,16 @@ export default function ClassroomFeedbackAdminPage() {
           />
           <Input
             prefix={<SearchOutlined />}
-            placeholder="搜索老师/课程/内容/学员"
+            placeholder="搜索内容/学员"
             value={q}
             onChange={(event) => setQ(event.target.value)}
             allowClear
             style={{ width: isMobile ? '100%' : 280 }}
           />
           <Button
-            type={viewAll ? 'primary' : 'default'}
             onClick={() => setViewAll((value) => !value)}
-            style={viewAll ? { background: '#E8784A', borderColor: '#E8784A' } : undefined}
           >
             {viewAll ? '恢复按日查看' : '查看全部历史'}
-          </Button>
-          <Button
-            type={groupByClass ? 'primary' : 'default'}
-            onClick={() => setGroupByClass(v => !v)}
-            style={groupByClass ? { background: '#534AB7', borderColor: '#534AB7' } : undefined}
-          >
-            {groupByClass ? '按班级分组' : '时间列表'}
           </Button>
         </div>
       </Card>
@@ -238,48 +275,78 @@ export default function ClassroomFeedbackAdminPage() {
         <Card
           bordered={false}
           style={{ borderRadius: 10, border: '1.5px solid #FED7AA', background: '#FFFBF5', marginBottom: 16 }}
-          title={<span style={{ color: '#D97706' }}><WarningOutlined /> 今日尚未提交反馈的老师</span>}
+          title={<span style={{ color: '#D97706', fontSize: 14, fontWeight: 600 }}><WarningOutlined /> 今日尚未提交反馈</span>}
         >
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {noFeedback.map((teacher) => <Tag key={teacher.id} color="orange" style={{ borderRadius: 9999 }}>{teacher.name}</Tag>)}
+            {noFeedback.map((teacher) => (
+              <Tag 
+                key={teacher.id} 
+                color="orange" 
+                style={{ borderRadius: 9999, cursor: 'pointer', padding: '2px 10px' }}
+                onClick={() => openCompose(teacher.id)}
+              >
+                {teacher.name}
+              </Tag>
+            ))}
           </div>
+          {missingLessons.length > 0 && (
+            <div style={{ marginTop: 12, borderTop: '1px dashed #FED7AA', paddingTop: 12 }}>
+              <div style={{ fontSize: 12, color: '#9A8E7A', marginBottom: 8 }}>待补发的课次：</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {missingLessons.map(lesson => (
+                  <Tag 
+                    key={lesson.id} 
+                    style={{ borderRadius: 6, cursor: 'pointer', padding: '4px 8px', background: '#fff' }}
+                    onClick={() => openCompose(undefined, lesson.id)}
+                  >
+                    <span style={{ color: '#E8784A', fontWeight: 600 }}>{lesson.groupName}</span>
+                    <span style={{ margin: '0 4px', color: '#ccc' }}>|</span>
+                    <span style={{ color: '#5a4e3a' }}>{lesson.teacherName}</span>
+                    <span style={{ marginLeft: 6, color: '#98A2B3', fontSize: 11 }}>{lesson.time}</span>
+                  </Tag>
+                ))}
+              </div>
+            </div>
+          )}
         </Card>
       )}
 
       {isLoading ? (
         <div style={{ textAlign: 'center', padding: 60 }}><Spin size="large" /></div>
       ) : filtered.length === 0 ? (
-        <Card bordered={false} style={{ borderRadius: 10, border: '1px solid #EEE7E1' }}>
+        <div style={{ textAlign: 'center', padding: '60px 0', background: '#fff', borderRadius: 12, border: '1px solid #EEE7E1' }}>
+          <img src="/images/empty-box.png" alt="" style={{ width: 120, opacity: 0.5, marginBottom: 16 }} />
           <Empty description={viewAll ? '暂无反馈记录' : `${date} 暂无课堂反馈`} />
-        </Card>
-      ) : groupByClass && groupedByClass ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {groupedByClass.map(group => (
-            <div key={group.className}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 4, height: 18, borderRadius: 2, background: '#E8784A', flexShrink: 0 }} />
-                <span style={{ fontWeight: 700, fontSize: 15, color: '#1F2329' }}>{group.className}</span>
-                <span style={{ fontSize: 12, padding: '1px 8px', borderRadius: 9999, background: '#FFF3EC', color: '#E8784A' }}>
-                  {group.subject}
-                </span>
-                <span style={{ fontSize: 12, color: '#98A2B3' }}>{group.items.length} 条反馈</span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 14, borderLeft: '2px solid #F5EDE8' }}>
-                {group.items.map(item => <FeedbackItemCard key={item.id} item={item} isMobile={isMobile} />)}
-              </div>
-            </div>
-          ))}
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {filtered.map(item => <FeedbackItemCard key={item.id} item={item} isMobile={isMobile} />)}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Feedbacks listed by class or time */}
+          {groupByClass && groupedByClass ? (
+            groupedByClass.map(group => (
+              <div key={group.className}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                  <div style={{ width: 4, height: 18, borderRadius: 2, background: '#E8784A', flexShrink: 0 }} />
+                  <span style={{ fontWeight: 700, fontSize: 15, color: '#1F2329' }}>{group.className}</span>
+                  <span style={{ fontSize: 12, padding: '1px 8px', borderRadius: 9999, background: '#FFF3EC', color: '#E8784A' }}>
+                    {group.subject}
+                  </span>
+                  <span style={{ fontSize: 12, color: '#98A2B3' }}>{group.items.length} 条反馈</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 14, borderLeft: '2px solid #F5EDE8' }}>
+                  {group.items.map(item => <FeedbackItemCard key={item.id} item={item} isMobile={isMobile} />)}
+                </div>
+              </div>
+            ))
+          ) : (
+            filtered.map(item => <FeedbackItemCard key={item.id} item={item} isMobile={isMobile} />)
+          )}
         </div>
       )}
 
       {/* Compose drawer */}
       <Drawer
         open={composeOpen}
-        onClose={() => { setComposeOpen(false); composeForm.resetFields(); setComposeTeacherId('') }}
+        onClose={() => { setComposeOpen(false); composeForm.resetFields(); setComposeTeacherId(''); setComposeLessonId('') }}
         title="代老师发布成长反馈"
         width={isMobile ? '100%' : 520}
         placement={isMobile ? 'bottom' : 'right'}
@@ -296,16 +363,29 @@ export default function ClassroomFeedbackAdminPage() {
         }
         styles={{ body: { paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))' } }}
       >
-        <div style={{ color: '#98A2B3', fontSize: 12, marginBottom: 16, padding: '8px 12px', background: '#FFF7ED', borderRadius: 8, border: '1px solid #FED7AA' }}>
-          管理端代发不计入教师薪资奖励
+        <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 12, padding: '6px 10px', background: '#FFF3EC', borderRadius: 6, border: '1px solid #FFD9BF' }}>
+          管理端代发反馈标记为 source=admin，不计入教师薪资奖励
         </div>
         <Form form={composeForm} layout="vertical" size="middle">
-          <Form.Item label="代发老师" required>
+          <Form.Item name="lessonId" label="选择关联课次（可选）">
+            <Select
+              allowClear
+              placeholder="关联具体课次可自动回显老师和学员"
+              onChange={handleLessonChange}
+              options={allLessons.map(l => ({ 
+                label: `${l.groupName} (${l.teacherName}) ${l.time}`, 
+                value: l.id,
+                disabled: l.hasFeedback 
+              }))}
+            />
+          </Form.Item>
+
+          <Form.Item name="teacherId" label="代发老师" required>
             <Select
               showSearch
               placeholder="选择老师"
               value={composeTeacherId || undefined}
-              onChange={v => { setComposeTeacherId(v || ''); composeForm.setFieldValue('studentIds', []) }}
+              onChange={handleTeacherChange}
               options={teachers.map((t: { id: string; name: string }) => ({ label: t.name, value: t.id }))}
               filterOption={(input, option) => String(option?.label || '').includes(input)}
               style={{ width: '100%' }}
@@ -315,7 +395,7 @@ export default function ClassroomFeedbackAdminPage() {
           <Form.Item name="studentIds" label={`选择学员${composeStudents.length ? `（${composeStudents.length}位可选）` : ''}`} required>
             <Select
               mode="multiple"
-              placeholder={composeTeacherId ? '选择要反馈的学员' : '请先选择老师'}
+              placeholder={composeTeacherId ? '选择要反馈的学员' : '请先选择老师或课次'}
               disabled={!composeTeacherId}
               style={{ width: '100%' }}
               options={composeStudents.map(s => ({ label: `${s.name}${s.grade ? ` · ${s.grade}` : ''}`, value: s.id }))}

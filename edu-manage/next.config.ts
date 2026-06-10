@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const securityHeaders = [
-  { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
@@ -15,7 +14,6 @@ const securityHeaders = [
       "font-src 'self' data:",
       "connect-src 'self' https:",
       "frame-src 'self' https://phet.colorado.edu https://www.geogebra.org https://www.desmos.com https://www.falstad.com https://chemcollective.org",
-      "child-src 'self' https://phet.colorado.edu https://www.geogebra.org https://www.desmos.com https://www.falstad.com https://chemcollective.org",
       "frame-ancestors 'none'",
     ].join('; '),
   },
@@ -32,6 +30,9 @@ const nextConfig: NextConfig = {
   compress: true,
   experimental: {
     optimizePackageImports: ['antd', '@ant-design/icons', 'lodash', 'date-fns'],
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
   },
   images: {
     formats: ['image/webp', 'image/avif'],
@@ -44,6 +45,18 @@ const nextConfig: NextConfig = {
       {
         source: '/:path*',
         headers: securityHeaders,
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store' },
+        ],
+      },
+      {
+        source: '/((?!_next/static|_next/image|favicon.ico|images|people|public|api).*)',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache' },
+        ],
       },
       {
         source: '/images/:path*',

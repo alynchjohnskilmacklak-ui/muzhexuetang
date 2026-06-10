@@ -44,8 +44,9 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({ materials })
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  } catch (err) {
+    console.error('[teacher:materials]', err instanceof Error ? err.message : err)
+    return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
 }
 
@@ -115,7 +116,8 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(material, { status: 201 })
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  } catch (err) {
+    console.error('[teacher:materials]', err instanceof Error ? err.message : err)
+    return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
 }

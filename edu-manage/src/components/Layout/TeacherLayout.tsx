@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Avatar, Badge, Dropdown, Layout, Menu, Spin, Tooltip } from 'antd'
+import useSWR from 'swr'
 import {
   CalendarOutlined,
   CheckSquareOutlined,
@@ -31,6 +32,8 @@ import { useSessionPing } from '@/hooks/useSessionPing'
 import { MobileLayout, type MobileNavItem } from './MobileLayout'
 
 const { Sider, Content, Header } = Layout
+
+const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 interface TeacherData {
   teacher: { id: string; name: string; avatar?: string | null }
@@ -81,19 +84,20 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     localStorage.setItem('teacher_sider_collapsed', String(collapsed))
   }, [collapsed])
 
+  const { data: dashData } = useSWR('/api/teacher/dashboard', fetcher, {
+    refreshInterval: 300_000,
+    revalidateOnFocus: true,
+    dedupingInterval: 30_000,
+  })
+
   useEffect(() => {
-    fetch('/api/teacher/dashboard')
-      .then((res) => res.json())
-      .then((payload) => {
-        if (payload.teacher) {
-          setData({
-            teacher: payload.teacher,
-            badges: payload.badges || { unsubmitted: 0, unpublished: 0, unread: 0 },
-          })
-        }
+    if (dashData?.teacher) {
+      setData({
+        teacher: dashData.teacher,
+        badges: dashData.badges || { unsubmitted: 0, unpublished: 0, unread: 0 },
       })
-      .catch(() => {})
-  }, [])
+    }
+  }, [dashData])
 
   const selectedKey = navItems.find(item => pathname.startsWith(item.key))?.key || '/teacher/dashboard'
   const mobileNavItems = withBadges(navItems, data)
@@ -105,6 +109,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   ], data)
   teacherBottomTabs.push({ key: '__more', icon: <EllipsisOutlined />, label: '更多' })
   const teacherMoreItems = mobileNavItems.filter(item => !['/teacher/dashboard', '/teacher/schedule', '/teacher/attendance', '/teacher/feedback'].includes(item.key))
+  const todoTotal = (data?.badges?.unsubmitted || 0) + (data?.badges?.unpublished || 0)
 
   const menuItems = navItems.map((item) => ({
     key: item.key,
@@ -126,6 +131,14 @@ export function TeacherLayout({ children, initialData }: { children: React.React
         bottomTabs={teacherBottomTabs}
         moreItems={teacherMoreItems}
         title="牧哲学堂 教师"
+        drawerHeaderExtra={todoTotal > 0 ? (
+          <div style={{ fontSize: 12, color: '#E8784A', background: 'rgba(232,120,74,.08)',
+            borderRadius: 8, padding: '8px 12px', border: '1px solid rgba(232,120,74,.15)' }}>
+            ⚠️ 待办：{data?.badges?.unsubmitted ? `${data.badges.unsubmitted}节考勤未提交` : ''}
+            {data?.badges?.unsubmitted && data?.badges?.unpublished ? '，' : ''}
+            {data?.badges?.unpublished ? `${data.badges.unpublished}条反馈未发布` : ''}
+          </div>
+        ) : undefined}
       >
         {children}
       </MobileLayout>

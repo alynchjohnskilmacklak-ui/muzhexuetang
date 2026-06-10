@@ -36,6 +36,7 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
   const [students, setStudents] = useState<StudentOption[]>([])
   const [choices, setChoices] = useState<Record<string, boolean | null>>({})
   const [submitting, setSubmitting] = useState<Record<string, boolean>>({})
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     fetch('/api/parent/meal-choice')
@@ -52,7 +53,7 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
         })
         setChoices(map)
       })
-      .catch(() => {})
+      .catch(() => { setLoadError(true) })
   }, [])
 
   const handleChoice = async (studentId: string, eating: boolean) => {
@@ -79,6 +80,11 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
 
   return (
     <div>
+      {loadError && (
+        <div style={{ background: '#fdeceb', border: '1px solid #E24B4A', borderRadius: 8, padding: '8px 14px', marginBottom: 16, color: '#E24B4A', fontSize: 13 }}>
+          就餐数据加载失败，请刷新页面重试
+        </div>
+      )}
       <div style={{
         position: 'relative',
         marginBottom: 24,

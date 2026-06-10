@@ -22,6 +22,7 @@ type TeacherLesson = {
   id: string
   groupName?: string
   courseName?: string
+  courseType?: string
   time?: string
   startTime?: string
   lessonDate?: string
@@ -167,12 +168,62 @@ export default function TeacherAttendancePage() {
       <Title level={4} style={{ marginTop: 0 }}>考勤录入</Title>
 
       <div style={isMobile ? { display: 'flex', flexDirection: 'column', gap: 12 } : { display: 'grid', gridTemplateColumns: '220px minmax(0, 1fr)', gap: 16, alignItems: 'start' }}>
-        {/* LEFT: Lesson list */}
+        {/* LEFT: Lesson list — pill tabs on mobile (grouped by time period), Card list on desktop */}
+        {isMobile ? (
+          (() => {
+            const timeBucket = (startTime: string): '上午' | '下午' | '晚上' => {
+              const h = parseInt((startTime || '00').split(':')[0])
+              if (h < 12) return '上午'
+              if (h < 18) return '下午'
+              return '晚上'
+            }
+            const buckets = ['上午', '下午', '晚上'] as const
+            const grouped = buckets.map(b => ({
+              label: b,
+              items: lessons.filter(l => timeBucket(l.time || l.startTime || '') === b)
+            })).filter(g => g.items.length > 0)
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {grouped.map(g => (
+                  <div key={g.label}>
+                    <div style={{ fontSize: 11, color: '#98A2B3', marginBottom: 6, fontWeight: 500 }}>{g.label}</div>
+                    <div style={{ display: 'flex', overflowX: 'auto', gap: 8, paddingBottom: 4, WebkitOverflowScrolling: 'touch' }}>
+                      {g.items.map((lesson: TeacherLesson) => {
+                        const selected = selectedLesson?.id === lesson.id
+                        const done = Number(lesson.attendanceCount || 0) > 0 || lesson.status === 'COMPLETED'
+                        const isOneOnOne = lesson.groupName?.includes('一对一') || lesson.courseType === 'ONE_ON_ONE'
+                        const pillColor = done ? '#1D9E75' : isOneOnOne ? '#534AB7' : '#E8784A'
+                        return (
+                          <div key={lesson.id} onClick={() => setSelectedLessonId(lesson.id)} style={{
+                            padding: '7px 14px', borderRadius: 20, fontSize: 13, whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none',
+                            border: `1.5px solid ${selected ? pillColor : '#EEE7E1'}`,
+                            background: selected ? (isOneOnOne ? 'rgba(83,74,183,.08)' : '#FFF3EC') : '#fff',
+                            color: selected ? pillColor : '#1F2329',
+                            fontWeight: selected ? 600 : 400,
+                            flexShrink: 0,
+                          }}>
+                            <div style={{ fontSize: 9, color: pillColor, marginBottom: 2 }}>
+                              {isOneOnOne ? '一对一' : '班课'}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              {done && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#1D9E75', flexShrink: 0 }} />}
+                              {!done && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#F5A623', flexShrink: 0 }} />}
+                              {lesson.groupName || lesson.courseName} {lesson.time}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          })()
+        ) : (
         <Card bordered={false} style={{ borderRadius: 10 }} title={`今日课次 (${lessons.length})`}>
           <List
             dataSource={lessons}
             locale={{ emptyText: '今日暂无课次' }}
-            style={isMobile ? { display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 } : undefined}
             renderItem={(lesson: TeacherLesson) => {
               const selected = selectedLesson?.id === lesson.id
               const done = Number(lesson.attendanceCount || 0) > 0 || lesson.status === 'COMPLETED'
@@ -181,8 +232,6 @@ export default function TeacherAttendancePage() {
                   cursor: 'pointer', border: selected ? '1px solid #E8784A' : '1px solid #f0e7de',
                   borderRadius: 8, padding: '8px 9px', marginBottom: 8,
                   background: selected ? '#FFF8F4' : '#fff',
-                  minWidth: isMobile ? 160 : undefined,
-                  maxWidth: isMobile ? 180 : undefined,
                 }}>
                   <div style={{ width: '100%' }}>
                     <Text strong style={{ fontSize: 12 }}>{lesson.groupName || lesson.courseName}</Text>
@@ -209,6 +258,7 @@ export default function TeacherAttendancePage() {
             </div>
           )}
         </Card>
+        )}
 
         {/* RIGHT: Attendance area */}
         <Card bordered={false} style={{ borderRadius: 10 }}
@@ -223,33 +273,48 @@ export default function TeacherAttendancePage() {
           ) : null}>
           {!selectedLesson ? <Empty description="请从左侧选择课次" /> : (
             <>
-              {isMobile && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
-                  <Button icon={<CheckCircleOutlined />} onClick={handleAllPresent} style={{ width: '100%', borderColor: '#1D9E75', color: '#1D9E75' }}>一键全勤</Button>
-                  <Button type="primary" loading={submitting} onClick={submitAttendance} style={{ width: '100%', background: '#E8784A' }}>{submitted ? '已提交 ✓' : '提交考勤'}</Button>
-                </div>
-              )}
               {isMobile && attendanceTimeHint(selectedLesson)}
               {/* Progress bar */}
-              <div style={{ background: 'var(--color-background-secondary, #faf8f5)', borderRadius: 8, padding: '8px 12px', marginBottom: 12, display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap' }}>签到进度</span>
-                  <div style={{ display: 'flex', gap: 10, fontSize: 10 }}>
-                    <span style={{ color: '#1D9E75', fontWeight: 500 }}>{summary.present}</span>
-                    <span style={{ color: '#BA7517', fontWeight: 500 }}>{summary.leave}</span>
-                    <span style={{ color: '#E24B4A', fontWeight: 500 }}>{summary.absent}</span>
+              <div style={{ 
+                background: 'linear-gradient(135deg, #FFFBF9 0%, #FDFCFB 100%)', 
+                borderRadius: 16, 
+                padding: '14px 18px', 
+                marginBottom: 16, 
+                border: '1px solid #F0EBE5',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#5a4e3a' }}>签到进度</span>
+                  <div style={{ display: 'flex', gap: 14, fontSize: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#1D9E75' }} />
+                      <span style={{ color: '#1D9E75', fontWeight: 600 }}>{summary.present}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#BA7517' }} />
+                      <span style={{ color: '#BA7517', fontWeight: 600 }}>{summary.leave}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#E24B4A' }} />
+                      <span style={{ color: '#E24B4A', fontWeight: 600 }}>{summary.absent}</span>
+                    </div>
                   </div>
                 </div>
-                <div style={{ flex: 1, height: 8, background: 'rgba(0,0,0,.06)', borderRadius: 4, overflow: 'hidden', display: 'flex', gap: 1 }}>
-                  <div style={{ flex: summary.present || 0.1, background: '#1D9E75', borderRadius: 2, transition: 'flex .3s' }} />
-                  <div style={{ flex: summary.leave || 0.1, background: '#BA7517', borderRadius: 2, transition: 'flex .3s' }} />
-                  <div style={{ flex: summary.absent || 0.1, background: '#E24B4A', borderRadius: 2, transition: 'flex .3s' }} />
-                  <div style={{ flex: summary.unmarked || 0.1, background: 'rgba(0,0,0,.08)', borderRadius: 2, transition: 'flex .3s' }} />
+                <div style={{ height: 10, background: 'rgba(0,0,0,.04)', borderRadius: 5, overflow: 'hidden', display: 'flex', gap: 0 }}>
+                  <div style={{ flex: summary.present || 0, background: 'linear-gradient(90deg, #1D9E75, #27D4A0)', transition: 'flex .5s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                  <div style={{ flex: summary.leave || 0, background: 'linear-gradient(90deg, #BA7517, #F5A623)', transition: 'flex .5s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                  <div style={{ flex: summary.absent || 0, background: 'linear-gradient(90deg, #E24B4A, #FF6B6B)', transition: 'flex .5s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                  <div style={{ flex: summary.unmarked || 0, background: '#F0EBE5', transition: 'flex .5s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                 </div>
               </div>
 
               {/* Student grid */}
-              <div className="teacher-attendance-student-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, 1fr)', gap: 6 }}>
+              <div className="teacher-attendance-student-grid" style={{ 
+                display: 'grid', 
+                gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, 1fr)', 
+                gap: 12, 
+                paddingBottom: isMobile ? 140 : 0 
+              }}>
                 {students.map((s) => {
                   const status: AttStatus = attMap.get(s.studentId) || 'none'
                   const cfg = STATUS_CONFIG[status]
@@ -282,6 +347,54 @@ export default function TeacherAttendancePage() {
                   点击学员卡片切换状态：未标记 → 出勤（绿）→ 请假（橙）→ 旷课（红）→ 循环
                 </Text>
               </div>
+
+              {/* Fixed bottom bar on mobile - positioned above the layout tab bar */}
+              {isMobile && (
+                <div style={{ 
+                  position: 'fixed', 
+                  bottom: 'calc(74px + env(safe-area-inset-bottom, 0px))', 
+                  left: 12, 
+                  right: 12, 
+                  zIndex: 400,
+                  background: 'rgba(255, 255, 255, 0.95)', 
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: 16,
+                  border: '1px solid #F0EBE5',
+                  boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
+                  padding: '12px 16px', 
+                  display: 'grid', 
+                  gridTemplateColumns: '1fr 1fr', 
+                  gap: 12 
+                }}>
+                  <Button 
+                    icon={<CheckCircleOutlined />} 
+                    onClick={handleAllPresent} 
+                    style={{ 
+                      height: 46, 
+                      borderRadius: 12, 
+                      borderColor: '#1D9E75', 
+                      color: '#1D9E75',
+                      fontWeight: 600,
+                      background: '#fff'
+                    }}>
+                    一键全勤
+                  </Button>
+                  <Button 
+                    type="primary" 
+                    loading={submitting} 
+                    onClick={submitAttendance}
+                    style={{ 
+                      height: 46, 
+                      borderRadius: 12, 
+                      background: '#E8784A', 
+                      borderColor: '#E8784A',
+                      fontWeight: 600,
+                      boxShadow: '0 4px 12px rgba(232,120,74,0.2)'
+                    }}>
+                    {submitted ? '已提交 ✓' : '提交考勤'}
+                  </Button>
+                </div>
+              )}
             </>
           )}
         </Card>

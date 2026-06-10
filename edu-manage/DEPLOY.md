@@ -138,7 +138,35 @@ netstat -tlnp | grep 3000
 
 ---
 
-## 七、环境变量检查清单
+## 七、安全与维护守则 (Operational Guardrails)
+
+为确保部署安全与系统稳定，请遵循以下规范：
+
+1.  **打包前安全检查**：
+    在执行打包命令前，务必运行：
+    ```bash
+    npm run security:check
+    ```
+    该脚本会检查是否存在未加密的 `.env` 文件或本地数据库文件，防止泄露。
+
+2.  **Schema 同步必行**：
+    每次部署后（特别是包含数据库变更的版本，如 6月7日的反馈字段扩展），必须在服务器执行：
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+    确保生成的 Prisma Client 与生产数据库结构完全一致。
+
+3.  **清理旧产物**：
+    如果部署后页面未更新或报错，尝试清理 `.next` 目录并重新构建：
+    ```bash
+    pm2 stop edu-manage
+    rm -rf .next
+    npm run build
+    pm2 start edu-manage --update-env
+    ```
+
+## 八、环境变量检查清单
 
 部署后确认 `.env` 中以下变量都存在：
 

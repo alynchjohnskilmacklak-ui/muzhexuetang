@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getTeacherDashboardData } from '@/lib/teacher-dashboard'
 import { requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export const GET = apiHandler(async () => {
   try {
     const { teacher } = await requireCurrentTeacher()
     const dashboard = await getTeacherDashboardData(teacher.id)
@@ -18,13 +19,15 @@ export async function GET() {
         unpublished: dashboard.pendingTasks.unpublishedPapers,
         unread: dashboard.pendingTasks.unreadParentComments,
       },
+    }, {
+      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
     })
   } catch {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
-}
+})
 
-export async function POST() {
+export const POST = apiHandler(async () => {
   try {
     const { user, teacher } = await requireCurrentTeacher()
     await prisma.activityLog.create({
@@ -41,4 +44,4 @@ export async function POST() {
   } catch {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
-}
+})

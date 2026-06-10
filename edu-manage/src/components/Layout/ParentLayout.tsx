@@ -7,6 +7,7 @@ import {
   BellOutlined,
   BookOutlined,
   CalendarOutlined,
+  CheckOutlined,
   ClockCircleOutlined,
   CoffeeOutlined,
   EllipsisOutlined,
@@ -27,6 +28,7 @@ import {
 import { signOut, useSession } from 'next-auth/react'
 import { usePathname, useRouter } from 'next/navigation'
 import useSWR from 'swr'
+import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
@@ -52,7 +54,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const isMobile = useIsMobile()
   const [collapsed, setCollapsed] = useState(false)
-  const { data: unreadData } = useSWR('/api/parent/unread-counts', fetcher, { refreshInterval: 300_000 })
+  const { data: unreadData, mutate: mutateUnread } = useSWR('/api/parent/unread-counts', fetcher, { refreshInterval: 300_000 })
   useKickListener()
   useSessionPing()
 
@@ -114,6 +116,12 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   const moreItems = navItems.filter(item => !['/parent/dashboard', '/parent/schedule', '/parent/volunteer/schools', '/parent/class-feedback'].includes(item.key))
   const currentKey = resolveActiveKey(pathname, navItems, '/parent/dashboard')
 
+  const markAllRead = async () => {
+    await fetch('/api/parent/notifications/read-all', { method: 'PATCH' })
+    mutateUnread()
+    toast.success('已全部标为已读')
+  }
+
   const menuItems = navItems.map(item => ({
     key: item.key,
     icon: item.icon,
@@ -134,6 +142,16 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
         bottomTabs={bottomTabs}
         moreItems={moreItems}
         title="牧哲学堂 家长"
+        drawerHeaderExtra={totalUnread > 0 ? (
+          <button onClick={markAllRead} style={{
+            width: '100%', padding: '10px 14px', borderRadius: 10,
+            background: 'rgba(232,120,74,.08)', border: '1px solid rgba(232,120,74,.2)',
+            color: '#E8784A', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}>
+            <CheckOutlined /> 一键已读（{totalUnread}条未读）
+          </button>
+        ) : undefined}
       >
         {children}
       </MobileLayout>

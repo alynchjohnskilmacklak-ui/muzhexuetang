@@ -12,7 +12,7 @@ export const GET = apiHandler(async () => {
   return NextResponse.json(rooms)
 })
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if ((session.user as { role?: string }).role !== 'admin') {
@@ -27,4 +27,4 @@ export async function POST(req: NextRequest) {
     if ((e as { code?: string }).code === 'P2002') return NextResponse.json({ error: '教室名称已存在' }, { status: 409 })
     return NextResponse.json({ error: '服务器错误' }, { status: 500 })
   }
-}
+})

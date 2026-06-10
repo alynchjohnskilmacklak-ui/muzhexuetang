@@ -12,5 +12,7 @@ export const GET = apiHandler(async () => {
   const schools = await prisma.highSchoolInfo.findMany({
     orderBy: [{ tongZhao: 'desc' }],
   })
-  return NextResponse.json({ schools })
+  return NextResponse.json({ schools }, {
+    headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=300' },
+  })
 })

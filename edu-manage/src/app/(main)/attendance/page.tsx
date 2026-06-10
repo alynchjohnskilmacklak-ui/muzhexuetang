@@ -406,42 +406,56 @@ export default function AttendancePage() {
                 </div>
 
                 {/* 学生列表 */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '8px 16px' }}>
+                <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
                   {students.map((s: Record<string, unknown>) => {
                     const status = attMap.get(s.studentId as string) || 'present'
                     const statusColors = {
-                      present: { bg: 'rgba(39,166,68,0.12)', color: '#27a644' },
-                      leave:   { bg: 'rgba(245,166,35,0.12)', color: '#f5a623' },
-                      absent:  { bg: 'rgba(224,62,45,0.12)',  color: '#e03e2d' },
-                      late:    { bg: 'rgba(100,100,220,0.12)',color: '#6464dc' },
+                      present: { bg: 'rgba(39,166,68,0.1)', color: '#27a644', label: '出勤' },
+                      leave:   { bg: 'rgba(245,166,35,0.1)', color: '#f5a623', label: '请假' },
+                      absent:  { bg: 'rgba(224,62,45,0.1)',  color: '#e03e2d', label: '旷课' },
+                      late:    { bg: 'rgba(100,100,220,0.1)', color: '#6464dc', label: '迟到' },
                     } as const
+                    
                     return (
                       <div key={s.studentId as string} style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '10px 0', borderBottom: '1px solid #F5F2EE',
+                        background: '#ffffff',
+                        borderRadius: 12,
+                        padding: '12px 14px',
+                        marginBottom: 12,
+                        border: '1px solid #F5F2EE',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                           <div style={{
-                            width: 36, height: 36, borderRadius: '50%', background: '#FCFBF9',
+                            width: 36, height: 36, borderRadius: '50%', background: '#FDFCFB',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 14, fontWeight: 600, color: '#5a4e3a', flexShrink: 0,
+                            fontSize: 14, fontWeight: 600, color: '#5a4e3a', border: '1px solid #F5F2EE'
                           }}>{(s.studentName as string)?.[0] || '?'}</div>
-                          <span style={{ fontSize: 14, color: '#1F2329' }}>{s.studentName as string}</span>
+                          <span style={{ fontSize: 15, fontWeight: 600, color: '#1F2329' }}>{s.studentName as string}</span>
                         </div>
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          {(['present', 'leave', 'absent', 'late'] as AttStatus[]).map(t => (
-                            <button key={t}
-                              onClick={() => setStudentStatus(s.studentId as string, t)}
-                              style={{
-                                padding: '5px 8px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
-                                border: `1px solid ${status === t ? statusColors[t].color : 'transparent'}`,
-                                background: status === t ? statusColors[t].bg : 'transparent',
-                                color: status === t ? statusColors[t].color : '#98A2B3',
-                                fontWeight: status === t ? 600 : 400,
-                              }}>
-                              {statusColors[t].color === '#27a644' ? '出勤' : t === 'leave' ? '请假' : t === 'absent' ? '旷课' : '迟到'}
-                            </button>
-                          ))}
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                          {(['present', 'leave', 'absent', 'late'] as AttStatus[]).map(t => {
+                            const active = status === t
+                            const c = statusColors[t]
+                            return (
+                              <button key={t}
+                                onClick={() => setStudentStatus(s.studentId as string, t)}
+                                style={{
+                                  padding: '8px 0',
+                                  borderRadius: 8,
+                                  fontSize: 12,
+                                  cursor: 'pointer',
+                                  border: `1px solid ${active ? c.color : '#F0EBE5'}`,
+                                  background: active ? c.bg : '#FDFCFB',
+                                  color: active ? c.color : '#98A2B3',
+                                  fontWeight: active ? 600 : 400,
+                                  transition: 'all 0.2s'
+                                }}>
+                                {c.label}
+                              </button>
+                            )
+                          })}
                         </div>
                       </div>
                     )
@@ -450,18 +464,30 @@ export default function AttendancePage() {
 
                 {/* 汇总 + 提交 */}
                 <div style={{
-                  padding: '12px 16px', background: '#fff',
+                  padding: '16px',
+                  background: '#ffffff',
                   borderTop: '1px solid #EEE7E1',
-                  paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+                  boxShadow: '0 -4px 12px rgba(0,0,0,0.03)',
+                  paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: 14 }}>
-                      <span style={{ fontSize: 13, color: '#27a644' }}>出勤 {summary.present}</span>
-                      <span style={{ fontSize: 13, color: '#f5a623' }}>请假 {summary.leave}</span>
-                      <span style={{ fontSize: 13, color: '#e03e2d' }}>旷课 {summary.absent}</span>
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: '#27a644' }}>{summary.present}</div>
+                        <div style={{ fontSize: 10, color: '#98A2B3' }}>出勤</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: '#f5a623' }}>{summary.leave}</div>
+                        <div style={{ fontSize: 10, color: '#98A2B3' }}>请假</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: '#e03e2d' }}>{summary.absent}</div>
+                        <div style={{ fontSize: 10, color: '#98A2B3' }}>旷课</div>
+                      </div>
                     </div>
-                    <Button type="primary" loading={submitting} onClick={async () => { await handleSubmit(); setAttendanceDrawerOpen(false) }}
-                      style={{ background: '#E8784A', borderColor: '#E8784A' }}
+                    <Button type="primary" loading={submitting} size="large"
+                      onClick={async () => { await handleSubmit(); setAttendanceDrawerOpen(false) }}
+                      style={{ background: '#E8784A', borderColor: '#E8784A', height: 44, borderRadius: 8, padding: '0 24px' }}
                       icon={<CheckCircleOutlined />}>
                       提交考勤
                     </Button>

@@ -424,7 +424,7 @@ model Schedule {
   teacherId             String
   title                 String
   startTime             DateTime
-  endTime               DateTime
+  endTime             DateTime
   isRecurring           Boolean   @default(false)
   recurrence            String?
   status                String    @default("scheduled")
@@ -626,23 +626,23 @@ model ClassroomFeedback {
   classLessonId   String?
   classLesson     ClassLesson? @relation(fields: [classLessonId], references: [id])
   targetType      String       @default("CLASS")
+  source          String       @default("teacher")
   studentIds      String[]
   knowledgePoints String[]
   summary         String?      @db.Text
+  mood            String?
+  tags            String[]     @default([])
+  badge           String?
+  overallComment  String?
   homework        Json?
   imageUrls       String[]
   imageTypes      Json?
   studentRatings  Json?
-  status          String       @default("DRAFT")
-  source          String       @default("teacher")
-  mood            String?
-  tags            String[]
-  badge           String?
-  overallComment  String?      @db.Text
-  parentReply     String?      @db.Text
+  parentReply     String?
   parentRepliedAt DateTime?
-  adminReply      String?      @db.Text
+  adminReply      String?
   adminRepliedAt  DateTime?
+  status          String       @default("DRAFT")
   notifySent      Boolean      @default(false)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt

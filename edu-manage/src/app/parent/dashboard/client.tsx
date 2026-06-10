@@ -231,100 +231,151 @@ export function ParentDashboardClient({
 
   return (
     <div>
+      {/* Sticky child switcher */}
+      {students.length > 1 && (
+        <div style={{
+          display: 'flex', gap: 10, marginBottom: 16,
+          overflowX: 'auto', padding: isMobile ? '12px 16px' : '4px 0',
+          position: 'sticky', top: isMobile ? 56 : 0, zIndex: 100,
+          background: isMobile ? '#fff' : 'transparent',
+          borderBottom: isMobile ? '1px solid rgba(0,0,0,0.05)' : 'none',
+          margin: isMobile ? '-8px -12px 20px -12px' : '0 0 16px 0',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+        }}>
+          {students.map((student: any) => {
+            const isActive = student.id === activeChildId
+            return (
+              <button
+                key={student.id}
+                onClick={() => {
+                  setActiveChildId(student.id)
+                  const params = new URLSearchParams(window.location.search)
+                  params.set('childId', student.id)
+                  window.history.replaceState({}, '', `?${params.toString()}`)
+                }}
+                style={{
+                  flexShrink: 0, padding: '7px 18px', borderRadius: 22, fontSize: 13,
+                  border: `1.5px solid ${isActive ? '#E8784A' : '#EEE7E1'}`,
+                  background: isActive ? 'linear-gradient(135deg, rgba(232,120,74,0.12) 0%, rgba(232,120,74,0.05) 100%)' : '#fff',
+                  color: isActive ? '#E8784A' : '#5a4e3a',
+                  fontWeight: isActive ? 700 : 500,
+                  cursor: 'pointer', whiteSpace: 'nowrap',
+                  boxShadow: isActive ? '0 4px 12px rgba(232,120,74,0.1)' : 'none',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              >
+                {student.name}{student.grade ? ` · ${student.grade}` : ''}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {/* Hero Card */}
       <div style={{
-        background: 'linear-gradient(135deg, #E8784A 0%, #F08A54 30%, #d4693a 70%, #bf5028 100%)',
-        borderRadius: 16, padding: isMobile ? '18px 16px' : '24px 28px', marginBottom: 20,
+        background: 'linear-gradient(145deg, #E8784A 0%, #F59A68 100%)',
+        borderRadius: 24, padding: isMobile ? '20px 18px' : '28px 32px', marginBottom: 20,
         position: 'relative', overflow: 'hidden',
+        boxShadow: '0 10px 30px rgba(232,120,74,0.15)'
       }}>
-        <div style={{ position: 'absolute', right: -30, bottom: -30, fontSize: 140, fontWeight: 700, color: 'rgba(255,255,255,.04)', userSelect: 'none', lineHeight: 1 }}>🌸</div>
-        <div style={{ position: 'absolute', right: 120, top: -20, fontSize: 80, fontWeight: 700, color: 'rgba(255,255,255,.03)', userSelect: 'none', lineHeight: 1 }}>⭐</div>
+        {/* Decorative background elements */}
+        <div style={{ 
+          position: 'absolute', right: -20, bottom: -20, fontSize: 160, 
+          opacity: 0.1, userSelect: 'none', filter: 'blur(1px)' 
+        }}>🌸</div>
+        <div style={{ 
+          position: 'absolute', left: '40%', top: -30, fontSize: 100, 
+          opacity: 0.05, userSelect: 'none', transform: 'rotate(15deg)' 
+        }}>⭐</div>
 
-        <Row gutter={[isMobile ? 12 : 24, 16]} align="middle">
-          <Col flex="auto">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-              <div style={{
-                width: 60, height: 60, borderRadius: 16, background: 'rgba(255,255,255,.2)',
-                border: '2px solid rgba(255,255,255,.3)', display: 'flex',
-                alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 700, color: '#fff',
-                flexShrink: 0,
-              }}>
-                {heroStudentName[0]}
-              </div>
-              <div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
-                  {heroStudentName}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <Row gutter={[isMobile ? 12 : 24, 16]} align="middle" justify="space-between">
+            <Col flex="auto">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+                <div style={{
+                  width: 64, height: 64, borderRadius: 20, 
+                  background: 'rgba(255,255,255,0.25)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.4)', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  fontSize: 28, fontWeight: 700, color: '#fff',
+                  flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                }}>
+                  {heroStudentName[0]}
                 </div>
-                {students.length > 1 && (
-                  <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
-                    {students.map((student: any) => (
-                      <a
-                        key={student.id}
-                        href={`/parent/dashboard?childId=${student.id}`}
-                        style={{
-                          padding: '5px 14px', borderRadius: 20, textDecoration: 'none',
-                          border: `1.5px solid ${student.id === activeChildId ? '#fff' : 'rgba(255,255,255,.4)'}`,
-                          background: student.id === activeChildId ? 'rgba(255,255,255,.25)' : 'transparent',
-                          color: '#fff', fontSize: 13,
-                          fontWeight: student.id === activeChildId ? 700 : 400,
-                          whiteSpace: 'nowrap', flexShrink: 0,
-                        }}
-                      >
-                        {student.name}
-                      </a>
-                    ))}
+                <div>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: -0.5 }}>
+                    {heroStudentName}
                   </div>
-                )}
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>
-                  {activeStudent?.grade ? `${activeStudent.grade} · ` : ''}
-                  负责老师：{activeTeacherNames.length > 0 ? activeTeacherNames.join('、') : '暂未分配'}
-                </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,.86)', marginTop: 8 }}>
-                  今日状态：<strong>{todayStatus}</strong> · 最近更新：{latestUpdate}
+                  <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4, fontWeight: 500 }}>
+                    {activeStudent?.grade ? <span style={{ marginRight: 8 }}>{activeStudent.grade}</span> : ''}
+                    <span style={{ opacity: 0.8 }}>负责老师：</span>
+                    {activeTeacherNames.length > 0 ? activeTeacherNames.join('、') : '审核中'}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div style={{
-              background: 'rgba(255,255,255,.12)', backdropFilter: 'blur(4px)',
-              borderRadius: 10, padding: '10px 16px', display: 'inline-block',
-            }}>
-              <Text style={{ color: 'rgba(255,255,255,.92)', fontSize: 14, fontStyle: 'italic', letterSpacing: 1 }}>
-                「每一个孩子都有花期，我们静待花开。」
-              </Text>
-            </div>
-          </Col>
-
-          <Col>
-            <div style={{ textAlign: 'right', color: 'rgba(255,255,255,.9)' }}>
-              <div style={{ fontSize: 11, opacity: .6, marginBottom: 3 }}>今日</div>
-              <div style={{ fontSize: 13, fontWeight: 500 }}>{format(today, 'M月d日 EEEE', { locale: zhCN })}</div>
-            </div>
-          </Col>
-        </Row>
-
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 10, marginTop: 20 }}>
-          {[
-            { val: todayLessons.length, label: '今日课次' },
-            { val: formatPercent(activeAttendanceRate), label: '本月出勤率' },
-            { val: activeBadgeCount, label: '已获徽章', icon: true },
-            { val: activeNotifications.filter((n: any) => !n.read).length, label: '待处理通知' },
-          ].map(({ val, label, icon }) => (
-            <div key={label} style={{
-              background: 'rgba(255,255,255,.15)', backdropFilter: 'blur(4px)',
-              borderRadius: 12, padding: '12px 14px', textAlign: 'center',
-            }}>
-              <div style={{ fontSize: 20, fontWeight: 600, color: '#fff', lineHeight: 1.2 }}>
-                {icon ? `🌟 ${val}` : val}
+              <div style={{
+                background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)',
+                borderRadius: 14, padding: '12px 18px', display: 'inline-flex',
+                alignItems: 'center', gap: 8, border: '1px solid rgba(255,255,255,0.1)'
+              }}>
+                <BulbOutlined style={{ color: '#fff', fontSize: 16 }} />
+                <Text style={{ color: '#fff', fontSize: 14, fontWeight: 500, letterSpacing: 0.5 }}>
+                  「每一个孩子都有花期，我们静待花开。」
+                </Text>
               </div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.7)', marginTop: 4 }}>{label}</div>
+            </Col>
+
+            {!isMobile && (
+              <Col>
+                <div style={{ textAlign: 'right', color: '#fff' }}>
+                  <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>{format(today, 'EEEE', { locale: zhCN })}</div>
+                  <div style={{ fontSize: 18, fontWeight: 700 }}>{format(today, 'M月d日')}</div>
+                </div>
+              </Col>
+            )}
+          </Row>
+
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12, marginTop: 24 }}>
+            {[
+              { val: todayLessons.length, label: '今日课次', icon: <ClockCircleOutlined /> },
+              { val: formatPercent(activeAttendanceRate), label: '本月出勤率', icon: <IdcardOutlined /> },
+              { val: activeBadgeCount, label: '已获徽章', icon: <StarOutlined />, special: true },
+              { val: activeNotifications.filter((n: any) => !n.read).length, label: '待处理通知', icon: <BellOutlined /> },
+            ].map(({ val, label, icon, special }) => (
+              <div key={label} style={{
+                background: 'rgba(255,255,255,0.18)', 
+                backdropFilter: 'blur(12px)',
+                borderRadius: 18, padding: '16px 14px', 
+                border: '1px solid rgba(255,255,255,0.2)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
+              }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {special && <span style={{ fontSize: 16 }}>🌟</span>}
+                  {val}
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, padding: '0 4px' }}>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', opacity: 0.6 }} />
+              今日状态：<strong style={{ color: '#fff' }}>{todayStatus}</strong>
             </div>
-          ))}
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>
+              更新于 {latestUpdate.split(' ')[1] || latestUpdate}
+            </div>
+          </div>
         </div>
       </div>
 
       <TodayStatus activeChildId={students.length > 1 ? activeChildId : undefined} />
-      <WeeklyReport />
+      <WeeklyReport activeChildId={students.length > 1 ? activeChildId : undefined} />
 
       <div style={{
         margin: '16px 0',

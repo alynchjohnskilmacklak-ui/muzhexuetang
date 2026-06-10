@@ -4,9 +4,11 @@ import { getCurrentUser } from '@/lib/get-user'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { revalidatePath } from 'next/cache'
 
+import { apiHandler } from '@/lib/api-handler'
+
 export const dynamic = 'force-dynamic'
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
@@ -145,4 +147,4 @@ export async function POST(req: NextRequest) {
     console.error('[one-on-one:create]', e)
     return NextResponse.json({ error: '创建一对一课程失败' }, { status: 500 })
   }
-}
+})
