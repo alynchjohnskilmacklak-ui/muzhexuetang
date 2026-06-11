@@ -180,7 +180,7 @@ export function ParentGrowthClient({
         setReplyText('')
         setReplyingId('')
         // Refresh the page to show updated reply
-        window.location.reload()
+        router.refresh()
       } else {
         const data = await res.json().catch(() => ({}))
         message.error(data.error || '回复失败')

@@ -456,10 +456,22 @@ export default function GradesPage() {
               ) : null}
               <Upload.Dragger name="file" action="/api/upload" accept="image/*,.pdf" multiple maxCount={9}
                 showUploadList={false}
+                beforeUpload={(file) => {
+                  const isValid = file.type.startsWith('image/') || file.type === 'application/pdf'
+                  if (!isValid) { message.warning('仅支持图片或 PDF 文件'); return Upload.LIST_IGNORE }
+                  if (file.size > 10 * 1024 * 1024) { message.warning('文件大小不能超过 10MB'); return Upload.LIST_IGNORE }
+                  return true
+                }}
                 onChange={(info) => {
+                  if (info.file.status === 'uploading') return
                   if (info.file.status === 'done') {
                     const url = (info.file.response as { url?: string })?.url
-                    if (url) setImageUrls(prev => [...prev, url])
+                    const error = (info.file.response as { error?: string })?.error
+                    if (url) { setImageUrls(prev => [...prev, url]); message.success('试卷上传成功') }
+                    else if (error) message.error(`试卷上传失败：${error}`)
+                    else message.error('上传成功但未返回文件地址')
+                  } else if (info.file.status === 'error') {
+                    message.error('试卷上传失败：网络错误，请重试')
                   }
                 }}
                 style={{ borderRadius: 8, background: imageUrls.length > 0 ? '#FCFBF9' : undefined }}

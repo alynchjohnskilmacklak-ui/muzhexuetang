@@ -53,11 +53,12 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
         })
         setChoices(map)
       })
-      .catch(() => { setLoadError(true) })
+      .catch((error) => { console.warn('就餐数据加载失败', error); setLoadError(true) })
   }, [])
 
   const handleChoice = async (studentId: string, eating: boolean) => {
     if (!todayMenu) return
+    if (submitting[studentId]) return
     setSubmitting((prev) => ({ ...prev, [studentId]: true }))
     try {
       const res = await fetch('/api/parent/meal-choice', {

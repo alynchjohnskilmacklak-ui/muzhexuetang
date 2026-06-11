@@ -44,7 +44,7 @@ export function StudentForm({
       }
       fetch('/api/teachers?limit=50').then(r => r.json()).then(d => {
         setTeachers(Array.isArray(d) ? d : (d.teachers || []))
-      }).catch(() => {})
+      }).catch((error) => { console.warn('教师列表加载失败', error) })
     }
   }, [open, initialData, form])
 

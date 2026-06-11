@@ -127,7 +127,7 @@ export default function VolunteerSimPage() {
     fetch('/api/volunteer/schools')
       .then(r => r.json())
       .then(d => setSchools(Array.isArray(d?.schools) ? d.schools : []))
-      .catch(() => { setSchoolsError(true) })
+      .catch((error) => { console.warn('学校数据加载失败', error); setSchoolsError(true) })
       .finally(() => setSchoolsReady(true))
   }, [])
 

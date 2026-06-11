@@ -12,6 +12,7 @@ declare module 'next-auth' {
       email: string
       name: string
       role: string
+      teacherId?: string | null
       sessionMark?: string
     }
   }
@@ -50,11 +51,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         )
         if (!result.ok) return null
 
+        const dbUser = await prisma.user.findUnique({
+          where: { id: result.user.id },
+          select: { teacherId: true },
+        })
+
         return {
-          id:    result.user.id,
-          email: result.user.email,
-          name:  result.user.name,
-          role:  result.user.role,
+          id:        result.user.id,
+          email:     result.user.email,
+          name:      result.user.name,
+          role:      result.user.role,
+          teacherId: dbUser?.teacherId ?? null,
         }
       },
     }),
@@ -67,9 +74,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const t = token as unknown as Record<string, unknown>
       if (user) {
         const u = user as unknown as Record<string, unknown>
-        t.role = u.role as string
-        t.sub  = u.id as string
-        t.id   = u.id as string
+        t.role      = u.role as string
+        t.sub       = u.id as string
+        t.id        = u.id as string
+        t.teacherId = u.teacherId ?? null
         const sessionMark = crypto.randomUUID()
         t.sessionMark = sessionMark
 
@@ -93,6 +101,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const t = token as unknown as Record<string, unknown>
         u.role        = t.role
         u.id          = t.sub ?? t.id
+        u.teacherId   = t.teacherId ?? null
         u.sessionMark = t.sessionMark
       }
       return session

@@ -64,66 +64,68 @@ export const POST = apiHandler(async () => {
   }
   results.deletedPapers = deletedPapers
 
-  // 5. 硬删除 RESIGNED 已离职教师（清理关联）
+  // 5. 硬删除 RESIGNED 已离职教师（清理关联，在事务中执行）
   const resignedTeachers = await prisma.teacher.findMany({ where: { status: 'RESIGNED' }, select: { id: true, name: true } })
   for (const t of resignedTeachers) {
-    // Clear references before deleting teacher
-    await prisma.postComment.deleteMany({ where: { post: { teacherId: t.id } } })
-    await prisma.postReaction.deleteMany({ where: { post: { teacherId: t.id } } })
-    await prisma.postBadge.deleteMany({ where: { post: { teacherId: t.id } } })
-    await prisma.performancePost.deleteMany({ where: { teacherId: t.id } })
-    await prisma.paperComment.deleteMany({ where: { paper: { teacherId: t.id } } })
-    await prisma.paperReaction.deleteMany({ where: { paper: { teacherId: t.id } } })
-    await prisma.paperQuestion.deleteMany({ where: { paper: { teacherId: t.id } } })
-    await prisma.weaknessRecord.deleteMany({ where: { paper: { teacherId: t.id } } })
-    await prisma.examPaper.deleteMany({ where: { teacherId: t.id } })
-    await prisma.achievementBadge.deleteMany({ where: { teacherId: t.id } })
-    await prisma.classroomFeedback.deleteMany({ where: { teacherId: t.id } })
-    await prisma.classHighlight.deleteMany({ where: { teacherId: t.id } })
-    await prisma.$executeRawUnsafe(`UPDATE "ActivityLog" SET "teacherId" = NULL WHERE "teacherId" = $1`, t.id)
-    await prisma.$executeRawUnsafe(`UPDATE "ClassLesson" SET "teacherId" = NULL WHERE "teacherId" = $1`, t.id)
-    await prisma.classGroupTeacher.deleteMany({ where: { teacherId: t.id } })
-    await prisma.teacherAlert.deleteMany({ where: { teacherId: t.id } })
-    await prisma.teacher.delete({ where: { id: t.id } })
+    await prisma.$transaction(async (tx) => {
+      await tx.postComment.deleteMany({ where: { post: { teacherId: t.id } } })
+      await tx.postReaction.deleteMany({ where: { post: { teacherId: t.id } } })
+      await tx.postBadge.deleteMany({ where: { post: { teacherId: t.id } } })
+      await tx.performancePost.deleteMany({ where: { teacherId: t.id } })
+      await tx.paperComment.deleteMany({ where: { paper: { teacherId: t.id } } })
+      await tx.paperReaction.deleteMany({ where: { paper: { teacherId: t.id } } })
+      await tx.paperQuestion.deleteMany({ where: { paper: { teacherId: t.id } } })
+      await tx.weaknessRecord.deleteMany({ where: { paper: { teacherId: t.id } } })
+      await tx.examPaper.deleteMany({ where: { teacherId: t.id } })
+      await tx.achievementBadge.deleteMany({ where: { teacherId: t.id } })
+      await tx.classroomFeedback.deleteMany({ where: { teacherId: t.id } })
+      await tx.classHighlight.deleteMany({ where: { teacherId: t.id } })
+      await tx.activityLog.updateMany({ where: { teacherId: t.id }, data: { teacherId: null } })
+      await tx.classLesson.updateMany({ where: { teacherId: t.id }, data: { teacherId: null } })
+      await tx.classGroupTeacher.deleteMany({ where: { teacherId: t.id } })
+      await tx.teacherAlert.deleteMany({ where: { teacherId: t.id } })
+      await tx.teacher.delete({ where: { id: t.id } })
+    })
   }
   results.resignedTeachers = resignedTeachers.length
 
-  // 6. 硬删除 INACTIVE 学员（已离校）
+  // 6. 硬删除 INACTIVE 学员（已离校，在事务中执行）
   const inactiveStudents = await prisma.student.findMany({ where: { status: 'INACTIVE' }, select: { id: true, parentId: true, parentUserId: true } })
   for (const s of inactiveStudents) {
-    // Order: children before parent (foreign key cascade order)
-    const parentIds = [s.parentId, s.parentUserId].filter((parentId): parentId is string => Boolean(parentId))
-    await prisma.makeupRequest.deleteMany({ where: { studentId: s.id } })
-    await prisma.attendance.deleteMany({ where: { studentId: s.id } })
-    await prisma.classHighlight.deleteMany({ where: { studentId: s.id } })
-    await prisma.dimensionScore.deleteMany({ where: { grade: { studentId: s.id } } })
-    await prisma.gradeRecord.deleteMany({ where: { studentId: s.id } })
-    await prisma.enrollment.deleteMany({ where: { studentId: s.id } })
-    await prisma.scheduleStudent.deleteMany({ where: { studentId: s.id } })
-    await prisma.learningGoal.deleteMany({ where: { studentId: s.id } })
-    await prisma.weaknessRecord.deleteMany({ where: { studentId: s.id } })
-    await prisma.fee.deleteMany({ where: { studentId: s.id } })
-    await prisma.postComment.deleteMany({ where: { post: { studentId: s.id } } })
-    await prisma.postReaction.deleteMany({ where: { post: { studentId: s.id } } })
-    await prisma.postBadge.deleteMany({ where: { post: { studentId: s.id } } })
-    await prisma.performancePost.deleteMany({ where: { studentId: s.id } })
-    await prisma.paperComment.deleteMany({ where: { paper: { studentId: s.id } } })
-    await prisma.paperReaction.deleteMany({ where: { paper: { studentId: s.id } } })
-    await prisma.paperQuestion.deleteMany({ where: { paper: { studentId: s.id } } })
-    await prisma.examPaper.deleteMany({ where: { studentId: s.id } })
-    await prisma.achievementBadge.deleteMany({ where: { studentId: s.id } })
-    const feedbacks = await prisma.classroomFeedback.findMany({ where: { studentIds: { has: s.id } }, select: { id: true, studentIds: true } })
-    for (const feedback of feedbacks) {
-      const studentIds = feedback.studentIds.filter((studentId) => studentId !== s.id)
-      if (studentIds.length) await prisma.classroomFeedback.update({ where: { id: feedback.id }, data: { studentIds } })
-      else await prisma.classroomFeedback.delete({ where: { id: feedback.id } })
-    }
-    if (parentIds.length) {
-      await prisma.notification.deleteMany({
-        where: { userId: { in: parentIds }, link: { in: ['/parent/performance', '/parent/grades', '/parent/schedule'] } },
-      })
-    }
-    await prisma.student.delete({ where: { id: s.id } })
+    await prisma.$transaction(async (tx) => {
+      const parentIds = [s.parentId, s.parentUserId].filter((parentId): parentId is string => Boolean(parentId))
+      await tx.makeupRequest.deleteMany({ where: { studentId: s.id } })
+      await tx.attendance.deleteMany({ where: { studentId: s.id } })
+      await tx.classHighlight.deleteMany({ where: { studentId: s.id } })
+      await tx.dimensionScore.deleteMany({ where: { grade: { studentId: s.id } } })
+      await tx.gradeRecord.deleteMany({ where: { studentId: s.id } })
+      await tx.enrollment.deleteMany({ where: { studentId: s.id } })
+      await tx.scheduleStudent.deleteMany({ where: { studentId: s.id } })
+      await tx.learningGoal.deleteMany({ where: { studentId: s.id } })
+      await tx.weaknessRecord.deleteMany({ where: { studentId: s.id } })
+      await tx.fee.deleteMany({ where: { studentId: s.id } })
+      await tx.postComment.deleteMany({ where: { post: { studentId: s.id } } })
+      await tx.postReaction.deleteMany({ where: { post: { studentId: s.id } } })
+      await tx.postBadge.deleteMany({ where: { post: { studentId: s.id } } })
+      await tx.performancePost.deleteMany({ where: { studentId: s.id } })
+      await tx.paperComment.deleteMany({ where: { paper: { studentId: s.id } } })
+      await tx.paperReaction.deleteMany({ where: { paper: { studentId: s.id } } })
+      await tx.paperQuestion.deleteMany({ where: { paper: { studentId: s.id } } })
+      await tx.examPaper.deleteMany({ where: { studentId: s.id } })
+      await tx.achievementBadge.deleteMany({ where: { studentId: s.id } })
+      const feedbacks = await tx.classroomFeedback.findMany({ where: { studentIds: { has: s.id } }, select: { id: true, studentIds: true } })
+      for (const feedback of feedbacks) {
+        const studentIds = feedback.studentIds.filter((studentId) => studentId !== s.id)
+        if (studentIds.length) await tx.classroomFeedback.update({ where: { id: feedback.id }, data: { studentIds } })
+        else await tx.classroomFeedback.delete({ where: { id: feedback.id } })
+      }
+      if (parentIds.length) {
+        await tx.notification.deleteMany({
+          where: { userId: { in: parentIds }, link: { in: ['/parent/performance', '/parent/grades', '/parent/schedule'] } },
+        })
+      }
+      await tx.student.delete({ where: { id: s.id } })
+    })
   }
   results.inactiveStudents = inactiveStudents.length
 

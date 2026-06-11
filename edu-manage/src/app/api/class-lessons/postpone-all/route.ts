@@ -25,7 +25,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       groupId: lesson.groupId,
       group: visibleClassGroupWhere,
       lessonDate: { gte: lesson.lessonDate },
-      status: { not: 'COMPLETED' },
+      status: { notIn: ['COMPLETED', 'CANCELLED', 'POSTPONED'] },
     },
   })
 

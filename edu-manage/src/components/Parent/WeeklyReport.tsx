@@ -39,7 +39,7 @@ export function WeeklyReport({ activeChildId }: { activeChildId?: string }) {
         setData(result)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch((error) => { console.warn('周报加载失败', error); setLoading(false) })
   }, [activeChildId])
 
   if (loading) return <Skeleton active paragraph={{ rows: 4 }} />

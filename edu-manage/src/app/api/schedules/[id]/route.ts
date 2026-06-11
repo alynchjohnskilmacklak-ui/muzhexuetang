@@ -1,93 +1,12 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { validateScheduleStudentCount } from '@/lib/schedule-class-type'
+import { checkScheduleConflicts } from '@/lib/schedule-conflicts'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
-
-async function checkScheduleConflicts({
-  teacherId,
-  roomId,
-  startTime,
-  endTime,
-  excludeScheduleId,
-}: {
-  teacherId: string
-  roomId?: string | null
-  startTime: Date
-  endTime: Date
-  excludeScheduleId?: string
-}) {
-  const conflicts: Array<{
-    id: string
-    title: string
-    startTime: string
-    endTime: string
-    teacherName: string
-    roomName?: string
-    type: 'teacher' | 'room'
-  }> = []
-
-  const teacherSchedules = await prisma.schedule.findMany({
-    where: {
-      teacherId,
-      status: { not: 'cancelled' },
-      startTime: { lt: endTime },
-      endTime: { gt: startTime },
-      ...(excludeScheduleId ? { id: { not: excludeScheduleId } } : {}),
-    },
-    include: {
-      teacher: { select: { name: true } },
-      room: { select: { name: true } },
-    },
-  })
-
-  for (const s of teacherSchedules) {
-    conflicts.push({
-      id: s.id,
-      title: s.title,
-      startTime: s.startTime.toISOString(),
-      endTime: s.endTime.toISOString(),
-      teacherName: s.teacher.name,
-      roomName: s.room?.name || undefined,
-      type: 'teacher',
-    })
-  }
-
-  if (roomId) {
-    const roomSchedules = await prisma.schedule.findMany({
-      where: {
-        roomId,
-        status: { not: 'cancelled' },
-        startTime: { lt: endTime },
-        endTime: { gt: startTime },
-        ...(excludeScheduleId ? { id: { not: excludeScheduleId } } : {}),
-      },
-      include: {
-        teacher: { select: { name: true } },
-        room: { select: { name: true } },
-      },
-    })
-
-    for (const s of roomSchedules) {
-      if (!conflicts.some(c => c.id === s.id)) {
-        conflicts.push({
-          id: s.id,
-          title: s.title,
-          startTime: s.startTime.toISOString(),
-          endTime: s.endTime.toISOString(),
-          teacherName: s.teacher.name,
-          roomName: s.room?.name || undefined,
-          type: 'room',
-        })
-      }
-    }
-  }
-
-  return conflicts
-}
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -129,7 +48,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: '结束时间必须晚于开始时间' }, { status: 400 })
     }
 
-    // Get current schedule for conflict check context
+    // Get current schedule for context
     const existing = await prisma.schedule.findUnique({
       where: { id },
       select: {
@@ -149,37 +68,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const effectiveEnd = endTime || existing.endTime
     const effectiveClassType = (classType as string | undefined) || existing.classType || 'SMALL_CLASS'
     const effectiveStudentIds = Array.isArray(studentIds)
-      ? studentIds
-      : existing.students.map((student) => student.studentId)
+      ? [...new Set(studentIds)] as string[]
+      : existing.students.map(s => s.studentId)
 
     if (effectiveEnd <= effectiveStart) {
       return NextResponse.json({ error: '结束时间必须晚于开始时间' }, { status: 400 })
-    }
-
-    // Check conflicts
-    const conflicts = await checkScheduleConflicts({
-      teacherId: effectiveTeacherId,
-      roomId: effectiveRoomId,
-      startTime: effectiveStart,
-      endTime: effectiveEnd,
-      excludeScheduleId: id,
-    })
-
-    if (conflicts.length > 0) {
-      const teacherConflicts = conflicts.filter(c => c.type === 'teacher')
-      const roomConflicts = conflicts.filter(c => c.type === 'room')
-
-      let errorMsg = ''
-      if (teacherConflicts.length > 0) {
-        errorMsg = '该老师在此时间段已有课程，不能安排'
-      } else if (roomConflicts.length > 0) {
-        errorMsg = '该教室在此时间段已被占用'
-      }
-
-      return NextResponse.json(
-        { error: errorMsg, conflicts },
-        { status: 409 }
-      )
     }
 
     const room = effectiveRoomId
@@ -194,31 +87,66 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: studentCountError }, { status: 400 })
     }
 
-    // Sync students if studentIds provided
-    if (studentIds !== undefined) {
-      // Delete old and create new
-      await prisma.scheduleStudent.deleteMany({ where: { scheduleId: id } })
-      if (effectiveStudentIds.length > 0) {
-        await prisma.scheduleStudent.createMany({
-          data: effectiveStudentIds.map((studentId: string) => ({ scheduleId: id, studentId })),
-        })
-      }
-    }
+    const s = await prisma.$transaction(async (tx) => {
+      // Re-check conflicts inside transaction
+      const conflicts = await checkScheduleConflicts({
+        teacherId: effectiveTeacherId,
+        roomId: effectiveRoomId,
+        studentIds: effectiveStudentIds,
+        startTime: effectiveStart,
+        endTime: effectiveEnd,
+        excludeScheduleId: id,
+        tx,
+      })
 
-    const s = await prisma.schedule.update({
-      where: { id },
-      data,
-      include: {
-        teacher: { select: { id: true, name: true } },
-        room: { select: { id: true, name: true, type: true, usageType: true } },
-        course: { select: { id: true, name: true, subject: true, type: true } },
-        students: { include: { student: { select: { id: true, name: true } } } },
-      },
+      if (conflicts.length > 0) {
+        const teacherConflicts = conflicts.filter(c => c.type === 'teacher')
+        const roomConflicts = conflicts.filter(c => c.type === 'room')
+        const studentConflicts = conflicts.filter(c => c.type === 'student')
+
+        let errorMsg = ''
+        if (teacherConflicts.length > 0) {
+          errorMsg = '该老师在此时间段已有课程，不能安排'
+        } else if (studentConflicts.length > 0) {
+          errorMsg = '有学员在此时间段已有排课'
+        } else if (roomConflicts.length > 0) {
+          errorMsg = '该教室在此时间段已被占用'
+        }
+
+        throw { status: 409, message: errorMsg, conflicts }
+      }
+
+      // Sync students if studentIds provided
+      if (studentIds !== undefined) {
+        await tx.scheduleStudent.deleteMany({ where: { scheduleId: id } })
+        if (effectiveStudentIds.length > 0) {
+          await tx.scheduleStudent.createMany({
+            data: effectiveStudentIds.map((sid: string) => ({ scheduleId: id, studentId: sid })),
+            skipDuplicates: true,
+          })
+        }
+      }
+
+      return tx.schedule.update({
+        where: { id },
+        data,
+        include: {
+          teacher: { select: { id: true, name: true } },
+          room: { select: { id: true, name: true, type: true, usageType: true } },
+          course: { select: { id: true, name: true, subject: true, type: true } },
+          students: { include: { student: { select: { id: true, name: true } } } },
+        },
+      })
     })
 
     revalidatePath('/schedule')
     return NextResponse.json(s)
-  } catch {
+  } catch (e: any) {
+    if (e?.status) {
+      const body: Record<string, unknown> = { error: e.message }
+      if (e.conflicts) body.conflicts = e.conflicts
+      return NextResponse.json(body, { status: e.status })
+    }
     return NextResponse.json({ error: '更新失败' }, { status: 500 })
   }
 }
@@ -230,6 +158,8 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
   const { id } = await params
+  const existing = await prisma.schedule.findUnique({ where: { id }, select: { id: true } })
+  if (!existing) return NextResponse.json({ error: '排课不存在' }, { status: 404 })
   await prisma.schedule.update({ where: { id }, data: { status: 'cancelled' } })
   revalidatePath('/schedule')
   return NextResponse.json({ success: true })

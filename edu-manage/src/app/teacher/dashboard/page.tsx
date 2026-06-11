@@ -155,7 +155,9 @@ export default function TeacherDashboardPage() {
   const { data, isLoading } = useSWR<DashboardData>('/api/teacher/dashboard', fetcher, { refreshInterval: 180_000 })
 
   useEffect(() => {
-    fetch('/api/teacher/dashboard', { method: 'POST' }).catch(() => {})
+    fetch('/api/teacher/dashboard', { method: 'POST' }).catch((error) =>
+      console.warn('教师仪表盘状态同步失败', error)
+    )
   }, [])
 
   if (isLoading) return <div style={{ textAlign: 'center', padding: 80 }}>加载中...</div>

@@ -69,6 +69,16 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   })
   if (!student) return NextResponse.json({ error: 'STUDENT_NOT_AVAILABLE' }, { status: 404 })
 
+  // Enforce maxStudents
+  if (group.maxStudents > 0) {
+    const activeCount = await prisma.enrollment.count({
+      where: { groupId: id, status: 'ACTIVE', studentId: { not: studentId } },
+    })
+    if (activeCount >= group.maxStudents) {
+      return NextResponse.json({ error: `班级人数已满（上限 ${group.maxStudents} 人）` }, { status: 409 })
+    }
+  }
+
   const existing = await prisma.enrollment.findUnique({
     where: { studentId_groupId: { studentId, groupId: id } },
   })

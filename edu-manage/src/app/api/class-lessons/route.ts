@@ -35,7 +35,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ]
   }
   if (roomId) groupWhere.roomId = roomId
-  if (courseType) groupWhere.course = { type: courseType }
+  if (courseType) groupWhere.course = { ...(groupWhere.course as object), type: courseType }
   where.group = groupWhere
 
   const lessons = await prisma.classLesson.findMany({

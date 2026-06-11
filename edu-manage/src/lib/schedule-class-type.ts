@@ -42,9 +42,14 @@ export function validateScheduleStudentCount(params: {
     if (studentCount < 1) {
       return '小班课至少需要选择 1 名学生'
     }
-    if (roomCapacity && studentCount > roomCapacity) {
+    if (roomCapacity != null && roomCapacity > 0 && studentCount > roomCapacity) {
       return `学生人数(${studentCount})超过教室容量(${roomCapacity})`
     }
+    return null
+  }
+
+  if (classType) {
+    return `无效的课程类型: ${classType}`
   }
 
   return null

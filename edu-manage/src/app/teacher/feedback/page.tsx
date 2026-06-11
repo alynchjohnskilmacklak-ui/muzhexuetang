@@ -316,7 +316,30 @@ function FeedbackPageInner() {
             </div>
           )}
           <Upload.Dragger name="file" action="/api/upload" accept="image/*" multiple maxCount={9} showUploadList={false}
-            onChange={info => { if (info.file.status === 'done') { const url = (info.file.response as { url?: string })?.url; if (url) setImageUrls(prev => [...prev, url]) } }}
+            beforeUpload={(file) => {
+              const isImage = file.type.startsWith('image/')
+              if (!isImage) { toast.warning('仅支持图片文件'); return Upload.LIST_IGNORE }
+              const maxSize = 5 * 1024 * 1024
+              if (file.size > maxSize) { toast.warning('图片大小不能超过 5MB'); return Upload.LIST_IGNORE }
+              return true
+            }}
+            onChange={info => {
+              if (info.file.status === 'uploading') return
+              if (info.file.status === 'done') {
+                const url = (info.file.response as { url?: string })?.url
+                const error = (info.file.response as { error?: string })?.error
+                if (url) {
+                  setImageUrls(prev => [...prev, url])
+                  toast.success('课堂资料上传成功')
+                } else if (error) {
+                  toast.error(`课堂资料上传失败：${error}`)
+                } else {
+                  toast.error('上传成功但未返回文件地址，请重新上传')
+                }
+              } else if (info.file.status === 'error') {
+                toast.error('课堂资料上传失败：网络错误，请重试')
+              }
+            }}
             style={{ borderRadius: 8, padding: '10px 0' }}>
             <div style={{ fontSize: 13, color: '#98A2B3' }}>点击或拖拽上传课堂照片</div>
           </Upload.Dragger>

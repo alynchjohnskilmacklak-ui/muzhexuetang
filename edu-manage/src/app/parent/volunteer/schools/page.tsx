@@ -55,7 +55,7 @@ export default function ParentSchoolsPage() {
     fetch('/api/schools')
       .then(r => r.json())
       .then(d => { setSchools(d.schools || []); setLoading(false) })
-      .catch(() => setLoading(false))
+      .catch((error) => { console.warn('学校数据加载失败', error); setLoading(false) })
   }, [])
 
   const filtered = useMemo(() => {

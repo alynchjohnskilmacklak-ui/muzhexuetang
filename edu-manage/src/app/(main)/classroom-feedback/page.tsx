@@ -430,7 +430,23 @@ export default function ClassroomFeedbackAdminPage() {
               </div>
             )}
             <Upload name="file" action="/api/upload" accept="image/*" multiple maxCount={9} showUploadList={false}
-              onChange={info => { if (info.file.status === 'done') { const url = (info.file.response as { url?: string })?.url; if (url) setComposeImages(prev => [...prev, url]) } }}>
+              beforeUpload={(file) => {
+                if (!file.type.startsWith('image/')) { message.warning('仅支持图片文件'); return Upload.LIST_IGNORE }
+                if (file.size > 5 * 1024 * 1024) { message.warning('图片大小不能超过 5MB'); return Upload.LIST_IGNORE }
+                return true
+              }}
+              onChange={info => {
+                if (info.file.status === 'uploading') return
+                if (info.file.status === 'done') {
+                  const url = (info.file.response as { url?: string })?.url
+                  const error = (info.file.response as { error?: string })?.error
+                  if (url) { setComposeImages(prev => [...prev, url]); message.success('图片上传成功') }
+                  else if (error) message.error(`图片上传失败：${error}`)
+                  else message.error('上传成功但未返回图片地址')
+                } else if (info.file.status === 'error') {
+                  message.error('图片上传失败：网络错误，请重试')
+                }
+              }}>
               <Button icon={<PlusOutlined />}>上传图片</Button>
             </Upload>
           </Form.Item>

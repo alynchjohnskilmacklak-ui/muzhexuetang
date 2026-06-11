@@ -20,7 +20,8 @@
     "check:data": "tsx scripts/check-data-integrity.ts",
     "create-admin": "tsx scripts/create-admin.ts",
     "seed:schools": "tsx scripts/seed-schools.ts",
-    "security:check": "node scripts/security-check.mjs"
+    "security:check": "node scripts/security-check.mjs",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.3",
@@ -68,10 +69,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": ">=20.9.0"

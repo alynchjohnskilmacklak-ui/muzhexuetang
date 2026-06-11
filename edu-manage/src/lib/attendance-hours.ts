@@ -11,7 +11,8 @@ export function shouldDeductAttendanceHours(status: string, courseType?: CourseT
 
   if (normalized === 'PRESENT') return true
   if (normalized === 'ABSENT') return true
-  if (isSmallClass && normalized === 'LEAVE') return true
+  // LEAVE always deducts — for one-on-one, a makeup request gives a free session later
+  if (normalized === 'LEAVE') return true
 
   return false
 }

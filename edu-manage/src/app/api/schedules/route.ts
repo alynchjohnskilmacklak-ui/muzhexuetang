@@ -1,20 +1,26 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { activeCourseWhere, visibleStudentWhere } from '@/lib/business-visibility'
+import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { validateScheduleStudentCount } from '@/lib/schedule-class-type'
+import { checkScheduleConflicts } from '@/lib/schedule-conflicts'
 import { apiHandler } from '@/lib/api-handler'
+import { detectTeacherId } from '@/lib/teacher-identity'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { searchParams } = new URL(req.url)
+
+  const role = (session.user as { role?: string }).role
+  const userId = (session.user as { id?: string }).id
+  const searchParams = new URL(req.url).searchParams
   const start = searchParams.get('startDate')
   const end = searchParams.get('endDate')
-  const teacherId = searchParams.get('teacherId')
+  const teacherIdParam = searchParams.get('teacherId')
   const classType = searchParams.get('classType')
   const includeCancelled = searchParams.get('includeCancelled') === 'true'
 
@@ -23,7 +29,32 @@ export const GET = apiHandler(async (req: NextRequest) => {
     where.status = { not: 'cancelled' }
   }
   where.course = activeCourseWhere
-  if (teacherId) where.teacherId = teacherId
+
+  // Role-based access control
+  if (role === 'admin') {
+    // Admin: may optionally filter by teacherId from URL
+    if (teacherIdParam) where.teacherId = teacherIdParam
+  } else if (role === 'teacher') {
+    // Teacher: force to own teacherId; ignore URL teacherId to prevent leaking
+    const ownTeacherId = await detectTeacherId(userId!)
+    if (!ownTeacherId) return NextResponse.json({ error: '未绑定教师身份' }, { status: 403 })
+    where.teacherId = ownTeacherId
+  } else if (role === 'parent') {
+    // Parent: schedules that include their children
+    const childIds = await prisma.student.findMany({
+      where: parentLinkedStudentWhere(userId!),
+      select: { id: true },
+    }).then(r => r.map(s => s.id))
+
+    if (childIds.length === 0) {
+      return NextResponse.json({ schedules: [], total: 0, page: 1, limit: 50 })
+    }
+
+    where.students = { some: { studentId: { in: childIds } } }
+  } else {
+    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
+
   if (classType) where.classType = classType
 
   if (start || end) {
@@ -60,88 +91,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
   return NextResponse.json({ schedules, total, page, limit })
 })
 
-async function checkScheduleConflicts({
-  teacherId,
-  roomId,
-  startTime,
-  endTime,
-  excludeScheduleId,
-}: {
-  teacherId: string
-  roomId?: string | null
-  startTime: Date
-  endTime: Date
-  excludeScheduleId?: string
-}) {
-  const conflicts: Array<{
-    id: string
-    title: string
-    startTime: string
-    endTime: string
-    teacherName: string
-    roomName?: string
-    type: 'teacher' | 'room'
-  }> = []
-
-  const teacherSchedules = await prisma.schedule.findMany({
-    where: {
-      teacherId,
-      status: { not: 'cancelled' },
-      startTime: { lt: endTime },
-      endTime: { gt: startTime },
-      ...(excludeScheduleId ? { id: { not: excludeScheduleId } } : {}),
-    },
-    include: {
-      teacher: { select: { name: true } },
-      room: { select: { name: true } },
-    },
-  })
-
-  for (const s of teacherSchedules) {
-    conflicts.push({
-      id: s.id,
-      title: s.title,
-      startTime: s.startTime.toISOString(),
-      endTime: s.endTime.toISOString(),
-      teacherName: s.teacher.name,
-      roomName: s.room?.name || undefined,
-      type: 'teacher',
-    })
-  }
-
-  if (roomId) {
-    const roomSchedules = await prisma.schedule.findMany({
-      where: {
-        roomId,
-        status: { not: 'cancelled' },
-        startTime: { lt: endTime },
-        endTime: { gt: startTime },
-        ...(excludeScheduleId ? { id: { not: excludeScheduleId } } : {}),
-      },
-      include: {
-        teacher: { select: { name: true } },
-        room: { select: { name: true } },
-      },
-    })
-
-    for (const s of roomSchedules) {
-      if (!conflicts.some(c => c.id === s.id)) {
-        conflicts.push({
-          id: s.id,
-          title: s.title,
-          startTime: s.startTime.toISOString(),
-          endTime: s.endTime.toISOString(),
-          teacherName: s.teacher.name,
-          roomName: s.room?.name || undefined,
-          type: 'room',
-        })
-      }
-    }
-  }
-
-  return conflicts
-}
-
 export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -172,84 +121,95 @@ export const POST = apiHandler(async (req: NextRequest) => {
       return NextResponse.json({ error: '结束时间必须晚于开始时间' }, { status: 400 })
     }
 
-    const normalizedStudentIds = Array.isArray(studentIds) ? studentIds : []
+    const dedupedStudentIds = [...new Set(Array.isArray(studentIds) ? studentIds : [])] as string[]
     const room = roomId
       ? await prisma.room.findUnique({ where: { id: roomId }, select: { capacity: true } })
       : null
     const studentCountError = validateScheduleStudentCount({
       classType: classType || 'SMALL_CLASS',
-      studentCount: normalizedStudentIds.length,
+      studentCount: dedupedStudentIds.length,
       roomCapacity: room?.capacity,
     })
     if (studentCountError) {
       return NextResponse.json({ error: studentCountError }, { status: 400 })
     }
 
-    // Check teacher and room conflicts
-    const conflicts = await checkScheduleConflicts({ teacherId, roomId, startTime, endTime })
-    if (conflicts.length > 0) {
-      const teacherConflicts = conflicts.filter(c => c.type === 'teacher')
-      const roomConflicts = conflicts.filter(c => c.type === 'room')
-
-      let errorMsg = ''
-      if (teacherConflicts.length > 0) {
-        errorMsg = '该老师在此时间段已有课程，不能安排'
-      } else if (roomConflicts.length > 0) {
-        errorMsg = '该教室在此时间段已被占用'
-      }
-
-      return NextResponse.json(
-        { error: errorMsg, conflicts },
-        { status: 409 }
-      )
-    }
-
-    // Ensure course exists or create a placeholder reference
-    let resolvedCourseId = courseId
-    if (!resolvedCourseId) {
-      const defaultCourse = await prisma.course.findFirst({ where: { isActive: true }, select: { id: true } })
-      if (!defaultCourse) {
-        const newCourse = await prisma.course.create({
-          data: {
-            name: title,
-            subject: '其他',
-            teacherId,
-          },
-        })
-        resolvedCourseId = newCourse.id
-      } else {
-        resolvedCourseId = defaultCourse.id
-      }
-    }
-
-    const schedule = await prisma.schedule.create({
-      data: {
-        title,
-        courseId: resolvedCourseId,
+    const schedule = await prisma.$transaction(async (tx) => {
+      // Re-check conflicts inside transaction
+      const conflicts = await checkScheduleConflicts({
         teacherId,
-        roomId: roomId || null,
+        roomId,
+        studentIds: dedupedStudentIds,
         startTime,
         endTime,
-        isRecurring: isRecurring || false,
-        recurrence: recurrence || null,
-        color: color || null,
-        notes: notes || null,
-        classType: classType || 'SMALL_CLASS',
-        students: normalizedStudentIds.length > 0
-          ? { create: normalizedStudentIds.map((studentId: string) => ({ studentId })) }
-          : undefined,
-      },
-      include: {
-        teacher: { select: { id: true, name: true } },
-        room: { select: { id: true, name: true, type: true, usageType: true } },
-        course: { select: { id: true, name: true, subject: true, type: true } },
-        students: { include: { student: { select: { id: true, name: true } } } },
-      },
+        tx,
+      })
+
+      if (conflicts.length > 0) {
+        const teacherConflicts = conflicts.filter(c => c.type === 'teacher')
+        const roomConflicts = conflicts.filter(c => c.type === 'room')
+        const studentConflicts = conflicts.filter(c => c.type === 'student')
+
+        let errorMsg = ''
+        if (teacherConflicts.length > 0) {
+          errorMsg = '该老师在此时间段已有课程，不能安排'
+        } else if (studentConflicts.length > 0) {
+          errorMsg = '有学员在此时间段已有排课'
+        } else if (roomConflicts.length > 0) {
+          errorMsg = '该教室在此时间段已被占用'
+        }
+
+        throw { status: 409, message: errorMsg, conflicts }
+      }
+
+      // Ensure course exists
+      let resolvedCourseId = courseId
+      if (!resolvedCourseId) {
+        const defaultCourse = await tx.course.findFirst({ where: { isActive: true }, select: { id: true } })
+        if (!defaultCourse) {
+          const newCourse = await tx.course.create({
+            data: { name: title, subject: '其他', teacherId },
+          })
+          resolvedCourseId = newCourse.id
+        } else {
+          resolvedCourseId = defaultCourse.id
+        }
+      }
+
+      return tx.schedule.create({
+        data: {
+          title,
+          courseId: resolvedCourseId,
+          teacherId,
+          roomId: roomId || null,
+          startTime,
+          endTime,
+          isRecurring: isRecurring || false,
+          recurrence: recurrence || null,
+          color: color || null,
+          notes: notes || null,
+          classType: classType || 'SMALL_CLASS',
+          students: dedupedStudentIds.length > 0
+            ? { create: dedupedStudentIds.map((studentId: string) => ({ studentId })) }
+            : undefined,
+        },
+        include: {
+          teacher: { select: { id: true, name: true } },
+          room: { select: { id: true, name: true, type: true, usageType: true } },
+          course: { select: { id: true, name: true, subject: true, type: true } },
+          students: { include: { student: { select: { id: true, name: true } } } },
+        },
+      })
     })
 
     revalidatePath('/schedule')
     return NextResponse.json(schedule, { status: 201 })
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.status) {
+      const body: Record<string, unknown> = { error: e.message }
+      if (e.conflicts) body.conflicts = e.conflicts
+      return NextResponse.json(body, { status: e.status })
+    }
     console.error('[schedules:create]', e)
     return NextResponse.json({ error: '创建排课失败' }, { status: 500 })
   }

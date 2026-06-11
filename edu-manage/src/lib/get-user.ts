@@ -9,6 +9,7 @@ export async function getCurrentUser() {
     email: session.user.email,
     name: session.user.name,
     role: (session.user as { role: string }).role,
+    teacherId: (session.user as { teacherId?: string | null }).teacherId ?? null,
   }
 }
 

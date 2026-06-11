@@ -44,14 +44,19 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!lesson) return NextResponse.json({ error: '课次不存在' }, { status: 404 })
 
   const group = lesson.group
-  const existingDeductedCount = await prisma.attendance.count({
-    where: { lessonId, hoursDeducted: { gt: 0 } },
-  })
-  const alreadyDeducted = !!lesson.hoursDeductedAt || existingDeductedCount > 0
-
   let processedCount = 0
     let deductedCount = 0
+    let alreadyDeducted = false
     await prisma.$transaction(async (tx) => {
+      // Check inside transaction to prevent concurrent double-deduction
+      const existingDeductedCount = await tx.attendance.count({
+        where: { lessonId, hoursDeducted: { gt: 0 } },
+      })
+      const currentLesson = await tx.classLesson.findUnique({
+        where: { id: lessonId },
+        select: { hoursDeductedAt: true },
+      })
+      alreadyDeducted = !!currentLesson?.hoursDeductedAt || existingDeductedCount > 0
       const deductedByStudent = new Map<string, number>()
       const notificationItems: Array<{
         attendanceId: string
@@ -68,7 +73,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         }
 
         const status = rec.status
-        const actualMinutes = Number(rec.actualMinutes) || null
+        const actualMinutes = rec.actualMinutes != null ? Number(rec.actualMinutes) : null
         const enrollment = await tx.enrollment.findFirst({
           where: { studentId: rec.studentId, groupId: group.id, ...activeEnrollmentWhere },
         })
@@ -116,12 +121,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
         processedCount += 1
 
         if (!alreadyDeducted && hoursToDeduct > 0) {
+          const safeDeduct = Math.min(hoursToDeduct, enrollment.remainHours)
+          if (safeDeduct <= 0) continue
           deductedCount += 1
           await tx.enrollment.update({
             where: { id: enrollment.id },
             data: {
-              usedHours: { increment: hoursToDeduct },
-              remainHours: { decrement: hoursToDeduct },
+              usedHours: { increment: safeDeduct },
+              remainHours: { decrement: safeDeduct },
             },
           })
         }

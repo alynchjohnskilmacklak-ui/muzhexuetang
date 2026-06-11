@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { Button, Card, Empty, List, message, Space, Tag, Typography } from 'antd'
 import { CheckCircleOutlined, ClockCircleOutlined, EnvironmentOutlined } from '@ant-design/icons'
+import { toast } from 'sonner'
 import { formatHours } from '@/lib/format'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -64,7 +65,15 @@ export default function TeacherAttendancePage() {
   const [students, setStudents] = useState<AttendanceStudent[]>([])
   const [attMap, setAttMap] = useState<Map<string, AttStatus>>(new Map())
   const [submitting, setSubmitting] = useState(false)
-  const [summary, setSummary] = useState({ present: 0, leave: 0, absent: 0, unmarked: 0 })
+  const summary = useMemo(() => {
+    const vals = [...attMap.values()]
+    return {
+      present: vals.filter(v => v === 'PRESENT').length,
+      leave: vals.filter(v => v === 'LEAVE').length,
+      absent: vals.filter(v => v === 'ABSENT').length,
+      unmarked: vals.filter(v => v === 'none').length,
+    }
+  }, [attMap])
 
   const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId) || lessons[0]
 
@@ -81,19 +90,8 @@ export default function TeacherAttendancePage() {
         list.forEach((student) => m.set(student.studentId, (student.status as AttStatus) || 'none'))
         setAttMap(m)
       })
-      .catch(() => message.error('学员列表加载失败'))
+      .catch((error) => toast.error(`学员列表加载失败：${error instanceof Error ? error.message : '请检查网络连接'}`))
   }, [selectedLesson?.id])
-
-  // Recalc summary whenever attMap changes
-  useEffect(() => {
-    const vals = [...attMap.values()]
-    setSummary({
-      present: vals.filter(v => v === 'PRESENT').length,
-      leave: vals.filter(v => v === 'LEAVE').length,
-      absent: vals.filter(v => v === 'ABSENT').length,
-      unmarked: vals.filter(v => v === 'none').length,
-    })
-  }, [attMap])
 
   const cycleAttendance = (studentId: string) => {
     setAttMap(prev => {
@@ -113,10 +111,12 @@ export default function TeacherAttendancePage() {
   }
 
   const [submitted, setSubmitted] = useState(false)
+  const submittingRef = { current: false }
 
   const submitAttendance = async () => {
-    if (submitting) return
-    if (!selectedLesson?.id) return
+    if (submitting || submittingRef.current) return
+    submittingRef.current = true
+    if (!selectedLesson?.id) { submittingRef.current = false; return }
     const startTime = (selectedLesson.startTime as string) || String(selectedLesson.time || '').slice(0, 5)
     const lessonDate = (selectedLesson.lessonDate as string) || new Date().toISOString()
     if (startTime && lessonDate) {
@@ -142,6 +142,7 @@ export default function TeacherAttendancePage() {
     })
     const payload = await res.json().catch(() => ({}))
     setSubmitting(false)
+    submittingRef.current = false
     if (!res.ok) { message.error(payload.error || '提交失败'); return }
     setSubmitted(true)
     mutateDashboard()
@@ -154,10 +155,10 @@ export default function TeacherAttendancePage() {
         list.forEach((student) => m.set(student.studentId, (student.status as AttStatus) || 'none'))
         setAttMap(m)
       })
-      .catch(() => {})
+      .catch((error) => toast.warning(`考勤已提交，但最新考勤列表刷新失败，请手动刷新页面。原因：${error instanceof Error ? error.message : '未知错误'}`))
     setTimeout(() => setSubmitted(false), 2000)
     if (payload.alreadyDeducted) {
-      message.success(`✅ 考勤已提交，本次课次状态已更新`, 4)
+      message.success(`✅ 考勤已更新，本次课次已结算课时`, 4)
     } else {
       message.success(`✅ 考勤已提交，本次课次状态已更新`, 4)
     }

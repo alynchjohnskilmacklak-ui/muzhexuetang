@@ -55,7 +55,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     Object.assign(where, visibleClassGroupWhere)
   }
   if (grade) {
-    where.course = { grade }
+    where.course = { ...activeCourseWhere, grade }
   }
 
   const includeAll = {
@@ -108,7 +108,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         name, courseId, teacherId: primaryTeacherId, roomId: roomId || null,
         maxStudents: maxStudents || 20,
         startDate: new Date(startDate),
-        totalLessons: totalLessons || 0,
+        totalLessons: totalLessons || 1,
         recurringDays: normalizedRecurringDays,
         lessonStartTime,
         lessonMinutes: lessonMinutes || 90,

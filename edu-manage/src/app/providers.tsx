@@ -121,7 +121,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         }}
       >
         <NextAuthProvider>{children}</NextAuthProvider>
-        <Toaster position="top-right" richColors />
+        <Toaster position="top-center" richColors style={{ zIndex: 10000 }} />
       </ConfigProvider>
     </AntdRegistry>
     </SWRConfig>

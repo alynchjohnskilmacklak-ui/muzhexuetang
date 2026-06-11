@@ -30,6 +30,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const type = String(form.get('type') || 'OTHER') as 'POLICY_DOC' | 'QUOTA_TABLE' | 'OTHER'
   if (!file) return NextResponse.json({ error: '请选择文件' }, { status: 400 })
 
+  const allowedExts = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.zip', '.rar', '.7z', '.txt', '.csv']
+  const ext = path.extname(file.name).toLowerCase()
+  if (!allowedExts.includes(ext)) {
+    return NextResponse.json({ error: '仅支持 PDF、图片、Office 文档、压缩包及文本文件' }, { status: 400 })
+  }
+  if (file.size > 20 * 1024 * 1024) {
+    return NextResponse.json({ error: '文件大小不能超过 20MB' }, { status: 400 })
+  }
+
   const bytes = Buffer.from(await file.arrayBuffer())
   const safeName = `${Date.now()}-${file.name}`.replace(/[^\w.\-\u4e00-\u9fa5]/g, '_')
   const uploadDir = path.join(process.cwd(), 'public', 'volunteer', 'docs')

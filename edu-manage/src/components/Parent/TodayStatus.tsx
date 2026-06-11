@@ -38,14 +38,17 @@ export function TodayStatus({ activeChildId }: { activeChildId?: string }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/parent/today')
+    const url = activeChildId
+      ? `/api/parent/today?childId=${activeChildId}`
+      : '/api/parent/today'
+    fetch(url)
       .then(response => response.json())
       .then(result => {
         setData(result)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
-  }, [])
+      .catch((error) => { console.warn('今日动态加载失败', error); setLoading(false) })
+  }, [activeChildId])
 
   if (loading) return <Skeleton active paragraph={{ rows: 3 }} />
   if (!data || data.students.length === 0) return null

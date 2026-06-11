@@ -16,6 +16,7 @@ model User {
   avatar      String?
   status      String   @default("active")
   wxpusherUid String?
+  teacherId   String?  @unique
   currentSessionToken String?
   lastLoginAt         DateTime?
   lastLoginIp         String?
@@ -23,6 +24,7 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  teacher                Teacher?               @relation(fields: [teacherId], references: [id])
   sessions               Session[]
   students               Student[]
   activityLogs           ActivityLog[]
@@ -111,6 +113,8 @@ model Teacher {
   ratingCount    Int       @default(0)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+
+  user               User?
 
   courses            Course[]
   schedules          Schedule[]

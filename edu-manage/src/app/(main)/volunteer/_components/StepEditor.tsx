@@ -70,9 +70,21 @@ export function StepEditor({ step, onSaved }: { step?: Step; onSaved: () => void
           accept="image/*"
           maxCount={1}
           showUploadList={false}
+          beforeUpload={(file) => {
+            if (!file.type.startsWith('image/')) { toast.warning('仅支持图片文件'); return Upload.LIST_IGNORE }
+            if (file.size > 10 * 1024 * 1024) { toast.warning('图片大小不能超过 10MB'); return Upload.LIST_IGNORE }
+            return true
+          }}
           onChange={(info) => {
-            const url = (info.file.response as { url?: string } | undefined)?.url
-            if (url) setImageUrl(url)
+            if (info.file.status === 'uploading') return
+            if (info.file.status === 'done') {
+              const url = (info.file.response as { url?: string } | undefined)?.url
+              const error = (info.file.response as { error?: string } | undefined)?.error
+              if (url) { setImageUrl(url); toast.success('截图上传成功') }
+              else if (error) toast.error(`截图上传失败：${error}`)
+            } else if (info.file.status === 'error') {
+              toast.error('截图上传失败：网络错误，请重试')
+            }
           }}
         >
           <p className="ant-upload-drag-icon"><InboxOutlined /></p>

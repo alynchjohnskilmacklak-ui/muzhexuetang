@@ -91,6 +91,11 @@
   --font-geist-mono: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', monospace;
 }
 
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   background: #faf8f5;
   color: #1a1201;
@@ -98,6 +103,10 @@ body {
   letter-spacing: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+  position: relative;
 }
 
 .ai-markdown {
@@ -601,6 +610,8 @@ body {
   body {
     max-width: 100vw;
     overflow-x: hidden;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .mobile-page-content {

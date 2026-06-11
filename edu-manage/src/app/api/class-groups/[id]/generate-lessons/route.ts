@@ -47,12 +47,21 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   const start = startDate ? new Date(startDate) : group.startDate
   const requestDays = normalizeRecurringDays(recurringDays)
   const days = requestDays.length ? requestDays : group.recurringDays
-  const mins = lessonMinutes || group.lessonMinutes
+  const mins = lessonMinutes || group.lessonMinutes || 45
   const total = totalDays || totalLessons || group.totalLessons
   const startTime = lessonStartTime || group.lessonStartTime
 
   if (!days.length) return NextResponse.json({ error: '请选择上课日期' }, { status: 400 })
+  if (!total || total <= 0) return NextResponse.json({ error: '请设置总课次数' }, { status: 400 })
+  if (total > 200) return NextResponse.json({ error: '单次最多生成 200 节课次' }, { status: 400 })
 
+  // Clean up attendances before deleting lessons (FK constraint)
+  const oldLessons = await prisma.classLesson.findMany({
+    where: { groupId: id, status: { not: 'COMPLETED' } },
+    select: { id: true },
+  })
+  const oldIds = oldLessons.map(l => l.id)
+  await prisma.attendance.deleteMany({ where: { lessonId: { in: oldIds } } })
   await prisma.classLesson.deleteMany({
     where: { groupId: id, status: { not: 'COMPLETED' } },
   })
