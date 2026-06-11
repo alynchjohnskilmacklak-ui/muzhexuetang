@@ -6,7 +6,7 @@ export default async function TeacherRouteLayout({ children }: { children: React
   return (
     <TeacherLayout initialData={{
       teacher: { id: teacher.id, name: teacher.name, avatar: teacher.avatar || undefined },
-      badges: { unsubmitted: 0, unpublished: 0, unread: 0 },
+      badges: { unsubmitted: 0, unpublished: 0, unread: 0, unreadMessages: 0 },
     }}>
       {children}
     </TeacherLayout>

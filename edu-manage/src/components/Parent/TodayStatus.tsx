@@ -188,28 +188,37 @@ export function TodayStatus({ activeChildId }: { activeChildId?: string }) {
                     </div>
                   )}
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginTop: 8 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
                     {item.todaySchedules.map(schedule => {
                       const isPast = new Date(schedule.endTime) < now
                       const isCurrent = new Date(schedule.startTime) <= now && new Date(schedule.endTime) >= now
                       const isNext = nextClass?.id === schedule.id
                       return (
                         <div key={schedule.id} style={{
-                          padding: '10px 12px',
-                          borderRadius: 10,
-                          background: isPast ? 'rgba(0,0,0,.04)' : isCurrent ? 'rgba(39,166,68,.08)' : 'rgba(232,117,69,.06)',
-                          border: `1px solid ${isPast ? 'rgba(0,0,0,.08)' : isCurrent ? 'rgba(39,166,68,.25)' : 'rgba(232,117,69,.2)'}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: '7px 10px',
+                          borderRadius: 8,
+                          background: isPast ? 'rgba(0,0,0,.03)' : isCurrent ? 'rgba(39,166,68,.07)' : 'rgba(232,117,69,.05)',
+                          border: `1px solid ${isPast ? 'rgba(0,0,0,.06)' : isCurrent ? 'rgba(39,166,68,.2)' : 'rgba(232,117,69,.15)'}`,
                         }}>
-                          <div style={{ fontSize: 11, fontWeight: 600,
-                            color: isPast ? '#c0b8ae' : isCurrent ? '#27a644' : '#E87545' }}>
-                            {isPast ? '已完成' : isCurrent ? '上课中 🟢' : isNext ? '下节课' : '待上课'}
-                          </div>
-                          <div style={{ fontSize: 13, fontWeight: 500, color: isPast ? '#c0b8ae' : '#1a1201', marginTop: 2 }}>
+                          <div style={{
+                            width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                            background: isPast ? '#c0b8ae' : isCurrent ? '#27a644' : '#E87545',
+                          }} />
+                          <div style={{ fontSize: 13, fontWeight: 500, color: isPast ? '#c0b8ae' : '#1a1201', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {schedule.courseName}
                           </div>
-                          <div style={{ fontSize: 11, color: '#9a8e7a', marginTop: 1 }}>
-                            {formatTime(schedule.startTime)}
-                            {isPast ? ' 完成' : ''}
+                          <div style={{ fontSize: 11, color: '#9a8e7a', flexShrink: 0 }}>
+                            {formatTime(schedule.startTime)}{isPast ? ' 完成' : isCurrent ? ' 上课中' : isNext ? ' 下节' : ''}
+                          </div>
+                          <div style={{ fontSize: 11, fontWeight: 600, flexShrink: 0,
+                            color: isPast ? '#c0b8ae' : isCurrent ? '#27a644' : '#E87545',
+                            background: isPast ? 'rgba(0,0,0,.04)' : isCurrent ? 'rgba(39,166,68,.1)' : 'rgba(232,117,69,.1)',
+                            padding: '1px 6px', borderRadius: 4,
+                          }}>
+                            {isPast ? '已完成' : isCurrent ? '🟢' : isNext ? '下节课' : '待上课'}
                           </div>
                         </div>
                       )

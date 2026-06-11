@@ -71,7 +71,10 @@ export function ParentDashboardClient({
   todayPaperCount?: number
   todayMeal?: any
 }) {
-  const isMobile = useIsMobile() ?? false
+  const isMobileRaw = useIsMobile()
+  const isMobile = isMobileRaw ?? false
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
   const router = useRouter()
   const searchParams = useSearchParams()
   const today = new Date()
@@ -234,12 +237,14 @@ export function ParentDashboardClient({
       {/* Sticky child switcher */}
       {students.length > 1 && (
         <div style={{
-          display: 'flex', gap: 10, marginBottom: 16,
-          overflowX: 'auto', padding: isMobile ? '12px 16px' : '4px 0',
-          position: 'sticky', top: isMobile ? 56 : 0, zIndex: 100,
+          display: 'flex', gap: 10,
+          overflowX: 'auto', padding: isMobile ? '10px 12px' : '4px 0',
+          position: 'sticky', top: 0, zIndex: 100,
           background: isMobile ? '#fff' : 'transparent',
           borderBottom: isMobile ? '1px solid rgba(0,0,0,0.05)' : 'none',
-          margin: isMobile ? '-8px -12px 20px -12px' : '0 0 16px 0',
+          marginBottom: isMobile ? 16 : 16,
+          marginLeft: isMobile ? -12 : 0,
+          marginRight: isMobile ? -12 : 0,
           WebkitOverflowScrolling: 'touch',
           scrollbarWidth: 'none',
         }}>
@@ -280,14 +285,32 @@ export function ParentDashboardClient({
         boxShadow: '0 10px 30px rgba(232,120,74,0.15)'
       }}>
         {/* Decorative background elements */}
-        <div style={{ 
-          position: 'absolute', right: -20, bottom: -20, fontSize: 160, 
-          opacity: 0.1, userSelect: 'none', filter: 'blur(1px)' 
-        }}>🌸</div>
-        <div style={{ 
-          position: 'absolute', left: '40%', top: -30, fontSize: 100, 
-          opacity: 0.05, userSelect: 'none', transform: 'rotate(15deg)' 
-        }}>⭐</div>
+        {mounted && (
+          <>
+            <div style={{
+              position: 'absolute',
+              right: -20,
+              bottom: -20,
+              fontSize: 160,
+              opacity: 0.1,
+              userSelect: 'none',
+              filter: 'blur(1px)',
+            }}>
+              {'*'}
+            </div>
+            <div style={{
+              position: 'absolute',
+              left: '40%',
+              top: -30,
+              fontSize: 100,
+              opacity: 0.05,
+              userSelect: 'none',
+              transform: 'rotate(15deg)',
+            }}>
+              {'+'}
+            </div>
+          </>
+        )}
 
         <div style={{ position: 'relative', zIndex: 1 }}>
           <Row gutter={[isMobile ? 12 : 24, 16]} align="middle" justify="space-between">
@@ -375,7 +398,7 @@ export function ParentDashboardClient({
       </div>
 
       <TodayStatus activeChildId={students.length > 1 ? activeChildId : undefined} />
-      <WeeklyReport activeChildId={students.length > 1 ? activeChildId : undefined} />
+      <WeeklyReport activeChildId={activeChildId} />
 
       <div style={{
         margin: '16px 0',

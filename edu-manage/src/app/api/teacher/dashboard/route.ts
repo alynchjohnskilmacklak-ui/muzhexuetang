@@ -18,6 +18,7 @@ export const GET = apiHandler(async () => {
         unsubmitted: dashboard.pendingTasks.unsubmittedAttendance,
         unpublished: dashboard.pendingTasks.unpublishedPapers,
         unread: dashboard.pendingTasks.unreadParentComments,
+        unreadMessages: 0,
       },
     }, {
       headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },

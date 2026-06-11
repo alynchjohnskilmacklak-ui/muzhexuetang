@@ -311,7 +311,7 @@ export function MobileLayout({
       <main
         className="mobile-page-content"
         style={{
-          paddingTop: 'calc(52px + env(safe-area-inset-top, 0px))',
+          paddingTop: 'calc(52px + env(safe-area-inset-top, 0px) + 2px)',
           paddingBottom: hasBottomTabs
             ? `calc(${TAB_BAR_HEIGHT + 26}px + max(env(safe-area-inset-bottom, 0px), 8px))`
             : 'calc(24px + max(env(safe-area-inset-bottom, 0px), 8px))',

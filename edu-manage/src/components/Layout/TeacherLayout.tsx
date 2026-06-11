@@ -37,13 +37,14 @@ const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 interface TeacherData {
   teacher: { id: string; name: string; avatar?: string | null }
-  badges: { unsubmitted: number; unpublished: number; unread: number }
+  badges: { unsubmitted: number; unpublished: number; unread: number; unreadMessages: number }
 }
 
 type NavItem = MobileNavItem & { badgeKey?: keyof TeacherData['badges'] | null }
 
 const navItems: NavItem[] = [
   { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
+  { key: '/teacher/messages', icon: <MessageOutlined />, label: '家长留言', badgeKey: 'unreadMessages' },
   { key: '/teacher/leave', icon: <CalendarOutlined />, label: '请假审批' },
   { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '我的课表' },
   { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
@@ -94,7 +95,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     if (dashData?.teacher) {
       setData({
         teacher: dashData.teacher,
-        badges: dashData.badges || { unsubmitted: 0, unpublished: 0, unread: 0 },
+        badges: dashData.badges || { unsubmitted: 0, unpublished: 0, unread: 0, unreadMessages: 0 },
       })
     }
   }, [dashData])

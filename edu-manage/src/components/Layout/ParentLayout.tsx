@@ -10,6 +10,7 @@ import {
   CheckOutlined,
   ClockCircleOutlined,
   CoffeeOutlined,
+  CommentOutlined,
   EllipsisOutlined,
   ExperimentOutlined,
   FileTextOutlined,
@@ -67,12 +68,14 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     localStorage.setItem('parent_sider_collapsed', String(collapsed))
   }, [collapsed])
 
+  const { data: msgUnreadData } = useSWR('/api/messages/unread-count', fetcher, { refreshInterval: 60_000 })
   const unread = {
     papers: Number(unreadData?.papers || 0),
     posts: Number(unreadData?.posts || 0),
     notifications: Number(unreadData?.notifications || 0),
+    messages: Number(msgUnreadData?.count || 0),
   }
-  const totalUnread = unread.papers + unread.posts + unread.notifications
+  const totalUnread = unread.papers + unread.posts + unread.notifications + unread.messages
 
   const userMenu = {
     items: [
@@ -101,6 +104,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     { key: '/parent/ai', icon: <MessageFilled />, label: 'AI 助手' },
     { key: '/parent/volunteer', icon: <ReadOutlined />, label: '志愿填报' },
     { key: '/parent/volunteer/schools', icon: <BankOutlined />, label: '学校信息' },
+    { key: '/parent/messages', icon: <CommentOutlined />, label: '我的留言', badge: unread.messages },
     { key: '/parent/bind', icon: <WechatOutlined />, label: '绑定微信' },
     { key: '/parent/profile', icon: <IdcardOutlined />, label: '个人中心' },
   ]
@@ -108,12 +112,12 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   const bottomTabs: MobileNavItem[] = [
     { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
     { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课次' },
-    { key: '/parent/volunteer/schools', icon: <BankOutlined />, label: '学校信息' },
+    { key: '/parent/messages', icon: <CommentOutlined />, label: '留言', badge: unread.messages },
     { key: '/parent/class-feedback', icon: <BookOutlined />, label: '反馈' },
-    { key: '__more', icon: <EllipsisOutlined />, label: '我的', badge: totalUnread },
+    { key: '__more', icon: <EllipsisOutlined />, label: '我的', badge: unread.papers + unread.posts + unread.notifications },
   ]
 
-  const moreItems = navItems.filter(item => !['/parent/dashboard', '/parent/schedule', '/parent/volunteer/schools', '/parent/class-feedback'].includes(item.key))
+  const moreItems = navItems.filter(item => !['/parent/dashboard', '/parent/schedule', '/parent/messages', '/parent/volunteer/schools', '/parent/class-feedback'].includes(item.key))
   const currentKey = resolveActiveKey(pathname, navItems, '/parent/dashboard')
 
   const markAllRead = async () => {

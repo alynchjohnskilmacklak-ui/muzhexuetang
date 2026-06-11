@@ -46,6 +46,7 @@ const adminNavItems = [
   { key: '/reports', icon: <BarChartOutlined />, label: '数据报表' },
   { key: '/data-admin', icon: <DatabaseOutlined />, label: '数据管理' },
   { key: '/login-records', icon: <SafetyOutlined />, label: '登录记录' },
+  { key: '/parent-messages', icon: <MessageOutlined />, label: '家长留言' },
   { key: '/volunteer', icon: <ReadOutlined />, label: '志愿填报' },
   { key: '/volunteer-sim', icon: <ExperimentOutlined />, label: '志愿模拟' },
   { key: '/volunteer-sim/schools', icon: <HomeOutlined />, label: '学校信息' },

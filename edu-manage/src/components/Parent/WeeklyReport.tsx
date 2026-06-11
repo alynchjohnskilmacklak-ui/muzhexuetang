@@ -30,9 +30,8 @@ export function WeeklyReport({ activeChildId }: { activeChildId?: string }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const url = activeChildId
-      ? `/api/parent/weekly-report?childId=${activeChildId}`
-      : '/api/parent/weekly-report'
+    if (!activeChildId) return
+    const url = `/api/parent/weekly-report?childId=${activeChildId}`
     fetch(url)
       .then(response => response.json())
       .then(result => {

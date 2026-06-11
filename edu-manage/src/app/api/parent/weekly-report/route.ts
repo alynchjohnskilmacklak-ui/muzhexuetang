@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
@@ -21,12 +21,14 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const childId = req.nextUrl.searchParams.get('childId') || ''
 
   const students = await prisma.student.findMany({
-    where: parentLinkedStudentWhere(userId),
+    where: {
+      ...parentLinkedStudentWhere(userId),
+      ...(childId ? { id: childId } : {}),
+    },
     select: { id: true, name: true, grade: true },
     orderBy: { name: 'asc' },
   })
-  const allStudentIds = students.map((student) => student.id)
-  const studentIds = childId && allStudentIds.includes(childId) ? [childId] : allStudentIds
+  const studentIds = students.map((student) => student.id)
 
   const now = new Date()
   const weekStart = new Date(now)

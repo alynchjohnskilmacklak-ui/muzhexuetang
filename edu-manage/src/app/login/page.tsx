@@ -132,7 +132,7 @@ function RightForm({
       return
     }
     if (loading) return
-    onFinish({ email, password })
+    await onFinish({ email, password })
   }
 
   return (

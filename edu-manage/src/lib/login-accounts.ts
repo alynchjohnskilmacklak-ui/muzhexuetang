@@ -25,6 +25,8 @@ type TeacherLoginAccount = {
   phone: string
 }
 
+
+type RequestMeta = { ip?: string; userAgent?: string; device?: string; os?: string; browser?: string }
 export function normalizeLoginEmail(emailInput: string) {
   return emailInput.trim().toLowerCase()
 }
@@ -50,23 +52,33 @@ export async function getLoginStatus(emailInput: string) {
   }
 }
 
-async function recordLoginFailure(email: string, failReason: LoginFailReason, userId?: string) {
+async function recordLoginFailure(email: string, failReason: LoginFailReason, userId?: string, meta?: RequestMeta) {
   await prisma.loginRecord.create({
     data: {
       userId,
       email,
       success: false,
       failReason,
+      ip: meta?.ip,
+      userAgent: meta?.userAgent,
+      device: meta?.device,
+      os: meta?.os,
+      browser: meta?.browser,
     },
   })
 }
 
-async function recordLoginSuccess(user: LoginUser) {
+async function recordLoginSuccess(user: LoginUser, meta?: RequestMeta) {
   await prisma.loginRecord.create({
     data: {
       userId: user.id,
       email: user.email,
       success: true,
+      ip: meta?.ip,
+      userAgent: meta?.userAgent,
+      device: meta?.device,
+      os: meta?.os,
+      browser: meta?.browser,
     },
   })
 }
@@ -109,11 +121,12 @@ async function validateDatabaseUser(
   expectedRole: LoginRole,
   options: { recordAttempt?: boolean; recordSuccess?: boolean },
   teacher?: TeacherLoginAccount | null,
+  meta?: RequestMeta,
 ): Promise<ValidationResult> {
   const user = await prisma.user.findUnique({ where: { email } })
 
   if (!user) {
-    if (options.recordAttempt) await recordLoginFailure(email, teacher ? 'uninitialized' : 'not_found')
+    if (options.recordAttempt) await recordLoginFailure(email, teacher ? 'uninitialized' : 'not_found', undefined, meta)
     return {
       ok: false,
       error: teacher ? '账号未初始化，请联系管理员' : '用户名输入错误',
@@ -122,28 +135,28 @@ async function validateDatabaseUser(
   }
 
   if (user.role !== expectedRole) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id)
+    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta)
     return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
   }
 
   if (user.status === 'disabled') {
-    if (options.recordAttempt) await recordLoginFailure(email, 'disabled', user.id)
+    if (options.recordAttempt) await recordLoginFailure(email, 'disabled', user.id, meta)
     return { ok: false, error: '账号已停用', code: 'DISABLED' }
   }
 
   const pwdOk = await verifyPassword(password, user.password)
   if (!pwdOk) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'wrong_password', user.id)
+    if (options.recordAttempt) await recordLoginFailure(email, 'wrong_password', user.id, meta)
     return { ok: false, error: '密码错误', code: 'BAD_PASSWORD' }
   }
 
   const loginUser = toLoginUser(user)
   if (!loginUser) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id)
+    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta)
     return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
   }
 
-  if (options.recordSuccess) await recordLoginSuccess(loginUser)
+  if (options.recordSuccess) await recordLoginSuccess(loginUser, meta)
   return { ok: true, user: loginUser }
 }
 
@@ -152,6 +165,7 @@ export async function validateLoginAccount(
   passwordInput: string,
   loginRole: LoginRole,
   options: { persistUser?: boolean; recordAttempt?: boolean; recordSuccess?: boolean } = {},
+  meta?: RequestMeta,
 ): Promise<ValidationResult> {
   const email = normalizeLoginEmail(emailInput)
   const password = passwordInput.trim()
@@ -159,7 +173,7 @@ export async function validateLoginAccount(
   if (options.recordAttempt) {
     const status = await getLoginStatus(email)
     if (status.locked) {
-      await recordLoginFailure(email, 'locked')
+      await recordLoginFailure(email, 'locked', undefined, meta)
       return { ok: false, error: '密码连续错误次数过多，账号已临时锁定，请30分钟后重试', code: 'LOCKED' }
     }
   }
@@ -167,22 +181,22 @@ export async function validateLoginAccount(
   const actualRole = await detectLoginRole(email)
 
   if (!actualRole) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'not_found')
+    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta)
     return { ok: false, error: '用户名输入错误', code: 'BAD_USERNAME' }
   }
   if (actualRole !== loginRole) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'not_found')
+    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta)
     return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
   }
 
   if (loginRole === 'teacher') {
     const teacher = await findTeacherByLoginEmail(email)
     if (!teacher) {
-      if (options.recordAttempt) await recordLoginFailure(email, 'not_found')
+      if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta)
       return { ok: false, error: '用户名输入错误', code: 'BAD_USERNAME' }
     }
-    return validateDatabaseUser(email, password, 'teacher', options, teacher)
+    return validateDatabaseUser(email, password, 'teacher', options, teacher, meta)
   }
 
-  return validateDatabaseUser(email, password, loginRole, options)
+  return validateDatabaseUser(email, password, loginRole, options, undefined, meta)
 }

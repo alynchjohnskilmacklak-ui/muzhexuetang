@@ -38,6 +38,7 @@ model User {
   mealMenus              MealMenu[]              @relation("MealMenuCreator")
   loginRecords           LoginRecord[]
   uploadedMaterials      StudyMaterial[]         @relation("MaterialUploader")
+  parentMessages         ParentMessage[]         @relation("ParentMessages")
 }
 
 model Student {
@@ -83,6 +84,7 @@ model Student {
   notifications     Notification[]
   leaveRequests     LeaveRequest[]
   mealChoices       ParentMealChoice[]
+  parentMessages    ParentMessage[]
 
   @@index([status, createdAt])
   @@index([grade])
@@ -133,6 +135,7 @@ model Teacher {
   mealReports        MealReport[]
   salaryConfigs      TeacherSalaryConfig[]
   salaryTransactions TeacherSalaryTransaction[]
+  parentMessages     ParentMessage[]            @relation("TeacherMessages")
 
   @@index([status, createdAt])
 }
@@ -1197,4 +1200,41 @@ model HighSchoolInfo {
   infoConfidence   String?   @default("unknown")
   updatedAt        DateTime @updatedAt
   updatedBy        String?
+}
+
+// ── 家长留言 ──────────────────────────────────────────────
+model ParentMessage {
+  id          String   @id @default(cuid())
+  parentId    String
+  parent      User     @relation("ParentMessages", fields: [parentId], references: [id], onDelete: Cascade)
+  studentId   String?
+  student     Student? @relation(fields: [studentId], references: [id])
+  teacherId   String?
+  teacher     Teacher? @relation("TeacherMessages", fields: [teacherId], references: [id])
+  subject     String?
+  title       String
+  status      String   @default("OPEN")   // OPEN | CLOSED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  replies     ParentMessageReply[]
+
+  @@index([parentId, createdAt])
+  @@index([teacherId, status, createdAt])
+  @@index([status, createdAt])
+}
+
+model ParentMessageReply {
+  id              String         @id @default(cuid())
+  messageId       String
+  message         ParentMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  authorId        String
+  authorName      String
+  role            String         // parent | teacher | admin
+  content         String
+  isReadByParent  Boolean        @default(false)
+  isReadByTeacher Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+
+  @@index([messageId, createdAt])
 }

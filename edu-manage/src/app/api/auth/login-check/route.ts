@@ -1,5 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { validateLoginAccount, type LoginRole } from '@/lib/login-accounts'
+import { parseUserAgent } from '@/lib/device'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -97,7 +98,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
     )
   }
 
-  const result = await validateLoginAccount(email, password, loginRole, { recordAttempt: true })
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    '未知'
+  const ua = req.headers.get('user-agent') || ''
+  const { device, os, browser } = parseUserAgent(ua)
+  const meta = { ip, userAgent: ua, device, os, browser }
+
+  const result = await validateLoginAccount(email, password, loginRole, { recordAttempt: true }, meta)
   if (!result.ok) {
     recordAccountFailure(accountKey)
     return NextResponse.json({ ok: false, error: result.error, code: result.code }, { status: 400 })
