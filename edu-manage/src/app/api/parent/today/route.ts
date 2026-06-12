@@ -49,6 +49,7 @@ export const GET = apiHandler(async () => {
       prisma.classLesson.findMany({
         where: {
           ...visibleClassLessonWhere,
+          status: { notIn: ['CANCELLED', 'POSTPONED'] },
           lessonDate: { gte: today, lt: tomorrow },
           group: {
             ...visibleClassGroupWhere,

@@ -2,94 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
-import { activeCourseWhere, visibleStudentWhere } from '@/lib/business-visibility'
-import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { validateScheduleStudentCount } from '@/lib/schedule-class-type'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { apiHandler } from '@/lib/api-handler'
-import { detectTeacherId } from '@/lib/teacher-identity'
 
 export const dynamic = 'force-dynamic'
-
-export const GET = apiHandler(async (req: NextRequest) => {
-  const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const role = (session.user as { role?: string }).role
-  const userId = (session.user as { id?: string }).id
-  const searchParams = new URL(req.url).searchParams
-  const start = searchParams.get('startDate')
-  const end = searchParams.get('endDate')
-  const teacherIdParam = searchParams.get('teacherId')
-  const classType = searchParams.get('classType')
-  const includeCancelled = searchParams.get('includeCancelled') === 'true'
-
-  const where: Record<string, unknown> = {}
-  if (!includeCancelled) {
-    where.status = { not: 'cancelled' }
-  }
-  where.course = activeCourseWhere
-
-  // Role-based access control
-  if (role === 'admin') {
-    // Admin: may optionally filter by teacherId from URL
-    if (teacherIdParam) where.teacherId = teacherIdParam
-  } else if (role === 'teacher') {
-    // Teacher: force to own teacherId; ignore URL teacherId to prevent leaking
-    const ownTeacherId = await detectTeacherId(userId!)
-    if (!ownTeacherId) return NextResponse.json({ error: '未绑定教师身份' }, { status: 403 })
-    where.teacherId = ownTeacherId
-  } else if (role === 'parent') {
-    // Parent: schedules that include their children
-    const childIds = await prisma.student.findMany({
-      where: parentLinkedStudentWhere(userId!),
-      select: { id: true },
-    }).then(r => r.map(s => s.id))
-
-    if (childIds.length === 0) {
-      return NextResponse.json({ schedules: [], total: 0, page: 1, limit: 50 })
-    }
-
-    where.students = { some: { studentId: { in: childIds } } }
-  } else {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-
-  if (classType) where.classType = classType
-
-  if (start || end) {
-    where.startTime = {}
-    if (start) (where.startTime as Record<string, unknown>).gte = new Date(start)
-    if (end) (where.startTime as Record<string, unknown>).lte = new Date(end)
-  }
-
-  const page = Math.max(1, Number(searchParams.get('page') || 1))
-  const limit = Math.min(200, Math.max(1, Number(searchParams.get('limit') || 50)))
-
-  const [schedules, total] = await Promise.all([
-    prisma.schedule.findMany({
-      where,
-      include: {
-        course: { select: { id: true, name: true, subject: true, type: true } },
-        teacher: { select: { id: true, name: true } },
-        room: { select: { id: true, name: true, type: true, usageType: true } },
-        students: {
-          where: { student: visibleStudentWhere },
-          include: { student: { select: { id: true, name: true } } },
-        },
-        attendances: {
-          select: { id: true, studentId: true, status: true },
-        },
-      },
-      orderBy: { startTime: 'asc' },
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.schedule.count({ where }),
-  ])
-
-  return NextResponse.json({ schedules, total, page, limit })
-})
 
 function calcLessonMinutes(startTimeVal: string, endTimeVal: string) {
   const [sh, sm] = startTimeVal.split(':').map(Number)

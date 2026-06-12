@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get('type') || 'ALL'
     const where: Record<string, unknown> = {
       ...teacherLessonWhere(teacher.id),
+      status: { notIn: ['CANCELLED', 'POSTPONED'] },
       ...(startDate || endDate ? {
         lessonDate: {
           ...(startDate ? { gte: new Date(`${startDate}T00:00:00`) } : {}),

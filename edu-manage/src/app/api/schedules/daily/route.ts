@@ -20,7 +20,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   const where: Record<string, unknown> = {
     lessonDate: { gte: dayStart, lte: dayEnd },
-    status: { not: 'CANCELLED' },
+    status: { notIn: ['CANCELLED', 'POSTPONED'] },
   }
   if (courseType === 'GROUP') {
     where.group = { course: { type: 'GROUP' } }

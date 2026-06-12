@@ -44,6 +44,7 @@ export async function getParentDashboardData(userId: string) {
   const todayClassLessons = await prisma.classLesson.findMany({
     where: {
       ...parentVisibleLessonWhere(userId),
+      status: { notIn: ['CANCELLED', 'POSTPONED'] },
       lessonDate: { gte: todayStart, lt: todayEnd },
     },
     include: {
