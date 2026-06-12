@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { resolveTeacherForUser } from '@/lib/performance'
-import { AttStatus } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -100,77 +99,3 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   return NextResponse.json(result)
 })
-
-export async function POST(req: NextRequest) {
-  const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if ((session.user as { role?: string }).role !== 'admin') {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-
-  try {
-    const body = await req.json()
-    const { scheduleId, records } = body as {
-      scheduleId: string
-      records: { studentId: string; status: string; notes?: string }[]
-    }
-
-    if (!scheduleId || !records?.length) {
-      return NextResponse.json({ error: '缺少排课ID或考勤记录' }, { status: 400 })
-    }
-
-    const schedule = await prisma.schedule.findFirst({
-      where: { id: scheduleId, status: { not: 'cancelled' } },
-      include: {
-        students: true,
-      },
-    })
-    if (!schedule) return NextResponse.json({ error: '排课不存在或已取消' }, { status: 404 })
-
-    const statusMap: Record<string, AttStatus> = {
-      present: AttStatus.PRESENT,
-      leave: AttStatus.LEAVE,
-      absent: AttStatus.ABSENT,
-      late: AttStatus.PRESENT,
-    }
-    const validStatuses = Object.keys(statusMap)
-    for (const rec of records) {
-      if (!validStatuses.includes(rec.status)) {
-        return NextResponse.json({ error: `无效的考勤状态: ${rec.status}` }, { status: 400 })
-      }
-    }
-
-    const validStudentIds = schedule.students.map((s) => s.studentId)
-    for (const rec of records) {
-      if (!validStudentIds.includes(rec.studentId)) {
-        return NextResponse.json({ error: `学生 ${rec.studentId} 不在本课程中` }, { status: 400 })
-      }
-    }
-
-    // Upsert each record
-    for (const rec of records) {
-      const status = statusMap[rec.status]
-      await prisma.attendance.upsert({
-        where: {
-          scheduleId_studentId: {
-            scheduleId,
-            studentId: rec.studentId,
-          },
-        },
-        update: {
-          status,
-        },
-        create: {
-          scheduleId,
-          studentId: rec.studentId,
-          status,
-        },
-      })
-    }
-
-    return NextResponse.json({ success: true })
-  } catch (e) {
-    console.error('[attendance:submit]', e)
-    return NextResponse.json({ error: '考勤保存失败' }, { status: 500 })
-  }
-}
