@@ -67,9 +67,7 @@ export const GET = apiHandler(async () => {
   const [
     totalStudents,
     lastMonthStudents,
-    monthlySchedules,
     monthlyClassLessons,
-    todaySchedules,
     todayClassLessons,
     activityLogs,
     activeGroups,
@@ -87,10 +85,6 @@ export const GET = apiHandler(async () => {
   ] = await Promise.all([
     prisma.student.count({ where: { status: 'ACTIVE' } }),
     prisma.student.count({ where: { status: 'ACTIVE', createdAt: { lt: monthStart } } }),
-    prisma.schedule.findMany({
-      where: { startTime: { gte: monthStart, lt: monthEnd }, status: { not: 'cancelled' }, course: { isActive: true } },
-      select: { startTime: true, endTime: true },
-    }),
     prisma.classLesson.findMany({
       where: {
         lessonDate: { gte: monthStart, lt: monthEnd },
@@ -98,16 +92,6 @@ export const GET = apiHandler(async () => {
         group: visibleClassGroupWhere,
       },
       select: { startTime: true, endTime: true, lessonDate: true, group: { select: { lessonMinutes: true } } },
-    }),
-    prisma.schedule.findMany({
-      where: { startTime: { gte: today, lt: todayEnd }, status: { not: 'cancelled' }, course: { isActive: true } },
-      include: {
-        teacher: true,
-        course: true,
-        room: true,
-        students: { where: { student: visibleStudentWhere } },
-      },
-      orderBy: { startTime: 'asc' },
     }),
     prisma.classLesson.findMany({
       where: {
@@ -167,12 +151,11 @@ export const GET = apiHandler(async () => {
     }),
   ])
 
-  const scheduleHours = monthlySchedules.reduce((sum, schedule) => sum + hoursBetween(schedule.startTime, schedule.endTime), 0)
   const classLessonHours = monthlyClassLessons.reduce((sum, lesson) => {
     if (lesson.group.lessonMinutes > 0) return sum + lesson.group.lessonMinutes / 60
     return sum + hoursBetween(combineLessonDateTime(lesson.lessonDate, lesson.startTime), combineLessonDateTime(lesson.lessonDate, lesson.endTime))
   }, 0)
-  const monthlyScheduledHours = roundHours(scheduleHours + classLessonHours)
+  const monthlyScheduledHours = roundHours(classLessonHours)
   const monthlyDeductedHours = roundHours(monthlyDeducted._sum.hoursDeducted ?? 0)
 
   const teacherWorkloadMap = new Map<string, { name: string; hours: number; students: Set<string> }>()
@@ -212,27 +195,13 @@ export const GET = apiHandler(async () => {
     }
   })
 
-  const legacySchedules = todaySchedules.map((schedule) => ({
-    id: schedule.id,
-    source: 'schedule' as const,
-    time: `${formatTime(schedule.startTime)}-${formatTime(schedule.endTime)}`,
-    startTime: schedule.startTime.toISOString(),
-    endTime: schedule.endTime.toISOString(),
-    courseName: schedule.title || schedule.course.name,
-    teacher: schedule.teacher.name,
-    room: schedule.room?.name ?? schedule.roomId ?? '-',
-    subject: schedule.course.subject,
-    students: schedule.students.length,
-    statusLabel: getStatusLabel(schedule.startTime, schedule.endTime, schedule.attendanceSubmittedAt),
-  }))
-
   const minuteOfDay = (item: { time: string; startTime: string }) => {
     const m = item.time.match(/^(\d{1,2}):(\d{2})/)
     if (m) return parseInt(m[1], 10) * 60 + parseInt(m[2], 10)
     const d = new Date(item.startTime)
     return d.getHours() * 60 + d.getMinutes()
   }
-  const schedules = [...classLessonSchedules, ...legacySchedules].sort((a, b) => minuteOfDay(a) - minuteOfDay(b))
+  const schedules = classLessonSchedules.sort((a, b) => minuteOfDay(a) - minuteOfDay(b))
   const todayLessonsCompleted = schedules.filter((item) => item.statusLabel === '已完成').length
   const todayLessonsPendingAttendance = schedules.filter((item) => item.statusLabel === '待考勤').length
   const unreadComments = unreadParentComments + unreadPerformanceComments

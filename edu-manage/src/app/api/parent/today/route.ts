@@ -8,7 +8,6 @@ import {
   visibleClassGroupWhere,
   visibleClassLessonWhere,
   visibleNotificationWhere,
-  visibleScheduleWhere,
   visibleTeacherWhere,
 } from '@/lib/business-visibility'
 
@@ -46,21 +45,7 @@ export const GET = apiHandler(async () => {
   const day = today.getDay()
   weekStart.setDate(today.getDate() - (day === 0 ? 6 : day - 1))
 
-  const [scheduleRows, classLessonRows, attendanceRows, notificationRows, leaveRows] = await Promise.all([
-      prisma.schedule.findMany({
-        where: {
-          ...visibleScheduleWhere,
-          startTime: { gte: today, lt: tomorrow },
-          students: { some: { studentId: { in: studentIds } } },
-        },
-        include: {
-          course: { select: { name: true, subject: true } },
-          room: { select: { name: true } },
-          teacher: { select: { name: true } },
-          students: { where: { studentId: { in: studentIds } }, select: { studentId: true } },
-        },
-        orderBy: { startTime: 'asc' },
-      }),
+  const [classLessonRows, attendanceRows, notificationRows, leaveRows] = await Promise.all([
       prisma.classLesson.findMany({
         where: {
           ...visibleClassLessonWhere,
@@ -119,15 +104,6 @@ export const GET = apiHandler(async () => {
       }),
     ])
 
-  const schedulesByStudent = new Map<string, typeof scheduleRows>()
-  scheduleRows.forEach((schedule) => {
-    schedule.students.forEach(({ studentId }) => {
-      const items = schedulesByStudent.get(studentId) || []
-      items.push(schedule)
-      schedulesByStudent.set(studentId, items)
-    })
-  })
-
   const classLessonsByStudent = new Map<string, typeof classLessonRows>()
   classLessonRows.forEach((lesson) => {
     lesson.group.enrollments.forEach(({ studentId }) => {
@@ -159,20 +135,9 @@ export const GET = apiHandler(async () => {
     return d.getHours() * 60 + d.getMinutes()
   }
   const results = students.map((student) => {
-    const todaySchedules = schedulesByStudent.get(student.id) || []
     const todayClassLessons = classLessonsByStudent.get(student.id) || []
     const attendance = attendanceByStudent.get(student.id) || []
     const unreadCount = unreadCounts.get(student.id) || 0
-
-    const scheduleItems = todaySchedules.map((schedule) => ({
-      id: schedule.id,
-      courseName: schedule.course?.name || schedule.title,
-      subject: schedule.course?.subject || '',
-      teacherName: schedule.teacher?.name || '',
-      roomName: schedule.room?.name || '',
-      startTime: schedule.startTime.toISOString(),
-      endTime: schedule.endTime.toISOString(),
-    }))
 
     const lessonItems = todayClassLessons.map((lesson) => {
       return {
@@ -193,7 +158,7 @@ export const GET = apiHandler(async () => {
         grade: student.grade,
         mainTeacherName: student.mainTeacher?.name || '未分配',
       },
-      todaySchedules: [...scheduleItems, ...lessonItems].sort((a, b) => minuteOfDay(a) - minuteOfDay(b)),
+      todaySchedules: lessonItems.sort((a, b) => minuteOfDay(a) - minuteOfDay(b)),
       attendance: attendance.map((item) => ({
         status: item.status,
         createdAt: item.createdAt.toISOString(),

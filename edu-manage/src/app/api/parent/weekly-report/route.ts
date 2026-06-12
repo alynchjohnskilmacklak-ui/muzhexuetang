@@ -8,7 +8,6 @@ import {
   visibleClassGroupWhere,
   visibleClassLessonWhere,
   visibleNotificationWhere,
-  visibleScheduleWhere,
   visibleTeacherWhere,
 } from '@/lib/business-visibility'
 
@@ -38,15 +37,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const weekEnd = new Date(weekStart)
   weekEnd.setDate(weekStart.getDate() + 7)
 
-  const [schedules, classLessons, attendanceRows, gradeRows, notificationRows, leaveRows] = await Promise.all([
-      prisma.schedule.findMany({
-        where: {
-          ...visibleScheduleWhere,
-          startTime: { gte: weekStart, lt: weekEnd },
-          students: { some: { studentId: { in: studentIds } } },
-        },
-        select: { students: { where: { studentId: { in: studentIds } }, select: { studentId: true } } },
-      }),
+  const [classLessons, attendanceRows, gradeRows, notificationRows, leaveRows] = await Promise.all([
       prisma.classLesson.findMany({
         where: {
           ...visibleClassLessonWhere,
@@ -109,13 +100,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
       }),
     ])
 
-  const scheduleCounts = new Map<string, number>()
-  schedules.forEach((schedule) => {
-    schedule.students.forEach(({ studentId }) => {
-      scheduleCounts.set(studentId, (scheduleCounts.get(studentId) || 0) + 1)
-    })
-  })
-
   const classLessonCounts = new Map<string, number>()
   classLessons.forEach((lesson) => {
     lesson.group.enrollments.forEach(({ studentId }) => {
@@ -148,14 +132,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
   })
 
   const reports = students.map((student) => {
-    const scheduleCount = scheduleCounts.get(student.id) || 0
     const classLessonCount = classLessonCounts.get(student.id) || 0
     const attendanceList = attendanceByStudent.get(student.id) || []
     const grades = gradesByStudent.get(student.id) || []
     const notificationCount = notificationCounts.get(student.id) || 0
     const leaveCount = leaveCounts.get(student.id) || 0
 
-    const totalSchedules = scheduleCount + classLessonCount
+    const totalSchedules = classLessonCount
     const presentCount = attendanceList.filter(item => item.status === 'PRESENT').length
     const absentCount = attendanceList.filter(item => item.status === 'ABSENT').length
     const lateCount = 0

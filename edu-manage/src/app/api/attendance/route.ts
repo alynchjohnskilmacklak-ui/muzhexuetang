@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
+import { resolveTeacherForUser } from '@/lib/performance'
 import { AttStatus } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
@@ -10,29 +11,48 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const role = (session.user as { role?: string }).role
+  const userId = (session.user as { id?: string }).id
+
   const { searchParams } = new URL(req.url)
   const dateStr = searchParams.get('date') || new Date().toISOString().slice(0, 10)
-  const teacherId = searchParams.get('teacherId')
+  const teacherIdParam = searchParams.get('teacherId')
   const classType = searchParams.get('classType')
 
   const dayStart = new Date(`${dateStr}T00:00:00`)
   const dayEnd = new Date(`${dateStr}T23:59:59`)
 
   const where: Record<string, unknown> = {
-    status: { not: 'cancelled' },
-    startTime: { gte: dayStart, lte: dayEnd },
+    status: { notIn: ['CANCELLED', 'POSTPONED'] },
+    lessonDate: { gte: dayStart, lt: dayEnd },
   }
-  if (teacherId) where.teacherId = teacherId
-  if (classType) where.classType = classType
 
-  const schedules = await prisma.schedule.findMany({
+  // Role-based access control
+  if (role === 'admin') {
+    if (teacherIdParam) where.teacherId = teacherIdParam
+  } else if (role === 'teacher') {
+    const teacher = await resolveTeacherForUser(session.user as { id: string; email?: string | null; name?: string | null; role?: string | null })
+    if (!teacher) return NextResponse.json({ error: '未绑定教师身份' }, { status: 403 })
+    where.teacherId = teacher.id
+  } else {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  if (classType) where.group = { course: { type: classType } }
+
+  const lessons = await prisma.classLesson.findMany({
     where,
     include: {
       teacher: { select: { id: true, name: true } },
-      room: { select: { id: true, name: true, type: true, usageType: true } },
-      course: { select: { id: true, name: true, subject: true, type: true } },
-      students: {
-        include: { student: { select: { id: true, name: true } } },
+      group: {
+        include: {
+          course: { select: { id: true, name: true, subject: true, type: true, color: true } },
+          teacher: { select: { id: true, name: true } },
+          room: { select: { id: true, name: true, type: true, usageType: true } },
+          enrollments: {
+            include: { student: { select: { id: true, name: true } } },
+          },
+        },
       },
       attendances: {
         select: { id: true, studentId: true, status: true },
@@ -41,33 +61,36 @@ export const GET = apiHandler(async (req: NextRequest) => {
     orderBy: { startTime: 'asc' },
   })
 
-  const result = schedules.map((s) => {
-    const allDone = s.students.length > 0 && s.students.every(
-      (ss) => s.attendances.some((a) => a.studentId === ss.studentId)
+  const result = lessons.map((lesson) => {
+    const enrollments = lesson.group.enrollments
+    const allDone = enrollments.length > 0 && enrollments.every(
+      (enr) => lesson.attendances.some((a) => a.studentId === enr.studentId)
     )
+    const startTime = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T${lesson.startTime}:00`)
+    const endTime = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T${lesson.endTime}:00`)
     return {
-      id: s.id,
-      title: s.title,
-      startTime: s.startTime.toISOString(),
-      endTime: s.endTime.toISOString(),
-      status: s.status,
-      classType: s.classType,
-      color: s.color,
-      teacherId: s.teacherId,
-      teacherName: s.teacher.name,
-      roomId: s.roomId,
-      roomName: s.room?.name || '未分配',
-      roomType: s.room?.type,
-      roomUsageType: s.room?.usageType,
-      courseName: s.course.name,
-      courseSubject: s.course.subject,
-      courseType: s.course.type,
-      students: s.students.map((ss) => ({
-        studentId: ss.studentId,
-        studentName: ss.student.name,
+      id: lesson.id,
+      title: lesson.group.name || lesson.group.course?.name || '-',
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+      status: lesson.status,
+      classType: lesson.group.course?.type || null,
+      color: lesson.group.course?.color || null,
+      teacherId: lesson.teacherId,
+      teacherName: lesson.teacher?.name || lesson.group.teacher?.name || '未分配',
+      roomId: lesson.group.roomId,
+      roomName: lesson.group.room?.name || '未分配',
+      roomType: lesson.group.room?.type || null,
+      roomUsageType: lesson.group.room?.usageType || null,
+      courseName: lesson.group.course?.name || '-',
+      courseSubject: lesson.group.course?.subject || '',
+      courseType: lesson.group.course?.type || null,
+      students: enrollments.map((enr) => ({
+        studentId: enr.studentId,
+        studentName: enr.student.name,
       })),
-      studentCount: s.students.length,
-      attendances: s.attendances.map((a) => ({
+      studentCount: enrollments.length,
+      attendances: lesson.attendances.map((a) => ({
         studentId: a.studentId,
         status: a.status,
       })),

@@ -162,24 +162,18 @@ export const POST = apiHandler(async (req: NextRequest) => {
         throw { status: 409, message: errorMsg, conflicts }
       }
 
-      // Ensure course exists
-      let resolvedCourseId = courseId
-      if (!resolvedCourseId) {
-        const defaultCourse = await tx.course.findFirst({ where: { isActive: true }, select: { id: true } })
-        if (!defaultCourse) {
-          const newCourse = await tx.course.create({
-            data: { name: title, subject: '其他', teacherId },
-          })
-          resolvedCourseId = newCourse.id
-        } else {
-          resolvedCourseId = defaultCourse.id
-        }
-      }
+      // 课程必须前端明确指定，禁止自动挂默认课程（否则课程归属/科目/薪资全错）
+      if (!courseId) throw new Error('MISSING_COURSE_ID')
+      const courseExists = await tx.course.findFirst({
+        where: { id: courseId, isActive: true },
+        select: { id: true },
+      })
+      if (!courseExists) throw new Error('INVALID_COURSE')
 
       return tx.schedule.create({
         data: {
           title,
-          courseId: resolvedCourseId,
+          courseId,
           teacherId,
           roomId: roomId || null,
           startTime,
@@ -209,6 +203,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
       const body: Record<string, unknown> = { error: e.message }
       if (e.conflicts) body.conflicts = e.conflicts
       return NextResponse.json(body, { status: e.status })
+    }
+    if (e?.message === 'MISSING_COURSE_ID') {
+      return NextResponse.json({ error: '请先选择课程' }, { status: 400 })
+    }
+    if (e?.message === 'INVALID_COURSE') {
+      return NextResponse.json({ error: '所选课程不存在或已停用' }, { status: 400 })
     }
     console.error('[schedules:create]', e)
     return NextResponse.json({ error: '创建排课失败' }, { status: 500 })

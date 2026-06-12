@@ -9,7 +9,6 @@ import {
   parentVisiblePerformancePostWhere,
   visibleClassroomFeedbackWhere,
   visibleNotificationWhere,
-  visibleScheduleWhere,
   visibleTeacherWhere,
 } from '@/lib/business-visibility'
 
@@ -41,51 +40,6 @@ export async function getParentDashboardData(userId: string) {
   const todayEnd = new Date(todayStart.getTime() + 86400000)
   const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
   const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 1)
-
-  const todaySchedules = await prisma.schedule.findMany({
-    where: {
-      ...visibleScheduleWhere,
-      startTime: { gte: todayStart, lt: todayEnd },
-      students: { some: { student: parentLinkedStudentWhere(userId) } },
-    },
-    include: {
-      course: { select: { id: true, name: true, subject: true } },
-      teacher: { select: { id: true, name: true } },
-      room: { select: { id: true, name: true } },
-      students: { include: { student: { select: { id: true, name: true, parentId: true, parentUserId: true } } } },
-    },
-    orderBy: { startTime: 'asc' },
-  })
-
-  const filteredTodaySchedules = todaySchedules.map((schedule) => ({
-    id: schedule.id,
-    title: schedule.title || schedule.course?.name || '-',
-    startTime: schedule.startTime.toISOString(),
-    endTime: schedule.endTime.toISOString(),
-    teacherName: schedule.teacher?.name || null,
-    roomName: schedule.room?.name || null,
-    studentIds: schedule.students
-      .filter((item) => item.student.parentId === userId || item.student.parentUserId === userId)
-      .map((item) => item.student.id),
-    studentNames: schedule.students
-      .filter((item) => item.student.parentId === userId || item.student.parentUserId === userId)
-      .map((item) => item.student.name),
-    attendanceSubmittedAt: schedule.attendanceSubmittedAt?.toISOString() || null,
-    classType: schedule.classType,
-  }))
-
-  for (const schedule of todaySchedules) {
-    if (!schedule.teacher?.name) continue
-    for (const item of schedule.students) {
-      if (item.student.parentId === userId || item.student.parentUserId === userId) {
-        const studentId = item.student.id
-        if (!studentTeachers[studentId]) studentTeachers[studentId] = []
-        if (!studentTeachers[studentId].includes(schedule.teacher.name)) {
-          studentTeachers[studentId].push(schedule.teacher.name)
-        }
-      }
-    }
-  }
 
   const todayClassLessons = await prisma.classLesson.findMany({
     where: {
@@ -229,7 +183,7 @@ export async function getParentDashboardData(userId: string) {
   return {
     students,
     studentTeachers,
-    todaySchedules: filteredTodaySchedules,
+    todaySchedules: [],
     todayClassLessons: filteredTodayClassLessons,
     notifications,
     latestPost,

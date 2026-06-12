@@ -2,9 +2,10 @@ interface Bucket { count: number; resetAt: number }
 const buckets = new Map<string, Bucket>()
 
 const RATE_RULES: Array<{ prefix: string; rpm: number }> = [
-  { prefix: '/api/auth/detect-role',           rpm: 10  },
+  { prefix: '/api/auth/detect-role',           rpm: 5   },
   { prefix: '/api/auth/login-check',           rpm: 20  },
   { prefix: '/api/ai',                         rpm: 10  },
+  { prefix: '/api/exam-papers/recognize',      rpm: 6   },
   { prefix: '/api/class-groups',               rpm: 20  },
   { prefix: '/api/attendance/submit',          rpm: 20  },
   { prefix: '/api/admin/attendance',           rpm: 20  },

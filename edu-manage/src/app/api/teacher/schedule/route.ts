@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = req.nextUrl
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
-    const type = searchParams.get('type') || 'GROUP'
+    const type = searchParams.get('type') || 'ALL'
     const where: Record<string, unknown> = {
       ...teacherLessonWhere(teacher.id),
       ...(startDate || endDate ? {
@@ -21,7 +21,9 @@ export async function GET(req: NextRequest) {
         },
       } : {}),
     }
-    if (type === 'GROUP') {
+    if (type === 'ALL') {
+      // 不加 course.type 过滤，返回该教师全部课次
+    } else if (type === 'GROUP') {
       where.group = { ...(where.group as Record<string, unknown> || {}), course: { type: 'GROUP' } }
     } else if (type === 'INTENSIVE') {
       where.group = { ...(where.group as Record<string, unknown> || {}), course: { type: { in: ['ONE_ON_ONE', 'SMALL_GROUP'] } } }

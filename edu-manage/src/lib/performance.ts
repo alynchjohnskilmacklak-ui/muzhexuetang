@@ -43,15 +43,25 @@ export const RATING_LABELS = {
 
 export async function resolveTeacherForUser(user: { id: string; email?: string | null; name?: string | null; role?: string | null }) {
   const loginEmail = user.email?.toLowerCase() || ''
-  const teacher = await prisma.teacher.findFirst({
-    where: {
-      status: { not: 'RESIGNED' },
-      OR: [
-        user.email ? { email: user.email } : {},
-        user.name ? { name: user.name } : {},
-      ].filter((item) => Object.keys(item).length > 0),
-    },
+
+  // 最高优先级：通过 User.teacherId 直接绑定（唯一、准确，杜绝姓名误匹配）
+  const boundUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { teacherId: true },
   })
+  if (boundUser?.teacherId) {
+    const bound = await prisma.teacher.findFirst({
+      where: { id: boundUser.teacherId, status: { not: 'RESIGNED' } },
+    })
+    if (bound) return bound
+  }
+
+  // 次优先：精确邮箱匹配（不再用姓名兜底，避免同名张冠李戴）
+  const teacher = user.email
+    ? await prisma.teacher.findFirst({
+        where: { status: { not: 'RESIGNED' }, email: user.email },
+      })
+    : null
 
   if (teacher) return teacher
   if (loginEmail.endsWith('@tea.com')) {
