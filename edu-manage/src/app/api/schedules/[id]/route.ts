@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
-import { validateScheduleStudentCount } from '@/lib/schedule-class-type'
-import { checkScheduleConflicts } from '@/lib/schedule-conflicts'
+import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -19,135 +18,135 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const body = await req.json()
     const {
-      title, teacherId, roomId, startDate, startTimeVal, endTimeVal,
-      status, color, notes, classType, studentIds,
+      teacherId, roomId, startDate, startTimeVal, endTimeVal,
+      status, notes, studentIds,
     } = body
 
-    const data: Record<string, unknown> = {}
-    if (title !== undefined) data.title = title
-    if (teacherId !== undefined) data.teacherId = teacherId
-    if (roomId !== undefined) data.roomId = roomId || null
-    if (status !== undefined) data.status = status
-    if (color !== undefined) data.color = color
-    if (notes !== undefined) data.notes = notes
-    if (classType !== undefined) data.classType = classType
-
-    let startTime: Date | undefined
-    let endTime: Date | undefined
-
-    if (startDate && startTimeVal) {
-      startTime = new Date(`${startDate}T${startTimeVal}:00`)
-      if (!isNaN(startTime.getTime())) data.startTime = startTime
-    }
-    if (startDate && endTimeVal) {
-      endTime = new Date(`${startDate}T${endTimeVal}:00`)
-      if (!isNaN(endTime.getTime())) data.endTime = endTime
-    }
-
-    if (startTime && endTime && endTime <= startTime) {
-      return NextResponse.json({ error: '结束时间必须晚于开始时间' }, { status: 400 })
-    }
-
-    // Get current schedule for context
-    const existing = await prisma.schedule.findUnique({
+    const existing = await prisma.classLesson.findUnique({
       where: { id },
       select: {
         teacherId: true,
-        roomId: true,
+        lessonDate: true,
         startTime: true,
         endTime: true,
-        classType: true,
-        students: { select: { studentId: true } },
+        status: true,
+        groupId: true,
+        group: {
+          select: {
+            roomId: true,
+            enrollments: { where: { status: 'ACTIVE' }, select: { studentId: true } },
+          },
+        },
       },
     })
-    if (!existing) return NextResponse.json({ error: '排课不存在' }, { status: 404 })
+    if (!existing) return NextResponse.json({ error: '课次不存在' }, { status: 404 })
 
-    const effectiveTeacherId = (teacherId as string) || existing.teacherId
-    const effectiveRoomId = roomId !== undefined ? (roomId || null) : existing.roomId
-    const effectiveStart = startTime || existing.startTime
-    const effectiveEnd = endTime || existing.endTime
-    const effectiveClassType = (classType as string | undefined) || existing.classType || 'SMALL_CLASS'
-    const effectiveStudentIds = Array.isArray(studentIds)
+    const effectiveTeacherId = teacherId || existing.teacherId
+    const effectiveDate = startDate || existing.lessonDate.toISOString().slice(0, 10)
+    const effectiveStart = startTimeVal || existing.startTime
+    const effectiveEnd = endTimeVal || existing.endTime
+    const effectiveStudentIds: string[] = Array.isArray(studentIds)
       ? [...new Set(studentIds)] as string[]
-      : existing.students.map(s => s.studentId)
+      : existing.group.enrollments.map(e => e.studentId)
 
-    if (effectiveEnd <= effectiveStart) {
+    if (effectiveStart >= effectiveEnd) {
       return NextResponse.json({ error: '结束时间必须晚于开始时间' }, { status: 400 })
     }
 
-    const room = effectiveRoomId
-      ? await prisma.room.findUnique({ where: { id: effectiveRoomId }, select: { capacity: true } })
-      : null
-    const studentCountError = validateScheduleStudentCount({
-      classType: effectiveClassType,
-      studentCount: effectiveStudentIds.length,
-      roomCapacity: room?.capacity,
-    })
-    if (studentCountError) {
-      return NextResponse.json({ error: studentCountError }, { status: 400 })
-    }
-
-    const s = await prisma.$transaction(async (tx) => {
-      // Re-check conflicts inside transaction
-      const conflicts = await checkScheduleConflicts({
+    // Conflict check against ClassLesson
+    const allConflicts: Array<{ type: string; lessonId: string; courseName: string; timeRange: string }> = []
+    for (const sid of effectiveStudentIds.length > 0 ? effectiveStudentIds : [effectiveTeacherId]) {
+      const conflicts = await checkScheduleConflict({
         teacherId: effectiveTeacherId,
-        roomId: effectiveRoomId,
-        studentIds: effectiveStudentIds,
+        studentId: effectiveStudentIds.includes(sid) ? sid : undefined,
+        roomId: roomId !== undefined ? (roomId || undefined) : (existing.group.roomId || undefined),
+        date: effectiveDate,
         startTime: effectiveStart,
         endTime: effectiveEnd,
-        excludeScheduleId: id,
-        tx,
+        excludeLessonId: id,
       })
-
-      if (conflicts.length > 0) {
-        const teacherConflicts = conflicts.filter(c => c.type === 'teacher')
-        const roomConflicts = conflicts.filter(c => c.type === 'room')
-        const studentConflicts = conflicts.filter(c => c.type === 'student')
-
-        let errorMsg = ''
-        if (teacherConflicts.length > 0) {
-          errorMsg = '该老师在此时间段已有课程，不能安排'
-        } else if (studentConflicts.length > 0) {
-          errorMsg = '有学员在此时间段已有排课'
-        } else if (roomConflicts.length > 0) {
-          errorMsg = '该教室在此时间段已被占用'
+      for (const c of conflicts) {
+        if (!allConflicts.some(e => e.lessonId === c.lessonId && e.type === c.type)) {
+          allConflicts.push(c)
         }
+      }
+    }
 
-        throw { status: 409, message: errorMsg, conflicts }
+    if (allConflicts.length > 0) {
+      return NextResponse.json({ error: '时间冲突', conflicts: allConflicts }, { status: 409 })
+    }
+
+    const lesson = await prisma.$transaction(async (tx) => {
+      // Update lesson fields
+      const lessonData: Record<string, unknown> = {}
+      if (teacherId !== undefined) lessonData.teacherId = teacherId
+      if (status !== undefined) lessonData.status = status
+      if (notes !== undefined) lessonData.note = notes
+      if (startDate) lessonData.lessonDate = new Date(`${effectiveDate}T00:00:00`)
+      if (startTimeVal !== undefined) lessonData.startTime = startTimeVal
+      if (endTimeVal !== undefined) lessonData.endTime = endTimeVal
+
+      // Update group room if provided
+      if (roomId !== undefined) {
+        await tx.classGroup.update({
+          where: { id: existing.groupId },
+          data: { roomId: roomId || null },
+        })
       }
 
-      // Sync students if studentIds provided
+      // Sync enrollments if studentIds provided
       if (studentIds !== undefined) {
-        await tx.scheduleStudent.deleteMany({ where: { scheduleId: id } })
-        if (effectiveStudentIds.length > 0) {
-          await tx.scheduleStudent.createMany({
-            data: effectiveStudentIds.map((sid: string) => ({ scheduleId: id, studentId: sid })),
-            skipDuplicates: true,
+        const group = await tx.classGroup.findUnique({
+          where: { id: existing.groupId },
+          select: { id: true, maxStudents: true },
+        })
+        if (group) {
+          await tx.enrollment.updateMany({
+            where: { groupId: existing.groupId, status: 'ACTIVE' },
+            data: { status: 'WITHDRAWN' },
+          })
+          for (const sid of effectiveStudentIds) {
+            await tx.enrollment.upsert({
+              where: { studentId_groupId: { studentId: sid, groupId: existing.groupId } },
+              update: { status: 'ACTIVE' },
+              create: { groupId: existing.groupId, studentId: sid, totalHours: 1, remainHours: 1, status: 'ACTIVE' },
+            })
+          }
+          await tx.classGroup.update({
+            where: { id: existing.groupId },
+            data: { maxStudents: Math.max(group.maxStudents, effectiveStudentIds.length) },
           })
         }
       }
 
-      return tx.schedule.update({
+      return tx.classLesson.update({
         where: { id },
-        data,
+        data: lessonData,
         include: {
+          group: {
+            include: {
+              course: { select: { id: true, name: true, subject: true, type: true } },
+              teacher: { select: { id: true, name: true } },
+              room: { select: { id: true, name: true } },
+              enrollments: { where: { status: 'ACTIVE' }, include: { student: { select: { id: true, name: true } } } },
+            },
+          },
           teacher: { select: { id: true, name: true } },
-          room: { select: { id: true, name: true, type: true, usageType: true } },
-          course: { select: { id: true, name: true, subject: true, type: true } },
-          students: { include: { student: { select: { id: true, name: true } } } },
         },
       })
     })
 
     revalidatePath('/schedule')
-    return NextResponse.json(s)
+    revalidatePath('/teacher/schedule')
+    return NextResponse.json({ success: true, lesson })
   } catch (e: any) {
     if (e?.status) {
       const body: Record<string, unknown> = { error: e.message }
       if (e.conflicts) body.conflicts = e.conflicts
       return NextResponse.json(body, { status: e.status })
     }
-    return NextResponse.json({ error: '更新失败' }, { status: 500 })
+    console.error('[schedules:update]', e)
+    return NextResponse.json({ error: '更新课次失败' }, { status: 500 })
   }
 }
 
@@ -158,9 +157,10 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
   const { id } = await params
-  const existing = await prisma.schedule.findUnique({ where: { id }, select: { id: true } })
-  if (!existing) return NextResponse.json({ error: '排课不存在' }, { status: 404 })
-  await prisma.schedule.update({ where: { id }, data: { status: 'cancelled' } })
+  const existing = await prisma.classLesson.findUnique({ where: { id }, select: { id: true } })
+  if (!existing) return NextResponse.json({ error: '课次不存在' }, { status: 404 })
+  await prisma.classLesson.update({ where: { id }, data: { status: 'CANCELLED' } })
   revalidatePath('/schedule')
+  revalidatePath('/teacher/schedule')
   return NextResponse.json({ success: true })
 })
