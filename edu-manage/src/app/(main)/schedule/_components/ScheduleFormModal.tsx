@@ -27,10 +27,12 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
 
   const { data: teachers } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
   const { data: rooms } = useSWR('/api/rooms', fetcher)
-  const { data: students } = useSWR('/api/students?limit=200&status=active', fetcher, { refreshInterval: 0 })
+  const { data: coursesData } = useSWR('/api/courses?limit=200', fetcher)
+  const { data: students } = useSWR('/api/students?limit=200&status=ACTIVE', fetcher, { refreshInterval: 0 })
 
   const teacherList = Array.isArray(teachers?.teachers) ? teachers.teachers : Array.isArray(teachers) ? teachers : []
   const roomList: Array<Record<string, unknown>> = Array.isArray(rooms) ? rooms : []
+  const courseList: Array<Record<string, unknown>> = Array.isArray(coursesData) ? coursesData : []
   const studentList: Array<Record<string, unknown>> = Array.isArray(students?.students) ? students.students : Array.isArray(students) ? students : []
 
   const filteredRooms = roomList.filter((room) => {
@@ -160,6 +162,18 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
               setSelectedStudentIds([])
               form.setFieldValue('roomId', undefined)
             }}
+          />
+        </Form.Item>
+
+        <Form.Item name="courseId" label="所属课程" rules={[{ required: true, message: '请选择课程' }]}>
+          <Select
+            showSearch
+            optionFilterProp="label"
+            placeholder="选择课程（决定科目与归属）"
+            options={courseList.map((c: Record<string, unknown>) => ({
+              label: `${c.name as string}${c.subject ? ` · ${c.subject}` : ''}`,
+              value: c.id as string,
+            }))}
           />
         </Form.Item>
 

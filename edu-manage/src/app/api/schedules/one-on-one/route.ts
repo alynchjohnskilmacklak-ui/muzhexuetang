@@ -21,6 +21,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
       return NextResponse.json({ error: '缺少必填字段（老师/学员/科目/日期/时间）' }, { status: 400 })
     }
 
+    const [sh, sm] = startTime.split(':').map(Number)
+    const [eh, em] = endTime.split(':').map(Number)
+    const lessonMinutes = (eh * 60 + em) - (sh * 60 + sm)
+    if (lessonMinutes <= 0) {
+      return NextResponse.json({ error: '结束时间必须晚于开始时间' }, { status: 400 })
+    }
+
     // Validate teacher exists
     const teacher = await prisma.teacher.findUnique({ where: { id: teacherId } })
     if (!teacher) return NextResponse.json({ error: '教师不存在' }, { status: 400 })
@@ -67,7 +74,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             subject,
             type: 'ONE_ON_ONE',
             grade: student.grade || undefined,
-            lessonMinutes: 40,
+            lessonMinutes,
             color: '#534AB7',
             isActive: true,
           },
@@ -94,7 +101,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             startDate: new Date(`${date}T00:00:00`),
             totalLessons: 1,
             lessonStartTime: startTime,
-            lessonMinutes: 40,
+            lessonMinutes,
             recurringDays: [],
             status: 'ACTIVE',
           },

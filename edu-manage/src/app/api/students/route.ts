@@ -33,7 +33,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   const where: Record<string, unknown> = {}
   if (status) {
-    where.status = status
+    where.status = status.toUpperCase()
   } else {
     where.status = { not: 'INACTIVE' }
   }

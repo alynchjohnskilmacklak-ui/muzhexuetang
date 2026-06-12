@@ -116,8 +116,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
       })
       if (!teacher) throw { status: 400, message: '教师不存在' }
 
-      // Find or create ClassGroup container
-      const groupName = `临时·${teacher.name}·${course.name}·${startDate}`
+      // key 加入开始时间和班型，确保同一天同老师同课程的不同课次不会被错误合并到一个班
+      const groupName = `临时·${teacher.name}·${course.name}·${startDate} ${startTimeVal}·${classType || 'SMALL_CLASS'}`
       let group = await tx.classGroup.findFirst({
         where: { name: groupName, teacherId, courseId, status: 'ACTIVE' },
       })
@@ -137,6 +137,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
             status: 'ACTIVE',
           },
         })
+      } else if (roomId && group.roomId !== roomId) {
+        // 复用已有 group 但教室不同时，更新为本次值
+        await tx.classGroup.update({ where: { id: group.id }, data: { roomId } })
       }
 
       // Ensure enrollments for all students
