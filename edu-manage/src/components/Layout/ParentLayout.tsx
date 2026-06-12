@@ -122,6 +122,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
 
   const markAllRead = async () => {
     await fetch('/api/parent/notifications/read-all', { method: 'PATCH' })
+    await fetch('/api/messages/read-all', { method: 'PATCH' })
     mutateUnread()
     toast.success('已全部标为已读')
   }

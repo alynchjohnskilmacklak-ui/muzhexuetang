@@ -122,7 +122,11 @@ export function TeacherMessagesClient() {
   const [closing, setClosing] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  const { data, mutate } = useSWR('/api/messages', fetcher, { refreshInterval: 15_000 })
+  const { data, mutate } = useSWR('/api/messages', fetcher, {
+    refreshInterval: 5_000,
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+  })
   const allMessages: Message[] = data?.messages || []
   const messages = allMessages.filter(m => filter === 'ALL' || m.status === filter)
   const active = allMessages.find(m => m.id === activeId) || null
@@ -168,7 +172,7 @@ export function TeacherMessagesClient() {
     finally { setClosing(false) }
   }
 
-  const ChatPanel = () => (
+  const chatPanel = (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {active && (
         <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(0,0,0,.07)', background: '#fff', flexShrink: 0 }}>
@@ -233,7 +237,7 @@ export function TeacherMessagesClient() {
     </div>
   )
 
-  const FilterBar = () => (
+  const filterBar = (
     <Select value={filter} onChange={v => setFilter(v as typeof filter)}
       style={{ width: 100, borderRadius: 8 }} size="small">
       <Select.Option value="ALL">全部</Select.Option>
@@ -250,7 +254,7 @@ export function TeacherMessagesClient() {
             <Title level={4} style={{ marginBottom: 2 }}>家长留言</Title>
             <Text type="secondary" style={{ fontSize: 13 }}>查看并回复家长提问</Text>
           </div>
-          <FilterBar />
+          {filterBar}
         </div>
         {messages.length === 0 ? (
           <div style={{ background: '#fff', borderRadius: 16, padding: '48px 24px', textAlign: 'center', border: '1px solid rgba(0,0,0,.06)' }}>
@@ -282,7 +286,7 @@ export function TeacherMessagesClient() {
             </button>
           </div>
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <ChatPanel />
+            {chatPanel}
           </div>
         </Drawer>
       </div>
@@ -296,7 +300,7 @@ export function TeacherMessagesClient() {
           <Title level={4} style={{ marginBottom: 2 }}>家长留言</Title>
           <Text type="secondary" style={{ fontSize: 13 }}>查看并回复家长提问</Text>
         </div>
-        <FilterBar />
+        {filterBar}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 16, height: 'calc(100vh - 160px)' }}>
         <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -313,7 +317,7 @@ export function TeacherMessagesClient() {
           </div>
         </div>
         <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <ChatPanel />
+          {chatPanel}
         </div>
       </div>
     </div>

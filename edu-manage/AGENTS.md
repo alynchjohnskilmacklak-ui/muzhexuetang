@@ -26,3 +26,8 @@ Before building or modifying any UI, read `DESIGN.md` at the project root. It de
 3. Primary buttons use `#E8784A` background with white text.
 4. Use design tokens from globals.css or Ant Design ConfigProvider; do not hardcode colors.
 5. Login page is the exception: dark-themed left panel with photo grid, warm-light right form.
+
+## Project Safety Rules
+
+- Before frontend changes, read docs/frontend-rules.md and DESIGN.md.
+- Before production/deployment changes, read docs/production-safety.md.

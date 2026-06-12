@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
@@ -154,6 +154,10 @@ export const GET = apiHandler(async () => {
     leaveCounts.set(studentId, (leaveCounts.get(studentId) || 0) + 1)
   })
 
+  const minuteOfDay = (item: { startTime: string }) => {
+    const d = new Date(item.startTime)
+    return d.getHours() * 60 + d.getMinutes()
+  }
   const results = students.map((student) => {
     const todaySchedules = schedulesByStudent.get(student.id) || []
     const todayClassLessons = classLessonsByStudent.get(student.id) || []
@@ -189,7 +193,7 @@ export const GET = apiHandler(async () => {
         grade: student.grade,
         mainTeacherName: student.mainTeacher?.name || '未分配',
       },
-      todaySchedules: [...scheduleItems, ...lessonItems].sort((a, b) => a.startTime.localeCompare(b.startTime)),
+      todaySchedules: [...scheduleItems, ...lessonItems].sort((a, b) => minuteOfDay(a) - minuteOfDay(b)),
       attendance: attendance.map((item) => ({
         status: item.status,
         createdAt: item.createdAt.toISOString(),

@@ -46,7 +46,6 @@ export async function proxy(request: NextRequest) {
     pathname === '/api/setup' ||
     pathname.startsWith('/api/wxpusher/callback') ||
     pathname.startsWith('/people/') ||
-    pathname.startsWith('/uploads/') ||
     pathname.startsWith('/images/') ||
     pathname.startsWith('/UI_picture/') ||
     pathname.startsWith('/volunteer/picture/') ||
@@ -99,7 +98,8 @@ export async function proxy(request: NextRequest) {
   const role = user.role
 
   // Page role redirects only. API permission checks remain inside API handlers.
-  if (!apiRequest && !pathname.startsWith('/parent') && role === 'parent') {
+  const isParentRoute = pathname === '/parent' || pathname.startsWith('/parent/')
+  if (!apiRequest && !isParentRoute && role === 'parent') {
     return NextResponse.redirect(new URL('/parent/dashboard', request.url))
   }
 
@@ -111,7 +111,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/teacher/dashboard', request.url))
   }
 
-  if (!apiRequest && pathname.startsWith('/parent') && role !== 'parent') {
+  if (!apiRequest && isParentRoute && role !== 'parent') {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
@@ -129,5 +129,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|images|people|uploads|UI_picture|volunteer/picture|volunteer/docs|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|images|people|UI_picture|volunteer/picture|volunteer/docs|favicon.ico).*)'],
 }

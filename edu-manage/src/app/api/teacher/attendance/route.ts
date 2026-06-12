@@ -195,14 +195,29 @@ export const POST = apiHandler(async (request: NextRequest) => {
           })
           if (hoursDeducted > 0) {
             if (!attendance.hoursDeducted || attendance.hoursDeducted <= 0) {
+              const safeDeduct = Math.min(hoursDeducted, enrollment.remainHours)
+              if (safeDeduct <= 0) continue
               deductedCount += 1
               await tx.attendance.update({
                 where: { id: attendance.id },
-                data: { hoursDeducted },
+                data: { hoursDeducted: safeDeduct },
               })
               await tx.enrollment.update({
                 where: { id: enrollment.id },
-                data: { usedHours: { increment: hoursDeducted }, remainHours: { decrement: hoursDeducted } },
+                data: { usedHours: { increment: safeDeduct }, remainHours: { decrement: safeDeduct } },
+              })
+              await tx.hourTransaction.create({
+                data: {
+                  studentId,
+                  enrollmentId: enrollment.id,
+                  lessonId,
+                  amount: -safeDeduct,
+                  beforeHours: enrollment.remainHours,
+                  afterHours: enrollment.remainHours - safeDeduct,
+                  type: 'ATTENDANCE_DEDUCT',
+                  reason: `${group.name} 考勤扣课时`,
+                  operatorId: user.id,
+                },
               })
             }
           }

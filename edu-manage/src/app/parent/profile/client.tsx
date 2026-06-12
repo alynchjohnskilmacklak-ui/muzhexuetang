@@ -1,8 +1,10 @@
 'use client'
 
-import { Card, Descriptions, Tag, Typography, Empty, Avatar } from 'antd'
-import { UserOutlined, TeamOutlined, MailOutlined, CalendarOutlined } from '@ant-design/icons'
+import { useState } from 'react'
+import { Card, Descriptions, Tag, Typography, Empty, Avatar, Button, Form, Input, Modal } from 'antd'
+import { UserOutlined, TeamOutlined, MailOutlined, CalendarOutlined, LockOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 
 const { Title, Text } = Typography
 
@@ -12,6 +14,27 @@ export function ParentProfileClient({
   user: any
   studentInfo: any[]
 }) {
+  const [changingPwd, setChangingPwd] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [form] = Form.useForm()
+
+  const handleChangePassword = async (values: { oldPassword: string; newPassword: string }) => {
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      })
+      const data = await res.json()
+      if (!res.ok) { toast.error(data.error || '修改失败'); return }
+      toast.success('密码已修改，下次登录请使用新密码')
+      setChangingPwd(false)
+      form.resetFields()
+    } catch { toast.error('网络错误') }
+    finally { setSubmitting(false) }
+  }
+
   return (
     <div>
       <Title level={4} style={{ marginBottom: 20 }}>个人中心</Title>
@@ -30,6 +53,11 @@ export function ParentProfileClient({
             {format(new Date(user.createdAt), 'yyyy-MM-dd')}
           </Descriptions.Item>
         </Descriptions>
+        <div style={{ marginTop: 16 }}>
+          <Button icon={<LockOutlined />} onClick={() => setChangingPwd(true)}>
+            修改密码
+          </Button>
+        </div>
       </Card>
 
       <Card
@@ -74,6 +102,35 @@ export function ParentProfileClient({
           ))
         )}
       </Card>
+
+      <Modal
+        open={changingPwd}
+        onCancel={() => { setChangingPwd(false); form.resetFields() }}
+        title="修改密码"
+        footer={null}
+        width={400}
+        centered
+        destroyOnClose
+      >
+        <Form form={form} layout="vertical" onFinish={handleChangePassword} style={{ marginTop: 16 }}>
+          <Form.Item name="oldPassword" label="当前密码" rules={[{ required: true, message: '请输入当前密码' }]}>
+            <Input.Password placeholder="输入当前密码" style={{ borderRadius: 8 }} />
+          </Form.Item>
+          <Form.Item name="newPassword" label="新密码" rules={[
+            { required: true, message: '请输入新密码' },
+            { min: 6, message: '新密码至少6位' },
+          ]}>
+            <Input.Password placeholder="输入新密码（至少6位）" style={{ borderRadius: 8 }} />
+          </Form.Item>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <Button onClick={() => { setChangingPwd(false); form.resetFields() }}>取消</Button>
+            <Button type="primary" htmlType="submit" loading={submitting}
+              style={{ background: '#E8784A', border: 'none', borderRadius: 8 }}>
+              确认修改
+            </Button>
+          </div>
+        </Form>
+      </Modal>
     </div>
   )
 }

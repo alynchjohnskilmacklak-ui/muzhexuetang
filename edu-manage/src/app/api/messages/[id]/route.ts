@@ -21,6 +21,14 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
   })
   if (!message) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
+  // 授权检查：家长只能读自己的留言，教师只能读分配给自己的留言
+  if (user.role === 'parent' && message.parentId !== user.id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  if (user.role === 'teacher' && message.teacherId !== user.teacherId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   if (user.role === 'parent' && message.parentId === user.id) {
     await prisma.parentMessageReply.updateMany({
       where: { messageId: id, isReadByParent: false },
@@ -41,6 +49,12 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (!['admin', 'teacher'].includes(user.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const { id } = await params
+
+  const existing = await prisma.parentMessage.findUnique({ where: { id } })
+  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (user.role === 'teacher' && existing.teacherId !== user.teacherId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const body = await req.json()
   const status = body.status === 'CLOSED' ? 'CLOSED' : 'OPEN'

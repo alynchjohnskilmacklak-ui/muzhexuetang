@@ -158,36 +158,59 @@ export default function MealsPage() {
           key: 'templates',
           label: '周期菜单',
           children: (
-            <Row gutter={[12, 12]}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))',
+              gap: 12,
+            }}>
               {WEEKDAYS.map((weekday, index) => {
                 const dayOfWeek = index + 1
                 const template = templateMap.get(dayOfWeek)
                 return (
-                  <Col key={weekday} xs={24} md={8} xl={4}>
-                    <Card style={{ minHeight: 250, borderRadius: 12 }} styles={{ body: { padding: 16 } }}>
-                      <Text type="secondary">{weekday}</Text>
-                      {template ? (
-                        <>
-                          <div style={{ fontSize: 18, fontWeight: 700, margin: '10px 0 6px', color: '#1F2329' }}>
-                            {template.lunch || '未设置米饭配菜'}
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '10px 0' }}>
-                            <Text style={{ fontSize: 13 }}>可选双倍米饭</Text>
-                            <Tag color={template.allowDouble !== false ? 'green' : 'default'}>
-                              {template.allowDouble !== false ? '允许' : '不允许'}
-                            </Tag>
-                          </div>
-                          <Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 10 }}>{template.note || ''}</Text>
-                          <Button size="small" icon={<EditOutlined />} onClick={() => openTemplateEditor(dayOfWeek, template)}>编辑</Button>
-                        </>
-                      ) : (
-                        <Button style={{ marginTop: 48 }} onClick={() => openTemplateEditor(dayOfWeek)}>点击设置</Button>
+                  <Card
+                    key={weekday}
+                    hoverable
+                    onClick={() => !template && openTemplateEditor(dayOfWeek)}
+                    style={{
+                      borderRadius: 10,
+                      minHeight: template ? 116 : 76,
+                      border: template ? '1px solid #EEE7E1' : '1px dashed #E8D8CA',
+                      background: template ? '#fff' : '#FCFBF9',
+                    }}
+                    styles={{ body: { padding: isMobile ? 10 : 12 } }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: template ? 8 : 0 }}>
+                      <Text strong style={{ fontSize: 14, color: '#1F2329' }}>{weekday}</Text>
+                      {template && (
+                        <Button
+                          size="small"
+                          type="text"
+                          icon={<EditOutlined />}
+                          onClick={(event) => { event.stopPropagation(); openTemplateEditor(dayOfWeek, template) }}
+                        >
+                          编辑
+                        </Button>
                       )}
-                    </Card>
-                  </Col>
+                    </div>
+                    {template ? (
+                      <div style={{ display: 'grid', gap: 6 }}>
+                        <Text strong style={{ fontSize: 15, color: '#1F2329', lineHeight: 1.35 }}>{template.lunch || '未设置米饭配菜'}</Text>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                          <Tag color={template.allowDouble !== false ? 'green' : 'default'} style={{ margin: 0 }}>
+                            {template.allowDouble !== false ? '可双倍米饭' : '不可双倍'}
+                          </Tag>
+                          {template.note && <Text type="secondary" style={{ fontSize: 12 }}>{template.note}</Text>}
+                        </div>
+                      </div>
+                    ) : (
+                      <Button type="link" size="small" style={{ padding: 0, height: 24 }} onClick={(event) => { event.stopPropagation(); openTemplateEditor(dayOfWeek) }}>
+                        点击设置
+                      </Button>
+                    )}
+                  </Card>
                 )
               })}
-            </Row>
+            </div>
           ),
         },
         {

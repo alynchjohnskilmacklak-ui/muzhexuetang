@@ -131,6 +131,19 @@ export const POST = apiHandler(async (req: NextRequest) => {
               remainHours: { decrement: safeDeduct },
             },
           })
+          await tx.hourTransaction.create({
+            data: {
+              studentId: rec.studentId,
+              enrollmentId: enrollment.id,
+              lessonId,
+              amount: -safeDeduct,
+              beforeHours: enrollment.remainHours,
+              afterHours: enrollment.remainHours - safeDeduct,
+              type: 'ATTENDANCE_DEDUCT',
+              reason: `${group.name} 考勤扣课时`,
+              operatorId: user.id,
+            },
+          })
         }
 
         if (status === 'LEAVE' && group.course.type === 'ONE_ON_ONE') {

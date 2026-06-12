@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { parentActiveStudentWhere } from '@/lib/business-visibility'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,9 +17,37 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (user.role === 'parent') {
     where = { parentId: user.id }
   } else if (user.role === 'teacher') {
-    where = { teacherId: user.teacherId }
+    if (!user.teacherId) {
+      return NextResponse.json({ messages: [] })
+    }
+    const taughtGroups = await prisma.classGroupTeacher.findMany({
+      where: { teacherId: user.teacherId },
+      select: { groupId: true },
+    })
+    const groupIds = taughtGroups.map((g) => g.groupId)
+    const enrollments = await prisma.enrollment.findMany({
+      where: { groupId: { in: groupIds }, status: 'ACTIVE' },
+      select: { studentId: true },
+    })
+    const taughtStudentIds = Array.from(new Set(enrollments.map((e) => e.studentId)))
+
+    where = {
+      OR: [
+        { teacherId: user.teacherId },
+        {
+          teacherId: null,
+          studentId: { in: taughtStudentIds.length > 0 ? taughtStudentIds : ['__none__'] },
+        },
+      ],
+    }
   }
-  if (status) where.status = status
+  if (status) {
+    if (where.OR) {
+      where = { AND: [{ OR: where.OR }, { status }] }
+    } else {
+      where.status = status
+    }
+  }
 
   const messages = await prisma.parentMessage.findMany({
     where,
@@ -53,6 +82,26 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (title.length > 100) return NextResponse.json({ error: '标题不能超过100字' }, { status: 400 })
   if (!content) return NextResponse.json({ error: '请填写问题内容' }, { status: 400 })
   if (content.length > 2000) return NextResponse.json({ error: '内容不能超过2000字' }, { status: 400 })
+
+  // 验证 studentId 属于当前家长
+  if (studentId) {
+    const owned = await prisma.student.count({
+      where: { id: studentId, ...parentActiveStudentWhere(user.id) },
+    })
+    if (owned === 0) return NextResponse.json({ error: '无权为该学员创建留言' }, { status: 403 })
+  }
+
+  // 验证 teacherId 是该学员的任课教师
+  if (studentId && teacherId) {
+    const assigned = await prisma.enrollment.count({
+      where: {
+        studentId,
+        status: 'ACTIVE',
+        group: { teacherAssignments: { some: { teacherId } } },
+      },
+    })
+    if (assigned === 0) return NextResponse.json({ error: '该老师不是此学员的任课教师' }, { status: 400 })
+  }
 
   const message = await prisma.parentMessage.create({
     data: {

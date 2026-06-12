@@ -56,9 +56,9 @@ export default function VolunteerAdminPage() {
       subtitle="管理填报流程、政策附件、分配生名额和家长咨询"
       actions={<Button icon={<ReadOutlined />} href="/volunteer/guide">填报指南</Button>}
     >
-      {isLoading ? <div style={{ textAlign: 'center', padding: 80 }}><Spin /></div> : (
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '280px minmax(0, 1fr)', gap: 16, alignItems: 'start' }}>
-          <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
+      {isLoading ? <div style={{ textAlign: 'center', padding: isMobile ? 32 : 80 }}><Spin /></div> : (
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : '280px minmax(0, 1fr)', gap: isMobile ? 12 : 16, alignItems: 'start', width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
+          <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1', width: '100%', maxWidth: '100%' }} styles={{ body: { padding: isMobile ? 12 : 24 } }}>
             <StepList
               steps={steps}
               selectedId={selected?.id}
@@ -73,16 +73,16 @@ export default function VolunteerAdminPage() {
           </Card>
 
           <Space direction="vertical" size={16} style={{ width: '100%' }}>
-            <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
+            <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1', width: '100%', maxWidth: '100%' }} styles={{ body: { padding: isMobile ? 12 : 24 } }}>
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
                 <Input value={data?.title || ''} onChange={(event) => patchGuide({ title: event.target.value })} addonBefore="标题" />
                 <Input value={data?.subtitle || ''} onChange={(event) => patchGuide({ subtitle: event.target.value })} addonBefore="副标题" />
               </Space>
             </Card>
-            <Card title="步骤编辑" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
+            <Card title="步骤编辑" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1', width: '100%', maxWidth: '100%' }} styles={{ body: { padding: isMobile ? 12 : 24 } }}>
               <StepEditor step={selected} onSaved={() => mutate()} />
             </Card>
-            <Card title="家长咨询回复" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
+            <Card title="家长咨询回复" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1', width: '100%', maxWidth: '100%' }} styles={{ body: { padding: isMobile ? 12 : 24 } }}>
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
                 {consultations.length ? consultations.map((item: never) => <ConsultReply key={(item as { id: string }).id} item={item} onReplied={() => mutateConsults()} />) : <div style={{ color: '#98A2B3' }}>暂无咨询</div>}
               </Space>

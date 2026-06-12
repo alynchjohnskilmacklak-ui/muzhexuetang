@@ -19,11 +19,26 @@ export const GET = apiHandler(async () => {
       },
     })
   } else if (user.role === 'teacher' && user.teacherId) {
+    const taughtGroups = await prisma.classGroupTeacher.findMany({
+      where: { teacherId: user.teacherId },
+      select: { groupId: true },
+    })
+    const groupIds = taughtGroups.map((g) => g.groupId)
+    const enrollments = await prisma.enrollment.findMany({
+      where: { groupId: { in: groupIds }, status: 'ACTIVE' },
+      select: { studentId: true },
+    })
+    const taughtStudentIds = Array.from(new Set(enrollments.map((e) => e.studentId)))
     count = await prisma.parentMessageReply.count({
       where: {
         isReadByTeacher: false,
         role: 'parent',
-        message: { teacherId: user.teacherId },
+        message: {
+          OR: [
+            { teacherId: user.teacherId },
+            { teacherId: null, studentId: { in: taughtStudentIds.length > 0 ? taughtStudentIds : ['__none__'] } },
+          ],
+        },
       },
     })
   } else if (user.role === 'admin') {

@@ -168,7 +168,9 @@ export function ParentMessagesClient({
   const [filterChildId, setFilterChildId] = useState<string>(activeChildId)
   const { data, mutate } = useSWR('/api/messages', fetcher, {
     fallbackData: { messages: initialMessages },
-    refreshInterval: 15_000,
+    refreshInterval: 5_000,
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
   })
   const allMessages: Message[] = data?.messages || []
   const messages = students.length > 1 && filterChildId
@@ -229,7 +231,7 @@ export function ParentMessagesClient({
     finally { setSubmitting(false) }
   }
 
-  const ChatPanel = () => (
+  const chatPanel = (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {active && (
         <div style={{
@@ -338,7 +340,7 @@ export function ParentMessagesClient({
       label: t.subjects.length > 0 ? `${t.name}（${t.subjects.join('·')}）` : t.name,
     }))
 
-  const ComposeModal = () => (
+  const composeModal = (
     <Modal
       open={showCompose}
       onCancel={() => { setShowCompose(false); composeForm.resetFields() }}
@@ -501,11 +503,11 @@ export function ParentMessagesClient({
             </button>
           </div>
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <ChatPanel />
+            {chatPanel}
           </div>
         </Drawer>
 
-        <ComposeModal />
+        {composeModal}
       </div>
     )
   }
@@ -582,11 +584,11 @@ export function ParentMessagesClient({
           border: '1px solid rgba(0,0,0,.07)',
           overflow: 'hidden', display: 'flex', flexDirection: 'column',
         }}>
-          <ChatPanel />
+          {chatPanel}
         </div>
       </div>
 
-      <ComposeModal />
+      {composeModal}
     </div>
   )
 }

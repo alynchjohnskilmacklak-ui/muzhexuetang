@@ -218,7 +218,7 @@ export function TodayStatus({ activeChildId }: { activeChildId?: string }) {
                             background: isPast ? 'rgba(0,0,0,.04)' : isCurrent ? 'rgba(39,166,68,.1)' : 'rgba(232,117,69,.1)',
                             padding: '1px 6px', borderRadius: 4,
                           }}>
-                            {isPast ? '已完成' : isCurrent ? '🟢' : isNext ? '下节课' : '待上课'}
+                            {isPast ? '已完成' : isCurrent ? '上课中' : isNext ? '下节课' : '待上课'}
                           </div>
                         </div>
                       )

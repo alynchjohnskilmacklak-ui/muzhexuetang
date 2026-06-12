@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
@@ -226,7 +226,13 @@ export const GET = apiHandler(async () => {
     statusLabel: getStatusLabel(schedule.startTime, schedule.endTime, schedule.attendanceSubmittedAt),
   }))
 
-  const schedules = [...classLessonSchedules, ...legacySchedules].sort((a, b) => a.startTime.localeCompare(b.startTime))
+  const minuteOfDay = (item: { time: string; startTime: string }) => {
+    const m = item.time.match(/^(\d{1,2}):(\d{2})/)
+    if (m) return parseInt(m[1], 10) * 60 + parseInt(m[2], 10)
+    const d = new Date(item.startTime)
+    return d.getHours() * 60 + d.getMinutes()
+  }
+  const schedules = [...classLessonSchedules, ...legacySchedules].sort((a, b) => minuteOfDay(a) - minuteOfDay(b))
   const todayLessonsCompleted = schedules.filter((item) => item.statusLabel === '已完成').length
   const todayLessonsPendingAttendance = schedules.filter((item) => item.statusLabel === '待考勤').length
   const unreadComments = unreadParentComments + unreadPerformanceComments

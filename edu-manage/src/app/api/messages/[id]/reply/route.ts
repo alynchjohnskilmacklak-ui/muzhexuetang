@@ -17,8 +17,19 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   if (user.role === 'parent' && message.parentId !== user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
-  if (user.role === 'teacher' && message.teacherId && message.teacherId !== user.teacherId) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (user.role === 'teacher') {
+    if (!user.teacherId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    if (message.teacherId && message.teacherId !== user.teacherId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    if (!message.teacherId) {
+      await prisma.parentMessage.update({
+        where: { id },
+        data: { teacherId: user.teacherId },
+      })
+    }
   }
 
   const body = await req.json()
@@ -35,8 +46,8 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
       authorName: user.name || user.role,
       role: user.role,
       content,
-      isReadByParent: !isParent,
-      isReadByTeacher: isParent ? false : true,
+      isReadByParent: isParent,
+      isReadByTeacher: !isParent,
     },
   })
 

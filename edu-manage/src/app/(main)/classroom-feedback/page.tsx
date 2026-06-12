@@ -249,11 +249,15 @@ export default function ClassroomFeedbackAdminPage() {
           <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} style={{ width: 150 }} disabled={viewAll} />
           <Select
             allowClear
+            showSearch={false}
             placeholder="按教师筛选"
             style={{ width: 150 }}
             value={teacherFilter || undefined}
             onChange={(value) => setTeacherFilter(value || '')}
             options={teachers.map((teacher: { id: string; name: string }) => ({ label: teacher.name, value: teacher.id }))}
+            getPopupContainer={(trigger) => trigger.parentElement || document.body}
+            listHeight={220}
+            virtual={false}
           />
           <Input
             prefix={<SearchOutlined />}
@@ -370,8 +374,12 @@ export default function ClassroomFeedbackAdminPage() {
           <Form.Item name="lessonId" label="选择关联课次（可选）">
             <Select
               allowClear
+              showSearch={false}
               placeholder="关联具体课次可自动回显老师和学员"
               onChange={handleLessonChange}
+              getPopupContainer={(trigger) => trigger.parentElement || document.body}
+              listHeight={220}
+              virtual={false}
               options={allLessons.map(l => ({ 
                 label: `${l.groupName} (${l.teacherName}) ${l.time}`, 
                 value: l.id,
@@ -382,28 +390,37 @@ export default function ClassroomFeedbackAdminPage() {
 
           <Form.Item name="teacherId" label="代发老师" required>
             <Select
-              showSearch
+              showSearch={false}
               placeholder="选择老师"
               value={composeTeacherId || undefined}
               onChange={handleTeacherChange}
               options={teachers.map((t: { id: string; name: string }) => ({ label: t.name, value: t.id }))}
-              filterOption={(input, option) => String(option?.label || '').includes(input)}
               style={{ width: '100%' }}
+              getPopupContainer={(trigger) => trigger.parentElement || document.body}
+              listHeight={220}
+              virtual={false}
             />
           </Form.Item>
 
           <Form.Item name="studentIds" label={`选择学员${composeStudents.length ? `（${composeStudents.length}位可选）` : ''}`} required>
             <Select
               mode="multiple"
+              showSearch={false}
               placeholder={composeTeacherId ? '选择要反馈的学员' : '请先选择老师或课次'}
               disabled={!composeTeacherId}
               style={{ width: '100%' }}
+              getPopupContainer={(trigger) => trigger.parentElement || document.body}
+              listHeight={220}
+              virtual={false}
               options={composeStudents.map(s => ({ label: `${s.name}${s.grade ? ` · ${s.grade}` : ''}`, value: s.id }))}
             />
           </Form.Item>
 
           <Form.Item name="knowledgePoints" label="知识点">
             <Select mode="tags" placeholder="输入知识点后回车" style={{ width: '100%' }}
+              getPopupContainer={(trigger) => trigger.parentElement || document.body}
+              listHeight={180}
+              virtual={false}
               options={['新知识讲解', '错题订正', '课堂练习', '复习巩固', '测验讲评'].map(v => ({ label: v, value: v }))} />
           </Form.Item>
 

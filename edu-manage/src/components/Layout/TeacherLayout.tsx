@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Avatar, Badge, Dropdown, Layout, Menu, Spin, Tooltip } from 'antd'
+import { Avatar, Badge, Button, Dropdown, Form, Input, Layout, Menu, Modal, Spin, Tooltip } from 'antd'
 import useSWR from 'swr'
 import {
   CalendarOutlined,
@@ -16,6 +16,7 @@ import {
   ExperimentOutlined,
   FileImageOutlined,
   FolderOutlined,
+  LockOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -25,6 +26,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons'
 import { signOut } from 'next-auth/react'
+import { toast } from 'sonner'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useKickListener } from '@/hooks/useKickListener'
@@ -73,6 +75,9 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   const isMobile = useIsMobile()
   const [collapsed, setCollapsed] = useState(false)
   const [data, setData] = useState<TeacherData | null>(initialData || null)
+  const [changingPwd, setChangingPwd] = useState(false)
+  const [pwdSubmitting, setPwdSubmitting] = useState(false)
+  const [pwdForm] = Form.useForm()
   useKickListener()
   useSessionPing()
 
@@ -91,14 +96,21 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     dedupingInterval: 30_000,
   })
 
+  const { data: msgUnreadData } = useSWR('/api/messages/unread-count', fetcher, {
+    refreshInterval: 60_000,
+  })
+
   useEffect(() => {
     if (dashData?.teacher) {
       setData({
         teacher: dashData.teacher,
-        badges: dashData.badges || { unsubmitted: 0, unpublished: 0, unread: 0, unreadMessages: 0 },
+        badges: {
+          ...(dashData.badges || { unsubmitted: 0, unpublished: 0, unread: 0 }),
+          unreadMessages: Number(msgUnreadData?.count || 0),
+        },
       })
     }
-  }, [dashData])
+  }, [dashData, msgUnreadData])
 
   const selectedKey = navItems.find(item => pathname.startsWith(item.key))?.key || '/teacher/dashboard'
   const mobileNavItems = withBadges(navItems, data)
@@ -111,6 +123,23 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   teacherBottomTabs.push({ key: '__more', icon: <EllipsisOutlined />, label: '更多' })
   const teacherMoreItems = mobileNavItems.filter(item => !['/teacher/dashboard', '/teacher/schedule', '/teacher/attendance', '/teacher/feedback'].includes(item.key))
   const todoTotal = (data?.badges?.unsubmitted || 0) + (data?.badges?.unpublished || 0)
+
+  const handleChangePwd = async (values: { oldPassword: string; newPassword: string }) => {
+    setPwdSubmitting(true)
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      })
+      const result = await res.json()
+      if (!res.ok) { toast.error(result.error || '修改失败'); return }
+      toast.success('密码已修改，下次登录请使用新密码')
+      setChangingPwd(false)
+      pwdForm.resetFields()
+    } catch { toast.error('网络错误') }
+    finally { setPwdSubmitting(false) }
+  }
 
   const menuItems = navItems.map((item) => ({
     key: item.key,
@@ -222,7 +251,10 @@ export function TeacherLayout({ children, initialData }: { children: React.React
           gap: 16,
         }}>
           {data ? (
-            <Dropdown menu={{ items: [{ key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: () => signOut({ callbackUrl: '/login' }) }] }}>
+            <Dropdown menu={{ items: [
+              { key: 'change-pwd', icon: <LockOutlined />, label: '修改密码', onClick: () => setChangingPwd(true) },
+              { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: () => signOut({ callbackUrl: '/login' }) },
+            ] }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <Avatar size={28} icon={<UserOutlined />} src={normalizeUploadUrl(data.teacher.avatar) || undefined} />
                 <span style={{ fontSize: 13, color: '#1a1201', whiteSpace: 'nowrap' }}>{data.teacher.name}</span>
@@ -234,6 +266,35 @@ export function TeacherLayout({ children, initialData }: { children: React.React
           {children}
         </Content>
       </Layout>
+
+      <Modal
+        open={changingPwd}
+        onCancel={() => { setChangingPwd(false); pwdForm.resetFields() }}
+        title="修改密码"
+        footer={null}
+        width={400}
+        centered
+        destroyOnClose
+      >
+        <Form form={pwdForm} layout="vertical" onFinish={handleChangePwd} style={{ marginTop: 16 }}>
+          <Form.Item name="oldPassword" label="当前密码" rules={[{ required: true, message: '请输入当前密码' }]}>
+            <Input.Password placeholder="输入当前密码" style={{ borderRadius: 8 }} />
+          </Form.Item>
+          <Form.Item name="newPassword" label="新密码" rules={[
+            { required: true, message: '请输入新密码' },
+            { min: 6, message: '新密码至少6位' },
+          ]}>
+            <Input.Password placeholder="输入新密码（至少6位）" style={{ borderRadius: 8 }} />
+          </Form.Item>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <Button onClick={() => { setChangingPwd(false); pwdForm.resetFields() }}>取消</Button>
+            <Button type="primary" htmlType="submit" loading={pwdSubmitting}
+              style={{ background: '#E8784A', border: 'none', borderRadius: 8 }}>
+              确认修改
+            </Button>
+          </div>
+        </Form>
+      </Modal>
     </Layout>
   )
 }

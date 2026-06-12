@@ -1,12 +1,10 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { readFile, stat } from 'fs/promises'
 import path from 'path'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
-
-// If Nginx serves /uploads directly, this route is kept only for old links and fallback compatibility.
 
 const CONTENT_TYPES: Record<string, string> = {
   avif: 'image/avif',
@@ -15,6 +13,14 @@ const CONTENT_TYPES: Record<string, string> = {
   jpg: 'image/jpeg',
   png: 'image/png',
   webp: 'image/webp',
+  pdf: 'application/pdf',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  xls: 'application/vnd.ms-excel',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ppt: 'application/vnd.ms-powerpoint',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  zip: 'application/zip',
 }
 
 function uploadRoots() {
@@ -26,10 +32,18 @@ function uploadRoots() {
   ]
 }
 
-async function findUploadedFile(filename: string) {
-  const safeName = path.basename(filename)
+function safeRelativePath(raw: string) {
+  const decoded = decodeURIComponent(raw || '').replace(/\\/g, '/')
+  const normalized = path.posix.normalize(decoded).replace(/^\/+/, '')
+  if (!normalized || normalized === '.' || normalized.startsWith('../') || normalized.includes('/../')) return null
+  return normalized
+}
+
+async function findUploadedFile(relativePath: string) {
   for (const root of uploadRoots()) {
-    const filePath = path.join(root, safeName)
+    const rootPath = path.resolve(root)
+    const filePath = path.resolve(rootPath, relativePath)
+    if (!filePath.startsWith(rootPath + path.sep) && filePath !== rootPath) continue
     try {
       const info = await stat(filePath)
       if (info.isFile()) return filePath
@@ -47,16 +61,16 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
   }
 
   const { filename } = await params
-  const safeName = path.basename(decodeURIComponent(filename || ''))
-  if (!safeName || safeName !== filename) {
+  const relativePath = safeRelativePath(filename)
+  if (!relativePath) {
     return NextResponse.json({ error: 'Invalid file' }, { status: 400 })
   }
 
-  const filePath = await findUploadedFile(safeName)
+  const filePath = await findUploadedFile(relativePath)
   if (!filePath) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const fileInfo = await stat(filePath)
-  const etag = `"${safeName}-${fileInfo.mtimeMs}"`
+  const etag = `"${relativePath}-${fileInfo.mtimeMs}"`
   const ifNoneMatch = req.headers.get('if-none-match')
   if (ifNoneMatch === etag) {
     return new NextResponse(null, {
@@ -68,7 +82,7 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     })
   }
 
-  const ext = safeName.split('.').pop()?.toLowerCase() || ''
+  const ext = relativePath.split('.').pop()?.toLowerCase() || ''
   const body = await readFile(filePath)
   return new NextResponse(body, {
     headers: {

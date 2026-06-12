@@ -1,19 +1,25 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
+import { Badge, Button, Empty, Input, Select, Tag, Typography } from 'antd'
 import {
-  Badge, Button, Empty, Input, Select, Tag, Typography,
-} from 'antd'
-import { CheckCircleOutlined, SendOutlined } from '@ant-design/icons'
+  CheckCircleOutlined, SendOutlined, SearchOutlined,
+  MessageOutlined, UserOutlined,
+} from '@ant-design/icons'
 import { toast } from 'sonner'
 import useSWR from 'swr'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
+import { zhCN } from 'date-fns/locale'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { SUBJECT_COLORS } from '@/constants/subjects'
 
 const { Text, Title } = Typography
 const { TextArea } = Input
 const fetcher = (url: string) => fetch(url).then(r => r.json())
+
+const ADMIN = '#534AB7'
+const PARENT = '#E8784A'
+const TEACHER = '#1D9E75'
 
 type Reply = { id: string; authorName: string; role: string; content: string; isReadByTeacher: boolean; createdAt: string }
 type Message = {
@@ -24,62 +30,63 @@ type Message = {
   replies: Reply[]; updatedAt: string
 }
 
-function unreadCount(msg: Message) {
-  return msg.replies.filter(r => !r.isReadByTeacher && r.role === 'parent').length
-}
+const unreadCount = (m: Message) => m.replies.filter(r => !r.isReadByTeacher && r.role === 'parent').length
 
 function ChatBubble({ reply }: { reply: Reply }) {
-  const isStaff = reply.role !== 'parent'
+  const isParent = reply.role === 'parent'
+  const color = reply.role === 'parent' ? PARENT : reply.role === 'teacher' ? TEACHER : ADMIN
+  const roleLabel = reply.role === 'admin' ? '管理员' : reply.role === 'teacher' ? '老师' : '家长'
   return (
-    <div style={{ display: 'flex', flexDirection: isStaff ? 'row-reverse' : 'row', gap: 8, alignItems: 'flex-end', marginBottom: 16 }}>
-      <div style={{
-        width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-        background: isStaff ? '#534AB7' : '#E8784A',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#fff', fontSize: 13, fontWeight: 600,
-      }}>{reply.authorName.slice(0, 1)}</div>
-      <div style={{ maxWidth: '70%' }}>
-        <div style={{ fontSize: 11, color: '#9a8e7a', marginBottom: 4, textAlign: isStaff ? 'right' : 'left' }}>
-          {reply.authorName}{reply.role === 'admin' ? '（管理员）' : reply.role === 'teacher' ? '（老师）' : '（家长）'}
-          {' · '}{format(new Date(reply.createdAt), 'MM-dd HH:mm')}
+    <div style={{ display: 'flex', flexDirection: isParent ? 'row' : 'row-reverse', gap: 8, alignItems: 'flex-end', marginBottom: 16 }}>
+      <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 600 }}>
+        {reply.authorName.slice(0, 1)}
+      </div>
+      <div style={{ maxWidth: '72%' }}>
+        <div style={{ fontSize: 11, color: '#9a8e7a', marginBottom: 4, textAlign: isParent ? 'left' : 'right' }}>
+          {reply.authorName}（{roleLabel}） · {format(new Date(reply.createdAt), 'MM-dd HH:mm')}
         </div>
         <div style={{
-          background: isStaff ? '#534AB7' : '#fff',
-          color: isStaff ? '#fff' : '#1a1201',
-          border: isStaff ? 'none' : '1px solid rgba(0,0,0,.08)',
-          borderRadius: isStaff ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
+          background: isParent ? '#fff' : color,
+          color: isParent ? '#1a1201' : '#fff',
+          border: isParent ? '1px solid rgba(0,0,0,.08)' : 'none',
+          borderRadius: isParent ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
           padding: '10px 14px', fontSize: 14, lineHeight: 1.6,
-          boxShadow: '0 2px 8px rgba(0,0,0,.06)',
-          whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+          boxShadow: '0 2px 8px rgba(0,0,0,.05)', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
         }}>{reply.content}</div>
       </div>
     </div>
   )
 }
 
-function MessageCard({ msg, onClick, active }: { msg: Message; onClick: () => void; active: boolean }) {
+function ConversationItem({ msg, onClick, active }: { msg: Message; onClick: () => void; active: boolean }) {
   const unread = unreadCount(msg)
-  const lastReply = msg.replies[msg.replies.length - 1]
-  const subjectColor = msg.subject ? SUBJECT_COLORS[msg.subject] : null
+  const last = msg.replies[msg.replies.length - 1]
+  const sc = msg.subject ? SUBJECT_COLORS[msg.subject] : null
   return (
     <div onClick={onClick} style={{
-      background: active ? '#EEEDFE' : '#fff',
-      border: active ? '1.5px solid #534AB7' : '1px solid rgba(0,0,0,.07)',
-      borderRadius: 12, padding: '14px 16px', cursor: 'pointer', transition: 'all .18s', marginBottom: 8,
+      background: active ? '#F4F3FE' : '#fff',
+      borderLeft: active ? `3px solid ${ADMIN}` : '3px solid transparent',
+      borderBottom: '1px solid rgba(0,0,0,.05)',
+      padding: '12px 14px', cursor: 'pointer', transition: 'background .15s',
     }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
-        <Text strong style={{ flex: 1, fontSize: 14 }}>{msg.title}</Text>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+        <div style={{ width: 28, height: 28, borderRadius: '50%', background: PARENT, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 600 }}>
+          {msg.parent.name.slice(0, 1)}
+        </div>
+        <Text strong style={{ flex: 1, fontSize: 14 }} ellipsis>{msg.parent.name}</Text>
         {unread > 0 && <Badge count={unread} size="small" />}
+        {msg.status === 'CLOSED' && <Tag style={{ margin: 0, fontSize: 10, borderRadius: 9999, background: '#f5f5f5', color: '#999', border: 'none' }}>已关闭</Tag>}
       </div>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
-        <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#FFF6F1', color: '#E8784A', border: 'none' }}>{msg.parent.name}</Tag>
-        {msg.teacher && <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#F0F9F5', color: '#1D9E75', border: 'none' }}>{msg.teacher.name}</Tag>}
-        {msg.subject && subjectColor && <Tag style={{ borderRadius: 9999, fontSize: 11, border: 'none', background: subjectColor.bg, color: subjectColor.color }}>{msg.subject}</Tag>}
-        <Tag style={{ marginLeft: 'auto', borderRadius: 9999, fontSize: 11, background: msg.status === 'CLOSED' ? '#f5f5f5' : '#EEEDFE', color: msg.status === 'CLOSED' ? '#999' : '#534AB7', border: 'none' }}>
-          {msg.status === 'CLOSED' ? '已关闭' : '进行中'}
-        </Tag>
+      <Text style={{ fontSize: 13, color: '#3a3320', display: 'block', marginBottom: 4 }} ellipsis>{msg.title}</Text>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+        {msg.teacher && <Tag style={{ margin: 0, fontSize: 10, borderRadius: 9999, background: '#F0F9F5', color: TEACHER, border: 'none' }}>{msg.teacher.name}</Tag>}
+        {msg.subject && sc && <Tag style={{ margin: 0, fontSize: 10, borderRadius: 9999, background: sc.bg, color: sc.color, border: 'none' }}>{msg.subject}</Tag>}
+        {msg.student && <Tag style={{ margin: 0, fontSize: 10, borderRadius: 9999, background: '#f5f2ee', color: '#8a7e6a', border: 'none' }}>{msg.student.name}</Tag>}
+        <span style={{ marginLeft: 'auto', fontSize: 11, color: '#bbb' }}>
+          {formatDistanceToNow(new Date(msg.updatedAt), { addSuffix: true, locale: zhCN })}
+        </span>
       </div>
-      {lastReply && <Text type="secondary" style={{ fontSize: 12 }} ellipsis>{lastReply.authorName}：{lastReply.content}</Text>}
+      {last && <Text type="secondary" style={{ fontSize: 12, marginTop: 4, display: 'block' }} ellipsis>{last.authorName}：{last.content}</Text>}
     </div>
   )
 }
@@ -88,19 +95,48 @@ export function AdminMessagesClient() {
   const isMobile = useIsMobile() ?? false
   const [activeId, setActiveId] = useState<string | null>(null)
   const [filter, setFilter] = useState<'ALL' | 'OPEN' | 'CLOSED'>('ALL')
+  const [teacherFilter, setTeacherFilter] = useState('')
+  const [search, setSearch] = useState('')
   const [replyText, setReplyText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [closing, setClosing] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  const { data, mutate } = useSWR('/api/messages', fetcher, { refreshInterval: 15_000 })
+  const { data, mutate } = useSWR('/api/messages', fetcher, {
+    refreshInterval: 5_000, revalidateOnFocus: true, revalidateOnReconnect: true,
+  })
   const allMessages: Message[] = data?.messages || []
-  const messages = allMessages.filter(m => filter === 'ALL' || m.status === filter)
+
+  const teacherOptions = useMemo(() => {
+    const map = new Map<string, string>()
+    allMessages.forEach(m => { if (m.teacher) map.set(m.teacher.id, m.teacher.name) })
+    return Array.from(map.entries()).map(([value, label]) => ({ value, label }))
+  }, [allMessages])
+
+  const stats = useMemo(() => ({
+    total: allMessages.length,
+    open: allMessages.filter(m => m.status === 'OPEN').length,
+    unread: allMessages.reduce((s, m) => s + unreadCount(m), 0),
+  }), [allMessages])
+
+  const messages = useMemo(() => {
+    const kw = search.trim()
+    return allMessages
+      .filter(m => filter === 'ALL' || m.status === filter)
+      .filter(m => !teacherFilter || m.teacher?.id === teacherFilter)
+      .filter(m => !kw || `${m.title} ${m.parent.name} ${m.teacher?.name || ''} ${m.student?.name || ''} ${m.subject || ''}`.includes(kw) || m.replies.some(r => r.content.includes(kw)))
+      .sort((a, b) => {
+        const ua = unreadCount(a), ub = unreadCount(b)
+        if (ua !== ub) return ub - ua
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      })
+  }, [allMessages, filter, teacherFilter, search])
+
   const active = allMessages.find(m => m.id === activeId) || null
 
   useEffect(() => {
     if (active) setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
-  }, [active?.replies.length])
+  }, [active?.replies.length, active])
 
   const handleSelect = async (id: string) => { setActiveId(id); await fetch(`/api/messages/${id}`); mutate() }
 
@@ -125,80 +161,137 @@ export function AdminMessagesClient() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'CLOSED' }),
       })
-      toast.success('已关闭留言'); mutate()
+      toast.success('已关闭'); mutate()
     } catch { toast.error('操作失败') } finally { setClosing(false) }
   }
 
-  const ChatPanel = () => (
+  const statCards = (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 14 }}>
+      {[
+        { label: '沟通总数', value: stats.total, color: ADMIN, bg: '#F4F3FE' },
+        { label: '进行中', value: stats.open, color: PARENT, bg: '#FFF6F1' },
+        { label: '待处理', value: stats.unread, color: '#E24B4A', bg: '#FDECEC' },
+      ].map(c => (
+        <div key={c.label} style={{ background: c.bg, borderRadius: 12, padding: '10px 14px' }}>
+          <div style={{ fontSize: 11, color: '#98A2B3', marginBottom: 2 }}>{c.label}</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: c.color }}>{c.value}</div>
+        </div>
+      ))}
+    </div>
+  )
+
+  const filterBar = (
+    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+      <Input prefix={<SearchOutlined style={{ color: '#bbb' }} />} placeholder="搜索家长/老师/学员/内容"
+        value={search} onChange={e => setSearch(e.target.value)} allowClear
+        style={{ flex: 1, minWidth: 160, borderRadius: 8 }} />
+      <Select allowClear placeholder="按老师" value={teacherFilter || undefined}
+        onChange={v => setTeacherFilter(v || '')} options={teacherOptions} style={{ width: 130 }}
+        showSearch filterOption={(i, o) => String(o?.label || '').includes(i)} />
+      <Select value={filter} onChange={v => setFilter(v)} style={{ width: 110 }}
+        options={[{ value: 'ALL', label: '全部状态' }, { value: 'OPEN', label: '进行中' }, { value: 'CLOSED', label: '已关闭' }]} />
+    </div>
+  )
+
+  const conversationList = (
+    <div style={{ overflowY: 'auto', flex: 1 }}>
+      {messages.length === 0 ? (
+        <div style={{ textAlign: 'center', marginTop: 60 }}>
+          <MessageOutlined style={{ fontSize: 36, color: ADMIN, opacity: .25, marginBottom: 12 }} />
+          <Empty description={search || teacherFilter ? '没有匹配的会话' : '暂无留言'} image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        </div>
+      ) : messages.map(m => (
+        <ConversationItem key={m.id} msg={m} active={m.id === activeId} onClick={() => handleSelect(m.id)} />
+      ))}
+    </div>
+  )
+
+  const chatPanel = (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {active && (
-        <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(0,0,0,.07)', background: '#fff', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <Text strong style={{ fontSize: 15, flex: 1 }}>{active.title}</Text>
-            {active.status === 'OPEN' && (
-              <Button size="small" onClick={handleClose} loading={closing} style={{ borderRadius: 8, fontSize: 12 }}>关闭留言</Button>
-            )}
+      {!active ? (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#c4bab0' }}>
+          <MessageOutlined style={{ fontSize: 48, marginBottom: 16, opacity: .3 }} />
+          <Text type="secondary">选择左侧会话查看详情</Text>
+        </div>
+      ) : (
+        <>
+          <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(0,0,0,.07)', background: '#fff', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Text strong style={{ fontSize: 15, flex: 1 }}>{active.title}</Text>
+              {active.status === 'OPEN' && <Button size="small" onClick={handleClose} loading={closing} style={{ borderRadius: 8, fontSize: 12 }}>关闭会话</Button>}
+            </div>
+            <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+              <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#FFF6F1', color: PARENT, border: 'none' }}><UserOutlined /> {active.parent.name}</Tag>
+              {active.teacher && <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#F0F9F5', color: TEACHER, border: 'none' }}>{active.teacher.name} 老师</Tag>}
+              {active.student && <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#f5f2ee', color: '#8a7e6a', border: 'none' }}>学员：{active.student.name}</Tag>}
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-            <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#FFF6F1', color: '#E8784A', border: 'none' }}>{active.parent.name} 家长</Tag>
-            {active.teacher && <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#F0F9F5', color: '#1D9E75', border: 'none' }}>{active.teacher.name} 老师</Tag>}
-            {active.student && <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#f5f5f5', color: '#5a4e3a', border: 'none' }}>学员：{active.student.name}</Tag>}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 18px', background: '#faf8f5' }}>
+            {active.replies.map(r => <ChatBubble key={r.id} reply={r} />)}
+            <div ref={bottomRef} />
           </div>
-        </div>
-      )}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', background: '#faf8f5' }}>
-        {!active ? <Empty description="选择留言开始回复" style={{ marginTop: 80 }} /> : (
-          <>{active.replies.map(r => <ChatBubble key={r.id} reply={r} />)}<div ref={bottomRef} /></>
-        )}
-      </div>
-      {active && active.status === 'OPEN' && (
-        <div style={{ padding: '12px 16px', background: '#fff', borderTop: '1px solid rgba(0,0,0,.07)', flexShrink: 0, display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-          <TextArea value={replyText} onChange={e => setReplyText(e.target.value)}
-            placeholder="以管理员身份回复..."
-            autoSize={{ minRows: 1, maxRows: 4 }}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleReply() } }}
-            style={{ borderRadius: 10, flex: 1, resize: 'none' }}
-          />
-          <Button type="primary" icon={<SendOutlined />} loading={submitting}
-            disabled={!replyText.trim()} onClick={handleReply}
-            style={{ background: '#534AB7', border: 'none', borderRadius: 10, height: 36 }}
-          />
-        </div>
-      )}
-      {active && active.status === 'CLOSED' && (
-        <div style={{ padding: '10px 16px', background: '#f9f9f9', borderTop: '1px solid rgba(0,0,0,.07)', textAlign: 'center', flexShrink: 0 }}>
-          <Text type="secondary" style={{ fontSize: 13 }}><CheckCircleOutlined style={{ marginRight: 6 }} />该留言已关闭</Text>
-        </div>
+          {active.status === 'OPEN' ? (
+            <div style={{ padding: '12px 18px', background: '#fff', borderTop: '1px solid rgba(0,0,0,.07)', flexShrink: 0, display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+              <TextArea value={replyText} onChange={e => setReplyText(e.target.value)} placeholder="以管理员身份回复（Enter 发送，Shift+Enter 换行）"
+                autoSize={{ minRows: 1, maxRows: 4 }}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleReply() } }}
+                style={{ borderRadius: 10, flex: 1, resize: 'none' }} />
+              <Button type="primary" icon={<SendOutlined />} loading={submitting} disabled={!replyText.trim()} onClick={handleReply}
+                style={{ background: ADMIN, border: 'none', borderRadius: 10, height: 36 }} />
+            </div>
+          ) : (
+            <div style={{ padding: '10px 18px', background: '#f9f9f9', borderTop: '1px solid rgba(0,0,0,.07)', textAlign: 'center', flexShrink: 0 }}>
+              <Text type="secondary" style={{ fontSize: 13 }}><CheckCircleOutlined style={{ marginRight: 6 }} />该会话已关闭</Text>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
 
+  if (isMobile) {
+    return (
+      <div style={{ paddingBottom: 20 }}>
+        <Title level={4} style={{ marginBottom: 2 }}>家长沟通监控</Title>
+        <Text type="secondary" style={{ fontSize: 13, display: 'block', marginBottom: 14 }}>查看全部教师与家长留言，可随时介入</Text>
+        {!activeId ? (
+          <>
+            {statCards}
+            {filterBar}
+            <div style={{ background: '#fff', borderRadius: 14, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden' }}>
+              {conversationList}
+            </div>
+          </>
+        ) : (
+          <div>
+            <Button onClick={() => setActiveId(null)} style={{ marginBottom: 12, borderRadius: 8 }}>← 返回列表</Button>
+            <div style={{ background: '#fff', borderRadius: 14, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden', height: 'calc(100vh - 200px)' }}>
+              {chatPanel}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <div>
-          <Title level={4} style={{ marginBottom: 2 }}>家长留言管理</Title>
-          <Text type="secondary" style={{ fontSize: 13 }}>查看所有家长留言，支持以管理员身份回复</Text>
-        </div>
-        <Select value={filter} onChange={v => setFilter(v as typeof filter)} style={{ width: 100, borderRadius: 8 }} size="small">
-          <Select.Option value="ALL">全部</Select.Option>
-          <Select.Option value="OPEN">进行中</Select.Option>
-          <Select.Option value="CLOSED">已关闭</Select.Option>
-        </Select>
+      <div style={{ marginBottom: 14 }}>
+        <Title level={4} style={{ marginBottom: 2 }}>家长沟通监控</Title>
+        <Text type="secondary" style={{ fontSize: 13 }}>查看全部教师与家长的留言往来，可随时以管理员身份介入</Text>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '340px 1fr', gap: 16, height: isMobile ? 'auto' : 'calc(100vh - 160px)' }}>
-        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: isMobile ? 400 : undefined }}>
-          <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid rgba(0,0,0,.06)', flexShrink: 0 }}>
-            <Text strong style={{ fontSize: 14, color: '#5a4e3a' }}>全部留言</Text>
-            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>（{messages.length}条）</Text>
+      {statCards}
+      <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 16, height: 'calc(100vh - 260px)', minHeight: 480 }}>
+        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '14px 14px 0' }}>{filterBar}</div>
+          <div style={{ padding: '0 14px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,.06)' }}>
+            <Text strong style={{ fontSize: 13, color: '#5a4e3a' }}>会话列表（{messages.length}）</Text>
+            {stats.unread > 0 && <Badge count={stats.unread} size="small" />}
           </div>
-          <div style={{ overflowY: 'auto', flex: 1, padding: '12px 12px' }}>
-            {messages.length === 0 ? <Empty description="暂无留言" style={{ marginTop: 60 }} image={Empty.PRESENTED_IMAGE_SIMPLE} /> :
-              messages.map(msg => <MessageCard key={msg.id} msg={msg} onClick={() => handleSelect(msg.id)} active={msg.id === activeId} />)}
-          </div>
+          {conversationList}
         </div>
-        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: isMobile ? 500 : undefined }}>
-          <ChatPanel />
+        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {chatPanel}
         </div>
       </div>
     </div>

@@ -5,12 +5,14 @@ import type { ColumnsType } from 'antd/es/table'
 import { DownloadOutlined, UploadOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import useSWR from 'swr'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 type Quota = { id: string; schoolName: string; district: string; allocQuota: number; normalQuota: number; totalQuota: number; note?: string | null }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export function QuotaManager() {
+  const isMobile = useIsMobile() ?? false
   const { data, mutate, isLoading } = useSWR('/api/volunteer/quota', fetcher)
   const records: Quota[] = Array.isArray(data?.records) ? data.records : []
   const districts: string[] = Array.isArray(data?.districts) ? data.districts : []
@@ -26,11 +28,11 @@ export function QuotaManager() {
   return (
     <Space direction="vertical" size={14} style={{ width: '100%' }}>
       <Space wrap style={{ justifyContent: 'space-between', width: '100%' }}>
-        <Space wrap>
-          <Input.Search placeholder="搜索学校或区县" style={{ width: 240 }} onSearch={(q) => mutate(`/api/volunteer/quota?q=${encodeURIComponent(q)}`)} />
-          <Select allowClear placeholder="区县" style={{ width: 160 }} options={districts.map((district) => ({ label: district, value: district }))} onChange={(district) => mutate(`/api/volunteer/quota${district ? `?district=${encodeURIComponent(district)}` : ''}`)} />
+        <Space wrap direction={isMobile ? 'vertical' : 'horizontal'} style={{ width: isMobile ? '100%' : undefined }}>
+          <Input.Search placeholder="搜索学校或区县" style={{ width: isMobile ? '100%' : 240 }} onSearch={(q) => mutate(`/api/volunteer/quota?q=${encodeURIComponent(q)}`)} />
+          <Select allowClear placeholder="区县" style={{ width: isMobile ? '100%' : 160 }} options={districts.map((district) => ({ label: district, value: district }))} onChange={(district) => mutate(`/api/volunteer/quota${district ? `?district=${encodeURIComponent(district)}` : ''}`)} />
         </Space>
-        <Space>
+        <Space wrap style={{ width: isMobile ? '100%' : undefined }}>
           <Upload
             accept=".xlsx,.xls"
             name="file"
@@ -50,7 +52,7 @@ export function QuotaManager() {
           <Button icon={<DownloadOutlined />} onClick={() => toast.info('模板列：学校名称、县（市、区）、分配生计划、统招计划、合计、说明')}>下载模板</Button>
         </Space>
       </Space>
-      <Table rowKey="id" columns={columns} dataSource={records} loading={isLoading} pagination={{ pageSize: 12 }} scroll={{ x: 760 }} />
+      <Table rowKey="id" columns={columns} dataSource={records} loading={isLoading} pagination={{ pageSize: 12 }} scroll={{ x: 'max-content' }} />
     </Space>
   )
 }

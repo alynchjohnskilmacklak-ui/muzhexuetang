@@ -73,8 +73,6 @@ export function ParentDashboardClient({
 }) {
   const isMobileRaw = useIsMobile()
   const isMobile = isMobileRaw ?? false
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
   const router = useRouter()
   const searchParams = useSearchParams()
   const today = new Date()
@@ -285,32 +283,28 @@ export function ParentDashboardClient({
         boxShadow: '0 10px 30px rgba(232,120,74,0.15)'
       }}>
         {/* Decorative background elements */}
-        {mounted && (
-          <>
-            <div style={{
-              position: 'absolute',
-              right: -20,
-              bottom: -20,
-              fontSize: 160,
-              opacity: 0.1,
-              userSelect: 'none',
-              filter: 'blur(1px)',
-            }}>
-              {'*'}
-            </div>
-            <div style={{
-              position: 'absolute',
-              left: '40%',
-              top: -30,
-              fontSize: 100,
-              opacity: 0.05,
-              userSelect: 'none',
-              transform: 'rotate(15deg)',
-            }}>
-              {'+'}
-            </div>
-          </>
-        )}
+        <div style={{
+          position: 'absolute',
+          right: -20,
+          bottom: -20,
+          fontSize: 160,
+          opacity: 0.1,
+          userSelect: 'none',
+          filter: 'blur(1px)',
+        }}>
+          {'*'}
+        </div>
+        <div style={{
+          position: 'absolute',
+          left: '40%',
+          top: -30,
+          fontSize: 100,
+          opacity: 0.05,
+          userSelect: 'none',
+          transform: 'rotate(15deg)',
+        }}>
+          {'+'}
+        </div>
 
         <div style={{ position: 'relative', zIndex: 1 }}>
           <Row gutter={[isMobile ? 12 : 24, 16]} align="middle" justify="space-between">

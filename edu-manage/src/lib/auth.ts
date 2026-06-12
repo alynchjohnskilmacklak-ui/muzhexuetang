@@ -2,6 +2,7 @@ import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { headers } from 'next/headers'
 import { validateLoginAccount, type LoginRole } from './login-accounts'
+import { parseUserAgent } from './device'
 import { emitKick } from './session-events'
 import { prisma } from './prisma'
 
@@ -43,11 +44,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const loginRole = credentials.loginRole as LoginRole
         if (!['admin', 'teacher', 'parent'].includes(loginRole)) return null
 
+        const ip = await getClientIp() || '未知'
+        let ua = ''
+        try { const h = await headers(); ua = h.get('user-agent') || '' } catch { /* ignore */ }
+        const { device, os, browser } = parseUserAgent(ua)
+        const meta = { ip, userAgent: ua, device, os, browser }
+
         const result = await validateLoginAccount(
           credentials.email as string,
           credentials.password as string,
           loginRole,
-          { persistUser: true, recordAttempt: true, recordSuccess: true }
+          { persistUser: true, recordAttempt: true, recordSuccess: true },
+          meta,
         )
         if (!result.ok) return null
 
