@@ -30,3 +30,23 @@ Read this before changing edu-manage UI.
 
 - Keep the warm light education theme from `DESIGN.md`.
 - Do not reintroduce old purple-blue/slate dashboard colors as the dominant palette. Purple can be an accent only when a feature needs a distinct role color.
+
+## Management menus
+
+- Desktop admin navigation lives in `src/components/Layout/Sidebar.tsx` as `menuItems`.
+- Mobile admin navigation lives in `src/components/Layout/MainLayout.tsx` as `adminNavItems`.
+- Add, remove, or rename management entries in both places, otherwise desktop and mobile navigation will diverge.
+
+## Realtime lists
+
+- Lists that must feel realtime should use SWR with `refreshInterval: 5000`, `revalidateOnFocus: true`, and `revalidateOnReconnect: true`.
+
+## Merged schedule data
+
+- When merging old `Schedule` data with new `ClassLesson` data, sort by displayed time of day such as `HH:mm`. Do not rely on ISO string `localeCompare`, because timezone offsets can scramble same-day ordering.
+
+## Brand role colors
+
+- Parent portal warm orange: `#E8784A`.
+- Teacher portal green: `#1D9E75`.
+- Admin console purple accent: `#534AB7`.

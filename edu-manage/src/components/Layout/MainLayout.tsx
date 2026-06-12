@@ -31,6 +31,8 @@ import { useSessionPing } from '@/hooks/useSessionPing'
 
 const { Content } = Layout
 
+// Mobile admin menu. Keep in sync with Sidebar.tsx menuItems for desktop.
+// When adding or removing admin routes, update both places.
 const adminNavItems = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: '数据总览' },
   { key: '/students', icon: <UserOutlined />, label: '学员管理' },

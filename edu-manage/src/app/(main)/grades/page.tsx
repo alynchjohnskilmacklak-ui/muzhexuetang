@@ -46,6 +46,7 @@ export default function GradesPage() {
   const [selectedPaperId, setSelectedPaperId] = useState('')
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
+  const [recognizing, setRecognizing] = useState(false)
   const [filterGrade, setFilterGrade] = useState('')
 
   const { data: studentsData } = useSWR('/api/students?status=ACTIVE&limit=200', fetcher)
@@ -208,6 +209,33 @@ export default function GradesPage() {
     if (tags.includes(tag)) return message.error('标签已存在')
     setTags((prev) => [...prev, tag])
     setCustomTag('')
+  }
+
+  const recognizeQuestions = async () => {
+    if (imageUrls.length === 0) return message.warning('\u8bf7\u5148\u4e0a\u4f20\u8bd5\u5377\u56fe\u7247')
+    setRecognizing(true)
+    try {
+      const res = await fetch('/api/exam-papers/recognize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageUrls, subject }),
+      })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) { message.error(data?.error || 'AI \u8bc6\u522b\u5931\u8d25'); return }
+      const recognized = Array.isArray(data?.questions) ? data.questions : []
+      if (recognized.length === 0) { message.info('\u672a\u8bc6\u522b\u5230\u9898\u76ee\uff0c\u8bf7\u624b\u52a8\u6dfb\u52a0'); return }
+      setQuestions(recognized.map((q: Record<string, unknown>, i: number) => ({
+        order: Number(q.order) || i + 1,
+        topic: String(q.topic || ''),
+        mastery: ['MASTERED', 'NEEDS_REVIEW', 'NEEDS_PRACTICE'].includes(String(q.mastery)) ? String(q.mastery) : 'NEEDS_REVIEW',
+        teacherNote: String(q.teacherNote || ''),
+      })))
+      message.success(`AI \u8bc6\u522b\u51fa ${recognized.length} \u9053\u9898\uff0c\u8bf7\u6838\u5bf9\u4fee\u6539`)
+    } catch {
+      message.error('AI \u8bc6\u522b\u5f02\u5e38\uff0c\u8bf7\u91cd\u8bd5')
+    } finally {
+      setRecognizing(false)
+    }
   }
 
   const addQuestion = () => {
@@ -419,23 +447,12 @@ export default function GradesPage() {
               </div>
             </div>
 
-            {/* 总评语 */}
-            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #EEE7E1', padding: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#1F2329', marginBottom: 8 }}>总体评语</div>
-              <TextArea
-                value={overallComment}
-                onChange={e => setOverallComment(e.target.value)}
-                rows={3}
-                placeholder="对本次试卷的总体评价，将显示在家长端试卷卡片顶部..."
-                style={{ borderRadius: 8 }}
-                maxLength={300}
-                showCount
-              />
-            </div>
-
             {/* 试卷图片 */}
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #EEE7E1', padding: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#1F2329', marginBottom: 10 }}>试卷图片</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#E8784A', color: '#fff', fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>1</span>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#1F2329' }}>{'\u4e0a\u4f20\u8bd5\u5377\u56fe\u7247'}</div>
+              </div>
               {imageUrls.length > 0 ? (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 10 }}>
                   {imageUrls.map((url, i) => (
@@ -454,12 +471,11 @@ export default function GradesPage() {
                   ))}
                 </div>
               ) : null}
-              <Upload.Dragger name="file" action="/api/upload" accept="image/*,.pdf" multiple maxCount={9}
+              <Upload.Dragger name="file" action="/api/upload" accept="image/*" multiple maxCount={9}
                 showUploadList={false}
                 beforeUpload={(file) => {
-                  const isValid = file.type.startsWith('image/') || file.type === 'application/pdf'
-                  if (!isValid) { message.warning('仅支持图片或 PDF 文件'); return Upload.LIST_IGNORE }
-                  if (file.size > 10 * 1024 * 1024) { message.warning('文件大小不能超过 10MB'); return Upload.LIST_IGNORE }
+                  if (!file.type.startsWith('image/')) { message.warning('\u4ec5\u652f\u6301\u56fe\u7247\u6587\u4ef6'); return Upload.LIST_IGNORE }
+                  if (file.size > 10 * 1024 * 1024) { message.warning('\u56fe\u7247\u5927\u5c0f\u4e0d\u80fd\u8d85\u8fc7 10MB'); return Upload.LIST_IGNORE }
                   return true
                 }}
                 onChange={(info) => {
@@ -477,9 +493,23 @@ export default function GradesPage() {
                 style={{ borderRadius: 8, background: imageUrls.length > 0 ? '#FCFBF9' : undefined }}
               >
                 <p style={{ margin: 0, fontSize: 13, color: '#98A2B3' }}>
-                  {imageUrls.length > 0 ? `已上传 ${imageUrls.length} 张，继续添加` : '点击或拖拽上传试卷图片 / PDF'}
+                  {imageUrls.length > 0 ? `已上传 ${imageUrls.length} 张，继续添加` : '\u70b9\u51fb\u6216\u62d6\u62fd\u4e0a\u4f20\u8bd5\u5377\u56fe\u7247'}
                 </p>
               </Upload.Dragger>
+            </div>
+
+            {/* 总评语 */}
+            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #EEE7E1', padding: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#1F2329', marginBottom: 8 }}>总体评语</div>
+              <TextArea
+                value={overallComment}
+                onChange={e => setOverallComment(e.target.value)}
+                rows={3}
+                placeholder="对本次试卷的总体评价，将显示在家长端试卷卡片顶部..."
+                style={{ borderRadius: 8 }}
+                maxLength={300}
+                showCount
+              />
             </div>
 
             {/* 知识点标签 */}
@@ -517,13 +547,24 @@ export default function GradesPage() {
 
             {/* 题目标注 */}
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #EEE7E1', padding: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#1F2329' }}>题目标注</div>
-                <Button size="small" icon={<PlusOutlined />} onClick={addQuestion}>添加题目</Button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#1F2329' }}>{'\u9898\u76ee\u6807\u6ce8'}</div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <Button size="small" type="primary" loading={recognizing} onClick={recognizeQuestions}
+                    disabled={imageUrls.length === 0}
+                    style={{ background: '#7c5cff', borderColor: '#7c5cff' }}>
+                    {'\u2728 AI \u8bc6\u522b\u9898\u76ee'}
+                  </Button>
+                  <Button size="small" icon={<PlusOutlined />} onClick={addQuestion}>{'\u6dfb\u52a0\u9898\u76ee'}</Button>
+                </div>
               </div>
-              {questions.length === 0 ? (
+              {imageUrls.length === 0 && questions.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '20px 0', color: '#98A2B3', fontSize: 13 }}>
-                  点击"添加题目"开始标注每道题的掌握情况
+                  {'\u5148\u5728\u4e0a\u65b9\u4e0a\u4f20\u8bd5\u5377\u56fe\u7247\uff0c\u518d\u70b9\u300cAI \u8bc6\u522b\u9898\u76ee\u300d\u81ea\u52a8\u751f\u6210\uff0c\u6216\u624b\u52a8\u300c\u6dfb\u52a0\u9898\u76ee\u300d'}
+                </div>
+              ) : questions.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '20px 0', color: '#98A2B3', fontSize: 13 }}>
+                  {'\u70b9\u300cAI \u8bc6\u522b\u9898\u76ee\u300d\u8ba9 AI \u81ea\u52a8\u6807\u6ce8\uff0c\u6216\u300c\u6dfb\u52a0\u9898\u76ee\u300d\u624b\u52a8\u5f55\u5165'}
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

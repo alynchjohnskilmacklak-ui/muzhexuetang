@@ -12,6 +12,7 @@ import {
   BookOutlined,
   CalendarOutlined,
   CheckSquareOutlined,
+  CommentOutlined,
   ClockCircleOutlined,
   CoffeeOutlined,
   DashboardOutlined,
@@ -34,6 +35,8 @@ import {
 const { Sider } = Layout
 const fetcher = (url: string) => fetch(url).then((res) => res.ok ? res.json() : [])
 
+// Desktop admin menu. Keep in sync with MainLayout.tsx adminNavItems for mobile.
+// When adding or removing admin routes, update both places.
 const menuItems: MenuProps['items'] = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: '数据总览' },
   { key: '/students', icon: <UserOutlined />, label: '学员管理' },
@@ -62,6 +65,7 @@ const menuItems: MenuProps['items'] = [
   { key: '/attendance', icon: <CheckSquareOutlined />, label: '考勤管理' },
   { key: '/meals', icon: <CoffeeOutlined />, label: '就餐管理' },
   { key: '/classroom-feedback', icon: <MessageOutlined />, label: '成长反馈' },
+  { key: '/parent-messages', icon: <CommentOutlined />, label: '\u5bb6\u957f\u7559\u8a00' },
   { key: '/volunteer', icon: <ReadOutlined />, label: '志愿填报' },
   { key: '/fees', icon: <DollarOutlined />, label: '收费管理' },
   { key: '/grades', icon: <FileTextOutlined />, label: '学习档案' },
