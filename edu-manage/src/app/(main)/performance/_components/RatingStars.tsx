@@ -1,7 +1,7 @@
 'use client'
 
 import { Rate, Space } from 'antd'
-import { RATING_LABELS } from '@/lib/performance'
+import { RATING_LABELS } from '@/lib/mood-meta'
 
 export type RatingMap = Record<keyof typeof RATING_LABELS, number>
 

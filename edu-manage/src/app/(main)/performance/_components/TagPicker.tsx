@@ -1,8 +1,8 @@
-ï»¿'use client'
+'use client'
 
 import { Input, Space, Tag } from 'antd'
 import { useState } from 'react'
-import { QUICK_TAGS } from '@/lib/performance'
+import { QUICK_TAGS } from '@/lib/mood-meta'
 
 export function TagPicker({ value, onChange }: { value: string[]; onChange: (value: string[]) => void }) {
   const [custom, setCustom] = useState('')
@@ -44,7 +44,7 @@ export function TagPicker({ value, onChange }: { value: string[]; onChange: (val
         value={custom}
         onChange={(event) => setCustom(event.target.value)}
         onPressEnter={addCustom}
-        placeholder="è¾“å…¥è‡ªå®šä¹‰æ ‡ç­¾åŽå›žè½¦"
+        placeholder="ÊäÈë×Ô¶¨Òå±êÇ©ºó»Ø³µ"
         maxLength={12}
       />
     </Space>

@@ -20,11 +20,6 @@ function createClient(url: string | undefined): PrismaClient {
   })
 }
 
-/**
- * Legacy single-database client. Kept exported for backward compatibility with
- * routes that have not been migrated to dual-DB yet. When DUAL_DB is enabled,
- * new code MUST use getRequestPrisma() or getPrismaForDivision() instead.
- */
 export const prisma: PrismaClient =
   globalForPrisma.prisma ?? createClient(buildUrl(process.env.DATABASE_URL))
 
@@ -50,19 +45,20 @@ export function isDualDbEnabled(): boolean {
   return process.env.DUAL_DB === 'true'
 }
 
-/** Pick the prisma client for a given division. */
 export function getPrismaForDivision(division: DivisionKey): PrismaClient {
   if (!isDualDbEnabled()) return prisma
   return division === 'SENIOR' ? getSenior() : getJunior()
 }
 
 /**
- * Resolve the prisma client for the CURRENT request using session.user.division.
- * Throws if no session is present. Use this in API routes after authentication.
+ * Resolve the prisma client for the CURRENT request.
+ * In single-DB mode returns the default prisma client.
+ * In dual-DB mode reads division from session via lazy require to avoid webpack tracing.
  */
 export async function getRequestPrisma(): Promise<PrismaClient> {
   if (!isDualDbEnabled()) return prisma
-  const { auth } = await import('./auth')
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { auth } = require('./auth') as typeof import('./auth')
   const session = await auth()
   const division = (session?.user as { division?: string } | undefined)?.division
   if (division !== 'JUNIOR' && division !== 'SENIOR') {
