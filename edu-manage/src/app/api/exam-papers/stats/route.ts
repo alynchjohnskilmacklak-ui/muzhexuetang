@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
@@ -12,6 +12,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
 
+
+  const prisma = await getRequestPrisma()
   const now = new Date()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
   const division = getRequestDivision(user, req.nextUrl.searchParams.get('division'))

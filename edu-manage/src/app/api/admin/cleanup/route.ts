@@ -1,5 +1,5 @@
-﻿import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 export const POST = apiHandler(async () => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '仅管理员可操作' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const results: Record<string, number> = {}
 
@@ -157,6 +158,8 @@ export const GET = apiHandler(async () => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '仅管理员' }, { status: 403 })
 
+
+  const prisma = await getRequestPrisma()
   const [archivedGroups, cancelledSchedules, cancelledLessons, deletedPapers, resignedTeachers, inactiveStudents, withdrawnEnrollments, oldLogs, oldRecords] = await Promise.all([
     prisma.classGroup.count({ where: { status: 'ARCHIVED' } }),
     prisma.schedule.count({ where: { status: 'cancelled' } }),

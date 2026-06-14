@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { resolveTeacherForUser } from '@/lib/performance'
@@ -12,6 +12,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const role = (session.user as { role?: string }).role
+  const prisma = await getRequestPrisma()
   const userId = (session.user as { id?: string }).id
 
   const { searchParams } = new URL(req.url)

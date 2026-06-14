@@ -1,7 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const post = await prisma.performancePost.findFirst({
@@ -31,6 +32,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const user = session?.user as { id?: string; email?: string | null; name?: string | null; role?: string } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (!['admin', 'teacher'].includes(user.role || '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const post = await prisma.performancePost.findFirst({ where: { id, deletedAt: null } })
@@ -67,6 +69,7 @@ export const DELETE = apiHandler(async (_req: NextRequest, { params }: { params:
   const user = session?.user as { id?: string; email?: string | null; name?: string | null; role?: string } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (!['admin', 'teacher'].includes(user.role || '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const post = await prisma.performancePost.findFirst({ where: { id, deletedAt: null } })

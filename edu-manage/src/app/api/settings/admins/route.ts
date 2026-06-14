@@ -1,7 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -18,6 +18,8 @@ export const GET = apiHandler(async () => {
   const currentUser = await requireAdmin()
   if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 
+
+  const prisma = await getRequestPrisma()
   const admins = await prisma.user.findMany({
     where: { role: 'admin' },
     select: {
@@ -37,6 +39,7 @@ export const GET = apiHandler(async () => {
 export const POST = apiHandler(async (req: NextRequest) => {
   const currentUser = await requireAdmin()
   if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const body = await req.json().catch(() => ({}))
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''

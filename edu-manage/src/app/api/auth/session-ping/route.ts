@@ -1,6 +1,6 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -13,6 +13,8 @@ export const GET = apiHandler(async () => {
     return NextResponse.json({ status: 'unauthenticated' }, { status: 401 })
   }
 
+
+  const prisma = await getRequestPrisma()
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
     select: { currentSessionToken: true, status: true },

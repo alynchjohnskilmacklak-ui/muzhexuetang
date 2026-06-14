@@ -1,7 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getVolunteerGuideForAdmin, getVolunteerGuideForParent, getOrCreateVolunteerGuide } from '@/lib/volunteer'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -21,6 +21,8 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   const role = (session?.user as { role?: string } | undefined)?.role
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   if (!['admin', 'teacher'].includes(role || '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const guide = await getOrCreateVolunteerGuide()

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireAdminUser, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ teacherId: string }> }) {
   try {
-    await requireAdminUser()
+    const { prisma } = await requireAdminUser()
     const { teacherId } = await params
     const period = request.nextUrl.searchParams.get('period') || 'month'
     const now = new Date()

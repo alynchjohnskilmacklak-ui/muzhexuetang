@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 const SUPER_ADMIN_NAME = '任文涛'
@@ -26,6 +26,7 @@ export async function PATCH(
     return NextResponse.json({ error: '不能禁用自己的账号' }, { status: 400 })
   }
 
+  const prisma = await getRequestPrisma()
   const [currentAdmin, targetUser] = await Promise.all([
     prisma.user.findUnique({ where: { id: currentUser.id }, select: { name: true } }),
     prisma.user.findUnique({ where: { id }, select: { name: true, role: true } }),

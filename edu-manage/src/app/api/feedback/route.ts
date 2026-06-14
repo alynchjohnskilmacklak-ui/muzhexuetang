@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 import { triggerFeedbackBonus } from '@/lib/teacher-salary'
 import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { getRequestPrisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,8 +29,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const limit = Math.min(200, Number(sp.get('limit') || 50))
 
   const where: Record<string, unknown> = { status: 'PUBLISHED' }
+  let prisma = await getRequestPrisma()
   if (user.role === 'teacher') {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma: tPrisma } = await requireCurrentTeacher()
+    prisma = tPrisma
     where.teacherId = teacher.id
   } else if (teacherId) {
     where.teacherId = teacherId
@@ -94,7 +95,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   let teacherId: string
   let teacherName: string
   if (isTeacher) {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     teacherId = teacher.id
     teacherName = teacher.name
   } else {
@@ -199,6 +200,8 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
   const user = session?.user as { id: string; role: string } | undefined
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const { id, parentReply, adminReply } = await req.json()
   if (!id) return NextResponse.json({ error: '缺少反馈 ID' }, { status: 400 })
 

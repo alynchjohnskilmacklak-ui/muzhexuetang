@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -9,6 +9,8 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const sp = request.nextUrl.searchParams
   const page = parseInt(sp.get('page') || '1')
   const pageSize = parseInt(sp.get('pageSize') || '50')

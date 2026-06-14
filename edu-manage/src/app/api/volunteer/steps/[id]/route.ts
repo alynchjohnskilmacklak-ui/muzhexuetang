@@ -1,7 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -15,6 +15,7 @@ async function requireEditor() {
 }
 
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  const prisma = await getRequestPrisma()
   const guard = await requireEditor()
   if (guard.error) return guard.error
 
@@ -41,6 +42,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
 })
 
 export const DELETE = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  const prisma = await getRequestPrisma()
   const guard = await requireEditor()
   if (guard.error) return guard.error
 

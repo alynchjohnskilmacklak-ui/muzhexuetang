@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getEffectiveMealMenuForDate } from '@/lib/meal-template'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -15,6 +15,8 @@ function startOfToday() {
 export const GET = apiHandler(async () => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   const userId = (session.user as { id: string }).id
 
   const today = startOfToday()
@@ -57,6 +59,8 @@ export const GET = apiHandler(async () => {
 export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   const userId = (session.user as { id: string }).id
 
   const { studentId, menuId, eating } = await req.json()

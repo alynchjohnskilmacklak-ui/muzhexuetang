@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const prisma = await getRequestPrisma()
   const { id } = await params
 
   const message = await prisma.parentMessage.findUnique({
@@ -48,6 +49,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (!['admin', 'teacher'].includes(user.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const prisma = await getRequestPrisma()
   const { id } = await params
 
   const existing = await prisma.parentMessage.findUnique({ where: { id } })

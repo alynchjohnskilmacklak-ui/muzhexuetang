@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { calculateAttendanceDeductHours } from '@/lib/attendance-hours'
@@ -20,6 +20,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!user || user.role !== 'admin') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
+  const prisma = await getRequestPrisma()
 
   const { lessonId, records } = await req.json() as {
     lessonId?: string

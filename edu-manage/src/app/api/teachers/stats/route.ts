@@ -1,5 +1,5 @@
-﻿import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -9,6 +9,8 @@ export const GET = apiHandler(async () => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const [total, fullTime, partTime, avgRating] = await Promise.all([
     prisma.teacher.count({ where: { status: 'ACTIVE' } }),
     prisma.teacher.count({ where: { status: 'ACTIVE', employmentType: 'FULL_TIME' } }),

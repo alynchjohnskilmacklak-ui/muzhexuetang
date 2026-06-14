@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { revalidatePath } from 'next/cache'
@@ -12,6 +12,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   try {
     const body = await req.json()

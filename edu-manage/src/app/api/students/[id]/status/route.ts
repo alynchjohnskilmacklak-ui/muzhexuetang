@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { apiHandler } from '@/lib/api-handler'
@@ -11,6 +11,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const role = (session.user as { role?: string }).role
   if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const { status, reason } = await req.json()

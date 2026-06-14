@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -8,6 +8,8 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async () => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   const rooms = await prisma.room.findMany({ where: { status: 'active' }, orderBy: { name: 'asc' } })
   return NextResponse.json(rooms)
 })
@@ -15,6 +17,8 @@ export const GET = apiHandler(async () => {
 export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   if ((session.user as { role?: string }).role !== 'admin') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }

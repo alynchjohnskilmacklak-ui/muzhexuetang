@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import {
   DEFAULT_FEEDBACK_RATE_GROUP,
@@ -27,7 +26,7 @@ function normalizeOneOnOneRates(value: unknown) {
 
 export async function GET(req: NextRequest) {
   try {
-    await requireAdminUser()
+    const { prisma } = await requireAdminUser()
     const teacherId = req.nextUrl.searchParams.get('teacherId')
     if (!teacherId) return NextResponse.json({ error: '缺少 teacherId' }, { status: 400 })
 
@@ -49,7 +48,7 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const user = await requireAdminUser()
+    const { user, prisma } = await requireAdminUser()
     const body = await req.json()
     const teacherId = typeof body.teacherId === 'string' ? body.teacherId : ''
     if (!teacherId) return NextResponse.json({ error: '缺少 teacherId' }, { status: 400 })

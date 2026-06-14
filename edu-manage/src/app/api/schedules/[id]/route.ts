@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
@@ -14,6 +14,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
   const { id } = await params
+  const prisma = await getRequestPrisma()
 
   try {
     const body = await req.json()
@@ -156,6 +157,7 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
   if ((session.user as { role?: string }).role !== 'admin') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
+  const prisma = await getRequestPrisma()
   const { id } = await params
   const existing = await prisma.classLesson.findUnique({ where: { id }, select: { id: true } })
   if (!existing) return NextResponse.json({ error: '课次不存在' }, { status: 404 })

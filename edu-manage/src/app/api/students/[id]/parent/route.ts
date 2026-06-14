@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 import pinyin from 'pinyin'
@@ -14,6 +14,7 @@ export const POST = apiHandler(async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) => {
+  const prisma = await getRequestPrisma()
   const { id } = await params
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

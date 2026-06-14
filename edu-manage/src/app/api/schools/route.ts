@@ -1,6 +1,6 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -9,6 +9,8 @@ export const GET = apiHandler(async () => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const schools = await prisma.highSchoolInfo.findMany({
     orderBy: [{ tongZhao: 'desc' }],
   })

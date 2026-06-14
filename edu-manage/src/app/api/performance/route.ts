@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { assertTeacherOwnsStudent, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 import { parentActiveStudentWhere, parentVisiblePerformancePostWhere } from '@/lib/business-visibility'
@@ -22,6 +22,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   const user = session?.user as { id?: string; email?: string | null; name?: string | null; role?: string } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   if (!['admin', 'teacher', 'parent'].includes(user.role || '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { searchParams } = new URL(req.url)
@@ -106,6 +108,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   const teacher = await resolveTeacherForUser({ id: user.id, email: user.email, name: user.name, role: user.role })
   if (!teacher) return NextResponse.json({ error: '没有匹配到教师档案，请先创建教师资料' }, { status: 400 })
+  const prisma = await getRequestPrisma()
 
   const body = await req.json()
   const rawIds = Array.isArray(body.studentIds)

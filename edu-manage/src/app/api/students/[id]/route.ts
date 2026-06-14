@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { apiHandler } from '@/lib/api-handler'
@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const student = await prisma.student.findUnique({
@@ -51,6 +52,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const role = (session.user as { role?: string }).role
   if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const body = await req.json()
@@ -88,6 +90,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!session?.user) return NextResponse.json({ error: '请重新登录后再办理离校' }, { status: 401 })
     const role = (session.user as { role?: string }).role
     if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+    const prisma = await getRequestPrisma()
 
     const { id } = await params
 

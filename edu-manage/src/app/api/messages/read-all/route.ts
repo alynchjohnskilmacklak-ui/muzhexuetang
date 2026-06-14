@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -9,6 +9,8 @@ export const PATCH = apiHandler(async () => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   if (user.role === 'parent') {
     await prisma.parentMessageReply.updateMany({
       where: {

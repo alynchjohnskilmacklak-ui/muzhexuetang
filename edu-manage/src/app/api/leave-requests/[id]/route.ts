@@ -1,10 +1,11 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { requireCurrentTeacher, teacherStudentWhere } from '@/lib/teacher-portal'
 
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  const prisma = await getRequestPrisma()
   const { id } = await params
   const session = await auth()
   if (!session?.user || !['admin', 'teacher'].includes((session.user as any).role)) {

@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
 import { differenceInDays } from 'date-fns'
-import { prisma } from '@/lib/prisma'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     const now = new Date()
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
     const students = await prisma.student.findMany({

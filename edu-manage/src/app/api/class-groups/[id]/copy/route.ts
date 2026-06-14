@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { addDays, differenceInDays } from 'date-fns'
 import { apiHandler } from '@/lib/api-handler'
@@ -7,6 +7,7 @@ import { apiHandler } from '@/lib/api-handler'
 export const POST = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const body = await req.json()

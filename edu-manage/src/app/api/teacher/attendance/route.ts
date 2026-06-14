@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonWhere, todayRange } from '@/lib/teacher-portal'
 import { calculateAttendanceDeductHours } from '@/lib/attendance-hours'
@@ -13,7 +13,7 @@ const VALID_STATUS = new Set(['PRESENT', 'LEAVE', 'ABSENT', 'MAKEUP'])
 
 export const GET = apiHandler(async (request: NextRequest) => {
   try {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     const { start: today, end: todayEnd } = todayRange()
     const lessonId = request.nextUrl.searchParams.get('lessonId')
     const lessonWhere = teacherLessonWhere(teacher.id)
@@ -111,6 +111,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
     let lessonWhere: Record<string, unknown>
 
     if (session.user.role === 'admin') {
+      const prisma = await getRequestPrisma()
       const lessonForAdmin = await prisma.classLesson.findUnique({
         where: { id: lessonId },
         include: {
@@ -124,6 +125,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
       lessonWhere = { id: lessonId }
     } else {
       const result = await requireCurrentTeacher()
+      const prisma = result.prisma
       user = { id: result.user.id }
       teacher = { id: result.teacher.id, name: result.teacher.name }
       lessonWhere = { id: lessonId, ...teacherLessonWhere(teacher.id) }

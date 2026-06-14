@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { activeEnrollmentWhere, visibleClassGroupWhere, visibleStudentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
@@ -24,6 +24,7 @@ function roleLabel(role?: string | null) {
 export const GET = apiHandler(async (req: NextRequest) => {
   const user = await requireAdmin()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const prisma = await getRequestPrisma()
 
   const { searchParams } = req.nextUrl
   const source = searchParams.get('source') || 'all'
@@ -199,6 +200,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 export const POST = apiHandler(async (req: NextRequest) => {
   const user = await requireAdmin()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const prisma = await getRequestPrisma()
 
   const body = await req.json()
   const type = body.type === 'paper' ? 'paper' : body.type === 'notification' ? 'notification' : 'post'
@@ -256,6 +258,8 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
   const user = await requireAdmin()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const body = await req.json()
   const type = body.type === 'paper' ? 'paper' : body.type === 'notification' ? 'notification' : 'post'
   const id = typeof body.id === 'string' ? body.id : ''
@@ -275,6 +279,8 @@ export const DELETE = apiHandler(async (req: NextRequest) => {
   const user = await requireAdmin()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const { searchParams } = req.nextUrl
   const type = searchParams.get('type') === 'paper' ? 'paper' : searchParams.get('type') === 'notification' ? 'notification' : 'post'
   const id = searchParams.get('id') || ''

@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { startOfMealWeek, templateToMenuLike, type EffectiveMealMenu } from '@/lib/meals'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
@@ -11,6 +11,8 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const weekStart = startOfMealWeek(request.nextUrl.searchParams.get('weekStart') || new Date())
   if (!weekStart) return NextResponse.json({ error: 'Invalid weekStart' }, { status: 400 })
   const division = getRequestDivision(session.user as Record<string, unknown> | undefined, request.nextUrl.searchParams.get('division'))
@@ -54,6 +56,8 @@ export const POST = apiHandler(async (request: NextRequest) => {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
+
+  const prisma = await getRequestPrisma()
   const body = await request.json()
   const weekStart = startOfMealWeek(body.weekStart || new Date())
   const dayOfWeek = Number(body.dayOfWeek)

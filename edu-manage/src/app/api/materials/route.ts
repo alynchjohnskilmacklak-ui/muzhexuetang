@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { MaterialAudience, MaterialSource } from '@prisma/client'
 import {
   adminVisibleMaterialWhere,
@@ -16,6 +16,8 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   const user = session.user as { id?: string; email?: string | null; name?: string | null; role?: string }
   const role = user.role
 
@@ -77,6 +79,8 @@ export const DELETE = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
+
+  const prisma = await getRequestPrisma()
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ error: '缺少id' }, { status: 400 })

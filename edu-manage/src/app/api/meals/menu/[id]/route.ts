@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 async function requireAdmin() {
@@ -10,6 +10,7 @@ async function requireAdmin() {
 
 export const PUT = apiHandler(async (request: NextRequest, context: { params: Promise<{ id: string }> }) => {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  const prisma = await getRequestPrisma()
   const { id } = await context.params
   const body = await request.json()
   const mainDish = typeof body.mainDish === 'string' ? body.mainDish.trim() : ''
@@ -29,6 +30,7 @@ export const PUT = apiHandler(async (request: NextRequest, context: { params: Pr
 
 export const DELETE = apiHandler(async (_request: NextRequest, context: { params: Promise<{ id: string }> }) => {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  const prisma = await getRequestPrisma()
   const { id } = await context.params
   await prisma.mealMenu.delete({ where: { id } })
   return NextResponse.json({ success: true })

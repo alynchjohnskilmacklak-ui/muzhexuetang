@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -7,6 +7,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const { searchParams } = new URL(req.url)
   const groupId = searchParams.get('groupId')
 
@@ -31,6 +33,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
+
+  const prisma = await getRequestPrisma()
   const body = await req.json()
   const { groupId, name, type, assessDate, fullScore } = body
 

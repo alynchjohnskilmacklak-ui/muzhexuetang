@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { LessonStatus } from '@prisma/client'
-import { prisma } from '@/lib/prisma'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   try {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     const { searchParams } = req.nextUrl
     const days = Math.min(30, Math.max(1, Number(searchParams.get('days') || 7)))
     const status = searchParams.get('status')

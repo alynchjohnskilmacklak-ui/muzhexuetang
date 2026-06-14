@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 
 export const dynamic = 'force-dynamic'
@@ -15,7 +14,7 @@ function normalizeIds(body: any) {
 
 export async function GET() {
   try {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     const papers = await prisma.examPaper.findMany({
       where: { teacherId: teacher.id, status: { not: 'DELETED' } },
       include: { student: { select: { id: true, name: true, grade: true } } },
@@ -30,7 +29,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, teacher } = await requireCurrentTeacher()
+    const { user, teacher, prisma } = await requireCurrentTeacher()
     const body = await request.json()
     const studentIds = normalizeIds(body)
     const title = typeof body.title === 'string' ? body.title.trim() : ''

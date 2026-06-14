@@ -1,5 +1,5 @@
-﻿import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -9,6 +9,7 @@ export const POST = apiHandler(async () => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const [students, teachers, courses, classGroups, fees, enrollments, attendances, examPapers, makeups] =
     await Promise.all([

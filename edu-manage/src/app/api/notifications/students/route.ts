@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 
@@ -10,6 +10,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
+
+  const prisma = await getRequestPrisma()
   const division = getRequestDivision(session.user as Record<string, unknown> | undefined, req.nextUrl.searchParams.get('division'))
 
   const students = await prisma.student.findMany({

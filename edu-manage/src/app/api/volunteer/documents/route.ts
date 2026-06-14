@@ -1,9 +1,9 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getOrCreateVolunteerGuide } from '@/lib/volunteer'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -12,6 +12,8 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async () => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   const guide = await getOrCreateVolunteerGuide()
   const documents = await prisma.guideDocument.findMany({ where: { guideId: guide.id }, orderBy: { sortOrder: 'asc' } })
   return NextResponse.json({ documents })
@@ -38,6 +40,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (file.size > 20 * 1024 * 1024) {
     return NextResponse.json({ error: '文件大小不能超过 20MB' }, { status: 400 })
   }
+  const prisma = await getRequestPrisma()
 
   const bytes = Buffer.from(await file.arrayBuffer())
   const safeName = `${Date.now()}-${file.name}`.replace(/[^\w.\-\u4e00-\u9fa5]/g, '_')

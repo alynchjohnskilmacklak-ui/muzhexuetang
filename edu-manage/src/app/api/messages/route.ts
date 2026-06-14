@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { parentActiveStudentWhere } from '@/lib/business-visibility'
@@ -11,6 +11,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const { searchParams } = new URL(req.url)
   const status = searchParams.get('status') || undefined
   const division = getRequestDivision(user, searchParams.get('division'))
@@ -74,6 +76,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
 export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   if (user.role !== 'parent') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()

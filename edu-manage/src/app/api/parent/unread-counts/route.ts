@@ -1,5 +1,5 @@
-﻿import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { parentActiveStudentWhere, parentVisibleExamPaperWhere, parentVisiblePerformancePostWhere, visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
@@ -12,6 +12,8 @@ export const GET = apiHandler(async () => {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
 
+
+  const prisma = await getRequestPrisma()
   const [papers, posts, notifications] = await Promise.all([
     prisma.examPaper.count({
       where: {

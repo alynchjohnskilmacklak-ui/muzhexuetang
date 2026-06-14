@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
@@ -19,6 +19,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const { searchParams } = new URL(req.url)
   const q = searchParams.get('q') || ''
   const type = searchParams.get('type')
@@ -106,6 +108,7 @@ export async function POST(req: NextRequest) {
     if ((session.user as { role?: string }).role !== 'admin') {
       return NextResponse.json({ error: '无权限' }, { status: 403 })
     }
+    const prisma = await getRequestPrisma()
 
     const body = await req.json()
     const name = typeof body.name === 'string' ? body.name.trim() : ''

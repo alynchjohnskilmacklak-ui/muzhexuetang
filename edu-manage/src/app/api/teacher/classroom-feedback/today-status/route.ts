@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
 import { visibleStudentWhere } from '@/lib/business-visibility'
@@ -7,7 +6,7 @@ import { visibleStudentWhere } from '@/lib/business-visibility'
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async () => {
-  const { teacher } = await requireCurrentTeacher()
+  const { teacher, prisma } = await requireCurrentTeacher()
   const today = new Date()
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
   const todayEnd = new Date(todayStart.getTime() + 86400000)

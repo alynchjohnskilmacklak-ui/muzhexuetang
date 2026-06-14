@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,6 +10,7 @@ export const POST = apiHandler(async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) => {
+  const prisma = await getRequestPrisma()
   const { id } = await params
   const session = await auth()
   if (!session?.user || (session.user as { role?: string }).role !== 'admin') {
@@ -101,6 +102,7 @@ export const DELETE = apiHandler(async (
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) => {
+  const prisma = await getRequestPrisma()
   const { id } = await params
   const session = await auth()
   if (!session?.user || (session.user as { role?: string }).role !== 'admin') {

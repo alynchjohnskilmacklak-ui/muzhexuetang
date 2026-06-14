@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { parentVisibleExamPaperWhere } from '@/lib/business-visibility'
@@ -12,6 +12,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const { searchParams } = new URL(req.url)
   const studentId = searchParams.get('studentId')
   const teacherId = searchParams.get('teacherId')
@@ -60,6 +62,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!user || (user.role !== 'admin' && user.role !== 'teacher')) {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
+  const prisma = await getRequestPrisma()
 
   const body = await req.json()
   const { studentId, classLessonId, title, subject, paperDate, tags } = body
