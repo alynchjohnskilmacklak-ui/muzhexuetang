@@ -16,7 +16,7 @@ import {
   TrophyOutlined,
 } from '@ant-design/icons'
 import { format } from 'date-fns'
-import { PERFORMANCE_BADGES } from '@/lib/performance'
+import { PERFORMANCE_BADGES } from '@/lib/mood-meta'
 import { getDailyQuote } from '@/data/daily-quotes'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 
