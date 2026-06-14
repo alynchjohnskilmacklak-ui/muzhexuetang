@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import { validateLoginAccount, type LoginRole } from './login-accounts'
 import { parseUserAgent } from './device'
 import { emitKick } from './session-events'
-import { prisma } from './prisma'
+import { prisma, getPrismaForDivision } from './prisma'
 
 declare module 'next-auth' {
   interface Session {
@@ -16,7 +16,6 @@ declare module 'next-auth' {
       teacherId?: string | null
       sessionMark?: string
       division: string
-      selectedDivision: string
     }
   }
 }
@@ -63,7 +62,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         )
         if (!result.ok) return null
 
-        const dbUser = await prisma.user.findUnique({
+        const userDb = getPrismaForDivision(result.user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR')
+        const dbUser = await userDb.user.findUnique({
           where: { id: result.user.id },
           select: { teacherId: true, division: true },
         })
@@ -74,8 +74,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name:      result.user.name,
           role:      result.user.role,
           teacherId: dbUser?.teacherId ?? null,
-          division:  dbUser?.division || result.user.division || 'JUNIOR',
-          selectedDivision: result.user.selectedDivision || (credentials.division as string) || (dbUser?.division as string) || 'JUNIOR',
+          division:  result.user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR',
         }
       },
     }),
@@ -93,11 +92,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         t.id               = u.id as string
         t.teacherId        = u.teacherId ?? null
         t.division         = u.division ?? 'JUNIOR'
-        t.selectedDivision = u.selectedDivision ?? 'JUNIOR'
         const sessionMark = crypto.randomUUID()
         t.sessionMark = sessionMark
 
-        await prisma.user.update({
+        const userDivision = (u.division as string) === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+        const userDb = getPrismaForDivision(userDivision)
+        await userDb.user.update({
           where: { id: u.id as string },
           data: {
             currentSessionToken: sessionMark,
@@ -120,7 +120,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         u.teacherId        = t.teacherId ?? null
         u.sessionMark      = t.sessionMark
         u.division         = t.division ?? 'JUNIOR'
-        u.selectedDivision = t.selectedDivision ?? 'JUNIOR'
       }
       return session
     },

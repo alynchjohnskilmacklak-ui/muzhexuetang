@@ -1,7 +1,18 @@
-import { prisma } from '@/lib/prisma'
+import { prisma, getPrismaForDivision, isDualDbEnabled } from '@/lib/prisma'
 import { chineseToPinyin } from '@/lib/pinyin'
 import bcrypt from 'bcryptjs'
-
+import type { PrismaClient } from '@prisma/client'
+/**
+ * Resolve the prisma client for a login attempt. In dual-DB mode the client
+ * for the requested division is used; otherwise the legacy single client.
+ * Returns null if dual-DB is on but division is missing/invalid (a hard error
+ * the caller should surface to the user).
+ */
+function resolveLoginPrisma(division: string | undefined): PrismaClient | null {
+  if (!isDualDbEnabled()) return prisma
+  if (division !== 'JUNIOR' && division !== 'SENIOR') return null
+  return getPrismaForDivision(division)
+}
 export type LoginRole = 'admin' | 'teacher' | 'parent'
 export type LoginFailReason = 'wrong_password' | 'not_found' | 'locked' | 'disabled' | 'uninitialized'
 
@@ -14,7 +25,6 @@ type LoginUser = {
   name: string
   role: LoginRole
   division: string
-  selectedDivision?: string
 }
 
 type ValidationResult =
@@ -33,12 +43,13 @@ export function normalizeLoginEmail(emailInput: string) {
   return emailInput.trim().toLowerCase()
 }
 
-export async function getLoginStatus(emailInput: string) {
+export async function getLoginStatus(emailInput: string, division?: string) {
   const email = normalizeLoginEmail(emailInput)
   if (!email) return { locked: false, failCount: 0, remaining: MAX_FAIL_ATTEMPTS }
 
   const lockWindowStart = new Date(Date.now() - LOCK_WINDOW_MINUTES * 60 * 1000)
-  const failCount = await prisma.loginRecord.count({
+  const db = resolveLoginPrisma(division) ?? prisma
+  const failCount = await db.loginRecord.count({
     where: {
       email,
       success: false,
@@ -54,8 +65,9 @@ export async function getLoginStatus(emailInput: string) {
   }
 }
 
-async function recordLoginFailure(email: string, failReason: LoginFailReason, userId?: string, meta?: RequestMeta) {
-  await prisma.loginRecord.create({
+async function recordLoginFailure(email: string, failReason: LoginFailReason, userId?: string, meta?: RequestMeta, division?: string) {
+  const db = resolveLoginPrisma(division) ?? prisma
+  await db.loginRecord.create({
     data: {
       userId,
       email,
@@ -70,8 +82,9 @@ async function recordLoginFailure(email: string, failReason: LoginFailReason, us
   })
 }
 
-async function recordLoginSuccess(user: LoginUser, meta?: RequestMeta) {
-  await prisma.loginRecord.create({
+async function recordLoginSuccess(user: LoginUser, meta?: RequestMeta, division?: string) {
+  const db = resolveLoginPrisma(division) ?? prisma
+  await db.loginRecord.create({
     data: {
       userId: user.id,
       email: user.email,
@@ -85,25 +98,27 @@ async function recordLoginSuccess(user: LoginUser, meta?: RequestMeta) {
   })
 }
 
-async function findTeacherByLoginEmail(email: string): Promise<TeacherLoginAccount | null> {
-  const teachers = await prisma.teacher.findMany({
+async function findTeacherByLoginEmail(email: string, division?: string): Promise<TeacherLoginAccount | null> {
+  const db = resolveLoginPrisma(division) ?? prisma
+  const teachers = await db.teacher.findMany({
     where: { status: { not: 'RESIGNED' } },
     select: { id: true, name: true, phone: true },
   })
   return teachers.find((teacher) => `${chineseToPinyin(teacher.name)}@tea.com` === email) || null
 }
 
-export async function detectLoginRole(emailInput: string): Promise<LoginRole | null> {
+export async function detectLoginRole(emailInput: string, division?: string): Promise<LoginRole | null> {
   const email = normalizeLoginEmail(emailInput)
   if (!email) return null
 
-  const user = await prisma.user.findUnique({
+  const db = resolveLoginPrisma(division) ?? prisma
+  const user = await db.user.findUnique({
     where: { email },
     select: { role: true },
   })
   if (user?.role === 'admin' || user?.role === 'teacher' || user?.role === 'parent') return user.role
 
-  if (await findTeacherByLoginEmail(email)) return 'teacher'
+  if (await findTeacherByLoginEmail(email, division)) return 'teacher'
   return null
 }
 
@@ -112,9 +127,10 @@ async function verifyPassword(plainPassword: string, storedPassword: string): Pr
   return bcrypt.compare(plainPassword, storedPassword)
 }
 
-function toLoginUser(user: { id: string; email: string; name: string; role: string; division?: string | null }, selectedDivision?: string): LoginUser | null {
+function toLoginUser(user: { id: string; email: string; name: string; role: string; division?: string | null }): LoginUser | null {
   if (user.role !== 'admin' && user.role !== 'teacher' && user.role !== 'parent') return null
-  return { id: user.id, email: user.email, name: user.name, role: user.role, division: user.division || 'JUNIOR', selectedDivision: selectedDivision || user.division || 'JUNIOR' }
+  const division = user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+  return { id: user.id, email: user.email, name: user.name, role: user.role, division }
 }
 
 async function validateDatabaseUser(
@@ -126,10 +142,14 @@ async function validateDatabaseUser(
   meta?: RequestMeta,
   division?: string,
 ): Promise<ValidationResult> {
-  const user = await prisma.user.findUnique({ where: { email } })
+  const db = resolveLoginPrisma(division)
+  if (db === null) {
+    return { ok: false, error: '学部参数缺失', code: 'BAD_DIVISION' }
+  }
+  const user = await db.user.findUnique({ where: { email } })
 
   if (!user) {
-    if (options.recordAttempt) await recordLoginFailure(email, teacher ? 'uninitialized' : 'not_found', undefined, meta)
+    if (options.recordAttempt) await recordLoginFailure(email, teacher ? 'uninitialized' : 'not_found', undefined, meta, division)
     return {
       ok: false,
       error: teacher ? '账号未初始化，请联系管理员' : '用户名输入错误',
@@ -138,40 +158,28 @@ async function validateDatabaseUser(
   }
 
   if (user.role !== expectedRole) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta)
+    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta, division)
     return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
   }
 
   if (user.status === 'disabled') {
-    if (options.recordAttempt) await recordLoginFailure(email, 'disabled', user.id, meta)
+    if (options.recordAttempt) await recordLoginFailure(email, 'disabled', user.id, meta, division)
     return { ok: false, error: '账号已停用', code: 'DISABLED' }
-  }
-
-  // Division validation for teacher and admin
-  if (division && (expectedRole === 'teacher' || expectedRole === 'admin')) {
-    const userDivision = user.division || 'JUNIOR'
-    // ALL-division super admin can access any division
-    if (userDivision !== 'ALL' && userDivision !== division) {
-      const divisionLabel = division === 'JUNIOR' ? '初中部' : '高中部'
-      if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta)
-      return { ok: false, error: `该账号不属于${divisionLabel}`, code: 'BAD_DIVISION' }
-    }
   }
 
   const pwdOk = await verifyPassword(password, user.password)
   if (!pwdOk) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'wrong_password', user.id, meta)
+    if (options.recordAttempt) await recordLoginFailure(email, 'wrong_password', user.id, meta, division)
     return { ok: false, error: '密码错误', code: 'BAD_PASSWORD' }
   }
 
-  const selectedDivision = (user.division === 'ALL' || !division) ? (division || user.division || 'JUNIOR') : (user.division || 'JUNIOR')
-  const loginUser = toLoginUser(user, selectedDivision)
+  const loginUser = toLoginUser(user)
   if (!loginUser) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta)
+    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta, division)
     return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
   }
 
-  if (options.recordSuccess) await recordLoginSuccess(loginUser, meta)
+  if (options.recordSuccess) await recordLoginSuccess(loginUser, meta, division)
   return { ok: true, user: loginUser }
 }
 
@@ -187,28 +195,28 @@ export async function validateLoginAccount(
   const password = passwordInput.trim()
 
   if (options.recordAttempt) {
-    const status = await getLoginStatus(email)
+    const status = await getLoginStatus(email, division)
     if (status.locked) {
-      await recordLoginFailure(email, 'locked', undefined, meta)
+      await recordLoginFailure(email, 'locked', undefined, meta, division)
       return { ok: false, error: '密码连续错误次数过多，账号已临时锁定，请30分钟后重试', code: 'LOCKED' }
     }
   }
 
-  const actualRole = await detectLoginRole(email)
+  const actualRole = await detectLoginRole(email, division)
 
   if (!actualRole) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta)
+    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta, division)
     return { ok: false, error: '用户名输入错误', code: 'BAD_USERNAME' }
   }
   if (actualRole !== loginRole) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta)
+    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta, division)
     return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
   }
 
   if (loginRole === 'teacher') {
-    const teacher = await findTeacherByLoginEmail(email)
+    const teacher = await findTeacherByLoginEmail(email, division)
     if (!teacher) {
-      if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta)
+      if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta, division)
       return { ok: false, error: '用户名输入错误', code: 'BAD_USERNAME' }
     }
     return validateDatabaseUser(email, password, 'teacher', options, teacher, meta, division)
