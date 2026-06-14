@@ -20,7 +20,7 @@ function asStringArray(value: unknown) {
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
-  const user = session?.user as { id?: string; email?: string | null; name?: string | null; role?: string } | undefined
+  const user = session?.user as { id?: string; email?: string | null; name?: string | null; role?: string; division?: string | null } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
  
   const prisma = await getRequestPrisma()
@@ -102,7 +102,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
 export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
-  const user = session?.user as { id?: string; email?: string | null; name?: string | null; role?: string } | undefined
+  const user = session?.user as { id?: string; email?: string | null; name?: string | null; role?: string; division?: string | null } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (!['admin', 'teacher'].includes(user.role || '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 

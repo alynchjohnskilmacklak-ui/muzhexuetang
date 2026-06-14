@@ -13,7 +13,7 @@ async function assertOwnMaterial(id: string) {
       OR: [{ teacherId: teacher.id }, { uploadedBy: user.id }],
     },
   })
-  return { user, teacher, material }
+  return { user, teacher, material, prisma }
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

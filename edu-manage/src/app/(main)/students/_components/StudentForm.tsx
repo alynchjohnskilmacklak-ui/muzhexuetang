@@ -43,7 +43,7 @@ export function StudentForm({
         })
       } else {
         form.resetFields()
-        form.setFieldValue('division', division === 'ALL' ? 'JUNIOR' : division)
+        form.setFieldValue('division', division)
       }
       fetch('/api/teachers?limit=50').then(r => r.json()).then(d => {
         setTeachers(Array.isArray(d) ? d : (d.teachers || []))

@@ -21,14 +21,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const role = (session.user as any).role
   const where: any = {}
   if (status) where.status = status
-  let prisma
+  let prisma = await getRequestPrisma()
   if (role === 'teacher') {
     const result = await requireCurrentTeacher()
     prisma = result.prisma
     where.student = teacherStudentWhere(result.teacher.id)
   }
   if (role === 'admin') {
-    prisma = await getRequestPrisma()
     where.student = { ...(where.student || {}), division }
   }
 

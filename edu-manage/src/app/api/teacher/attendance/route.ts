@@ -109,9 +109,10 @@ export const POST = apiHandler(async (request: NextRequest) => {
     let user = { id: session.user.id }
     let teacher: { id: string; name?: string | null }
     let lessonWhere: Record<string, unknown>
+    let prisma
 
     if (session.user.role === 'admin') {
-      const prisma = await getRequestPrisma()
+      prisma = await getRequestPrisma()
       const lessonForAdmin = await prisma.classLesson.findUnique({
         where: { id: lessonId },
         include: {
@@ -125,7 +126,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
       lessonWhere = { id: lessonId }
     } else {
       const result = await requireCurrentTeacher()
-      const prisma = result.prisma
+      prisma = result.prisma
       user = { id: result.user.id }
       teacher = { id: result.teacher.id, name: result.teacher.name }
       lessonWhere = { id: lessonId, ...teacherLessonWhere(teacher.id) }
