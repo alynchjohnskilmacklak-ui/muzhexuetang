@@ -1,7 +1,7 @@
 'use client'
 
 import { Tooltip } from 'antd'
-import { PERFORMANCE_BADGES } from '@/lib/performance'
+import { PERFORMANCE_BADGES } from '@/lib/mood-meta'
 
 export function BadgeWall({ earned }: { earned: string[] }) {
   return (

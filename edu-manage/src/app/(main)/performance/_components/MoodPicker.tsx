@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Space } from 'antd'
-import { MOOD_META } from '@/lib/performance'
+import { MOOD_META } from '@/lib/mood-meta'
 
 export type MoodValue = keyof typeof MOOD_META
 

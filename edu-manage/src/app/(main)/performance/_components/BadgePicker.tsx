@@ -1,7 +1,7 @@
 'use client'
 
 import { Space, Tag } from 'antd'
-import { PERFORMANCE_BADGES } from '@/lib/performance'
+import { PERFORMANCE_BADGES } from '@/lib/mood-meta'
 
 export function BadgePicker({ value, onChange }: { value: string[]; onChange: (value: string[]) => void }) {
   const selected = value[0] || ''
