@@ -1,5 +1,4 @@
 import { Prisma } from '@prisma/client'
-import { getRequestPrisma } from '@/lib/prisma'
 
 export type EntityKey =
   | 'students'
@@ -205,7 +204,9 @@ export async function createActivityLog(
   entityId: string,
   metadata?: Record<string, unknown>,
 ) {
-  const prisma = await getRequestPrisma()
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { getRequestPrisma: getReqPrisma } = require('@/lib/prisma') as typeof import('@/lib/prisma')
+  const prisma = await getReqPrisma()
   await prisma.activityLog.create({
     data: {
       userId,
@@ -226,7 +227,9 @@ export async function createDeletedRecord(
   deletedById: string,
   reason: string,
 ) {
-  const prisma = await getRequestPrisma()
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { getRequestPrisma: getReqPrisma } = require('@/lib/prisma') as typeof import('@/lib/prisma')
+  const prisma = await getReqPrisma()
   await prisma.deletedRecord.create({
     data: {
       entityType,
