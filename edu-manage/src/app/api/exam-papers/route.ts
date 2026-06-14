@@ -1,10 +1,10 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { parentVisibleExamPaperWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { divisionWhere, getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 

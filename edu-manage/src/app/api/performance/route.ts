@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
@@ -54,7 +54,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     Object.assign(where, parentVisiblePerformancePostWhere(user.id), { studentId: studentId || { in: childIds } })
   }
 
-  if (user.role === 'admin' && division && division !== 'ALL') {
+  if (user.role === 'admin') {
     Object.assign(where, { student: { division } })
   }
 
