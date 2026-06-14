@@ -2,7 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,9 +14,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   const now = new Date()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  const division = req.nextUrl.searchParams.get('division')
-  const divFilter = divisionWhere(division)
-  const paperStudentWhere = { student: divFilter }
+  const division = getRequestDivision(user, req.nextUrl.searchParams.get('division'))
+  const paperStudentWhere = { student: { division } }
 
   const [
     totalPapers,
@@ -41,7 +40,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     }),
     prisma.weaknessRecord.groupBy({
       by: ['topic'],
-      where: { student: divFilter },
+      where: { student: { division } },
       _count: { topic: true },
       orderBy: { _count: { topic: 'desc' } },
       take: 10,

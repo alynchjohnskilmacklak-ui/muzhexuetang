@@ -24,6 +24,22 @@ const TEST_USER_EMAILS = [
   'parent2@test.com',
 ]
 
+const TEST_NAMES = [
+  '管理员',
+  '王老师',
+  '李老师',
+  '张老师',
+  '赵老师',
+  '陈老师',
+  '张爸爸',
+  '李妈妈',
+  '张三',
+  '李四',
+  '王五',
+  '赵六',
+  '孙七',
+]
+
 const TEST_STUDENT_IDS = ['s1', 's2', 's3', 's4', 's5']
 const TEST_TEACHER_IDS = ['t1', 't2', 't3', 't4', 't5']
 const TEST_COURSE_IDS = ['c1', 'c2', 'c3', 'c4', 'c5']
@@ -39,21 +55,27 @@ const TEST_COURSE_NAMES = [
 async function main() {
   console.log('开始清理测试数据...\n')
 
-  // 1. 找到测试用户 ID
+  // 1. 找到测试用户 ID（按邮箱 + 按姓名）
   const testUsers = await prisma.user.findMany({
-    where: { email: { in: TEST_USER_EMAILS } },
-    select: { id: true, email: true },
+    where: {
+      OR: [
+        { email: { in: TEST_USER_EMAILS } },
+        { name: { in: TEST_NAMES } },
+      ],
+    },
+    select: { id: true, email: true, name: true },
   })
   const testUserIds = testUsers.map((u) => u.id)
   console.log(`  找到 ${testUserIds.length} 个测试用户`)
 
-  // 找到测试学生 ID（按硬编码 ID + 关联测试用户的 student）
+  // 找到测试学生 ID（按硬编码 ID + 关联测试用户 + 按姓名）
   const testStudents = await prisma.student.findMany({
     where: {
       OR: [
         { id: { in: TEST_STUDENT_IDS } },
         { parentId: { in: testUserIds } },
         { parentUserId: { in: testUserIds } },
+        { name: { in: TEST_NAMES } },
       ],
     },
     select: { id: true, name: true },
@@ -61,9 +83,14 @@ async function main() {
   const testStudentIds = testStudents.map((s) => s.id)
   console.log(`  找到 ${testStudentIds.length} 个测试学员: ${testStudents.map((s) => s.name).join(', ') || '(无)'}`)
 
-  // 找到测试教师 ID
+  // 找到测试教师 ID（按硬编码 ID + 按姓名）
   const testTeachers = await prisma.teacher.findMany({
-    where: { id: { in: TEST_TEACHER_IDS } },
+    where: {
+      OR: [
+        { id: { in: TEST_TEACHER_IDS } },
+        { name: { in: TEST_NAMES } },
+      ],
+    },
     select: { id: true, name: true },
   })
   const testTeacherIds = testTeachers.map((t) => t.id)

@@ -6,7 +6,7 @@ import { resolveTeacherForUser } from '@/lib/performance'
 import { assertTeacherOwnsStudent, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 import { parentActiveStudentWhere, parentVisiblePerformancePostWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,7 +29,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const teacherId = searchParams.get('teacherId') || ''
   const type = searchParams.get('type') || ''
   const mood = searchParams.get('mood') || ''
-  const division = searchParams.get('division')
+  const division = getRequestDivision(user, searchParams.get('division'))
   const unreadComments = searchParams.get('filter') === 'unread_comments'
   const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
   const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)))
@@ -55,7 +55,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   }
 
   if (user.role === 'admin' && division && division !== 'ALL') {
-    Object.assign(where, { student: divisionWhere(division) })
+    Object.assign(where, { student: { division } })
   }
 
   if (user.role === 'teacher') {

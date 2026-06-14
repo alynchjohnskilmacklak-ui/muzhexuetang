@@ -4,12 +4,15 @@ export async function getCurrentUser() {
   const session = await auth()
   if (!session?.user) return null
 
+  const u = session.user as Record<string, unknown>
   return {
-    id: (session.user as { id: string }).id,
+    id: u.id as string,
     email: session.user.email,
     name: session.user.name,
-    role: (session.user as { role: string }).role,
-    teacherId: (session.user as { teacherId?: string | null }).teacherId ?? null,
+    role: u.role as string,
+    teacherId: (u.teacherId as string | null) ?? null,
+    division: (u.division as string) || 'JUNIOR',
+    selectedDivision: (u.selectedDivision as string) || 'JUNIOR',
   }
 }
 

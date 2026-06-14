@@ -57,6 +57,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   BAD_PASSWORD: '密码错误，请重新输入',
   wrong_password: '密码错误，请重新输入',
   BAD_ROLE: '身份选择不正确，请切换到对应的身份入口登录',
+  BAD_DIVISION: '该账号不属于所选学部，请切换初中部/高中部后再登录',
   DISABLED: '该账号已被停用，请联系管理员',
   LOCKED: '密码连续输错次数过多，账号已临时锁定，请30分钟后重试',
   ACCOUNT_LOCKED: '该账号尝试次数过多，请15分钟后重试',

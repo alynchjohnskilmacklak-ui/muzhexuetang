@@ -18,7 +18,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const subject = searchParams.get('subject')
   const status = searchParams.get('status')
   const mine = searchParams.get('mine')
-  const division = searchParams.get('division')
+  const division = getRequestDivision(user, searchParams.get('division'))
 
   const where: Record<string, unknown> = {}
   if (mine === 'true' && user.role === 'parent') {
@@ -30,7 +30,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     if (status) where.status = status
     else where.status = { not: 'DELETED' }
     if (user.role === 'admin') {
-      where.student = divisionWhere(division)
+      where.student = { division }
     }
   }
   if (Object.keys(where).length === 0) {

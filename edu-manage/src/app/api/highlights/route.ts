@@ -11,13 +11,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url)
   const studentId = searchParams.get('studentId')
   const groupId = searchParams.get('groupId')
-  const division = searchParams.get('division')
+  const division = getRequestDivision(user, searchParams.get('division'))
 
   const where: Record<string, unknown> = {}
   if (studentId) where.studentId = studentId
   if (groupId) where.groupId = groupId
   if (user.role === 'admin') {
-    where.student = divisionWhere(division)
+    where.student = { division }
   }
 
   const highlights = await prisma.classHighlight.findMany({

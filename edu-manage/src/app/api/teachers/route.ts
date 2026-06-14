@@ -56,6 +56,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ? await prisma.classGroup.findMany({
         where: {
           status: { not: 'ARCHIVED' },
+          division,
           course: { isActive: true },
           OR: [
             { teacherId: { in: teacherIds } },

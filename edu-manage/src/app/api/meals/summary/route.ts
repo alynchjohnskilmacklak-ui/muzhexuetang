@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { startOfLocalDay } from '@/lib/meals'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +20,8 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const dayOfWeek = jsDay === 0 ? 7 : jsDay
   const weekStart = new Date(reportDate)
   weekStart.setDate(reportDate.getDate() - (dayOfWeek - 1))
-  const divisionFilter = divisionWhere(request.nextUrl.searchParams.get('division'))
+  const division = getRequestDivision(session.user as Record<string, unknown> | undefined, request.nextUrl.searchParams.get('division'))
+  const divisionFilter = { division }
   const [reports, activeTeachers, parentChoices, totalStudents] = await Promise.all([
     prisma.mealReport.findMany({
       where: { reportDate: { gte: reportDate, lt: nextDate }, ...divisionFilter },

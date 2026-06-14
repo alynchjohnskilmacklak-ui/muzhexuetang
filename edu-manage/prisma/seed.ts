@@ -9,7 +9,7 @@ async function main() {
   const renHash = await bcrypt.hash('ren031213', 10)
   await prisma.user.upsert({
     where: { email: 'renwentao@nuc.com' },
-    update: { password: renHash, division: 'ALL' },
+    update: { password: renHash, name: '任文涛', role: 'admin', status: 'active', division: 'ALL' },
     create: { email: 'renwentao@nuc.com', password: renHash, name: '任文涛', role: 'admin', status: 'active', division: 'ALL' },
   })
 
@@ -17,7 +17,7 @@ async function main() {
   const maHash = await bcrypt.hash('mashaokun', 10)
   await prisma.user.upsert({
     where: { email: 'mashaokun@nuc.com' },
-    update: { password: maHash },
+    update: { password: maHash, name: '马少坤', role: 'admin', status: 'active', division: 'JUNIOR' },
     create: { email: 'mashaokun@nuc.com', password: maHash, name: '马少坤', role: 'admin', status: 'active', division: 'JUNIOR' },
   })
 
@@ -25,13 +25,13 @@ async function main() {
   const huHash = await bcrypt.hash('husitong', 10)
   await prisma.user.upsert({
     where: { email: 'husitong@tea.com' },
-    update: { password: huHash },
+    update: { password: huHash, name: '胡思同', role: 'teacher', status: 'active', division: 'JUNIOR' },
     create: { email: 'husitong@tea.com', password: huHash, name: '胡思同', role: 'teacher', status: 'active', division: 'JUNIOR' },
   })
   await prisma.teacher.upsert({
     where: { id: 't6' },
-    update: {},
-    create: { id: 't6', name: '胡思同', gender: '男', phone: '13800001006', email: 'husitong@tea.com', subjects: '数学', bio: '8年数学教学经验', employmentType: 'FULL_TIME', education: '硕士', university: '南京大学', major: '应用数学', monthlyHours: 36, rating: 4.6, ratingCount: 20 },
+    update: { name: '胡思同', email: 'husitong@tea.com', phone: '13800001006', status: 'ACTIVE', division: 'JUNIOR' },
+    create: { id: 't6', name: '胡思同', gender: '男', phone: '13800001006', email: 'husitong@tea.com', subjects: '数学', bio: '8年数学教学经验', employmentType: 'FULL_TIME', education: '硕士', university: '南京大学', major: '应用数学', monthlyHours: 36, division: 'JUNIOR' },
   })
 
   console.log('Seed complete')

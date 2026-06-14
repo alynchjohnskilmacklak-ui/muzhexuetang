@@ -163,12 +163,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
       parentPlainPassword = creds.plainPassword
       const parentUser = await prisma.user.upsert({
         where: { email: creds.email },
-        update: { status: 'active' },
+        update: { status: 'active', division },
         create: {
           email: creds.email,
           password: creds.password,
           name: body.parentName || `${name}家长`,
           role: 'parent',
+          status: 'active',
+          division,
         },
       })
       parentUserId = parentUser.id

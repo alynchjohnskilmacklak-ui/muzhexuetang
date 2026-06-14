@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdminUser } from '@/lib/teacher-portal'
-import { divisionWhere } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,12 +14,11 @@ function salaryPeriodStart(period: string) {
 
 export async function GET(req: NextRequest) {
   try {
-    await requireAdminUser()
+    const adminUser = await requireAdminUser()
     const teacherId = req.nextUrl.searchParams.get('teacherId')
     const period = req.nextUrl.searchParams.get('period') || 'month'
-    const division = req.nextUrl.searchParams.get('division')
+    const division = getRequestDivision(adminUser, req.nextUrl.searchParams.get('division'))
     const since = salaryPeriodStart(period)
-    const divFilter = divisionWhere(division)
     const where = teacherId
       ? { teacherId, createdAt: { gte: since } }
       : { createdAt: { gte: since } }
@@ -37,7 +36,7 @@ export async function GET(req: NextRequest) {
       }),
       prisma.teacherSalaryTransaction.count({ where }),
       prisma.teacher.findMany({
-        where: { status: 'ACTIVE', ...divFilter },
+        where: { status: 'ACTIVE', division },
         select: { id: true, name: true, avatar: true },
         orderBy: { createdAt: 'asc' },
       }),

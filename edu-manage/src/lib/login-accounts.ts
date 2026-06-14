@@ -19,7 +19,7 @@ type LoginUser = {
 
 type ValidationResult =
   | { ok: true; user: LoginUser }
-  | { ok: false; error: string; code: 'BAD_USERNAME' | 'BAD_PASSWORD' | 'BAD_ROLE' | 'DISABLED' | 'LOCKED' }
+  | { ok: false; error: string; code: 'BAD_USERNAME' | 'BAD_PASSWORD' | 'BAD_ROLE' | 'BAD_DIVISION' | 'DISABLED' | 'LOCKED' }
 
 type TeacherLoginAccount = {
   id: string
@@ -154,7 +154,7 @@ async function validateDatabaseUser(
     if (userDivision !== 'ALL' && userDivision !== division) {
       const divisionLabel = division === 'JUNIOR' ? '初中部' : '高中部'
       if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta)
-      return { ok: false, error: `该账号不属于${divisionLabel}`, code: 'BAD_ROLE' }
+      return { ok: false, error: `该账号不属于${divisionLabel}`, code: 'BAD_DIVISION' }
     }
   }
 

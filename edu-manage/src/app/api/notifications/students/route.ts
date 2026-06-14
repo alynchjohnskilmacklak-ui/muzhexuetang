@@ -2,7 +2,7 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
@@ -10,10 +10,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
-  const division = req.nextUrl.searchParams.get('division')
+  const division = getRequestDivision(session.user as Record<string, unknown> | undefined, req.nextUrl.searchParams.get('division'))
 
   const students = await prisma.student.findMany({
-    where: { status: { not: 'INACTIVE' }, ...divisionWhere(division) },
+    where: { status: { not: 'INACTIVE' }, division },
     include: {
       parent: { select: { wxpusherUid: true } },
       schedules: {

@@ -8,7 +8,7 @@ import {
   createActivityLog,
   type EntityKey,
 } from '@/lib/data-admin/entities'
-import { divisionWhere } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 const ALLOWED_ENTITIES = Object.keys(DATA_ADMIN_ENTITIES)
 
@@ -35,20 +35,15 @@ export async function GET(
   const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10))
   const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '20', 10)))
   const includeDeleted = url.searchParams.get('includeDeleted') === 'true'
-  const division = url.searchParams.get('division')
+  const division = getRequestDivision(session.user as Record<string, unknown> | undefined, url.searchParams.get('division'))
 
   const where: Record<string, unknown> = {}
 
-  const divFilter = divisionWhere(division)
-  if (Object.keys(divFilter).length > 0) {
-    const studentLinked = ['exam-papers', 'notifications', 'materials', 'performance-posts', 'enrollments', 'attendances', 'classroom-feedbacks'] as EntityKey[]
-    if (studentLinked.includes(entityKey)) {
-      where.student = divFilter
-    } else if (entityKey === 'teachers') {
-      Object.assign(where, divFilter)
-    } else {
-      Object.assign(where, divFilter)
-    }
+  const studentLinked = ['exam-papers', 'notifications', 'materials', 'performance-posts', 'enrollments', 'attendances', 'classroom-feedbacks'] as EntityKey[]
+  if (studentLinked.includes(entityKey)) {
+    where.student = { division }
+  } else {
+    Object.assign(where, { division })
   }
 
   if (!includeDeleted) {

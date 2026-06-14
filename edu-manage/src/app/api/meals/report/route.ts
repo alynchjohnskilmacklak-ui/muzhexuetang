@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { mealCounts, parseMealDetails, startOfLocalDay } from '@/lib/meals'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +18,8 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const reportDate = startOfLocalDay(request.nextUrl.searchParams.get('date') || new Date())
   if (!reportDate) return NextResponse.json({ error: 'Invalid date' }, { status: 400 })
   const nextDate = new Date(reportDate.getTime() + 86400000)
-  const divisionFilter = divisionWhere(request.nextUrl.searchParams.get('division'))
+  const division = getRequestDivision(session.user as Record<string, unknown> | undefined, request.nextUrl.searchParams.get('division'))
+  const divisionFilter = { division }
 
   let teacherId: string | undefined
   if (role === 'teacher') {

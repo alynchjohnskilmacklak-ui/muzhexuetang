@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { startOfMealWeek, templateToMenuLike, type EffectiveMealMenu } from '@/lib/meals'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +13,8 @@ export const GET = apiHandler(async (request: NextRequest) => {
 
   const weekStart = startOfMealWeek(request.nextUrl.searchParams.get('weekStart') || new Date())
   if (!weekStart) return NextResponse.json({ error: 'Invalid weekStart' }, { status: 400 })
-  const divisionFilter = divisionWhere(request.nextUrl.searchParams.get('division'))
+  const division = getRequestDivision(session.user as Record<string, unknown> | undefined, request.nextUrl.searchParams.get('division'))
+  const divisionFilter = { division }
 
   const [menus, templates] = await Promise.all([
     prisma.mealMenu.findMany({

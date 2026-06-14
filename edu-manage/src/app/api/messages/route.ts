@@ -13,7 +13,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   const { searchParams } = new URL(req.url)
   const status = searchParams.get('status') || undefined
-  const division = searchParams.get('division')
+  const division = getRequestDivision(user, searchParams.get('division'))
 
   let where: Record<string, unknown> = {}
   if (user.role === 'parent') {
@@ -44,7 +44,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     }
   }
   if (user.role === 'admin') {
-    where.student = divisionWhere(division)
+    where.student = { division }
   }
   if (status) {
     if (where.OR) {
