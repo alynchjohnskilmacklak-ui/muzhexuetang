@@ -4,7 +4,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { parentVisibleExamPaperWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere, getRequestDivision } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 

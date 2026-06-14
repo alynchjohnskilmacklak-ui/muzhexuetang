@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere, getRequestDivision } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()

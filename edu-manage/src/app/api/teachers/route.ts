@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { chineseToPinyin } from '@/lib/pinyin'
 import bcrypt from 'bcryptjs'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere, getRequestDivision } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
