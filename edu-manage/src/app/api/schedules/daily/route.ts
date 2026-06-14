@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { CLASS_PERIODS_ONLY, getPeriodId } from '@/lib/schedule-periods'
 import { activeEnrollmentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,11 +15,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url)
   const dateStr = searchParams.get('date') || new Date().toISOString().slice(0, 10)
   const courseType = searchParams.get('courseType') || ''
+  const division = searchParams.get('division')
 
   const dayStart = new Date(`${dateStr}T00:00:00`)
   const dayEnd = new Date(`${dateStr}T23:59:59`)
 
   const where: Record<string, unknown> = {
+    ...divisionWhere(division),
     lessonDate: { gte: dayStart, lte: dayEnd },
     status: { notIn: ['CANCELLED', 'POSTPONED'] },
   }

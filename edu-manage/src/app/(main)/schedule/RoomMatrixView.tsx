@@ -6,6 +6,7 @@ import { zhCN } from 'date-fns/locale'
 import { addDays, subDays } from 'date-fns'
 import { Spin, Empty } from 'antd'
 import useSWR from 'swr'
+import { useDivision } from '@/contexts/DivisionContext'
 import { SCHEDULE_PERIODS, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
 
 const TYPE_LABELS: Record<string, string> = {
@@ -35,8 +36,9 @@ export function RoomMatrixView({
   onLessonClick: (lesson: Record<string, unknown>) => void
   onNewCourseClick?: () => void
 }) {
+  const { division } = useDivision()
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
-  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}`, fetcher, { refreshInterval: 180_000 })
+  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}&division=${division}`, fetcher, { refreshInterval: 180_000 })
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
 
   const matrix = (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown> | Record<string, unknown>[]>>

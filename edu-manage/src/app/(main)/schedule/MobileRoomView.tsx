@@ -5,6 +5,7 @@ import { format, addDays, subDays } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { Spin, Tag, Empty } from 'antd'
 import useSWR from 'swr'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const fetcher = (url: string) => fetch(url).then(r => r.ok ? r.json() : Promise.reject('error'))
 
@@ -26,9 +27,10 @@ export function MobileRoomView({
   onNewCourseClick?: () => void
   onLessonClick?: (lesson: Record<string, unknown>) => void
 }) {
+  const { division } = useDivision()
   const [expandedRoom, setExpandedRoom] = useState<string | null>(null)
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
-  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}`, fetcher, { refreshInterval: 180_000 })
+  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}&division=${division}`, fetcher, { refreshInterval: 180_000 })
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
 
   const matrix = (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown>[]>>

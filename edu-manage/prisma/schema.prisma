@@ -65,6 +65,7 @@ model Student {
   updatedAt     DateTime  @updatedAt
   parentId      String?
   mainTeacherId String?
+  division      String    @default("JUNIOR")
 
   parent            User?              @relation(fields: [parentId], references: [id])
   mainTeacher       Teacher?           @relation(fields: [mainTeacherId], references: [id])
@@ -90,6 +91,7 @@ model Student {
   @@index([grade])
   @@index([parentId])
   @@index([mainTeacherId])
+  @@index([division, status])
 }
 
 model Teacher {
@@ -161,6 +163,7 @@ model Course {
   createdAt      DateTime   @default(now())
 
   teacherId   String?
+  division        String    @default("JUNIOR")
   teacher     Teacher?     @relation(fields: [teacherId], references: [id])
   schedules   Schedule[]
   fees        Fee[]
@@ -168,6 +171,7 @@ model Course {
 
   @@index([isActive])
   @@index([teacherId])
+  @@index([division])
 }
 
 enum GroupStatus {
@@ -180,6 +184,7 @@ enum GroupStatus {
 model ClassGroup {
   id               String      @id @default(cuid())
   name             String
+  division        String    @default("JUNIOR")
   courseId         String
   course           Course      @relation(fields: [courseId], references: [id])
   teacherId        String
@@ -207,6 +212,7 @@ model ClassGroup {
   @@index([status, teacherId])
   @@index([courseId, status])
   @@index([roomId])
+  @@index([division, status])
 }
 
 model ClassGroupTeacher {
@@ -232,6 +238,7 @@ enum LessonStatus {
 
 model ClassLesson {
   id                  String       @id @default(cuid())
+  division        String    @default("JUNIOR")
   groupId             String
   group               ClassGroup   @relation(fields: [groupId], references: [id])
   teacherId           String?
@@ -257,6 +264,7 @@ model ClassLesson {
   @@index([status, lessonDate])
   @@index([teacherId, lessonDate])
   @@index([groupId, lessonDate])
+  @@index([division, lessonDate])
 }
 
 enum EnrollStatus {
@@ -470,6 +478,7 @@ model ScheduleStudent {
 
 model Fee {
   id        String    @id @default(cuid())
+  division        String    @default("JUNIOR")
   studentId String
   courseId  String?
   amount    Float
@@ -487,6 +496,7 @@ model Fee {
   @@index([status, paidAt])
   @@index([studentId, createdAt])
   @@index([createdAt])
+  @@index([division])
 }
 
 model Room {

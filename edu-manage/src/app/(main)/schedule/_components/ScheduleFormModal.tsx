@@ -7,6 +7,7 @@ import useSWR from 'swr'
 import { CLASS_TYPE_OPTIONS, TYPE_LABELS, USAGE_TYPE_LABELS } from '../_types'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { getPersonalClassLimit, isPersonalClassType } from '@/lib/schedule-class-type'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
@@ -24,11 +25,13 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
   const [classType, setClassType] = useState<string>('SMALL_CLASS')
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
   const isMobile = useIsMobile() ?? false
+  const { division } = useDivision()
+  const writableDivision = division === 'ALL' ? 'JUNIOR' : division
 
   const { data: teachers } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
   const { data: rooms } = useSWR('/api/rooms', fetcher)
-  const { data: coursesData } = useSWR('/api/courses?limit=200', fetcher)
-  const { data: students } = useSWR('/api/students?limit=200&status=ACTIVE', fetcher, { refreshInterval: 0 })
+  const { data: coursesData } = useSWR(`/api/courses?limit=200&division=${division}`, fetcher)
+  const { data: students } = useSWR(`/api/students?limit=200&status=ACTIVE&division=${division}`, fetcher, { refreshInterval: 0 })
 
   const teacherList = Array.isArray(teachers?.teachers) ? teachers.teachers : Array.isArray(teachers) ? teachers : []
   const roomList: Array<Record<string, unknown>> = Array.isArray(rooms) ? rooms : []
@@ -53,17 +56,18 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
         startTimeVal: editData.startTimeVal ? dayjs(editData.startTimeVal as string, 'HH:mm') : undefined,
         endTimeVal: editData.endTimeVal ? dayjs(editData.endTimeVal as string, 'HH:mm') : undefined,
         classType: editData.classType || 'SMALL_CLASS',
+        division: editData.division || writableDivision,
       })
       setClassType((editData.classType as string) || 'SMALL_CLASS')
       setSelectedStudentIds((editData.studentIds as string[]) || [])
     } else {
       form.resetFields()
-      form.setFieldsValue({ startDate: dayjs(), classType: 'SMALL_CLASS' })
+      form.setFieldsValue({ startDate: dayjs(), classType: 'SMALL_CLASS', division: writableDivision })
       setClassType('SMALL_CLASS')
       setSelectedStudentIds([])
     }
     setConflicts(null)
-  }, [open, editData, form])
+  }, [open, editData, form, writableDivision])
 
   const handleSubmit = async () => {
     try {
@@ -80,6 +84,7 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
         endTimeVal: values.endTimeVal.format('HH:mm'),
         classType: values.classType,
         studentIds: selectedStudentIds,
+        division: values.division || writableDivision,
         courseId: values.courseId || undefined,
         color: values.color || undefined,
         notes: values.notes || undefined,
@@ -154,6 +159,10 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
       )}
 
       <Form form={form} layout="vertical" style={{ marginTop: 8 }}>
+        <Form.Item name="division" label="??" rules={[{ required: true, message: '?????' }]}>
+          <Select options={[{ label: '???', value: 'JUNIOR' }, { label: '???', value: 'SENIOR' }]} />
+        </Form.Item>
+
         <Form.Item name="classType" label="班型" rules={[{ required: true, message: '请选择班型' }]}>
           <Select
             options={CLASS_TYPE_OPTIONS}

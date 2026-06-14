@@ -19,6 +19,12 @@ import { toast } from 'sonner'
 const { Text } = Typography
 
 type LoginRole = 'admin' | 'teacher' | 'parent'
+type LoginDivision = 'JUNIOR' | 'SENIOR'
+
+const DIVISION_OPTIONS: Array<{ value: LoginDivision; label: string }> = [
+  { value: 'JUNIOR', label: '???' },
+  { value: 'SENIOR', label: '???' },
+]
 
 const ROLE_OPTIONS: Array<{ value: LoginRole; label: string; hint: string }> = [
   { value: 'admin', label: '管理者', hint: '掌舵全局，服务每一个家庭' },
@@ -108,10 +114,11 @@ function BrandLeft({ mounted }: { mounted: boolean }) {
 }
 
 function RightForm({
-  role, setRole, loading, formError, setFormError, onFinish, showPwd, setShowPwd, mounted,
+  role, setRole, division, setDivision, loading, formError, setFormError, onFinish, showPwd, setShowPwd, mounted,
   detectedRole, onEmailBlur, isMobile, reason,
 }: {
   role: LoginRole; setRole: (r: LoginRole) => void
+  division: LoginDivision; setDivision: (d: LoginDivision) => void
   loading: boolean
   formError: string; setFormError: (msg: string) => void
   onFinish: (values: { email: string; password: string }) => Promise<void>
@@ -180,6 +187,37 @@ function RightForm({
               )
             })}
           </div>
+
+          {(role === 'admin' || role === 'teacher') && (
+            <div style={{ marginBottom: 20 }}>
+              <Text style={{ color: '#9a8e7a', fontSize: 13, display: 'block', marginBottom: 8 }}>????</Text>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {DIVISION_OPTIONS.map((item) => {
+                  const active = division === item.value
+                  return (
+                    <button
+                      key={item.value}
+                      type="button"
+                      onClick={() => setDivision(item.value)}
+                      style={{
+                        height: 44,
+                        borderRadius: 10,
+                        cursor: 'pointer',
+                        border: active ? '1.5px solid #E87545' : '1px solid #EFE3DC',
+                        background: active ? '#FFF6F1' : '#fff',
+                        color: active ? '#E87545' : '#7d7468',
+                        fontSize: 14,
+                        fontWeight: active ? 600 : 400,
+                        transition: 'all .2s ease',
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           <div style={{ fontSize: 22, fontWeight: 800, color: '#1a1201', marginBottom: 4 }}>欢迎回来</div>
           <Text style={{ color: '#9a8e7a', display: 'block', marginBottom: 26, fontSize: 14 }}>请选择对应身份入口，再输入账号密码。</Text>
@@ -272,6 +310,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [showPwd, setShowPwd] = useState(false)
   const [role, setRole] = useState<LoginRole>('admin')
+  const [division, setDivision] = useState<LoginDivision>('JUNIOR')
   const [mounted, setMounted] = useState(false)
   const [detectedRole, setDetectedRole] = useState<LoginRole | null>(null)
   const [reason, setReason] = useState<string | null>(null)
@@ -345,8 +384,8 @@ export default function LoginPage() {
       toast.success('登录成功，正在跳转...', { duration: 2000 })
 
       if (userRole === 'parent') router.push('/parent/dashboard')
-      else if (userRole === 'teacher') router.push('/teacher/dashboard')
-      else router.push('/dashboard')
+      else if (userRole === 'teacher') router.push(`/teacher/dashboard?division=${division}`)
+      else router.push(`/dashboard?division=${division}`)
       router.refresh()
     } catch {
       const msg = '网络异常，请检查网络连接后重试'
@@ -365,6 +404,7 @@ export default function LoginPage() {
         {!isMobile && <BrandLeft mounted={mounted} />}
         <RightForm
           role={role} setRole={setRole}
+          division={division} setDivision={setDivision}
           loading={loading}
           formError={formError} setFormError={setFormError}
           onFinish={handleLogin}

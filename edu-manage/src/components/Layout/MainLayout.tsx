@@ -25,6 +25,7 @@ import {
 import { Sidebar } from './Sidebar'
 import { TopNav } from './TopNav'
 import { MobileLayout } from './MobileLayout'
+import { DivisionSwitcher } from './DivisionSwitcher'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'

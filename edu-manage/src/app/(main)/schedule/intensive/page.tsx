@@ -6,6 +6,7 @@ import { zhCN } from 'date-fns/locale'
 import { addDays, subDays } from 'date-fns'
 import { Spin, Empty, Modal, Select, Input, message, Typography } from 'antd'
 import useSWR from 'swr'
+import { useDivision } from '@/contexts/DivisionContext'
 import { MobileSelect } from '@/components/MobileSelect'
 import { SCHEDULE_PERIODS } from '@/lib/schedule-periods'
 
@@ -45,20 +46,21 @@ export default function IntensiveSchedulePage() {
   const [saving, setSaving] = useState(false)
   const [conflictMsg, setConflictMsg] = useState('')
 
+  const { division } = useDivision()
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
-  const { data: daily, isLoading, mutate } = useSWR(`/api/schedules/daily?date=${dateStr}&courseType=SMALL`, fetcher, { refreshInterval: 180_000 })
+  const { data: daily, isLoading, mutate } = useSWR(`/api/schedules/daily?date=${dateStr}&courseType=SMALL&division=${division}`, fetcher, { refreshInterval: 180_000 })
   // 额外获取 ClassLesson 中的一对一/小组课数据
   const { data: classLessonsData } = useSWR(
-    `/api/class-lessons?startDate=${dateStr}&endDate=${dateStr}&courseType=ONE_ON_ONE`,
+    `/api/class-lessons?startDate=${dateStr}&endDate=${dateStr}&courseType=ONE_ON_ONE&division=${division}`,
     fetcher, { refreshInterval: 180_000 }
   )
   const { data: smallGroupData } = useSWR(
-    `/api/class-lessons?startDate=${dateStr}&endDate=${dateStr}&courseType=SMALL_GROUP`,
+    `/api/class-lessons?startDate=${dateStr}&endDate=${dateStr}&courseType=SMALL_GROUP&division=${division}`,
     fetcher, { refreshInterval: 180_000 }
   )
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
   const { data: teachersData } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
-  const { data: studentsData } = useSWR('/api/students?limit=500', fetcher)
+  const { data: studentsData } = useSWR(`/api/students?limit=500&division=${division}`, fetcher)
 
   const matrix = useMemo(() => (
     (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown>>>

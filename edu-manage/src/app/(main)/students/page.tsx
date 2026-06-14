@@ -8,6 +8,7 @@ import { StudentForm } from './_components/StudentForm'
 import { ImportModal } from './_components/ImportModal'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const { Text } = Typography
 
@@ -66,6 +67,7 @@ function readQuery() {
 
 export default function StudentsPage() {
   const isMobile = useIsMobile() ?? false
+  const { division } = useDivision()
   const [grouped, setGrouped] = useState<GroupedStudents>({})
   const [gradeCounts, setGradeCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
@@ -118,6 +120,7 @@ export default function StudentsPage() {
     const params = new URLSearchParams()
     params.set('groupByGrade', 'true')
     params.set('limit', '500')
+    params.set('division', division)
     if (filterGrade !== 'all') params.set('grade', filterGrade)
     if (filterType !== 'all') params.set('courseType', filterType)
     if (filterStatus) params.set('status', filterStatus)
@@ -137,7 +140,7 @@ export default function StudentsPage() {
     } finally {
       setLoading(false)
     }
-  }, [filterGrade, filterStatus, filterType, lowHourOnly, search])
+  }, [division, filterGrade, filterStatus, filterType, lowHourOnly, search])
 
   useEffect(() => { fetchStudents() }, [fetchStudents])
 

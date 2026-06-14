@@ -23,6 +23,8 @@ import { ActivityLogCard } from '@/components/Dashboard/ActivityLog'
 import { PendingItemsCard } from '@/components/Dashboard/PendingItemsCard'
 import { DashboardSkeleton } from '@/components/Dashboard/DashboardSkeleton'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useDivision } from '@/contexts/DivisionContext'
+import { DIVISION_OPTIONS, type Division } from '@/lib/division'
 import { formatHours } from '@/lib/format'
 import type { AdminDashboardData, TodaySchedule } from '@/types/dashboard'
 
@@ -43,6 +45,37 @@ const statusColors: Record<TodaySchedule['statusLabel'], string> = {
   上课中: '#1D9E75',
   待考勤: '#E87545',
   已完成: '#98A2B3',
+}
+
+
+function DivisionEntryCards() {
+  const { division, setDivision } = useDivision()
+
+  return (
+    <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+      {DIVISION_OPTIONS.map((item) => {
+        const active = division === item.value
+        return (
+          <Col xs={8} key={item.value}>
+            <Button
+              block
+              type={active ? 'primary' : 'default'}
+              onClick={() => setDivision(item.value as Division)}
+              style={{
+                height: 64,
+                borderRadius: 12,
+                fontWeight: 800,
+                background: active ? '#E87545' : '#fff',
+                borderColor: active ? '#E87545' : '#EEE7E1',
+              }}
+            >
+              {item.label}
+            </Button>
+          </Col>
+        )
+      })}
+    </Row>
+  )
 }
 
 function MobileDashboard({ data }: { data: AdminDashboardData }) {
@@ -267,7 +300,8 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
 
 export default function DashboardPage() {
   const isMobile = useIsMobile() ?? false
-  const { data, error, isLoading } = useSWR('/api/dashboard', fetcher, {
+  const { division } = useDivision()
+  const { data, error, isLoading } = useSWR(`/api/dashboard?division=${division}`, fetcher, {
     refreshInterval: 120_000,
     revalidateOnFocus: true,
   })
@@ -288,11 +322,17 @@ export default function DashboardPage() {
   }
 
   if (isMobile) {
-    return <MobileDashboard data={data} />
+    return (
+      <>
+        <DivisionEntryCards />
+        <MobileDashboard data={data} />
+      </>
+    )
   }
 
   return (
     <div style={{ paddingBottom: 24 }}>
+      <DivisionEntryCards />
       <DashboardHero metrics={data.metrics} />
       <MetricsCards data={data.metrics} />
       <OperationHighlightsCard data={data.operatingHighlights} />

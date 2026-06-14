@@ -7,6 +7,7 @@ import { addDays, subDays, setHours, setMinutes } from 'date-fns'
 import { Spin, Empty, Tag, Typography } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
+import { useDivision } from '@/contexts/DivisionContext'
 import { HOURLY_PERIODS } from '@/lib/schedule-periods'
 
 const { Text } = Typography
@@ -33,8 +34,9 @@ export function OneOnOneView({
   onOneOnOneClick?: () => void
   onLessonClick: (lesson: Record<string, unknown>) => void
 }) {
+  const { division } = useDivision()
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
-  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}`, fetcher, { refreshInterval: 180_000 })
+  const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}&division=${division}`, fetcher, { refreshInterval: 180_000 })
 
   const matrix = (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown>>>
 

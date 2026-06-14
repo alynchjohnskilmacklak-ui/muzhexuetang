@@ -39,6 +39,7 @@ import { PageLayout } from '@/components/Layout/PageLayout'
 import { MobileSelect } from '@/components/MobileSelect'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { CLASS_PERIODS_ONLY, HOURLY_PERIODS } from '@/lib/schedule-periods'
+import { useDivision } from '@/contexts/DivisionContext'
 
 type CourseType = 'GROUP' | 'ONE_ON_ONE' | 'SMALL_GROUP'
 type ScheduleTemplateRow = {
@@ -119,11 +120,13 @@ function buildScheduleTemplate(type: CourseType): ScheduleTemplateRow[] {
 
 export default function CoursesPage() {
   const router = useRouter()
-  const { data: groups, mutate: mutateGroups, isLoading } = useSWR('/api/class-groups', fetcher)
-  const { data: courses, mutate: mutateCourses } = useSWR('/api/courses', fetcher)
+  const { division } = useDivision()
+  const writableDivision = division === 'ALL' ? 'JUNIOR' : division
+  const { data: groups, mutate: mutateGroups, isLoading } = useSWR(`/api/class-groups?division=${division}`, fetcher)
+  const { data: courses, mutate: mutateCourses } = useSWR(`/api/courses?division=${division}`, fetcher)
   const { data: teachers } = useSWR('/api/teachers?status=ACTIVE', fetcher)
   const { data: rooms } = useSWR('/api/rooms', fetcher)
-  const { data: dashboard, mutate: mutateDashboard } = useSWR('/api/dashboard', fetcher)
+  const { data: dashboard, mutate: mutateDashboard } = useSWR(`/api/dashboard?division=${division}`, fetcher)
 
   const [courseTab, setCourseTab] = useState<'GROUP'|'SMALL'>('GROUP')
   const [filterType, setFilterType] = useState('')
@@ -220,6 +223,7 @@ export default function CoursesPage() {
       totalLessons: 16,
       startDate: todayString(),
       lessonStartTime: '08:00',
+      division: writableDivision,
       recurringDays: ['MON', 'WED', 'FRI'],
       maxStudents: initialType === 'ONE_ON_ONE' ? 1 : 20,
       teacherAssignments: [{ teacherId: '', subject: '' }],
@@ -293,6 +297,7 @@ export default function CoursesPage() {
         lessonMinutes: createData.lessonMinutes || 90,
         totalLessons: createData.totalLessons || 16,
         color: SUBJECT_COLOR[primarySubject] || '#e8784a',
+        division: createData.division || writableDivision,
       }),
     })
 
@@ -363,6 +368,7 @@ export default function CoursesPage() {
         lessonStartTime: createData.lessonStartTime || '19:00',
         lessonMinutes: createData.lessonMinutes || 90,
         totalLessons: Number(createData.totalLessons) || 16,
+        division: createData.division || writableDivision,
       }
 
       const groupRes = await fetch('/api/class-groups', {

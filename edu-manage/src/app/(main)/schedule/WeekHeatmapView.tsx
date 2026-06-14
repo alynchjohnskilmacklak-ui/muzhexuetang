@@ -6,6 +6,7 @@ import { format, addDays, startOfWeek } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { Spin, Empty, Typography } from 'antd'
 import useSWR from 'swr'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const { Text } = Typography
 
@@ -26,6 +27,7 @@ export function WeekHeatmapView({
 }: {
   weekStart: Date; setWeekStart: (d: Date) => void; onCellClick: (date: Date) => void
 }) {
+  const { division } = useDivision()
   const router = useRouter()
   const weekDates = useMemo(() => WEEK_DAYS.map((_, i) => addDays(weekStart, i)), [weekStart])
   const startStr = format(weekStart, 'yyyy-MM-dd')
@@ -33,14 +35,14 @@ export function WeekHeatmapView({
 
   // Get GROUP lessons for classrooms
   const { data: groupData, isLoading: loadingGroup } = useSWR(
-    `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=GROUP`, fetcher, { refreshInterval: 120_000 }
+    `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=GROUP&division=${division}`, fetcher, { refreshInterval: 120_000 }
   )
   // Get SMALL lessons for intensive summary
   const { data: smallGroupData } = useSWR(
-    `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=SMALL_GROUP`, fetcher, { refreshInterval: 120_000 }
+    `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=SMALL_GROUP&division=${division}`, fetcher, { refreshInterval: 120_000 }
   )
   const { data: oneOnOneData } = useSWR(
-    `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=ONE_ON_ONE`, fetcher, { refreshInterval: 120_000 }
+    `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=ONE_ON_ONE&division=${division}`, fetcher, { refreshInterval: 120_000 }
   )
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
 

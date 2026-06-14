@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { validateScheduleStudentCount } from '@/lib/schedule-class-type'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { apiHandler } from '@/lib/api-handler'
+import { normalizeWritableDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,6 +48,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (!courseId) {
       return NextResponse.json({ error: '请先选择课程' }, { status: 400 })
     }
+
+    const requestedDivision = normalizeWritableDivision(body.division)
 
     const dedupedStudentIds = [...new Set(Array.isArray(studentIds) ? studentIds : [])] as string[]
     const room = roomId
@@ -107,9 +110,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
       // Verify course + teacher exist
       const course = await tx.course.findFirst({
         where: { id: courseId, isActive: true },
-        select: { id: true, name: true },
+        select: { id: true, name: true, division: true },
       })
       if (!course) throw { status: 400, message: '所选课程不存在或已停用' }
+      const lessonDivision = normalizeWritableDivision(course.division, requestedDivision)
       const teacher = await tx.teacher.findUnique({
         where: { id: teacherId },
         select: { id: true, name: true },
@@ -119,7 +123,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       // key 加入开始时间和班型，确保同一天同老师同课程的不同课次不会被错误合并到一个班
       const groupName = `临时·${teacher.name}·${course.name}·${startDate} ${startTimeVal}·${classType || 'SMALL_CLASS'}`
       let group = await tx.classGroup.findFirst({
-        where: { name: groupName, teacherId, courseId, status: 'ACTIVE' },
+        where: { name: groupName, teacherId, courseId, status: 'ACTIVE', division: lessonDivision },
       })
       if (!group) {
         group = await tx.classGroup.create({
@@ -135,6 +139,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             lessonMinutes,
             recurringDays: [],
             status: 'ACTIVE',
+            division: lessonDivision,
           },
         })
       } else if (roomId && group.roomId !== roomId) {
@@ -170,6 +175,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           endTime: endTimeVal,
           status: 'SCHEDULED',
           note: notes || null,
+          division: lessonDivision,
         },
         include: {
           group: {

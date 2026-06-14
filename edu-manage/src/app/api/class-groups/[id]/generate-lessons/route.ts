@@ -107,6 +107,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     startTime: slot.startTime,
     endTime: slot.endTime,
     status: 'SCHEDULED' as const,
+    division: group.division,
   })))
 
   const BATCH_SIZE = 50

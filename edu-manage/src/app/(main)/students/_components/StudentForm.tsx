@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space } from 'antd'
 import { UserOutlined, PhoneOutlined, BookOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const STATUS_OPTIONS = [
   { label: '潜客', value: 'LEAD' },
@@ -30,6 +31,7 @@ export function StudentForm({
   const [loading, setLoading] = useState(false)
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const isMobile = useIsMobile() ?? false
+  const { division } = useDivision()
 
   useEffect(() => {
     if (open) {
@@ -41,6 +43,7 @@ export function StudentForm({
         })
       } else {
         form.resetFields()
+        form.setFieldValue('division', division === 'ALL' ? 'JUNIOR' : division)
       }
       fetch('/api/teachers?limit=50').then(r => r.json()).then(d => {
         setTeachers(Array.isArray(d) ? d : (d.teachers || []))
