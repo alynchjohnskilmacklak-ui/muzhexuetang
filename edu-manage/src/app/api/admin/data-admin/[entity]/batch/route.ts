@@ -3,10 +3,10 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import {
   DATA_ADMIN_ENTITIES,
-  createActivityLog,
   getSoftDeleteConfig,
   type EntityKey,
 } from '@/lib/data-admin/entities'
+import { createActivityLog } from '@/lib/data-admin/entities-server'
 
 const ALLOWED_ACTIONS = ['softDelete', 'restore', 'markRead'] as const
 type BatchAction = typeof ALLOWED_ACTIONS[number]
