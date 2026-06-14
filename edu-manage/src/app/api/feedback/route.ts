@@ -6,6 +6,7 @@ import { requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal
 import { triggerFeedbackBonus } from '@/lib/teacher-salary'
 import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +26,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const teacherId = sp.get('teacherId') || undefined
   const date = sp.get('date') || undefined
   const all = sp.get('all') === '1'
+  const division = sp.get('division')
   const limit = Math.min(200, Number(sp.get('limit') || 50))
 
   const where: Record<string, unknown> = { status: 'PUBLISHED' }
@@ -33,6 +35,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     where.teacherId = teacher.id
   } else if (teacherId) {
     where.teacherId = teacherId
+  } else if (user.role === 'admin' && division && division !== 'ALL') {
+    where.classLesson = { division }
   }
   if (date && !all) {
     const d = new Date(date)

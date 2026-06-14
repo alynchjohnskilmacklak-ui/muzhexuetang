@@ -1,17 +1,21 @@
-﻿import { NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import * as XLSX from 'xlsx'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
-export const GET = apiHandler(async () => {
+export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
+  const division = req.nextUrl.searchParams.get('division')
+
   const students = await prisma.student.findMany({
+    where: divisionWhere(division),
     include: { enrollments: { include: { group: { include: { course: true } } } }, fees: true },
     orderBy: { createdAt: 'desc' },
   })

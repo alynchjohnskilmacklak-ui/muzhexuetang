@@ -6,6 +6,7 @@ import { resolveTeacherForUser } from '@/lib/performance'
 import { assertTeacherOwnsStudent, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 import { parentActiveStudentWhere, parentVisiblePerformancePostWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,6 +29,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const teacherId = searchParams.get('teacherId') || ''
   const type = searchParams.get('type') || ''
   const mood = searchParams.get('mood') || ''
+  const division = searchParams.get('division')
   const unreadComments = searchParams.get('filter') === 'unread_comments'
   const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
   const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '10', 10)))
@@ -50,6 +52,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
     if (!childIds.length) return NextResponse.json({ posts: [], total: 0, page, limit })
     if (studentId && !childIds.includes(studentId)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     Object.assign(where, parentVisiblePerformancePostWhere(user.id), { studentId: studentId || { in: childIds } })
+  }
+
+  if (user.role === 'admin' && division && division !== 'ALL') {
+    Object.assign(where, { student: divisionWhere(division) })
   }
 
   if (user.role === 'teacher') {

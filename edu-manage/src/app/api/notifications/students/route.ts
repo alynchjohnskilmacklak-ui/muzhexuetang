@@ -1,16 +1,19 @@
-﻿import { NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
-export const GET = apiHandler(async () => {
+export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user || (session.user as any).role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
+  const division = req.nextUrl.searchParams.get('division')
+
   const students = await prisma.student.findMany({
-    where: { status: { not: 'INACTIVE' } },
+    where: { status: { not: 'INACTIVE' }, ...divisionWhere(division) },
     include: {
       parent: { select: { wxpusherUid: true } },
       schedules: {

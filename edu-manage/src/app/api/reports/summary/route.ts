@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,6 +48,9 @@ export const GET = apiHandler(async (request: NextRequest) => {
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const { from, to } = parseDateRange(request.nextUrl.searchParams)
+  const division = request.nextUrl.searchParams.get('division')
+  const studentWhere = { ...divisionWhere(division) }
+  const feeWhere = { ...divisionWhere(division) }
 
   const [
     totalStudents,
@@ -68,18 +72,18 @@ export const GET = apiHandler(async (request: NextRequest) => {
     makeupStatusCounts,
     guideActions,
   ] = await Promise.all([
-    prisma.student.count({ where: { status: 'ACTIVE' } }),
+    prisma.student.count({ where: { status: 'ACTIVE', ...studentWhere } }),
     prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to } } }),
     prisma.paperQuestion.count({ where: { mastery: 'MASTERED', paper: { paperDate: { gte: from, lt: to } } } }),
     prisma.paperQuestion.count({ where: { paper: { paperDate: { gte: from, lt: to } } } }),
-    prisma.student.groupBy({ by: ['status'], _count: true }),
+    prisma.student.groupBy({ by: ['status'], _count: true, where: studentWhere }),
     prisma.paperQuestion.groupBy({ by: ['mastery'], _count: true, where: { paper: { paperDate: { gte: from } } } }),
     prisma.paperQuestion.groupBy({ by: ['topic'], _count: true, where: { mastery: 'NEEDS_PRACTICE', paper: { paperDate: { gte: from } } }, orderBy: { _count: { topic: 'desc' } }, take: 6 }),
     prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to }, isReadByParent: true } }),
     prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to }, isReadByParent: true } }),
     prisma.performancePost.count({ where: { createdAt: { gte: from, lt: to }, deletedAt: null } }),
     prisma.postReaction.count({ where: { post: { createdAt: { gte: from, lt: to }, deletedAt: null } } }),
-    prisma.student.count(),
+    prisma.student.count({ where: studentWhere }),
     prisma.paperComment.count({ where: { createdAt: { gte: from, lt: to }, author: { role: 'parent' } } }),
     prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to } } }),
     prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to }, isReplied: true } }),
@@ -117,7 +121,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
 
   // Monthly finance: group fees by month within the range
   const monthlyFees = await prisma.fee.findMany({
-    where: { paidAt: { gte: from, lt: to }, status: 'paid' },
+    where: { paidAt: { gte: from, lt: to }, status: 'paid', ...feeWhere },
     select: { amount: true, paidAt: true },
     orderBy: { paidAt: 'asc' },
   })
@@ -141,8 +145,8 @@ export const GET = apiHandler(async (request: NextRequest) => {
   for (let i = 5; i >= 0; i--) {
     const mFrom = new Date(from.getFullYear(), from.getMonth() - i, 1)
     const mTo = new Date(mFrom.getFullYear(), mFrom.getMonth() + 1, 1)
-    const created = await prisma.student.count({ where: { createdAt: { gte: mFrom, lt: mTo } } })
-    const stillActive = await prisma.student.count({ where: { createdAt: { gte: mFrom, lt: mTo }, status: 'ACTIVE' } })
+    const created = await prisma.student.count({ where: { createdAt: { gte: mFrom, lt: mTo }, ...studentWhere } })
+    const stillActive = await prisma.student.count({ where: { createdAt: { gte: mFrom, lt: mTo }, status: 'ACTIVE', ...studentWhere } })
     retentionMonths.push({
       month: mFrom.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit' }),
       rate: created > 0 ? Math.round((stillActive / created) * 100) : 100,

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import * as XLSX from 'xlsx'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,9 +13,10 @@ export const GET = apiHandler(async (request: NextRequest) => {
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const year = parseInt(request.nextUrl.searchParams.get('year') || String(new Date().getFullYear()))
+  const division = request.nextUrl.searchParams.get('division')
 
   const fees = await prisma.fee.findMany({
-    where: { createdAt: { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) } },
+    where: { createdAt: { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) }, ...divisionWhere(division) },
     include: { student: { select: { name: true } } },
     orderBy: { createdAt: 'desc' },
   })

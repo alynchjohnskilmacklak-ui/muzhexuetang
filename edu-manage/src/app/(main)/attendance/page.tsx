@@ -7,6 +7,7 @@ import { CheckCircleOutlined, TeamOutlined, EnvironmentOutlined, ClockCircleOutl
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { format } from 'date-fns'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const { Text } = Typography
 
@@ -60,11 +61,12 @@ function buildTimeIso(date: string, time: unknown) {
 
 export default function AttendancePage() {
   const isMobile = useIsMobile() ?? false
+  const { division } = useDivision()
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [filterTeacherId, setFilterTeacherId] = useState('')
   const [filterType, setFilterType] = useState('')
 
-  const query = `/api/attendance/today?date=${selectedDate}${filterTeacherId ? `&teacherId=${filterTeacherId}` : ''}`
+  const query = `/api/attendance/today?date=${selectedDate}&division=${division}${filterTeacherId ? `&teacherId=${filterTeacherId}` : ''}`
   const { data: lessonsRaw, mutate: mutateData, isLoading } = useSWR(query, fetcher, { refreshInterval: 120_000 })
   const { data: teachersData } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
 

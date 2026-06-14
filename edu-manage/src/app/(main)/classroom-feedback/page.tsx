@@ -8,6 +8,7 @@ import { Image as AntImage } from 'antd'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { normalizeUploadUrl } from '@/lib/upload-url'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const fetcher = (url: string) => fetch(url).then((res) => { if (!res.ok) throw new Error('加载失败'); return res.json() })
 
@@ -78,6 +79,7 @@ function FeedbackItemCard({ item, isMobile: _isMobile }: { item: AdminFeedback; 
 
 export default function ClassroomFeedbackAdminPage() {
   const isMobile = useIsMobile() ?? false
+  const { division } = useDivision()
   const today = new Date().toISOString().slice(0, 10)
   const [date, setDate] = useState(today)
   const [teacherFilter, setTeacherFilter] = useState('')
@@ -94,6 +96,7 @@ export default function ClassroomFeedbackAdminPage() {
   const [composeLessonId, setComposeLessonId] = useState('')
 
   const params = new URLSearchParams({ date, limit: '200' })
+  params.set('division', division)
   if (teacherFilter) params.set('teacherId', teacherFilter)
   if (viewAll) params.set('all', '1')
   const { data, isLoading, mutate } = useSWR(`/api/admin/classroom-feedback?${params.toString()}`, fetcher)
@@ -106,7 +109,7 @@ export default function ClassroomFeedbackAdminPage() {
   const noFeedback: Array<{ id: string; name: string }> = Array.isArray(data?.teachersWithoutFeedback) ? data.teachersWithoutFeedback : []
   
   const { data: composeStudentsData } = useSWR(
-    composeTeacherId && !composeLessonId ? `/api/students?status=ACTIVE&limit=200` : null,
+    composeTeacherId && !composeLessonId ? `/api/students?status=ACTIVE&limit=200&division=${division}` : null,
     fetcher
   )
   const composeStudents: Array<{ id: string; name: string; grade?: string }> = useMemo(() => {

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { visibleClassGroupWhere, visibleStudentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
@@ -11,8 +12,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url)
   const groupId = searchParams.get('groupId')
   const month = searchParams.get('month')
+  const division = searchParams.get('division')
 
-  const where: Record<string, unknown> = {}
+  const where: Record<string, unknown> = user.role === 'admin' ? { ...divisionWhere(division) } : {}
   if (groupId) {
     where.lesson = { groupId, group: visibleClassGroupWhere }
   } else {

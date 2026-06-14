@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import * as XLSX from 'xlsx'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,10 +55,13 @@ export const GET = apiHandler(async (
 
   const { chartKey } = await params
   const { from, to } = parseRange(request.nextUrl.searchParams)
+  const division = request.nextUrl.searchParams.get('division')
+  const studentWhere = { ...divisionWhere(division) }
+  const feeWhere = { ...divisionWhere(division) }
 
   switch (chartKey) {
     case 'funnel': {
-      const counts = await prisma.student.groupBy({ by: ['status'], _count: true })
+      const counts = await prisma.student.groupBy({ by: ['status'], _count: true, where: studentWhere })
       const statusMap: Record<string, string> = { LEAD: '潜客咨询', TRIAL: '预约试听', ACTIVE: '报名缴费', INACTIVE: '暂停', GRADUATED: '毕业/离校' }
       const rows = counts.map((c) => [statusMap[c.status] || c.status, c._count])
       const ws = XLSX.utils.aoa_to_sheet([['阶段', '人数'], ...rows])
@@ -77,8 +81,8 @@ export const GET = apiHandler(async (
       for (let i = 5; i >= 0; i--) {
         const mFrom = new Date(from.getFullYear(), from.getMonth() - i, 1)
         const mTo = new Date(mFrom.getFullYear(), mFrom.getMonth() + 1, 1)
-        const created = await prisma.student.count({ where: { createdAt: { gte: mFrom, lt: mTo } } })
-        const active = await prisma.student.count({ where: { createdAt: { gte: mFrom, lt: mTo }, status: 'ACTIVE' } })
+        const created = await prisma.student.count({ where: { createdAt: { gte: mFrom, lt: mTo }, ...studentWhere } })
+        const active = await prisma.student.count({ where: { createdAt: { gte: mFrom, lt: mTo }, status: 'ACTIVE', ...studentWhere } })
         rows.push([mFrom.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit' }), created > 0 ? Math.round((active / created) * 100) : 100])
       }
       const ws = XLSX.utils.aoa_to_sheet([['月份', '留存率(%)'], ...rows])
@@ -91,7 +95,7 @@ export const GET = apiHandler(async (
         prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to }, isReadByParent: true } }),
         prisma.performancePost.count({ where: { createdAt: { gte: from, lt: to }, deletedAt: null } }),
         prisma.postReaction.count({ where: { post: { createdAt: { gte: from, lt: to }, deletedAt: null } } }),
-        prisma.student.count(),
+        prisma.student.count({ where: studentWhere }),
         prisma.paperComment.count({ where: { createdAt: { gte: from, lt: to }, author: { role: 'parent' } } }),
         prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to } } }),
         prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to }, isReplied: true } }),
@@ -108,7 +112,7 @@ export const GET = apiHandler(async (
     }
     case 'finance': {
       const fees = await prisma.fee.findMany({
-        where: { paidAt: { gte: from, lt: to }, status: 'paid' },
+        where: { paidAt: { gte: from, lt: to }, status: 'paid', ...feeWhere },
         select: { amount: true, paidAt: true },
         orderBy: { paidAt: 'asc' },
       })

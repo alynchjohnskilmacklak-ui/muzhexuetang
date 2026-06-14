@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { isPayableFeedback } from '@/lib/teacher-salary'
+import { divisionWhere } from '@/lib/division'
 
 import { apiHandler } from '@/lib/api-handler'
 
@@ -16,6 +17,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     const teacherId = sp.get('teacherId') || undefined
     const date = sp.get('date') || new Date().toISOString().slice(0, 10)
     const all = sp.get('all') === '1'
+    const division = sp.get('division')
     const limit = Math.min(200, Math.max(1, Number(sp.get('limit') || 100)))
 
     const dayStart = new Date(`${date}T00:00:00`)
@@ -25,6 +27,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       where: {
         ...(teacherId ? { teacherId } : {}),
         ...(all ? {} : { createdAt: { gte: dayStart, lt: dayEnd } }),
+        ...(division && division !== 'ALL' ? { classLesson: { division } } : {}),
       },
       include: {
         teacher: { select: { id: true, name: true } },
@@ -42,6 +45,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       where: {
         lessonDate: { gte: dayStart, lt: dayEnd },
         status: { not: 'CANCELLED' },
+        ...divisionWhere(division),
       },
       include: {
         teacher: { select: { id: true, name: true } },

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { resolveTeacherForUser } from '@/lib/performance'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,6 +30,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   // Role-based access control
   if (role === 'admin') {
     if (teacherIdParam) where.teacherId = teacherIdParam
+    const division = searchParams.get('division')
+    Object.assign(where, divisionWhere(division))
   } else if (role === 'teacher') {
     const teacher = await resolveTeacherForUser(session.user as { id: string; email?: string | null; name?: string | null; role?: string | null })
     if (!teacher) return NextResponse.json({ error: '未绑定教师身份' }, { status: 403 })

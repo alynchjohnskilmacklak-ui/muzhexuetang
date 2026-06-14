@@ -22,8 +22,8 @@ type LoginRole = 'admin' | 'teacher' | 'parent'
 type LoginDivision = 'JUNIOR' | 'SENIOR'
 
 const DIVISION_OPTIONS: Array<{ value: LoginDivision; label: string }> = [
-  { value: 'JUNIOR', label: '???' },
-  { value: 'SENIOR', label: '???' },
+  { value: 'JUNIOR', label: '初中部' },
+  { value: 'SENIOR', label: '高中部' },
 ]
 
 const ROLE_OPTIONS: Array<{ value: LoginRole; label: string; hint: string }> = [
@@ -190,7 +190,7 @@ function RightForm({
 
           {(role === 'admin' || role === 'teacher') && (
             <div style={{ marginBottom: 20 }}>
-              <Text style={{ color: '#9a8e7a', fontSize: 13, display: 'block', marginBottom: 8 }}>????</Text>
+              <Text style={{ color: '#9a8e7a', fontSize: 13, display: 'block', marginBottom: 8 }}>选择学部</Text>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {DIVISION_OPTIONS.map((item) => {
                   const active = division === item.value

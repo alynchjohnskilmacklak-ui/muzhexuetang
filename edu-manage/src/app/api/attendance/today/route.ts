@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { activeEnrollmentWhere, attendanceEligibleLessonWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,9 +19,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const todayStart = new Date(queryDate.getFullYear(), queryDate.getMonth(), queryDate.getDate())
   const todayEnd = new Date(todayStart.getTime() + 86400000)
 
+  const division = searchParams.get('division')
   const where: Record<string, unknown> = {
     lessonDate: { gte: todayStart, lt: todayEnd },
     ...attendanceEligibleLessonWhere,
+    ...(user.role === 'admin' ? divisionWhere(division) : {}),
   }
   if (teacherId) {
     where.OR = [

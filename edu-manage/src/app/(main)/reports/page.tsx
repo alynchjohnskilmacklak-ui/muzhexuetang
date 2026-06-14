@@ -16,6 +16,7 @@ import {
   buildGuideUsageOption,
 } from './chartBuilders'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const { RangePicker } = DatePicker
 const ReactECharts = dynamic(() => import('echarts-for-react'), {
@@ -88,10 +89,12 @@ function ChartCard({ title, chartKey, period, from, to, children }: {
 
 export default function ReportsPage() {
   const isMobile = useIsMobile() ?? false
+  const { division } = useDivision()
   const [period, setPeriod] = useState<string>('month')
   const [customRange, setCustomRange] = useState<[string, string] | null>(null)
 
   const queryParams = new URLSearchParams({ period })
+  queryParams.set('division', division)
   if (period === 'custom' && customRange) {
     queryParams.set('from', customRange[0])
     queryParams.set('to', customRange[1])

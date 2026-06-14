@@ -159,8 +159,8 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
       )}
 
       <Form form={form} layout="vertical" style={{ marginTop: 8 }}>
-        <Form.Item name="division" label="??" rules={[{ required: true, message: '?????' }]}>
-          <Select options={[{ label: '???', value: 'JUNIOR' }, { label: '???', value: 'SENIOR' }]} />
+        <Form.Item name="division" label="学部" rules={[{ required: true, message: '请选择学部' }]}>
+          <Select options={[{ label: '初中部', value: 'JUNIOR' }, { label: '高中部', value: 'SENIOR' }]} />
         </Form.Item>
 
         <Form.Item name="classType" label="班型" rules={[{ required: true, message: '请选择班型' }]}>

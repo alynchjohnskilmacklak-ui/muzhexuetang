@@ -18,12 +18,12 @@ export function DivisionSwitcher({ compact = false }: { compact?: boolean }) {
     <Select
       value={division}
       onChange={handleChange}
-      options={DIVISION_OPTIONS.map((item) => ({ value: item.value, label: compact ? item.label : `???${item.label}` }))}
+      options={DIVISION_OPTIONS.map((item) => ({ value: item.value, label: compact ? item.label : `当前：${item.label}` }))}
       style={{ minWidth: compact ? 112 : 148 }}
       size={compact ? 'small' : 'middle'}
       popupMatchSelectWidth={false}
       getPopupContainer={(trigger) => trigger.parentElement || document.body}
-      aria-label="????"
+      aria-label="切换学部"
     />
   )
 }
