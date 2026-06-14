@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 
 export type EntityKey =
   | 'students'
@@ -205,6 +205,7 @@ export async function createActivityLog(
   entityId: string,
   metadata?: Record<string, unknown>,
 ) {
+  const prisma = await getRequestPrisma()
   await prisma.activityLog.create({
     data: {
       userId,
@@ -225,6 +226,7 @@ export async function createDeletedRecord(
   deletedById: string,
   reason: string,
 ) {
+  const prisma = await getRequestPrisma()
   await prisma.deletedRecord.create({
     data: {
       entityType,

@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client'
+import type { Prisma, PrismaClient } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 
 export interface ScheduleConflict {
@@ -19,6 +19,7 @@ export interface CheckScheduleConflictsInput {
   endTime: Date
   excludeScheduleId?: string
   tx?: Prisma.TransactionClient
+  prismaClient?: PrismaClient
 }
 
 export async function checkScheduleConflicts({
@@ -29,8 +30,9 @@ export async function checkScheduleConflicts({
   endTime,
   excludeScheduleId,
   tx,
+  prismaClient,
 }: CheckScheduleConflictsInput): Promise<ScheduleConflict[]> {
-  const db = tx ?? prisma
+  const db = tx ?? prismaClient ?? prisma
   const conflicts: ScheduleConflict[] = []
   const exclude = excludeScheduleId ? { id: { not: excludeScheduleId } } : {}
   const timeFilter = {

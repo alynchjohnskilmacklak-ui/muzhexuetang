@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 
 interface HealthIssue {
   label: string
@@ -9,6 +9,7 @@ interface HealthIssue {
 }
 
 export async function runDataHealthCheck(): Promise<HealthIssue[]> {
+  const prisma = await getRequestPrisma()
   const issues: HealthIssue[] = []
 
   // 1. Duplicate attendance for same lesson+student

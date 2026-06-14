@@ -1,7 +1,9 @@
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
+import type { PrismaClient } from '@prisma/client'
 import { startOfMealWeek } from '@/lib/meals'
 
-export async function getEffectiveMealMenuForDate(date: Date) {
+export async function getEffectiveMealMenuForDate(date: Date, prismaClient?: PrismaClient) {
+  const prisma = prismaClient ?? await getRequestPrisma()
   const dayOfWeek = date.getDay()
   if (dayOfWeek < 1 || dayOfWeek > 6) return null
 

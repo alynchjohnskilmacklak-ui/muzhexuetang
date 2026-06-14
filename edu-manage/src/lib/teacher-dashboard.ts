@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
+import type { PrismaClient } from '@prisma/client'
 import { teacherLessonWhere, teacherStudentWhere, todayRange, weekRange } from '@/lib/teacher-portal'
 import { visibleStudentWhere } from '@/lib/business-visibility'
 import { minutesToHours, roundHours } from '@/lib/hours'
@@ -31,7 +32,8 @@ function daysSince(date?: Date | null) {
   return Math.floor((Date.now() - date.getTime()) / 86400000)
 }
 
-export async function getTeacherDashboardData(teacherId: string) {
+export async function getTeacherDashboardData(teacherId: string, prismaClient?: PrismaClient) {
+  const prisma = prismaClient ?? await getRequestPrisma()
   const now = new Date()
   const { start: today, end: todayEnd } = todayRange(now)
   const { start: weekStart, end: weekEnd } = weekRange(now)

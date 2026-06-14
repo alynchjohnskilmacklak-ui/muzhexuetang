@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
+import type { PrismaClient } from '@prisma/client'
 import { getEffectiveMealMenuForDate } from '@/lib/meal-template'
 import {
   parentActiveEnrollmentWhere,
@@ -12,7 +13,8 @@ import {
   visibleTeacherWhere,
 } from '@/lib/business-visibility'
 
-export async function getParentDashboardData(userId: string) {
+export async function getParentDashboardData(userId: string, prismaClient?: PrismaClient) {
+  const prisma = prismaClient ?? await getRequestPrisma()
   const students = await prisma.student.findMany({
     where: parentActiveStudentWhere(userId),
     include: {
@@ -179,7 +181,7 @@ export async function getParentDashboardData(userId: string) {
       todayPaperCount: todayPaperRows.filter((paper) => paper.studentId === studentId).length,
     }]
   }))
-  const todayMeal = await getEffectiveMealMenuForDate(today)
+  const todayMeal = await getEffectiveMealMenuForDate(today, prisma)
 
   return {
     students,

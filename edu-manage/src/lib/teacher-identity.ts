@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
+import type { PrismaClient } from '@prisma/client'
 import { chineseToPinyin } from '@/lib/pinyin'
 
 /**
@@ -6,7 +7,8 @@ import { chineseToPinyin } from '@/lib/pinyin'
  * Primary: session.user.teacherId (strong binding).
  * Fallback: match by pinyin email for migration compatibility.
  */
-export async function detectTeacherId(userId: string): Promise<string | null> {
+export async function detectTeacherId(userId: string, prismaClient?: PrismaClient): Promise<string | null> {
+  const prisma = prismaClient ?? await getRequestPrisma()
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { teacherId: true, email: true, name: true },

@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
+import type { Prisma, PrismaClient } from '@prisma/client'
 
 export const DEFAULT_GROUP_RATE_JUNIOR = 22
 export const DEFAULT_GROUP_RATE_SENIOR = 26
@@ -67,7 +68,8 @@ export function isPayableFeedback(feedback: { status: string; summary?: string |
     && (Boolean(feedback.summary?.trim()) || feedback.knowledgePoints.length > 0)
 }
 
-export async function getTeacherSalaryConfig(teacherId: string) {
+export async function getTeacherSalaryConfig(teacherId: string, prismaClient?: PrismaClient | Prisma.TransactionClient) {
+  const prisma = prismaClient ?? await getRequestPrisma()
   const cfg = await prisma.teacherSalaryConfig.findUnique({ where: { teacherId } })
   return {
     groupRateJunior: cfg?.groupRateJunior ?? DEFAULT_GROUP_RATE_JUNIOR,
@@ -97,8 +99,9 @@ export function calcLessonPay(opts: {
   return Number((ratePerHour * lessonMinutes / 60).toFixed(4))
 }
 
-export async function triggerLessonPay(lessonId: string): Promise<{ success: boolean; error?: string }> {
+export async function triggerLessonPay(lessonId: string, prismaClient?: PrismaClient): Promise<{ success: boolean; error?: string }> {
   try {
+    const prisma = prismaClient ?? await getRequestPrisma()
     const lesson = await prisma.classLesson.findUnique({
       where: { id: lessonId },
       include: { group: { include: { course: true } } },
@@ -113,7 +116,7 @@ export async function triggerLessonPay(lessonId: string): Promise<{ success: boo
       })
       if (existing) return { success: true }
 
-      const cfg = await getTeacherSalaryConfig(teacherId)
+      const cfg = await getTeacherSalaryConfig(teacherId, tx)
       const grade = inferGrade(lesson.group.course.grade, lesson.group.name, lesson.group.course.name)
       const amount = calcLessonPay({
         courseType: lesson.group.course.type,
@@ -147,8 +150,9 @@ export async function triggerLessonPay(lessonId: string): Promise<{ success: boo
   }
 }
 
-export async function triggerFeedbackBonus(feedbackId: string): Promise<{ success: boolean; error?: string }> {
+export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: PrismaClient): Promise<{ success: boolean; error?: string }> {
   try {
+    const prisma = prismaClient ?? await getRequestPrisma()
     const feedback = await prisma.classroomFeedback.findUnique({
       where: { id: feedbackId },
       include: { classLesson: { include: { group: { include: { course: true } } } } },
@@ -193,7 +197,7 @@ export async function triggerFeedbackBonus(feedbackId: string): Promise<{ succes
         if (existing) return { success: true }
       }
 
-      const cfg = await getTeacherSalaryConfig(teacherId)
+      const cfg = await getTeacherSalaryConfig(teacherId, tx)
       let isOneOnOne = lesson?.group?.course?.type === 'ONE_ON_ONE'
       // When lesson is null, check if students have one-on-one enrollments with this teacher
       if (!lesson && feedback.studentIds.length > 0) {

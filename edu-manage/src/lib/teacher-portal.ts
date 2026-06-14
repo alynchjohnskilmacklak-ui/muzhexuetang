@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
-import type { Prisma } from '@prisma/client'
+import { getPrismaForDivision, getRequestPrisma } from '@/lib/prisma'
+import type { Prisma, PrismaClient } from '@prisma/client'
 import { auth } from '@/lib/auth'
 import { getCurrentUser } from '@/lib/get-user'
 import { resolveTeacherForUser } from '@/lib/performance'
@@ -50,14 +50,15 @@ export function isAdminRole(role?: string | null) {
 export async function getCurrentTeacher() {
   const user = await getCurrentUser()
   if (!user || !isTeacherRole(user.role)) return null
+  const prisma = getPrismaForDivision(user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR')
   const teacher = await resolveTeacherForUser({
     id: user.id,
     email: user.email,
     name: user.name,
     role: user.role,
-  })
+  }, prisma)
   if (!teacher || teacher.status === 'RESIGNED') return null
-  return { user, teacher }
+  return { user, teacher, prisma }
 }
 
 export async function requireCurrentTeacher() {
@@ -73,12 +74,14 @@ export async function requireTeacherPage() {
   const role = (session?.user as { role?: string } | undefined)?.role
   if (!session?.user || !isTeacherRole(role)) redirect('/login')
 
+  const division = (session.user as { division?: string }).division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+  const prisma = getPrismaForDivision(division)
   const teacher = await resolveTeacherForUser({
     id: (session.user as { id?: string }).id || '',
     email: session.user.email,
     name: session.user.name,
     role,
-  })
+  }, prisma)
   if (!teacher || teacher.status === 'RESIGNED') redirect('/login')
   return teacher
 }
@@ -88,10 +91,12 @@ export async function requireAdminUser() {
   if (!user || !isAdminRole(user.role)) {
     throw new Error('ADMIN_UNAUTHORIZED')
   }
-  return user
+  const prisma = getPrismaForDivision(user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR')
+  return Object.assign(user, { user, prisma })
 }
 
-export async function assertTeacherOwnsStudent(teacherId: string, studentId: string) {
+export async function assertTeacherOwnsStudent(teacherId: string, studentId: string, prismaClient?: PrismaClient) {
+  const prisma = prismaClient ?? await getRequestPrisma()
   const student = await prisma.student.findFirst({
     where: {
       id: studentId,

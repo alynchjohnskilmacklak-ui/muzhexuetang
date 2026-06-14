@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
+import type { PrismaClient } from '@prisma/client'
 
 export function hasTimeOverlap(
   newStart: string,
@@ -28,7 +29,8 @@ export interface ConflictInfo {
   roomName?: string
 }
 
-export async function checkScheduleConflict(input: ConflictCheckInput): Promise<ConflictInfo[]> {
+export async function checkScheduleConflict(input: ConflictCheckInput, prismaClient?: PrismaClient): Promise<ConflictInfo[]> {
+  const prisma = prismaClient ?? await getRequestPrisma()
   const { teacherId, studentId, roomId, date, startTime, endTime, excludeLessonId } = input
 
   const dayStart = new Date(`${date}T00:00:00`)

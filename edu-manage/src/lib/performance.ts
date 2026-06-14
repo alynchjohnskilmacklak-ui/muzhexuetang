@@ -1,4 +1,5 @@
-﻿import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
+import type { PrismaClient } from '@prisma/client'
 import { chineseToPinyin } from '@/lib/pinyin'
 
 export const MOOD_META = {
@@ -41,16 +42,20 @@ export const RATING_LABELS = {
   homework: '作业情况',
 } as const
 
-export async function resolveTeacherForUser(user: { id: string; email?: string | null; name?: string | null; role?: string | null }) {
+export async function resolveTeacherForUser(
+  user: { id: string; email?: string | null; name?: string | null; role?: string | null },
+  prismaClient: PrismaClient = prisma,
+) {
+  const db = prismaClient
   const loginEmail = user.email?.toLowerCase() || ''
 
   // 最高优先级：通过 User.teacherId 直接绑定（唯一、准确，杜绝姓名误匹配）
-  const boundUser = await prisma.user.findUnique({
+  const boundUser = await db.user.findUnique({
     where: { id: user.id },
     select: { teacherId: true },
   })
   if (boundUser?.teacherId) {
-    const bound = await prisma.teacher.findFirst({
+    const bound = await db.teacher.findFirst({
       where: { id: boundUser.teacherId, status: { not: 'RESIGNED' } },
     })
     if (bound) return bound
@@ -58,21 +63,21 @@ export async function resolveTeacherForUser(user: { id: string; email?: string |
 
   // 次优先：精确邮箱匹配（不再用姓名兜底，避免同名张冠李戴）
   const teacher = user.email
-    ? await prisma.teacher.findFirst({
+    ? await db.teacher.findFirst({
         where: { status: { not: 'RESIGNED' }, email: user.email },
       })
     : null
 
   if (teacher) return teacher
   if (loginEmail.endsWith('@tea.com')) {
-    const teachers = await prisma.teacher.findMany({
+    const teachers = await db.teacher.findMany({
       where: { status: { not: 'RESIGNED' } },
     })
     const matched = teachers.find((item) => `${chineseToPinyin(item.name)}@tea.com` === loginEmail)
     if (matched) return matched
   }
   if (user.role === 'admin') {
-    return prisma.teacher.findFirst({ where: { status: { not: 'RESIGNED' } }, orderBy: { createdAt: 'asc' } })
+    return db.teacher.findFirst({ where: { status: { not: 'RESIGNED' } }, orderBy: { createdAt: 'asc' } })
   }
   return null
 }

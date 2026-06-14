@@ -1,9 +1,13 @@
-import { prisma } from '@/lib/prisma'
+import { getPrismaForDivision, isDualDbEnabled, prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import path from 'path'
 import { existsSync, readFileSync } from 'fs'
 import * as XLSX from 'xlsx'
 import { BATCH_TAGS } from '@/lib/volunteer-shared'
+
+function getVolunteerPrisma() {
+  return isDualDbEnabled() ? getPrismaForDivision('JUNIOR') : prisma
+}
 
 const VOLUNTEER_DOCS = [
   {
@@ -95,6 +99,7 @@ export const DEFAULT_VOLUNTEER_STEPS = [
 ]
 
 export async function getOrCreateVolunteerGuide() {
+  const prisma = getVolunteerPrisma()
   const guide = await prisma.volunteerGuide.findFirst({
     orderBy: { createdAt: 'desc' },
   })
@@ -171,6 +176,7 @@ function patchMissingImageUrls(steps: { order: number; imageUrl?: string | null 
 }
 
 async function ensureVolunteerStepImages(guideId: string) {
+  const prisma = getVolunteerPrisma()
   const steps = await prisma.guideStep.findMany({ where: { guideId }, orderBy: { order: 'asc' } })
   let updated = false
   for (const step of steps) {
@@ -188,6 +194,7 @@ async function ensureVolunteerStepImages(guideId: string) {
 }
 
 async function ensureVolunteerDocuments(guideId: string) {
+  const prisma = getVolunteerPrisma()
   const existing = await prisma.guideDocument.count({ where: { guideId } })
   if (existing >= VOLUNTEER_DOCS.length) return
   for (const doc of VOLUNTEER_DOCS) {
@@ -197,6 +204,7 @@ async function ensureVolunteerDocuments(guideId: string) {
 }
 
 async function ensureVolunteerQuotaData(guideId: string, year: number) {
+  const prisma = getVolunteerPrisma()
   const existing = await prisma.quotaRecord.count({ where: { guideId, year } })
   if (existing > 0) return
   try {
@@ -208,6 +216,7 @@ async function ensureVolunteerQuotaData(guideId: string, year: number) {
 }
 
 export async function getVolunteerGuideForAdmin() {
+  const prisma = getVolunteerPrisma()
   const guide = await getOrCreateVolunteerGuide()
   const result = await prisma.volunteerGuide.findUnique({
     where: { id: guide.id },
@@ -222,6 +231,7 @@ export async function getVolunteerGuideForAdmin() {
 }
 
 export async function getVolunteerGuideForParent() {
+  const prisma = getVolunteerPrisma()
   const guide = await getOrCreateVolunteerGuide()
   const result = await prisma.volunteerGuide.findFirst({
     where: { id: guide.id, isPublished: true },
