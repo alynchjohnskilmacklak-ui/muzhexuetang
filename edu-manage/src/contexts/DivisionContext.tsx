@@ -10,9 +10,9 @@ interface DivisionCtx {
   setDivision: (d: Division) => void
 }
 
-const isDivision = (value: string | null): value is Division => value === 'JUNIOR' || value === 'SENIOR' || value === 'ALL'
+const isDivision = (value: string | null | undefined): value is Division => value === 'JUNIOR' || value === 'SENIOR' || value === 'ALL'
 
-const isWritableDivision = (d: Division): d is 'JUNIOR' | 'SENIOR' => d === 'JUNIOR' || d === 'SENIOR'
+const isWritableDivision = (d: string | null | undefined): d is 'JUNIOR' | 'SENIOR' => d === 'JUNIOR' || d === 'SENIOR'
 
 const Ctx = createContext<DivisionCtx>({ division: 'JUNIOR', setDivision: () => {} })
 
@@ -34,7 +34,7 @@ export function DivisionProvider({ children }: { children: ReactNode }) {
         setDivisionState(urlDiv)
       } else {
         // No permission for this division — fall back to own division
-        const fallback = isWritableDivision(userDivision as Division) ? userDivision : 'JUNIOR'
+        const fallback = isWritableDivision(userDivision) ? userDivision : 'JUNIOR'
         setDivisionState(fallback as Division)
         const url = new URL(window.location.href)
         url.searchParams.set('division', fallback)
@@ -43,8 +43,8 @@ export function DivisionProvider({ children }: { children: ReactNode }) {
     } else if (isDivision(sessionSelected)) {
       // No URL param — use session selectedDivision
       setDivisionState(sessionSelected)
-    } else if (isWritableDivision(userDivision as Division)) {
-      setDivisionState(userDivision as Division)
+    } else if (isWritableDivision(userDivision)) {
+      setDivisionState(userDivision)
     }
   }, [sessionSelected, userDivision, canSwitch])
 
