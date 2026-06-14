@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { generateParentCredentials, generateParentCredentialsHashed } from '@/lib/pinyin'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere, normalizeWritableDivision } from '@/lib/division'
+import { divisionWhere, getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,10 +30,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const q = searchParams.get('q') || ''
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '100')
-  const division = searchParams.get('division')
+  const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
   const skip = (page - 1) * limit
 
-  const where: Record<string, unknown> = { ...divisionWhere(division) }
+  const where: Record<string, unknown> = { division }
   if (status) {
     where.status = status.toUpperCase()
   } else {
@@ -73,7 +73,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       by: ['studentId'],
       where: {
         status: 'ACTIVE',
-        student: { status: 'ACTIVE', ...divisionWhere(division) },
+        student: { status: 'ACTIVE', division },
         group: { status: { not: 'ARCHIVED' }, course: { isActive: true } },
       },
       _sum: { remainHours: true },
@@ -151,7 +151,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
     const body = await req.json()
-    const division = normalizeWritableDivision(body.division)
+    const division = getRequestDivision(session.user as Record<string, unknown> | undefined, body.division)
     const name = typeof body.name === 'string' ? body.name.trim() : ''
     if (!name) return NextResponse.json({ error: '姓名不能为空' }, { status: 400 })
 

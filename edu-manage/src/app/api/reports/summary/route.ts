@@ -2,7 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,9 +48,9 @@ export const GET = apiHandler(async (request: NextRequest) => {
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const { from, to } = parseDateRange(request.nextUrl.searchParams)
-  const division = request.nextUrl.searchParams.get('division')
-  const studentWhere = { ...divisionWhere(division) }
-  const feeWhere = { ...divisionWhere(division) }
+  const division = getRequestDivision(user, request.nextUrl.searchParams.get('division'))
+  const studentWhere = { division }
+  const feeWhere = { division }
 
   const [
     totalStudents,

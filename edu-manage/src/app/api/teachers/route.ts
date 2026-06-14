@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { chineseToPinyin } from '@/lib/pinyin'
 import bcrypt from 'bcryptjs'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { divisionWhere, getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,11 +23,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const q = searchParams.get('q') || ''
   const type = searchParams.get('type')
   const subject = searchParams.get('subject')
-  const division = searchParams.get('division')
+  const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '100')
 
-  const where: Record<string, unknown> = { ...divisionWhere(division) }
+  const where: Record<string, unknown> = { division }
   if (type === 'FULL_TIME' || type === 'PART_TIME') where.employmentType = type
   if (type === 'RESIGNED') where.status = 'RESIGNED'
   if (!type || type === 'FULL_TIME' || type === 'PART_TIME') where.status = { not: 'RESIGNED' }
@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
       subjects,
       bio: body.bio || null,
       monthlyHours: body.monthlyHours ? parseInt(body.monthlyHours) : 0,
-      division: body.division || 'JUNIOR',
+      division: getRequestDivision(session.user as Record<string, unknown> | undefined, body.division),
     }
 
     const existingTeacher = await prisma.teacher.findUnique({ where: { phone } })

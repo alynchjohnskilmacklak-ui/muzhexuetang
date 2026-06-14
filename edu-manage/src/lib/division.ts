@@ -19,3 +19,25 @@ export function divisionWhere(value: unknown): { division?: WritableDivision } {
   const division = normalizeDivision(value)
   return division === 'ALL' ? {} : { division }
 }
+
+/** Returns the effective division for this request.
+ *  Super admins (division=ALL) may use requestedDivision (defaults to selectedDivision).
+ *  Regular users are locked to their own division.
+ *  Always returns JUNIOR or SENIOR, never ALL (ALL means "no filter" which is a leak). */
+export function getRequestDivision(
+  sessionUser: { role?: string; division?: string | null; selectedDivision?: string } | null | undefined,
+  requestedDivision?: string | null,
+): WritableDivision {
+  if (!sessionUser) throw new Error('UNAUTHORIZED')
+
+  const userDiv = sessionUser.division || 'JUNIOR'
+  const selectedDiv = sessionUser.selectedDivision || 'JUNIOR'
+
+  if (userDiv === 'ALL') {
+    const req = requestedDivision || selectedDiv
+    return req === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+  }
+
+  // Regular user: locked to own division
+  return userDiv === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+}

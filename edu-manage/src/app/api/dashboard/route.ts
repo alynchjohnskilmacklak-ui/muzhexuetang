@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 import {
   activeEnrollmentWhere,
   visibleClassGroupWhere,
@@ -65,10 +65,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const today = startOfDay(now)
   const todayEnd = addDays(today, 1)
   const { searchParams } = new URL(req.url)
-  const division = searchParams.get('division')
-  const scopedStudentWhere = { ...visibleStudentWhere, ...divisionWhere(division) }
-  const scopedGroupWhere = { ...visibleClassGroupWhere, ...divisionWhere(division) }
-  const scopedLessonWhere = divisionWhere(division)
+  const division = getRequestDivision(user, searchParams.get('division'))
+  const scopedStudentWhere = { ...visibleStudentWhere, division }
+  const scopedGroupWhere = { ...visibleClassGroupWhere, division }
+  const scopedLessonWhere = { division }
 
   const [
     totalStudents,
@@ -89,8 +89,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     performancePostsToday,
     monthAttendance,
   ] = await Promise.all([
-    prisma.student.count({ where: { status: 'ACTIVE', ...divisionWhere(division) } }),
-    prisma.student.count({ where: { status: 'ACTIVE', createdAt: { lt: monthStart }, ...divisionWhere(division) } }),
+    prisma.student.count({ where: { status: 'ACTIVE', division } }),
+    prisma.student.count({ where: { status: 'ACTIVE', createdAt: { lt: monthStart }, division } }),
     prisma.classLesson.findMany({
       where: {
         ...scopedLessonWhere,
@@ -125,8 +125,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
       orderBy: { createdAt: 'desc' },
       include: { user: true, teacher: true },
     }),
-    prisma.classGroup.count({ where: { status: 'ACTIVE', course: { isActive: true }, ...divisionWhere(division) } }),
-    prisma.classGroup.count({ where: { status: 'WAITING', course: { isActive: true }, ...divisionWhere(division) } }),
+    prisma.classGroup.count({ where: { status: 'ACTIVE', course: { isActive: true }, division } }),
+    prisma.classGroup.count({ where: { status: 'WAITING', course: { isActive: true }, division } }),
     prisma.enrollment.count({ where: { remainHours: { lte: 5 }, totalHours: { gt: 0 }, ...activeEnrollmentWhere, student: scopedStudentWhere } }),
     prisma.makeupRequest.count({ where: { status: 'PENDING', student: scopedStudentWhere, attendance: { lesson: { group: scopedGroupWhere } } } }),
     prisma.attendance.aggregate({

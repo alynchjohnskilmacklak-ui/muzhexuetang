@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { activeEnrollmentWhere, activeCourseWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere, normalizeWritableDivision } from '@/lib/division'
+import { divisionWhere, getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,9 +48,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const grade = searchParams.get('grade')
   const status = searchParams.get('status')
   const include = searchParams.get('include')
-  const division = searchParams.get('division')
+  const division = getRequestDivision(user, searchParams.get('division'))
 
-  const where: Record<string, unknown> = { course: activeCourseWhere, ...divisionWhere(division) }
+  const where: Record<string, unknown> = { course: activeCourseWhere, division }
   if (status) {
     where.status = status
   } else {
@@ -91,7 +91,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const body = await req.json()
-  const division = normalizeWritableDivision(body.division)
+  const division = getRequestDivision(user, body.division)
   const { name, courseId, teacherId, teacherIds, roomId, startDate, maxStudents, recurringDays, lessonStartTime, lessonMinutes, totalLessons, note } = body
   const normalizedRecurringDays = normalizeRecurringDays(recurringDays)
   const normalizedAssignments = normalizeTeacherAssignments(body)

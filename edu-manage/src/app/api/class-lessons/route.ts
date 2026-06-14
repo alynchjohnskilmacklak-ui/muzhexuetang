@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { activeEnrollmentWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
-import { divisionWhere } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,9 +18,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const roomId = searchParams.get('roomId')
   const groupId = searchParams.get('groupId')
   const courseType = searchParams.get('courseType')
-  const division = searchParams.get('division')
+  const division = getRequestDivision(user, searchParams.get('division'))
 
-  const where: Record<string, unknown> = { status: { not: 'CANCELLED' }, ...divisionWhere(division) }
+  const where: Record<string, unknown> = { status: { not: 'CANCELLED' }, division }
   if (startDate || endDate) {
     where.lessonDate = {
       ...(startDate ? { gte: new Date(`${startDate}T00:00:00`) } : {}),
