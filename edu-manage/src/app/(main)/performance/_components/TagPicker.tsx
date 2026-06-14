@@ -1,4 +1,4 @@
-'use client'
+ï»¿'use client'
 
 import { Input, Space, Tag } from 'antd'
 import { useState } from 'react'
@@ -44,7 +44,7 @@ export function TagPicker({ value, onChange }: { value: string[]; onChange: (val
         value={custom}
         onChange={(event) => setCustom(event.target.value)}
         onPressEnter={addCustom}
-        placeholder="ÊäÈë×Ô¶¨Òå±êÇ©ºó»Ø³µ"
+        placeholder="è¾“å…¥è‡ªå®šä¹‰æ ‡ç­¾åŽå›žè½¦"
         maxLength={12}
       />
     </Space>

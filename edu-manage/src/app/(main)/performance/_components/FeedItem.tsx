@@ -1,4 +1,4 @@
-'use client'
+Ôªø'use client'
 
 import Image from 'next/image'
 import { Avatar, Button, Card, Image as AntImage, Popconfirm, Rate, Space, Tag } from 'antd'
@@ -40,16 +40,16 @@ export function FeedItem({ post, onDelete }: { post: FeedPost; onDelete?: (id: s
             <Space align="center">
               <Avatar src={normalizeUploadUrl(post.teacher?.avatar) || undefined} icon={<UserOutlined />} style={{ background: '#E8784A' }} />
               <div>
-                <div style={{ color: '#1F2329', fontWeight: 700 }}>{post.teacher?.name || '¿œ ¶'}</div>
+                <div style={{ color: '#1F2329', fontWeight: 700 }}>{post.teacher?.name || 'ËÄÅÂ∏à'}</div>
                 <div style={{ color: '#98A2B3', fontSize: 12 }}>
-                  {post.student?.name || '-'} {post.student?.grade ? `°§ ${post.student.grade}` : ''} °§ {timeLabel(post.createdAt)}
+                  {post.student?.name || '-'} {post.student?.grade ? `¬∑ ${post.student.grade}` : ''} ¬∑ {timeLabel(post.createdAt)}
                 </div>
               </div>
             </Space>
             <Space>
               <Tag color={mood.color}><span style={{ marginRight: 4 }}>{mood.icon}</span>{mood.label}</Tag>
               {onDelete && (
-                <Popconfirm title="»∑»œ…æ≥˝’‚Ãı∂ØÃ¨£ø" okText="…æ≥˝" cancelText="»°œ˚" onConfirm={() => onDelete(post.id)}>
+                <Popconfirm title="Á°ÆËÆ§Âà†Èô§ËøôÊù°Âä®ÊÄÅÔºü" okText="Âà†Èô§" cancelText="ÂèñÊ∂à" onConfirm={() => onDelete(post.id)}>
                   <Button size="small" danger icon={<DeleteOutlined />} />
                 </Popconfirm>
               )}
@@ -68,7 +68,7 @@ export function FeedItem({ post, onDelete }: { post: FeedPost; onDelete?: (id: s
             <Space wrap style={{ marginBottom: 12 }}>
               {badgeTypes.map((type) => {
                 const badge = PERFORMANCE_BADGES.find((item) => item.type === type)
-                return <Tag key={type} color="gold">{badge?.icon || '??'} {badge?.label || type}</Tag>
+                return <Tag key={type} color="gold">{badge?.icon || 'üèÖ'} {badge?.label || type}</Tag>
               })}
             </Space>
           )}
@@ -82,7 +82,7 @@ export function FeedItem({ post, onDelete }: { post: FeedPost; onDelete?: (id: s
                     <AntImage
                       key={src}
                       src={imageUrl}
-                      alt="øŒÃ√’’∆¨"
+                      alt="ËØæÂ†ÇÁÖßÁâá"
                       width={88}
                       height={88}
                       style={{ objectFit: 'cover', borderRadius: 8, background: '#FCFBF9' }}
@@ -106,7 +106,7 @@ export function FeedItem({ post, onDelete }: { post: FeedPost; onDelete?: (id: s
 
           {latestComment && (
             <div style={{ marginTop: 12, padding: 10, borderRadius: 8, background: '#FCFBF9', color: '#5a4e3a', fontSize: 13 }}>
-              º“≥§¡Ù—‘£∫{latestComment.content}
+              ÂÆ∂ÈïøÁïôË®ÄÔºö{latestComment.content}
             </div>
           )}
         </div>
