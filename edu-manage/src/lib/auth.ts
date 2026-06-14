@@ -37,6 +37,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email:     { label: 'Email',      type: 'email' },
         password:  { label: 'Password',   type: 'password' },
         loginRole: { label: 'Login Role', type: 'text' },
+        division:  { label: 'Division',   type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password || !credentials?.loginRole) return null
@@ -56,6 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           loginRole,
           { persistUser: true, recordAttempt: true, recordSuccess: true },
           meta,
+          (credentials.division as string) || undefined,
         )
         if (!result.ok) return null
 

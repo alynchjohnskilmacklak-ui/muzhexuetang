@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { chineseToPinyin } from '@/lib/pinyin'
 import bcrypt from 'bcryptjs'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,10 +22,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const q = searchParams.get('q') || ''
   const type = searchParams.get('type')
   const subject = searchParams.get('subject')
+  const division = searchParams.get('division')
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '100')
 
-  const where: Record<string, unknown> = {}
+  const where: Record<string, unknown> = { ...divisionWhere(division) }
   if (type === 'FULL_TIME' || type === 'PART_TIME') where.employmentType = type
   if (type === 'RESIGNED') where.status = 'RESIGNED'
   if (!type || type === 'FULL_TIME' || type === 'PART_TIME') where.status = { not: 'RESIGNED' }
@@ -112,7 +114,7 @@ export async function POST(req: NextRequest) {
     if (!phone) return NextResponse.json({ error: '手机号不能为空' }, { status: 400 })
     if (!subjects) return NextResponse.json({ error: '至少选择一个授课科目' }, { status: 400 })
 
-    const teacherData = {
+    const teacherData: Record<string, unknown> = {
       name,
       gender: body.gender || null,
       phone,
@@ -129,6 +131,7 @@ export async function POST(req: NextRequest) {
       subjects,
       bio: body.bio || null,
       monthlyHours: body.monthlyHours ? parseInt(body.monthlyHours) : 0,
+      division: body.division || 'JUNIOR',
     }
 
     const existingTeacher = await prisma.teacher.findUnique({ where: { phone } })
@@ -156,6 +159,7 @@ export async function POST(req: NextRequest) {
         name: teacher.name,
         role: 'teacher',
         status: 'active',
+        division: (teacherData.division as string) || 'JUNIOR',
       },
     })
 

@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
@@ -10,10 +11,14 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url)
   const studentId = searchParams.get('studentId')
   const groupId = searchParams.get('groupId')
+  const division = searchParams.get('division')
 
   const where: Record<string, unknown> = {}
   if (studentId) where.studentId = studentId
   if (groupId) where.groupId = groupId
+  if (user.role === 'admin') {
+    where.student = divisionWhere(division)
+  }
 
   const highlights = await prisma.classHighlight.findMany({
     where,

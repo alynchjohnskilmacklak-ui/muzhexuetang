@@ -84,6 +84,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const email = typeof body.email === 'string' ? body.email : ''
   const password = typeof body.password === 'string' ? body.password : ''
   const loginRole = typeof body.loginRole === 'string' ? body.loginRole as LoginRole : null
+  const division = typeof body.division === 'string' ? body.division : undefined
 
   if (!loginRole || !['admin', 'teacher', 'parent'].includes(loginRole)) {
     return NextResponse.json({ ok: false, error: '请选择登录身份' }, { status: 400 })
@@ -106,7 +107,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const { device, os, browser } = parseUserAgent(ua)
   const meta = { ip, userAgent: ua, device, os, browser }
 
-  const result = await validateLoginAccount(email, password, loginRole, { recordAttempt: true }, meta)
+  const result = await validateLoginAccount(email, password, loginRole, { recordAttempt: true }, meta, division)
   if (!result.ok) {
     recordAccountFailure(accountKey)
     return NextResponse.json({ ok: false, error: result.error, code: result.code }, { status: 400 })

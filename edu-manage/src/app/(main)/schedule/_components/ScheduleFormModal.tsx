@@ -28,7 +28,7 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
   const { division } = useDivision()
   const writableDivision = division === 'ALL' ? 'JUNIOR' : division
 
-  const { data: teachers } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
+  const { data: teachers } = useSWR(`/api/teachers?status=ACTIVE&limit=100&division=${division}`, fetcher)
   const { data: rooms } = useSWR('/api/rooms', fetcher)
   const { data: coursesData } = useSWR(`/api/courses?limit=200&division=${division}`, fetcher)
   const { data: students } = useSWR(`/api/students?limit=200&status=ACTIVE&division=${division}`, fetcher, { refreshInterval: 0 })

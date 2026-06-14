@@ -122,6 +122,7 @@ async function validateDatabaseUser(
   options: { recordAttempt?: boolean; recordSuccess?: boolean },
   teacher?: TeacherLoginAccount | null,
   meta?: RequestMeta,
+  division?: string,
 ): Promise<ValidationResult> {
   const user = await prisma.user.findUnique({ where: { email } })
 
@@ -142,6 +143,14 @@ async function validateDatabaseUser(
   if (user.status === 'disabled') {
     if (options.recordAttempt) await recordLoginFailure(email, 'disabled', user.id, meta)
     return { ok: false, error: '账号已停用', code: 'DISABLED' }
+  }
+
+  if (division && (expectedRole === 'teacher' || expectedRole === 'admin')) {
+    if (user.division !== division) {
+      const divisionLabel = division === 'JUNIOR' ? '初中部' : '高中部'
+      if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta)
+      return { ok: false, error: `该账号不属于${divisionLabel}`, code: 'BAD_ROLE' }
+    }
   }
 
   const pwdOk = await verifyPassword(password, user.password)
@@ -166,6 +175,7 @@ export async function validateLoginAccount(
   loginRole: LoginRole,
   options: { persistUser?: boolean; recordAttempt?: boolean; recordSuccess?: boolean } = {},
   meta?: RequestMeta,
+  division?: string,
 ): Promise<ValidationResult> {
   const email = normalizeLoginEmail(emailInput)
   const password = passwordInput.trim()
@@ -195,8 +205,8 @@ export async function validateLoginAccount(
       if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta)
       return { ok: false, error: '用户名输入错误', code: 'BAD_USERNAME' }
     }
-    return validateDatabaseUser(email, password, 'teacher', options, teacher, meta)
+    return validateDatabaseUser(email, password, 'teacher', options, teacher, meta, division)
   }
 
-  return validateDatabaseUser(email, password, loginRole, options, undefined, meta)
+  return validateDatabaseUser(email, password, loginRole, options, undefined, meta, division)
 }

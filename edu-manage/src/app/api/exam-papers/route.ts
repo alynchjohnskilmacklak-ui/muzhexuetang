@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { parentVisibleExamPaperWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const subject = searchParams.get('subject')
   const status = searchParams.get('status')
   const mine = searchParams.get('mine')
+  const division = searchParams.get('division')
 
   const where: Record<string, unknown> = {}
   if (mine === 'true' && user.role === 'parent') {
@@ -27,6 +29,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
     if (subject) where.subject = subject
     if (status) where.status = status
     else where.status = { not: 'DELETED' }
+    if (user.role === 'admin') {
+      where.student = divisionWhere(division)
+    }
   }
   if (Object.keys(where).length === 0) {
     where.status = { not: 'DELETED' }

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { activeEnrollmentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere, normalizeDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +14,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url)
   const teacherId = searchParams.get('teacherId')
   const weekStart = searchParams.get('weekStart')
+  const division = searchParams.get('division')
 
   if (!teacherId || !weekStart) {
     return NextResponse.json({ error: '缺少 teacherId 或 weekStart' }, { status: 400 })
@@ -23,10 +25,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
   end.setDate(end.getDate() + 6)
   end.setHours(23, 59, 59)
 
+  const divFilter = divisionWhere(division)
+
   const lessons = await prisma.classLesson.findMany({
     where: {
       lessonDate: { gte: start, lte: end },
       status: { not: 'CANCELLED' },
+      ...divFilter,
       OR: [
         { teacherId },
         { group: { teacherId } },

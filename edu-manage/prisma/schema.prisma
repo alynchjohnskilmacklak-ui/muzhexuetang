@@ -17,6 +17,7 @@ model User {
   status      String   @default("active")
   wxpusherUid String?
   teacherId   String?  @unique
+  division       String   @default("JUNIOR")
   currentSessionToken String?
   lastLoginAt         DateTime?
   lastLoginIp         String?
@@ -115,6 +116,7 @@ model Teacher {
   monthlyHours   Int       @default(0)
   rating         Float     @default(0)
   ratingCount    Int       @default(0)
+  division       String    @default("JUNIOR")
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -140,6 +142,7 @@ model Teacher {
   parentMessages     ParentMessage[]            @relation("TeacherMessages")
 
   @@index([status, createdAt])
+  @@index([division, status])
 }
 
 enum CourseType {
@@ -823,6 +826,7 @@ model MealMenu {
   sideDish    String?
   allowDouble Boolean  @default(false)
   notes       String?
+  division    String   @default("JUNIOR")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdBy   String
@@ -848,6 +852,7 @@ model MealTemplate {
   isActive  Boolean   @default(true)
   startDate DateTime?
   endDate   DateTime?
+  division  String    @default("JUNIOR")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -865,6 +870,7 @@ model MealReport {
   noodleCount Int      @default(0)
   details     Json
   notes       String?
+  division    String   @default("JUNIOR")
   submittedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

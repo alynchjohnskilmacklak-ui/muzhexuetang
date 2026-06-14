@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { hasTimeOverlap } from '@/lib/schedule-conflict'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +11,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
 
-  const { teacherId, date, startTime, endTime } = await req.json()
+  const { teacherId, date, startTime, endTime, division } = await req.json()
 
   if (!teacherId || !date || !startTime || !endTime) {
     return NextResponse.json({ conflict: false })
@@ -18,12 +19,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   const dayStart = new Date(`${date}T00:00:00`)
   const dayEnd = new Date(`${date}T23:59:59`)
+  const divFilter = divisionWhere(division)
 
   const lessons = await prisma.classLesson.findMany({
     where: {
       teacherId,
       lessonDate: { gte: dayStart, lte: dayEnd },
       status: { not: 'CANCELLED' },
+      ...divFilter,
     },
     include: {
       group: { include: { course: { select: { name: true } } } },

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { sendWxMessage, buildFeedbackContent, buildSafeHomeContent } from '@/lib/wxpusher'
 import { visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,16 +17,18 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '20')
   const skip = (page - 1) * limit
+  const division = searchParams.get('division')
+  const divFilter = divisionWhere(division)
 
   const [records, total] = await Promise.all([
     prisma.notification.findMany({
-      where: { senderId: { not: null }, ...visibleNotificationWhere },
+      where: { senderId: { not: null }, ...visibleNotificationWhere, student: divFilter },
       include: { student: { select: { id: true, name: true } } },
       orderBy: { createdAt: 'desc' },
       skip,
       take: limit,
     }),
-    prisma.notification.count({ where: { senderId: { not: null }, ...visibleNotificationWhere } }),
+    prisma.notification.count({ where: { senderId: { not: null }, ...visibleNotificationWhere, student: divFilter } }),
   ])
   return NextResponse.json({ records, total })
 })

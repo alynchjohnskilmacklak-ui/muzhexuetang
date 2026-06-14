@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { requireCurrentTeacher, teacherStudentWhere } from '@/lib/teacher-portal'
+import { divisionWhere } from '@/lib/division'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
@@ -15,6 +16,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '20')
   const skip = (page - 1) * limit
+  const division = searchParams.get('division')
 
   const role = (session.user as any).role
   const where: any = {}
@@ -22,6 +24,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (role === 'teacher') {
     const { teacher } = await requireCurrentTeacher()
     where.student = teacherStudentWhere(teacher.id)
+  }
+  if (role === 'admin') {
+    where.student = { ...(where.student || {}), ...divisionWhere(division) }
   }
 
   const [records, total] = await Promise.all([

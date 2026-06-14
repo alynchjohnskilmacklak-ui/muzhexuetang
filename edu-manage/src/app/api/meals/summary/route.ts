@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { startOfLocalDay } from '@/lib/meals'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,22 +20,23 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const dayOfWeek = jsDay === 0 ? 7 : jsDay
   const weekStart = new Date(reportDate)
   weekStart.setDate(reportDate.getDate() - (dayOfWeek - 1))
+  const divisionFilter = divisionWhere(request.nextUrl.searchParams.get('division'))
   const [reports, activeTeachers, parentChoices, totalStudents] = await Promise.all([
     prisma.mealReport.findMany({
-      where: { reportDate: { gte: reportDate, lt: nextDate } },
+      where: { reportDate: { gte: reportDate, lt: nextDate }, ...divisionFilter },
       include: { teacher: { select: { id: true, name: true } }, menu: true },
       orderBy: { submittedAt: 'desc' },
     }),
     prisma.teacher.findMany({
-      where: { status: { not: 'RESIGNED' } },
+      where: { status: { not: 'RESIGNED' }, ...divisionFilter },
       select: { id: true, name: true },
       orderBy: { name: 'asc' },
     }),
     prisma.parentMealChoice.findMany({
-      where: { menu: { weekStart, dayOfWeek }, choiceDate: reportDate },
+      where: { menu: { weekStart, dayOfWeek, ...divisionFilter }, choiceDate: reportDate },
       include: { student: { select: { name: true, mainTeacherId: true } } },
     }),
-    prisma.student.count({ where: { status: { not: 'INACTIVE' } } }),
+    prisma.student.count({ where: { status: { not: 'INACTIVE' }, ...divisionFilter } }),
   ])
 
   const reportedIds = new Set(reports.map((report) => report.teacherId))

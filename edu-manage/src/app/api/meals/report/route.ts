@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { mealCounts, parseMealDetails, startOfLocalDay } from '@/lib/meals'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
+import { divisionWhere } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const reportDate = startOfLocalDay(request.nextUrl.searchParams.get('date') || new Date())
   if (!reportDate) return NextResponse.json({ error: 'Invalid date' }, { status: 400 })
   const nextDate = new Date(reportDate.getTime() + 86400000)
+  const divisionFilter = divisionWhere(request.nextUrl.searchParams.get('division'))
 
   let teacherId: string | undefined
   if (role === 'teacher') {
@@ -25,7 +27,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
   }
 
   const reports = await prisma.mealReport.findMany({
-    where: { reportDate: { gte: reportDate, lt: nextDate }, ...(teacherId ? { teacherId } : {}) },
+    where: { reportDate: { gte: reportDate, lt: nextDate }, ...(teacherId ? { teacherId } : {}), ...divisionFilter },
     include: { teacher: { select: { id: true, name: true } }, menu: true },
     orderBy: { submittedAt: 'desc' },
   })
@@ -58,6 +60,7 @@ export async function POST(request: NextRequest) {
         ...counts,
         details,
         notes: typeof body.notes === 'string' ? body.notes.trim() || null : null,
+        division: teacher.division || 'JUNIOR',
       },
       include: { menu: true, teacher: { select: { id: true, name: true } } },
     })

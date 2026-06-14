@@ -350,7 +350,7 @@ export default function LoginPage() {
       const loginRes = await fetch('/api/auth/login-check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: values.password, loginRole: role }),
+        body: JSON.stringify({ email, password: values.password, loginRole: role, division }),
       })
       const loginData = await loginRes.json().catch(() => null)
 
@@ -364,7 +364,7 @@ export default function LoginPage() {
       }
 
       const result = await signIn('credentials', {
-        email, password: values.password, loginRole: role, redirect: false,
+        email, password: values.password, loginRole: role, division, redirect: false,
       })
 
       if (!result || result.error) {
