@@ -5,11 +5,10 @@ import {
   DATA_ADMIN_ENTITIES,
   filterEditableFields,
   sanitizeDataAdminRecord,
-  createActivityLog,
-  createDeletedRecord,
   getSoftDeleteConfig,
   type EntityKey,
 } from '@/lib/data-admin/entities'
+import { createActivityLog, createDeletedRecord } from '@/lib/data-admin/entities-server'
 
 const ALLOWED_ENTITIES = Object.keys(DATA_ADMIN_ENTITIES)
 

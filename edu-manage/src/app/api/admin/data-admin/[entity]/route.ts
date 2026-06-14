@@ -5,9 +5,9 @@ import {
   DATA_ADMIN_ENTITIES,
   filterEditableFields,
   sanitizeDataAdminRecord,
-  createActivityLog,
   type EntityKey,
 } from '@/lib/data-admin/entities'
+import { createActivityLog } from '@/lib/data-admin/entities-server'
 import { getRequestDivision } from '@/lib/division'
 
 const ALLOWED_ENTITIES = Object.keys(DATA_ADMIN_ENTITIES)

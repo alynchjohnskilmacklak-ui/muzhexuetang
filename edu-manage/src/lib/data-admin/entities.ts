@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client'
 
 export type EntityKey =
   | 'students'
@@ -197,47 +196,3 @@ export function getSoftDeleteConfig(entityKey: EntityKey): {
   return configs[entityKey] || null
 }
 
-export async function createActivityLog(
-  userId: string,
-  action: string,
-  entityType: string,
-  entityId: string,
-  metadata?: Record<string, unknown>,
-) {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { getRequestPrisma: getReqPrisma } = require('@/lib/prisma') as typeof import('@/lib/prisma')
-  const prisma = await getReqPrisma()
-  await prisma.activityLog.create({
-    data: {
-      userId,
-      action,
-      entityType,
-      entityId,
-      detail: `${action}: ${entityType} ${entityId}`,
-      metadata: (metadata ?? undefined) as Prisma.InputJsonValue | undefined,
-    },
-  })
-}
-
-export async function createDeletedRecord(
-  entityType: string,
-  entityId: string,
-  entityName: string | null,
-  payload: unknown,
-  deletedById: string,
-  reason: string,
-) {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { getRequestPrisma: getReqPrisma } = require('@/lib/prisma') as typeof import('@/lib/prisma')
-  const prisma = await getReqPrisma()
-  await prisma.deletedRecord.create({
-    data: {
-      entityType,
-      entityId,
-      entityName,
-      payload: JSON.parse(JSON.stringify(payload)),
-      deletedById,
-      reason,
-    },
-  })
-}
