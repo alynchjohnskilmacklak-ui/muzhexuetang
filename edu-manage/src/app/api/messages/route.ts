@@ -3,7 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { parentActiveStudentWhere } from '@/lib/business-visibility'
-import { divisionWhere, getRequestDivision } from '@/lib/division'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
