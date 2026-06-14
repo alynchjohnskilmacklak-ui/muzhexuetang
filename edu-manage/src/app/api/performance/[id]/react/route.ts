@@ -1,14 +1,14 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
 const REACTIONS = new Set(['HEART', 'STAR', 'CLAP'])
 
-async function canAccessPost(userId: string, postId: string) {
-  const post = await prisma.performancePost.findFirst({
+async function canAccessPost(userId: string, postId: string, client: any) {
+  const post = await client.performancePost.findFirst({
     where: {
       id: postId,
       deletedAt: null,
@@ -24,9 +24,10 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   const user = session?.user as { id?: string; role?: string } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (user.role !== 'parent') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
-  if (!(await canAccessPost(user.id, id))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!(await canAccessPost(user.id, id, prisma))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()
   const type = typeof body.type === 'string' && REACTIONS.has(body.type) ? body.type : 'HEART'
@@ -43,6 +44,7 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
   const user = session?.user as { id?: string; role?: string } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (user.role !== 'parent') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const { searchParams } = new URL(req.url)

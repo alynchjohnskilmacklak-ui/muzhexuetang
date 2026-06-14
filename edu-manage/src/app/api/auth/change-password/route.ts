@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import bcrypt from 'bcryptjs'
@@ -10,6 +10,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '请先登录' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const body = await req.json()
   const oldPassword = typeof body.oldPassword === 'string' ? body.oldPassword.trim() : ''
   const newPassword = typeof body.newPassword === 'string' ? body.newPassword.trim() : ''

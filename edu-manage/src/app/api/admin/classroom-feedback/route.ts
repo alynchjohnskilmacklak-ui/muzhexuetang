@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { isPayableFeedback } from '@/lib/teacher-salary'
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   try {
-    await requireAdminUser()
+    const { prisma } = await requireAdminUser()
     const sp = req.nextUrl.searchParams
     const teacherId = sp.get('teacherId') || undefined
     const date = sp.get('date') || new Date().toISOString().slice(0, 10)
@@ -126,6 +126,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const session = await auth()
     const user = session?.user as { id: string; role: string; name?: string | null } | undefined
     if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+    const prisma = await getRequestPrisma()
 
     const body = await req.json()
     const { 

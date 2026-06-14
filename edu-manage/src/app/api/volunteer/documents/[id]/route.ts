@@ -1,7 +1,7 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -11,6 +11,7 @@ export const DELETE = apiHandler(async (_req: Request, { params }: { params: Pro
   const role = (session?.user as { role?: string } | undefined)?.role
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (!['admin', 'teacher'].includes(role || '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   await prisma.guideDocument.delete({ where: { id } })

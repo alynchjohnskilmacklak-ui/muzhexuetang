@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonWhere } from '@/lib/teacher-portal'
 import { triggerFeedbackBonus } from '@/lib/teacher-salary'
 
@@ -12,7 +11,7 @@ function asStringArray(value: unknown, limit = 100) {
 
 export async function GET(req: NextRequest) {
   try {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     const limit = Math.min(50, Math.max(1, Number(req.nextUrl.searchParams.get('limit') || 10)))
     const feedbacks = await prisma.classroomFeedback.findMany({
       where: { teacherId: teacher.id },
@@ -32,7 +31,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { user, teacher } = await requireCurrentTeacher()
+    const { user, teacher, prisma } = await requireCurrentTeacher()
     const body = await req.json()
     const classLessonId = typeof body.classLessonId === 'string' && body.classLessonId ? body.classLessonId : null
     const targetType = body.targetType === 'STUDENT' ? 'STUDENT' : 'CLASS'

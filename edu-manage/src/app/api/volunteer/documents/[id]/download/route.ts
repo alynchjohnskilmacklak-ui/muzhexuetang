@@ -1,8 +1,8 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { readFile } from 'fs/promises'
 import path from 'path'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async (_req: Request, { params }: { params: Promise<{ id: string }> }) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const doc = await prisma.guideDocument.findUnique({ where: { id } })

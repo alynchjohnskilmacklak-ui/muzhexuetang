@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { sendWxMessage, buildFeedbackContent, buildSafeHomeContent } from '@/lib/wxpusher'
 import { visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
@@ -13,6 +13,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (!session?.user || (session.user as any).role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
+ 
+  const prisma = await getRequestPrisma()
   const { searchParams } = new URL(req.url)
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '20')
@@ -37,6 +39,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!session?.user || !['admin', 'teacher'].includes((session.user as any).role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
+  const prisma = await getRequestPrisma()
   const senderId = (session.user as { id: string }).id
 
   const body = await req.json()

@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 function clean(value: unknown) {
@@ -13,6 +13,8 @@ async function requireAdmin() {
 }
 
 export const GET = apiHandler(async () => {
+ 
+  const prisma = await getRequestPrisma()
   if (!await requireAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   const templates = await prisma.mealTemplate.findMany({
     where: { isActive: true, weekday: { gte: 1, lte: 6 } },
@@ -22,6 +24,8 @@ export const GET = apiHandler(async () => {
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {
+ 
+  const prisma = await getRequestPrisma()
   if (!await requireAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   const body = await req.json()
   const weekday = Number(body.weekday)

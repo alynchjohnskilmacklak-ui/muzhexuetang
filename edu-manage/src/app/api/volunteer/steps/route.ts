@@ -1,7 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getOrCreateVolunteerGuide } from '@/lib/volunteer'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -15,6 +15,8 @@ export const GET = apiHandler(async () => {
   const session = await auth()
   const role = (session?.user as { role?: string } | undefined)?.role
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   const guide = await getOrCreateVolunteerGuide()
   const steps = await prisma.guideStep.findMany({
     where: { guideId: guide.id, ...(isEditor(role) ? {} : { isPublished: true }) },
@@ -28,6 +30,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const role = (session?.user as { role?: string } | undefined)?.role
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (!isEditor(role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const guide = await getOrCreateVolunteerGuide()
   const body = await req.json()

@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { getTeacherDashboardData } from '@/lib/teacher-dashboard'
 import { requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
@@ -8,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async () => {
   try {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     const dashboard = await getTeacherDashboardData(teacher.id)
 
     return NextResponse.json({
@@ -30,7 +29,7 @@ export const GET = apiHandler(async () => {
 
 export const POST = apiHandler(async () => {
   try {
-    const { user, teacher } = await requireCurrentTeacher()
+    const { user, teacher, prisma } = await requireCurrentTeacher()
     await prisma.activityLog.create({
       data: {
         userId: user.id,

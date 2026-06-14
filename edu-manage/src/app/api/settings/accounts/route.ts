@@ -1,7 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -35,22 +35,22 @@ function parentEmailFromPhone(phone: string) {
   return `${digits || Date.now()}@st.com`
 }
 
-async function writeLog(userId: string, action: string, detail: string) {
+async function writeLog(client: any, userId: string, action: string, detail: string) {
   try {
-    await prisma.activityLog.create({ data: { userId, action, detail } })
+    await client.activityLog.create({ data: { userId, action, detail } })
   } catch (error) {
     console.error('[settings:accounts] skipped activity log', error)
   }
 }
 
-async function assertCanDisableAdmin(targetId: string, currentUserId: string) {
+async function assertCanDisableAdmin(client: any, targetId: string, currentUserId: string) {
   if (targetId === currentUserId) {
     return '不能停用或删除自己的当前登录账号'
   }
 
   const [currentUser, target] = await Promise.all([
-    prisma.user.findUnique({ where: { id: currentUserId }, select: { name: true, role: true } }),
-    prisma.user.findUnique({ where: { id: targetId }, select: { name: true, role: true, status: true } }),
+    client.user.findUnique({ where: { id: currentUserId }, select: { name: true, role: true } }),
+    client.user.findUnique({ where: { id: targetId }, select: { name: true, role: true, status: true } }),
   ])
   if (
     target?.role === 'admin'
@@ -86,6 +86,7 @@ async function assertCanModifyProtectedAdmin(targetId: string, currentUserId: st
 export const GET = apiHandler(async () => {
   const currentUser = await requireAdmin()
   if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const [users, teachers, students] = await Promise.all([
     prisma.user.findMany({
@@ -144,6 +145,7 @@ export const GET = apiHandler(async () => {
 export const POST = apiHandler(async (req: NextRequest) => {
   const currentUser = await requireAdmin()
   if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const body = await req.json().catch(() => ({}))
   const role = normalizeText(body.role)
@@ -178,7 +180,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       },
       select: { id: true, email: true, name: true, role: true, status: true },
     })
-    await writeLog(currentUser.id, '创建教师账号', `${teacher.name}（${email}）`)
+    await writeLog(prisma, currentUser.id, '创建教师账号', `${teacher.name}（${email}）`)
     return NextResponse.json({ user, initialPassword: plainPassword }, { status: 201 })
   }
 
@@ -211,7 +213,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       })
     }
 
-    await writeLog(currentUser.id, '创建家长账号', `${name}（${email}），绑定学员 ${studentIds.length} 人`)
+    await writeLog(prisma, currentUser.id, '创建家长账号', `${name}（${email}），绑定学员 ${studentIds.length} 人`)
     return NextResponse.json({ user, initialPassword: plainPassword }, { status: 201 })
   }
 
@@ -240,6 +242,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
 export const PATCH = apiHandler(async (req: NextRequest) => {
   const currentUser = await requireAdmin()
   if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const body = await req.json().catch(() => ({}))
   const action = normalizeText(body.action)
@@ -253,7 +256,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
     if (protectedGuard) return NextResponse.json({ error: protectedGuard }, { status: 400 })
 
     if (status === 'disabled') {
-      const guard = await assertCanDisableAdmin(userId, currentUser.id)
+      const guard = await assertCanDisableAdmin(prisma, userId, currentUser.id)
       if (guard) return NextResponse.json({ error: guard }, { status: 400 })
     }
 
@@ -262,7 +265,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
       data: { status, ...(status === 'disabled' ? { currentSessionToken: null } : {}) },
       select: { id: true, email: true, name: true, role: true, status: true },
     })
-    await writeLog(currentUser.id, status === 'active' ? '启用账号' : '停用账号', `${user.name}（${user.email}）`)
+    await writeLog(prisma, currentUser.id, status === 'active' ? '启用账号' : '停用账号', `${user.name}（${user.email}）`)
     return NextResponse.json({ ok: true, user })
   }
 
@@ -278,7 +281,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
       data: { password: await bcrypt.hash(password, 12), currentSessionToken: null },
       select: { id: true, email: true, name: true },
     })
-    await writeLog(currentUser.id, '重置账号密码', `${user.name}（${user.email}）`)
+    await writeLog(prisma, currentUser.id, '重置账号密码', `${user.name}（${user.email}）`)
     return NextResponse.json({ ok: true })
   }
 
@@ -296,7 +299,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
       data: { name, email },
       select: { id: true, email: true, name: true, role: true, status: true },
     })
-    await writeLog(currentUser.id, '编辑账号', `${user.name}（${user.email}）`)
+    await writeLog(prisma, currentUser.id, '编辑账号', `${user.name}（${user.email}）`)
     return NextResponse.json({ ok: true, user })
   }
 
@@ -309,7 +312,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
       where: { id: { in: studentIds } },
       data: { parentId: parent.id, parentUserId: parent.id, parentName: parent.name },
     })
-    await writeLog(currentUser.id, '绑定家长学员', `${parent.name}，绑定 ${studentIds.length} 人`)
+    await writeLog(prisma, currentUser.id, '绑定家长学员', `${parent.name}，绑定 ${studentIds.length} 人`)
     return NextResponse.json({ ok: true })
   }
 
@@ -319,7 +322,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
       where: { id: studentId },
       data: { parentId: null, parentUserId: null },
     })
-    await writeLog(currentUser.id, '解绑家长学员', studentId)
+    await writeLog(prisma, currentUser.id, '解绑家长学员', studentId)
     return NextResponse.json({ ok: true })
   }
 
@@ -329,6 +332,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
 export const DELETE = apiHandler(async (req: NextRequest) => {
   const currentUser = await requireAdmin()
   if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { searchParams } = new URL(req.url)
   const userId = searchParams.get('userId') || ''

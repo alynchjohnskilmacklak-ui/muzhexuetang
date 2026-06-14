@@ -17,12 +17,11 @@ const normalizeCourseTypeFilter = (courseType: string) => {
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   const role = (session.user as { role?: string }).role
   if (role === 'teacher') return NextResponse.json({ error: '请使用教师端查看学员' }, { status: 403 })
-  if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
-
-  const prisma = await getRequestPrisma()
-
+  if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
   const { searchParams } = new URL(req.url)
   const status = searchParams.get('status')
   const grade = searchParams.get('grade')
@@ -150,10 +149,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
       return NextResponse.json({ error: '请重新登录后再添加学员' }, { status: 401 })
     }
     const role = (session.user as { role?: string }).role
-    if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
-
+    if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
     const prisma = await getRequestPrisma()
-
     const body = await req.json()
     const division = getRequestDivision(session.user as Record<string, unknown> | undefined, body.division)
     const name = typeof body.name === 'string' ? body.name.trim() : ''

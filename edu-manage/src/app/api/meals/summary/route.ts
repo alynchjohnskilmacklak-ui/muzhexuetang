@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { startOfLocalDay } from '@/lib/meals'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
@@ -13,6 +13,8 @@ export const GET = apiHandler(async (request: NextRequest) => {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
+
+  const prisma = await getRequestPrisma()
   const reportDate = startOfLocalDay(request.nextUrl.searchParams.get('date') || new Date())
   if (!reportDate) return NextResponse.json({ error: 'Invalid date' }, { status: 400 })
   const nextDate = new Date(reportDate.getTime() + 86400000)

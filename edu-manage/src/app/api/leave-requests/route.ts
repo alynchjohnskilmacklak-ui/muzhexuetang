@@ -1,9 +1,9 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { requireCurrentTeacher, teacherStudentWhere } from '@/lib/teacher-portal'
 import { getRequestDivision } from '@/lib/division'
+import { getRequestPrisma } from '@/lib/prisma'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
@@ -21,11 +21,14 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const role = (session.user as any).role
   const where: any = {}
   if (status) where.status = status
+  let prisma
   if (role === 'teacher') {
-    const { teacher } = await requireCurrentTeacher()
-    where.student = teacherStudentWhere(teacher.id)
+    const result = await requireCurrentTeacher()
+    prisma = result.prisma
+    where.student = teacherStudentWhere(result.teacher.id)
   }
   if (role === 'admin') {
+    prisma = await getRequestPrisma()
     where.student = { ...(where.student || {}), division }
   }
 

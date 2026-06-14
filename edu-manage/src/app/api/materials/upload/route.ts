@@ -1,8 +1,8 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { MaterialSource } from '@prisma/client'
 import { normalizeMaterialAudience, normalizeMaterialStatus } from '@/lib/material-visibility'
 import { apiHandler } from '@/lib/api-handler'
@@ -44,6 +44,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (file.size > 50 * 1024 * 1024) {
     return NextResponse.json({ error: '文件大小不能超过 50MB' }, { status: 400 })
   }
+  const prisma = await getRequestPrisma()
 
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`
   const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'materials')

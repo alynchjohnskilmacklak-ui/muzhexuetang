@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { activeEnrollmentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  const prisma = await getRequestPrisma()
 
   const { searchParams } = new URL(req.url)
   const teacherId = searchParams.get('teacherId')

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { hasTimeOverlap } from '@/lib/schedule-conflict'
@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic'
 export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  const prisma = await getRequestPrisma()
 
   const { teacherId, date, startTime, endTime, division } = await req.json()
 

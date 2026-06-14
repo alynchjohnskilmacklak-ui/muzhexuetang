@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { parentVisibleMaterialWhere } from '@/lib/material-visibility'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -12,6 +12,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
+
+  const prisma = await getRequestPrisma()
   const { searchParams } = new URL(req.url)
   const grade = searchParams.get('grade') || undefined
   const subject = searchParams.get('subject') || undefined

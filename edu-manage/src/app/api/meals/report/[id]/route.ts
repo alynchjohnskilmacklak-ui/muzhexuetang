@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { mealCounts, parseMealDetails } from '@/lib/meals'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     const { id } = await context.params
     const current = await prisma.mealReport.findFirst({
       where: { id, teacherId: teacher.id },

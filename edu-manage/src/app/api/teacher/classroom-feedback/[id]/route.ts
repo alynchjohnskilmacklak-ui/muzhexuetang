@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -10,7 +9,7 @@ export const GET = apiHandler(async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params
-  const { teacher } = await requireCurrentTeacher()
+  const { teacher, prisma } = await requireCurrentTeacher()
 
   const feedback = await prisma.classroomFeedback.findFirst({
     where: { id, teacherId: teacher.id },

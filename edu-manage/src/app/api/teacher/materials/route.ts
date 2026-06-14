@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
-import { prisma } from '@/lib/prisma'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import {
   normalizeMaterialAudience,
@@ -15,7 +14,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   try {
-    const { user, teacher } = await requireCurrentTeacher()
+    const { user, teacher, prisma } = await requireCurrentTeacher()
     const { searchParams } = new URL(req.url)
     const tab = searchParams.get('tab') || 'all'
     const grade = searchParams.get('grade') || undefined
@@ -52,7 +51,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { user, teacher } = await requireCurrentTeacher()
+    const { user, teacher, prisma } = await requireCurrentTeacher()
     const formData = await req.formData()
     const file = formData.get('file') as File | null
     const title = formData.get('title') as string | null

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import {
   parentActiveEnrollmentWhere,
@@ -23,6 +23,8 @@ function combineLessonDateTime(date: Date, time: string) {
 export const GET = apiHandler(async () => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   const userId = (session.user as { id: string }).id
 
   const students = await prisma.student.findMany({

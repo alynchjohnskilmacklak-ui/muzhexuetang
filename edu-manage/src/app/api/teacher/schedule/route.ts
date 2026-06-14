@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
 import { activeEnrollmentWhere } from '@/lib/business-visibility'
 
@@ -7,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   try {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     const { searchParams } = req.nextUrl
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')

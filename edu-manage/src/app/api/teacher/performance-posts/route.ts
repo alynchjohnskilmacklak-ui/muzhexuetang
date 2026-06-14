@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 import { MOOD_META } from '@/lib/performance'
 
@@ -16,7 +15,7 @@ function normalizeIds(body: any) {
 
 export async function GET() {
   try {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     const posts = await prisma.performancePost.findMany({
       where: { teacherId: teacher.id, deletedAt: null },
       include: {
@@ -34,7 +33,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, teacher } = await requireCurrentTeacher()
+    const { user, teacher, prisma } = await requireCurrentTeacher()
     const body = await request.json()
     const studentIds = normalizeIds(body)
     const content = typeof body.content === 'string' ? body.content.trim() : ''

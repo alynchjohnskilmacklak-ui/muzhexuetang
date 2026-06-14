@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -9,6 +9,8 @@ export const GET = apiHandler(async () => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '未授权' }, { status: 403 })
 
+
+  const prisma = await getRequestPrisma()
   const alerts = await prisma.teacherAlert.findMany({
     where: { isResolved: false },
     include: { teacher: { select: { name: true } } },
@@ -21,6 +23,8 @@ export const POST = apiHandler(async (request: NextRequest) => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '未授权' }, { status: 403 })
 
+
+  const prisma = await getRequestPrisma()
   const body = await request.json()
   const { alertId } = body
 

@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -8,6 +8,8 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async () => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   const types = await prisma.feeType.findMany({ orderBy: { order: 'asc' } })
   return NextResponse.json(types)
 })
@@ -16,6 +18,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const body = await request.json()
   const { name, description } = body

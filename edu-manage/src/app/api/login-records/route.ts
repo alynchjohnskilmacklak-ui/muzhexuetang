@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -12,6 +12,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
 
+
+  const prisma = await getRequestPrisma()
   const { searchParams } = new URL(req.url)
   const page = Math.max(1, Number(searchParams.get('page') || '1'))
   const limit = Math.min(100, Math.max(10, Number(searchParams.get('limit') || '50')))

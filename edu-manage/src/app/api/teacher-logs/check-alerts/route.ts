@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export async function POST() {
   try {
-    await requireAdminUser()
+    const { prisma } = await requireAdminUser()
     const result = await checkTeacherAlerts()
     return NextResponse.json(result)
   } catch {

@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma, prisma as prismaFallback } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -12,8 +12,8 @@ async function requireSession() {
   return session
 }
 
-async function getEffectiveTeacherStudents(teacherId: string) {
-  const groups = await prisma.classGroup.findMany({
+async function getEffectiveTeacherStudents(teacherId: string, client = prisma) {
+  const groups = await client.classGroup.findMany({
     where: {
       status: { not: 'ARCHIVED' },
       course: { isActive: true },
@@ -51,6 +51,7 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const role = (session.user as { role?: string }).role
   if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const teacher = await prisma.teacher.findUnique({
@@ -97,6 +98,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const role = (session.user as { role?: string }).role
   if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const body = await req.json()
@@ -138,6 +140,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await requireSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const url = new URL(req.url)

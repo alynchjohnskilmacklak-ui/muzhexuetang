@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import {
   parentActiveEnrollmentWhere,
@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic'
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const prisma = await getRequestPrisma()
   const userId = (session.user as { id: string }).id
   const childId = req.nextUrl.searchParams.get('childId') || ''
 

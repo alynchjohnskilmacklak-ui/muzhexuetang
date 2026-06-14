@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -10,6 +10,8 @@ export const GET = apiHandler(async () => {
   const user = session?.user as { id?: string; role?: string } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   const consultations = await prisma.volunteerConsultation.findMany({
     where: user.role === 'parent' ? { parentId: user.id } : {},
     include: { parent: { select: { name: true } } },
@@ -23,6 +25,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   const user = session?.user as { id?: string; role?: string } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
   if (user.role !== 'parent') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getLoginStatus } from '@/lib/login-accounts'
 import { apiHandler } from '@/lib/api-handler'
 

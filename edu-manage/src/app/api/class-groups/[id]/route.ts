@@ -1,8 +1,8 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@prisma/client'
 import { randomUUID } from 'crypto'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { activeEnrollmentWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
@@ -38,6 +38,7 @@ function normalizeTeacherAssignments(body: Record<string, unknown>) {
 export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const group = await prisma.classGroup.findFirst({
@@ -71,6 +72,7 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const body = await req.json()
@@ -182,6 +184,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
 export const DELETE = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const group = await prisma.classGroup.findUnique({ where: { id } })

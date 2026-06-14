@@ -1,6 +1,6 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -9,6 +9,7 @@ export const DELETE = apiHandler(async (_req: Request, { params }: { params: Pro
   const session = await auth()
   const user = session?.user as { id?: string; role?: string } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const consultation = await prisma.volunteerConsultation.findUnique({ where: { id }, select: { parentId: true } })

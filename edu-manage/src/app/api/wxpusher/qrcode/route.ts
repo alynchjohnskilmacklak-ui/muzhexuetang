@@ -1,13 +1,15 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { createBindQrcode } from '@/lib/wxpusher'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const GET = apiHandler(async () => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+
+  const prisma = await getRequestPrisma()
   if (!process.env.WXPUSHER_APP_TOKEN) {
     return NextResponse.json({
       error: '微信推送服务未配置，请联系管理员',

@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireAdminUser, TEACHER_LOG_ACTIONS, todayRange, weekRange } from '@/lib/teacher-portal'
 
 export const dynamic = 'force-dynamic'
@@ -16,7 +15,7 @@ function groupBy<T>(arr: T[], key: (item: T) => string): Map<string, T[]> {
 
 export async function GET() {
   try {
-    await requireAdminUser()
+    const { prisma } = await requireAdminUser()
     const now = new Date()
     const { start: today, end: todayEnd } = todayRange(now)
     const { start: weekStart, end: weekEnd } = weekRange(now)

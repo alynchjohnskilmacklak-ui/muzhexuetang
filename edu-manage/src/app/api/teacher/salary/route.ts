@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 
 export const dynamic = 'force-dynamic'
@@ -13,7 +12,7 @@ function salaryPeriodStart(period: string) {
 
 export async function GET(req: NextRequest) {
   try {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     const period = req.nextUrl.searchParams.get('period') || 'month'
     const since = salaryPeriodStart(period)
 

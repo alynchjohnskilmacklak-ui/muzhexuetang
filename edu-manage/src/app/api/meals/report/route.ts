@@ -1,6 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
 import { mealCounts, parseMealDetails, startOfLocalDay } from '@/lib/meals'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
@@ -14,6 +14,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
   if (!session?.user || !['admin', 'teacher'].includes(role || '')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
+  const prisma = await getRequestPrisma()
 
   const reportDate = startOfLocalDay(request.nextUrl.searchParams.get('date') || new Date())
   if (!reportDate) return NextResponse.json({ error: 'Invalid date' }, { status: 400 })
@@ -24,6 +25,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
   let teacherId: string | undefined
   if (role === 'teacher') {
     const current = await requireCurrentTeacher()
+    const prisma = current.prisma
     teacherId = current.teacher.id
   }
 
@@ -37,7 +39,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
 
 export async function POST(request: NextRequest) {
   try {
-    const { teacher } = await requireCurrentTeacher()
+    const { teacher, prisma } = await requireCurrentTeacher()
     const body = await request.json()
     const reportDate = startOfLocalDay(body.reportDate || new Date())
     const details = parseMealDetails(body.details)

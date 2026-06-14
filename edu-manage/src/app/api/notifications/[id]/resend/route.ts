@@ -1,11 +1,12 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { sendWxMessage, buildFeedbackContent, buildSafeHomeContent } from '@/lib/wxpusher'
 import { visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 
 export const POST = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  const prisma = await getRequestPrisma()
   const { id } = await params
   const session = await auth()
   if (!session?.user || (session.user as any).role !== 'admin') {

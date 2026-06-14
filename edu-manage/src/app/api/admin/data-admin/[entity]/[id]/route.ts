@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import {
   DATA_ADMIN_ENTITIES,
   filterEditableFields,
@@ -47,6 +47,7 @@ export async function GET(
 
   const entityKey = entity as EntityKey
   const def = DATA_ADMIN_ENTITIES[entityKey]
+  const prisma = await getRequestPrisma()
   const prismaModel = (prisma as any)[def.model]
   if (!prismaModel) {
     return NextResponse.json({ error: '模型不存在' }, { status: 500 })
@@ -80,6 +81,7 @@ export async function PUT(
 
   const entityKey = entity as EntityKey
   const def = DATA_ADMIN_ENTITIES[entityKey]
+  const prisma = await getRequestPrisma()
   const prismaModel = (prisma as any)[def.model]
   if (!prismaModel) {
     return NextResponse.json({ error: '模型不存在' }, { status: 500 })
@@ -141,6 +143,7 @@ export async function DELETE(
 
   const entityKey = entity as EntityKey
   const def = DATA_ADMIN_ENTITIES[entityKey]
+  const prisma = await getRequestPrisma()
   const prismaModel = (prisma as any)[def.model]
   if (!prismaModel) {
     return NextResponse.json({ error: '模型不存在' }, { status: 500 })
@@ -206,6 +209,7 @@ export async function PATCH(
 
   const entityKey = entity as EntityKey
   const def = DATA_ADMIN_ENTITIES[entityKey]
+  const prisma = await getRequestPrisma()
   const prismaModel = (prisma as any)[def.model]
   if (!prismaModel) {
     return NextResponse.json({ error: '模型不存在' }, { status: 500 })

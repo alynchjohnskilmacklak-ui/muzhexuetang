@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/get-user'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { apiHandler } from '@/lib/api-handler'

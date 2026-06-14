@@ -1,8 +1,8 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { readFile } from 'fs/promises'
 import path from 'path'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { parentVisibleMaterialWhere, teacherVisibleMaterialWhere } from '@/lib/material-visibility'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { apiHandler } from '@/lib/api-handler'
@@ -30,6 +30,7 @@ export const GET = apiHandler(async (
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const user = session.user as { id?: string; email?: string | null; name?: string | null; role?: string }
+  const prisma = await getRequestPrisma()
 
   const { id } = await params
   const material = await prisma.studyMaterial.findUnique({ where: { id } })

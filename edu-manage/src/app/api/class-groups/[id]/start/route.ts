@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 
 export const dynamic = 'force-dynamic'
@@ -10,6 +10,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const { id } = await params
+  const prisma = await getRequestPrisma()
 
   try {
     const result = await prisma.$transaction(async (tx) => {
