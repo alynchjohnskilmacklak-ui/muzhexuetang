@@ -26,7 +26,6 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
   const isMobile = useIsMobile() ?? false
   const { division } = useDivision()
-  const writableDivision = division === 'ALL' ? 'JUNIOR' : division
 
   const { data: teachers } = useSWR(`/api/teachers?status=ACTIVE&limit=100&division=${division}`, fetcher)
   const { data: rooms } = useSWR('/api/rooms', fetcher)
@@ -56,18 +55,18 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
         startTimeVal: editData.startTimeVal ? dayjs(editData.startTimeVal as string, 'HH:mm') : undefined,
         endTimeVal: editData.endTimeVal ? dayjs(editData.endTimeVal as string, 'HH:mm') : undefined,
         classType: editData.classType || 'SMALL_CLASS',
-        division: editData.division || writableDivision,
+        division: editData.division || division,
       })
       setClassType((editData.classType as string) || 'SMALL_CLASS')
       setSelectedStudentIds((editData.studentIds as string[]) || [])
     } else {
       form.resetFields()
-      form.setFieldsValue({ startDate: dayjs(), classType: 'SMALL_CLASS', division: writableDivision })
+      form.setFieldsValue({ startDate: dayjs(), classType: 'SMALL_CLASS', division: division })
       setClassType('SMALL_CLASS')
       setSelectedStudentIds([])
     }
     setConflicts(null)
-  }, [open, editData, form, writableDivision])
+  }, [open, editData, form, division])
 
   const handleSubmit = async () => {
     try {
@@ -84,7 +83,7 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
         endTimeVal: values.endTimeVal.format('HH:mm'),
         classType: values.classType,
         studentIds: selectedStudentIds,
-        division: values.division || writableDivision,
+        division: values.division || division,
         courseId: values.courseId || undefined,
         color: values.color || undefined,
         notes: values.notes || undefined,

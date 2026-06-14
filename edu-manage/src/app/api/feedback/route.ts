@@ -94,8 +94,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
   // Determine teacherId
   let teacherId: string
   let teacherName: string
+  let prisma = await getRequestPrisma()
   if (isTeacher) {
-    const { teacher, prisma } = await requireCurrentTeacher()
+    const { teacher, prisma: tPrisma } = await requireCurrentTeacher()
+    prisma = tPrisma
     teacherId = teacher.id
     teacherName = teacher.name
   } else {

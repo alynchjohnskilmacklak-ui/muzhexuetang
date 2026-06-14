@@ -12,7 +12,7 @@ async function requireSession() {
   return session
 }
 
-async function getEffectiveTeacherStudents(teacherId: string, client = prisma) {
+async function getEffectiveTeacherStudents(teacherId: string, client = prismaFallback) {
   const groups = await client.classGroup.findMany({
     where: {
       status: { not: 'ARCHIVED' },

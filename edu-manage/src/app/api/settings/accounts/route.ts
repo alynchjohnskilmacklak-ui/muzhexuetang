@@ -61,17 +61,17 @@ async function assertCanDisableAdmin(client: any, targetId: string, currentUserI
   }
   if (target?.role !== 'admin' || target.status !== 'active') return null
 
-  const activeAdmins = await prisma.user.count({
+  const activeAdmins = await client.user.count({
     where: { role: 'admin', status: 'active', id: { not: targetId } },
   })
   return activeAdmins > 0 ? null : '至少需要保留一个可用管理员账号'
 }
 
-async function assertCanModifyProtectedAdmin(targetId: string, currentUserId: string) {
+async function assertCanModifyProtectedAdmin(client: any, targetId: string, currentUserId: string) {
   if (targetId === currentUserId) return null
   const [currentUser, target] = await Promise.all([
-    prisma.user.findUnique({ where: { id: currentUserId }, select: { name: true } }),
-    prisma.user.findUnique({ where: { id: targetId }, select: { name: true, role: true } }),
+    client.user.findUnique({ where: { id: currentUserId }, select: { name: true } }),
+    client.user.findUnique({ where: { id: targetId }, select: { name: true, role: true } }),
   ])
   if (
     target?.role === 'admin'
@@ -235,7 +235,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     },
     select: { id: true, email: true, name: true, role: true, status: true },
   })
-  await writeLog(currentUser.id, '创建管理员', `${admin.name}（${admin.email}）`)
+  await writeLog(prisma, currentUser.id, '创建管理员', `${admin.name}（${admin.email}）`)
   return NextResponse.json({ user: admin }, { status: 201 })
 })
 
@@ -252,7 +252,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
     const status = normalizeText(body.status)
     if (!['active', 'disabled'].includes(status)) return NextResponse.json({ error: '状态无效' }, { status: 400 })
 
-    const protectedGuard = await assertCanModifyProtectedAdmin(userId, currentUser.id)
+    const protectedGuard = await assertCanModifyProtectedAdmin(prisma, userId, currentUser.id)
     if (protectedGuard) return NextResponse.json({ error: protectedGuard }, { status: 400 })
 
     if (status === 'disabled') {
@@ -270,7 +270,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
   }
 
   if (action === 'reset-password') {
-    const protectedGuard = await assertCanModifyProtectedAdmin(userId, currentUser.id)
+    const protectedGuard = await assertCanModifyProtectedAdmin(prisma, userId, currentUser.id)
     if (protectedGuard) return NextResponse.json({ error: protectedGuard }, { status: 400 })
 
     const password = typeof body.password === 'string' ? body.password : ''
@@ -286,7 +286,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
   }
 
   if (action === 'update') {
-    const protectedGuard = await assertCanModifyProtectedAdmin(userId, currentUser.id)
+    const protectedGuard = await assertCanModifyProtectedAdmin(prisma, userId, currentUser.id)
     if (protectedGuard) return NextResponse.json({ error: protectedGuard }, { status: 400 })
 
     const email = normalizeEmail(body.email)
@@ -336,7 +336,7 @@ export const DELETE = apiHandler(async (req: NextRequest) => {
 
   const { searchParams } = new URL(req.url)
   const userId = searchParams.get('userId') || ''
-  const guard = await assertCanDisableAdmin(userId, currentUser.id)
+  const guard = await assertCanDisableAdmin(prisma, userId, currentUser.id)
   if (guard) return NextResponse.json({ error: guard }, { status: 400 })
 
   const user = await prisma.user.update({
@@ -344,6 +344,6 @@ export const DELETE = apiHandler(async (req: NextRequest) => {
     data: { status: 'disabled', currentSessionToken: null },
     select: { id: true, email: true, name: true },
   })
-  await writeLog(currentUser.id, '停用账号', `${user.name}（${user.email}）`)
+  await writeLog(prisma, currentUser.id, '停用账号', `${user.name}（${user.email}）`)
   return NextResponse.json({ ok: true })
 })

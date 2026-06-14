@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getRequestPrisma } from '@/lib/prisma'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { getRequestDivision } from '@/lib/division'
 
@@ -15,7 +14,6 @@ function salaryPeriodStart(period: string) {
 export async function GET(req: NextRequest) {
   try {
     const adminUser = await requireAdminUser()
-    const prisma = await getRequestPrisma()
     const prisma = adminUser.prisma
     const teacherId = req.nextUrl.searchParams.get('teacherId')
     const period = req.nextUrl.searchParams.get('period') || 'month'

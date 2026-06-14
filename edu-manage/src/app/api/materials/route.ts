@@ -18,7 +18,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
  
   const prisma = await getRequestPrisma()
-  const user = session.user as { id?: string; email?: string | null; name?: string | null; role?: string }
+  const user = session.user as { id?: string; email?: string | null; name?: string | null; role?: string; division?: string | null }
   const role = user.role
 
   const { searchParams } = new URL(req.url)
