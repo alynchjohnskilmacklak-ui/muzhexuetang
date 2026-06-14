@@ -1,5 +1,6 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import type { Prisma } from '@prisma/client'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { chineseToPinyin } from '@/lib/pinyin'
@@ -114,7 +115,7 @@ export async function POST(req: NextRequest) {
     if (!phone) return NextResponse.json({ error: '手机号不能为空' }, { status: 400 })
     if (!subjects) return NextResponse.json({ error: '至少选择一个授课科目' }, { status: 400 })
 
-    const teacherData: Record<string, unknown> = {
+    const teacherData: Prisma.TeacherCreateInput = {
       name,
       gender: body.gender || null,
       phone,

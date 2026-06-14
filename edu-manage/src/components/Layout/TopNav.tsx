@@ -1,13 +1,21 @@
 ﻿'use client'
 
-import { Layout, Input, Badge, Avatar, Dropdown, Space } from 'antd'
+import { Layout, Input, Badge, Avatar, Dropdown, Space, Tag } from 'antd'
 import { BellOutlined, SearchOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons'
 import { signOut, useSession } from 'next-auth/react'
 
 const { Header } = Layout
 
+function getDivisionLabel(user: Record<string, unknown> | undefined) {
+  const selected = user?.selectedDivision as string | undefined
+  if (selected === 'SENIOR') return '高中部管理系统'
+  return '初中部管理系统'
+}
+
 export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
   const { data: session } = useSession()
+  const user = session?.user as Record<string, unknown> | undefined
+  const divisionLabel = getDivisionLabel(user)
 
   const userMenu = {
     items: [
@@ -59,7 +67,12 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
         <Dropdown menu={userMenu} placement="bottomRight">
           <Space style={{ cursor: 'pointer' }}>
             <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: '#E87545' }} />
-            <span style={{ color: '#1F2329', fontSize: 14, fontWeight: 500 }}>{session?.user?.name || '管理员'}</span>
+            <span style={{ color: '#1F2329', fontSize: 14, fontWeight: 500 }}>
+              {(user?.name as string) || '管理员'}
+            </span>
+            <Tag style={{ borderRadius: 20, border: '1px solid #E8754530', background: '#FFF6F1', color: '#E87545', fontSize: 11, marginInlineEnd: 0 }}>
+              {divisionLabel}
+            </Tag>
           </Space>
         </Dropdown>
       </Space>

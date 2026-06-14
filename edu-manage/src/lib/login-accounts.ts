@@ -13,6 +13,8 @@ type LoginUser = {
   email: string
   name: string
   role: LoginRole
+  division: string
+  selectedDivision?: string
 }
 
 type ValidationResult =
@@ -110,9 +112,9 @@ async function verifyPassword(plainPassword: string, storedPassword: string): Pr
   return bcrypt.compare(plainPassword, storedPassword)
 }
 
-function toLoginUser(user: { id: string; email: string; name: string; role: string }): LoginUser | null {
+function toLoginUser(user: { id: string; email: string; name: string; role: string; division?: string | null }, selectedDivision?: string): LoginUser | null {
   if (user.role !== 'admin' && user.role !== 'teacher' && user.role !== 'parent') return null
-  return { id: user.id, email: user.email, name: user.name, role: user.role }
+  return { id: user.id, email: user.email, name: user.name, role: user.role, division: user.division || 'JUNIOR', selectedDivision: selectedDivision || user.division || 'JUNIOR' }
 }
 
 async function validateDatabaseUser(
@@ -145,8 +147,11 @@ async function validateDatabaseUser(
     return { ok: false, error: '账号已停用', code: 'DISABLED' }
   }
 
+  // Division validation for teacher and admin
   if (division && (expectedRole === 'teacher' || expectedRole === 'admin')) {
-    if (user.division !== division) {
+    const userDivision = user.division || 'JUNIOR'
+    // ALL-division super admin can access any division
+    if (userDivision !== 'ALL' && userDivision !== division) {
       const divisionLabel = division === 'JUNIOR' ? '初中部' : '高中部'
       if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta)
       return { ok: false, error: `该账号不属于${divisionLabel}`, code: 'BAD_ROLE' }
@@ -159,7 +164,8 @@ async function validateDatabaseUser(
     return { ok: false, error: '密码错误', code: 'BAD_PASSWORD' }
   }
 
-  const loginUser = toLoginUser(user)
+  const selectedDivision = (user.division === 'ALL' || !division) ? (division || user.division || 'JUNIOR') : (user.division || 'JUNIOR')
+  const loginUser = toLoginUser(user, selectedDivision)
   if (!loginUser) {
     if (options.recordAttempt) await recordLoginFailure(email, 'not_found', user.id, meta)
     return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }

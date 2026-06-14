@@ -15,6 +15,8 @@ declare module 'next-auth' {
       role: string
       teacherId?: string | null
       sessionMark?: string
+      division: string
+      selectedDivision: string
     }
   }
 }
@@ -63,7 +65,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const dbUser = await prisma.user.findUnique({
           where: { id: result.user.id },
-          select: { teacherId: true },
+          select: { teacherId: true, division: true },
         })
 
         return {
@@ -72,6 +74,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name:      result.user.name,
           role:      result.user.role,
           teacherId: dbUser?.teacherId ?? null,
+          division:  dbUser?.division || result.user.division || 'JUNIOR',
+          selectedDivision: result.user.selectedDivision || (credentials.division as string) || (dbUser?.division as string) || 'JUNIOR',
         }
       },
     }),
@@ -84,10 +88,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const t = token as unknown as Record<string, unknown>
       if (user) {
         const u = user as unknown as Record<string, unknown>
-        t.role      = u.role as string
-        t.sub       = u.id as string
-        t.id        = u.id as string
-        t.teacherId = u.teacherId ?? null
+        t.role             = u.role as string
+        t.sub              = u.id as string
+        t.id               = u.id as string
+        t.teacherId        = u.teacherId ?? null
+        t.division         = u.division ?? 'JUNIOR'
+        t.selectedDivision = u.selectedDivision ?? 'JUNIOR'
         const sessionMark = crypto.randomUUID()
         t.sessionMark = sessionMark
 
@@ -109,10 +115,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         const u = session.user as unknown as Record<string, unknown>
         const t = token as unknown as Record<string, unknown>
-        u.role        = t.role
-        u.id          = t.sub ?? t.id
-        u.teacherId   = t.teacherId ?? null
-        u.sessionMark = t.sessionMark
+        u.role             = t.role
+        u.id               = t.sub ?? t.id
+        u.teacherId        = t.teacherId ?? null
+        u.sessionMark      = t.sessionMark
+        u.division         = t.division ?? 'JUNIOR'
+        u.selectedDivision = t.selectedDivision ?? 'JUNIOR'
       }
       return session
     },
@@ -127,7 +135,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         httpOnly: true,
         sameSite: 'lax',
         path:     '/',
-        // HTTP keeps the cookie usable; HTTPS enables the secure flag automatically.
         secure:   process.env.NEXTAUTH_URL?.startsWith('https://') === true,
         maxAge:   30 * 24 * 60 * 60,
       },

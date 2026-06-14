@@ -1,53 +1,61 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
   // Create admin
+  const adminHash = await bcrypt.hash('123456', 10)
   await prisma.user.upsert({
     where: { email: 'admin@test.com' },
-    update: {},
-    create: { email: 'admin@test.com', password: '123456', name: '管理员', role: 'admin', status: 'active' },
+    update: { password: adminHash },
+    create: { email: 'admin@test.com', password: adminHash, name: '管理员', role: 'admin', status: 'active', division: 'ALL' },
   })
 
-  // Create admin accounts
+  // Super admin — can access all divisions
+  const renHash = await bcrypt.hash('ren031213', 10)
   await prisma.user.upsert({
     where: { email: 'renwentao@nuc.com' },
-    update: {},
-    create: { email: 'renwentao@nuc.com', password: 'ren031213', name: '任文涛', role: 'admin', status: 'active' },
+    update: { password: renHash, division: 'ALL' },
+    create: { email: 'renwentao@nuc.com', password: renHash, name: '任文涛', role: 'admin', status: 'active', division: 'ALL' },
   })
+  const maHash = await bcrypt.hash('mashaokun', 10)
   await prisma.user.upsert({
     where: { email: 'mashaokun@nuc.com' },
-    update: {},
-    create: { email: 'mashaokun@nuc.com', password: 'mashaokun', name: '马少坤', role: 'admin', status: 'active' },
+    update: { password: maHash },
+    create: { email: 'mashaokun@nuc.com', password: maHash, name: '马少坤', role: 'admin', status: 'active', division: 'JUNIOR' },
   })
 
   // Create teacher user + teacher record
+  const teacherHash = await bcrypt.hash('123456', 10)
   await prisma.user.upsert({
     where: { email: 'wang@test.com' },
-    update: {},
-    create: { email: 'wang@test.com', password: '123456', name: '王老师', role: 'teacher', status: 'active' },
+    update: { password: teacherHash },
+    create: { email: 'wang@test.com', password: teacherHash, name: '王老师', role: 'teacher', status: 'active', division: 'JUNIOR' },
   })
   await prisma.user.upsert({
     where: { email: 'li@test.com' },
-    update: {},
-    create: { email: 'li@test.com', password: '123456', name: '李老师', role: 'teacher', status: 'active' },
+    update: { password: teacherHash },
+    create: { email: 'li@test.com', password: teacherHash, name: '李老师', role: 'teacher', status: 'active', division: 'JUNIOR' },
   })
-  // Teacher with pinyin login pattern: email=husitong@tea.com, password=husitong
+  // Teacher with pinyin login pattern
+  const huHash = await bcrypt.hash('husitong', 10)
   await prisma.user.upsert({
     where: { email: 'husitong@tea.com' },
-    update: {},
-    create: { email: 'husitong@tea.com', password: 'husitong', name: '胡思同', role: 'teacher', status: 'active' },
+    update: { password: huHash },
+    create: { email: 'husitong@tea.com', password: huHash, name: '胡思同', role: 'teacher', status: 'active', division: 'JUNIOR' },
   })
+  const zhangHash = await bcrypt.hash('zhanglaoshi', 10)
   await prisma.user.upsert({
     where: { email: 'zhanglaoshi@tea.com' },
-    update: {},
-    create: { email: 'zhanglaoshi@tea.com', password: 'zhanglaoshi', name: '张老师', role: 'teacher', status: 'active' },
+    update: { password: zhangHash },
+    create: { email: 'zhanglaoshi@tea.com', password: zhangHash, name: '张老师', role: 'teacher', status: 'active', division: 'JUNIOR' },
   })
+  const liHash = await bcrypt.hash('lilaoshi', 10)
   await prisma.user.upsert({
     where: { email: 'lilaoshi@tea.com' },
-    update: {},
-    create: { email: 'lilaoshi@tea.com', password: 'lilaoshi', name: '李老师', role: 'teacher', status: 'active' },
+    update: { password: liHash },
+    create: { email: 'lilaoshi@tea.com', password: liHash, name: '李老师', role: 'teacher', status: 'active', division: 'JUNIOR' },
   })
 
   const t1 = await prisma.teacher.upsert({ where: { id: 't1' }, update: {}, create: { id: 't1', name: '王老师', gender: '女', phone: '13800001001', email: 'wang@test.com', subjects: '音乐', bio: '10年钢琴教学经验', employmentType: 'FULL_TIME', education: '硕士', university: '中央音乐学院', major: '钢琴教育', monthlyHours: 40, rating: 4.8, ratingCount: 32 } })
@@ -65,15 +73,16 @@ async function main() {
   const c5 = await prisma.course.upsert({ where: { id: 'c5' }, update: {}, create: { id: 'c5', name: '美术素描', subject: '美术', pricePerLesson: 2800, lessonMinutes: 120, teacherId: t5.id } })
 
   // Create parent users
+  const parentHash = await bcrypt.hash('123456', 10)
   const parent1 = await prisma.user.upsert({
     where: { email: 'parent1@test.com' },
-    update: {},
-    create: { email: 'parent1@test.com', password: '123456', name: '张爸爸', role: 'parent', status: 'active' },
+    update: { password: parentHash },
+    create: { email: 'parent1@test.com', password: parentHash, name: '张爸爸', role: 'parent', status: 'active', division: 'JUNIOR' },
   })
   const parent2 = await prisma.user.upsert({
     where: { email: 'parent2@test.com' },
-    update: {},
-    create: { email: 'parent2@test.com', password: '123456', name: '李妈妈', role: 'parent', status: 'active' },
+    update: { password: parentHash },
+    create: { email: 'parent2@test.com', password: parentHash, name: '李妈妈', role: 'parent', status: 'active', division: 'JUNIOR' },
   })
 
   // Create students linked to parents
