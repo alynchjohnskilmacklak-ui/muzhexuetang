@@ -29,12 +29,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ role: null }, { status: 429, headers: { 'Retry-After': '60' } })
   }
 
-  const { email } = await req.json().catch(() => ({ email: '' }))
-  if (!email || typeof email !== 'string') {
+  const body = await req.json().catch(() => ({ email: '', division: undefined }))
+  const email = typeof body.email === 'string' ? body.email : ''
+  const division = typeof body.division === 'string' ? body.division : undefined
+  if (!email) {
     return NextResponse.json({ role: null })
   }
 
-  const role = await detectLoginRole(email.trim().toLowerCase())
+  const role = await detectLoginRole(email.trim().toLowerCase(), division)
 
   // 不向未登录请求返回 admin 身份，防止攻击者探测管理员账号。
   // 家长/教师可返回（用于前端自动切换登录入口），admin 一律返回 null。

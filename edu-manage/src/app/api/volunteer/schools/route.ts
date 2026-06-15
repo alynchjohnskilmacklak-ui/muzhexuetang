@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getPrismaForDivision } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  const prisma = getPrismaForDivision('JUNIOR')
   const schools = await prisma.highSchoolInfo.findMany({
     orderBy: [{ tongZhao: 'desc' }],
     select: {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import {
   DATA_ADMIN_ENTITIES,
   getSoftDeleteConfig,
@@ -41,6 +41,8 @@ export async function POST(
   if (!session?.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
+
+  const prisma = await getRequestPrisma()
 
   const { entity } = await params
   if (!ALLOWED_ENTITIES.includes(entity)) {
