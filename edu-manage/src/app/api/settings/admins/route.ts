@@ -10,7 +10,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 async function requireAdmin() {
   const session = await auth()
-  const user = session?.user as { id?: string; role?: string } | undefined
+  const user = session?.user as { id?: string; role?: string; division?: string } | undefined
   return user?.id && user.role === 'admin' ? user : null
 }
 
@@ -45,6 +45,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
   const name = typeof body.name === 'string' ? body.name.trim() : ''
   const password = typeof body.password === 'string' ? body.password : ''
+  const currentDivision = currentUser.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
 
   if (!emailPattern.test(email)) {
     return NextResponse.json({ error: '邮箱格式不正确' }, { status: 400 })
@@ -69,6 +70,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       name,
       role: 'admin',
       status: 'active',
+      division: currentDivision,
     },
     select: {
       id: true,

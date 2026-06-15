@@ -10,7 +10,13 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
   const { data: session } = useSession()
   const user = session?.user as Record<string, unknown> | undefined
   const userName = (user?.name as string) || '管理员'
-  const systemName = (user?.division as string) === 'SENIOR' ? '高中部管理系统' : '初中部管理系统'
+  const division = user?.division as string | undefined
+  const systemName =
+    division === 'SENIOR'
+      ? '高中部管理系统'
+      : division === 'JUNIOR'
+        ? '初中部管理系统'
+        : '管理系统'
 
   const userMenu = {
     items: [

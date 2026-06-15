@@ -14,11 +14,22 @@ export function useKickListener() {
       es = new EventSource('/api/auth/kick-events')
 
       es.onmessage = async (event) => {
-        if (event.data === 'kick') {
+        try {
+          const data = JSON.parse(event.data) as { type?: string; sessionMark?: string }
+          if (data.type !== 'kick') return
+
+          const sessionRes = await fetch('/api/auth/session', { cache: 'no-store' })
+          const sessionData = await sessionRes.json().catch(() => null)
+          const currentMark = sessionData?.user?.sessionMark
+
+          if (data.sessionMark && currentMark === data.sessionMark) return
+
           active = false
           es?.close()
           await signOut({ redirect: false })
           window.location.href = '/login?reason=kicked'
+        } catch {
+          // Ignore malformed events and keep the listener alive.
         }
       }
 

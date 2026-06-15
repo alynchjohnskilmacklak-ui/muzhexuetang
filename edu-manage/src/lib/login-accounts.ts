@@ -8,9 +8,17 @@ import type { PrismaClient } from '@prisma/client'
  * Returns null if dual-DB is on but division is missing/invalid (a hard error
  * the caller should surface to the user).
  */
+function isLoginDivision(value: string | undefined): value is 'JUNIOR' | 'SENIOR' {
+  return value === 'JUNIOR' || value === 'SENIOR'
+}
+
+function hasInvalidDualDbDivision(division: string | undefined) {
+  return isDualDbEnabled() && !isLoginDivision(division)
+}
+
 function resolveLoginPrisma(division: string | undefined): PrismaClient | null {
   if (!isDualDbEnabled()) return prisma
-  if (division !== 'JUNIOR' && division !== 'SENIOR') return null
+  if (!isLoginDivision(division)) return null
   return getPrismaForDivision(division)
 }
 export type LoginRole = 'admin' | 'teacher' | 'parent'
@@ -48,7 +56,8 @@ export async function getLoginStatus(emailInput: string, division?: string) {
   if (!email) return { locked: false, failCount: 0, remaining: MAX_FAIL_ATTEMPTS }
 
   const lockWindowStart = new Date(Date.now() - LOCK_WINDOW_MINUTES * 60 * 1000)
-  const db = resolveLoginPrisma(division) ?? prisma
+  const db = resolveLoginPrisma(division)
+  if (!db) return { locked: false, failCount: 0, remaining: MAX_FAIL_ATTEMPTS }
   const failCount = await db.loginRecord.count({
     where: {
       email,
@@ -66,7 +75,8 @@ export async function getLoginStatus(emailInput: string, division?: string) {
 }
 
 async function recordLoginFailure(email: string, failReason: LoginFailReason, userId?: string, meta?: RequestMeta, division?: string) {
-  const db = resolveLoginPrisma(division) ?? prisma
+  const db = resolveLoginPrisma(division)
+  if (!db) return
   await db.loginRecord.create({
     data: {
       userId,
@@ -83,7 +93,8 @@ async function recordLoginFailure(email: string, failReason: LoginFailReason, us
 }
 
 async function recordLoginSuccess(user: LoginUser, meta?: RequestMeta, division?: string) {
-  const db = resolveLoginPrisma(division) ?? prisma
+  const db = resolveLoginPrisma(division)
+  if (!db) return
   await db.loginRecord.create({
     data: {
       userId: user.id,
@@ -99,7 +110,8 @@ async function recordLoginSuccess(user: LoginUser, meta?: RequestMeta, division?
 }
 
 async function findTeacherByLoginEmail(email: string, division?: string): Promise<TeacherLoginAccount | null> {
-  const db = resolveLoginPrisma(division) ?? prisma
+  const db = resolveLoginPrisma(division)
+  if (!db) return null
   const teachers = await db.teacher.findMany({
     where: { status: { not: 'RESIGNED' } },
     select: { id: true, name: true, phone: true },
@@ -111,7 +123,8 @@ export async function detectLoginRole(emailInput: string, division?: string): Pr
   const email = normalizeLoginEmail(emailInput)
   if (!email) return null
 
-  const db = resolveLoginPrisma(division) ?? prisma
+  const db = resolveLoginPrisma(division)
+  if (!db) return null
   const user = await db.user.findUnique({
     where: { email },
     select: { role: true },
@@ -144,7 +157,7 @@ async function validateDatabaseUser(
 ): Promise<ValidationResult> {
   const db = resolveLoginPrisma(division)
   if (db === null) {
-    return { ok: false, error: '学部参数缺失', code: 'BAD_DIVISION' }
+    return { ok: false, error: 'Missing division', code: 'BAD_DIVISION' }
   }
   const user = await db.user.findUnique({ where: { email } })
 
@@ -179,8 +192,19 @@ async function validateDatabaseUser(
     return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
   }
 
-  if (options.recordSuccess) await recordLoginSuccess(loginUser, meta, division)
-  return { ok: true, user: loginUser }
+  const effectiveDivision =
+    isDualDbEnabled() && division === 'SENIOR' ? 'SENIOR'
+    : isDualDbEnabled() && division === 'JUNIOR' ? 'JUNIOR'
+    : loginUser.division === 'SENIOR' ? 'SENIOR'
+    : 'JUNIOR'
+
+  const scopedLoginUser = {
+    ...loginUser,
+    division: effectiveDivision,
+  }
+
+  if (options.recordSuccess) await recordLoginSuccess(scopedLoginUser, meta, effectiveDivision)
+  return { ok: true, user: scopedLoginUser }
 }
 
 export async function validateLoginAccount(
@@ -193,6 +217,10 @@ export async function validateLoginAccount(
 ): Promise<ValidationResult> {
   const email = normalizeLoginEmail(emailInput)
   const password = passwordInput.trim()
+
+  if (hasInvalidDualDbDivision(division)) {
+    return { ok: false, error: 'Missing division', code: 'BAD_DIVISION' }
+  }
 
   if (options.recordAttempt) {
     const status = await getLoginStatus(email, division)

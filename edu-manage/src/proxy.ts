@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getPrismaForDivision } from '@/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
 
 function jsonUnauthorized(error: string) {
@@ -14,15 +14,15 @@ type CachedSession = { currentSessionToken: string | null; status: string }
 const sessionCache = new Map<string, { data: CachedSession | null; ts: number }>()
 const SESSION_CACHE_TTL = 5_000
 
-function getCachedSession(userId: string): CachedSession | null | undefined {
-  const entry = sessionCache.get(userId)
+function getCachedSession(cacheKey: string): CachedSession | null | undefined {
+  const entry = sessionCache.get(cacheKey)
   if (entry && Date.now() - entry.ts < SESSION_CACHE_TTL) return entry.data
-  if (entry) sessionCache.delete(userId)
+  if (entry) sessionCache.delete(cacheKey)
   return undefined
 }
 
-function setCachedSession(userId: string, data: CachedSession | null) {
-  sessionCache.set(userId, { data, ts: Date.now() })
+function setCachedSession(cacheKey: string, data: CachedSession | null) {
+  sessionCache.set(cacheKey, { data, ts: Date.now() })
   if (sessionCache.size > 5_000) {
     for (const [k, v] of sessionCache) {
       if (Date.now() - v.ts > SESSION_CACHE_TTL) sessionCache.delete(k)
@@ -36,7 +36,7 @@ let failCountResetAt = 0
 export async function proxy(request: NextRequest) {
   const session = await auth()
   const { pathname } = request.nextUrl
-  const user = session?.user as { role?: string; id?: string; sessionMark?: string } | undefined
+  const user = session?.user as { role?: string; id?: string; sessionMark?: string; division?: string } | undefined
   const apiRequest = isApiRequest(pathname)
 
   // Allow public routes and explicitly protected self-contained setup endpoint.
@@ -65,14 +65,17 @@ export async function proxy(request: NextRequest) {
 
   if (user.id && user.sessionMark) {
     try {
-      let dbUser = getCachedSession(user.id)
+      const division = user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+      const cacheKey = `${division}:${user.id}`
+      let dbUser = getCachedSession(cacheKey)
       if (dbUser === undefined) {
+        const prisma = getPrismaForDivision(division)
         const row = await prisma.user.findUnique({
           where: { id: user.id },
           select: { currentSessionToken: true, status: true },
         })
         dbUser = row ? { currentSessionToken: row.currentSessionToken, status: row.status } : null
-        setCachedSession(user.id, dbUser)
+        setCachedSession(cacheKey, dbUser)
       }
 
       if (dbUser?.status === 'disabled') {
