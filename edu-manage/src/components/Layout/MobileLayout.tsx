@@ -56,7 +56,7 @@ export function MobileLayout({
       icon: <LogoutOutlined />,
       label: '退出登录',
       danger: true,
-      onClick: () => signOut({ callbackUrl: '/login' }),
+      onClick: () => signOut({ callbackUrl: `${window.location.origin}/login` }),
     }],
   }
 
@@ -284,7 +284,7 @@ export function MobileLayout({
         }}>
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: '/login' })}
+            onClick={() => signOut({ callbackUrl: `${window.location.origin}/login` })}
             style={{
               width: '100%',
               display: 'flex',

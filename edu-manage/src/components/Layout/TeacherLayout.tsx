@@ -253,7 +253,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
           {data ? (
             <Dropdown menu={{ items: [
               { key: 'change-pwd', icon: <LockOutlined />, label: '修改密码', onClick: () => setChangingPwd(true) },
-              { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: () => signOut({ callbackUrl: '/login' }) },
+              { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: () => signOut({ callbackUrl: `${window.location.origin}/login` }) },
             ] }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <Avatar size={28} icon={<UserOutlined />} src={normalizeUploadUrl(data.teacher.avatar) || undefined} />

@@ -81,7 +81,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     items: [
       { key: 'profile', icon: <UserOutlined />, label: '个人中心' },
       { type: 'divider' as const },
-      { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', danger: true, onClick: () => signOut({ callbackUrl: '/login' }) },
+      { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', danger: true, onClick: () => signOut({ callbackUrl: `${window.location.origin}/login` }) },
     ],
     onClick: ({ key }: { key: string }) => {
       if (key === 'profile') router.push('/parent/profile')

@@ -21,7 +21,7 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
         icon: <LogoutOutlined />,
         label: '退出登录',
         danger: true,
-        onClick: () => signOut({ callbackUrl: '/login' }),
+        onClick: () => signOut({ callbackUrl: `${window.location.origin}/login` }),
       },
     ],
   }
