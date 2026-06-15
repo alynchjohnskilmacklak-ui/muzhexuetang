@@ -336,7 +336,7 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/detect-role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: trimmed }),
+        body: JSON.stringify({ email: trimmed, division }),
       })
       const data = await res.json()
       if (data.role) { setDetectedRole(data.role as LoginRole); setRole(data.role as LoginRole) }

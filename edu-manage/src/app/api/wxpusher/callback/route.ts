@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getPrismaForDivision, isDualDbEnabled, prisma } from '@/lib/prisma'
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,10 +16,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ code: 403, msg: '签名无效' }, { status: 403 })
     }
 
-    await prisma.user.update({
-      where: { id: extra },
-      data: { wxpusherUid: uid },
-    })
+    if (!isDualDbEnabled()) {
+      await prisma.user.update({
+        where: { id: extra },
+        data: { wxpusherUid: uid },
+      }).catch(() => null)
+    } else {
+      const juniorDb = getPrismaForDivision('JUNIOR')
+      const seniorDb = getPrismaForDivision('SENIOR')
+      await juniorDb.user.update({
+        where: { id: extra },
+        data: { wxpusherUid: uid },
+      }).catch(() => null)
+      await seniorDb.user.update({
+        where: { id: extra },
+        data: { wxpusherUid: uid },
+      }).catch(() => null)
+    }
 
     return NextResponse.json({ code: 1000, msg: 'success' })
   } catch (e) {
