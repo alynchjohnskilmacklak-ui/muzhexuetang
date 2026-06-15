@@ -31,6 +31,7 @@ async function getClientIp() {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -80,6 +81,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Force configured site URL to avoid localhost fallback behind reverse proxy.
+      const site = process.env.NEXTAUTH_URL || baseUrl
+      // Relative path: resolve against the configured site URL.
+      if (url.startsWith('/')) return `${site}${url}`
+      // Same-origin absolute URL: allow it.
+      try {
+        if (new URL(url).origin === new URL(site).origin) return url
+      } catch {
+        // Ignore malformed absolute URLs.
+      }
+      // Everything else returns to the configured site root.
+      return site
+    },
     async signIn() {
       return true
     },
