@@ -24,9 +24,9 @@ export async function GET() {
         }
       }, 30_000)
 
-      const onKick = () => {
+      const onKick = (sessionMark: string) => {
         try {
-          controller.enqueue('data: kick\n\n')
+          controller.enqueue(`data: ${JSON.stringify({ type: 'kick', sessionMark })}\n\n`)
         } catch {
           // 连接已关闭
         }

@@ -122,7 +122,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
         })
 
-        emitKick(u.id as string)
+        emitKick(u.id as string, sessionMark)
       }
       return token
     },

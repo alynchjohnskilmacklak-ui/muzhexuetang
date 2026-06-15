@@ -12,6 +12,6 @@ if (!globalForEmitter.sessionEmitter) {
   sessionEmitter.setMaxListeners(500)
 }
 
-export function emitKick(userId: string) {
-  sessionEmitter.emit(`kick:${userId}`)
+export function emitKick(userId: string, sessionMark: string) {
+  sessionEmitter.emit(`kick:${userId}`, sessionMark)
 }
