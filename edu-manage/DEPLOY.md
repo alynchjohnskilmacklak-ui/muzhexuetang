@@ -74,8 +74,9 @@ npm install
 # 8. 生成 Prisma 客户端
 npx prisma generate
 
-# 9. 同步数据库结构（新增表/字段时必执行）
-npx prisma db push
+# 9. 生产迁移（新增表/字段时必执行）
+# 双库环境必须使用 migrate:all；单独 prisma migrate deploy 只会更新一个库。
+npm run migrate:all
 
 # 10. 导入种子数据（有新学校数据时执行）
 npx tsx scripts/seed-schools.ts
@@ -100,7 +101,7 @@ pm2 logs edu-manage --lines 20
 所有步骤合并为一条命令：
 
 ```bash
-pm2 stop edu-manage && cd /opt/edu-manage && cp .env /tmp/edu-manage.env.bak && tar -xf /tmp/edu-manage-20260526.tar && cp /tmp/edu-manage.env.bak .env && cp prisma/schema.pg.prisma prisma/schema.prisma && npm install && npx prisma generate && npx prisma db push && npx tsx scripts/seed-schools.ts && npm run build && pm2 start edu-manage --update-env && pm2 save && pm2 logs edu-manage --lines 5
+pm2 stop edu-manage && cd /opt/edu-manage && cp .env /tmp/edu-manage.env.bak && tar -xf /tmp/edu-manage-20260526.tar && cp /tmp/edu-manage.env.bak .env && cp prisma/schema.pg.prisma prisma/schema.prisma && npm install && npm run migrate:all && npx tsx scripts/seed-schools.ts && npm run build && pm2 start edu-manage --update-env && pm2 save && pm2 logs edu-manage --lines 5
 ```
 
 ---
@@ -128,7 +129,7 @@ netstat -tlnp | grep 3000
 |---------|------|------|
 | `Could not find a production build in '.next'` | 构建失败或 .next 被删 | 执行 `npm run build` |
 | `Property 'highSchoolInfo' does not exist` | Prisma 客户端未更新 | 执行 `npx prisma generate` |
-| 种子数据报 `highSchoolInfo` 表不存在 | 未同步 schema | 执行 `npx prisma db push` |
+| 种子数据报 `highSchoolInfo` 表不存在 | 未执行生产迁移 | 执行 `npm run migrate:all` |
 | 构建卡住超过 3 分钟 | 内存不足或 .next 损坏 | `rm -rf .next && npm run build` |
 | 登录后跳转失败 | `.env` 被覆盖 | 检查 `AUTH_URL` 和 `AUTH_SECRET` |
 | Prisma 报 `url` 字段错误 | 全局 Prisma 版本不兼容 | 必须用 `npx prisma` 而非全局 `prisma` |
@@ -152,10 +153,9 @@ netstat -tlnp | grep 3000
 2.  **Schema 同步必行**：
     每次部署后（特别是包含数据库变更的版本，如 6月7日的反馈字段扩展），必须在服务器执行：
     ```bash
-    npx prisma generate
-    npx prisma db push
+    npm run migrate:all
     ```
-    确保生成的 Prisma Client 与生产数据库结构完全一致。
+    确保两个分部数据库结构与生产代码完全一致。双库环境必须用 `npm run migrate:all`，单独的 `prisma migrate deploy` 只会更新一个库。
 
 3.  **清理旧产物**：
     如果部署后页面未更新或报错，尝试清理 `.next` 目录并重新构建：
