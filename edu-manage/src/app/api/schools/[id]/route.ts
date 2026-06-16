@@ -5,6 +5,38 @@ import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
+// 字段白名单：仅允许通过此接口更新的字段。
+// 系统字段 (id, schoolId, createdAt, updatedAt) 不允许前端传入。
+const ALLOWED_UPDATE_FIELDS = new Set([
+  'name',
+  'fullName',
+  'type',
+  'location',
+  'address',
+  'distanceFromXinle',
+  'yiTong',
+  'tongZhao',
+  'allocationLine',
+  'acceptsOtherCounty',
+  'xinleAccessible',
+  'xinleAccessibleOverride',
+  'xinleAllocationId',
+  'enrollment',
+  'boardingAvail',
+  'boardingFee',
+  'tuitionFee',
+  'keyFeature',
+  'gaokaoRate',
+  'intro',
+  'tips',
+  'website',
+  'phone',
+  'sourceUrl',
+  'sourceNote',
+  'infoVerifiedAt',
+  'infoConfidence',
+])
+
 export const PUT = apiHandler(async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -17,11 +49,16 @@ export const PUT = apiHandler(async (
   const prisma = await getRequestPrisma()
 
   const { id } = await params
-  const data = await req.json()
+  const rawData = await req.json()
   const userId = (session.user as Record<string, string>).id
 
-  delete data.id
-  delete data.schoolId
+  // 只提取白名单字段，禁止前端写入系统字段
+  const data: Record<string, unknown> = {}
+  for (const key of Object.keys(rawData)) {
+    if (ALLOWED_UPDATE_FIELDS.has(key)) {
+      data[key] = rawData[key]
+    }
+  }
 
   const school = await prisma.highSchoolInfo.update({
     where: { id },
