@@ -1,15 +1,16 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Button, Collapse, Divider, Form, InputNumber, Modal, Select,
   Spin, Switch, Tag, Typography,
 } from 'antd'
 import {
   ArrowLeftOutlined, TrophyOutlined,
-  CloseOutlined, SwapOutlined,
+  CloseOutlined, FilePdfOutlined, ShareAltOutlined, SwapOutlined,
 } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import {
   CONTROL_LINES_2025,
@@ -23,12 +24,19 @@ import {
   isXinleAccessible,
   SCORE_TAG_CONFIG,
   XINLE_ALLOCATION_2025,
+  type AllocationBand,
   type ScoreTag,
 } from '@/data/volunteer-2025'
 
 const { Title, Text } = Typography
 
 const XINLE_SCHOOLS = Object.keys(XINLE_ALLOCATION_2025).filter((school) => school !== '超击武校')
+
+const DISCLAIMER_TEXT =
+  '本方案依据 2025 年石家庄中考数据测算给出，结果仅供参考，并非百分之百准确，仅为方便孩子更好地对比择校。所填信息仍需家长仔细核对，本机构不承担任何后果。'
+
+// 真实二维码替换后，standalone 部署需重新构建并同步 public 目录。
+const CONSULT_QR_SRC = '/volunteer/consult-qr.png'
 
 interface DBSchool {
   id: string
@@ -102,6 +110,8 @@ export default function VolunteerSimPage() {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const [form] = Form.useForm()
+  const reportRef = useRef<HTMLDivElement>(null)
+  const posterRef = useRef<HTMLDivElement>(null)
 
   const [inputScore, setInputScore] = useState<number | null>(null)
   const [inputSchool, setInputSchool] = useState<string>('')
@@ -122,6 +132,8 @@ export default function VolunteerSimPage() {
   const [tongzhaoSlots, setTongzhaoSlots] = useState<(DBSchool | null)[]>(Array(6).fill(null))
 
   const [detailSchool, setDetailSchool] = useState<ProcessedSchool | null>(null)
+  const [exportingPdf, setExportingPdf] = useState(false)
+  const [exportingPoster, setExportingPoster] = useState(false)
 
   // First-visit onboarding
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -316,6 +328,62 @@ export default function VolunteerSimPage() {
   }, [allocationSlot, tongzhaoSlots])
 
   const tongzhaoFilled = tongzhaoSlots.filter(Boolean).length
+
+  const exportPdf = async () => {
+    const el = reportRef.current
+    if (!el) return
+    try {
+      setExportingPdf(true)
+      const html2canvas = (await import('html2canvas')).default
+      const { jsPDF } = await import('jspdf')
+      const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
+      const img = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pageW = 210
+      const pageH = 297
+      const imgH = (canvas.height * pageW) / canvas.width
+      let heightLeft = imgH
+      let position = 0
+      pdf.addImage(img, 'PNG', 0, position, pageW, imgH)
+      heightLeft -= pageH
+      while (heightLeft > 0) {
+        position -= pageH
+        pdf.addPage()
+        pdf.addImage(img, 'PNG', 0, position, pageW, imgH)
+        heightLeft -= pageH
+      }
+      pdf.save(`志愿方案_${inputSchool || '未填写初中'}_${inputScore ?? '未填'}分_${new Date().toISOString().slice(0,10)}.pdf`)
+    } catch (error) {
+      console.error('PDF生成失败', error)
+      toast.error('生成失败，请重试')
+    } finally {
+      setExportingPdf(false)
+    }
+  }
+
+  const exportPoster = async () => {
+    const el = posterRef.current
+    if (!el) return
+    try {
+      setExportingPoster(true)
+      const html2canvas = (await import('html2canvas')).default
+      const canvas = await html2canvas(el, { scale: 2, useCORS: true })
+      canvas.toBlob((blob) => {
+        if (!blob) return
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `志愿模拟海报_${new Date().toISOString().slice(0,10)}.png`
+        a.click()
+        URL.revokeObjectURL(url)
+      }, 'image/png')
+    } catch (error) {
+      console.error('海报生成失败', error)
+      toast.error('生成失败，请重试')
+    } finally {
+      setExportingPoster(false)
+    }
+  }
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', color: C.ink }}>
@@ -1125,8 +1193,207 @@ export default function VolunteerSimPage() {
               </div>
             </div>
           </div>
+
+          <div style={{ display:'flex', gap:12, justifyContent:'center', marginTop:16, flexWrap:'wrap' }}>
+            <Button
+              type="primary"
+              icon={<FilePdfOutlined />}
+              disabled={!submitted || (!allocationSlot && tongzhaoFilled === 0)}
+              loading={exportingPdf}
+              onClick={exportPdf}
+            >导出志愿方案 PDF</Button>
+            <Button
+              icon={<ShareAltOutlined />}
+              disabled={!submitted}
+              loading={exportingPoster}
+              onClick={exportPoster}
+            >生成分享海报</Button>
+          </div>
         </div>
       )}
+      <div ref={reportRef} style={{ position:'fixed', left:-99999, top:0, zIndex:-1 }}>
+        {submitted && (
+          <ReportDocument
+            inputScore={inputScore}
+            inputSchool={inputSchool}
+            inputRank={inputRank}
+            marketRankResult={marketRankResult}
+            percentileResult={percentileResult}
+            allocationSlot={allocationSlot}
+            allocationTop={allocationTop}
+            tongzhaoSlots={tongzhaoSlots}
+            processedSchools={processedSchools}
+          />
+        )}
+      </div>
+      <div ref={posterRef} style={{ position:'fixed', left:-99999, top:0, zIndex:-1 }}>
+        {submitted && (
+          <SharePoster
+            marketRankResult={marketRankResult}
+            percentileResult={percentileResult}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+
+type RankResult = ReturnType<typeof getMarketRank> | null
+type PercentileResult = ReturnType<typeof getMarketPercentile> | null
+type AllocationTopResult = { band: AllocationBand; source: 'recommended' | 'fallback_safe' } | null
+
+function ReportDocument({
+  inputScore,
+  inputSchool,
+  inputRank,
+  marketRankResult,
+  percentileResult,
+  allocationSlot,
+  allocationTop,
+  tongzhaoSlots,
+  processedSchools,
+}: {
+  inputScore: number | null
+  inputSchool: string
+  inputRank: number | null
+  marketRankResult: RankResult
+  percentileResult: PercentileResult
+  allocationSlot: DBSchool | null
+  allocationTop: AllocationTopResult
+  tongzhaoSlots: (DBSchool | null)[]
+  processedSchools: ProcessedSchool[]
+}) {
+  const filledTongzhao = tongzhaoSlots.filter(Boolean) as DBSchool[]
+  const rankText = marketRankResult?.rank != null ? marketRankResult.rank.toLocaleString() : '—'
+  const percentileText = percentileResult?.percentile && percentileResult.percentile !== '—' ? `${percentileResult.percentile}%` : '—'
+
+  return (
+    <div style={{ width: 794, background: '#ffffff', padding: 32, color: C.ink, boxSizing: 'border-box', fontFamily: 'Arial, sans-serif' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #E8784A', paddingBottom: 14, marginBottom: 24 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#E8784A' }}>牧哲学堂 · 中考志愿模拟方案</div>
+        <div style={{ fontSize: 13, color: C.inkSubtle }}>{new Date().toLocaleDateString('zh-CN')}</div>
+      </div>
+
+      <section style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 12 }}>考生测算概览</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+          <ReportMetric label="分数" value={inputScore !== null ? `${inputScore}分` : '—'} />
+          <ReportMetric label="毕业初中" value={inputSchool || '—'} />
+          <ReportMetric label="校内排名" value={inputRank !== null ? `第${inputRank}名` : '—'} />
+          <ReportMetric label="全市位次" value={rankText === '—' ? '—' : `第${rankText}名`} />
+          <ReportMetric label="全市百分位" value={percentileText} />
+        </div>
+      </section>
+
+      <section style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 12 }}>分配生志愿（C 段，1 所）</div>
+        {allocationSlot ? (
+          <div style={{ border: '1px solid #f5c9b3', background: '#fff3ec', borderRadius: 10, padding: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+              <div style={{ fontSize: 17, fontWeight: 700, color: '#E8784A' }}>{allocationSlot.name}</div>
+              <div style={{ fontSize: 14, color: C.inkMuted }}>统招线 {allocationSlot.tongZhao} 分</div>
+            </div>
+            {allocationTop && (
+              <div style={{ marginTop: 10, fontSize: 13, lineHeight: 1.7, color: C.inkMuted }}>
+                推荐理由：{allocationTop.band.note}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{ border: '1px dashed #e5ddd0', background: C.surface3, borderRadius: 10, padding: 16, color: C.inkSubtle }}>未选择</div>
+        )}
+      </section>
+
+      <section style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 12 }}>平行统招志愿（D 段，最多 6 所）</div>
+        {filledTongzhao.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {filledTongzhao.map((slot, index) => {
+              const processed = processedSchools.find((school) => school.schoolId === slot.schoolId)
+              const tag = processed?.tag ?? '稳妥'
+              const gap = processed?.gap ?? slot.tongZhao - slot.tongZhao
+              const cfg = SCORE_TAG_CONFIG[tag]
+              return (
+                <div key={`${slot.schoolId}-${index}`} style={{ display: 'grid', gridTemplateColumns: '48px 1fr 100px 116px', alignItems: 'center', gap: 12, border: '1px solid #EEE7E1', borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ fontSize: 13, color: C.inkSubtle }}>第{index + 1}志愿</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>{slot.name}</div>
+                  <div style={{ fontSize: 13, color: C.inkMuted }}>统招线 {slot.tongZhao}</div>
+                  <div style={{ display: 'inline-flex', justifyContent: 'center', border: `1px solid ${cfg.border}`, background: cfg.bg, color: cfg.color, borderRadius: 999, padding: '4px 10px', fontSize: 12, fontWeight: 700 }}>
+                    {cfg.label}{gap >= 0 ? ` +${gap}` : ` ${gap}`}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div style={{ border: '1px dashed #e5ddd0', background: C.surface3, borderRadius: 10, padding: 16, color: C.inkSubtle }}>未选择</div>
+        )}
+      </section>
+
+      <div style={{ background: C.surface3, borderRadius: 10, padding: 14, fontSize: 12, lineHeight: 1.8, color: C.inkMuted }}>
+        {DISCLAIMER_TEXT}
+      </div>
+    </div>
+  )
+}
+
+function ReportMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ background: C.surface3, borderRadius: 10, padding: '12px 10px', minHeight: 74 }}>
+      <div style={{ fontSize: 12, color: C.inkSubtle, marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 15, fontWeight: 700, color: C.ink, lineHeight: 1.3 }}>{value}</div>
+    </div>
+  )
+}
+
+function SharePoster({
+  marketRankResult,
+  percentileResult,
+}: {
+  marketRankResult: RankResult
+  percentileResult: PercentileResult
+}) {
+  const rankText = marketRankResult?.rank != null
+    ? `全市位次 第 ${marketRankResult.rank.toLocaleString()} 名`
+    : '已完成志愿模拟测算'
+  const percentileText = percentileResult?.percentile && percentileResult.percentile !== '—'
+    ? `百分位 ${percentileResult.percentile}%`
+    : '百分位 —'
+
+  return (
+    <div style={{ width: 750, height: 1334, background: 'linear-gradient(160deg,#fff3ec,#ffffff)', color: C.ink, boxSizing: 'border-box', padding: 54, fontFamily: 'Arial, sans-serif', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ fontSize: 28, fontWeight: 700, color: '#E8784A', borderBottom: '2px solid #f5c9b3', paddingBottom: 18 }}>
+        牧哲学堂 · 中考志愿模拟系统
+      </div>
+
+      <div style={{ marginTop: 150, textAlign: 'center' }}>
+        <div style={{ fontSize: 54, fontWeight: 800, color: C.ink, lineHeight: 1.25 }}>
+          {rankText}
+        </div>
+        <div style={{ marginTop: 22, fontSize: 28, fontWeight: 700, color: '#E8784A' }}>
+          {percentileText}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 120, background: '#ffffff', border: '1px solid #f5c9b3', borderRadius: 24, padding: '36px 34px', boxShadow: '0 18px 50px #f5c9b3' }}>
+        <div style={{ fontSize: 31, fontWeight: 800, color: C.ink, lineHeight: 1.45 }}>
+          系统已生成 7 个梯度志愿建议 —— 冲刺 / 稳妥 / 保底一目了然
+        </div>
+        <div style={{ marginTop: 24, fontSize: 28, fontWeight: 700, color: '#E8784A', lineHeight: 1.45 }}>
+          分配生名额怎么排？自己真算不清，找老师
+        </div>
+      </div>
+
+      <div style={{ position: 'absolute', left: 54, right: 54, bottom: 96, display: 'flex', alignItems: 'center', gap: 32 }}>
+        <img src={CONSULT_QR_SRC} alt="咨询二维码" width={200} height={200} style={{ width: 200, height: 200, background: '#ffffff', border: '10px solid #ffffff', borderRadius: 18 }} />
+        <div style={{ fontSize: 30, fontWeight: 800, color: C.ink, lineHeight: 1.35 }}>
+          扫码找牧哲学堂老师，做专业人工解读
+        </div>
+      </div>
+
+      <div style={{ position: 'absolute', left: 54, right: 54, bottom: 36, fontSize: 10, color: C.inkSubtle, textAlign: 'center' }}>
+        数据依据 2025 年石家庄中考测算，仅供参考
+      </div>
     </div>
   )
 }

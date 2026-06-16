@@ -1,3 +1,4 @@
+import type { PrismaClient } from '@prisma/client'
 import { getRequestPrisma } from '@/lib/prisma'
 
 interface HealthIssue {
@@ -8,8 +9,8 @@ interface HealthIssue {
   sampleIds?: string[]
 }
 
-export async function runDataHealthCheck(): Promise<HealthIssue[]> {
-  const prisma = await getRequestPrisma()
+export async function runDataHealthCheck(db?: PrismaClient): Promise<HealthIssue[]> {
+  const prisma = db ?? await getRequestPrisma()
   const issues: HealthIssue[] = []
 
   // 1. Duplicate attendance for same lesson+student
