@@ -21,7 +21,6 @@ import {
   DollarOutlined,
   ExperimentOutlined,
   FileTextOutlined,
-  HomeOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MessageFilled,
@@ -64,21 +63,49 @@ const menuItems: MenuProps['items'] = [
     ],
   },
   { key: '/attendance', icon: <CheckSquareOutlined />, label: '考勤管理' },
-  { key: '/meals', icon: <CoffeeOutlined />, label: '就餐管理' },
   { key: '/classroom-feedback', icon: <MessageOutlined />, label: '成长反馈' },
-  { key: '/parent-messages', icon: <CommentOutlined />, label: '\u5bb6\u957f\u7559\u8a00' },
-  { key: '/volunteer', icon: <ReadOutlined />, label: '志愿填报' },
-  { key: '/fees', icon: <DollarOutlined />, label: '收费管理' },
+  {
+    key: 'finance-group',
+    icon: <DollarOutlined />,
+    label: '财务后勤',
+    children: [
+      { key: '/fees', label: '收费管理' },
+      { key: '/meals', icon: <CoffeeOutlined />, label: '就餐管理' },
+    ],
+  },
   { key: '/grades', icon: <FileTextOutlined />, label: '学习档案' },
+  {
+    key: 'comm-group',
+    icon: <CommentOutlined />,
+    label: '沟通中心',
+    children: [
+      { key: '/parent-messages', label: '家长留言' },
+      { key: '/notifications', icon: <BellOutlined />, label: '消息通知' },
+    ],
+  },
+  {
+    key: 'volunteer-group',
+    icon: <ExperimentOutlined />,
+    label: '中考志愿',
+    children: [
+      { key: '/volunteer', label: '志愿咨询' },
+      { key: '/volunteer-sim', label: '中考模拟测算' },
+      { key: '/volunteer-sim/schools', label: '高中学校库' },
+    ],
+  },
   { key: '/reports', icon: <BarChartOutlined />, label: '数据报表' },
   { key: '/data-admin', icon: <DatabaseOutlined />, label: '数据管理' },
-  { key: '/notifications', icon: <BellOutlined />, label: '消息通知' },
   { key: '/login-records', icon: <SafetyOutlined />, label: '登录记录' },
-  { key: '/volunteer-sim', icon: <ExperimentOutlined />, label: '志愿模拟填报' },
-  { key: '/volunteer-sim/schools', icon: <HomeOutlined />, label: '学校信息' },
-  { key: '/materials', icon: <ReadOutlined />, label: '学习资料' },
-  { key: '/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
-  { key: '/ai', icon: <MessageFilled />, label: 'AI 助手' },
+  {
+    key: 'resource-group',
+    icon: <ReadOutlined />,
+    label: '教学资源',
+    children: [
+      { key: '/materials', label: '学习资料' },
+      { key: '/phet', label: '仿真教学' },
+      { key: '/ai', label: 'AI 助手' },
+    ],
+  },
   { key: '/settings', icon: <SettingOutlined />, label: '系统设置' },
 ]
 
@@ -135,14 +162,22 @@ export function Sidebar({
     ? ['teacher-group']
     : (baseKey === '/schedule' || isScheduleIntensive)
     ? ['schedule-group']
+    : (baseKey === '/fees' || baseKey === '/meals')
+    ? ['finance-group']
+    : (baseKey === '/parent-messages' || baseKey === '/notifications')
+    ? ['comm-group']
+    : (baseKey === '/volunteer' || baseKey === '/volunteer-sim' || baseKey === '/volunteer-sim/schools')
+    ? ['volunteer-group']
+    : (baseKey === '/materials' || baseKey === '/phet' || baseKey === '/ai')
+    ? ['resource-group']
     : []
 
   // 初中部专属菜单：高中部不展示中考志愿相关入口
+  const JUNIOR_ONLY_GROUP_KEY = 'volunteer-group'
   const visibleMenuItems = useMemo(() => {
     if (!isSenior) return menuItems
-    const juniorOnlyKeys = new Set(['/volunteer', '/volunteer-sim', '/volunteer-sim/schools'])
     return (menuItems as { key: string; [k: string]: unknown }[]).filter(
-      (item) => !juniorOnlyKeys.has(item.key),
+      (item) => item.key !== JUNIOR_ONLY_GROUP_KEY,
     )
   }, [isSenior])
 
@@ -176,16 +211,16 @@ export function Sidebar({
       collapsedWidth={72}
       style={{
         height: '100vh', position: onMenuClick ? 'relative' : 'fixed', left: 0, top: 0, bottom: 0, overflow: 'auto',
-        background: '#ffffff', borderRight: '1px solid #EEE7E1', zIndex: 98,
+        background: '#ffffff', borderRight: '1px solid rgba(0,0,0,.06)', zIndex: 98,
       }}
     >
       <div style={{
         height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: collapsed ? '0 12px' : '0 12px 0 24px', borderBottom: '1px solid #EEE7E1',
+        padding: collapsed ? '0 12px' : '0 12px 0 24px', borderBottom: '1px solid rgba(0,0,0,.06)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Image src="/images/logo.jpg" alt="牧哲学堂" width={32} height={32} style={{ borderRadius: 8, objectFit: 'cover' }} unoptimized />
-          {!collapsed && <span style={{ fontSize: 16, fontWeight: 700, color: '#E87545', whiteSpace: 'nowrap' }}>牧哲学堂</span>}
+          {!collapsed && <span style={{ fontSize: 16, fontWeight: 700, color: '#E8784A', whiteSpace: 'nowrap' }}>牧哲学堂</span>}
         </div>
         <Tooltip title={collapsed ? '展开导航' : '收起导航'}>
           <button onClick={() => onCollapse(!collapsed)} style={{

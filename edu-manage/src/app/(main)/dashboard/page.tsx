@@ -40,10 +40,10 @@ const fetcher = async (url: string): Promise<AdminDashboardData> => {
 const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 
 const statusColors: Record<TodaySchedule['statusLabel'], string> = {
-  待上课: '#1677ff',
+  待上课: '#185FA5',
   上课中: '#1D9E75',
-  待考勤: '#E87545',
-  已完成: '#98A2B3',
+  待考勤: '#E8784A',
+  已完成: '#9a8e7a',
 }
 
 
@@ -60,48 +60,48 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
   ), [data.schedules, scheduleFilter])
 
   const quickActions = [
-    { icon: <CalendarOutlined />, label: '考勤管理', href: '/attendance', badge: metrics.todayLessonsPendingAttendance, color: '#E87545' },
-    { icon: <TeamOutlined />, label: '学员管理', href: '/students', color: '#1677ff' },
+    { icon: <CalendarOutlined />, label: '考勤管理', href: '/attendance', badge: metrics.todayLessonsPendingAttendance, color: '#E8784A' },
+    { icon: <TeamOutlined />, label: '学员管理', href: '/students', color: '#185FA5' },
     { icon: <BookOutlined />, label: '课程管理', href: '/courses', color: '#1D9E75' },
-    { icon: <ExclamationCircleOutlined />, label: '待处理', href: '/notifications', badge: metrics.pendingTasks, color: '#722ed1' },
+    { icon: <ExclamationCircleOutlined />, label: '待处理', href: '/notifications', badge: metrics.pendingTasks, color: '#7a7fad' },
   ]
 
   const activeHighlights = data.operatingHighlights.filter((highlight) => Number(highlight.value) > 0)
 
   return (
-    <div style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))', background: '#F7F4F0', minHeight: '100dvh' }}>
+    <div style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))', background: '#faf8f5', minHeight: '100dvh' }}>
       <div style={{
         background: 'linear-gradient(160deg, #FFF2E8 0%, #FFFBF6 100%)',
         padding: '16px 16px 20px',
-        borderBottom: '1px solid #F0E6DC',
+        borderBottom: '1px solid rgba(0,0,0,.06)',
       }}>
-        <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 2 }}>
+        <div style={{ fontSize: 12, color: '#9a8e7a', marginBottom: 2 }}>
           {now.getFullYear()}年{now.getMonth() + 1}月{now.getDate()}日 {weekDays[now.getDay()]}
         </div>
         <div style={{ fontSize: 20, fontWeight: 800, color: '#1a1201', marginBottom: 4 }}>
           牧哲学堂 · 管理
         </div>
         <div style={{ fontSize: 13, color: '#5a4e3a' }}>
-          今日 <strong style={{ color: '#E87545' }}>{metrics.todayLessons}</strong> 节课，
-          <strong style={{ color: '#E87545' }}>{metrics.todayLessonsPendingAttendance}</strong> 节待考勤，
-          <strong style={{ color: '#722ed1' }}>{metrics.pendingTasks}</strong> 项待处理
+          今日 <strong style={{ color: '#E8784A' }}>{metrics.todayLessons}</strong> 节课，
+          <strong style={{ color: '#E8784A' }}>{metrics.todayLessonsPendingAttendance}</strong> 节待考勤，
+          <strong style={{ color: '#7a7fad' }}>{metrics.pendingTasks}</strong> 项待处理
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginTop: 14 }}>
           {[
-            { label: '在读学员', value: `${metrics.activeStudents}人`, color: '#E87545' },
-            { label: '今日课次', value: `${metrics.todayLessons}节`, color: '#1677ff' },
-            { label: '本月课时', value: formatHours(metrics.monthlyDeductedHours), color: '#722ed1' },
+            { label: '在读学员', value: `${metrics.activeStudents}人`, color: '#E8784A' },
+            { label: '今日课次', value: `${metrics.todayLessons}节`, color: '#185FA5' },
+            { label: '本月课时', value: formatHours(metrics.monthlyDeductedHours), color: '#7a7fad' },
           ].map((item) => (
             <div key={item.label} style={{
               background: 'rgba(255,255,255,0.78)',
               borderRadius: 12,
               padding: '10px 8px',
               textAlign: 'center',
-              border: '1px solid rgba(232,117,69,0.1)',
+              border: '1px solid rgba(232,120,74,0.1)',
             }}>
               <div style={{ fontSize: 17, fontWeight: 800, color: item.color }}>{item.value}</div>
-              <div style={{ fontSize: 11, color: '#98A2B3', marginTop: 2 }}>{item.label}</div>
+              <div style={{ fontSize: 11, color: '#9a8e7a', marginTop: 2 }}>{item.label}</div>
             </div>
           ))}
         </div>
@@ -146,13 +146,13 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
             {activeHighlights.map((item) => {
               const colorMap: Record<string, string> = {
-                orange: '#E87545',
-                red: '#d9363e',
-                blue: '#1677ff',
-                purple: '#722ed1',
+                orange: '#E8784A',
+                red: '#E24B4A',
+                blue: '#185FA5',
+                purple: '#7a7fad',
                 green: '#1D9E75',
               }
-              const color = colorMap[item.tone] || '#E87545'
+              const color = colorMap[item.tone] || '#E8784A'
               return (
                 <button
                   key={item.label}
@@ -184,7 +184,7 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
           <div style={{ fontSize: 13, fontWeight: 700, color: '#5a4e3a' }}>今日课表</div>
           <button
             onClick={() => router.push('/attendance')}
-            style={{ fontSize: 12, color: '#E87545', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 2 }}
+            style={{ fontSize: 12, color: '#E8784A', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 2 }}
           >
             全部 <RightOutlined style={{ fontSize: 10 }} />
           </button>
@@ -200,9 +200,9 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
                 padding: '4px 12px',
                 borderRadius: 20,
                 fontSize: 12,
-                background: scheduleFilter === status ? '#E87545' : '#fff',
+                background: scheduleFilter === status ? '#E8784A' : '#fff',
                 color: scheduleFilter === status ? '#fff' : '#5a4e3a',
-                border: `1px solid ${scheduleFilter === status ? '#E87545' : '#EEE7E1'}`,
+                border: `1px solid ${scheduleFilter === status ? '#E8784A' : '#EEE7E1'}`,
                 cursor: 'pointer',
                 fontWeight: scheduleFilter === status ? 600 : 400,
               }}
@@ -223,7 +223,7 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {filteredSchedules.slice(0, 10).map((item) => {
-              const color = statusColors[item.statusLabel] || '#98A2B3'
+              const color = statusColors[item.statusLabel] || '#9a8e7a'
               return (
                 <button
                   key={`${item.source}-${item.id}`}
@@ -234,7 +234,7 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
                     background: '#fff',
                     borderRadius: 12,
                     padding: '12px 14px',
-                    border: item.statusLabel === '待考勤' ? `1px solid ${color}40` : '1px solid #F0E6DC',
+                    border: item.statusLabel === '待考勤' ? `1px solid ${color}40` : '1px solid rgba(0,0,0,.06)',
                     cursor: 'pointer',
                   }}
                 >
@@ -248,15 +248,15 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
                     </Tag>
                   </div>
                   <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 11, color: '#98A2B3' }}><UserOutlined style={{ marginRight: 3 }} />{item.teacher}</span>
-                    <span style={{ fontSize: 11, color: '#98A2B3' }}><TeamOutlined style={{ marginRight: 3 }} />{item.students}人</span>
-                    <span style={{ fontSize: 11, color: '#98A2B3' }}><ClockCircleOutlined style={{ marginRight: 3 }} />{item.subject}</span>
+                    <span style={{ fontSize: 11, color: '#9a8e7a' }}><UserOutlined style={{ marginRight: 3 }} />{item.teacher}</span>
+                    <span style={{ fontSize: 11, color: '#9a8e7a' }}><TeamOutlined style={{ marginRight: 3 }} />{item.students}人</span>
+                    <span style={{ fontSize: 11, color: '#9a8e7a' }}><ClockCircleOutlined style={{ marginRight: 3 }} />{item.subject}</span>
                   </div>
                 </button>
               )
             })}
             {filteredSchedules.length > 10 && (
-              <Button block onClick={() => router.push('/attendance')} style={{ borderRadius: 12, color: '#E87545', fontWeight: 600 }}>
+              <Button block onClick={() => router.push('/attendance')} style={{ borderRadius: 12, color: '#E8784A', fontWeight: 600 }}>
                 查看全部 {filteredSchedules.length} 节课
               </Button>
             )}
