@@ -362,3 +362,19 @@ Implementation rules:
 - "Create a student list page with a searchable data table, following DESIGN.md table and card styling."
 - "Style the volunteer simulation page following DESIGN.md's warm-light theme and orange accent."
 - "Build a settings form with DESIGN.md's input fields and orange primary buttons."
+
+## Growth Feature Palette
+
+The parent growth page (成长动态) uses a warm brown sub-palette derived from the primary ink scale. These are NOT separate tokens — they are tint/shade variants of `{colors.ink}` and `{colors.primary}` used exclusively for the growth timeline and badge wall:
+
+| Role | Value | Derived From |
+|------|-------|-------------|
+| growth-title | `#2f241b` | ink + lighter |
+| growth-eyebrow | `#b4663f` | primary + muted |
+| growth-quote-bg | `#fffcf8` | canvas + warmer |
+| growth-quote-border | `#f0ddd2` | primary + very light |
+| growth-node-bg | `#fff8f1` | surface-3 + warm |
+| growth-badge-earned | `#fff3d8` | warning + light |
+| growth-badge-locked | `#f3eee8` | surface-3 |
+
+These are defined in `globals.css` under `.growth-*` classes. Do NOT use these values outside the growth feature. All other pages use the main design tokens.
