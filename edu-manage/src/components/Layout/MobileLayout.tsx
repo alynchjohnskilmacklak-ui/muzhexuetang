@@ -151,7 +151,7 @@ export function MobileLayout({
           header: { display: 'none' },
           body: {
             padding: 0,
-            backgroundColor: '#FFFBF7',
+            backgroundColor: '#faf8f5',
             display: 'flex',
             flexDirection: 'column',
             height: '100%',
@@ -167,7 +167,7 @@ export function MobileLayout({
           alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: '1px solid rgba(0,0,0,.06)',
-          backgroundColor: '#FFFBF7',
+          backgroundColor: '#faf8f5',
         }}>
           <span style={{ fontSize: 17, fontWeight: 700, color: '#E8784A' }}>
             {mode === 'tabs' ? '更多功能' : '牧哲学堂'}
@@ -199,7 +199,7 @@ export function MobileLayout({
           alignItems: 'center',
           gap: 12,
           borderBottom: '1px solid rgba(0,0,0,.05)',
-          backgroundColor: '#FFFBF7',
+          backgroundColor: '#faf8f5',
         }}>
           <Avatar size={42} icon={<UserOutlined />} style={{ backgroundColor: '#E8784A', flexShrink: 0 }} />
           <div style={{ minWidth: 0 }}>
@@ -280,7 +280,7 @@ export function MobileLayout({
         <div style={{
           padding: '10px 10px calc(20px + env(safe-area-inset-bottom, 0px))',
           borderTop: '1px solid rgba(0,0,0,.05)',
-          backgroundColor: '#FFFBF7',
+          backgroundColor: '#faf8f5',
         }}>
           <button
             type="button"
@@ -293,7 +293,7 @@ export function MobileLayout({
               padding: '14px 14px',
               borderRadius: 12,
               cursor: 'pointer',
-              color: '#d9363e',
+              color: '#E24B4A',
               fontSize: 15,
               fontWeight: 500,
               backgroundColor: 'rgba(217,54,62,.06)',
@@ -344,7 +344,7 @@ export function MobileLayout({
               minWidth: 0,
               border: 0,
               background: active ? 'rgba(232,120,74,.06)' : 'transparent',
-              color: active ? '#E8784A' : '#8D806F',
+              color: active ? '#E8784A' : '#9a8e7a',
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
@@ -366,7 +366,7 @@ export function MobileLayout({
                 <span style={{
                   fontSize: 20,
                   lineHeight: 1,
-                  color: active ? '#E8784A' : '#8D806F',
+                  color: active ? '#E8784A' : '#9a8e7a',
                   transition: 'color .15s ease',
                 }}>
                   {item.icon}

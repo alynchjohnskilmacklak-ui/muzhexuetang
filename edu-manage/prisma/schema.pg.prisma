@@ -13,6 +13,7 @@ model User {
   password    String
   name        String
   role        String   @default("parent")
+  division    String   @default("JUNIOR")
   avatar      String?
   status      String   @default("active")
   wxpusherUid String?
@@ -38,6 +39,9 @@ model User {
   mealMenus              MealMenu[]              @relation("MealMenuCreator")
   loginRecords           LoginRecord[]
   uploadedMaterials      StudyMaterial[]         @relation("MaterialUploader")
+  parentMessages         ParentMessage[]         @relation("ParentMessages")
+
+  @@index([division, status])
 }
 
 model Student {
@@ -84,6 +88,7 @@ model Student {
   notifications     Notification[]
   leaveRequests     LeaveRequest[]
   mealChoices       ParentMealChoice[]
+  parentMessages    ParentMessage[]
 
   @@index([status, createdAt])
   @@index([grade])
@@ -101,6 +106,7 @@ model Teacher {
   avatar         String?
   employmentType String    @default("FULL_TIME")
   status         String    @default("ACTIVE")
+  division       String    @default("JUNIOR")
   joinedAt       DateTime  @default(now())
   contractEnd    DateTime?
   education      String?
@@ -135,7 +141,9 @@ model Teacher {
   mealReports        MealReport[]
   salaryConfigs      TeacherSalaryConfig[]
   salaryTransactions TeacherSalaryTransaction[]
+  parentMessages     ParentMessage[]            @relation("TeacherMessages")
 
+  @@index([division])
   @@index([status, createdAt])
 }
 
@@ -820,6 +828,7 @@ model MealMenu {
   sideDish    String?
   allowDouble Boolean  @default(false)
   notes       String?
+  division    String   @default("JUNIOR")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdBy   String
@@ -845,6 +854,7 @@ model MealTemplate {
   isActive  Boolean   @default(true)
   startDate DateTime?
   endDate   DateTime?
+  division  String    @default("JUNIOR")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -862,6 +872,7 @@ model MealReport {
   noodleCount Int      @default(0)
   details     Json
   notes       String?
+  division    String   @default("JUNIOR")
   submittedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -1207,4 +1218,41 @@ model HighSchoolInfo {
   infoConfidence   String?   @default("unknown")
   updatedAt        DateTime @updatedAt
   updatedBy        String?
+}
+
+// ── 家长留言 ──────────────────────────────────────────────
+model ParentMessage {
+  id          String   @id @default(cuid())
+  parentId    String
+  parent      User     @relation("ParentMessages", fields: [parentId], references: [id], onDelete: Cascade)
+  studentId   String?
+  student     Student? @relation(fields: [studentId], references: [id])
+  teacherId   String?
+  teacher     Teacher? @relation("TeacherMessages", fields: [teacherId], references: [id])
+  subject     String?
+  title       String
+  status      String   @default("OPEN")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  replies     ParentMessageReply[]
+
+  @@index([parentId, createdAt])
+  @@index([teacherId, status, createdAt])
+  @@index([status, createdAt])
+}
+
+model ParentMessageReply {
+  id              String         @id @default(cuid())
+  messageId       String
+  message         ParentMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  authorId        String
+  authorName      String
+  role            String
+  content         String
+  isReadByParent  Boolean        @default(false)
+  isReadByTeacher Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+
+  @@index([messageId, createdAt])
 }

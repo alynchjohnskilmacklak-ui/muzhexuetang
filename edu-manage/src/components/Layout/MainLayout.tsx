@@ -14,7 +14,6 @@ import {
   DollarOutlined,
   ExperimentOutlined,
   FileTextOutlined,
-  HomeOutlined,
   MessageFilled,
   MessageOutlined,
   ReadOutlined,
@@ -42,17 +41,17 @@ const adminNavItems = [
   { key: '/schedule', icon: <CalendarOutlined />, label: '排课系统' },
   { key: '/attendance', icon: <CheckSquareOutlined />, label: '考勤管理' },
   { key: '/classroom-feedback', icon: <MessageOutlined />, label: '成长反馈' },
-  { key: '/meals', icon: <CoffeeOutlined />, label: '就餐管理' },
   { key: '/fees', icon: <DollarOutlined />, label: '收费管理' },
+  { key: '/meals', icon: <CoffeeOutlined />, label: '就餐管理' },
   { key: '/grades', icon: <FileTextOutlined />, label: '学习档案' },
   { key: '/notifications', icon: <MessageOutlined />, label: '消息通知' },
+  { key: '/parent-messages', icon: <MessageOutlined />, label: '家长留言' },
   { key: '/reports', icon: <BarChartOutlined />, label: '数据报表' },
   { key: '/data-admin', icon: <DatabaseOutlined />, label: '数据管理' },
   { key: '/login-records', icon: <SafetyOutlined />, label: '登录记录' },
-  { key: '/parent-messages', icon: <MessageOutlined />, label: '家长留言' },
-  { key: '/volunteer', icon: <ReadOutlined />, label: '志愿填报' },
-  { key: '/volunteer-sim', icon: <ExperimentOutlined />, label: '志愿模拟' },
-  { key: '/volunteer-sim/schools', icon: <HomeOutlined />, label: '学校信息' },
+  { key: '/volunteer', icon: <ReadOutlined />, label: '志愿咨询' },
+  { key: '/volunteer-sim', icon: <ExperimentOutlined />, label: '中考模拟' },
+  { key: '/volunteer-sim/schools', icon: <ReadOutlined />, label: '高中学校库' },
   { key: '/materials', icon: <ReadOutlined />, label: '学习资料' },
   { key: '/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
   { key: '/ai', icon: <MessageFilled />, label: 'AI 助手' },
@@ -68,7 +67,6 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   const isSenior = (session?.user as { division?: string } | undefined)?.division === 'SENIOR'
 
-  // 初中部专属菜单：高中部不展示中考志愿相关入口
   const visibleNavItems = useMemo(() => {
     if (!isSenior) return adminNavItems
     const juniorOnlyKeys = new Set(['/volunteer', '/volunteer-sim', '/volunteer-sim/schools'])
@@ -92,7 +90,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Suspense fallback={<div style={{ width: 72, height: '100vh', position: 'fixed', left: 0, top: 0, background: '#fff', borderRight: '1px solid #EEE7E1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Spin /></div>}>
+      <Suspense fallback={<div style={{ width: 72, height: '100vh', position: 'fixed', left: 0, top: 0, background: '#fff', borderRight: '1px solid rgba(0,0,0,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Spin /></div>}>
         <Sidebar collapsed={collapsed} onCollapse={setCollapsed} />
       </Suspense>
       <Layout style={{ marginLeft: collapsed ? 72 : 220, transition: 'margin-left 0.2s' }}>

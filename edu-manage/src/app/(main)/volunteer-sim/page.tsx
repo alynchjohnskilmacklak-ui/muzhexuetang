@@ -123,6 +123,17 @@ export default function VolunteerSimPage() {
 
   const [detailSchool, setDetailSchool] = useState<ProcessedSchool | null>(null)
 
+  // First-visit onboarding
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window === 'undefined') return true
+    return !localStorage.getItem('volunteer_sim_onboarding_done')
+  })
+
+  const dismissOnboarding = () => {
+    localStorage.setItem('volunteer_sim_onboarding_done', '1')
+    setShowOnboarding(false)
+  }
+
   useEffect(() => {
     fetch('/api/volunteer/schools')
       .then(r => r.json())
@@ -325,14 +336,56 @@ export default function VolunteerSimPage() {
         </div>
       </div>
 
+      {/* First-visit onboarding guide */}
+      {showOnboarding && (
+        <div style={{
+          background: 'linear-gradient(135deg, #fff3ec 0%, #fdf4e3 100%)',
+          border: `1px solid ${C.primaryBorder}`,
+          borderRadius: 12,
+          padding: '16px 20px',
+          marginBottom: 20,
+          position: 'relative',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <Text strong style={{ fontSize: 14, color: C.primary }}>新手指南：三步完成志愿模拟</Text>
+            <Button type="text" size="small" onClick={dismissOnboarding} style={{ color: C.inkSubtle, fontSize: 12 }}>
+              知道了
+            </Button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              { step: '1', text: '输入学生中考成绩、就读初中和本校排名', color: C.primary },
+              { step: '2', text: '查看全市排名、分配生推荐和学校匹配结果', color: C.success },
+              { step: '3', text: '从推荐列表中挑选7个志愿（1分配生+6统招）加入底部志愿篮', color: C.purple },
+            ].map((item) => (
+              <div key={item.step} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{
+                  width: 24, height: 24, borderRadius: '50%',
+                  background: item.color, color: '#fff', fontSize: 12, fontWeight: 700,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  {item.step}
+                </span>
+                <Text style={{ fontSize: 13, color: C.inkMuted }}>{item.text}</Text>
+              </div>
+            ))}
+          </div>
+          <Text style={{ display: 'block', marginTop: 10, fontSize: 11, color: C.inkSubtle }}>
+            提示：分数和排名信息请从学校班主任处获取。不确定排名？可以先输入分数体验，排名留空不影响模拟。
+          </Text>
+        </div>
+      )}
+
       <Collapse
         ghost
         size="small"
         style={{ marginBottom: 20 }}
+        defaultActiveKey={showOnboarding ? ['disclaimer'] : undefined}
         items={[{
           key: 'disclaimer',
           label: <span style={{ color: C.warning, fontSize: 13, fontWeight: 500 }}>重要提示：本系统仅供模拟参考，非官方录取结果</span>,
-          children: <span style={{ color: C.inkMuted, fontSize: 13, lineHeight: 1.8 }}>本系统基于2025年公开分数线、分配名额和学校信息进行模拟，仅供志愿填报参考。全市排名基于2025年石家庄中考一分一档表测算。梯度标签基于2025年分数线静态测算，不代表2026年实际录取结果。2026年实际录取以石家庄市教育考试院、学校招生简章及最终录取结果为准。</span>,
+          children: <span style={{ color: C.inkMuted, fontSize: 13, lineHeight: 1.8 }}>本系统基于2025年石家庄中考一分一档表、全市统招线和各初中分配生名额进行模拟，仅供志愿填报参考。全市排名基于一分一档表测算。梯度标签（冲刺/稳妥/保底）基于2025年分数线静态计算，不代表2026年实际录取结果。分配生级联推荐基于"全校按分数优先填报"的理想假设，实际录取受考生意愿、分配生控制线、同校竞争等因素影响。最终录取以石家庄市教育考试院和学校官方公布为准。</span>,
         }]}
       />
 
