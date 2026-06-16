@@ -83,7 +83,7 @@ function BrandLeft({ mounted }: { mounted: boolean }) {
       <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(160deg, rgba(160,55,10,0.78) 0%, rgba(100,30,5,0.82) 35%, rgba(15,25,8,0.88) 100%)' }} />
       <div style={{ position: 'absolute', top: 22, left: 20, right: 20, zIndex: 10, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'opacity .6s ease, transform .6s ease' }}>
         <div style={{ width: 220, height: 68, position: 'relative', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,.4))' }}>
-          <Image src="/images/logo.jpg" alt="牧哲学堂 MOREJOY" fill sizes="220px" style={{ objectFit: 'contain', objectPosition: 'left center', mixBlendMode: 'screen' }} priority />
+          <Image src="/images/logo.jpg" alt="牧哲学堂 MOREJOY" fill sizes="220px" style={{ objectFit: 'contain', objectPosition: 'left center', opacity: 0.9 }} priority />
         </div>
         <div style={{ marginTop: 6, fontSize: 10, color: 'rgba(255,255,255,.45)', letterSpacing: 4, textTransform: 'uppercase', paddingLeft: 2 }}>教育管理系统</div>
       </div>
@@ -282,7 +282,7 @@ function MobileBrandBar() {
       <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(180deg, rgba(26,18,10,.6) 0%, rgba(26,18,10,.85) 100%)' }} />
       <div style={{ position: 'relative', zIndex: 2, width: '100%', padding: '20px 16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ width: '100%', maxWidth: 180, height: 40, position: 'relative', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,.3))' }}>
-          <Image src="/images/logo.jpg" alt="牧哲学堂" fill sizes="180px" style={{ objectFit: 'contain', objectPosition: 'left center', mixBlendMode: 'screen' }} priority />
+          <Image src="/images/logo.jpg" alt="牧哲学堂" fill sizes="180px" style={{ objectFit: 'contain', objectPosition: 'left center', opacity: 0.9 }} priority />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(245,166,35,.18)', border: '0.5px solid rgba(245,166,35,.4)', borderRadius: 10, padding: '2px 7px', fontSize: 9, color: '#f5a623', whiteSpace: 'nowrap' }}>🏆 家长信赖品牌</span>

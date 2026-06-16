@@ -1223,3 +1223,33 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+/* Mobile: auto scroll-hint on all ant-table wrappers that overflow */
+@media (max-width: 768px) {
+  .ant-table-wrapper {
+    position: relative;
+  }
+
+  .ant-table-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 32px;
+    background: linear-gradient(to right, transparent, rgba(250,248,245,.85));
+    pointer-events: none;
+    z-index: 2;
+    border-radius: 0 8px 8px 0;
+  }
+}
+
+/* Unified focus ring — matches DESIGN.md primary */
+:focus-visible {
+  outline: 2px solid rgba(232,120,74,.5);
+  outline-offset: 2px;
+}
+
+button:focus:not(:focus-visible) {
+  outline: none;
+}

@@ -22,12 +22,12 @@ const MOOD_COLORS: Record<string, { bg: string; color: string; label: string }> 
 }
 
 const NOTIFICATION_META: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
-  EXAM_PAPER: { label: '试卷', icon: <FileTextOutlined />, color: '#2476A8', bg: '#EAF5FB' },
-  PAPER_PUBLISHED: { label: '试卷', icon: <FileTextOutlined />, color: '#2476A8', bg: '#EAF5FB' },
-  CLASSROOM_FEEDBACK: { label: '反馈', icon: <BookOutlined />, color: '#6A5ACD', bg: '#F0EEFF' },
-  PERFORMANCE_FEEDBACK: { label: '表现', icon: <StarOutlined />, color: '#D96F43', bg: '#FFF3EA' },
-  ATTENDANCE: { label: '考勤', icon: <ClockCircleOutlined />, color: '#BA7517', bg: '#FAEEDA' },
-  SYSTEM: { label: '通知', icon: <BellOutlined />, color: '#5A4E3A', bg: '#F5F2EE' },
+  EXAM_PAPER: { label: '试卷', icon: <FileTextOutlined />, color: '#185FA5', bg: '#eaf1f9' },
+  PAPER_PUBLISHED: { label: '试卷', icon: <FileTextOutlined />, color: '#185FA5', bg: '#eaf1f9' },
+  CLASSROOM_FEEDBACK: { label: '反馈', icon: <BookOutlined />, color: '#8892f0', bg: '#f0eeff' },
+  PERFORMANCE_FEEDBACK: { label: '表现', icon: <StarOutlined />, color: '#E8784A', bg: '#fff3ec' },
+  ATTENDANCE: { label: '考勤', icon: <ClockCircleOutlined />, color: '#C77F00', bg: '#fdf4e3' },
+  SYSTEM: { label: '通知', icon: <BellOutlined />, color: '#5a4e3a', bg: '#f5f2ee' },
 }
 
 function notificationMeta(n: any) {

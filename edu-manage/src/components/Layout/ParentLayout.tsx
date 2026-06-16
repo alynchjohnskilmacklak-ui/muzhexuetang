@@ -93,18 +93,18 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课次' },
     { key: '/parent/class-feedback', icon: <BookOutlined />, label: '反馈' },
     { key: '/parent/archive', icon: <FileTextOutlined />, label: '档案', badge: unread.papers },
-    { key: '/parent/hour-records', icon: <ClockCircleOutlined />, label: '课时明细' },
     { key: '/parent/growth', icon: <HeartOutlined />, label: '成长动态', badge: unread.posts },
-    { key: '/parent/meals', icon: <CoffeeOutlined />, label: '就餐安排' },
-    { key: '/parent/notifications', icon: <BellOutlined />, label: '通知', badge: unread.notifications },
-    { key: '/parent/leave', icon: <CalendarOutlined />, label: '请假' },
+    { key: '/parent/volunteer/schools', icon: <BankOutlined />, label: '高中学校库' },
+    { key: '/parent/volunteer', icon: <ReadOutlined />, label: '志愿咨询' },
     { key: '/parent/teachers', icon: <TeamOutlined />, label: '教师信息' },
+    { key: '/parent/notifications', icon: <BellOutlined />, label: '通知', badge: unread.notifications },
+    { key: '/parent/messages', icon: <CommentOutlined />, label: '我的留言', badge: unread.messages },
+    { key: '/parent/meals', icon: <CoffeeOutlined />, label: '就餐安排' },
+    { key: '/parent/leave', icon: <CalendarOutlined />, label: '请假' },
+    { key: '/parent/hour-records', icon: <ClockCircleOutlined />, label: '课时明细' },
     { key: '/parent/materials', icon: <ReadOutlined />, label: '学习资料' },
     { key: '/parent/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
     { key: '/parent/ai', icon: <MessageFilled />, label: 'AI 助手' },
-    { key: '/parent/volunteer', icon: <ReadOutlined />, label: '志愿填报' },
-    { key: '/parent/volunteer/schools', icon: <BankOutlined />, label: '学校信息' },
-    { key: '/parent/messages', icon: <CommentOutlined />, label: '我的留言', badge: unread.messages },
     { key: '/parent/bind', icon: <WechatOutlined />, label: '绑定微信' },
     { key: '/parent/profile', icon: <IdcardOutlined />, label: '个人中心' },
   ]
@@ -117,7 +117,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     { key: '__more', icon: <EllipsisOutlined />, label: '我的', badge: unread.papers + unread.posts + unread.notifications },
   ]
 
-  const moreItems = navItems.filter(item => !['/parent/dashboard', '/parent/schedule', '/parent/messages', '/parent/volunteer/schools', '/parent/class-feedback'].includes(item.key))
+  const moreItems = navItems.filter(item => !['/parent/dashboard', '/parent/schedule', '/parent/messages', '/parent/class-feedback'].includes(item.key))
   const currentKey = resolveActiveKey(pathname, navItems, '/parent/dashboard')
 
   const markAllRead = async () => {
@@ -173,8 +173,8 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
         width={220}
         collapsedWidth={72}
         style={{
-          background: '#FFFBF7',
-          borderRight: '1px solid #F0DDD2',
+          background: '#faf8f5',
+          borderRight: '1px solid rgba(0,0,0,.06)',
           position: 'fixed',
           left: 0,
           top: 0,
@@ -189,7 +189,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: collapsed ? '0 12px' : '0 12px 0 20px',
-          borderBottom: '1px solid #F0DDD2',
+          borderBottom: '1px solid rgba(0,0,0,.06)',
         }}>
           {collapsed ? (
             <span style={{ fontSize: 22, fontWeight: 700, color: '#E8784A' }}>牧</span>
