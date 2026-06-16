@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from 'react'
 import Image from 'next/image'
+import { useSession } from 'next-auth/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
 import { Badge, Layout, Menu, Tooltip } from 'antd'
@@ -112,8 +113,10 @@ export function Sidebar({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { data: session } = useSession()
   const { data: alerts } = useSWR('/api/teacher-logs/alerts', fetcher, { refreshInterval: 300_000 })
   const alertCount = Array.isArray(alerts) ? alerts.filter((a: any) => !a.isResolved).length : 0
+  const isSenior = (session?.user as { division?: string } | undefined)?.division === 'SENIOR'
 
   useEffect(() => {
     localStorage.setItem('admin_sider_collapsed', String(collapsed))
@@ -134,7 +137,16 @@ export function Sidebar({
     ? ['schedule-group']
     : []
 
-  const items = useMemo(() => (menuItems as any[]).map((item: any) => {
+  // 初中部专属菜单：高中部不展示中考志愿相关入口
+  const visibleMenuItems = useMemo(() => {
+    if (!isSenior) return menuItems
+    const juniorOnlyKeys = new Set(['/volunteer', '/volunteer-sim', '/volunteer-sim/schools'])
+    return (menuItems as { key: string; [k: string]: unknown }[]).filter(
+      (item) => !juniorOnlyKeys.has(item.key),
+    )
+  }, [isSenior])
+
+  const items = useMemo(() => (visibleMenuItems as any[]).map((item: any) => {
     if (item.key === 'teacher-group') {
       return {
         ...item,
@@ -146,7 +158,7 @@ export function Sidebar({
       }
     }
     return item
-  }), [alertCount])
+  }), [visibleMenuItems, alertCount])
 
   const handleClick: MenuProps['onClick'] = ({ key }) => {
     if (!key.startsWith('/')) return

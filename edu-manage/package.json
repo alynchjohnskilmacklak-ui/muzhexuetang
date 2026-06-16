@@ -21,6 +21,8 @@
     "create-admin": "tsx scripts/create-admin.ts",
     "seed:schools": "tsx scripts/seed-schools.ts",
     "security:check": "node scripts/security-check.mjs",
+    "school:missing": "tsx scripts/check-school-info-missing.ts",
+    "school:update-info": "tsx scripts/update-school-info-verified.ts",
     "test": "vitest run"
   },
   "dependencies": {

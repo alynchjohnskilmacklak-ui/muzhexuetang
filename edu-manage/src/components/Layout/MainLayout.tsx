@@ -1,6 +1,7 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { Layout, Spin } from 'antd'
 import {
   BarChartOutlined,
@@ -61,8 +62,18 @@ const adminNavItems = [
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile()
   const [collapsed, setCollapsed] = useState(false)
+  const { data: session } = useSession()
   useKickListener()
   useSessionPing()
+
+  const isSenior = (session?.user as { division?: string } | undefined)?.division === 'SENIOR'
+
+  // 初中部专属菜单：高中部不展示中考志愿相关入口
+  const visibleNavItems = useMemo(() => {
+    if (!isSenior) return adminNavItems
+    const juniorOnlyKeys = new Set(['/volunteer', '/volunteer-sim', '/volunteer-sim/schools'])
+    return adminNavItems.filter((item) => !juniorOnlyKeys.has(item.key))
+  }, [isSenior])
 
   useEffect(() => {
     const saved = localStorage.getItem('admin_sider_collapsed')
@@ -73,7 +84,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   if (isMobile) {
     return (
-      <MobileLayout mode="drawer" navItems={adminNavItems} title="牧哲学堂 管理">
+      <MobileLayout mode="drawer" navItems={visibleNavItems} title="牧哲学堂 管理">
         {children}
       </MobileLayout>
     )

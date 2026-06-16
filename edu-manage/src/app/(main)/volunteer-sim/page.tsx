@@ -814,7 +814,7 @@ export default function VolunteerSimPage() {
               </Title>
               <Text style={{ color: C.inkSubtle, fontSize: 13 }}>{detailSchool.name}</Text>
 
-              {/* Info grid */}
+              {/* Info grid — basic info */}
               <div style={{
                 marginTop: 20,
                 display: 'grid',
@@ -827,10 +827,27 @@ export default function VolunteerSimPage() {
               }}>
                 <InfoRow label="学校类型" value={detailSchool.type} />
                 <InfoRow label="所在地" value={detailSchool.location} />
-                {detailSchool.address && <InfoRow label="地址" value={detailSchool.address} />}
-                {detailSchool.distanceFromXinle && <InfoRow label="距新乐" value={detailSchool.distanceFromXinle} />}
-                {detailSchool.phone && <InfoRow label="电话" value={detailSchool.phone} />}
-                {detailSchool.website && <InfoRow label="官网" value={detailSchool.website} />}
+                <InfoRow label="地址" value={detailSchool.address || '暂未收录'} missing={!detailSchool.address} />
+                <InfoRow label="距新乐" value={detailSchool.distanceFromXinle || '暂未收录'} missing={!detailSchool.distanceFromXinle} />
+                <InfoRow label="电话" value={detailSchool.phone || '暂未收录'} missing={!detailSchool.phone} />
+                <InfoRow label="官网" value={detailSchool.website || '暂未收录'} missing={!detailSchool.website} />
+              </div>
+
+              {/* Fee & enrollment info */}
+              <div style={{
+                marginTop: 12,
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                gap: isMobile ? '6px' : '8px 24px',
+                padding: '16px',
+                background: C.surface3,
+                borderRadius: 10,
+                border: `1px solid ${C.hairline}`,
+              }}>
+                <InfoRow label="学费" value={detailSchool.tuitionFee || '暂未收录'} missing={!detailSchool.tuitionFee} />
+                <InfoRow label="住宿费" value={detailSchool.boardingFee || '暂未收录'} missing={!detailSchool.boardingFee} />
+                {detailSchool.enrollment && <InfoRow label="年招生人数" value={`约${detailSchool.enrollment}人`} />}
+                <InfoRow label="住宿" value={detailSchool.boardingAvail ? `可住宿${detailSchool.boardingFee ? ' · ' + detailSchool.boardingFee : ''}` : '走读'} />
               </div>
 
               {/* Score data */}
@@ -863,75 +880,70 @@ export default function VolunteerSimPage() {
                 </div>
               )}
 
-              {/* Features */}
+              {/* Features — always show, with fallback for missing */}
               <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {detailSchool.keyFeature && (
-                  <FeatureSection label="核心特色" content={detailSchool.keyFeature} />
-                )}
-                {detailSchool.gaokaoRate && (
-                  <FeatureSection label="高考升学率" content={detailSchool.gaokaoRate} />
-                )}
-                {detailSchool.enrollment && (
-                  <FeatureSection label="年招生人数" content={`约${detailSchool.enrollment}人`} />
-                )}
-                {detailSchool.boardingAvail && (
-                  <FeatureSection label="住宿" content={`可住宿${detailSchool.boardingFee ? ` · ${detailSchool.boardingFee}` : ''}`} />
-                )}
-                {detailSchool.tuitionFee && (
-                  <FeatureSection label="学费" content={detailSchool.tuitionFee} />
-                )}
-                {detailSchool.intro && (
-                  <div>
-                    <Text strong style={{ color: C.inkMuted, fontSize: 13 }}>学校简介</Text>
-                    <div style={{ color: C.inkMuted, fontSize: 13, marginTop: 4, lineHeight: 1.7 }}>
-                      {detailSchool.intro}
-                    </div>
+                <FeatureSection label="核心特色" content={detailSchool.keyFeature || '暂未收录'} missing={!detailSchool.keyFeature} />
+                <FeatureSection label="高考/升学情况" content={detailSchool.gaokaoRate || '暂未收录'} missing={!detailSchool.gaokaoRate} />
+                <div>
+                  <Text strong style={{ color: C.inkMuted, fontSize: 13 }}>学校简介</Text>
+                  <div style={{ color: detailSchool.intro ? C.inkMuted : C.inkSubtle, fontSize: 13, marginTop: 4, lineHeight: 1.7, fontStyle: detailSchool.intro ? 'normal' : 'italic' }}>
+                    {detailSchool.intro || '暂未收录'}
                   </div>
-                )}
-                {detailSchool.tips && (
-                  <div>
-                    <Text strong style={{ color: C.warning, fontSize: 13 }}>报考建议</Text>
-                    <div style={{ color: C.inkMuted, fontSize: 13, marginTop: 4, lineHeight: 1.7 }}>
-                      {detailSchool.tips}
-                    </div>
+                </div>
+                <div>
+                  <Text strong style={{ color: C.warning, fontSize: 13 }}>报考建议</Text>
+                  <div style={{ color: detailSchool.tips ? C.inkMuted : C.inkSubtle, fontSize: 13, marginTop: 4, lineHeight: 1.7, fontStyle: detailSchool.tips ? 'normal' : 'italic' }}>
+                    {detailSchool.tips || '暂未收录，以学校最新公布为准'}
                   </div>
-                )}
+                </div>
 
-                {/* Source info */}
-                {(detailSchool.sourceNote || detailSchool.infoVerifiedAt || detailSchool.infoConfidence) && (
-                  <div style={{
-                    marginTop: 12, padding: '10px 14px', borderRadius: 8,
-                    background: C.surface3, border: `1px solid ${C.hairline}`,
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <Text strong style={{ fontSize: 12, color: C.inkSubtle }}>信息来源：</Text>
-                      {detailSchool.sourceNote && (
-                        <Text style={{ fontSize: 11, color: C.inkMuted }}>{detailSchool.sourceNote}</Text>
-                      )}
-                      {detailSchool.infoVerifiedAt && (
-                        <Text style={{ fontSize: 11, color: C.inkSubtle }}>
-                          核实时间：{new Date(detailSchool.infoVerifiedAt).toLocaleDateString('zh-CN')}
-                        </Text>
-                      )}
-                      {detailSchool.infoConfidence && (
-                        <Tag style={{ margin: 0, fontSize: 10 }} color={
-                          detailSchool.infoConfidence === 'high' ? 'success' :
-                          detailSchool.infoConfidence === 'medium' ? 'processing' :
-                          detailSchool.infoConfidence === 'low' ? 'warning' : 'default'
-                        }>
-                          可信度：{detailSchool.infoConfidence === 'high' ? '高' :
-                            detailSchool.infoConfidence === 'medium' ? '中' :
-                            detailSchool.infoConfidence === 'low' ? '低' : '未知'}
-                        </Tag>
-                      )}
-                    </div>
-                    {(detailSchool.infoConfidence === 'low' || detailSchool.infoConfidence === 'unknown') && (
-                      <Text style={{ fontSize: 11, color: C.warning, display: 'block', marginTop: 4 }}>
-                        该校部分信息暂未核实，请以学校官方招生简章为准。
-                      </Text>
+                {/* Source info — always show */}
+                <div style={{
+                  marginTop: 12, padding: '10px 14px', borderRadius: 8,
+                  background: C.surface3, border: `1px solid ${C.hairline}`,
+                }}>
+                  <Text strong style={{ fontSize: 12, color: C.inkSubtle, display: 'block', marginBottom: 6 }}>信息来源</Text>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    {detailSchool.sourceUrl ? (
+                      <a href={detailSchool.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: C.blue }}>
+                        {detailSchool.sourceUrl}
+                      </a>
+                    ) : (
+                      <Text style={{ fontSize: 11, color: C.inkSubtle, fontStyle: 'italic' }}>暂未收录来源链接</Text>
                     )}
                   </div>
-                )}
+                  <div style={{ marginTop: 4, fontSize: 11, color: detailSchool.sourceNote ? C.inkMuted : C.inkSubtle, fontStyle: detailSchool.sourceNote ? 'normal' : 'italic' }}>
+                    {detailSchool.sourceNote || '暂未收录来源说明'}
+                  </div>
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    {detailSchool.infoVerifiedAt ? (
+                      <Text style={{ fontSize: 11, color: C.inkSubtle }}>
+                        核验时间：{new Date(detailSchool.infoVerifiedAt).toLocaleDateString('zh-CN')}
+                      </Text>
+                    ) : (
+                      <Text style={{ fontSize: 11, color: C.inkSubtle, fontStyle: 'italic' }}>待核实</Text>
+                    )}
+                    {detailSchool.infoConfidence && detailSchool.infoConfidence !== 'unknown' ? (
+                      <Tag style={{ margin: 0, fontSize: 10 }} color={
+                        detailSchool.infoConfidence === 'official' ? 'success' :
+                        detailSchool.infoConfidence === 'school' || detailSchool.infoConfidence === 'media' ? 'processing' :
+                        detailSchool.infoConfidence === 'parent' ? 'warning' : 'default'
+                      }>
+                        {detailSchool.infoConfidence === 'official' ? '官方来源' :
+                         detailSchool.infoConfidence === 'school' ? '学校来源' :
+                         detailSchool.infoConfidence === 'media' ? '第三方' :
+                         detailSchool.infoConfidence === 'parent' ? '家长反馈' : '待核实'}
+                      </Tag>
+                    ) : (
+                      <Tag style={{ margin: 0, fontSize: 10 }} color="default">待核实</Tag>
+                    )}
+                  </div>
+                  {(!detailSchool.infoConfidence || detailSchool.infoConfidence === 'unverified' || detailSchool.infoConfidence === 'unknown') && (
+                    <Text style={{ fontSize: 11, color: C.warning, display: 'block', marginTop: 4 }}>
+                      该校部分信息暂未核实，请以学校官方招生简章为准。
+                    </Text>
+                  )}
+                </div>
               </div>
 
               {/* Modal actions */}
@@ -1066,11 +1078,22 @@ export default function VolunteerSimPage() {
   )
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value, missing }: { label: string; value: string; missing?: boolean }) {
   return (
     <div>
       <Text style={{ fontSize: 12, color: C.inkSubtle }}>{label}</Text>
-      <div style={{ fontSize: 13, color: C.inkMuted }}>{value}</div>
+      <div style={{
+        fontSize: 13,
+        color: missing ? C.inkSubtle : C.inkMuted,
+        fontStyle: missing ? 'italic' : 'normal',
+      }}>
+        {missing ? (
+          <span>
+            {value}
+            <Tag style={{ marginLeft: 4, fontSize: 10 }} color="default">待核实</Tag>
+          </span>
+        ) : value}
+      </div>
     </div>
   )
 }
@@ -1089,11 +1112,23 @@ function ScoreBlock({ label, value, sub }: { label: string; value: string; sub?:
   )
 }
 
-function FeatureSection({ label, content }: { label: string; content: string }) {
+function FeatureSection({ label, content, missing }: { label: string; content: string; missing?: boolean }) {
   return (
     <div>
       <Text strong style={{ color: C.inkMuted, fontSize: 13 }}>{label}</Text>
-      <div style={{ color: C.inkMuted, fontSize: 13, marginTop: 2 }}>{content}</div>
+      <div style={{
+        color: missing ? C.inkSubtle : C.inkMuted,
+        fontSize: 13,
+        marginTop: 2,
+        fontStyle: missing ? 'italic' : 'normal',
+      }}>
+        {missing ? (
+          <span>
+            {content}
+            <Tag style={{ marginLeft: 4, fontSize: 10 }} color="warning">待核实</Tag>
+          </span>
+        ) : content}
+      </div>
     </div>
   )
 }

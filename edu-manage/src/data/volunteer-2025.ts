@@ -226,8 +226,17 @@ export function getAllocationQuotaByName(highSchoolName: string, highSchoolFullN
 
 // ====== 可报性判断 ======
 
-// 判断某高中新乐学生是否可报
-// 规则优先级：location含新乐 > xinleAccessibleOverride > 分配表有名额 > acceptsOtherCounty > 不判定为民办即自动可报
+/**
+ * 判断某高中新乐学生是否可报。
+ *
+ * 规则优先级：
+ *   1. 本地学校 — location 含"新乐"即自动可报
+ *   2. 手动覆盖 — xinleAccessibleOverride 不为 null 时直接使用该值
+ *   3. 分配名额 — 在任一初中分配名额表中有该高中
+ *   4. 外县统招 — 明确 acceptsOtherCounty
+ *   5. 民办全市招生 — 民办且 location/fullName 含"其他县区"
+ *   6. 默认不可报 — 不满足以上任一条件则返回 false
+ */
 export function isXinleAccessible(school: {
   name: string
   fullName: string
@@ -237,19 +246,14 @@ export function isXinleAccessible(school: {
   xinleAccessibleOverride?: boolean | null
   acceptsOtherCounty?: boolean
 }): boolean {
-  // 1. 新乐本地学校
   if (school.location.includes('新乐')) return true
-  // 2. 人工覆盖（管理员手动设置）
   if (school.xinleAccessibleOverride != null) return school.xinleAccessibleOverride
-  // 3. 在分配名额表中有该高中
   for (const quotaMap of Object.values(XINLE_ALLOCATION_2025)) {
     for (const allocKey of Object.keys(quotaMap)) {
       if (nameMatches(school.name, school.fullName, allocKey)) return true
     }
   }
-  // 4. 明确标明面向其他县区/外县统招
   if (school.acceptsOtherCounty === true) return true
-  // 5. 民办且明确面向全市招生（需 location 含"其他县区"或 fullName 含"其他县区"）
   if (school.type === '民办' && (school.location.includes('其他县区') || school.fullName.includes('其他县区'))) return true
   return false
 }
