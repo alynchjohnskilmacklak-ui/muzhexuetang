@@ -10,6 +10,7 @@
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
+    "db:baseline-prod": "tsx scripts/baseline-production-migrations.ts",
     "migrate:all": "bash scripts/migrate-all.sh",
     "db:seed": "tsx prisma/seed.ts",
     "export:data": "tsx scripts/export-business-data.ts",
