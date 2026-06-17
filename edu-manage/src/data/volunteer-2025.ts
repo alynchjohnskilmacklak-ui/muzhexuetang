@@ -265,21 +265,13 @@ export type ScoreTag = '冲刺' | '稳妥' | '保底' | '分配生机会' | '差
 export function getScoreTag(
   score: number,
   tongZhao: number,
-  allocationLine: number | null,
-  allocationQuota: number,
-  schoolRank: number
+  allocationBand: AllocationBand | null
 ): ScoreTag {
-  const gap = score - tongZhao
-
-  if (
-    allocationQuota > 0 &&
-    schoolRank <= allocationQuota &&
-    allocationLine !== null &&
-    score >= allocationLine
-  ) {
+  if (allocationBand && (allocationBand.tag === '推荐' || allocationBand.tag === '保底')) {
     return '分配生机会'
   }
 
+  const gap = score - tongZhao
   if (gap >= VOLUNTEER_SCORE_THRESHOLDS.safe)      return '保底'
   if (gap >= VOLUNTEER_SCORE_THRESHOLDS.stable)    return '稳妥'
   if (gap >= VOLUNTEER_SCORE_THRESHOLDS.challenge) return '冲刺'

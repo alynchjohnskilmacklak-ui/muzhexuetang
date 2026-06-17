@@ -22,6 +22,7 @@ import {
   getScoreTag,
   getTopRecommendation,
   isXinleAccessible,
+  nameMatches,
   SCORE_TAG_CONFIG,
   XINLE_ALLOCATION_2025,
   type AllocationBand,
@@ -168,6 +169,37 @@ export default function VolunteerSimPage() {
   const marketRankResult = submitted && inputScore !== null ? getMarketRank(inputScore) : null
   const percentileResult = submitted && inputScore !== null ? getMarketPercentile(inputScore) : null
 
+  // Allocation cascade bands
+  const allocationBands = useMemo(() => {
+    if (!submitted || inputScore === null || !inputSchool || inputRank === null) return null
+    return getAllocationBands(
+      inputSchool, inputRank, inputScore,
+      CONTROL_LINES_2025['新乐市'],
+      (allocKey) => {
+        const s = schools.find(school => {
+          if (!school?.name || !school?.fullName) return false
+          return (
+            school.name === allocKey ||
+            school.fullName === allocKey ||
+            school.fullName.includes(allocKey) ||
+            school.name.replace(/[(（][^)）]*[)）]\s*$/, '').trim() === allocKey
+          )
+        })
+        return s ? { yiTong: s.yiTong, tongZhao: s.tongZhao, allocationLine: s.allocationLine } : null
+      }
+    )
+  }, [submitted, inputScore, inputSchool, inputRank, schools])
+
+  const allocationTop = useMemo(() => {
+    if (!allocationBands) return null
+    return getTopRecommendation(allocationBands)
+  }, [allocationBands])
+
+  const findAllocationBand = useCallback((school: DBSchool): AllocationBand | null => {
+    if (!allocationBands) return null
+    return allocationBands.find(b => nameMatches(school.name, school.fullName, b.highSchoolName)) ?? null
+  }, [allocationBands])
+
   const processedSchools = useMemo((): ProcessedSchool[] => {
     if (!submitted || inputScore === null) return []
     return schools
@@ -177,9 +209,7 @@ export default function VolunteerSimPage() {
         const tag = getScoreTag(
           inputScore,
           school.tongZhao,
-          allocationLine,
-          quota,
-          inputRank ?? 9999
+          findAllocationBand(school)
         )
         const gap = inputScore - school.tongZhao
         const accessible = school.xinleAccessibleOverride ?? isXinleAccessible({...school, acceptsOtherCounty: school.acceptsOtherCounty})
@@ -192,7 +222,7 @@ export default function VolunteerSimPage() {
         if (pa !== pb) return pa - pb
         return b.tongZhao - a.tongZhao
       })
-  }, [schools, submitted, inputScore, inputRank, getAllocationQuota])
+  }, [schools, submitted, inputScore, getAllocationQuota, findAllocationBand])
 
   const filteredSchools = useMemo(() => {
     return processedSchools.filter(s => {
@@ -224,32 +254,6 @@ export default function VolunteerSimPage() {
     }
     return { total: accessible.length, counts }
   }, [processedSchools])
-
-  // Allocation cascade bands
-  const allocationBands = useMemo(() => {
-    if (!submitted || inputScore === null || !inputSchool || inputRank === null) return null
-    return getAllocationBands(
-      inputSchool, inputRank, inputScore,
-      CONTROL_LINES_2025['新乐市'],
-      (allocKey) => {
-        const s = schools.find(school => {
-          if (!school?.name || !school?.fullName) return false
-          return (
-            school.name === allocKey ||
-            school.fullName === allocKey ||
-            school.fullName.includes(allocKey) ||
-            school.name.replace(/[(（][^)）]*[)）]\s*$/, '').trim() === allocKey
-          )
-        })
-        return s ? { yiTong: s.yiTong, tongZhao: s.tongZhao, allocationLine: s.allocationLine } : null
-      }
-    )
-  }, [submitted, inputScore, inputSchool, inputRank, schools])
-
-  const allocationTop = useMemo(() => {
-    if (!allocationBands) return null
-    return getTopRecommendation(allocationBands)
-  }, [allocationBands])
 
   const handleSimulate = async () => {
     try {
