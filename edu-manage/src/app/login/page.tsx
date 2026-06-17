@@ -148,7 +148,7 @@ function RightForm({
       <div style={{ width: '100%', maxWidth: 440, opacity: mounted ? 1 : 0, transform: mounted ? 'translateX(0)' : 'translateX(16px)', transition: 'opacity .6s ease .15s, transform .6s ease .15s' }}>
         {isMobile && (
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{ fontSize: 28, fontWeight: 700, color: '#E87545', marginBottom: 6 }}>牧哲学堂</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: '#E8784A', marginBottom: 6 }}>牧哲学堂</div>
             <div style={{ fontSize: 13, color: '#9a8e7a' }}>在思想的原野上，放牧星辰</div>
           </div>
         )}
@@ -181,7 +181,7 @@ function RightForm({
             {ROLE_OPTIONS.map((item) => {
               const active = role === item.value
               return (
-                <button key={item.value} type="button" onClick={() => setRole(item.value)} style={{ height: 58, borderRadius: 10, cursor: 'pointer', border: active ? '1.5px solid #E87545' : '1px solid #EFE3DC', background: active ? '#FFF6F1' : '#fff', color: active ? '#E87545' : '#7d7468', transition: 'all .2s ease', padding: '6px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <button key={item.value} type="button" onClick={() => setRole(item.value)} style={{ height: 58, borderRadius: 10, cursor: 'pointer', border: active ? '1.5px solid #E8784A' : '1px solid #EFE3DC', background: active ? '#FFF6F1' : '#fff', color: active ? '#E8784A' : '#7d7468', transition: 'all .2s ease', padding: '6px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ fontSize: 14, fontWeight: 700 }}>{item.label}</div>
                   <div style={{ fontSize: 11, marginTop: 2, color: active ? '#c08560' : '#b8b0a5' }}>{item.hint}</div>
                 </button>
@@ -204,9 +204,9 @@ function RightForm({
                         height: 44,
                         borderRadius: 10,
                         cursor: 'pointer',
-                        border: active ? '1.5px solid #E87545' : '1px solid #EFE3DC',
+                        border: active ? '1.5px solid #E8784A' : '1px solid #EFE3DC',
                         background: active ? '#FFF6F1' : '#fff',
-                        color: active ? '#E87545' : '#7d7468',
+                        color: active ? '#E8784A' : '#7d7468',
                         fontSize: 14,
                         fontWeight: active ? 600 : 400,
                         transition: 'all .2s ease',
@@ -251,7 +251,7 @@ function RightForm({
             />
           </div>
           {detectedRole && (
-            <div style={{ marginBottom: 16, fontSize: 11, color: '#E87545' }}>
+            <div style={{ marginBottom: 16, fontSize: 11, color: '#E8784A' }}>
               检测到身份：<Tag color="orange" style={{ borderRadius: 9999 }}>{ROLE_OPTIONS.find(r => r.value === detectedRole)?.label || detectedRole}</Tag>
             </div>
           )}
@@ -262,7 +262,7 @@ function RightForm({
               <span style={{ flex: 1 }}>{formError}</span>
             </div>
           ) : null}
-          <Button type="primary" loading={loading} onClick={handleLogin} block style={{ height: isMobile ? 48 : 46, borderRadius: isMobile ? 12 : 10, fontSize: 16, fontWeight: 700, background: 'linear-gradient(135deg, #E87545, #F09A5B)', border: 'none', boxShadow: '0 6px 18px rgba(232,117,69,.3)' }}>登录</Button>
+          <Button type="primary" loading={loading} onClick={handleLogin} block style={{ height: isMobile ? 48 : 46, borderRadius: isMobile ? 12 : 10, fontSize: 16, fontWeight: 700, background: 'linear-gradient(135deg, #E8784A, #F09A5B)', border: 'none', boxShadow: '0 6px 18px rgba(232,120,74,.3)' }}>登录</Button>
         </div>
 
         <p style={{ textAlign: 'center', fontSize: 10, color: '#c8c4be', marginTop: 10 }}>牧哲学堂 · 让每一位学生学有所成</p>

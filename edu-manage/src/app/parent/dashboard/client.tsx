@@ -91,10 +91,6 @@ export function ParentDashboardClient({
     [activeChildId, students]
   )
 
-  const selectChild = (childId: string) => {
-    window.location.href = `/parent/dashboard?childId=${childId}`
-  }
-
   // Build mood map
   const moodMap: Record<number, { mood: string; ids: string[] }> = {}
   monthMoods.forEach((m: any) => {
