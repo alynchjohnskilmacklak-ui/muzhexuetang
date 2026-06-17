@@ -146,10 +146,17 @@ export default function SchoolsManagePage() {
 
   const fetchSchools = useCallback(async () => {
     setLoading(true)
-    const res = await fetch('/api/schools')
-    const data = await res.json()
-    setSchools(data.schools || [])
-    setLoading(false)
+    try {
+      const res = await fetch('/api/schools')
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      setSchools(Array.isArray(data.schools) ? data.schools : [])
+    } catch (error) {
+      console.error('学校数据加载失败', error)
+      message.error('学校数据加载失败，请检查数据库或稍后重试')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => { fetchSchools() }, [fetchSchools])

@@ -129,6 +129,7 @@ export default function VolunteerSimPage() {
   const [loading, setLoading] = useState(false)
   const [schoolsReady, setSchoolsReady] = useState(false)
   const [schoolsError, setSchoolsError] = useState(false)
+  const [schoolsEmpty, setSchoolsEmpty] = useState(false)
 
   const [filterTag, setFilterTag] = useState<string>('全部')
   const [filterType, setFilterType] = useState<string>('全部')
@@ -155,9 +156,16 @@ export default function VolunteerSimPage() {
 
   useEffect(() => {
     fetch('/api/volunteer/schools')
-      .then(r => r.json())
-      .then(d => setSchools(Array.isArray(d?.schools) ? d.schools : []))
-      .catch((error) => { console.warn('学校数据加载失败', error); setSchoolsError(true) })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
+      .then(d => {
+        const list = Array.isArray(d?.schools) ? d.schools : []
+        setSchools(list)
+        setSchoolsEmpty(list.length === 0)
+      })
+      .catch((error) => { console.warn('学校数据加载失败', error); setSchoolsError(true); setSchoolsEmpty(false) })
       .finally(() => setSchoolsReady(true))
   }, [])
 
@@ -363,12 +371,51 @@ export default function VolunteerSimPage() {
     })
   }, [])
 
+  const generateTongzhaoSlots = useCallback(() => {
+    const usable = processedSchools.filter(s =>
+      s.accessible &&
+      s.tag !== '分配生机会' &&
+      s.tag !== '差距较大' &&
+      s.tag !== '暂未达线' &&
+      allocationSlot?.schoolId !== s.schoolId
+    )
+    const byTag = (tag: ScoreTag) => usable
+      .filter(s => s.tag === tag)
+      .sort((a, b) => b.tongZhao - a.tongZhao)
+
+    const selected: ProcessedSchool[] = [
+      ...byTag('冲刺').slice(0, 2),
+      ...byTag('稳妥').slice(0, 3),
+      ...byTag('保底').slice(0, 2),
+    ]
+    const unique = new Map<string, ProcessedSchool>()
+    selected.forEach(s => unique.set(s.schoolId, s))
+    usable
+      .sort((a, b) => b.tongZhao - a.tongZhao)
+      .forEach(s => {
+        if (unique.size < 6) unique.set(s.schoolId, s)
+      })
+
+    const generated = Array.from(unique.values())
+      .sort((a, b) => b.tongZhao - a.tongZhao)
+      .slice(0, 6)
+    setTongzhaoSlots([...generated, ...Array(Math.max(0, 6 - generated.length)).fill(null)])
+    toast.success(generated.length > 0 ? '已生成平行统招志愿表，可继续手动调整' : '暂无可生成的统招志愿')
+  }, [allocationSlot, processedSchools])
+
   const isInBasket = useCallback((schoolId: string) => {
     if (allocationSlot?.schoolId === schoolId) return true
     return tongzhaoSlots.some(s => s?.schoolId === schoolId)
   }, [allocationSlot, tongzhaoSlots])
 
   const tongzhaoFilled = tongzhaoSlots.filter(Boolean).length
+  const tongzhaoOrderWarning = useMemo(() => {
+    const filled = tongzhaoSlots.filter(Boolean) as DBSchool[]
+    return filled.some((slot, index) => {
+      const next = filled[index + 1]
+      return next ? slot.tongZhao < next.tongZhao : false
+    })
+  }, [tongzhaoSlots])
 
   const exportPdf = async () => {
     const el = reportRef.current
@@ -511,6 +558,11 @@ export default function VolunteerSimPage() {
             {schoolsError && (
               <div style={{ background: C.errorBg, border: `1px solid ${C.error}`, borderRadius: 8, padding: '8px 14px', marginBottom: 16, color: C.error, fontSize: 13 }}>
                 学校数据加载失败，请刷新页面重试
+              </div>
+            )}
+            {!schoolsError && schoolsEmpty && (
+              <div style={{ background: C.warningBg, border: `1px solid ${C.warningBorder}`, borderRadius: 8, padding: '8px 14px', marginBottom: 16, color: C.warning, fontSize: 13 }}>
+                暂无学校数据，请联系管理员在后台录入
               </div>
             )}
             <Form form={form} layout="vertical">
@@ -752,6 +804,16 @@ export default function VolunteerSimPage() {
                 <Text style={{ display: 'block', fontSize: 12, color: C.inkSubtle, lineHeight: 1.6, marginBottom: 12 }}>
                   当前结果基于你填写的本校排名第 {inputRank} 名测算，排名变化会影响分配生档位。
                 </Text>
+                {allocationTop && inputRank !== null && (
+                  Math.min(
+                    Math.abs(inputRank - allocationTop.band.bandLo),
+                    Math.abs(inputRank - allocationTop.band.bandHi)
+                  ) <= 3
+                ) && (
+                  <Text style={{ display: 'block', fontSize: 12, color: C.warning, lineHeight: 1.6, marginBottom: 12 }}>
+                    你的排名接近名额档位边界，±3 名就可能改变结果，建议向学校确认精确年级名次后再定。
+                  </Text>
+                )}
 
                 {/* Top recommendation */}
                 {allocationTop ? (
@@ -759,6 +821,11 @@ export default function VolunteerSimPage() {
                     const topBand = allocationTop.band
                     const topDb = schools.find(s => s.name === topBand.highSchoolName || s.fullName.includes(topBand.highSchoolName))
                     const isFallback = allocationTop.source === 'fallback_safe'
+                    const saferBand = !isFallback && topBand.marginToEdge <= 2
+                      ? allocationBands
+                        .filter(b => b.tag === '推荐' && b.highSchoolName !== topBand.highSchoolName)
+                        .sort((a, b) => b.marginToEdge - a.marginToEdge)[0]
+                      : null
                     return (
                       <div style={{
                         background: isFallback ? C.warningBg : C.primaryBg,
@@ -777,13 +844,21 @@ export default function VolunteerSimPage() {
                           {isFallback
                             ? `排名高于该档（前${topBand.bandLo - 1}名通常会竞争更好的学校），可作为稳妥选择，但可能浪费分配生机会。`
                             : `你校内第${topBand.bandLo < topBand.bandHi ? `${topBand.bandLo}-${topBand.bandHi}` : topBand.bandLo}名，落在${topBand.highSchoolName}名额区间（第${topBand.bandLo}-${topBand.bandHi}名），分数${inputScore}${
-                              topBand.allocationLine
-                                ? `已超该校分配线约${inputScore! - topBand.allocationLine.value}分`
-                                : topBand.tongZhao > 0
-                                  ? `已超该校统招线约${inputScore! - topBand.tongZhao}分`
-                                  : '已过分配生控制线'
+                              topBand.lineSource === 'control'
+                                ? '已过分配生控制线'
+                                : `已超该校分配线约${inputScore! - topBand.effectiveLine}分${topBand.lineSource === 'yiTong_est' ? `（分配线按一统线下50分估算）` : ''}`
                             }，可重点考虑。分配生只能填1所，建议填报此校。`}
                         </Text>
+                        {!isFallback && (
+                          <Text style={{ display: 'block', marginTop: 6, fontSize: 12, color: C.inkSubtle }}>
+                            {describeBandPosition(inputRank, topBand)}
+                          </Text>
+                        )}
+                        {saferBand && (
+                          <Text style={{ display: 'block', marginTop: 6, fontSize: 12, color: C.warning }}>
+                            若想更稳妥，可选 {saferBand.highSchoolName}（你在其名额区间余量 {Math.max(0, saferBand.marginToEdge)} 名）。
+                          </Text>
+                        )}
                         <div style={{ marginTop: 10 }}>
                           {topDb ? (
                             <Button
@@ -833,7 +908,7 @@ export default function VolunteerSimPage() {
                           }}>
                             <span style={{ fontSize: 13, color: C.ink }}>◎ {b.highSchoolName}</span>
                             <Text style={{ fontSize: 12, color: C.inkSubtle }}>
-                              {b.allocationLine ? `分配线 ${b.allocationLine.value}分` : b.tongZhao > 0 ? `统招线 ${b.tongZhao}分` : '分配线未公布'} · 名额第{b.bandLo}-{b.bandHi}名
+                              {b.lineSource === 'db' ? `分配线 ${b.effectiveLine}分` : b.lineSource === 'yiTong_est' ? `分配线约 ${b.effectiveLine}分` : '分配线未公布'} · 名额第{b.bandLo}-{b.bandHi}名
                             </Text>
                             {db && (
                               <Button size="small" disabled={!!allocationSlot}
@@ -859,7 +934,7 @@ export default function VolunteerSimPage() {
                           background: C.successBg, padding: '3px 8px', borderRadius: 6,
                           border: `1px solid ${C.successBorder}`, color: C.success,
                         }}>
-                          {b.highSchoolName}（{b.allocationLine ? `分配线${b.allocationLine.value}分` : b.tongZhao > 0 ? `统招线${b.tongZhao}分` : '分配线未公布'}）
+                          {b.highSchoolName}（{b.lineSource === 'db' ? `分配线${b.effectiveLine}分` : b.lineSource === 'yiTong_est' ? `分配线约${b.effectiveLine}分` : '分配线未公布'}）
                         </span>
                       ))}
                     </div>
@@ -904,6 +979,7 @@ export default function VolunteerSimPage() {
                 }}>
                   <Text style={{ fontSize: 11, color: C.inkSubtle, lineHeight: 1.6 }}>
                     说明：级联模型基于“全校学生按分数优先选最好学校”的理想假设，实际中部分学生有偏好（如宁可就近上新乐一中也不去市区），会使各档边界浮动。分配线仅使用数据库录入的官方分配生录取线；未录入时页面不展示分配线。真实录取受考生填报意愿、分配生控制线、同校竞争、当年政策影响，最终以石家庄市教育考试院和学校官方公布为准。
+                    标“约”的分配线为按一统线下50分且不低于控制线估算，未录官方分配线时使用，仅供参考。
                   </Text>
                 </div>
               </div>
@@ -1213,6 +1289,16 @@ export default function VolunteerSimPage() {
               志愿已填满，共7个
             </div>
           )}
+          {tongzhaoOrderWarning && (
+            <div style={{
+              textAlign: 'center',
+              marginBottom: 10,
+              color: C.warning,
+              fontSize: 12,
+            }}>
+              平行志愿建议按统招线从高到低排列（冲刺在前、保底在后），当前顺序可能浪费冲刺机会。
+            </div>
+          )}
 
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: isMobile ? 12 : 20, flexDirection: isMobile ? 'column' : 'row' }}>
             {/* Allocation slot */}
@@ -1264,9 +1350,14 @@ export default function VolunteerSimPage() {
 
             {/* Tongzhao slots */}
             <div style={{ flex: 1 }}>
-              <Text style={{ fontSize: 12, color: C.inkSubtle, display: 'block', marginBottom: 6 }}>
-                平行统招志愿（按意愿从高到低）
-              </Text>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+                <Text style={{ fontSize: 12, color: C.inkSubtle }}>
+                  平行统招志愿（按意愿从高到低）
+                </Text>
+                <Button size="small" onClick={generateTongzhaoSlots} disabled={!submitted || processedSchools.length === 0}>
+                  智能生成志愿表
+                </Button>
+              </div>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 {tongzhaoSlots.map((slot, idx) => (
                   <SlotItem
@@ -1329,6 +1420,15 @@ export default function VolunteerSimPage() {
 type RankResult = ReturnType<typeof getMarketRank> | null
 type PercentileResult = ReturnType<typeof getMarketPercentile> | null
 type AllocationTopResult = { band: AllocationBand; source: 'recommended' | 'fallback_safe' } | null
+
+function describeBandPosition(rank: number | null, band: AllocationBand): string {
+  if (rank == null) return ''
+  const span = Math.max(1, band.bandHi - band.bandLo + 1)
+  const offset = rank - band.bandLo
+  const ratio = offset / span
+  const position = ratio <= 0.33 ? '靠前' : ratio >= 0.67 ? '靠后' : '中部'
+  return `你校内第${rank}名，在该校名额区间（${band.bandLo}-${band.bandHi}名）中约处${position}。`
+}
 
 function ReportDocument({
   inputScore,
@@ -1399,7 +1499,7 @@ function ReportDocument({
             {filledTongzhao.map((slot, index) => {
               const processed = processedSchools.find((school) => school.schoolId === slot.schoolId)
               const tag = processed?.tag ?? '稳妥'
-              const gap = processed?.gap ?? slot.tongZhao - slot.tongZhao
+              const gap = processed?.gap ?? (inputScore != null ? inputScore - slot.tongZhao : 0)
               const cfg = SCORE_TAG_CONFIG[tag]
               return (
                 <div key={`${slot.schoolId}-${index}`} style={{ display: 'grid', gridTemplateColumns: '48px 1fr 100px 116px', alignItems: 'center', gap: 12, border: '1px solid #EEE7E1', borderRadius: 10, padding: '12px 14px' }}>

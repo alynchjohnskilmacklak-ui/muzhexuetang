@@ -25,6 +25,7 @@
     "security:check": "node scripts/security-check.mjs",
     "school:missing": "tsx scripts/check-school-info-missing.ts",
     "school:update-info": "tsx scripts/update-school-info-verified.ts",
+    "school:diagnose-db": "tsx scripts/diagnose-school-db.ts",
     "test": "vitest run"
   },
   "dependencies": {

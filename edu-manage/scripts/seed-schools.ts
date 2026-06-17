@@ -1,5 +1,27 @@
 import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+import { loadDotEnv } from './lib/load-dotenv'
+
+loadDotEnv()
+
+const TARGET_URL = process.env.DATABASE_URL_JUNIOR || process.env.DATABASE_URL
+if (!TARGET_URL) {
+  throw new Error('缺少 DATABASE_URL_JUNIOR 或 DATABASE_URL')
+}
+
+function maskDbUrl(rawUrl: string) {
+  try {
+    const url = new URL(rawUrl)
+    if (url.password) url.password = '***'
+    if (url.username) url.username = url.username ? `${url.username}` : ''
+    return `${url.protocol}//${url.username}${url.username ? ':***@' : ''}${url.host}${url.pathname}`
+  } catch {
+    return rawUrl.replace(/:\/\/([^:]+):([^@]+)@/, '://$1:***@')
+  }
+}
+
+console.log(`seeding into: ${maskDbUrl(TARGET_URL)}`)
+
+const prisma = new PrismaClient({ datasources: { db: { url: TARGET_URL } } })
 
 /**
  * 新乐市学生可报学校说明（2025年）：

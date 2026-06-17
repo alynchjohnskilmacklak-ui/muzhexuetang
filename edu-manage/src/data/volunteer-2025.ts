@@ -162,6 +162,9 @@ export const VOLUNTEER_SCORE_THRESHOLDS = {
   largeGap: -60,  // 分数低于统招线60分以内 → 差距较大（超出则为暂未达线）
 }
 
+// 分配生最多在一统线（yiTong）下浮的分数（石家庄政策值，如有调整在此修改）
+export const ALLOCATION_MAX_REDUCTION = 50
+
 // 位次法阈值：以"考生位次相对参考录取位次的领先/落后比例"判定
 // TODO: 下列阈值为初始默认值，需机构用真实录取数据校准后再调整。
 export const RANK_TAG_THRESHOLDS = {
@@ -325,9 +328,10 @@ export interface AllocationBand {
   tongZhao: number
   allocationLine: AllocationLineInfo | null
   effectiveLine: number
-  lineSource: 'db' | 'control'
+  lineSource: 'db' | 'yiTong_est' | 'control'
   tag: '推荐' | '保底' | '排名不足' | '分数不足'
   note: string
+  marginToEdge: number
 }
 
 function getAllocationLineInfo(school: { yiTong: number | null; allocationLine?: number | null }): AllocationLineInfo | null {
@@ -361,8 +365,18 @@ export function getAllocationBands(
     const bandLo = cum + 1
     cum += s.quota
     const bandHi = cum
-    const effectiveLine = s.allocationLine?.value ?? controlLine
-    const lineSource: 'db' | 'control' = s.allocationLine ? 'db' : 'control'
+    let effectiveLine: number
+    let lineSource: 'db' | 'yiTong_est' | 'control'
+    if (s.allocationLine) {
+      effectiveLine = s.allocationLine.value
+      lineSource = 'db'
+    } else if (s.yiTong != null) {
+      effectiveLine = Math.max(s.yiTong - ALLOCATION_MAX_REDUCTION, controlLine)
+      lineSource = 'yiTong_est'
+    } else {
+      effectiveLine = controlLine
+      lineSource = 'control'
+    }
 
     let tag: AllocationBand['tag']
     let note = ''
@@ -370,7 +384,9 @@ export function getAllocationBands(
       tag = '分数不足'
       note = lineSource === 'db'
         ? `你的分数未达该校分配生录取线（${effectiveLine}分）`
-        : `你的分数未达控制线（${effectiveLine}分）`
+        : lineSource === 'yiTong_est'
+          ? `你的分数未达该校分配生线（一统线下${ALLOCATION_MAX_REDUCTION}分，约${effectiveLine}分）`
+          : `你的分数未达控制线（${effectiveLine}分）`
     } else if (rank > bandHi) {
       tag = '排名不足'
       note = `该校名额对应校内前${bandHi}名，你目前第${rank}名，存在校内排名竞争风险`
@@ -393,6 +409,7 @@ export function getAllocationBands(
       lineSource,
       tag,
       note,
+      marginToEdge: bandHi - rank,
     }
   })
 }

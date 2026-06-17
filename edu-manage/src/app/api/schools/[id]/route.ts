@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { getRequestPrisma } from '@/lib/prisma'
+import { getPrismaForDivision } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
+// 高中学校信息为初中部志愿模块参考数据，固定 JUNIOR 库，与 /api/volunteer/schools 保持一致。
 // 字段白名单：仅允许通过此接口更新的字段。
 // 系统字段 (id, schoolId, createdAt, updatedAt) 不允许前端传入。
 const ALLOWED_UPDATE_FIELDS = new Set([
@@ -48,7 +49,7 @@ export const PUT = apiHandler(async (
   if (!session?.user || role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
-  const prisma = await getRequestPrisma()
+  const prisma = getPrismaForDivision('JUNIOR')
 
   const { id } = await params
   const rawData = await req.json()
