@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getPrismaForDivision, isDualDbEnabled, prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -21,7 +21,12 @@ async function probeDivision(division: 'JUNIOR' | 'SENIOR') {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const token = req.nextUrl.searchParams.get('token')
+  if (token !== process.env.HEALTH_TOKEN) {
+    return NextResponse.json({ status: 'ok' })
+  }
+
   const dual = isDualDbEnabled()
 
   if (dual) {
