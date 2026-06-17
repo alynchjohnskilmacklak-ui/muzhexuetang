@@ -8,6 +8,12 @@ ALTER TABLE "HighSchoolInfo" ADD COLUMN IF NOT EXISTS "admitRankByYear" JSONB;
 ALTER TABLE "HighSchoolInfo" ADD COLUMN IF NOT EXISTS "admitRankRef" INTEGER;
 `
 
+type DbTarget = {
+  label: string
+  envKey: string
+  url?: string
+}
+
 function run(command: string, args: string[], options: { input?: string } = {}) {
   const result = spawnSync(command, args, {
     input: options.input,
@@ -58,7 +64,18 @@ async function main() {
   assertPsqlAvailable()
 
   console.log('2/4 补齐当前生产库字段（幂等执行）')
-  run('psql', [dbUrl, '-v', 'ON_ERROR_STOP=1'], { input: CURRENT_SCHEMA_PATCH })
+  const targets: DbTarget[] = [
+    { label: '默认库', envKey: 'DATABASE_URL', url: process.env.DATABASE_URL },
+    { label: 'JUNIOR 库', envKey: 'DATABASE_URL_JUNIOR', url: process.env.DATABASE_URL_JUNIOR },
+    { label: 'SENIOR 库', envKey: 'DATABASE_URL_SENIOR', url: process.env.DATABASE_URL_SENIOR },
+  ]
+  const seenUrls = new Set<string>()
+  for (const target of targets) {
+    if (!target.url || seenUrls.has(target.url)) continue
+    seenUrls.add(target.url)
+    console.log(`  patch: ${target.label} (${target.envKey})`)
+    run('psql', [target.url, '-v', 'ON_ERROR_STOP=1'], { input: CURRENT_SCHEMA_PATCH })
+  }
 
   console.log('3/4 标记当前仓库迁移为已应用，修复 P3005 baseline')
   for (const name of migrationNames()) {
