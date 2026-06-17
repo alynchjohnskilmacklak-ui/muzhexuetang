@@ -37,8 +37,6 @@
     "@fullcalendar/daygrid": "^6.1.20",
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/react": "^6.1.20",
-    "@fullcalendar/resource": "^6.1.20",
-    "@fullcalendar/resource-timegrid": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20",
     "@prisma/client": "^5.22.0",
     "antd": "^5.29.3",

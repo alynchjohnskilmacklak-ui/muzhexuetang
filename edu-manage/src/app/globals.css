@@ -55,7 +55,7 @@
   /* ---- Brand Colors ---- */
   --color-brand-orange: #E8784A;
   --color-brand-teal: #1D9E75;
-  --color-brand-purple: #E8784A;
+  --color-brand-purple: #8B7AAF;
   --color-brand-gold: #f5a623;
 
   /* ---- Admin Theme (warm light, matches canvas) ---- */
@@ -248,9 +248,9 @@ body {
   padding: 24px;
 }
 
-/* Focus ring */
+/* Focus ring utility — uses primary with opacity */
 .focus-ring:focus-visible {
-  outline: 2px solid rgba(232,117,69,0.5);
+  outline: 2px solid rgba(232,120,74,0.5);
   outline-offset: 2px;
 }
 
@@ -1244,7 +1244,7 @@ img {
   }
 }
 
-/* Unified focus ring — matches DESIGN.md primary */
+/* Unified focus ring — uses primary color token */
 :focus-visible {
   outline: 2px solid rgba(232,120,74,.5);
   outline-offset: 2px;

@@ -1,23 +1,8 @@
-import { existsSync, readFileSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import type { PrismaClient } from '@prisma/client'
 import { sanitizeDataAdminRecord } from '../src/lib/data-admin/entities'
-
-function loadDotEnv() {
-  const envPath = path.join(process.cwd(), '.env')
-  if (!existsSync(envPath)) return
-  const lines = readFileSync(envPath, 'utf8').split(/\r?\n/)
-  for (const line of lines) {
-    const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) continue
-    const match = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/)
-    if (!match) continue
-    const [, key, rawValue] = match
-    if (process.env[key]) continue
-    process.env[key] = rawValue.replace(/^"|"$/g, '')
-  }
-}
+import { loadDotEnv } from './lib/load-dotenv'
 
 async function exportOne(prisma: PrismaClient, fileName: string, label: string) {
   const exportedAt = new Date()

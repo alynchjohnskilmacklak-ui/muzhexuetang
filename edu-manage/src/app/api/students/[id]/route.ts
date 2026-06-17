@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/get-user'
+import { resolveTeacherForUser } from '@/lib/performance'
 import { revalidatePath } from 'next/cache'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-  const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const prisma = await getRequestPrisma()
 
   const { id } = await params
@@ -32,6 +34,19 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
   })
 
   if (!student) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  // Ownership check: parents can only see their own children, teachers only their assigned students
+  if (user.role === 'parent' && student.parentUserId !== user.id) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+  if (user.role === 'teacher') {
+    const teacher = await resolveTeacherForUser(user)
+    if (!teacher) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    const isAssigned = student.enrollments.some(
+      e => e.group?.teacherAssignments?.some(ta => ta.teacherId === teacher.id)
+    )
+    if (!isAssigned) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
   const activeEnrollments = student.enrollments.filter((enrollment) => (
     enrollment.status === 'ACTIVE'
     && enrollment.group?.status !== 'ARCHIVED'

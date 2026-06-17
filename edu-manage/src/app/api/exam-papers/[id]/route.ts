@@ -15,7 +15,7 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
   const paper = await prisma.examPaper.findUnique({
     where: { id },
     include: {
-      student: { select: { id: true, name: true, grade: true } },
+      student: { select: { id: true, name: true, grade: true, parentUserId: true } },
       teacher: { select: { id: true, name: true } },
       questions: { orderBy: { order: 'asc' } },
       reactions: { select: { id: true, type: true, userId: true } },
@@ -26,6 +26,14 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
 
   if (!paper) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
   if (paper.status === 'DELETED') return NextResponse.json({ error: '试卷已删除' }, { status: 404 })
+
+  // Ownership check
+  if (user.role === 'parent' && paper.student.parentUserId !== user.id) {
+    return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
+  }
+  if (user.role === 'teacher' && paper.teacherId !== user.teacherId) {
+    return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
+  }
 
   return NextResponse.json(paper)
 })

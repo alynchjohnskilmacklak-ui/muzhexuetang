@@ -3,13 +3,14 @@ import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { resolveTeacherForUser } from '@/lib/performance'
+import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-  const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const prisma = await getRequestPrisma()
 
   const { id } = await params
@@ -24,6 +25,18 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
     },
   })
   if (!post) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  // Ownership check
+  if (user.role === 'parent' && post.student.parentUserId !== user.id) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+  if (user.role === 'teacher') {
+    const teacher = await resolveTeacherForUser(user)
+    if (!teacher || teacher.id !== post.teacherId) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+  }
+
   return NextResponse.json(post)
 })
 

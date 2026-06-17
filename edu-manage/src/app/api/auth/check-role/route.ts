@@ -26,5 +26,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
     select: { role: true },
   })
 
+  // 不向未登录请求返回 admin 身份，防止攻击者探测管理员账号
+  if (user?.role === 'admin') {
+    return NextResponse.json({ role: null })
+  }
   return NextResponse.json({ role: user?.role || null })
 })
