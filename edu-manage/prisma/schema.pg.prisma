@@ -1217,6 +1217,8 @@ model HighSchoolInfo {
   sourceNote       String?
   infoVerifiedAt   DateTime?
   infoConfidence   String?   @default("unknown")
+  admitRankByYear  Json?
+  admitRankRef     Int?
   updatedAt        DateTime @updatedAt
   updatedBy        String?
 }
