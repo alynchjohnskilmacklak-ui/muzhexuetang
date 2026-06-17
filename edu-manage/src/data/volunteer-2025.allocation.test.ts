@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getAllocationBands, getScoreTag } from './volunteer-2025'
+import { getAllocationBands, getRankTag, getScoreTag } from './volunteer-2025'
 
 const yiTongMap: Record<string, number> = {
   正定中学: 560,
@@ -48,5 +48,15 @@ describe('分配生：分配线缺失不丢校 + 级联为单一数据源', () =
   it('无级联档位时按统招分差走梯度', () => {
     expect(getScoreTag(700, 600, null)).toBe('保底')
     expect(getScoreTag(610, 600, null)).toBe('冲刺')
+  })
+})
+
+describe('位次法 getRankTag', () => {
+  it('考生位次远优于录取位次 → 保底', () => {
+    expect(getRankTag(5000, 7000)).toBe('保底')
+  })
+
+  it('考生位次略低于录取位次 → 冲刺/差距', () => {
+    expect(['冲刺', '差距较大']).toContain(getRankTag(7700, 7000))
   })
 })

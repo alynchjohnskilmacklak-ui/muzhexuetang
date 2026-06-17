@@ -43,6 +43,8 @@ export async function GET() {
       sourceNote: true,
       infoVerifiedAt: true,
       infoConfidence: true,
+      admitRankByYear: true,
+      admitRankRef: true,
       acceptsOtherCounty: true,
     },
   })

@@ -35,6 +35,8 @@ const ALLOWED_UPDATE_FIELDS = new Set([
   'sourceNote',
   'infoVerifiedAt',
   'infoConfidence',
+  'admitRankByYear',
+  'admitRankRef',
 ])
 
 export const PUT = apiHandler(async (

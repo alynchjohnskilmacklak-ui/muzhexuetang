@@ -162,6 +162,15 @@ export const VOLUNTEER_SCORE_THRESHOLDS = {
   largeGap: -60,  // 分数低于统招线60分以内 → 差距较大（超出则为暂未达线）
 }
 
+// 位次法阈值：以"考生位次相对参考录取位次的领先/落后比例"判定
+// TODO: 下列阈值为初始默认值，需机构用真实录取数据校准后再调整。
+export const RANK_TAG_THRESHOLDS = {
+  safe: 0.12,
+  stable: 0.0,
+  challenge: -0.08,
+  largeGap: -0.20,
+}
+
 // ====== 学校名称匹配 ======
 
 // 去掉学校名末尾的括号后缀，如「(其他县区)」「(市)」「(正定)」
@@ -276,6 +285,16 @@ export function getScoreTag(
   if (gap >= VOLUNTEER_SCORE_THRESHOLDS.stable)    return '稳妥'
   if (gap >= VOLUNTEER_SCORE_THRESHOLDS.challenge) return '冲刺'
   if (gap >= VOLUNTEER_SCORE_THRESHOLDS.largeGap)  return '差距较大'
+  return '暂未达线'
+}
+
+/** 位次法梯度判定；marketRank 为考生全市位次，admitRankRef 为该校参考录取位次 */
+export function getRankTag(marketRank: number, admitRankRef: number): Exclude<ScoreTag, '分配生机会'> {
+  const lead = (admitRankRef - marketRank) / admitRankRef
+  if (lead >= RANK_TAG_THRESHOLDS.safe)      return '保底'
+  if (lead >= RANK_TAG_THRESHOLDS.stable)    return '稳妥'
+  if (lead >= RANK_TAG_THRESHOLDS.challenge) return '冲刺'
+  if (lead >= RANK_TAG_THRESHOLDS.largeGap)  return '差距较大'
   return '暂未达线'
 }
 

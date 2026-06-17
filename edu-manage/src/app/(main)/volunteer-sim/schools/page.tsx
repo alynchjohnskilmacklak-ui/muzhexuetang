@@ -43,6 +43,8 @@ interface SchoolInfo {
   sourceNote: string | null
   infoVerifiedAt: string | null
   infoConfidence: string | null
+  admitRankByYear: Record<string, number> | null
+  admitRankRef: number | null
 }
 
 type MissingFilter =
@@ -85,7 +87,7 @@ const MISSING_FILTERS: MissingFilterOption[] = [
 const COMPLETENESS_FIELDS: (keyof SchoolInfo)[] = [
   'address', 'phone', 'website', 'tuitionFee', 'boardingFee',
   'keyFeature', 'gaokaoRate', 'intro', 'tips', 'sourceUrl',
-  'sourceNote', 'infoConfidence', 'infoVerifiedAt',
+  'sourceNote', 'infoConfidence', 'infoVerifiedAt', 'admitRankByYear', 'admitRankRef',
 ]
 
 function calcCompleteness(school: SchoolInfo): number {
@@ -195,6 +197,7 @@ export default function SchoolsManagePage() {
     form.setFieldsValue({
       ...school,
       infoVerifiedAt: school.infoVerifiedAt ? dayjs(school.infoVerifiedAt) : null,
+      admitRankByYear: school.admitRankByYear ? JSON.stringify(school.admitRankByYear, null, 2) : '',
     })
     setEditModal({ open: true, school })
   }
@@ -207,6 +210,16 @@ export default function SchoolsManagePage() {
     const payload: Record<string, unknown> = { ...values }
     if (payload.infoVerifiedAt instanceof dayjs || (payload.infoVerifiedAt && typeof payload.infoVerifiedAt === 'object')) {
       payload.infoVerifiedAt = (payload.infoVerifiedAt as dayjs.Dayjs).toISOString()
+    }
+    if (typeof payload.admitRankByYear === 'string') {
+      const rawRankJson = payload.admitRankByYear.trim()
+      try {
+        payload.admitRankByYear = rawRankJson ? JSON.parse(rawRankJson) : null
+      } catch {
+        message.error('历年录取位次 JSON 格式不正确')
+        setSaving(false)
+        return
+      }
     }
 
     const res = await fetch(`/api/schools/${editModal.school.id}`, {
@@ -294,7 +307,7 @@ export default function SchoolsManagePage() {
                 tuitionFee: '学费', boardingFee: '住宿费', keyFeature: '特色',
                 gaokaoRate: '升学率', intro: '简介', tips: '建议',
                 sourceUrl: '来源', sourceNote: '来源说明', infoConfidence: '可信度',
-                infoVerifiedAt: '核验时间',
+                infoVerifiedAt: '核验时间', admitRankByYear: '历年位次', admitRankRef: '参考位次',
               }
               return (
                 <Tag key={f} color="error" style={{ fontSize: 10, margin: 1 }}>
@@ -473,6 +486,25 @@ export default function SchoolsManagePage() {
           <Form.Item name="tips" label="新乐学生报考建议">
             <TextArea rows={3} placeholder="针对新乐学生的特别提示" />
           </Form.Item>
+
+          {/* 位次法数据 */}
+          <Title level={5} style={{ fontSize: 14, marginBottom: 8, marginTop: 16 }}>历史录取位次（可选）</Title>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
+            <Form.Item
+              name="admitRankRef"
+              label="参考录取位次"
+              extra="留空则志愿模拟继续使用分数线法；录入后该校可优先使用位次法测算。"
+            >
+              <InputNumber style={{ width: '100%' }} min={1} placeholder="如：7684，缺数据留空" />
+            </Form.Item>
+            <Form.Item
+              name="admitRankByYear"
+              label="历年录取位次 JSON"
+              extra='格式示例：{"2025": 7684, "2024": 8100}；无真实数据请留空。'
+            >
+              <TextArea rows={4} placeholder='{"2025": 7684}' />
+            </Form.Item>
+          </div>
 
           {/* 信息来源 */}
           <Title level={5} style={{ fontSize: 14, marginBottom: 8, marginTop: 16 }}>信息来源与核验</Title>
