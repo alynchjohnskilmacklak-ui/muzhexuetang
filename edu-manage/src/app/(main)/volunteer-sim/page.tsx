@@ -776,7 +776,13 @@ export default function VolunteerSimPage() {
                         <Text style={{ fontSize: 13, color: C.inkMuted, lineHeight: 1.7 }}>
                           {isFallback
                             ? `排名高于该档（前${topBand.bandLo - 1}名通常会竞争更好的学校），可作为稳妥选择，但可能浪费分配生机会。`
-                            : `你校内第${topBand.bandLo < topBand.bandHi ? `${topBand.bandLo}-${topBand.bandHi}` : topBand.bandLo}名，落在${topBand.highSchoolName}名额区间（第${topBand.bandLo}-${topBand.bandHi}名），分数${inputScore}已超${topBand.lineSource === 'db' ? '分配线' : '控制线'}约${inputScore! - topBand.effectiveLine}分，可重点考虑。分配生只能填1所，建议填报此校。`}
+                            : `你校内第${topBand.bandLo < topBand.bandHi ? `${topBand.bandLo}-${topBand.bandHi}` : topBand.bandLo}名，落在${topBand.highSchoolName}名额区间（第${topBand.bandLo}-${topBand.bandHi}名），分数${inputScore}${
+                              topBand.allocationLine
+                                ? `已超该校分配线约${inputScore! - topBand.allocationLine.value}分`
+                                : topBand.tongZhao > 0
+                                  ? `已超该校统招线约${inputScore! - topBand.tongZhao}分`
+                                  : '已过分配生控制线'
+                            }，可重点考虑。分配生只能填1所，建议填报此校。`}
                         </Text>
                         <div style={{ marginTop: 10 }}>
                           {topDb ? (
@@ -827,7 +833,7 @@ export default function VolunteerSimPage() {
                           }}>
                             <span style={{ fontSize: 13, color: C.ink }}>◎ {b.highSchoolName}</span>
                             <Text style={{ fontSize: 12, color: C.inkSubtle }}>
-                              {b.allocationLine ? `${b.allocationLine.label} ${b.allocationLine.value}分` : `参考控制线 ${b.effectiveLine}分`} · 名额第{b.bandLo}-{b.bandHi}名
+                              {b.allocationLine ? `分配线 ${b.allocationLine.value}分` : b.tongZhao > 0 ? `统招线 ${b.tongZhao}分` : '分配线未公布'} · 名额第{b.bandLo}-{b.bandHi}名
                             </Text>
                             {db && (
                               <Button size="small" disabled={!!allocationSlot}
@@ -853,7 +859,7 @@ export default function VolunteerSimPage() {
                           background: C.successBg, padding: '3px 8px', borderRadius: 6,
                           border: `1px solid ${C.successBorder}`, color: C.success,
                         }}>
-                          {b.highSchoolName}（{b.allocationLine ? `${b.allocationLine.label}${b.allocationLine.value}分` : `控制线${b.effectiveLine}分`}）
+                          {b.highSchoolName}（{b.allocationLine ? `分配线${b.allocationLine.value}分` : b.tongZhao > 0 ? `统招线${b.tongZhao}分` : '分配线未公布'}）
                         </span>
                       ))}
                     </div>
