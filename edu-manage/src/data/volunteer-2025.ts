@@ -312,7 +312,9 @@ export interface AllocationBand {
   bandLo: number
   bandHi: number
   tongZhao: number
-  allocationLine: AllocationLineInfo
+  allocationLine: AllocationLineInfo | null
+  effectiveLine: number
+  lineSource: 'db' | 'control'
   tag: '推荐' | '保底' | '排名不足' | '分数不足'
   note: string
 }
@@ -327,6 +329,7 @@ export function getAllocationBands(
   middleSchool: string,
   rank: number,
   score: number,
+  controlLine: number,
   lineLookup: (name: string) => { yiTong: number | null; tongZhao: number; allocationLine: number | null } | null
 ): AllocationBand[] {
   const quotaMap = XINLE_ALLOCATION_2025[middleSchool] || {}
@@ -340,7 +343,6 @@ export function getAllocationBands(
       const allocationLine = getAllocationLineInfo({ yiTong, allocationLine: lines?.allocationLine ?? null })
       return { name, quota, yiTong, tongZhao, allocationLine }
     })
-    .filter((school): school is { name: string; quota: number; yiTong: number | null; tongZhao: number; allocationLine: AllocationLineInfo } => school.allocationLine !== null)
     .sort((a, b) => (b.yiTong ?? 0) - (a.yiTong ?? 0))
 
   let cum = 0
@@ -348,12 +350,16 @@ export function getAllocationBands(
     const bandLo = cum + 1
     cum += s.quota
     const bandHi = cum
+    const effectiveLine = s.allocationLine?.value ?? controlLine
+    const lineSource: 'db' | 'control' = s.allocationLine ? 'db' : 'control'
 
     let tag: AllocationBand['tag']
     let note = ''
-    if (score < s.allocationLine.value) {
+    if (score < effectiveLine) {
       tag = '分数不足'
-      note = `你的分数未达该校分配生录取线（${s.allocationLine.value}分）`
+      note = lineSource === 'db'
+        ? `你的分数未达该校分配生录取线（${effectiveLine}分）`
+        : `你的分数未达控制线（${effectiveLine}分）`
     } else if (rank > bandHi) {
       tag = '排名不足'
       note = `该校名额对应校内前${bandHi}名，你目前第${rank}名，存在校内排名竞争风险`
@@ -365,7 +371,18 @@ export function getAllocationBands(
       note = `你的校内第${rank}名落在该校名额区间（第${bandLo}-${bandHi}名），分数也达标，当前模拟结果较匹配`
     }
 
-    return { highSchoolName: s.name, quota: s.quota, bandLo, bandHi, tongZhao: s.tongZhao, allocationLine: s.allocationLine, tag, note }
+    return {
+      highSchoolName: s.name,
+      quota: s.quota,
+      bandLo,
+      bandHi,
+      tongZhao: s.tongZhao,
+      allocationLine: s.allocationLine,
+      effectiveLine,
+      lineSource,
+      tag,
+      note,
+    }
   })
 }
 
