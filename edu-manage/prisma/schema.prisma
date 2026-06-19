@@ -660,6 +660,8 @@ model ClassroomFeedback {
   badge           String?
   overallComment  String?
   homework        Json?
+  homeworkDone    Boolean?     // 作业是否完成
+  inClassRating   Int?         // 课堂表现 1-5
   imageUrls       String[]
   imageTypes      Json?
   studentRatings  Json?
@@ -1310,4 +1312,17 @@ model FileAsset {
   @@index([postId])
   @@index([ownerType, ownerId])
   @@index([tenant])
+}
+
+// ── 知识点掌握推送（教师随手标注，不必整份试卷）──
+model MasteryRecord {
+  id             String   @id @default(cuid())
+  studentId      String
+  teacherId      String
+  knowledgePoint String
+  level          String   @default("NEEDS_REVIEW") // MASTERED | NEEDS_REVIEW | NEEDS_PRACTICE
+  note           String?
+  createdAt      DateTime @default(now())
+
+  @@index([studentId, createdAt])
 }

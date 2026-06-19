@@ -56,6 +56,7 @@ export async function getStudentProfile(
       prisma.classroomFeedback.findMany({
         where: { studentIds: { has: studentId }, status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
         select: { id: true, mood: true, tags: true, knowledgePoints: true, summary: true, overallComment: true,
+          homeworkDone: true, inClassRating: true,
           createdAt: true, teacher: { select: { name: true } } },
         orderBy: { createdAt: 'desc' }, take: 50,
       }),
@@ -100,7 +101,7 @@ export async function getStudentProfile(
     ? latestWithDims.dimensions.map(d => ({ dimension: d.dimension, score: d.score, maxScore: d.maxScore }))
     : []
 
-  // ── 习：出勤 ──
+  // ── 习：出勤 + 作业完成 + 课堂表现 ──
   const attTotal = attendances.length
   const attPresent = attendances.filter(a => a.status === 'PRESENT' || a.status === 'MAKEUP').length
   const attendanceRate = attTotal ? Math.round((attPresent / attTotal) * 100) : null
@@ -109,6 +110,19 @@ export async function getStudentProfile(
     .slice(0, 8)
     .map(f => ({ mood: f.mood, date: f.createdAt }))
     .reverse()
+
+  // 作业完成率 & 课堂表现趋势（第2期新增）
+  const feedbacksWithHomework = feedbacks.filter(f => f.homeworkDone !== null && f.homeworkDone !== undefined)
+  const homeworkDoneRate = feedbacksWithHomework.length
+    ? Math.round((feedbacksWithHomework.filter(f => f.homeworkDone).length / feedbacksWithHomework.length) * 100)
+    : null
+  const inClassRatings = feedbacks
+    .filter(f => f.inClassRating !== null && f.inClassRating !== undefined)
+    .map(f => ({ rating: f.inClassRating as number, date: f.createdAt }))
+    .sort((a, b) => a.date.getTime() - b.date.getTime())
+  const inClassAvg = inClassRatings.length
+    ? Math.round((inClassRatings.reduce((s, r) => s + r.rating, 0) / inClassRatings.length) * 10) / 10
+    : null
 
   // ── 档：成绩趋势（按学科，归一化为百分比）+ 统一时间线 ──
   const trendBySubject: Record<string, { date: Date; pct: number; name: string }[]> = {}
@@ -145,7 +159,7 @@ export async function getStudentProfile(
       weaknesses: weaknesses.map(w => ({ topic: w.topic, mistakeCount: w.mistakeCount, suggestion: w.suggestion })),
       radar,
     },
-    habits: { attendanceRate, moodTimeline },
+    habits: { attendanceRate, moodTimeline, homeworkDoneRate, inClassAvg, inClassRatings },
     record: {
       trendBySubject: Object.entries(trendBySubject).map(([subject, points]) => ({ subject, points })),
       timeline: timeline.slice(0, 40),

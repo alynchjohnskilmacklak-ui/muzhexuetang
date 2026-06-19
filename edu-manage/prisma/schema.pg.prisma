@@ -660,6 +660,8 @@ model ClassroomFeedback {
   badge           String?
   overallComment  String?
   homework        Json?
+  homeworkDone    Boolean?
+  inClassRating   Int?
   imageUrls       String[]
   imageTypes      Json?
   studentRatings  Json?
@@ -1309,4 +1311,16 @@ model FileAsset {
   @@index([postId])
   @@index([ownerType, ownerId])
   @@index([tenant])
+}
+
+model MasteryRecord {
+  id             String   @id @default(cuid())
+  studentId      String
+  teacherId      String
+  knowledgePoint String
+  level          String   @default("NEEDS_REVIEW")
+  note           String?
+  createdAt      DateTime @default(now())
+
+  @@index([studentId, createdAt])
 }
