@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 /** 按 uploadType 限制文件大小 */
 function getSizeLimit(uploadType: string | null): number {
   switch (uploadType) {
-    case 'teacher-feedback': return 5 * 1024 * 1024   // 5MB
+    case 'teacher-feedback': return 20 * 1024 * 1024  // 20MB
     case 'parent-upload':   return 10 * 1024 * 1024   // 10MB
     case 'admin-material':  return 50 * 1024 * 1024   // 50MB
     case 'avatar':          return 5 * 1024 * 1024    // 5MB

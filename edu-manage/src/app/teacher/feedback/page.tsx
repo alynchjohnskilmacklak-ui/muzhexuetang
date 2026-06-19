@@ -41,7 +41,9 @@ function FeedbackPageInner() {
   const groups: any[] = ctx?.groups || []
   const allLessons: any[] = ctx?.lessons || []
 
-  const { data: historyData, mutate } = useSWR('/api/feedback?limit=20', fetcher)
+  const [historyDate, setHistoryDate] = useState(new Date().toISOString().slice(0, 10))
+
+  const { data: historyData, mutate } = useSWR(`/api/feedback?limit=50&date=${historyDate}`, fetcher)
   const history: any[] = Array.isArray(historyData?.feedbacks) ? historyData.feedbacks : []
 
   // Selected group
@@ -217,7 +219,7 @@ function FeedbackPageInner() {
           data={{ uploadType: 'teacher-feedback' }}
           beforeUpload={(file) => {
             if (!file.type.startsWith('image/') && !/\.(heic|heif|avif)$/i.test(file.name)) { toast.warning('仅支持图片文件'); return Upload.LIST_IGNORE }
-            if (file.size > 5 * 1024 * 1024) { toast.warning('图片不能超过 5MB'); return Upload.LIST_IGNORE }
+            if (file.size > 20 * 1024 * 1024) { toast.warning('图片不能超过 20MB'); return Upload.LIST_IGNORE }
             return true
           }}
           onChange={info => {
@@ -231,7 +233,7 @@ function FeedbackPageInner() {
               toast.error('上传失败，网络不稳定或服务器限制，请重试', { duration: 5000 })
             }
           }} style={{ borderRadius: 8 }}>
-          <div style={{ fontSize: 12, color: '#98A2B3' }}>点击或拖拽上传，单张≤5MB</div>
+          <div style={{ fontSize: 12, color: '#98A2B3' }}>点击或拖拽上传，单张≤20MB</div>
         </Upload.Dragger>
       </Card>
 
@@ -280,7 +282,18 @@ function FeedbackPageInner() {
           </Card>
 
           {/* History list */}
-          <div style={{ fontSize: 13, fontWeight: 700 }}>历史反馈</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontSize: 13, fontWeight: 700 }}>历史反馈</div>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <Button size="small" type={historyDate === new Date().toISOString().slice(0, 10) ? 'primary' : 'default'}
+                onClick={() => setHistoryDate(new Date().toISOString().slice(0, 10))}
+                style={{ fontSize: 11 }}>今天</Button>
+              <Button size="small" onClick={() => { const d = new Date(); d.setDate(d.getDate() - 7); setHistoryDate(d.toISOString().slice(0, 10)) }}
+                style={{ fontSize: 11 }}>近7天</Button>
+              <Input type="date" size="small" value={historyDate} onChange={e => setHistoryDate(e.target.value)}
+                style={{ width: 130, fontSize: 11 }} />
+            </div>
+          </div>
           {history.slice(0, 10).map((item: any) => <FeedbackCard key={item.id} item={item} compact />)}
         </div>
       )}
