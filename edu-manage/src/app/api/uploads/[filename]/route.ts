@@ -26,10 +26,11 @@ const CONTENT_TYPES: Record<string, string> = {
 function uploadRoots() {
   const cwd = process.cwd()
   return [
+    process.env.UPLOAD_DIR,
     path.join(cwd, 'public', 'uploads'),
     path.join(cwd, '..', 'public', 'uploads'),
     path.join(cwd, '..', '..', 'public', 'uploads'),
-  ]
+  ].filter(Boolean) as string[]
 }
 
 function safeRelativePath(raw: string) {
