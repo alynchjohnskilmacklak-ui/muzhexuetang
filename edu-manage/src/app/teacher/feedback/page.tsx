@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { MOODS, QUICK_TAGS, QUICK_KPS, BADGES, FeedbackCard } from '@/components/FeedbackCard'
+import { StudentContextPanel } from '@/components/teacher/StudentContextPanel'
 import { format } from 'date-fns'
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
@@ -363,7 +364,10 @@ function FeedbackPageInner() {
       {/* RIGHT: Form (desktop) + history (mobile) */}
       {!isMobile ? (
         <div style={{ position: 'sticky', top: 12, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {selectedStudentIds.length > 0 && (
+          {selectedStudentIds.length === 1 && (
+            <StudentContextPanel studentId={selectedStudentIds[0]} />
+          )}
+          {selectedStudentIds.length > 1 && (
             <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1', background: '#FFFBF7' }}>
               <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>已选 {selectedStudentIds.length} 位学员</div>
               <div style={{ fontSize: 11, color: '#7A869A' }}>批量反馈适合发共同内容，个性化评价建议单独选择学生补充</div>
