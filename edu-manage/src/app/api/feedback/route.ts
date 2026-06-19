@@ -163,10 +163,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
             type: 'CLASSROOM_FEEDBACK',
             title: `${teacherName}老师发布了成长反馈`,
             content: `${student.name}: ${overallComment || summary || knowledgePoints.join('、') || badge || '课堂资料已更新'}`.slice(0, 80),
-            link: '/parent/growth',
+            link: '/parent/class-feedback',
             relatedType: 'CLASSROOM_FEEDBACK',
             relatedId: created.id,
-            href: `/parent/growth?studentId=${student.id}&feedbackId=${created.id}`,
+            href: `/parent/class-feedback/${created.id}`,
           },
         })
       }

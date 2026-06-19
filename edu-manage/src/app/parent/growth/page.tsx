@@ -24,18 +24,20 @@ export default async function ParentGrowthPage({ searchParams }: { searchParams:
   })
   const studentIds = students.map(s => s.id)
 
-  // Auto-open detail if feedbackId or postId is provided
-  let highlightedFeedback: any = null
-  const detailId = sp.feedbackId || sp.postId
-  if (sp.feedbackId) {
-    highlightedFeedback = await prisma.classroomFeedback.findFirst({
+  // If feedbackId is provided, redirect to the dedicated feedback center
+  if (sp.feedbackId && studentIds.length > 0) {
+    const fb = await prisma.classroomFeedback.findFirst({
       where: { id: sp.feedbackId, ...visibleClassroomFeedbackWhere, teacher: visibleTeacherWhere, studentIds: { hasSome: studentIds } },
-      include: { teacher: { select: { name: true } } },
+      select: { id: true },
     })
+    if (fb) redirect(`/parent/class-feedback/${sp.feedbackId}`)
   }
-  if (!highlightedFeedback && (sp.postId || sp.feedbackId)) {
+
+  // Auto-open detail if postId is provided (growth content)
+  let highlightedFeedback: any = null
+  if (sp.postId) {
     highlightedFeedback = await prisma.performancePost.findFirst({
-      where: { id: sp.postId || sp.feedbackId, ...visiblePerformancePostWhere, teacher: visibleTeacherWhere, studentId: { in: studentIds } },
+      where: { id: sp.postId, ...visiblePerformancePostWhere, teacher: visibleTeacherWhere, studentId: { in: studentIds } },
       include: { student: { select: { name: true } }, teacher: { select: { name: true } } },
     })
   }

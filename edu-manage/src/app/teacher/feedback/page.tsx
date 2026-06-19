@@ -316,11 +316,12 @@ function FeedbackPageInner() {
             </div>
           )}
           <Upload.Dragger name="file" action="/api/upload" accept="image/*" multiple maxCount={9} showUploadList={false}
+            data={{ uploadType: 'teacher-feedback' }}
             beforeUpload={(file) => {
               const isImage = file.type.startsWith('image/')
-              if (!isImage) { toast.warning('仅支持图片文件'); return Upload.LIST_IGNORE }
+              if (!isImage) { toast.warning('仅支持图片文件（JPG/PNG/GIF/WebP）'); return Upload.LIST_IGNORE }
               const maxSize = 5 * 1024 * 1024
-              if (file.size > maxSize) { toast.warning('图片大小不能超过 5MB'); return Upload.LIST_IGNORE }
+              if (file.size > maxSize) { toast.warning('图片不能超过 5MB，请压缩后重新上传'); return Upload.LIST_IGNORE }
               return true
             }}
             onChange={info => {
@@ -330,18 +331,23 @@ function FeedbackPageInner() {
                 const error = (info.file.response as { error?: string })?.error
                 if (url) {
                   setImageUrls(prev => [...prev, url])
-                  toast.success('课堂资料上传成功')
                 } else if (error) {
-                  toast.error(`课堂资料上传失败：${error}`)
+                  toast.error(error, { duration: 5000 })
                 } else {
-                  toast.error('上传成功但未返回文件地址，请重新上传')
+                  toast.error('上传失败，请重试')
                 }
               } else if (info.file.status === 'error') {
-                toast.error('课堂资料上传失败：网络错误，请重试')
+                // Try to get error details from the response
+                const response = info.file.response as { error?: string } | undefined
+                if (response?.error) {
+                  toast.error(response.error, { duration: 5000 })
+                } else {
+                  toast.error('图片上传失败：请检查网络连接后重试', { duration: 5000 })
+                }
               }
             }}
             style={{ borderRadius: 8, padding: '10px 0' }}>
-            <div style={{ fontSize: 13, color: '#98A2B3' }}>点击或拖拽上传课堂照片</div>
+            <div style={{ fontSize: 13, color: '#98A2B3' }}>点击或拖拽上传，单张不超过 5MB</div>
           </Upload.Dragger>
         </div>
 
