@@ -264,7 +264,7 @@ function FeedbackPageInner() {
 
           <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>关联课次</div>
-            <Select size="small" value={lessonId || undefined} onChange={(v: string) => { setLessonId(v); if (v) setSelectedStudentIds(allLessons.find((l: any) => l.id === v)?.studentIds || []) }}
+            <Select size="small" value={lessonId || undefined} onChange={(v: string) => { setLessonId(v || ''); setSelectedStudentIds(v ? (allLessons.find((l: any) => l.id === v)?.studentIds || []) : []) }}
               allowClear placeholder="选择课次" style={{ width: '100%' }} options={lessonOptions} />
           </Card>
 
@@ -306,7 +306,7 @@ function FeedbackPageInner() {
             <Select size="small" value={groupId || undefined} onChange={(v: string) => { setGroupId(v); setLessonId(''); setSelectedStudentIds([]) }}
               allowClear placeholder="选择班级" style={{ width: '100%' }}
               options={groups.map((g: any) => ({ label: `${g.courseName} (${g.studentCount}人)`, value: g.id }))} />
-            <Select size="small" value={lessonId || undefined} onChange={(v: string) => { setLessonId(v); if (v) setSelectedStudentIds(allLessons.find((l: any) => l.id === v)?.studentIds || []) }}
+            <Select size="small" value={lessonId || undefined} onChange={(v: string) => { setLessonId(v || ''); setSelectedStudentIds(v ? (allLessons.find((l: any) => l.id === v)?.studentIds || []) : []) }}
               allowClear placeholder="关联课次" style={{ width: '100%' }} options={lessonOptions} />
           </>
         )}
