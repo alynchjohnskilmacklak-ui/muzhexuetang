@@ -123,14 +123,14 @@ export async function getStudentProfile(
     ;(trendBySubject[subj] ||= []).push({ date: g.assessment.assessDate, pct: p, name: g.assessment.name })
   }
 
-  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string }
+  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; images?: string[]; refType?: 'feedback' | 'paper' | 'post'; refId?: string }
   const timeline: TLItem[] = []
   for (const p of papers) {
     const m = p.questions.filter(q => q.mastery === 'MASTERED').length
-    timeline.push({ type: 'paper', title: `${p.title} 已批改`, sub: `掌握 ${m}/${p.questions.length} 题`, date: p.paperDate, teacher: p.teacher?.name })
+    timeline.push({ type: 'paper', title: `${p.title} 已批改`, sub: `掌握 ${m}/${p.questions.length} 题`, date: p.paperDate, teacher: p.teacher?.name, refType: 'paper', refId: p.id })
   }
-  for (const f of feedbacks) timeline.push({ type: 'feedback', title: '课堂反馈', sub: f.overallComment || f.summary || (f.tags || []).join(' '), date: f.createdAt, teacher: f.teacher?.name })
-  for (const po of posts) timeline.push({ type: 'post', title: '成长动态', sub: po.content, date: po.createdAt, teacher: po.teacher?.name })
+  for (const f of feedbacks) timeline.push({ type: 'feedback', title: '课堂反馈', sub: f.overallComment || f.summary || (f.tags || []).join(' '), date: f.createdAt, teacher: f.teacher?.name, refType: 'feedback', refId: f.id })
+  for (const po of posts) timeline.push({ type: 'post', title: '成长动态', sub: po.content, date: po.createdAt, teacher: po.teacher?.name, images: (po.images as string[] | undefined) || undefined, refType: 'post', refId: po.id })
   for (const b of badges) timeline.push({ type: 'badge', title: `获得徽章「${b.badgeType}」`, sub: b.description || undefined, date: b.earnedAt })
   for (const g of grades) timeline.push({ type: 'grade', title: `${g.assessment.name}`, sub: `${g.score} 分`, date: g.assessment.assessDate })
   for (const go of goals.filter(x => x.isAchieved && x.achievedAt)) timeline.push({ type: 'goal', title: `达成目标：${go.goalDesc}`, date: go.achievedAt! })

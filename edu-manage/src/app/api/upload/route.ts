@@ -26,6 +26,24 @@ function getOwnerType(uploadType: string | null, role: string): string {
   return 'admin_material'
 }
 
+function isValidImageBuffer(buffer: Buffer): { ok: boolean; heic?: boolean } {
+  // JPEG
+  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return { ok: true }
+  // PNG
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return { ok: true }
+  // GIF
+  if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) return { ok: true }
+  // WebP: RIFF....WEBP
+  if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+      buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) return { ok: true }
+  // HEIC/HEIF/AVIF: ....ftyp + brand
+  if (buffer[4] === 0x66 && buffer[5] === 0x74 && buffer[6] === 0x79 && buffer[7] === 0x70) {
+    const brand = buffer.subarray(8, 12).toString('ascii')
+    if (['heic', 'heix', 'mif1', 'msf1', 'hevc', 'avif'].includes(brand)) return { ok: true, heic: true }
+  }
+  return { ok: false }
+}
+
 export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
@@ -47,17 +65,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: `文件过大，最大支持 ${limitMB}MB` }, { status: 400 })
   }
 
-  // Validation: image magic bytes
-  if (file.type.startsWith('image/')) {
+  // Validation: image magic bytes (supports JPEG/PNG/GIF/WebP/HEIC/AVIF)
+  if (file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif|avif)$/i.test(file.name)) {
     const buffer = Buffer.from(await file.arrayBuffer())
-    const magicBytes = [
-      [0xFF, 0xD8, 0xFF],           // JPEG
-      [0x89, 0x50, 0x4E, 0x47],     // PNG
-      [0x47, 0x49, 0x46],           // GIF
-    ]
-    const isValid = magicBytes.some(bytes => bytes.every((b, i) => buffer[i] === b))
-    if (!isValid) {
-      return NextResponse.json({ error: '文件格式不合法，只支持 JPG/PNG/GIF/WebP' }, { status: 400 })
+    const check = isValidImageBuffer(buffer)
+    if (!check.ok) {
+      return NextResponse.json({ error: '文件格式不合法，仅支持 JPG/PNG/GIF/WebP/HEIC' }, { status: 400 })
     }
   }
 
