@@ -111,12 +111,15 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   const bottomTabs: MobileNavItem[] = [
     { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
     { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课次' },
-    { key: '/parent/messages', icon: <CommentOutlined />, label: '留言', badge: unread.messages },
     { key: '/parent/class-feedback', icon: <BookOutlined />, label: '反馈' },
-    { key: '__more', icon: <EllipsisOutlined />, label: '我的', badge: unread.papers + unread.posts + unread.notifications },
+    { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长' },
+    { key: '__more', icon: <EllipsisOutlined />, label: '更多', badge: unread.papers + unread.posts + unread.notifications + unread.messages },
   ]
 
-  const moreItems = navItems.filter(item => !['/parent/dashboard', '/parent/schedule', '/parent/messages', '/parent/class-feedback'].includes(item.key))
+  const bottomKeys = ['/parent/dashboard', '/parent/schedule', '/parent/class-feedback', '/parent/archive']
+  // More items sorted by importance
+  const morePriority = ['/parent/notifications', '/parent/messages', '/parent/meals', '/parent/leave', '/parent/hour-records', '/parent/materials', '/parent/volunteer', '/parent/volunteer/schools', '/parent/teachers', '/parent/phet', '/parent/ai', '/parent/bind', '/parent/profile']
+  const moreItems = navItems.filter(item => !bottomKeys.includes(item.key)).sort((a, b) => morePriority.indexOf(a.key) - morePriority.indexOf(b.key))
   const currentKey = resolveActiveKey(pathname, navItems, '/parent/dashboard')
 
   const markAllRead = async () => {

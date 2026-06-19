@@ -46,17 +46,17 @@ type NavItem = MobileNavItem & { badgeKey?: keyof TeacherData['badges'] | null }
 
 const navItems: NavItem[] = [
   { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
-  { key: '/teacher/messages', icon: <MessageOutlined />, label: '家长留言', badgeKey: 'unreadMessages' },
-  { key: '/teacher/leave', icon: <CalendarOutlined />, label: '请假审批' },
   { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '我的课表' },
   { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
-  { key: '/teacher/meals', icon: <CoffeeOutlined />, label: '就餐上报' },
-  { key: '/teacher/papers', icon: <FileImageOutlined />, label: '试卷上传' },
   { key: '/teacher/feedback', icon: <MessageOutlined />, label: '成长反馈', badgeKey: 'unpublished' },
-  { key: '/teacher/materials', icon: <FolderOutlined />, label: '学习资料' },
+  { key: '/teacher/messages', icon: <MessageOutlined />, label: '家长留言', badgeKey: 'unreadMessages' },
+  { key: '/teacher/leave', icon: <CalendarOutlined />, label: '请假审批' },
+  { key: '/teacher/meals', icon: <CoffeeOutlined />, label: '就餐上报' },
   { key: '/teacher/students', icon: <TeamOutlined />, label: '我的学员' },
-  { key: '/teacher/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
+  { key: '/teacher/papers', icon: <FileImageOutlined />, label: '试卷上传' },
+  { key: '/teacher/materials', icon: <FolderOutlined />, label: '学习资料' },
   { key: '/teacher/salary', icon: <DollarOutlined />, label: '我的薪资' },
+  { key: '/teacher/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
   { key: '/teacher/ai', icon: <MessageFilled />, label: 'AI 助手' },
 ]
 
@@ -121,7 +121,9 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     { key: '/teacher/feedback', icon: <MessageOutlined />, label: '反馈', badgeKey: 'unpublished' },
   ], data)
   teacherBottomTabs.push({ key: '__more', icon: <EllipsisOutlined />, label: '更多' })
-  const teacherMoreItems = mobileNavItems.filter(item => !['/teacher/dashboard', '/teacher/schedule', '/teacher/attendance', '/teacher/feedback'].includes(item.key))
+  const bottomKeys = ['/teacher/dashboard', '/teacher/schedule', '/teacher/attendance', '/teacher/feedback']
+  const morePriority = ['/teacher/messages', '/teacher/leave', '/teacher/meals', '/teacher/students', '/teacher/papers', '/teacher/materials', '/teacher/salary', '/teacher/phet', '/teacher/ai']
+  const teacherMoreItems = mobileNavItems.filter(item => !bottomKeys.includes(item.key)).sort((a, b) => morePriority.indexOf(a.key) - morePriority.indexOf(b.key))
   const todoTotal = (data?.badges?.unsubmitted || 0) + (data?.badges?.unpublished || 0)
 
   const handleChangePwd = async (values: { oldPassword: string; newPassword: string }) => {
