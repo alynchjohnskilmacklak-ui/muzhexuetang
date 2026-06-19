@@ -27,29 +27,11 @@ tar -xzf "$TAR_FILE"
 echo "[deploy] 恢复 .env"
 cp /tmp/edu-manage.env.bak .env 2>/dev/null || true
 
-echo "[deploy] 同步 PG schema"
-cp prisma/schema.pg.prisma prisma/schema.prisma 2>/dev/null || true
-
 echo "[deploy] npm install"
 npm install
 
-echo "[deploy] prisma generate"
-npx prisma generate
-
-# ── 双库同步 ──
-DUAL_DB="$(load_env DUAL_DB)"
-JUNIOR_URL="$(load_env DATABASE_URL_JUNIOR)"
-SENIOR_URL="$(load_env DATABASE_URL_SENIOR)"
-LEGACY_URL="$(load_env DATABASE_URL)"
-
-if [ "${DUAL_DB:-false}" = "true" ]; then
-  echo "[deploy] 双库模式：同步初中部 + 高中部"
-  DATABASE_URL="$JUNIOR_URL" npx prisma db push --skip-generate
-  DATABASE_URL="$SENIOR_URL" npx prisma db push --skip-generate
-else
-  echo "[deploy] 单库模式"
-  DATABASE_URL="${LEGACY_URL:-$JUNIOR_URL}" npx prisma db push --skip-generate
-fi
+echo "[deploy] Build and migrate (both DBs)"
+bash scripts/db-sync-all.sh
 
 echo "[deploy] npm run build"
 npm run build

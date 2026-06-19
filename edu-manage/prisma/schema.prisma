@@ -13,11 +13,11 @@ model User {
   password    String
   name        String
   role        String   @default("parent")
+  division    String   @default("JUNIOR")
   avatar      String?
   status      String   @default("active")
   wxpusherUid String?
   teacherId   String?  @unique
-  division       String   @default("JUNIOR")
   currentSessionToken String?
   lastLoginAt         DateTime?
   lastLoginIp         String?
@@ -107,6 +107,7 @@ model Teacher {
   avatar         String?
   employmentType String    @default("FULL_TIME")
   status         String    @default("ACTIVE")
+  division       String    @default("JUNIOR")
   joinedAt       DateTime  @default(now())
   contractEnd    DateTime?
   education      String?
@@ -119,7 +120,6 @@ model Teacher {
   monthlyHours   Int       @default(0)
   rating         Float     @default(0)
   ratingCount    Int       @default(0)
-  division       String    @default("JUNIOR")
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -447,7 +447,7 @@ model Schedule {
   teacherId             String
   title                 String
   startTime             DateTime
-  endTime             DateTime
+  endTime               DateTime
   isRecurring           Boolean   @default(false)
   recurrence            String?
   status                String    @default("scheduled")
@@ -661,7 +661,7 @@ model ClassroomFeedback {
   overallComment  String?
   homework        Json?
   homeworkDone   Boolean?
-  inClassRating  Int?         // 1-5
+  inClassRating  Int?
   imageUrls       String[]
   imageTypes      Json?
   studentRatings  Json?
@@ -1257,7 +1257,7 @@ model ParentMessage {
   teacher     Teacher? @relation("TeacherMessages", fields: [teacherId], references: [id])
   subject     String?
   title       String
-  status      String   @default("OPEN")   // OPEN | CLOSED
+  status      String   @default("OPEN")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -1274,7 +1274,7 @@ model ParentMessageReply {
   message         ParentMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
   authorId        String
   authorName      String
-  role            String         // parent | teacher | admin
+  role            String
   content         String
   isReadByParent  Boolean        @default(false)
   isReadByTeacher Boolean        @default(false)
@@ -1283,7 +1283,6 @@ model ParentMessageReply {
   @@index([messageId, createdAt])
 }
 
-// ── 统一文件资产 ──
 model FileAsset {
   id             String    @id @default(cuid())
   filename       String
@@ -1293,13 +1292,13 @@ model FileAsset {
   storageDriver  String    @default("local")
   storageKey     String
   url            String
-  ownerType      String    // feedback | performance_post | student_archive | admin_material | parent_upload | teacher_upload
+  ownerType      String
   ownerId        String?
   studentId      String?
   lessonId       String?
   feedbackId     String?
   postId         String?
-  visibility     String    @default("PRIVATE") // PRIVATE | PARENT_VISIBLE | TEACHER_VISIBLE | ADMIN_ONLY | PUBLIC
+  visibility     String    @default("PRIVATE")
   uploadedById   String?
   uploadedByRole String?
   tenant         String?
@@ -1314,13 +1313,12 @@ model FileAsset {
   @@index([tenant])
 }
 
-// ── 知识点掌握推送（教师随手标注，不必整份试卷）──
 model MasteryRecord {
   id             String   @id @default(cuid())
   studentId      String
   teacherId      String
   knowledgePoint String
-  level          String   @default("NEEDS_REVIEW") // MASTERED | NEEDS_REVIEW | NEEDS_PRACTICE
+  level          String   @default("NEEDS_REVIEW")
   note           String?
   createdAt      DateTime @default(now())
 
