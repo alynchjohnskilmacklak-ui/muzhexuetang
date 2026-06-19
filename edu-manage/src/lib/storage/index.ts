@@ -34,7 +34,7 @@ export interface StorageDriver {
 
 // ---- local driver ----
 
-const UPLOAD_ROOT = join(process.cwd(), 'public', 'uploads')
+const UPLOAD_ROOT = process.env.UPLOAD_DIR || join(process.cwd(), 'public', 'uploads')
 
 class LocalStorageDriver implements StorageDriver {
   async put(key: string, file: File): Promise<UploadResult> {

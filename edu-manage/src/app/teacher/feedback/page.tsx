@@ -33,6 +33,7 @@ function FeedbackPageInner() {
   const [homework, setHomework] = useState<string[]>([])
   const [hwInput, setHwInput] = useState('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [badgeOpen, setBadgeOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [submitDone, setSubmitDone] = useState(false)
 
@@ -187,18 +188,23 @@ function FeedbackPageInner() {
         </div>
       </Card>
 
-      {/* Badge */}
+      {/* Badge — collapsible */}
       <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>闪光徽章（可选）</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {BADGES.map(b => (
-            <button key={b} onClick={() => setBadge(badge === b ? '' : b)} style={{
-              padding: '4px 12px', borderRadius: 20, cursor: 'pointer', fontSize: 12,
-              background: badge === b ? '#D4A017' : '#F5F2EE',
-              color: badge === b ? '#fff' : '#5a4e3a', border: 'none',
-            }}>{b}</button>
-          ))}
+        <div style={{ fontSize: 13, fontWeight: 700, display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => setBadgeOpen(!badgeOpen)}>
+          <span>闪光徽章 {badge ? `· ${badge}` : '(可选)'}</span>
+          <span style={{ color: '#98A2B3' }}>{badgeOpen ? '收起' : '展开'}</span>
         </div>
+        {badgeOpen && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+            {BADGES.map(b => (
+              <button key={b} onClick={() => setBadge(badge === b ? '' : b)} style={{
+                padding: '4px 12px', borderRadius: 20, cursor: 'pointer', fontSize: 12,
+                background: badge === b ? '#D4A017' : '#F5F2EE',
+                color: badge === b ? '#fff' : '#5a4e3a', border: 'none',
+              }}>{b}</button>
+            ))}
+          </div>
+        )}
       </Card>
 
       {/* Upload */}
@@ -250,8 +256,14 @@ function FeedbackPageInner() {
         </Upload.Dragger>
       </Card>
 
-      {/* Submit */}
-      <div style={{ display: 'flex', gap: 10, paddingBottom: 24 }}>
+      {/* Submit — fixed bottom bar on mobile */}
+      <div style={{
+        display: 'flex', gap: 10, paddingBottom: isMobile ? 'calc(12px + env(safe-area-inset-bottom))' : 24,
+        ...(isMobile ? {
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+          background: '#fff', padding: '10px 16px', borderTop: '1px solid #EEE7E1', boxShadow: '0 -2px 8px rgba(0,0,0,.06)',
+        } : {}),
+      }}>
         <Button block onClick={() => submit('DRAFT')} loading={saving} style={{ flex: 1 }}>保存草稿</Button>
         <Button block type="primary" icon={submitDone ? <CheckCircleOutlined /> : <SendOutlined />}
           onClick={() => submit('PUBLISHED')} loading={saving}
@@ -259,6 +271,8 @@ function FeedbackPageInner() {
           {submitDone ? '已发布' : saving ? '发布中...' : '发布给家长'}
         </Button>
       </div>
+      {/* Spacer for fixed bar on mobile */}
+      {isMobile && <div style={{ height: 80 }} />}
     </div>
   )
 
@@ -371,15 +385,21 @@ function FeedbackPageInner() {
           </Card>
         )}
 
-        {/* Selected count + form (mobile) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {selectedStudentIds.length > 0 && (
-            <Tag color="orange" style={{ borderRadius: 9999 }}>已选 {selectedStudentIds.length} 人</Tag>
-          )}
-          {!groupId && (
-            <div style={{ fontSize: 13, color: '#7A869A', padding: '20px 0', textAlign: 'center' }}>
-              请先选择班级，然后选择学员
-            </div>
+        {/* Selected count + stage summary link */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {selectedStudentIds.length > 0 && (
+              <Tag color="orange" style={{ borderRadius: 9999 }}>已选 {selectedStudentIds.length} 人</Tag>
+            )}
+            {!groupId && (
+              <div style={{ fontSize: 13, color: '#7A869A', padding: '12px 0' }}>请先选择班级，然后选择学员</div>
+            )}
+          </div>
+          {selectedStudentIds.length === 1 && (
+            <Button type="link" size="small" onClick={() => router.push(`/teacher/student/${selectedStudentIds[0]}`)}
+              style={{ fontSize: 12, color: '#E8784A' }}>
+              📝 写本期寄语（家长端·案）→
+            </Button>
           )}
         </div>
 
@@ -437,7 +457,7 @@ export default function TeacherFeedbackPage() {
   return (
     <div style={{ padding: '0 0 32px' }}>
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#1F2329' }}>成长反馈工作台</h2>
+        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#1F2329' }}>课堂反馈</h2>
         <div style={{ fontSize: 13, color: '#98A2B3', marginTop: 4 }}>发布后家长实时收到通知，并计入反馈奖励</div>
       </div>
       <Suspense fallback={<div style={{ textAlign: 'center', padding: 60 }}><Spin /></div>}>

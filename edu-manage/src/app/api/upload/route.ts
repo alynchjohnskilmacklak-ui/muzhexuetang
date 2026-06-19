@@ -115,7 +115,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
       file: { storageKey: result.storageKey, filename: file.name, mimeType: file.type, size: file.size, visibility },
     })
   } catch (uploadErr) {
-    console.error('[upload:fail]', { name: file.name, size: file.size, type: file.type, error: uploadErr instanceof Error ? uploadErr.message : String(uploadErr) })
-    return NextResponse.json({ error: '上传失败：服务器存储写入错误，请联系管理员' }, { status: 500 })
+    const code = (uploadErr as NodeJS.ErrnoException)?.code || 'UNKNOWN'
+    console.error('[upload:fail]', { name: file.name, size: file.size, code, error: String(uploadErr) })
+    return NextResponse.json({ error: `上传失败（${code}），请联系管理员` }, { status: 500 })
   }
 })
