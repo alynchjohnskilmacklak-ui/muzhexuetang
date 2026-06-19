@@ -660,8 +660,7 @@ model ClassroomFeedback {
   badge           String?
   overallComment  String?
   homework        Json?
-  homeworkDone    Boolean?
-  inClassRating   Int?
+  // TODO Phase2: homeworkDone Boolean? + inClassRating Int?
   imageUrls       String[]
   imageTypes      Json?
   studentRatings  Json?
