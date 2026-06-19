@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { Card, Empty, Select, Tag, Typography, Progress, Spin } from 'antd'
 import {
   FileTextOutlined,
@@ -57,9 +57,9 @@ const fetcher = (url: string) => fetch(url).then(async r => {
 
 export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   const [studentId, setStudentId] = useState(initial.activeStudentId || '')
-  const [months, setMonths] = useState(3)
+  const [months, setMonths] = useState(6)
 
-  const query = studentId ? `/api/parent/profile?studentId=${studentId}` : null
+  const query = studentId ? `/api/parent/profile?studentId=${studentId}&months=${months}` : null
   const { data, isLoading } = useSWR(query, fetcher, {
     fallbackData: initial.profile && studentId === initial.activeStudentId
       ? { children: initial.children, activeStudentId: initial.activeStudentId, profile: initial.profile }
@@ -71,10 +71,6 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
 
   const children: { id: string; name: string }[] = data?.children || initial.children
   const profile = data?.profile as StudentProfile | null | undefined
-
-  const handleChildChange = useCallback((id: string) => {
-    setStudentId(id)
-  }, [])
 
   if (!initial.children.length) {
     return (
@@ -101,7 +97,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
             <Select
               size="small"
               value={studentId}
-              onChange={handleChildChange}
+              onChange={setStudentId}
               style={{ minWidth: 100 }}
               options={children.map(c => ({ label: c.name, value: c.id }))}
             />
@@ -115,6 +111,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
               { label: '近 1 个月', value: 1 },
               { label: '近 3 个月', value: 3 },
               { label: '近 6 个月', value: 6 },
+              { label: '近 12 个月', value: 12 },
             ]}
           />
         </div>

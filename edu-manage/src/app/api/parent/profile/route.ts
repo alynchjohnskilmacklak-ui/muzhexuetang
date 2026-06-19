@@ -21,8 +21,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const requested = req.nextUrl.searchParams.get('studentId')
   const target = requested && children.some(c => c.id === requested) ? requested : children[0].id
 
+  const monthsParam = Number(req.nextUrl.searchParams.get('months'))
+  const months = Number.isFinite(monthsParam) ? Math.min(24, Math.max(1, Math.round(monthsParam))) : 6
   const to = new Date()
-  const from = new Date(to.getTime() - 180 * 86400000)
+  const from = new Date(to)
+  from.setMonth(from.getMonth() - months)
 
   const profile = await getStudentProfile(prisma, target, { from, to })
   return NextResponse.json({ children, activeStudentId: target, profile })

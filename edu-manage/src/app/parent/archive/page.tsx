@@ -27,7 +27,8 @@ export default async function ParentArchivePage() {
 
   if (initial.activeStudentId) {
     const to = new Date()
-    const from = new Date(to.getTime() - 180 * 86400000)
+    const from = new Date(to)
+    from.setMonth(from.getMonth() - 6)
     initial.profile = await getStudentProfile(prisma, initial.activeStudentId, { from, to })
   }
 

@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
-import { visiblePerformancePostWhere } from '@/lib/business-visibility'
+import { visiblePerformancePostWhere, visibleTeacherWhere } from '@/lib/business-visibility'
 
 export interface ProfileRange { from: Date; to: Date }
 
@@ -21,7 +21,7 @@ export async function getStudentProfile(
         },
       }),
       prisma.examPaper.findMany({
-        where: { studentId, status: 'PUBLISHED' },
+        where: { studentId, status: 'PUBLISHED', paperDate: { gte: from, lte: to } },
         select: {
           id: true, title: true, subject: true, paperDate: true, teacher: { select: { name: true } },
           questions: { select: { mastery: true, topic: true } },
@@ -60,7 +60,7 @@ export async function getStudentProfile(
         orderBy: { createdAt: 'desc' }, take: 50,
       }),
       prisma.performancePost.findMany({
-        where: { studentId, ...visiblePerformancePostWhere, createdAt: { gte: from, lte: to } },
+        where: { studentId, ...visiblePerformancePostWhere, teacher: visibleTeacherWhere, createdAt: { gte: from, lte: to } },
         select: { id: true, content: true, mood: true, images: true, createdAt: true, teacher: { select: { name: true } } },
         orderBy: { createdAt: 'desc' }, take: 50,
       }),
