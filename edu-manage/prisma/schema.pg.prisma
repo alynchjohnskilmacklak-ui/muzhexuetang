@@ -85,6 +85,7 @@ model Student {
   examPapers        ExamPaper[]
   learningGoals     LearningGoal[]
   weaknessRecords   WeaknessRecord[]
+  stageSummaries    StageSummary[]
   notifications     Notification[]
   leaveRequests     LeaveRequest[]
   mealChoices       ParentMealChoice[]
@@ -134,6 +135,7 @@ model Teacher {
   performancePosts   PerformancePost[]
   achievementBadges  AchievementBadge[]
   examPapers         ExamPaper[]
+  stageSummaries     StageSummary[]
   studyMaterials     StudyMaterial[]
   activityLogs       ActivityLog[]
   alerts             TeacherAlert[]
@@ -1061,6 +1063,27 @@ model WeaknessRecord {
   mistakeCount Int        @default(1)
   suggestion   String?
   createdAt    DateTime   @default(now())
+}
+
+model StageSummary {
+  id           String    @id @default(cuid())
+  studentId    String
+  student      Student   @relation(fields: [studentId], references: [id])
+  teacherId    String
+  teacher      Teacher   @relation(fields: [teacherId], references: [id])
+  periodStart  DateTime
+  periodEnd    DateTime
+  summary      String    @db.Text
+  suggestions  String?   @db.Text
+  dataSnapshot Json?
+  status       String    @default("DRAFT")
+  publishedAt  DateTime?
+  notifySent   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([studentId, status, periodEnd])
+  @@index([teacherId, createdAt])
 }
 
 model SystemConfig {

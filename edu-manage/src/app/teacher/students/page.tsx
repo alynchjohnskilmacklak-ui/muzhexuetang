@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import { Avatar, Badge, Button, Card, Empty, Input, Progress, Segmented, Select, Skeleton, Space, Tag, Typography } from 'antd'
-import { FileTextOutlined, MessageOutlined, SearchOutlined, UserOutlined, WarningFilled } from '@ant-design/icons'
+import { FileTextOutlined, MessageOutlined, ProfileOutlined, SearchOutlined, UserOutlined, WarningFilled } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatHourPair, formatHours, formatPercent } from '@/lib/format'
 
@@ -139,13 +139,14 @@ export default function TeacherStudentsPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 1fr))',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, minmax(0, 1fr))',
             gap: 8,
             marginTop: 14,
           }}
         >
           <Button icon={<FileTextOutlined />} onClick={() => router.push(`/teacher/classroom-feedback?studentId=${student.id}`)}>上传</Button>
           <Button icon={<MessageOutlined />} onClick={() => router.push(`/teacher/performance?studentId=${student.id}`)}>反馈</Button>
+          <Button icon={<ProfileOutlined />} onClick={() => router.push(`/teacher/student-profile/${student.id}`)}>学情档案</Button>
           <Button onClick={() => router.push(`/teacher/students/${student.id}`)}>档案</Button>
         </div>
       </Card>

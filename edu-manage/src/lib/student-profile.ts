@@ -10,7 +10,7 @@ export async function getStudentProfile(
 ) {
   const { from, to } = range
 
-  const [student, papers, grades, weaknesses, goals, badges, feedbacks, posts, attendances] =
+  const [student, papers, grades, weaknesses, goals, badges, feedbacks, posts, attendances, stageSummary] =
     await Promise.all([
       prisma.student.findUnique({
         where: { id: studentId },
@@ -67,6 +67,18 @@ export async function getStudentProfile(
       prisma.attendance.findMany({
         where: { studentId, createdAt: { gte: from, lte: to } },
         select: { status: true },
+      }),
+      prisma.stageSummary.findFirst({
+        where: { studentId, status: 'PUBLISHED' },
+        orderBy: { periodEnd: 'desc' },
+        select: {
+          summary: true,
+          suggestions: true,
+          periodStart: true,
+          periodEnd: true,
+          publishedAt: true,
+          teacher: { select: { name: true } },
+        },
       }),
     ])
 
@@ -140,7 +152,16 @@ export async function getStudentProfile(
     },
     profileCase: {
       goals: goals.map(g => ({ subject: g.subject, goalDesc: g.goalDesc, deadline: g.deadline, isAchieved: g.isAchieved })),
-      teacherSummary: null as string | null,
+      teacherSummary: stageSummary
+        ? {
+            summary: stageSummary.summary,
+            suggestions: stageSummary.suggestions,
+            teacherName: stageSummary.teacher?.name || null,
+            periodStart: stageSummary.periodStart,
+            periodEnd: stageSummary.periodEnd,
+            publishedAt: stageSummary.publishedAt,
+          }
+        : null,
     },
   }
 }

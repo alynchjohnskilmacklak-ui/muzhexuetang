@@ -328,7 +328,19 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
             <div style={{ padding: '12px 16px', background: '#faf8f5', borderRadius: 12, border: '1px solid rgba(0,0,0,.04)' }}>
               <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 4 }}>教师寄语</Text>
               {profile.profileCase.teacherSummary ? (
-                <Paragraph type="secondary" style={{ fontSize: 13, margin: 0 }}>{profile.profileCase.teacherSummary}</Paragraph>
+                <div>
+                  <Tag color="purple" style={{ borderRadius: 9999, marginBottom: 8 }}>
+                    {profile.profileCase.teacherSummary.teacherName || '老师'} · {format(new Date(profile.profileCase.teacherSummary.periodStart), 'M月d日')} 至 {format(new Date(profile.profileCase.teacherSummary.periodEnd), 'M月d日')}
+                  </Tag>
+                  <Paragraph type="secondary" style={{ fontSize: 13, margin: 0, whiteSpace: 'pre-wrap' }}>
+                    {profile.profileCase.teacherSummary.summary}
+                  </Paragraph>
+                  {profile.profileCase.teacherSummary.suggestions && (
+                    <Paragraph type="secondary" style={{ fontSize: 13, margin: '8px 0 0', whiteSpace: 'pre-wrap' }}>
+                      下一步建议：{profile.profileCase.teacherSummary.suggestions}
+                    </Paragraph>
+                  )}
+                </div>
               ) : (
                 <Text type="secondary" style={{ fontSize: 13, fontStyle: 'italic' }}>老师正在撰写本期寄语</Text>
               )}
