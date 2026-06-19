@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkRateLimit } from './api-rate-limit'
+import { checkRateLimit } from './rate-limit'
 import { ValidationError } from './api-validate'
 
 type Handler = (...args: any[]) => Promise<Response>
 
+/** 不同路径的请求体大小限制 */
+function getBodyLimit(path: string): number {
+  if (path.startsWith('/api/materials/upload')) return 50 * 1024 * 1024  // 50MB
+  if (path.startsWith('/api/upload'))           return 10 * 1024 * 1024  // 10MB
+  if (path.startsWith('/api/exam-papers'))      return 10 * 1024 * 1024
+  if (path.startsWith('/api/volunteer'))        return 10 * 1024 * 1024
+  return 5 * 1024 * 1024  // 默认 5MB
+}
+
 /**
- * 包装 API 路由，统一捕获未处理的异常。
+ * 包装 API 路由，统一捕获未处理的异常、限流、请求体大小检查。
  * 生产环境只返回通用错误信息，不暴露堆栈或数据库结构。
  */
 export function apiHandler<T extends Handler>(handler: T): T {
@@ -16,8 +25,10 @@ export function apiHandler<T extends Handler>(handler: T): T {
         const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
           || req.headers.get('x-real-ip')
           || '0.0.0.0'
-        const path = new URL(req.url).pathname
-        const { allowed, retryAfter } = checkRateLimit(ip, path)
+        const url = new URL(req.url)
+        const path = url.pathname
+
+        const { allowed, retryAfter } = await checkRateLimit(ip, path)
         if (!allowed) {
           return NextResponse.json(
             { error: '请求过于频繁，请稍后重试' },
@@ -25,10 +36,12 @@ export function apiHandler<T extends Handler>(handler: T): T {
           )
         }
 
+        const limit = getBodyLimit(path)
         const contentLength = req.headers.get('content-length')
-        if (contentLength && parseInt(contentLength) > 5 * 1024 * 1024) {
+        if (contentLength && parseInt(contentLength) > limit) {
+          const limitMB = Math.round(limit / 1024 / 1024)
           return NextResponse.json(
-            { error: '请求体过大，最大支持 5MB' },
+            { error: `文件过大，最大支持 ${limitMB}MB` },
             { status: 413 }
           )
         }

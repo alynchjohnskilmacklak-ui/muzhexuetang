@@ -152,7 +152,7 @@ function StudySection({ profile }: { profile: StudentProfile }) {
         <div style={{ marginTop: 16 }}>
           <Text strong>薄弱知识点</Text>
           <div style={{ marginTop: 8 }}>
-            {profile.study.weaknesses.map((item) => (
+            {profile.study.weaknesses.map((item: { topic: string; mistakeCount: number }) => (
               <Tag key={item.topic} color={item.mistakeCount >= 3 ? 'red' : 'orange'} style={{ marginBottom: 6 }}>
                 {item.topic} ×{item.mistakeCount}
               </Tag>
@@ -171,7 +171,7 @@ function HabitSection({ profile }: { profile: StudentProfile }) {
         <Text>出勤率：{profile.habits.attendanceRate !== null ? `${profile.habits.attendanceRate}%` : '暂无记录'}</Text>
         {profile.habits.moodTimeline.length > 0 ? (
           <Space wrap>
-            {profile.habits.moodTimeline.map((item, index) => (
+            {profile.habits.moodTimeline.map((item: { date: Date; mood: string | null }, index: number) => (
               <Tag key={`${item.date}-${index}`} color="orange">{format(new Date(item.date), 'M月d日')} · {item.mood}</Tag>
             ))}
           </Space>
@@ -222,7 +222,7 @@ function CaseSection({ profile, summaries }: { profile: StudentProfile; summarie
     <ArchiveCard title="案" subtitle="目标、教师寄语与阶段小结" icon={<FlagOutlined />} color="#EF9F27">
       {profile.profileCase.goals.length > 0 ? (
         <Space direction="vertical" size={8} style={{ width: '100%', marginBottom: 16 }}>
-          {profile.profileCase.goals.map((goal) => (
+          {profile.profileCase.goals.map((goal: { subject: string; goalDesc: string; isAchieved?: boolean }) => (
             <div key={`${goal.subject}-${goal.goalDesc}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <Text>{goal.goalDesc}</Text>
               <Tag color={goal.isAchieved ? 'green' : 'blue'}>{goal.isAchieved ? '已达成' : '进行中'}</Tag>

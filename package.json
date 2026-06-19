@@ -1,5 +1,11 @@
 {
   "scripts": {
+    "dev": "cd edu-manage && npm run dev",
+    "build": "cd edu-manage && npm run build",
+    "start": "cd edu-manage && npm run start",
+    "test": "cd edu-manage && npm run test",
+    "type-check": "cd edu-manage && npm run type-check",
+    "lint": "cd edu-manage && npm run lint",
     "claude": "set DISABLE_AUTOUPDATER=1&& claude",
     "claude:version": "set DISABLE_AUTOUPDATER=1&& claude --version"
   },

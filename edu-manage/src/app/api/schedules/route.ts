@@ -29,6 +29,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       title, courseId, teacherId, roomId,
       startDate, startTimeVal, endTimeVal,
       color, notes, classType, studentIds,
+      classGroupId, groupName,
     } = body
 
     if (!title || !teacherId || !startDate || !startTimeVal || !endTimeVal) {
@@ -85,22 +86,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
 
     if (allConflicts.length > 0) {
-      const teacherConflicts = allConflicts.filter(c => c.type === 'teacher')
-      const roomConflicts = allConflicts.filter(c => c.type === 'room')
-      const studentConflicts = allConflicts.filter(c => c.type === 'student')
-
-      let errorMsg = ''
-      if (teacherConflicts.length > 0) {
-        errorMsg = '该老师在此时间段已有课程，不能安排'
-      } else if (studentConflicts.length > 0) {
-        errorMsg = '有学员在此时间段已有排课'
-      } else if (roomConflicts.length > 0) {
-        errorMsg = '该教室在此时间段已被占用'
-      }
-
+      const details = allConflicts.map(c => {
+        const typeMap: Record<string, string> = { teacher: '教师冲突', room: '教室冲突', student: '学生冲突' }
+        return `${typeMap[c.type] || c.type}：${c.courseName} (${c.timeRange})${c.roomName ? ` @${c.roomName}` : ''}`
+      })
       return NextResponse.json({
-        error: errorMsg,
+        error: `排课冲突：${details.join('；')}`,
         conflicts: allConflicts,
+        details,
       }, { status: 409 })
     }
 
@@ -121,11 +114,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
       })
       if (!teacher) throw { status: 400, message: '教师不存在' }
 
-      // key 加入开始时间和班型，确保同一天同老师同课程的不同课次不会被错误合并到一个班
-      const groupName = `临时·${teacher.name}·${course.name}·${startDate} ${startTimeVal}·${classType || 'SMALL_CLASS'}`
-      let group = await tx.classGroup.findFirst({
-        where: { name: groupName, teacherId, courseId, status: 'ACTIVE', division: lessonDivision },
-      })
+      // 使用已有 ClassGroup 或创建新班级（不再用"临时"前缀污染班级列表）
+      const groupName = body.groupName || `${course.name}·${teacher.name}·${startDate}`
+      let group = classGroupId
+        ? await tx.classGroup.findFirst({ where: { id: classGroupId, status: { not: 'ARCHIVED' } } })
+        : await tx.classGroup.findFirst({ where: { name: groupName, teacherId, courseId, status: { not: 'ARCHIVED' }, division: lessonDivision } })
       if (!group) {
         group = await tx.classGroup.create({
           data: {
@@ -148,18 +141,18 @@ export const POST = apiHandler(async (req: NextRequest) => {
         await tx.classGroup.update({ where: { id: group.id }, data: { roomId } })
       }
 
-      // Ensure enrollments for all students
+      // Create enrollment relationship only (no fake hour purchase)
       for (const studentId of dedupedStudentIds) {
         const existing = await tx.enrollment.findFirst({
-          where: { groupId: group.id, studentId, status: 'ACTIVE' },
+          where: { groupId: group.id, studentId },
         })
         if (!existing) {
           await tx.enrollment.create({
             data: {
               groupId: group.id,
               studentId,
-              totalHours: 1,
-              remainHours: 1,
+              totalHours: 0,
+              remainHours: 0,
               status: 'ACTIVE',
             },
           })

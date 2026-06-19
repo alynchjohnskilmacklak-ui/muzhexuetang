@@ -44,7 +44,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
 
-
   const prisma = await getRequestPrisma()
   const { searchParams } = new URL(req.url)
   const grade = searchParams.get('grade')
@@ -61,6 +60,23 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (grade) {
     where.course = { ...activeCourseWhere, grade }
   }
+
+  // Role-based filtering: teacher sees own groups, parent sees children's
+  if (user.role === 'teacher') {
+    if (!user.teacherId) return NextResponse.json({ error: '未绑定教师档案' }, { status: 403 })
+    where.OR = [
+      { teacherId: user.teacherId },
+      { teacherAssignments: { some: { teacherId: user.teacherId } } },
+    ]
+  } else if (user.role === 'parent') {
+    where.enrollments = {
+      some: {
+        student: { parentUserId: user.id, status: { not: 'ARCHIVED' } },
+        status: 'ACTIVE',
+      },
+    }
+  }
+  // admin: no extra restriction (can see all in own division)
 
   const includeAll = {
     course: { select: { id: true, name: true, subject: true, type: true, grade: true, color: true, lessonMinutes: true } },

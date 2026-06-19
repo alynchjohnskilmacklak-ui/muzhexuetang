@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
+    "type-check": "tsc --noEmit",
     "lint": "eslint",
     "db:studio": "prisma studio",
     "db:push": "prisma db push",

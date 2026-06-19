@@ -33,8 +33,8 @@ export async function checkScheduleConflict(input: ConflictCheckInput, prismaCli
   const prisma = prismaClient ?? await getRequestPrisma()
   const { teacherId, studentId, roomId, date, startTime, endTime, excludeLessonId } = input
 
-  const dayStart = new Date(`${date}T00:00:00`)
-  const dayEnd = new Date(`${date}T23:59:59`)
+  const dayStart = new Date(`${date}T00:00:00+08:00`)
+  const dayEnd = new Date(`${date}T23:59:59+08:00`)
 
   const whereBase: Record<string, unknown> = {
     lessonDate: { gte: dayStart, lte: dayEnd },
@@ -63,7 +63,7 @@ export async function checkScheduleConflict(input: ConflictCheckInput, prismaCli
     if (hasTimeOverlap(startTime, endTime, lesson.startTime, lesson.endTime)) {
       conflicts.push({
         type: 'teacher',
-        message: '该老师在此时间段已有课程',
+        message: `教师冲突：${lesson.teacher?.name || '未知'} 在 ${date} ${lesson.startTime}-${lesson.endTime} 已有【${lesson.group?.course?.name || '-'}】课程`,
         lessonId: lesson.id,
         courseName: lesson.group?.course?.name || '-',
         timeRange: `${lesson.startTime}-${lesson.endTime}`,
@@ -90,7 +90,7 @@ export async function checkScheduleConflict(input: ConflictCheckInput, prismaCli
       if (hasTimeOverlap(startTime, endTime, lesson.startTime, lesson.endTime)) {
         conflicts.push({
           type: 'student',
-          message: '该学员在此时间段已有课程',
+          message: `学生冲突：该学员在 ${date} ${lesson.startTime}-${lesson.endTime} 已有【${lesson.group?.course?.name || '-'}】课程`,
           lessonId: lesson.id,
           courseName: lesson.group?.course?.name || '-',
           timeRange: `${lesson.startTime}-${lesson.endTime}`,
@@ -118,7 +118,7 @@ export async function checkScheduleConflict(input: ConflictCheckInput, prismaCli
       if (hasTimeOverlap(startTime, endTime, lesson.startTime, lesson.endTime)) {
         conflicts.push({
           type: 'room',
-          message: '该教室在此时间段已被占用',
+          message: `教室冲突：${lesson.group?.room?.name || '该教室'} 在 ${date} ${lesson.startTime}-${lesson.endTime} 已被【${lesson.group?.course?.name || '-'}】占用`,
           lessonId: lesson.id,
           courseName: lesson.group?.course?.name || '-',
           timeRange: `${lesson.startTime}-${lesson.endTime}`,
