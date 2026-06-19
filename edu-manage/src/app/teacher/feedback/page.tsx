@@ -215,12 +215,24 @@ function FeedbackPageInner() {
             ))}</AntImage.PreviewGroup>
           </div>
         )}
-        <Upload.Dragger name="file" action="/api/upload" accept="image/*" multiple maxCount={9} showUploadList={false}
-          data={{ uploadType: 'teacher-feedback' }}
+        <Upload.Dragger name="file" accept="image/*" multiple maxCount={9} showUploadList={false}
           beforeUpload={(file) => {
-            if (!file.type.startsWith('image/') && !/\.(heic|heif|avif)$/i.test(file.name)) { toast.warning('仅支持图片文件'); return Upload.LIST_IGNORE }
-            if (file.size > 20 * 1024 * 1024) { toast.warning('图片不能超过 20MB'); return Upload.LIST_IGNORE }
+            if (!file.type.startsWith('image/') && !/\.(heic|heif|avif)$/i.test(file.name)) { toast.warning('仅支持图片文件（JPG/PNG/WebP/HEIC）'); return Upload.LIST_IGNORE }
+            if (file.size > 20 * 1024 * 1024) { toast.warning('图片不能超过 20MB，请压缩后重新上传'); return Upload.LIST_IGNORE }
             return true
+          }}
+          customRequest={async ({ file, onSuccess, onError }) => {
+            const formData = new FormData()
+            formData.append('file', file as File)
+            formData.append('uploadType', 'teacher-feedback')
+            try {
+              const res = await fetch('/api/upload', { method: 'POST', body: formData })
+              const data = await res.json()
+              if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+              onSuccess?.(data)
+            } catch (err) {
+              onError?.(err instanceof Error ? err : new Error('上传失败'))
+            }
           }}
           onChange={info => {
             if (info.file.status === 'uploading') return
@@ -230,10 +242,11 @@ function FeedbackPageInner() {
               if (url) setImageUrls(prev => [...prev, url])
               else toast.error(error || '上传失败', { duration: 5000 })
             } else if (info.file.status === 'error') {
-              toast.error('上传失败，网络不稳定或服务器限制，请重试', { duration: 5000 })
+              const err = (info.file as any)?.error
+              toast.error((err as Error)?.message || '上传失败：请检查网络连接后重试', { duration: 5000 })
             }
           }} style={{ borderRadius: 8 }}>
-          <div style={{ fontSize: 12, color: '#98A2B3' }}>点击或拖拽上传，单张≤20MB</div>
+          <div style={{ fontSize: 12, color: '#98A2B3' }}>点击或拖拽上传，单张≤20MB，支持 JPG/PNG/WebP/HEIC</div>
         </Upload.Dragger>
       </Card>
 

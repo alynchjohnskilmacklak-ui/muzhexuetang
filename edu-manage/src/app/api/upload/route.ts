@@ -81,42 +81,41 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
   }
 
-  const result = await uploadBuffer(buffer, { originalName: file.name, mimeType: file.type, prefix: ownerType })
-
-  // Create FileAsset record if table exists
-  const prisma = await getRequestPrisma()
   try {
-    await (prisma as unknown as { fileAsset: { create: Function } }).fileAsset.create({
-      data: {
-        filename: result.storageKey,
-        originalName: file.name,
-        mimeType: file.type || 'application/octet-stream',
-        size: file.size,
-        storageDriver: result.storageDriver,
-        storageKey: result.storageKey,
-        url: result.url,
-        ownerType,
-        studentId,
-        lessonId,
-        feedbackId,
-        postId,
-        visibility,
-        uploadedById: user.id,
-        uploadedByRole: user.role,
-        tenant: user.division || null,
-      },
-    })
-  } catch { /* FileAsset table may not exist yet — skip gracefully */ }
+    const result = await uploadBuffer(buffer, { originalName: file.name, mimeType: file.type, prefix: ownerType })
 
-  return NextResponse.json({
-    url: result.url,
-    legacyUrl: result.url.replace('/api/uploads/', '/uploads/'),
-    file: {
-      storageKey: result.storageKey,
-      filename: file.name,
-      mimeType: file.type,
-      size: file.size,
-      visibility,
-    },
-  })
+    // Create FileAsset record if table exists
+    const prisma = await getRequestPrisma()
+    try {
+      await (prisma as unknown as { fileAsset: { create: Function } }).fileAsset.create({
+        data: {
+          filename: result.storageKey,
+          originalName: file.name,
+          mimeType: file.type || 'application/octet-stream',
+          size: file.size,
+          storageDriver: result.storageDriver,
+          storageKey: result.storageKey,
+          url: result.url,
+          ownerType,
+          studentId,
+          lessonId,
+          feedbackId,
+          postId,
+          visibility,
+          uploadedById: user.id,
+          uploadedByRole: user.role,
+          tenant: user.division || null,
+        },
+      })
+    } catch { /* FileAsset table may not exist yet */ }
+
+    return NextResponse.json({
+      url: result.url,
+      legacyUrl: result.url.replace('/api/uploads/', '/uploads/'),
+      file: { storageKey: result.storageKey, filename: file.name, mimeType: file.type, size: file.size, visibility },
+    })
+  } catch (uploadErr) {
+    console.error('[upload:fail]', { name: file.name, size: file.size, type: file.type, error: uploadErr instanceof Error ? uploadErr.message : String(uploadErr) })
+    return NextResponse.json({ error: '上传失败：服务器存储写入错误，请联系管理员' }, { status: 500 })
+  }
 })

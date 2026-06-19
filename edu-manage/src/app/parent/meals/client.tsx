@@ -56,16 +56,40 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
         </div>
       )}
 
-      {/* Promise banner (compact on mobile) */}
-      <div style={{ marginBottom: 16, borderRadius: 14, overflow: 'hidden', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #E87545 100%)', boxShadow: '0 6px 24px rgba(102,126,234,.25)' }}>
-        <div style={{ padding: '18px 18px 16px' }}>
-          <div style={{ fontSize: 17, fontWeight: 700, color: '#fff', marginBottom: 8 }}>牧哲学堂 · 就餐承诺</div>
-          <div style={{ fontSize: 12, lineHeight: 1.8, color: 'rgba(255,255,255,.9)' }}>
-            绝不赚取孩子一分钱饭钱。即使只订一份饭没吃饱，也会带孩子再次购买，直到孩子吃饱为止。
+      {/* Promise banner */}
+      <div style={{ position: 'relative', marginBottom: 16, borderRadius: 14, overflow: 'hidden', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #E87545 100%)', boxShadow: '0 6px 24px rgba(102,126,234,.25)' }}>
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,.08)' }} />
+        <div style={{ position: 'absolute', bottom: -60, left: -20, width: 160, height: 160, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,.05)' }} />
+        <div style={{ position: 'relative', padding: '22px 22px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+            <div style={{ width: 4, height: 28, borderRadius: 2, backgroundColor: 'rgba(255,255,255,.8)' }} />
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: 1 }}>牧哲学堂 · 就餐承诺</div>
           </div>
-          <div style={{ marginTop: 10, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {['吃饱吃好', '食品安全', '用心服务'].map(item => (
-              <span key={item} style={{ padding: '3px 10px', borderRadius: 16, background: 'rgba(255,255,255,.15)', fontSize: 11, color: '#fff' }}>{item}</span>
+          <div style={{ fontSize: 13, lineHeight: 2, color: 'rgba(255,255,255,.92)' }}>
+            <p style={{ margin: '0 0 10px' }}>
+              牧哲学堂始终坚持以学生为中心，以服务家长为宗旨，重视孩子在校期间的饮食安全与用餐保障。
+              <span style={{ fontWeight: 600, color: '#fff' }}>我们郑重承诺：绝不会赚取孩子一分钱饭钱</span>，
+              所有就餐安排均以保障孩子吃饱、吃好、吃得安全为基本原则。
+            </p>
+            <p style={{ margin: '0 0 10px' }}>
+              在订餐过程中，如遇到饭菜份数不足等特殊情况，我们会优先保障孩子用餐。
+              即使孩子只订了一份饭但没有吃饱，机构负责人也会及时关注，并根据实际情况带孩子再次购买饭食，
+              <span style={{ fontWeight: 600, color: '#fff' }}>直到孩子吃饱为止</span>。
+            </p>
+            <p style={{ margin: '0 0 10px' }}>
+              为保障食品安全，牧哲学堂每日饭菜均会按要求进行留样。
+              如家长对饭菜质量、食品安全或孩子用餐情况有任何疑问，请及时联系负责人，
+              我们一定会积极沟通、认真处理，并全力配合家长做好相关工作。
+            </p>
+            <p style={{ margin: '0' }}>
+              牧哲学堂不仅关注孩子的学习，也关心每一个家庭的实际情况。
+              <span style={{ fontWeight: 600, color: '#fff' }}>对于品学兼优、积极上进且家庭确有困难的学生，
+              我们也会根据实际情况提供力所能及的支持，尽可能帮助孩子顺利完成学业，直至高中毕业。</span>
+            </p>
+          </div>
+          <div style={{ marginTop: 14, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {['吃饱吃好', '食品安全', '用心服务', '尽职担当'].map(item => (
+              <span key={item} style={{ padding: '4px 12px', borderRadius: 16, background: 'rgba(255,255,255,.15)', fontSize: 11, color: '#fff' }}>{item}</span>
             ))}
           </div>
         </div>
