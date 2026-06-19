@@ -25,6 +25,7 @@
     "security:check": "node scripts/security-check.mjs",
     "school:missing": "tsx scripts/check-school-info-missing.ts",
     "school:update-info": "tsx scripts/update-school-info-verified.ts",
+    "check:garbled": "tsx scripts/check-garbled-text.ts",
     "test": "vitest run"
   },
   "dependencies": {
