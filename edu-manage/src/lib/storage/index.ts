@@ -121,6 +121,15 @@ const drivers: Record<string, StorageDriver> = {
 
 function getDriver(): StorageDriver {
   const configured = process.env.STORAGE_DRIVER || 'local'
+  if (configured === 'aliyun-oss') {
+    try { require.resolve('ali-oss') }
+    catch {
+      throw new Error('STORAGE_DRIVER=aliyun-oss 但未安装 ali-oss，请 npm install ali-oss 或改用 STORAGE_DRIVER=local')
+    }
+    if (!process.env.ALIYUN_OSS_BUCKET) {
+      throw new Error('STORAGE_DRIVER=aliyun-oss 但 ALIYUN_OSS_BUCKET 未配置')
+    }
+  }
   const driver = drivers[configured]
   if (!driver) {
     console.warn(`[storage] 未知 STORAGE_DRIVER "${configured}"，降级为 local`)
