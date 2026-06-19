@@ -660,7 +660,8 @@ model ClassroomFeedback {
   badge           String?
   overallComment  String?
   homework        Json?
-  // TODO Phase2: homeworkDone Boolean? + inClassRating Int? — need DB migration first
+  homeworkDone   Boolean?
+  inClassRating  Int?         // 1-5
   imageUrls       String[]
   imageTypes      Json?
   studentRatings  Json?

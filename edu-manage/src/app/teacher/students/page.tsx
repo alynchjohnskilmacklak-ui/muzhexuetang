@@ -144,10 +144,9 @@ export default function TeacherStudentsPage() {
             marginTop: 14,
           }}
         >
-          <Button icon={<FileTextOutlined />} onClick={() => router.push(`/teacher/classroom-feedback?studentId=${student.id}`)}>上传</Button>
-          <Button icon={<MessageOutlined />} onClick={() => router.push(`/teacher/performance?studentId=${student.id}`)}>反馈</Button>
-          <Button icon={<ProfileOutlined />} onClick={() => router.push(`/teacher/student-profile/${student.id}`)}>学情档案</Button>
-          <Button onClick={() => router.push(`/teacher/students/${student.id}`)}>档案</Button>
+          <Button type="primary" icon={<ProfileOutlined />} onClick={() => router.push(`/teacher/student/${student.id}`)}
+            style={{ gridColumn: isMobile ? 'span 1' : 'span 2' }}>学生工作台</Button>
+          <Button icon={<FileTextOutlined />} onClick={() => router.push(`/teacher/students/${student.id}`)}>基础档案</Button>
         </div>
       </Card>
     )

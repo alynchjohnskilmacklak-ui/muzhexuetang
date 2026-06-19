@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
 import { FeedbackDetailClient } from './client'
 import { parentLinkedStudentWhere, visibleClassroomFeedbackWhere, visibleTeacherWhere } from '@/lib/business-visibility'
@@ -11,6 +11,7 @@ export default async function FeedbackDetailPage({ params }: { params: Promise<{
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
+  const prisma = await getRequestPrisma()
 
   const studentIds = (
     await prisma.student.findMany({
