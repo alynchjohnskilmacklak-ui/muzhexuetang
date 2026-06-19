@@ -390,7 +390,29 @@ function FeedbackPageInner() {
         </div>
       ) : (
         <div style={{ marginTop: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>历史反馈</div>
+          {/* Mobile: Student context panel */}
+          {selectedStudentIds.length === 1 && (
+            <StudentContextPanel studentId={selectedStudentIds[0]} />
+          )}
+          {selectedStudentIds.length > 1 && (
+            <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1', background: '#FFFBF7', marginBottom: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>已选 {selectedStudentIds.length} 位学员</div>
+              <div style={{ fontSize: 11, color: '#7A869A' }}>批量反馈适合发共同内容，个性化评价建议单独选择学生补充</div>
+            </Card>
+          )}
+          {/* Mobile: History with date filter */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 700 }}>历史反馈</div>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <Button size="small" type={historyDate === new Date().toISOString().slice(0, 10) ? 'primary' : 'default'}
+                onClick={() => setHistoryDate(new Date().toISOString().slice(0, 10))}
+                style={{ fontSize: 11 }}>今天</Button>
+              <Button size="small" onClick={() => { const d = new Date(); d.setDate(d.getDate() - 7); setHistoryDate(d.toISOString().slice(0, 10)) }}
+                style={{ fontSize: 11 }}>近7天</Button>
+              <Input type="date" size="small" value={historyDate} onChange={e => setHistoryDate(e.target.value)}
+                style={{ width: 130, fontSize: 11 }} />
+            </div>
+          </div>
           {history.slice(0, 5).map((item: any) => <FeedbackCard key={item.id} item={item} compact />)}
         </div>
       )}
