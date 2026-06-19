@@ -43,6 +43,15 @@ const TYPE_COLOR: Record<string, string> = {
   goal: '#534AB7',
 }
 
+const TIMELINE_SOURCE: Record<string, { label: string; color: string }> = {
+  paper:    { label: '试卷模块 → 学',   color: '#0F6E56' },
+  feedback: { label: '课堂反馈 → 习',   color: '#854F0B' },
+  post:     { label: '成长反馈 → 档',   color: '#3C3489' },
+  badge:    { label: '成长反馈 → 案',   color: '#854F0B' },
+  grade:    { label: '成绩录入 → 档',   color: '#993C1D' },
+  goal:     { label: '学习目标 → 案',   color: '#3C3489' },
+}
+
 type InitialData = {
   children: { id: string; name: string }[]
   activeStudentId: string | null
@@ -288,6 +297,12 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                       </div>
                       {item.sub && <Text type="secondary" style={{ fontSize: 12 }}>{item.sub.length > 60 ? item.sub.slice(0, 60) + '...' : item.sub}</Text>}
                       {item.teacher && <Tag style={{ fontSize: 10, marginTop: 2, borderRadius: 9999 }}>{item.teacher} 老师</Tag>}
+                      {TIMELINE_SOURCE[item.type] && (
+                        <span style={{ fontSize: 10, color: TIMELINE_SOURCE[item.type].color,
+                          background: `${TIMELINE_SOURCE[item.type].color}14`, padding: '1px 7px', borderRadius: 9999, marginLeft: 6 }}>
+                          来自 {TIMELINE_SOURCE[item.type].label}
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}

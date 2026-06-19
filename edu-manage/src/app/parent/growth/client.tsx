@@ -30,8 +30,8 @@ const MOOD_LABELS: Record<string, { text: string; color: string; bg: string }> =
 }
 
 const TYPE_META: Record<string, { label: string; icon: ReactNode; color: string; bg: string }> = {
-  feedback: { label: '成长反馈', icon: <BookOutlined />, color: '#6A5ACD', bg: '#F0EEFF' },
-  performance_legacy: { label: '在校表现', icon: <HeartOutlined />, color: '#D96F43', bg: '#FFF3EA' },
+  feedback: { label: '课堂反馈', icon: <BookOutlined />, color: '#6A5ACD', bg: '#F0EEFF' },
+  performance_legacy: { label: '成长动态', icon: <HeartOutlined />, color: '#D96F43', bg: '#FFF3EA' },
   badge: { label: '闪光徽章', icon: <TrophyOutlined />, color: '#B7791F', bg: '#FFF5D8' },
   grade: { label: '学习成绩', icon: <StarOutlined />, color: '#2476A8', bg: '#EAF5FB' },
   highlight: { label: '高光时刻', icon: <RiseOutlined />, color: '#1D8A66', bg: '#EAF7EF' },
@@ -64,14 +64,13 @@ export function ParentGrowthClient({
 }) {
   const router = useRouter()
   const todayStr = new Date().toISOString().slice(0, 10)
-  const [clientDate, setClientDate] = useState<string>(filterDate || todayStr)
   const [detailModal, setDetailModal] = useState<any>(null)
   const [replyText, setReplyText] = useState('')
   const [replyingId, setReplyingId] = useState('')
   const [replySending, setReplySending] = useState(false)
 
+  // Scrolling timeline — no longer locked to a single day
   const timeline = useMemo(() => {
-    // Unified ClassroomFeedback with new fields
     const fbItems = classroomFeedbacks.map((f: any) => ({
       type: 'feedback' as const,
       date: new Date(f.createdAt),
@@ -95,7 +94,6 @@ export function ParentGrowthClient({
       source: f.source,
       raw: f,
     }))
-    // Legacy PerformancePost (read-only)
     const postItems = posts.map((p: any) => ({
       type: 'performance_legacy' as const,
       date: new Date(p.createdAt),
@@ -146,24 +144,22 @@ export function ParentGrowthClient({
       raw: g,
     }))
     return [...fbItems, ...postItems, ...badgeItems, ...highlightItems, ...gradeItems]
-      .filter(item => {
-        if (!clientDate) return true
-        const startOfDay = new Date(clientDate + 'T00:00:00').getTime()
-        const endOfDay = startOfDay + 86400000
-        return item.date.getTime() >= startOfDay && item.date.getTime() < endOfDay
-      })
       .sort((a, b) => b.date.getTime() - a.date.getTime())
-      .slice(0, 50)
-  }, [classroomFeedbacks, posts, badges, grades, highlights, clientDate])
+      .slice(0, 60)
+  }, [classroomFeedbacks, posts, badges, grades, highlights])
 
   const quote = getDailyQuote()
   const earnedTypes = new Set(badges.map((badge: any) => badge.badgeType))
   const featuredBadges = badges.slice(0, 3)
   const hasData = timeline.length > 0
+
+  // More meaningful stats
+  const thisMonthStart = new Date(); thisMonthStart.setDate(1); thisMonthStart.setHours(0,0,0,0)
+  const thisMonthCount = timeline.filter((t: any) => t.date >= thisMonthStart).length
   const stats = [
-    { label: '成长记录', value: timeline.length },
+    { label: '本月记录', value: thisMonthCount },
     { label: '闪光徽章', value: badges.length },
-    { label: '关联学员', value: students.length },
+    { label: '绑定学员', value: students.length },
   ]
 
   const handleParentReply = async (feedbackId: string) => {
@@ -179,7 +175,6 @@ export function ParentGrowthClient({
         message.success('回复已发送')
         setReplyText('')
         setReplyingId('')
-        // Refresh the page to show updated reply
         router.refresh()
       } else {
         const data = await res.json().catch(() => ({}))
@@ -197,7 +192,7 @@ export function ParentGrowthClient({
           <Text className="growth-eyebrow">家校成长记录</Text>
           <Title level={3} className="growth-title">成长动态</Title>
           <Text className="growth-subtitle">
-            记录孩子每一次进步与闪光时刻{clientDate ? `，当前查看 ${clientDate === todayStr ? '今日' : clientDate}` : ''}
+            近 30 天成长记录，记录孩子每一次进步与闪光时刻
           </Text>
         </div>
         <div className="growth-quote" aria-label="励志名言">
@@ -218,55 +213,31 @@ export function ParentGrowthClient({
         ))}
       </div>
 
+      {/* Scrolling timeline header — no date lock */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 14px',
-        padding: '8px 14px', background: '#fff', borderRadius: 12,
+        padding: '10px 16px', background: '#fff', borderRadius: 12,
         border: '1px solid #F0DDD2',
       }}>
-        <button
-          onClick={() => {
-            const prev = new Date(clientDate)
-            prev.setDate(prev.getDate() - 1)
-            const prevStr = prev.toISOString().slice(0, 10)
-            setClientDate(prevStr)
-            router.push(`/parent/growth?date=${prevStr}`)
-          }}
-          style={{ border: '1px solid #EEE7E1', borderRadius: 8, background: 'transparent', padding: '5px 12px', cursor: 'pointer' }}
-        >←</button>
-        <div style={{ flex: 1, textAlign: 'center', fontWeight: 600, fontSize: 14, color: '#1F2329' }}>
-          {clientDate === todayStr ? '今日' : clientDate}
+        <div style={{ flex: 1, fontWeight: 600, fontSize: 14, color: '#1F2329' }}>
+          近 30 天成长记录
           {timeline.length > 0 && <span style={{ fontSize: 12, color: '#98A2B3', marginLeft: 6 }}>({timeline.length} 条)</span>}
         </div>
-        <button
-          onClick={() => {
-            const next = new Date(clientDate)
-            next.setDate(next.getDate() + 1)
-            const nextStr = next.toISOString().slice(0, 10)
-            if (nextStr <= todayStr) { setClientDate(nextStr); router.push(`/parent/growth?date=${nextStr}`) }
-          }}
-          disabled={clientDate >= todayStr}
-          style={{ border: '1px solid #EEE7E1', borderRadius: 8, background: 'transparent', padding: '5px 12px', cursor: clientDate >= todayStr ? 'not-allowed' : 'pointer', opacity: clientDate >= todayStr ? 0.4 : 1 }}
-        >→</button>
-        {clientDate !== todayStr && (
-          <button
-            onClick={() => { setClientDate(todayStr); router.push('/parent/growth') }}
-            style={{ fontSize: 12, padding: '5px 12px', borderRadius: 8, background: '#E8784A', color: '#fff', border: 'none', cursor: 'pointer' }}
-          >今日</button>
-        )}
+        <Text type="secondary" style={{ fontSize: 11 }}>反馈 · 动态 · 徽章 · 试卷 · 目标</Text>
       </div>
 
       {highlightedFeedback && (
         <Alert
           type="info"
           icon={<InfoCircleOutlined />}
-          message="来自通知的反馈"
+          message="来自通知的旧链接"
           description={
             <div>
-              <Text strong>{highlightedFeedback.teacher?.name || '老师'}</Text>
-              {highlightedFeedback.student?.name && <Text style={{ marginLeft: 8 }}>学员：{highlightedFeedback.student.name}</Text>}
-              <Paragraph style={{ marginTop: 8, marginBottom: 0, fontSize: 13 }}>
-                {highlightedFeedback.overallComment || highlightedFeedback.content || highlightedFeedback.summary || '暂无内容'}
-              </Paragraph>
+              <Text>该反馈通知来自旧版本，请前往</Text>
+              <Button type="link" size="small" onClick={() => router.push(`/parent/class-feedback/${highlightedFeedback.id}`)}
+                style={{ padding: 0, height: 'auto' }}>
+                反馈中心查看详情
+              </Button>
             </div>
           }
           className="growth-alert"
@@ -280,9 +251,9 @@ export function ParentGrowthClient({
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description={
               <span>
-                {clientDate ? `${clientDate === todayStr ? '今日' : clientDate} 暂无成长记录。` : '老师还没有发布新的成长记录。'}
+                近 30 天暂无成长记录。
                 <br />
-                每一份努力都会被认真看见，新的闪光时刻很快会来到。
+                老师发布课堂反馈、表现评价后，会在这里展示。
               </span>
             }
           />
@@ -302,7 +273,6 @@ export function ParentGrowthClient({
                       {timeline.map((item: any) => {
                         const meta = typeMeta(item.type)
                         const canOpen = item.type === 'feedback' || item.type === 'performance_legacy'
-                        const isNewFeedback = item.type === 'feedback'
                         return (
                           <button
                             type="button"
@@ -503,7 +473,6 @@ export function ParentGrowthClient({
                 ))}
               </div>
             )}
-            {/* Parent reply section (for new feedback type) */}
             {detailModal.type === 'feedback' && (
               <div style={{ marginTop: 16, padding: '12px 0 0', borderTop: '1px solid #EEE7E1' }}>
                 {detailModal.parentReply ? (
