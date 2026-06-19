@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
-import { hasTimeOverlap } from '@/lib/schedule-conflict'
-import { divisionWhere } from '@/lib/division'
+import { getTeacherBusy } from '@/lib/teacher-busy'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,30 +17,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ conflict: false })
   }
 
-  const dayStart = new Date(`${date}T00:00:00`)
-  const dayEnd = new Date(`${date}T23:59:59`)
-  const divFilter = divisionWhere(division)
-
-  const lessons = await prisma.classLesson.findMany({
-    where: {
-      teacherId,
-      lessonDate: { gte: dayStart, lte: dayEnd },
-      status: { not: 'CANCELLED' },
-      ...divFilter,
-    },
-    include: {
-      group: { include: { course: { select: { name: true } } } },
-    },
-  })
-
-  for (const lesson of lessons) {
-    if (hasTimeOverlap(startTime, endTime, lesson.startTime, lesson.endTime)) {
-      return NextResponse.json({
-        conflict: true,
-        conflictDetail: `${lesson.group?.course?.name || '某班'} ${lesson.startTime}-${lesson.endTime}`,
-      })
-    }
+  const busy = await getTeacherBusy(prisma, teacherId, date, startTime, endTime)
+  if (busy) {
+    return NextResponse.json({ conflict: true, conflictDetail: `${busy.label} ${busy.start}-${busy.end}` })
   }
-
   return NextResponse.json({ conflict: false })
 })
