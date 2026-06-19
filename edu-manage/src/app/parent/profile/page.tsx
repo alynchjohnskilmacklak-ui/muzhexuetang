@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getPrismaForDivision } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ParentProfileClient } from './client'
 
@@ -9,6 +9,8 @@ export default async function ParentProfilePage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
+  const division = ((session.user as { division?: string }).division === 'SENIOR' ? 'SENIOR' : 'JUNIOR') as 'JUNIOR' | 'SENIOR'
+  const prisma = getPrismaForDivision(division)
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -18,23 +20,33 @@ export default async function ParentProfilePage() {
   if (!user) redirect('/login')
 
   const students = await prisma.student.findMany({
-    where: { parentId: userId, status: { not: 'INACTIVE' } },
+    where: { parentUserId: userId, status: { not: 'INACTIVE' } },
     include: {
       mainTeacher: { select: { id: true, name: true } },
-      schedules: {
-        where: { schedule: { status: { not: 'cancelled' } } },
-        include: { schedule: { include: { teacher: { select: { id: true, name: true } } } } },
-        take: 50,
+      enrollments: {
+        where: { status: 'ACTIVE' },
+        include: {
+          group: {
+            include: {
+              teacher: { select: { name: true } },
+              teacherAssignments: { include: { teacher: { select: { name: true } } } },
+            },
+          },
+        },
+        take: 20,
       },
     },
   })
 
-  // Gather all teachers for each student
+  // Gather teachers from enrollments (not old Schedule)
   const studentInfo = students.map(s => {
     const teacherSet = new Set<string>()
     if (s.mainTeacher?.name) teacherSet.add(s.mainTeacher.name)
-    s.schedules.forEach(sch => {
-      if (sch.schedule?.teacher?.name) teacherSet.add(sch.schedule.teacher.name)
+    s.enrollments.forEach(enr => {
+      if (enr.group?.teacher?.name) teacherSet.add(enr.group.teacher.name)
+      enr.group?.teacherAssignments?.forEach(a => {
+        if (a.teacher?.name) teacherSet.add(a.teacher.name)
+      })
     })
     return {
       id: s.id,

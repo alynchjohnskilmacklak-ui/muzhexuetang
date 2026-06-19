@@ -1280,3 +1280,33 @@ model ParentMessageReply {
 
   @@index([messageId, createdAt])
 }
+
+model FileAsset {
+  id             String    @id @default(cuid())
+  filename       String
+  originalName   String?
+  mimeType       String
+  size           Int
+  storageDriver  String    @default("local")
+  storageKey     String
+  url            String
+  ownerType      String
+  ownerId        String?
+  studentId      String?
+  lessonId       String?
+  feedbackId     String?
+  postId         String?
+  visibility     String    @default("PRIVATE")
+  uploadedById   String?
+  uploadedByRole String?
+  tenant         String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  @@index([studentId])
+  @@index([feedbackId])
+  @@index([postId])
+  @@index([ownerType, ownerId])
+  @@index([tenant])
+}

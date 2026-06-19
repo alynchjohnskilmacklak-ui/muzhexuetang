@@ -11,39 +11,41 @@ import {
 
 export const dynamic = 'force-dynamic'
 
-export default async function ParentGrowthPage({ searchParams }: { searchParams: Promise<{ date?: string; feedbackId?: string }> }) {
+export default async function ParentGrowthPage({ searchParams }: { searchParams: Promise<{ date?: string; feedbackId?: string; postId?: string; studentId?: string }> }) {
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
   const sp = await searchParams
 
+  const studentFilter = sp.studentId ? { id: sp.studentId } : {}
   const students = await prisma.student.findMany({
-    where: parentLinkedStudentWhere(userId),
+    where: { ...parentLinkedStudentWhere(userId), ...studentFilter },
     select: { id: true, name: true },
   })
   const studentIds = students.map(s => s.id)
 
-  // If feedbackId is provided, fetch that specific feedback item
+  // Auto-open detail if feedbackId or postId is provided
   let highlightedFeedback: any = null
+  const detailId = sp.feedbackId || sp.postId
   if (sp.feedbackId) {
-    // Try classroom feedback first
     highlightedFeedback = await prisma.classroomFeedback.findFirst({
       where: { id: sp.feedbackId, ...visibleClassroomFeedbackWhere, teacher: visibleTeacherWhere, studentIds: { hasSome: studentIds } },
       include: { teacher: { select: { name: true } } },
     })
-    if (!highlightedFeedback) {
-      // Try performance post
-      highlightedFeedback = await prisma.performancePost.findFirst({
-        where: { id: sp.feedbackId, ...visiblePerformancePostWhere, teacher: visibleTeacherWhere, studentId: { in: studentIds } },
-        include: { student: { select: { name: true } }, teacher: { select: { name: true } } },
-      })
-    }
+  }
+  if (!highlightedFeedback && (sp.postId || sp.feedbackId)) {
+    highlightedFeedback = await prisma.performancePost.findFirst({
+      where: { id: sp.postId || sp.feedbackId, ...visiblePerformancePostWhere, teacher: visibleTeacherWhere, studentId: { in: studentIds } },
+      include: { student: { select: { name: true } }, teacher: { select: { name: true } } },
+    })
   }
 
-  // Build today filter for default-only queries
+  // Default to last 30 days instead of just today
   const todayStart = new Date()
+  todayStart.setDate(todayStart.getDate() - 30)
   todayStart.setHours(0, 0, 0, 0)
-  const todayEnd = new Date(todayStart.getTime() + 86400000)
+  const todayEnd = new Date()
+  todayEnd.setHours(23, 59, 59, 999)
 
   // Performance posts
   const postsWhere: any = {

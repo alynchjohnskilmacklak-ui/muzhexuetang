@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { Card, Descriptions, Tag, Typography, Empty, Avatar, Button, Form, Input, Modal } from 'antd'
-import { UserOutlined, TeamOutlined, MailOutlined, CalendarOutlined, LockOutlined } from '@ant-design/icons'
+import { useRouter } from 'next/navigation'
+import { UserOutlined, TeamOutlined, MailOutlined, CalendarOutlined, LockOutlined, RightOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 
@@ -14,6 +15,7 @@ export function ParentProfileClient({
   user: any
   studentInfo: any[]
 }) {
+  const router = useRouter()
   const [changingPwd, setChangingPwd] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [form] = Form.useForm()
@@ -98,6 +100,17 @@ export function ParentProfileClient({
                   ))}
                 </div>
               )}
+              <div style={{ marginTop: 10, textAlign: 'right' }}>
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<RightOutlined />}
+                  onClick={() => router.push(`/parent/students/${s.id}/archive`)}
+                  style={{ color: '#E8784A', padding: 0 }}
+                >
+                  查看学习档案
+                </Button>
+              </div>
             </Card>
           ))
         )}

@@ -166,7 +166,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             link: '/parent/growth',
             relatedType: 'CLASSROOM_FEEDBACK',
             relatedId: created.id,
-            href: `/parent/growth?feedbackId=${created.id}`,
+            href: `/parent/growth?studentId=${student.id}&feedbackId=${created.id}`,
           },
         })
       }
@@ -226,6 +226,38 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
         parentRepliedAt: parentReply ? new Date() : null,
       },
     })
+
+    // Notify teacher of parent reply
+    if (parentReply) {
+      const fb = await prisma.classroomFeedback.findUnique({
+        where: { id },
+        select: { teacherId: true, studentIds: true },
+      })
+      if (fb?.teacherId) {
+        const teacherUser = await prisma.user.findFirst({
+          where: { teacherId: fb.teacherId, role: 'teacher', status: 'ACTIVE' },
+          select: { id: true },
+        })
+        if (teacherUser) {
+          const student = await prisma.student.findFirst({
+            where: { id: { in: fb.studentIds }, parentUserId: user.id },
+            select: { name: true },
+          })
+          await prisma.notification.create({
+            data: {
+              userId: teacherUser.id,
+              type: 'CLASSROOM_FEEDBACK',
+              title: '家长回复了课堂反馈',
+              content: `${student?.name || '家长'} 回复了你发布的课堂反馈`,
+              link: '/teacher/feedback',
+              relatedType: 'CLASSROOM_FEEDBACK',
+              relatedId: id,
+              href: `/teacher/feedback?feedbackId=${id}`,
+            },
+          })
+        }
+      }
+    }
   } else if ((user.role === 'admin' || user.role === 'teacher') && adminReply !== undefined) {
     await prisma.classroomFeedback.update({
       where: { id },

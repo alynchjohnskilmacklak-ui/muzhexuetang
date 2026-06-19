@@ -180,7 +180,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
               link: '/parent/growth',
               relatedType: 'CLASSROOM_FEEDBACK',
               relatedId: created.id,
-              href: `/parent/growth?feedbackId=${created.id}`,
+              href: `/parent/growth?studentId=${student.id}&feedbackId=${created.id}`,
             },
           })
         }
