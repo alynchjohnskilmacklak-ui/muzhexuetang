@@ -18,7 +18,7 @@ const SEARCH_TARGETS: { prefix: string; keywords: string[]; href: string }[] = [
   { prefix: '收费', keywords: ['收费', '缴费', '费用', '学费'], href: '/fees' },
   { prefix: '志愿', keywords: ['志愿', '中考', '高中', '学校'], href: '/volunteer-sim' },
   { prefix: '通知', keywords: ['通知', '消息', 'notification'], href: '/notifications' },
-  { prefix: '档案', keywords: ['档案', '成绩', '学习'], href: '/grades' },
+  { prefix: '档案', keywords: ['档案', '成绩', '学习'], href: '/student-archive' },
   { prefix: '设置', keywords: ['设置', '配置', '系统'], href: '/settings' },
 ]
 

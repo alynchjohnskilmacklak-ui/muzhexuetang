@@ -43,7 +43,7 @@ const adminNavItems = [
   { key: '/classroom-feedback', icon: <MessageOutlined />, label: '成长反馈' },
   { key: '/fees', icon: <DollarOutlined />, label: '收费管理' },
   { key: '/meals', icon: <CoffeeOutlined />, label: '就餐管理' },
-  { key: '/grades', icon: <FileTextOutlined />, label: '学习档案' },
+  { key: '/student-archive', icon: <FileTextOutlined />, label: '学习档案' },
   { key: '/notifications', icon: <MessageOutlined />, label: '消息通知' },
   { key: '/parent-messages', icon: <MessageOutlined />, label: '家长留言' },
   { key: '/reports', icon: <BarChartOutlined />, label: '数据报表' },

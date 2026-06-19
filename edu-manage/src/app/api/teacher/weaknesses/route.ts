@@ -39,6 +39,21 @@ export const POST = apiHandler(async (req: NextRequest) => {
     })
     if (!paper) return NextResponse.json({ error: '试卷不存在或不属于该学员' }, { status: 404 })
 
+    const [already, importLog] = await Promise.all([
+      prisma.weaknessRecord.findFirst({ where: { studentId, paperId: fromPaperId } }),
+      prisma.activityLog.findFirst({
+        where: {
+          teacherId: teacher.id,
+          action: TEACHER_LOG_ACTIONS.WEAKNESS_SAVE,
+          entityType: 'ExamPaper',
+          entityId: fromPaperId,
+        },
+      }),
+    ])
+    if (already || importLog) {
+      return NextResponse.json({ count: 0, message: '该试卷已导入过，未重复累加' })
+    }
+
     const topics = paper.questions
       .map((question) => question.topic?.trim())
       .filter((topic): topic is string => Boolean(topic))
@@ -56,7 +71,6 @@ export const POST = apiHandler(async (req: NextRequest) => {
             where: { id: existing.id },
             data: {
               mistakeCount: { increment: count },
-              paperId: fromPaperId,
               suggestion: existing.suggestion || '建议针对该知识点进行专项练习。',
             },
           }))

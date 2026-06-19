@@ -154,6 +154,9 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
   if (existing.teacherId !== teacher.id) return NextResponse.json({ error: '无权发布该小结' }, { status: 403 })
   const student = await assertOwned(teacher.id, existing.studentId, prisma)
   if (!student) return NextResponse.json({ error: '无权操作该学员' }, { status: 403 })
+  if (existing.status === 'PUBLISHED') {
+    return NextResponse.json({ stageSummary: existing, alreadyPublished: true })
+  }
 
   const stageSummary = await prisma.$transaction(async (tx) => {
     const published = await tx.stageSummary.update({

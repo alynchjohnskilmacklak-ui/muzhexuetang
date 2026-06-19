@@ -73,7 +73,7 @@ const menuItems: MenuProps['items'] = [
       { key: '/meals', icon: <CoffeeOutlined />, label: '就餐管理' },
     ],
   },
-  { key: '/grades', icon: <FileTextOutlined />, label: '学习档案' },
+  { key: '/student-archive', icon: <FileTextOutlined />, label: '学习档案' },
   {
     key: 'comm-group',
     icon: <CommentOutlined />,

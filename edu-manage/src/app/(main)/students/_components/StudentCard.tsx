@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { Button, Space, Tooltip, Typography } from 'antd'
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, EyeOutlined, ProfileOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 
 import { StatusBadge } from './StatusBadge'
@@ -108,6 +108,9 @@ export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
         <Space className="student-actions" size={2} style={{ opacity: 0, transition: 'opacity 0.2s' }}>
           <Tooltip title="查看">
             <Button type="text" size="small" icon={<EyeOutlined />} style={{ color: '#98A2B3' }} onClick={() => router.push(`/students/${student.id}`)} />
+          </Tooltip>
+          <Tooltip title="学情档案">
+            <Button type="text" size="small" icon={<ProfileOutlined />} style={{ color: '#98A2B3' }} onClick={() => router.push(`/student-archive/${student.id}`)} />
           </Tooltip>
           <Tooltip title="编辑">
             <Button type="text" size="small" icon={<EditOutlined />} style={{ color: '#98A2B3' }} onClick={() => onEdit(student)} />
