@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/get-user'
 import { getRequestPrisma } from '@/lib/prisma'
-import { uploadFile, safeFilename } from '@/lib/storage'
+import { uploadBuffer, safeFilename } from '@/lib/storage'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -65,21 +65,23 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: `文件过大，最大支持 ${limitMB}MB` }, { status: 400 })
   }
 
-  // Validation: image magic bytes (supports JPEG/PNG/GIF/WebP/HEIC/AVIF)
+  const ownerType = getOwnerType(uploadType, user.role)
+  const visibility = user.role === 'parent' ? 'PARENT_VISIBLE'
+    : user.role === 'admin' ? 'ADMIN_ONLY'
+    : 'TEACHER_VISIBLE'
+
+  // Read buffer ONCE — validate + upload use the same buffer
+  const buffer = Buffer.from(await file.arrayBuffer())
+
+  // Validation: image magic bytes
   if (file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif|avif)$/i.test(file.name)) {
-    const buffer = Buffer.from(await file.arrayBuffer())
     const check = isValidImageBuffer(buffer)
     if (!check.ok) {
       return NextResponse.json({ error: '文件格式不合法，仅支持 JPG/PNG/GIF/WebP/HEIC' }, { status: 400 })
     }
   }
 
-  const ownerType = getOwnerType(uploadType, user.role)
-  const visibility = user.role === 'parent' ? 'PARENT_VISIBLE'
-    : user.role === 'admin' ? 'ADMIN_ONLY'
-    : 'TEACHER_VISIBLE'
-
-  const result = await uploadFile(file, { prefix: ownerType })
+  const result = await uploadBuffer(buffer, { originalName: file.name, mimeType: file.type, prefix: ownerType })
 
   // Create FileAsset record if table exists
   const prisma = await getRequestPrisma()

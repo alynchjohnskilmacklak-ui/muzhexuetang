@@ -27,6 +27,7 @@ export interface UploadResult {
 
 export interface StorageDriver {
   put(key: string, file: File, bucket?: string): Promise<UploadResult>
+  putBuffer(key: string, buffer: Buffer, mimeType: string): Promise<UploadResult>
   delete(key: string): Promise<void>
   getUrl(key: string): string
 }
@@ -37,7 +38,10 @@ const UPLOAD_ROOT = join(process.cwd(), 'public', 'uploads')
 
 class LocalStorageDriver implements StorageDriver {
   async put(key: string, file: File): Promise<UploadResult> {
-    const buffer = Buffer.from(await file.arrayBuffer())
+    return this.putBuffer(key, Buffer.from(await file.arrayBuffer()), file.type)
+  }
+
+  async putBuffer(key: string, buffer: Buffer, _mimeType: string): Promise<UploadResult> {
     const filePath = join(UPLOAD_ROOT, key)
     const dir = filePath.substring(0, filePath.lastIndexOf('/'))
     await mkdir(dir, { recursive: true })
@@ -83,8 +87,11 @@ class AliyunOssDriver implements StorageDriver {
   }
 
   async put(key: string, file: File): Promise<UploadResult> {
+    return this.putBuffer(key, Buffer.from(await file.arrayBuffer()), file.type)
+  }
+
+  async putBuffer(key: string, buffer: Buffer, _mimeType: string): Promise<UploadResult> {
     const client = await this.getClient() as { put(key: string, buf: Buffer): Promise<{ url: string; name: string }> }
-    const buffer = Buffer.from(await file.arrayBuffer())
     const result = await client.put(key, buffer)
     const baseUrl = process.env.ALIYUN_OSS_PUBLIC_BASE_URL || `https://${process.env.ALIYUN_OSS_BUCKET}.${process.env.ALIYUN_OSS_REGION}.aliyuncs.com`
     return {
@@ -142,6 +149,13 @@ export function isImageFile(file: File): boolean {
 /** 判断是否为允许的文档格式 */
 export function isDocumentFile(file: File): boolean {
   return /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|zip|rar|7z)$/i.test(file.name)
+}
+
+/** 上传 Buffer 并返回统一结果（推荐，避免重复 read arrayBuffer） */
+export async function uploadBuffer(buffer: Buffer, meta: { originalName: string; mimeType: string; prefix?: string; bucket?: string }): Promise<UploadResult> {
+  const driver = getDriver()
+  const key = safeFilename(meta.originalName, meta.prefix)
+  return driver.putBuffer(key, buffer, meta.mimeType)
 }
 
 /** 上传文件并返回统一结果 */
