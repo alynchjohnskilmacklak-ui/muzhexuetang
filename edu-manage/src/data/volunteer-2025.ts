@@ -312,7 +312,7 @@ export interface AllocationBand {
   bandLo: number
   bandHi: number
   tongZhao: number
-  allocationLine: AllocationLineInfo
+  allocationLine: AllocationLineInfo | null
   tag: '推荐' | '保底' | '排名不足' | '分数不足'
   note: string
 }
@@ -340,7 +340,6 @@ export function getAllocationBands(
       const allocationLine = getAllocationLineInfo({ yiTong, allocationLine: lines?.allocationLine ?? null })
       return { name, quota, yiTong, tongZhao, allocationLine }
     })
-    .filter((school): school is { name: string; quota: number; yiTong: number | null; tongZhao: number; allocationLine: AllocationLineInfo } => school.allocationLine !== null)
     .sort((a, b) => (b.yiTong ?? 0) - (a.yiTong ?? 0))
 
   let cum = 0
@@ -351,7 +350,7 @@ export function getAllocationBands(
 
     let tag: AllocationBand['tag']
     let note = ''
-    if (score < s.allocationLine.value) {
+    if (s.allocationLine !== null && score < s.allocationLine.value) {
       tag = '分数不足'
       note = `你的分数未达该校分配生录取线（${s.allocationLine.value}分）`
     } else if (rank > bandHi) {
