@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import {
@@ -197,6 +197,8 @@ export default function CoursesPage() {
     return [...set].sort()
   }, [groupList])
 
+  const [slotConflicts, setSlotConflicts] = useState<Record<string, string>>({})
+
   const previewDates = useMemo(() => generatePreview(
     (createData.startDate as string) || todayString(),
     (createData.recurringDays as string[]) || [],
@@ -259,6 +261,35 @@ export default function CoursesPage() {
         subject: assignment.subject,
       })))
   }
+
+  useEffect(() => {
+    if (!createOpen) return
+    const tpl = resolveCreateScheduleTemplate().filter(r => r.teacherId && r.startTime && r.endTime)
+    const dates = previewDates.slice(0, 2).map(d => format(d, 'yyyy-MM-dd'))
+    if (!tpl.length || !dates.length) { setSlotConflicts({}); return }
+    const items = dates.flatMap(date => tpl.map(r => ({
+      key: `${r.teacherId}::${r.startTime}-${r.endTime}`,
+      teacherId: r.teacherId as string,
+      date,
+      startTime: r.startTime as string,
+      endTime: r.endTime as string,
+    })))
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/class-groups/check-teacher-conflict/batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items }),
+        })
+        const data = await res.json()
+        const map: Record<string, string> = {}
+        for (const r of (data.results || [])) if (r.conflict) map[r.key] = r.conflictDetail || '已有课程'
+        setSlotConflicts(map)
+      } catch { /* 静默，不打断填写 */ }
+    }, 350)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createOpen, createData.scheduleTemplate, createData.scheduleSlots, createData.teacherAssignments, createData.recurringDays, createData.startDate, previewDates])
 
   const handleNextStep = () => {
     if (createStep === 0) {
@@ -1089,6 +1120,11 @@ export default function CoursesPage() {
                         >
                           <div style={{ fontSize: 13, fontWeight: selected ? 700 : 400, color: selected ? '#E8784A' : '#1F2329' }}>{period.name}</div>
                           <div style={{ fontSize: 10, color: '#C4BAB0' }}>{period.end}</div>
+                          {selected && validAssignments.some(a =>
+                            slotConflicts[`${a.teacherId}::${period.start}-${period.end}`]
+                          ) && (
+                            <div style={{ fontSize: 10, color: '#E24B4A', fontWeight: 700 }}>⚠ 冲突</div>
+                          )}
                         </div>
                       )
                     })}
@@ -1138,6 +1174,12 @@ export default function CoursesPage() {
                             value: `${a.teacherId}::${a.subject}`,
                           }))}
                         />
+                        {!!(row.teacherId && row.startTime && row.endTime) &&
+                          slotConflicts[`${row.teacherId}::${row.startTime}-${row.endTime}`] && (
+                          <span style={{ fontSize: 11, color: '#E24B4A', flexShrink: 0 }}>
+                            ⚠ {slotConflicts[`${row.teacherId}::${row.startTime}-${row.endTime}`]}
+                          </span>
+                        )}
                       </div>
                     )
                   })}

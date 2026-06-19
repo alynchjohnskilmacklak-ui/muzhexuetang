@@ -54,7 +54,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
 
   if (!days.length) return NextResponse.json({ error: '请选择上课日期' }, { status: 400 })
   if (!total || total <= 0) return NextResponse.json({ error: '请设置总课次数' }, { status: 400 })
-  if (total > 200) return NextResponse.json({ error: '单次最多生成 200 节课次' }, { status: 400 })
+  if (total > 365) return NextResponse.json({ error: '单次最多安排 365 天课次' }, { status: 400 })
 
   // Clean up attendances before deleting lessons (FK constraint)
   const oldLessons = await prisma.classLesson.findMany({
@@ -110,6 +110,10 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     status: 'SCHEDULED' as const,
     division: group.division,
   })))
+
+  if (allData.length > 250) {
+    return NextResponse.json({ error: `课次总数 ${allData.length} 节超过单次上限 250 节，请减少上课日/天数/每天节次` }, { status: 400 })
+  }
 
   const BATCH_SIZE = 50
   let created = 0
