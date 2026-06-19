@@ -43,27 +43,5 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
   }
 
-  const groupTeacherLessons = await prisma.classLesson.findMany({
-    where: {
-      lessonDate: { gte: dayStart, lte: dayEnd },
-      status: { not: 'CANCELLED' },
-      group: {
-        teacherAssignments: { some: { teacherId } },
-      },
-    },
-    include: {
-      group: { include: { course: { select: { name: true } } } },
-    },
-  })
-
-  for (const lesson of groupTeacherLessons) {
-    if (hasTimeOverlap(startTime, endTime, lesson.startTime, lesson.endTime)) {
-      return NextResponse.json({
-        conflict: true,
-        conflictDetail: `${lesson.group?.course?.name || '某班'} ${lesson.startTime}-${lesson.endTime}（兼任教师）`,
-      })
-    }
-  }
-
   return NextResponse.json({ conflict: false })
 })

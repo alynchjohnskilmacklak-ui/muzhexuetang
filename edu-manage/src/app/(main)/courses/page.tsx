@@ -1132,31 +1132,6 @@ export default function CoursesPage() {
                               template[index] = { ...template[index], teacherId: '', subject: '' }
                             }
                             setCreateData(prev => ({ ...prev, scheduleTemplate: template }))
-                            // 实时冲突检查
-                            const days = (createData.recurringDays as string[] || [])
-                            const start = createData.startDate
-                            const total = createData.totalLessons
-                            setTimeout(async () => {
-                              const currentTemplate = template.filter(r => r.teacherId && r.subject)
-                              if (currentTemplate.length === 0) return
-                              if (!days.length) return
-                              try {
-                                const res = await fetch('/api/class-groups/check-teacher-conflict', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({
-                                    scheduleTemplate: currentTemplate,
-                                    recurringDays: days,
-                                    startDate: start,
-                                    totalLessons: total,
-                                  }),
-                                })
-                                const result = await res.json()
-                                if (result.conflicts?.length > 0) {
-                                  toast.warning(`⚠️ 时间冲突：${result.conflicts.map((c: Record<string, string>) => `${c.teacherName} 在 ${c.day} ${c.time}`).join('；')}`)
-                                }
-                              } catch { /* 静默，不影响主流程 */ }
-                            }, 200)
                           }}
                           options={assignments.filter(a => a.teacherId && a.subject).map(a => ({
                             label: `${teacherList.find((teacher: Record<string, unknown>) => teacher.id === a.teacherId)?.name || '老师'} / ${a.subject}`,
