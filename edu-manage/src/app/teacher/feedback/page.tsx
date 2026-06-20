@@ -1,10 +1,10 @@
 'use client'
 
-import { Suspense, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button, Image as AntImage, Input, Spin, Upload, Tag, Card, Select, Empty } from 'antd'
-import { CheckCircleOutlined, DeleteOutlined, PlusOutlined, SendOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons'
+import { CheckCircleOutlined, DeleteOutlined, PlusOutlined, SaveOutlined, SendOutlined, SearchOutlined, ThunderboltOutlined, UserOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { normalizeUploadUrl } from '@/lib/upload-url'
@@ -36,6 +36,21 @@ function FeedbackPageInner() {
   const [badgeOpen, setBadgeOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [submitDone, setSubmitDone] = useState(false)
+
+  // AI generation
+  const [aiNote, setAiNote] = useState('')
+  const [aiGenerating, setAiGenerating] = useState(false)
+  const [aiPrefilled, setAiPrefilled] = useState<Set<string>>(new Set())
+
+  // Stage summary (only when 1 student selected)
+  const [stageExpanded, setStageExpanded] = useState(false)
+  const [stageData, setStageData] = useState<any>(null)
+  const [stageSummaryText, setStageSummaryText] = useState('')
+  const [stageSuggestions, setStageSuggestions] = useState('')
+  const [stageKeywords, setStageKeywords] = useState('')
+  const [stageAiGenerating, setStageAiGenerating] = useState(false)
+  const [stageSaving, setStageSaving] = useState(false)
+  const [stageMaterialExpanded, setStageMaterialExpanded] = useState(false)
 
   // Data
   const { data: ctx } = useSWR('/api/teacher/feedback-context', fetcher)
@@ -76,6 +91,99 @@ function FeedbackPageInner() {
   }, [allLessons])
 
   const selectedLesson = allLessons.find((l: any) => l.id === lessonId)
+
+  // ── Stage summary load when single student selected ──
+  const stageStudentId = selectedStudentIds.length === 1 ? selectedStudentIds[0] : null
+  const { data: stageDataRaw } = useSWR(
+    stageStudentId ? `/api/teacher/stage-summary?studentId=${stageStudentId}&months=3` : null,
+    fetcher,
+  )
+  // Sync SWR data → local state
+  useEffect(() => {
+    if (stageDataRaw && stageDataRaw !== stageData) {
+      setStageData(stageDataRaw)
+      if (stageDataRaw.draft) {
+        setStageSummaryText(stageDataRaw.draft.summary || '')
+        setStageSuggestions(stageDataRaw.draft.suggestions || '')
+      } else if (!stageStudentId) {
+        setStageSummaryText('')
+        setStageSuggestions('')
+      }
+    }
+    if (!stageStudentId) {
+      setStageData(null)
+      setStageSummaryText('')
+      setStageSuggestions('')
+    }
+  }, [stageStudentId, stageDataRaw]) // eslint-disable-line
+
+  const stageSave = async () => {
+    if (!stageStudentId) return
+    setStageSaving(true)
+    try {
+      const res = await fetch('/api/teacher/stage-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentId: stageStudentId,
+          periodStart: new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().slice(0, 10),
+          periodEnd: new Date().toISOString().slice(0, 10),
+          summary: stageSummaryText,
+          suggestions: stageSuggestions,
+        }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error)
+      toast.success('寄语草稿已保存')
+    } catch (e: any) { toast.error(e.message) }
+    finally { setStageSaving(false) }
+  }
+
+  const stagePublish = async () => {
+    if (!stageStudentId) return
+    setStageSaving(true)
+    try {
+      const res1 = await fetch('/api/teacher/stage-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentId: stageStudentId,
+          periodStart: new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().slice(0, 10),
+          periodEnd: new Date().toISOString().slice(0, 10),
+          summary: stageSummaryText,
+          suggestions: stageSuggestions,
+        }),
+      })
+      const d1 = await res1.json()
+      if (!res1.ok) throw new Error(d1.error)
+      const res2 = await fetch('/api/teacher/stage-summary', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: d1.stageSummary.id, action: 'publish' }),
+      })
+      if (!res2.ok) throw new Error((await res2.json()).error)
+      toast.success('寄语已发布，家长端将显示本期寄语')
+    } catch (e: any) { toast.error(e.message) }
+    finally { setStageSaving(false) }
+  }
+
+  const stageAiGenerate = async () => {
+    if (!stageStudentId) return
+    setStageAiGenerating(true)
+    try {
+      const res = await fetch('/api/teacher/ai-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId: stageStudentId, keywords: stageKeywords, kind: 'stage' }),
+      })
+      const data = await res.json()
+      if (!res.ok) { toast.error(data.error); return }
+      if (data.draft) {
+        setStageSummaryText(data.draft)
+        toast.success(`AI 草稿已生成（${data.draft.length} 字），请核对后发布`)
+      }
+    } catch (e: any) { toast.error(e.message) }
+    finally { setStageAiGenerating(false) }
+  }
 
   // When lesson selected, auto-pick group + students
   useMemo(() => {
@@ -122,11 +230,120 @@ function FeedbackPageInner() {
     } finally { setSaving(false) }
   }
 
+  const aiGenerateClassroom = async () => {
+    if (!aiNote.trim()) { toast.warning('请输入本节课的一句话描述'); return }
+    if (!groupId) { toast.warning('请先选择班级'); return }
+    setAiGenerating(true)
+    try {
+      const roster = groupStudents.map((s: any) => ({ id: s.id, name: s.name }))
+      const options = {
+        moods: MOODS.map(m => ({ value: m.value, label: m.label })),
+        tags: QUICK_TAGS,
+        knowledgePoints: QUICK_KPS,
+      }
+      const res = await fetch('/api/teacher/ai-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'classroom', note: aiNote.trim(), roster, options }),
+      })
+      const data = await res.json()
+      if (!res.ok) { toast.error(data.error || 'AI 生成失败'); return }
+
+      const filled = new Set<string>()
+
+      // Match student names → IDs
+      if (data.studentIds?.length) {
+        setSelectedStudentIds(data.studentIds)
+        filled.add('students')
+      }
+      if (data.unknownNames?.length) {
+        toast(`未在本班找到：${data.unknownNames.join('、')}`, { duration: 3000 })
+      }
+
+      // Mood
+      if (data.mood && MOODS.some(m => m.value === data.mood)) {
+        setMood(data.mood)
+        filled.add('mood')
+      }
+
+      // Comment
+      if (data.overallComment) {
+        setOverallComment(data.overallComment)
+        filled.add('comment')
+      }
+
+      // Tags (intersection with whitelist)
+      if (data.tags?.length) {
+        const validTags = data.tags.filter((t: string) => QUICK_TAGS.includes(t))
+        if (validTags.length) { setTags(validTags); filled.add('tags') }
+      }
+
+      // Knowledge points
+      if (data.knowledgePoints?.length) {
+        const validKps = data.knowledgePoints.filter((k: string) => QUICK_KPS.includes(k))
+        if (validKps.length) { setKps(validKps); filled.add('kps') }
+      }
+
+      // Homework
+      if (data.homework?.length) {
+        setHomework(data.homework)
+        filled.add('homework')
+      }
+
+      // Suggestion
+      if (data.suggestion) {
+        setSummary(data.suggestion)
+        filled.add('suggestion')
+      }
+
+      setAiPrefilled(filled)
+      toast.success('已为你预填，请核对后发布', { duration: 2500 })
+    } catch (e: any) { toast.error(e.message || 'AI 生成失败') }
+    finally { setAiGenerating(false) }
+  }
+
+  const aiPrefillMark = (key: string) => aiPrefilled.has(key)
+    ? <Tag color="processing" style={{ fontSize: 10, marginLeft: 6, borderRadius: 4 }}>AI 预填</Tag>
+    : null
+
   const formSection = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* ── AI Input ── */}
+      {groupId && (
+        <Card size="small" style={{ borderRadius: 12, border: '1px dashed #E8784A', background: '#FFFBF7' }}>
+          <div style={{ fontSize: 12, color: '#8d806f', marginBottom: 8 }}>
+            ✨ AI 结构化填充 —— 用一句话描述本节课，AI 自动填表
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Input
+              size="small"
+              placeholder="例：马紫晨上课积极回答，函数掌握不错，作业全完成"
+              value={aiNote}
+              onChange={e => setAiNote(e.target.value)}
+              onPressEnter={aiGenerateClassroom}
+              style={{ flex: 1, borderRadius: 8 }}
+              allowClear
+              disabled={aiGenerating}
+            />
+            <Button
+              type="primary"
+              size="small"
+              icon={<ThunderboltOutlined />}
+              loading={aiGenerating}
+              onClick={aiGenerateClassroom}
+              style={{ whiteSpace: 'nowrap', flexShrink: 0, background: '#E8784A' }}
+            >
+              AI 生成草稿
+            </Button>
+          </div>
+        </Card>
+      )}
+
       {/* Mood */}
       <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>课堂状态</div>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
+          课堂状态{aiPrefillMark('mood')}
+        </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {MOODS.map(m => (
             <button key={m.value} onClick={() => setMood(m.value)} style={{
@@ -140,14 +357,18 @@ function FeedbackPageInner() {
 
       {/* Comment */}
       <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>评语</div>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
+          评语{aiPrefillMark('comment')}
+        </div>
         <Input.TextArea value={overallComment} onChange={e => setOverallComment(e.target.value)}
           rows={3} placeholder="对本次课的整体点评，家长会直接看到" maxLength={300} showCount style={{ borderRadius: 8 }} />
       </Card>
 
       {/* Tags + KP */}
       <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>表现标签</div>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          表现标签{aiPrefillMark('tags')}
+        </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
           {QUICK_TAGS.map(tag => (
             <button key={tag} onClick={() => toggleTag(tag)} style={{
@@ -157,7 +378,9 @@ function FeedbackPageInner() {
             }}>{tag}</button>
           ))}
         </div>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>知识点</div>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          知识点{aiPrefillMark('kps')}
+        </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
           {QUICK_KPS.map(kp => (
             <button key={kp} onClick={() => toggleKp(kp)} style={{
@@ -173,7 +396,9 @@ function FeedbackPageInner() {
 
       {/* Homework */}
       <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>作业布置</div>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
+          作业布置{aiPrefillMark('homework')}{aiPrefillMark('suggestion')}
+        </div>
         {homework.map((h, i) => (
           <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
             <span style={{ color: '#98A2B3', fontSize: 12, paddingTop: 6, minWidth: 20 }}>{i + 1}.</span>
@@ -256,6 +481,107 @@ function FeedbackPageInner() {
         </Upload.Dragger>
       </Card>
 
+      {/* ── Stage Summary (only when 1 student selected) ── */}
+      {stageStudentId && (
+        <Card size="small" style={{ borderRadius: 12, border: '1px solid #F0DDD2' }}>
+          <div
+            style={{ fontSize: 13, fontWeight: 700, display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}
+            onClick={() => setStageExpanded(!stageExpanded)}
+          >
+            <span>📋 本期寄语（家长端·案）{stageExpanded ? '' : ' — 点击展开'}</span>
+            <span style={{ color: '#98A2B3', fontSize: 12 }}>{stageExpanded ? '收起' : '展开'}</span>
+          </div>
+          {stageExpanded && (
+            <div style={{ marginTop: 10 }}>
+              {/* Auto-material (collapsible) */}
+              {stageData?.material && (
+                <div style={{ background: '#FFF8F4', borderRadius: 10, padding: 10, marginBottom: 10 }}>
+                  <div
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                    onClick={() => setStageMaterialExpanded(!stageMaterialExpanded)}
+                  >
+                    <span style={{ fontSize: 12, fontWeight: 600, color: '#5a4e3a' }}>自动素材参考</span>
+                    <Button type="link" size="small" style={{ fontSize: 11, padding: 0 }}>
+                      {stageMaterialExpanded ? '收起' : '展开'}
+                    </Button>
+                  </div>
+                  {stageMaterialExpanded && (
+                    <>
+                      <div style={{ marginTop: 6, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                        <Tag color="green" style={{ fontSize: 11 }}>出勤 {stageData.material.overview.attendanceRate ?? '暂无'}%</Tag>
+                        <Tag color="blue" style={{ fontSize: 11 }}>掌握 {stageData.material.overview.masteryRate ?? '暂无'}%</Tag>
+                      </div>
+                      <div style={{ whiteSpace: 'pre-wrap', margin: '8px 0 0', fontSize: 12, color: '#5a4e3a', lineHeight: 1.5 }}>
+                        {stageData.material.summarySeed}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* AI keywords + button */}
+              <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+                <Input
+                  size="small"
+                  placeholder="关键词：进步明显、计算薄弱"
+                  value={stageKeywords}
+                  onChange={e => setStageKeywords(e.target.value)}
+                  style={{ flex: 1, borderRadius: 8 }}
+                  allowClear
+                />
+                <Button
+                  size="small"
+                  icon={<ThunderboltOutlined />}
+                  loading={stageAiGenerating}
+                  onClick={stageAiGenerate}
+                  style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                >
+                  AI 生成
+                </Button>
+              </div>
+
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>教师寄语</div>
+              <Input.TextArea
+                rows={4}
+                maxLength={500}
+                showCount
+                value={stageSummaryText}
+                onChange={e => setStageSummaryText(e.target.value)}
+                placeholder="结合自动素材，写给家长看的阶段学情小结"
+                style={{ borderRadius: 8 }}
+              />
+
+              <div style={{ fontSize: 12, fontWeight: 600, margin: '8px 0 4px' }}>下一步建议</div>
+              <Input.TextArea
+                rows={2}
+                maxLength={200}
+                showCount
+                value={stageSuggestions}
+                onChange={e => setStageSuggestions(e.target.value)}
+                placeholder="例如：接下来重点巩固计算准确率"
+                style={{ borderRadius: 8 }}
+              />
+
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <Button size="small" icon={<SaveOutlined />} loading={stageSaving} onClick={stageSave} style={{ flex: 1 }}>
+                  保存草稿
+                </Button>
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<SendOutlined />}
+                  loading={stageSaving}
+                  onClick={stagePublish}
+                  style={{ flex: 1, background: '#E8784A', borderColor: '#E8784A' }}
+                >
+                  发布给家长
+                </Button>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
       {/* Submit — fixed bottom bar on mobile */}
       <div style={{
         display: 'flex', gap: 10, paddingBottom: isMobile ? 'calc(12px + env(safe-area-inset-bottom))' : 24,
@@ -277,10 +603,10 @@ function FeedbackPageInner() {
   )
 
   return (
-    <div style={isMobile ? {} : { display: 'grid', gridTemplateColumns: '300px minmax(0, 1fr) 360px', gap: 20, alignItems: 'start' }}>
-      {/* LEFT: Class & lesson picker */}
+    <div style={isMobile ? {} : { display: 'grid', gridTemplateColumns: '340px minmax(0, 1fr)', gap: 20, alignItems: 'start' }}>
+      {/* LEFT: class picker + student selection + history (desktop) */}
       {!isMobile && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, position: 'sticky', top: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, position: 'sticky', top: 12, maxHeight: '100vh', overflowY: 'auto' }}>
           <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>选择班级</div>
             <Select size="small" value={groupId || undefined} onChange={(v: string) => { setGroupId(v); setLessonId(''); setSelectedStudentIds([]) }}
@@ -295,7 +621,58 @@ function FeedbackPageInner() {
               allowClear placeholder="选择课次" style={{ width: '100%' }} options={lessonOptions} />
           </Card>
 
-          {/* Simple stats */}
+          {/* Student list — moved to left column */}
+          {groupId && (
+            <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <span style={{ fontSize: 13, fontWeight: 700 }}>{selectedGroup?.courseName || '班级'} ({filteredStudents.length}人)</span>
+              </div>
+              <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+                <Input size="small" prefix={<SearchOutlined />} value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="搜索" style={{ flex: 1, borderRadius: 8 }} />
+                <Button size="small" onClick={selectAll} style={{ fontSize: 11 }}>全选</Button>
+                <Button size="small" onClick={clearAll} style={{ fontSize: 11 }}>清空</Button>
+              </div>
+              {selectedStudentIds.length > 0 && (
+                <div style={{ marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  {selectedStudentIds.map((id) => {
+                    const s = groupStudents.find((gs: any) => gs.id === id)
+                    return s ? (
+                      <Tag key={id} closable color="orange" style={{ borderRadius: 9999, fontSize: 11, margin: 0 }}
+                        onClose={() => toggleStudent(id)}>{s.name}</Tag>
+                    ) : null
+                  })}
+                </div>
+              )}
+              {filteredStudents.length === 0 ? (
+                <Empty description="该班级暂无学员" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                  {filteredStudents.map((s: any) => {
+                    const selected = selectedStudentIds.includes(s.id)
+                    const needsFeedback = s.daysSinceLastFeedback === null || s.daysSinceLastFeedback > 7
+                    return (
+                      <div key={s.id} onClick={() => toggleStudent(s.id)} style={{
+                        padding: 8, borderRadius: 8, cursor: 'pointer', border: selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
+                        background: selected ? '#FFF3EC' : '#fff', transition: 'all .15s',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <div style={{ width: 26, height: 26, borderRadius: 8, background: '#F5F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#E8784A', flexShrink: 0 }}>{s.name[0]}</div>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </Card>
+          )}
+          {!groupId && (
+            <div style={{ fontSize: 13, color: '#7A869A', textAlign: 'center', padding: '20px 0' }}>请先选择班级</div>
+          )}
+
+          {/* Stats */}
           <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
             <div style={{ fontSize: 11, color: '#7A869A', display: 'flex', justifyContent: 'space-between' }}>
               <span>班级数</span><strong>{groups.length}</strong>
@@ -325,9 +702,9 @@ function FeedbackPageInner() {
         </div>
       )}
 
-      {/* MIDDLE: Student cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {/* Mobile: class/lesson picker */}
+      {/* RIGHT: Form (desktop) / everything (mobile) */}
+      <div style={!isMobile ? { position: 'sticky', top: 12, display: 'flex', flexDirection: 'column', gap: 14 } : { display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {/* Mobile: class/lesson picker + student cards */}
         {isMobile && (
           <>
             <Select size="small" value={groupId || undefined} onChange={(v: string) => { setGroupId(v); setLessonId(''); setSelectedStudentIds([]) }}
@@ -335,120 +712,81 @@ function FeedbackPageInner() {
               options={groups.map((g: any) => ({ label: `${g.courseName} (${g.studentCount}人)`, value: g.id }))} />
             <Select size="small" value={lessonId || undefined} onChange={(v: string) => { setLessonId(v || ''); setSelectedStudentIds(v ? (allLessons.find((l: any) => l.id === v)?.studentIds || []) : []) }}
               allowClear placeholder="关联课次" style={{ width: '100%' }} options={lessonOptions} />
+
+            {groupId && (
+              <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700 }}>{selectedGroup?.courseName || '班级'} ({filteredStudents.length}人)</span>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    <Button size="small" onClick={selectAll} style={{ fontSize: 11 }}>全选</Button>
+                    <Button size="small" onClick={clearAll} style={{ fontSize: 11 }}>清空</Button>
+                  </div>
+                </div>
+                {selectedStudentIds.length > 0 && (
+                  <div style={{ marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                    {selectedStudentIds.map((id) => {
+                      const s = groupStudents.find((gs: any) => gs.id === id)
+                      return s ? (
+                        <Tag key={id} closable color="orange" style={{ borderRadius: 9999, fontSize: 11, margin: 0 }}
+                          onClose={() => toggleStudent(id)}>{s.name}</Tag>
+                      ) : null
+                    })}
+                  </div>
+                )}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                  {filteredStudents.map((s: any) => {
+                    const selected = selectedStudentIds.includes(s.id)
+                    return (
+                      <div key={s.id} onClick={() => toggleStudent(s.id)} style={{
+                        padding: 8, borderRadius: 8, cursor: 'pointer', border: selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
+                        background: selected ? '#FFF3EC' : '#fff',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <div style={{ width: 24, height: 24, borderRadius: 6, background: '#F5F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#E8784A' }}>{s.name[0]}</div>
+                          <span style={{ fontSize: 12, fontWeight: 600 }}>{s.name}</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </Card>
+            )}
           </>
         )}
 
-        {/* Student list */}
-        {groupId && (
-          <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 13, fontWeight: 700 }}>{selectedGroup?.courseName || '班级'} 学员 ({filteredStudents.length}人)</span>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <Input size="small" prefix={<SearchOutlined />} value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="搜索" style={{ width: 120, borderRadius: 8 }} />
-                <Button size="small" onClick={selectAll}>全选</Button>
-                <Button size="small" onClick={clearAll}>清空</Button>
-              </div>
-            </div>
-            {filteredStudents.length === 0 ? (
-              <Empty description="该班级暂无学员" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr', gap: 8 }}>
-                {filteredStudents.map((s: any) => {
-                  const selected = selectedStudentIds.includes(s.id)
-                  const needsFeedback = s.daysSinceLastFeedback === null || s.daysSinceLastFeedback > 7
-                  const lowHours = s.remainHours != null && s.remainHours <= 2
-                  return (
-                    <div key={s.id} onClick={() => toggleStudent(s.id)} style={{
-                      padding: 10, borderRadius: 10, cursor: 'pointer', border: selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
-                      background: selected ? '#FFF3EC' : '#fff', transition: 'all .15s',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 10, background: '#F5F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#E8784A' }}>{s.name[0]}</div>
-                        {needsFeedback && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#EF9F27' }} title="超过7天未反馈" />}
-                      </div>
-                      <div style={{ fontSize: 14, fontWeight: 600, marginTop: 6 }}>{s.name}</div>
-                      <div style={{ fontSize: 11, color: '#7A869A' }}>{[s.grade, s.school].filter(Boolean).join(' / ') || '-'}</div>
-                      <div style={{ fontSize: 11, color: '#B0B8C1', marginTop: 2 }}>
-                        剩余 {s.remainHours ?? '—'}h {s.attendanceRate != null ? `· 出勤${s.attendanceRate}%` : ''}
-                      </div>
-                      {s.daysSinceLastFeedback != null && (
-                        <div style={{ fontSize: 10, marginTop: 2, color: needsFeedback ? '#EF9F27' : '#1D9E75' }}>
-                          {needsFeedback ? `⚠ ${s.daysSinceLastFeedback}天未反馈` : `${s.daysSinceLastFeedback}天前反馈`}
-                        </div>
-                      )}
-                      {lowHours && <div style={{ fontSize: 10, color: '#E24B4A', marginTop: 1 }}>课时不足</div>}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+        {/* Student context / multi-student info */}
+        {selectedStudentIds.length === 1 && (
+          <StudentContextPanel studentId={selectedStudentIds[0]} />
+        )}
+        {selectedStudentIds.length > 1 && (
+          <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1', background: '#FFFBF7' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>已选 {selectedStudentIds.length} 位学员</div>
+            <div style={{ fontSize: 11, color: '#7A869A' }}>批量反馈适合发共同内容，个性化评价建议单独选择学生补充</div>
           </Card>
         )}
 
-        {/* Selected count + stage summary link */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {selectedStudentIds.length > 0 && (
-              <Tag color="orange" style={{ borderRadius: 9999 }}>已选 {selectedStudentIds.length} 人</Tag>
-            )}
-            {!groupId && (
-              <div style={{ fontSize: 13, color: '#7A869A', padding: '12px 0' }}>请先选择班级，然后选择学员</div>
-            )}
-          </div>
-          {selectedStudentIds.length === 1 && (
-            <Button type="link" size="small" onClick={() => router.push(`/teacher/student/${selectedStudentIds[0]}`)}
-              style={{ fontSize: 12, color: '#E8784A' }}>
-              📝 写本期寄语（家长端·案）→
-            </Button>
-          )}
-        </div>
+        {/* Form (includes AI input, classroom feedback, stage-summary) */}
+        {formSection}
 
-        {/* Mobile: form below students */}
-        {isMobile && formSection}
-      </div>
-
-      {/* RIGHT: Form (desktop) + history (mobile) */}
-      {!isMobile ? (
-        <div style={{ position: 'sticky', top: 12, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {selectedStudentIds.length === 1 && (
-            <StudentContextPanel studentId={selectedStudentIds[0]} />
-          )}
-          {selectedStudentIds.length > 1 && (
-            <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1', background: '#FFFBF7' }}>
-              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>已选 {selectedStudentIds.length} 位学员</div>
-              <div style={{ fontSize: 11, color: '#7A869A' }}>批量反馈适合发共同内容，个性化评价建议单独选择学生补充</div>
-            </Card>
-          )}
-          {formSection}
-        </div>
-      ) : (
-        <div style={{ marginTop: 16 }}>
-          {/* Mobile: Student context panel */}
-          {selectedStudentIds.length === 1 && (
-            <StudentContextPanel studentId={selectedStudentIds[0]} />
-          )}
-          {selectedStudentIds.length > 1 && (
-            <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1', background: '#FFFBF7', marginBottom: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>已选 {selectedStudentIds.length} 位学员</div>
-              <div style={{ fontSize: 11, color: '#7A869A' }}>批量反馈适合发共同内容，个性化评价建议单独选择学生补充</div>
-            </Card>
-          )}
-          {/* Mobile: History with date filter */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <div style={{ fontSize: 13, fontWeight: 700 }}>历史反馈</div>
-            <div style={{ display: 'flex', gap: 4 }}>
-              <Button size="small" type={historyDate === new Date().toISOString().slice(0, 10) ? 'primary' : 'default'}
-                onClick={() => setHistoryDate(new Date().toISOString().slice(0, 10))}
-                style={{ fontSize: 11 }}>今天</Button>
-              <Button size="small" onClick={() => { const d = new Date(); d.setDate(d.getDate() - 7); setHistoryDate(d.toISOString().slice(0, 10)) }}
-                style={{ fontSize: 11 }}>近7天</Button>
-              <Input type="date" size="small" value={historyDate} onChange={e => setHistoryDate(e.target.value)}
-                style={{ width: 130, fontSize: 11 }} />
+        {/* Mobile: History */}
+        {isMobile && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 700 }}>历史反馈</div>
+              <div style={{ display: 'flex', gap: 4 }}>
+                <Button size="small" type={historyDate === new Date().toISOString().slice(0, 10) ? 'primary' : 'default'}
+                  onClick={() => setHistoryDate(new Date().toISOString().slice(0, 10))}
+                  style={{ fontSize: 11 }}>今天</Button>
+                <Button size="small" onClick={() => { const d = new Date(); d.setDate(d.getDate() - 7); setHistoryDate(d.toISOString().slice(0, 10)) }}
+                  style={{ fontSize: 11 }}>近7天</Button>
+                <Input type="date" size="small" value={historyDate} onChange={e => setHistoryDate(e.target.value)}
+                  style={{ width: 130, fontSize: 11 }} />
+              </div>
             </div>
+            {history.slice(0, 5).map((item: any) => <FeedbackCard key={item.id} item={item} compact />)}
           </div>
-          {history.slice(0, 5).map((item: any) => <FeedbackCard key={item.id} item={item} compact />)}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

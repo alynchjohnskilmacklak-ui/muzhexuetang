@@ -59,7 +59,7 @@ export async function callKimi(params: {
           { role: 'system', content: params.system },
           { role: 'user', content: params.user },
         ],
-        temperature: params.temperature ?? 0.6,
+        temperature: params.temperature ?? 1,
         max_tokens: params.maxTokens ?? 300,
         top_p: 0.9,
       }),

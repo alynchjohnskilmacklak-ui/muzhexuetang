@@ -279,7 +279,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     ? endpoint.visionModel
     : endpoint.model
   const streamEnabled = process.env.AI_STREAM_ENABLED !== 'false' && capability.supportsStream
-  const temperature = looksLikeScienceQuestion(safeMessages) ? 0.1 : 0.6
+  const temperature = 1
 
   try {
     const response = await fetchWithTimeout(`${endpoint.baseUrl.replace(/\/$/, '')}/chat/completions`, {

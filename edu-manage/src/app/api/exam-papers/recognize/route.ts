@@ -119,7 +119,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const res = await fetchWithTimeout('https://api.moonshot.cn/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: visionModel, messages: [{ role: 'user', content }], temperature: 0.2 }),
+      body: JSON.stringify({ model: visionModel, messages: [{ role: 'user', content }], temperature: 1 }),
     }, 55_000)
 
     if (!res.ok) {
