@@ -188,7 +188,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
   })
 
   if (status === 'PUBLISHED' && !isAdmin) {
-    await triggerFeedbackBonus(feedback.id)
+    const bonusResult = await triggerFeedbackBonus(feedback.id)
+    if (!bonusResult.success) {
+      console.warn('[feedback] triggerFeedbackBonus failed:', feedback.id, bonusResult.error)
+    }
   }
 
   revalidatePath('/teacher/dashboard')

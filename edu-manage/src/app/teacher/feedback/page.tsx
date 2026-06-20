@@ -171,7 +171,7 @@ function FeedbackPageInner() {
       }
 
       if (status === 'PUBLISHED') {
-        const msg = stagePublished ? '已发布：课堂反馈 + 本期寄语' : '已发布课堂反馈'
+        const msg = stagePublished ? '已发布给家长（课堂反馈 + 本期寄语）' : '已发布给家长，并计入反馈奖励'
         toast.success(msg, { duration: 4000 })
         setSubmitDone(true); setTimeout(() => setSubmitDone(false), 3000)
         setLessonId(''); setSelectedStudentIds([]); setGroupId('')
@@ -198,10 +198,11 @@ function FeedbackPageInner() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          mode: 'classroom',
           note: aiNote.trim(),
           roster, options,
           selected: { mood, tags, knowledgePoints: kps },
+          selectedStudentIds,
+          stageMaterial: stageData?.material?.summarySeed?.slice(0, 600) || '',
         }),
       })
       const data = await res.json()
@@ -209,9 +210,12 @@ function FeedbackPageInner() {
 
       const filled = new Set<string>()
 
-      // Match student names → IDs
-      if (data.studentIds?.length) {
-        setSelectedStudentIds(data.studentIds)
+      // Student IDs
+      const aiStudentIds: string[] = data.studentIds || []
+      const mergedIds = new Set(selectedStudentIds)
+      aiStudentIds.forEach((id: string) => mergedIds.add(id))
+      if (mergedIds.size > 0) {
+        setSelectedStudentIds([...mergedIds])
         filled.add('students')
       }
       if (data.unknownNames?.length) {
@@ -219,7 +223,7 @@ function FeedbackPageInner() {
       }
 
       // Mood
-      if (data.mood && MOODS.some(m => m.value === data.mood)) {
+      if (data.mood && MOODS.some((m: any) => m.value === data.mood)) {
         setMood(data.mood)
         filled.add('mood')
       }
@@ -236,26 +240,61 @@ function FeedbackPageInner() {
       aiTags.forEach((t: string) => prevTags.add(t))
       if (prevTags.size > tags.length) { setTags([...prevTags]); filled.add('tags') }
 
-      // Knowledge points — union with pre-selected
+      // Knowledge points — union
       const prevKps = new Set(kps)
       const aiKps = (data.knowledgePoints || []).filter((k: string) => QUICK_KPS.includes(k))
       aiKps.forEach((k: string) => prevKps.add(k))
       if (prevKps.size > kps.length) { setKps([...prevKps]); filled.add('kps') }
 
       // Homework
-      if (data.homework?.length) {
-        setHomework(data.homework)
-        filled.add('homework')
-      }
+      if (data.homework?.length) { setHomework(data.homework); filled.add('homework') }
 
-      // Suggestion
-      if (data.suggestion) {
-        setSummary(data.suggestion)
-        filled.add('suggestion')
-      }
+      // Suggestion / summary
+      if (data.suggestion) { setSummary(data.suggestion); filled.add('suggestion') }
+      else if (data.summary) { setSummary(data.summary); filled.add('suggestion') }
+
+      // Stage summary fields
+      if (data.stageSummaryText) { setStageSummaryText(data.stageSummaryText); filled.add('stageSummary') }
+      if (data.stageSuggestions) { setStageSuggestions(data.stageSuggestions); filled.add('stageSuggestion') }
 
       setAiPrefilled(filled)
-      toast.success('已为你预填，请核对后发布', { duration: 2500 })
+      toast.success('已自动填充，请核对后点击发布给家长', { duration: 2500 })
+    } catch (e: any) { toast.error(e.message || 'AI 生成失败') }
+    finally { setAiGenerating(false) }
+  }
+
+  const stageAiGenerate = async (target: 'summary' | 'suggestion') => {
+    if (!stageStudentId) return
+    setAiGenerating(true)
+    const hint = target === 'summary' ? '帮我生成教师寄语' : '帮我写下一步建议'
+    try {
+      const roster = groupStudents.map((s: any) => ({ id: s.id, name: s.name }))
+      const res = await fetch('/api/teacher/ai-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          note: hint,
+          roster,
+          selectedStudentIds: [stageStudentId],
+          stageMaterial: stageData?.material?.summarySeed?.slice(0, 600) || '',
+          options: { moods: [], tags: [], knowledgePoints: [] },
+          selected: {},
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) { toast.error(data.error || 'AI 生成失败'); return }
+      if (target === 'summary' && data.stageSummaryText) {
+        setStageSummaryText(data.stageSummaryText)
+        toast.success('已生成教师寄语')
+      } else if (target === 'suggestion' && data.stageSuggestions) {
+        setStageSuggestions(data.stageSuggestions)
+        toast.success('已生成下一步建议')
+      } else if (target === 'summary' && data.overallComment) {
+        setStageSummaryText(data.overallComment)
+        toast.success('已生成教师寄语')
+      } else {
+        toast.warning('AI 未返回对应内容，请再试一次')
+      }
     } catch (e: any) { toast.error(e.message || 'AI 生成失败') }
     finally { setAiGenerating(false) }
   }
@@ -416,14 +455,20 @@ function FeedbackPageInner() {
         )}
       </Card>
 
-      {/* ── Stage Summary (only when 1 student selected) ── */}
-      {stageStudentId && (
+      {/* ── Stage Summary ── */}
+      {selectedStudentIds.length > 1 ? (
+        <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1', background: '#faf8f5' }}>
+          <div style={{ fontSize: 12, color: '#7A869A', textAlign: 'center' }}>
+            本期寄语为单个学生专属内容，请只选择一名学生后填写
+          </div>
+        </Card>
+      ) : stageStudentId && (
         <Card size="small" style={{ borderRadius: 12, border: '1px solid #F0DDD2' }}>
           <div
             style={{ fontSize: 13, fontWeight: 700, display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}
             onClick={() => setStageExpanded(!stageExpanded)}
           >
-            <span>📋 本期寄语（家长端·案）{stageExpanded ? '' : ' — 点击展开'}</span>
+            <span>📋 本期寄语（家长端可见）{stageExpanded ? '' : ' — 点击展开'}</span>
             <span style={{ color: '#98A2B3', fontSize: 12 }}>{stageExpanded ? '收起' : '展开'}</span>
           </div>
           {stageExpanded && (
@@ -454,7 +499,12 @@ function FeedbackPageInner() {
                 </div>
               )}
 
-              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>教师寄语</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                <span style={{ fontSize: 12, fontWeight: 600 }}>教师寄语</span>
+                <Button type="link" size="small" icon={<ThunderboltOutlined />} loading={aiGenerating}
+                  onClick={() => stageAiGenerate('summary')}
+                  style={{ fontSize: 11, padding: 0 }}>AI 写寄语</Button>
+              </div>
               <Input.TextArea
                 rows={4}
                 maxLength={500}
@@ -465,7 +515,12 @@ function FeedbackPageInner() {
                 style={{ borderRadius: 8 }}
               />
 
-              <div style={{ fontSize: 12, fontWeight: 600, margin: '8px 0 4px' }}>下一步建议</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '8px 0 4px' }}>
+                <span style={{ fontSize: 12, fontWeight: 600 }}>下一步建议</span>
+                <Button type="link" size="small" icon={<ThunderboltOutlined />} loading={aiGenerating}
+                  onClick={() => stageAiGenerate('suggestion')}
+                  style={{ fontSize: 11, padding: 0 }}>AI 写建议</Button>
+              </div>
               <Input.TextArea
                 rows={2}
                 maxLength={200}
@@ -488,7 +543,7 @@ function FeedbackPageInner() {
       <div style={{
         display: 'flex', gap: 10, paddingBottom: isMobile ? 'calc(12px + env(safe-area-inset-bottom))' : 24,
         ...(isMobile ? {
-          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+          position: 'fixed', bottom: 'calc(72px + env(safe-area-inset-bottom))', left: 0, right: 0, zIndex: 1000,
           background: '#fff', padding: '10px 16px', borderTop: '1px solid #EEE7E1', boxShadow: '0 -2px 8px rgba(0,0,0,.06)',
         } : {}),
       }}>
@@ -500,7 +555,7 @@ function FeedbackPageInner() {
         </Button>
       </div>
       {/* Spacer for fixed bar on mobile */}
-      {isMobile && <div style={{ height: 80 }} />}
+      {isMobile && <div style={{ height: 152 }} />}
     </div>
   )
 
