@@ -91,6 +91,7 @@ export async function callDeepSeek(params: {
   user: string
   maxTokens?: number
   temperature?: number
+  jsonMode?: boolean
 }): Promise<string> {
   const baseUrl = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1'
   const apiKey = process.env.DEEPSEEK_API_KEY || ''
@@ -113,6 +114,7 @@ export async function callDeepSeek(params: {
         ],
         temperature: params.temperature ?? 0.7,
         max_tokens: params.maxTokens ?? 500,
+        ...(params.jsonMode ? { response_format: { type: 'json_object' } } : {}),
       }),
     },
     Number(process.env.AI_TIMEOUT_MS || 45_000),

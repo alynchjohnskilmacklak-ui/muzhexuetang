@@ -32,6 +32,7 @@ function FeedbackPageInner() {
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [badgeOpen, setBadgeOpen] = useState(false)
   const [uploadExpanded, setUploadExpanded] = useState(false)
+  const [studentsExpanded, setStudentsExpanded] = useState(false)
   const [saving, setSaving] = useState(false)
   const [submitDone, setSubmitDone] = useState(false)
 
@@ -45,8 +46,6 @@ function FeedbackPageInner() {
   const [stageData, setStageData] = useState<any>(null)
   const [stageSummaryText, setStageSummaryText] = useState('')
   const [stageSuggestions, setStageSuggestions] = useState('')
-  const [stageKeywords, setStageKeywords] = useState('')
-  const [stageAiGenerating, setStageAiGenerating] = useState(false)
   const [stageMaterialExpanded, setStageMaterialExpanded] = useState(false)
 
   // Data
@@ -109,25 +108,6 @@ function FeedbackPageInner() {
       setStageSuggestions('')
     }
   }, [stageStudentId, stageDataRaw]) // eslint-disable-line
-
-  const stageAiGenerate = async () => {
-    if (!stageStudentId) return
-    setStageAiGenerating(true)
-    try {
-      const res = await fetch('/api/teacher/ai-feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentId: stageStudentId, keywords: stageKeywords, kind: 'stage' }),
-      })
-      const data = await res.json()
-      if (!res.ok) { toast.error(data.error); return }
-      if (data.draft) {
-        setStageSummaryText(data.draft)
-        toast.success(`AI 草稿已生成（${data.draft.length} 字），请核对后发布`)
-      }
-    } catch (e: any) { toast.error(e.message) }
-    finally { setStageAiGenerating(false) }
-  }
 
   // When lesson selected, auto-pick group + students
   useMemo(() => {
@@ -217,7 +197,12 @@ function FeedbackPageInner() {
       const res = await fetch('/api/teacher/ai-feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'classroom', note: aiNote.trim(), roster, options }),
+        body: JSON.stringify({
+          mode: 'classroom',
+          note: aiNote.trim(),
+          roster, options,
+          selected: { mood, tags, knowledgePoints: kps },
+        }),
       })
       const data = await res.json()
       if (!res.ok) { toast.error(data.error || 'AI 生成失败'); return }
@@ -245,17 +230,17 @@ function FeedbackPageInner() {
         filled.add('comment')
       }
 
-      // Tags (intersection with whitelist)
-      if (data.tags?.length) {
-        const validTags = data.tags.filter((t: string) => QUICK_TAGS.includes(t))
-        if (validTags.length) { setTags(validTags); filled.add('tags') }
-      }
+      // Tags — union with pre-selected
+      const prevTags = new Set(tags)
+      const aiTags = (data.tags || []).filter((t: string) => QUICK_TAGS.includes(t))
+      aiTags.forEach(t => prevTags.add(t))
+      if (prevTags.size > tags.length) { setTags([...prevTags]); filled.add('tags') }
 
-      // Knowledge points
-      if (data.knowledgePoints?.length) {
-        const validKps = data.knowledgePoints.filter((k: string) => QUICK_KPS.includes(k))
-        if (validKps.length) { setKps(validKps); filled.add('kps') }
-      }
+      // Knowledge points — union with pre-selected
+      const prevKps = new Set(kps)
+      const aiKps = (data.knowledgePoints || []).filter((k: string) => QUICK_KPS.includes(k))
+      aiKps.forEach(k => prevKps.add(k))
+      if (prevKps.size > kps.length) { setKps([...prevKps]); filled.add('kps') }
 
       // Homework
       if (data.homework?.length) {
@@ -469,27 +454,6 @@ function FeedbackPageInner() {
                 </div>
               )}
 
-              {/* AI keywords + button */}
-              <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-                <Input
-                  size="small"
-                  placeholder="关键词：进步明显、计算薄弱"
-                  value={stageKeywords}
-                  onChange={e => setStageKeywords(e.target.value)}
-                  style={{ flex: 1, borderRadius: 8 }}
-                  allowClear
-                />
-                <Button
-                  size="small"
-                  icon={<ThunderboltOutlined />}
-                  loading={stageAiGenerating}
-                  onClick={stageAiGenerate}
-                  style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
-                >
-                  AI 生成
-                </Button>
-              </div>
-
               <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>教师寄语</div>
               <Input.TextArea
                 rows={4}
@@ -589,49 +553,64 @@ function FeedbackPageInner() {
             </Card>
           )}
 
-          {/* Student list — moved to left column */}
+          {/* Student list — collapsible */}
           {groupId && (
             <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <span style={{ fontSize: 13, fontWeight: 700 }}>{selectedGroup?.courseName || '班级'} ({filteredStudents.length}人)</span>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                onClick={() => setStudentsExpanded(!studentsExpanded)}
+              >
+                <span style={{ fontSize: 13, fontWeight: 700 }}>
+                  {selectedGroup?.courseName || '班级'} ({filteredStudents.length}人)
+                  {selectedStudentIds.length > 0 && (
+                    <span style={{ fontWeight: 400, color: '#E8784A', marginLeft: 6, fontSize: 12 }}>
+                      已选 {selectedStudentIds.length} 人
+                    </span>
+                  )}
+                </span>
+                <span style={{ color: '#98A2B3', fontSize: 12 }}>{studentsExpanded ? '收起 ▲' : '展开 ▼'}</span>
               </div>
-              <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
-                <Input size="small" prefix={<SearchOutlined />} value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="搜索" style={{ flex: 1, borderRadius: 8 }} />
-                <Button size="small" onClick={selectAll} style={{ fontSize: 11 }}>全选</Button>
-                <Button size="small" onClick={clearAll} style={{ fontSize: 11 }}>清空</Button>
-              </div>
+              {/* Always show selected chips */}
               {selectedStudentIds.length > 0 && (
-                <div style={{ marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                   {selectedStudentIds.map((id) => {
                     const s = groupStudents.find((gs: any) => gs.id === id)
                     return s ? (
                       <Tag key={id} closable color="orange" style={{ borderRadius: 9999, fontSize: 11, margin: 0 }}
-                        onClose={() => toggleStudent(id)}>{s.name}</Tag>
+                        onClose={(e: any) => { e.preventDefault(); toggleStudent(id) }}>{s.name}</Tag>
                     ) : null
                   })}
                 </div>
               )}
-              {filteredStudents.length === 0 ? (
-                <Empty description="该班级暂无学员" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                  {filteredStudents.map((s: any) => {
-                    const selected = selectedStudentIds.includes(s.id)
-                    const needsFeedback = s.daysSinceLastFeedback === null || s.daysSinceLastFeedback > 7
-                    return (
-                      <div key={s.id} onClick={() => toggleStudent(s.id)} style={{
-                        padding: 8, borderRadius: 8, cursor: 'pointer', border: selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
-                        background: selected ? '#FFF3EC' : '#fff', transition: 'all .15s',
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <div style={{ width: 26, height: 26, borderRadius: 8, background: '#F5F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#E8784A', flexShrink: 0 }}>{s.name[0]}</div>
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+              {studentsExpanded && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+                    <Input size="small" prefix={<SearchOutlined />} value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="搜索" style={{ flex: 1, borderRadius: 8 }} />
+                    <Button size="small" onClick={selectAll} style={{ fontSize: 11 }}>全选</Button>
+                    <Button size="small" onClick={clearAll} style={{ fontSize: 11 }}>清空</Button>
+                  </div>
+                  {filteredStudents.length === 0 ? (
+                    <Empty description="该班级暂无学员" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                      {filteredStudents.map((s: any) => {
+                        const selected = selectedStudentIds.includes(s.id)
+                        return (
+                          <div key={s.id} onClick={() => toggleStudent(s.id)} style={{
+                            padding: 8, borderRadius: 8, cursor: 'pointer', border: selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
+                            background: selected ? '#FFF3EC' : '#fff', transition: 'all .15s',
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <div style={{ width: 26, height: 26, borderRadius: 8, background: '#F5F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#E8784A', flexShrink: 0 }}>{s.name[0]}</div>
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    )
-                  })}
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </Card>
@@ -684,40 +663,53 @@ function FeedbackPageInner() {
 
             {groupId && (
               <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700 }}>{selectedGroup?.courseName || '班级'} ({filteredStudents.length}人)</span>
-                  <div style={{ display: 'flex', gap: 4 }}>
-                    <Button size="small" onClick={selectAll} style={{ fontSize: 11 }}>全选</Button>
-                    <Button size="small" onClick={clearAll} style={{ fontSize: 11 }}>清空</Button>
-                  </div>
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                  onClick={() => setStudentsExpanded(!studentsExpanded)}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 700 }}>
+                    {selectedGroup?.courseName || '班级'} ({filteredStudents.length}人)
+                    {selectedStudentIds.length > 0 && (
+                      <span style={{ fontWeight: 400, color: '#E8784A', marginLeft: 6, fontSize: 12 }}>已选 {selectedStudentIds.length} 人</span>
+                    )}
+                  </span>
+                  <span style={{ color: '#98A2B3', fontSize: 12 }}>{studentsExpanded ? '收起 ▲' : '展开 ▼'}</span>
                 </div>
                 {selectedStudentIds.length > 0 && (
-                  <div style={{ marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                     {selectedStudentIds.map((id) => {
                       const s = groupStudents.find((gs: any) => gs.id === id)
                       return s ? (
                         <Tag key={id} closable color="orange" style={{ borderRadius: 9999, fontSize: 11, margin: 0 }}
-                          onClose={() => toggleStudent(id)}>{s.name}</Tag>
+                          onClose={(e: any) => { e.preventDefault(); toggleStudent(id) }}>{s.name}</Tag>
                       ) : null
                     })}
                   </div>
                 )}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                  {filteredStudents.map((s: any) => {
-                    const selected = selectedStudentIds.includes(s.id)
-                    return (
-                      <div key={s.id} onClick={() => toggleStudent(s.id)} style={{
-                        padding: 8, borderRadius: 8, cursor: 'pointer', border: selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
-                        background: selected ? '#FFF3EC' : '#fff',
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <div style={{ width: 24, height: 24, borderRadius: 6, background: '#F5F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#E8784A' }}>{s.name[0]}</div>
-                          <span style={{ fontSize: 12, fontWeight: 600 }}>{s.name}</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                {studentsExpanded && (
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+                      <Button size="small" onClick={selectAll} style={{ fontSize: 11 }}>全选</Button>
+                      <Button size="small" onClick={clearAll} style={{ fontSize: 11 }}>清空</Button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                      {filteredStudents.map((s: any) => {
+                        const selected = selectedStudentIds.includes(s.id)
+                        return (
+                          <div key={s.id} onClick={() => toggleStudent(s.id)} style={{
+                            padding: 8, borderRadius: 8, cursor: 'pointer', border: selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
+                            background: selected ? '#FFF3EC' : '#fff',
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                              <div style={{ width: 24, height: 24, borderRadius: 6, background: '#F5F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#E8784A' }}>{s.name[0]}</div>
+                              <span style={{ fontSize: 12, fontWeight: 600 }}>{s.name}</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
               </Card>
             )}
           </>

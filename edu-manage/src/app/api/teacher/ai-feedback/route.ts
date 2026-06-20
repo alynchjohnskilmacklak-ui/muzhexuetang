@@ -28,15 +28,10 @@ function checkTeacherAILimit(teacherId: string) {
 }
 
 function parseAIJson(raw: string): any | null {
-  const cleaned = raw
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/\s*```\s*$/, '')
-    .trim()
-  try {
-    return JSON.parse(cleaned)
-  } catch {
-    return null
-  }
+  let s = (raw || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
+  const a = s.indexOf('{'), b = s.lastIndexOf('}')
+  if (a !== -1 && b !== -1 && b > a) s = s.slice(a, b + 1)
+  try { return JSON.parse(s) } catch { return null }
 }
 
 export const POST = apiHandler(async (req: NextRequest) => {
@@ -54,6 +49,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     note?: string
     roster?: Array<{ id: string; name: string }>
     options?: { moods?: Array<{ value: string; label: string }>; tags?: string[]; knowledgePoints?: string[] }
+    selected?: { mood?: string; tags?: string[]; knowledgePoints?: string[] }
   }
 
   // ── Classroom mode: teacher's spoken description → structured JSON ──
@@ -73,6 +69,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const moods = Array.isArray(options.moods) ? options.moods : []
     const tagOptions = Array.isArray(options.tags) ? options.tags : []
     const kpOptions = Array.isArray(options.knowledgePoints) ? options.knowledgePoints : []
+    const selected = body.selected || {}
 
     const sys = '你是课外辅导老师助理，把老师的口语化课堂描述整理成结构化课堂反馈。只输出 JSON，不要多余文字。'
     const user = [
@@ -83,6 +80,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
       `【可选课堂状态】${moods.map((m) => `${m.value}=${m.label}`).join(' / ')}`,
       `【可选表现标签】${tagOptions.join('、') || '（无预设）'}`,
       `【可选知识点】${kpOptions.join('、') || '（无预设）'}`,
+      '',
+      `【老师已选项（请尊重，不要删除，可在此基础上补全）】`,
+      `  课堂状态：${selected?.mood || '未选'}`,
+      `  表现标签：${selected?.tags?.length ? selected.tags.join('、') : '无'}`,
+      `  知识点：${selected?.knowledgePoints?.length ? selected.knowledgePoints.join('、') : '无'}`,
       '',
       '请输出 JSON（只输出 JSON，不要 ``` 包裹）：',
       '{',
@@ -103,7 +105,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     ].join('\n')
 
     try {
-      const raw = await callDeepSeek({ system: sys, user, maxTokens: 500 })
+      const raw = await callDeepSeek({ system: sys, user, maxTokens: 500, jsonMode: true })
       const parsed = parseAIJson(raw)
       if (!parsed || typeof parsed !== 'object') {
         console.error('[ai-feedback classroom] parse failed, raw:', raw.slice(0, 300))
