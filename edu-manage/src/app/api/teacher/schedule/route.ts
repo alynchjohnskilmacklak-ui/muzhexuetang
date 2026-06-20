@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
 import { activeEnrollmentWhere } from '@/lib/business-visibility'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest) {
-  try {
+export const GET = apiHandler(async (req: NextRequest) => {
     const { teacher, prisma } = await requireCurrentTeacher()
     const { searchParams } = req.nextUrl
     const startDate = searchParams.get('startDate')
@@ -54,7 +54,4 @@ export async function GET(req: NextRequest) {
         assignedSubject: lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.subject || lesson.group.course.subject,
       })),
     })
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-}
+})

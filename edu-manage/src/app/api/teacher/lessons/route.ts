@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { LessonStatus } from '@prisma/client'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest) {
-  try {
+export const GET = apiHandler(async (req: NextRequest) => {
     const { teacher, prisma } = await requireCurrentTeacher()
     const { searchParams } = req.nextUrl
     const days = Math.min(30, Math.max(1, Number(searchParams.get('days') || 7)))
@@ -64,7 +64,4 @@ export async function GET(req: NextRequest) {
         totalHours: enrollment.totalHours,
       })),
     })))
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-}
+})

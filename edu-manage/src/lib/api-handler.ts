@@ -7,6 +7,7 @@ type Handler = (...args: any[]) => Promise<Response>
 /** 不同路径的请求体大小限制 */
 function getBodyLimit(path: string): number {
   if (path.startsWith('/api/materials/upload')) return 50 * 1024 * 1024  // 50MB
+  if (path.startsWith('/api/teacher/materials'))  return 50 * 1024 * 1024  // 50MB（教师上传资料）
   if (path.startsWith('/api/upload'))           return 25 * 1024 * 1024  // 25MB (20MB + form overhead)
   if (path.startsWith('/api/exam-papers'))      return 10 * 1024 * 1024
   if (path.startsWith('/api/volunteer'))        return 10 * 1024 * 1024
@@ -50,6 +51,10 @@ export function apiHandler<T extends Handler>(handler: T): T {
     } catch (err) {
       if (err instanceof ValidationError) {
         return NextResponse.json({ error: err.message }, { status: 400 })
+      }
+      // 鉴权失败统一返回 403（其它错误才走 500），避免真因被掩盖
+      if (err instanceof Error && (err.message === 'TEACHER_UNAUTHORIZED' || err.message === 'ADMIN_UNAUTHORIZED')) {
+        return NextResponse.json({ error: '无权限' }, { status: 403 })
       }
       const isDev = process.env.NODE_ENV !== 'production'
       const message = isDev && err instanceof Error ? err.message : '服务器错误，请稍后重试'

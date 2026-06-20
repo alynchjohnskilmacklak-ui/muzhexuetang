@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,8 +11,7 @@ function salaryPeriodStart(period: string) {
   return new Date(now.getFullYear(), now.getMonth(), 1)
 }
 
-export async function GET(req: NextRequest) {
-  try {
+export const GET = apiHandler(async (req: NextRequest) => {
     const { teacher, prisma } = await requireCurrentTeacher()
     const period = req.nextUrl.searchParams.get('period') || 'month'
     const since = salaryPeriodStart(period)
@@ -39,7 +39,4 @@ export async function GET(req: NextRequest) {
         createdAt: item.createdAt.toISOString(),
       })),
     })
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-}
+})

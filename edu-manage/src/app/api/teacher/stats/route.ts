@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import { requireCurrentTeacher, teacherLessonWhere, teacherStudentWhere } from '@/lib/teacher-portal'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
-  try {
+export const GET = apiHandler(async () => {
     const { teacher, prisma } = await requireCurrentTeacher()
     const now = new Date()
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -16,7 +16,4 @@ export async function GET() {
     ])
 
     return NextResponse.json({ totalStudents, monthlyPapers, monthlyAttendance })
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-}
+})
