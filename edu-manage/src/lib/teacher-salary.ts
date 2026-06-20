@@ -61,20 +61,23 @@ export function isPayableFeedback(feedback: {
   studentIds: string[]
   overallComment?: string | null
   summary?: string | null
-  knowledgePoints?: string[]
+  knowledgePoints?: string[] | null
   badge?: string | null
-  imageUrls?: string[]
-  homework?: any[]
+  imageUrls?: string[] | null
+  homework?: unknown
 }) {
+  const hwArr = Array.isArray(feedback.homework) ? feedback.homework : []
+  const kpArr = Array.isArray(feedback.knowledgePoints) ? feedback.knowledgePoints : []
+  const imgsArr = Array.isArray(feedback.imageUrls) ? feedback.imageUrls : []
   return feedback.status === 'PUBLISHED'
     && feedback.studentIds.length > 0
     && (
       Boolean((feedback.overallComment || '').trim()) ||
       Boolean((feedback.summary || '').trim()) ||
-      (Array.isArray(feedback.knowledgePoints) && feedback.knowledgePoints.length > 0) ||
+      kpArr.length > 0 ||
       Boolean((feedback.badge || '').trim()) ||
-      (Array.isArray(feedback.imageUrls) && feedback.imageUrls.length > 0) ||
-      (Array.isArray(feedback.homework) && feedback.homework.length > 0)
+      imgsArr.length > 0 ||
+      hwArr.length > 0
     )
 }
 
