@@ -177,7 +177,7 @@ function FeedbackPageInner() {
         setLessonId(''); setSelectedStudentIds([]); setGroupId('')
         setMood('GOOD'); setTags([]); setKps([]); setBadge('')
         setSummary(''); setOverallComment(''); setHomework([]); setImageUrls([])
-        setStageSummaryText(''); setStageSuggestions(''); setStageKeywords('')
+        setStageSummaryText(''); setStageSuggestions('')
         setStageData(null); setStageExpanded(false)
       } else { toast.success('草稿已保存', { duration: 2000 }) }
     } finally { setSaving(false) }
