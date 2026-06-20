@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, Typography, Table, Tag, Select, Statistic, Row, Col, Button, message } from 'antd'
+import { Card, Typography, Table, Tag, Select, Statistic, Row, Col, Button } from 'antd'
+import { toast } from 'sonner'
 import { CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
@@ -24,7 +25,7 @@ export function ParentFeesClient({
   const filtered = selectedChild === 'all' ? feeData : feeData.filter(f => f.student === selectedChild)
 
   const handlePay = (record: FeeRow) => {
-    message.info('模拟支付：' + record.student + ' - ' + record.course + ' - ¥' + record.amount)
+    toast.info('模拟支付：' + record.student + ' - ' + record.course + ' - ¥' + record.amount)
   }
 
   return (

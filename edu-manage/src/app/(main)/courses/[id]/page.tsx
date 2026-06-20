@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
-import { Alert, Button, Card, Col, Dropdown, Empty, Input, InputNumber, message, Modal, Popconfirm, Progress, Row, Select, Space, Spin, Statistic, Table, Tag } from 'antd'
+import { Alert, Button, Card, Col, Dropdown, Empty, Input, InputNumber, Modal, Popconfirm, Progress, Row, Select, Space, Spin, Statistic, Table, Tag } from 'antd'
+import { toast } from 'sonner'
 import { ArrowLeftOutlined, CalendarOutlined, DeleteOutlined, MoreOutlined, PlusOutlined, ReloadOutlined, TeamOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
@@ -57,10 +58,10 @@ export default function CourseGroupDetailPage() {
       const res = await fetch(`/api/class-groups/${params.id}/start`, { method: 'POST' })
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(payload.error || '开班失败')
-      message.success(payload.alreadyActive ? '班级已经是进行中' : `开班成功，已通知 ${payload.notifiedParents || 0} 位家长`)
+      toast.success(payload.alreadyActive ? '班级已经是进行中' : `开班成功，已通知 ${payload.notifiedParents || 0} 位家长`)
       mutate()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '开班失败')
+      toast.error(error instanceof Error ? error.message : '开班失败')
     } finally {
       setStarting(false)
     }
@@ -68,7 +69,7 @@ export default function CourseGroupDetailPage() {
 
   const handleAddStudents = async () => {
     if (!selectedStudentIds.length) {
-      message.error('请选择要加入班级的学员')
+      toast.error('请选择要加入班级的学员')
       return
     }
     setSubmitting(true)
@@ -82,12 +83,12 @@ export default function CourseGroupDetailPage() {
         const payload = await res.json().catch(() => ({}))
         if (!res.ok) throw new Error(payload.error || '添加学员失败')
       }
-      message.success(`已添加 ${selectedStudentIds.length} 位学员`)
+      toast.success(`已添加 ${selectedStudentIds.length} 位学员`)
       handleCloseEnrollModal()
       setTotalHours(null)
       mutate()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '添加学员失败')
+      toast.error(error instanceof Error ? error.message : '添加学员失败')
     } finally {
       setSubmitting(false)
     }
@@ -102,7 +103,7 @@ export default function CourseGroupDetailPage() {
 
   const handleSelectGradeStudents = () => {
     if (!studentGrade) {
-      message.warning('请先选择年级')
+      toast.warning('请先选择年级')
       return
     }
     setSelectedStudentIds(filteredAvailableStudents.map((student: Record<string, unknown>) => student.id as string))
@@ -112,10 +113,10 @@ export default function CourseGroupDetailPage() {
     const res = await fetch(`/api/class-groups/${params.id}/enrollments?enrollmentId=${enrollmentId}`, { method: 'DELETE' })
     const payload = await res.json().catch(() => ({}))
     if (!res.ok) {
-      message.error(payload.error || '移出失败')
+      toast.error(payload.error || '移出失败')
       return
     }
-    message.success('已移出班级')
+    toast.success('已移出班级')
     mutate()
   }
 
@@ -123,10 +124,10 @@ export default function CourseGroupDetailPage() {
     const res = await fetch(`/api/class-groups/${params.id}`, { method: 'DELETE' })
     const payload = await res.json().catch(() => ({}))
     if (!res.ok) {
-      message.error(payload.error || '删除失败')
+      toast.error(payload.error || '删除失败')
       return
     }
-    message.success('班级已删除')
+    toast.success('班级已删除')
     router.push('/courses')
   }
 
@@ -139,10 +140,10 @@ export default function CourseGroupDetailPage() {
       })
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(payload.error || '重新生成失败')
-      message.success(`课表已重新生成，共 ${payload.count || 0} 节课`)
+      toast.success(`课表已重新生成，共 ${payload.count || 0} 节课`)
       mutate()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '重新生成失败')
+      toast.error(error instanceof Error ? error.message : '重新生成失败')
     }
   }
 
@@ -152,8 +153,8 @@ export default function CourseGroupDetailPage() {
     try {
       const res = await fetch(`/api/class-groups/${params.id}/sync-hours`, { method: 'POST' })
       const data = await res.json()
-      if (!res.ok) { message.error(data.error || '同步失败'); return }
-      message.success(data.message || `已同步 ${data.updated} 位学员课时`)
+      if (!res.ok) { toast.error(data.error || '同步失败'); return }
+      toast.success(data.message || `已同步 ${data.updated} 位学员课时`)
       mutate()
     } finally {
       setSyncingHours(false)

@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Card, Input, message, Modal, Select, Space, Statistic, Table, Tag, Typography } from 'antd'
+import { Button, Card, Input, Modal, Select, Space, Statistic, Table, Tag, Typography } from 'antd'
+import { toast } from 'sonner'
 import type { ColumnsType } from 'antd/es/table'
 import { ReloadOutlined, SafetyOutlined, SearchOutlined } from '@ant-design/icons'
 
@@ -56,7 +57,7 @@ export default function LoginRecordsPage() {
       setTotal(data.total || 0)
       setPage(nextPage)
     } catch {
-      message.error('登录记录加载失败')
+      toast.error('登录记录加载失败')
     } finally {
       setLoading(false)
     }
@@ -87,11 +88,11 @@ export default function LoginRecordsPage() {
           body: JSON.stringify({ status: newStatus }),
         })
         if (res.ok) {
-          message.success(`账号已${action}`)
+          toast.success(`账号已${action}`)
           fetchRecords()
         } else {
           const data = await res.json().catch(() => null)
-          message.error(data?.error || '操作失败，请重试')
+          toast.error(data?.error || '操作失败，请重试')
         }
       },
     })

@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
-import { Modal, Select, Input, message, Typography } from 'antd'
+import { Modal, Select, Input, Typography } from 'antd'
+import { toast } from 'sonner'
 import { MobileSelect } from '@/components/MobileSelect'
 import { SCHEDULE_PERIODS } from '@/lib/schedule-periods'
 
@@ -64,7 +65,7 @@ export function OneOnOneModal({
 
   const handleSave = async () => {
     if (!teacherId || !studentId || !subject || !date || !startTime || !endTime) {
-      message.warning('请填写所有必填字段')
+      toast.warning('请填写所有必填字段')
       return
     }
 
@@ -92,19 +93,19 @@ export function OneOnOneModal({
       if (!res.ok) {
         if (res.status === 409 && payload.conflicts) {
           setConflicts(payload.conflicts)
-          message.error('时间冲突，无法安排')
+          toast.error('时间冲突，无法安排')
         } else {
-          message.error(payload.error || '创建失败')
+          toast.error(payload.error || '创建失败')
         }
         return
       }
 
-      message.success(payload.message || '一对一排课成功')
+      toast.success(payload.message || '一对一排课成功')
       resetForm()
       onClose()
       onSuccess?.()
     } catch {
-      message.error('网络错误')
+      toast.error('网络错误')
     } finally {
       setSaving(false)
     }

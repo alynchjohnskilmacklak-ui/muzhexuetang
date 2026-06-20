@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Card, Empty, List, Tag, Typography, message } from 'antd'
+import { Button, Card, Empty, List, Tag, Typography } from 'antd'
+import { toast } from 'sonner'
 import {
   BellOutlined,
   BookOutlined,
@@ -52,7 +53,7 @@ export function ParentNotificationsClient({
       })
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
     } catch {
-      message.error('操作失败')
+      toast.error('操作失败')
     }
   }
 
@@ -64,9 +65,9 @@ export function ParentNotificationsClient({
         body: JSON.stringify({ all: true }),
       })
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-      message.success('全部已读')
+      toast.success('全部已读')
     } catch {
-      message.error('操作失败')
+      toast.error('操作失败')
     }
   }
 

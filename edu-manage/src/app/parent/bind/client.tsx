@@ -1,7 +1,8 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { Button, Card, Typography, Spin, Alert, Modal, message } from 'antd'
+import { Button, Card, Typography, Spin, Alert, Modal } from 'antd'
+import { toast } from 'sonner'
 import { WechatOutlined, CheckCircleFilled } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -46,12 +47,12 @@ export function BindWxClient({ bound, userName }: { bound: boolean; userName: st
       if (data.bound) {
         setIsBound(true)
         setQrcodeUrl(null)
-        message.success('微信绑定成功！')
+        toast.success('微信绑定成功！')
       } else {
-        message.info('暂未检测到绑定，请确认已用微信扫码并关注公众号')
+        toast.info('暂未检测到绑定，请确认已用微信扫码并关注公众号')
       }
     } catch {
-      message.error('检查失败，请重试')
+      toast.error('检查失败，请重试')
     } finally {
       setChecking(false)
     }
@@ -71,12 +72,12 @@ export function BindWxClient({ bound, userName }: { bound: boolean; userName: st
           if (res.ok) {
             setIsBound(false)
             setQrcodeUrl(null)
-            message.success('已解除微信绑定')
+            toast.success('已解除微信绑定')
           } else {
-            message.error('解除绑定失败，请稍后重试')
+            toast.error('解除绑定失败，请稍后重试')
           }
         } catch {
-          message.error('解除绑定失败，请稍后重试')
+          toast.error('解除绑定失败，请稍后重试')
         } finally {
           setUnbinding(false)
         }

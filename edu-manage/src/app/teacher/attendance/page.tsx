@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Empty, List, message, Space, Tag, Typography } from 'antd'
+import { Button, Card, Empty, List, Space, Tag, Typography } from 'antd'
 import { CheckCircleOutlined, ClockCircleOutlined, EnvironmentOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { formatHours } from '@/lib/format'
@@ -126,7 +126,7 @@ export default function TeacherAttendancePage() {
       const lessonStart = new Date(`${dateStr}T${startTime}:00`)
       const earliestAllowed = new Date(lessonStart.getTime() - 30 * 60 * 1000)
       if (new Date() < earliestAllowed) {
-        message.warning(`未到考勤时间，课程 ${startTime} 开始，最早 30 分钟前可提交考勤`)
+        toast.warning(`未到考勤时间，课程 ${startTime} 开始，最早 30 分钟前可提交考勤`)
         return
       }
     }
@@ -143,7 +143,7 @@ export default function TeacherAttendancePage() {
     const payload = await res.json().catch(() => ({}))
     setSubmitting(false)
     submittingRef.current = false
-    if (!res.ok) { message.error(payload.error || '提交失败'); return }
+    if (!res.ok) { toast.error(payload.error || '提交失败'); return }
     setSubmitted(true)
     mutateDashboard()
     fetch(`/api/teacher/attendance?lessonId=${selectedLesson.id}`)
@@ -158,9 +158,9 @@ export default function TeacherAttendancePage() {
       .catch((error) => toast.warning(`考勤已提交，但最新考勤列表刷新失败，请手动刷新页面。原因：${error instanceof Error ? error.message : '未知错误'}`))
     setTimeout(() => setSubmitted(false), 2000)
     if (payload.alreadyDeducted) {
-      message.success(`✅ 考勤已更新，本次课次已结算课时`, 4)
+      toast.success(`✅ 考勤已更新，本次课次已结算课时`, 4)
     } else {
-      message.success(`✅ 考勤已提交，本次课次状态已更新`, 4)
+      toast.success(`✅ 考勤已提交，本次课次状态已更新`, 4)
     }
   }
 

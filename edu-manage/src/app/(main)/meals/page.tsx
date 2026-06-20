@@ -1,11 +1,28 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState } from 'react'
 import * as XLSX from 'xlsx'
 import {
-  Button, Card, Col, DatePicker, Form, Input, Modal, Row, Statistic, Switch,
-  Table, Tabs, Tag, Typography, message,
+  Button,
+  Card,
+  Col,
+  DatePicker,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Statistic,
+  Switch,
+  Table,
+  Tabs,
+  Tag,
+  Typography,
 } from 'antd'
+import { toast } from 'sonner'
 import { DownloadOutlined, EditOutlined } from '@ant-design/icons'
 import dayjs, { Dayjs } from 'dayjs'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -113,12 +130,12 @@ export default function MealsPage() {
         body: JSON.stringify({ ...values, weekday: templateEditing?.weekday }),
       })
       if (!res.ok) throw new Error('save failed')
-      message.success('周期菜单已保存')
+      toast.success('周期菜单已保存')
       setTemplateEditing(null)
       templateForm.resetFields()
       fetchTemplates()
     } catch {
-      message.error('周期菜单保存失败')
+      toast.error('周期菜单保存失败')
     } finally {
       setSaving(false)
     }

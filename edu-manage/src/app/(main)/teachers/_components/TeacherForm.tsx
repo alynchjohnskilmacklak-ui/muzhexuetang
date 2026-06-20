@@ -1,7 +1,8 @@
 ﻿'use client'
 
 import { useEffect, useState } from 'react'
-import { Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, DatePicker, Upload } from 'antd'
+import { Modal, Form, Input, Select, InputNumber, Steps, Row, Col, Button, Space, DatePicker, Upload } from 'antd'
+import { toast } from 'sonner'
 import { UserOutlined, BookOutlined, IdcardOutlined, UploadOutlined } from '@ant-design/icons'
 import type { UploadProps } from 'antd'
 import dayjs from 'dayjs'
@@ -80,15 +81,15 @@ export function TeacherForm({
           setCurrent(0)
           form.setFields([{ name: 'phone', errors: [errorText] }])
         }
-        message.error(errorText)
+        toast.error(errorText)
         return
       }
-      message.success(mode === 'edit' ? '教师信息已更新' : '教师添加成功')
+      toast.success(mode === 'edit' ? '教师信息已更新' : '教师添加成功')
       form.resetFields()
       setCurrent(0)
       onClose()
     } catch {
-      message.error('提交失败')
+      toast.error('提交失败')
     } finally {
       setLoading(false)
     }
@@ -106,10 +107,10 @@ export function TeacherForm({
         const payload = await res.json().catch(() => ({}))
         if (!res.ok) throw new Error(payload.error || '上传失败')
         form.setFieldValue('avatar', payload.url)
-        message.success('照片已上传')
+        toast.success('照片已上传')
         onSuccess?.(payload)
       } catch (error) {
-        message.error(error instanceof Error ? error.message : '上传失败')
+        toast.error(error instanceof Error ? error.message : '上传失败')
         onError?.(error as Error)
       }
     },

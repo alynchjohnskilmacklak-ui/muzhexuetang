@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import useSWR from 'swr'
-import { Row, Col, Card, Segmented, DatePicker, Statistic, Button, Spin, message } from 'antd'
+import { Row, Col, Card, Segmented, DatePicker, Statistic, Button, Spin } from 'antd'
+import { toast } from 'sonner'
 import { DownloadOutlined, TeamOutlined, FileTextOutlined, TrophyOutlined, InteractionOutlined } from '@ant-design/icons'
 import dynamic from 'next/dynamic'
 import { PageLayout } from '@/components/Layout/PageLayout'
@@ -51,7 +52,7 @@ async function downloadExcel(chartKey: string, period: string, from?: string, to
   if (from) params.set('from', from)
   if (to) params.set('to', to)
   const res = await fetch(`/api/reports/export/${chartKey}?${params}`)
-  if (!res.ok) { message.error('导出失败'); return }
+  if (!res.ok) { toast.error('导出失败'); return }
   const blob = await res.blob()
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -59,7 +60,7 @@ async function downloadExcel(chartKey: string, period: string, from?: string, to
   a.download = `${chartKey}-${new Date().toISOString().slice(0, 10)}.xlsx`
   a.click()
   URL.revokeObjectURL(url)
-  message.success('导出成功')
+  toast.success('导出成功')
 }
 
 function ChartCard({ title, chartKey, period, from, to, children }: {

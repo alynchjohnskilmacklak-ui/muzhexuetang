@@ -9,7 +9,6 @@ import {
   Drawer,
   Empty,
   Input,
-  message,
   Modal,
   Pagination,
   Select,
@@ -21,6 +20,7 @@ import {
   Tooltip,
   Typography,
 } from 'antd'
+import { toast } from 'sonner'
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -203,7 +203,7 @@ function HourAdjustmentModal({
 
   const handleSubmit = async () => {
     if (!studentId || amount === 0) {
-      message.warning('请选择学员并输入课时数')
+      toast.warning('请选择学员并输入课时数')
       return
     }
     setLoading(true)
@@ -215,13 +215,13 @@ function HourAdjustmentModal({
       })
       const data = await res.json()
       if (data.success) {
-        message.success(data.message)
+        toast.success(data.message)
         onClose()
       } else {
-        message.error(data.error || '调整失败')
+        toast.error(data.error || '调整失败')
       }
     } catch {
-      message.error('网络错误')
+      toast.error('网络错误')
     } finally {
       setLoading(false)
     }
@@ -313,7 +313,7 @@ export function DataAdminClient() {
   const { data, mutate, isLoading } = useSWR(buildUrl, async (url: string) => {
     const res = await fetch(url)
     if (res.status === 403) {
-      message.error('无权限访问')
+      toast.error('无权限访问')
       return null
     }
     return res.json()
@@ -365,14 +365,14 @@ export function DataAdminClient() {
       })
       const result = await res.json()
       if (result.success) {
-        message.success('更新成功')
+        toast.success('更新成功')
         setEditModalOpen(false)
         mutate()
       } else {
-        message.error(result.error || '更新失败')
+        toast.error(result.error || '更新失败')
       }
     } catch {
-      message.error('网络错误')
+      toast.error('网络错误')
     } finally {
       setEditLoading(false)
     }
@@ -395,14 +395,14 @@ export function DataAdminClient() {
       })
       const result = await res.json()
       if (result.success) {
-        message.success('已删除')
+        toast.success('已删除')
         setDeleteModalOpen(false)
         mutate()
       } else {
-        message.error(result.error || '删除失败')
+        toast.error(result.error || '删除失败')
       }
     } catch {
-      message.error('网络错误')
+      toast.error('网络错误')
     } finally {
       setDeleteLoading(false)
     }
@@ -418,13 +418,13 @@ export function DataAdminClient() {
       })
       const result = await res.json()
       if (result.success) {
-        message.success('已恢复')
+        toast.success('已恢复')
         mutate()
       } else {
-        message.error(result.error || '恢复失败')
+        toast.error(result.error || '恢复失败')
       }
     } catch {
-      message.error('网络错误')
+      toast.error('网络错误')
     } finally {
       setRestoringId(null)
     }
@@ -433,11 +433,11 @@ export function DataAdminClient() {
   const handleBatchAction = async (action: 'softDelete' | 'restore' | 'markRead') => {
     if (!selectedRowKeys.length) return
     if (!supportsBatch && action !== 'markRead') {
-      message.warning('该类型暂不支持批量操作')
+      toast.warning('该类型暂不支持批量操作')
       return
     }
     if (action === 'markRead' && entityKey !== 'notifications') {
-      message.warning('仅通知支持批量标记已读')
+      toast.warning('仅通知支持批量标记已读')
       return
     }
 
@@ -454,14 +454,14 @@ export function DataAdminClient() {
       })
       const result = await res.json()
       if (result.success) {
-        message.success(result.message || '批量操作成功')
+        toast.success(result.message || '批量操作成功')
         setSelectedRowKeys([])
         mutate()
       } else {
-        message.error(result.error || '批量操作失败')
+        toast.error(result.error || '批量操作失败')
       }
     } catch {
-      message.error('网络错误')
+      toast.error('网络错误')
     } finally {
       setBatchLoading(false)
     }
@@ -476,7 +476,7 @@ export function DataAdminClient() {
         setDetailOpen(true)
       }
     } catch {
-      message.error('加载失败')
+      toast.error('加载失败')
     }
   }
 
@@ -564,7 +564,7 @@ export function DataAdminClient() {
 
   const handleExport = async () => {
     try {
-      message.info('正在导出数据，请稍候...')
+      toast.info('正在导出数据，请稍候...')
       const res = await fetch(`/api/admin/data-admin/${entityKey}?limit=10000`)
       const result = await res.json()
       if (result.success && result.data) {
@@ -575,10 +575,10 @@ export function DataAdminClient() {
         a.download = `${entityKey}-${new Date().toISOString().slice(0, 10)}.json`
         a.click()
         URL.revokeObjectURL(url)
-        message.success('导出成功')
+        toast.success('导出成功')
       }
     } catch {
-      message.error('导出失败')
+      toast.error('导出失败')
     }
   }
 

@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, Typography, message } from 'antd'
+import { Card, Typography } from 'antd'
+import { toast } from 'sonner'
 import dayjs from 'dayjs'
 
 const { Title, Text } = Typography
@@ -42,9 +43,9 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
       })
       if (res.ok) {
         setChoices(prev => ({ ...prev, [studentId]: eating }))
-        message.success(eating ? '已选择用餐' : '已选择不用餐', 1)
-      } else message.error('提交失败')
-    } catch { message.error('网络错误') }
+        toast.success(eating ? '已选择用餐' : '已选择不用餐', 1)
+      } else toast.error('提交失败')
+    } catch { toast.error('网络错误') }
     finally { setSubmitting(false) }
   }
 

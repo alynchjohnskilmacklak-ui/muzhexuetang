@@ -2,7 +2,8 @@
 
 import useSWR from 'swr'
 import { useParams } from 'next/navigation'
-import { Card, Descriptions, Tag, Timeline, Statistic, Row, Col, List, Button, message, Typography } from 'antd'
+import { Card, Descriptions, Tag, Timeline, Statistic, Row, Col, List, Button, Typography } from 'antd'
+import { toast } from 'sonner'
 import { ClockCircleOutlined, CheckCircleOutlined, FileTextOutlined, StarOutlined, LoginOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 
@@ -31,7 +32,7 @@ export default function TeacherLogDetailPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ alertId }),
     })
-    message.success('预警已处理')
+    toast.success('预警已处理')
   }
 
   if (isLoading || !data) return <PageLayout title="加载中..."><div /></PageLayout>

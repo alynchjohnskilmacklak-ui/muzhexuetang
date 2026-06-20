@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
-import { Button, Card, Col, Descriptions, Empty, Form, Input, Modal, Progress, Radio, Row, Select, Spin, Statistic, Table, Tag, message } from 'antd'
+import { Button, Card, Col, Descriptions, Empty, Form, Input, Modal, Progress, Radio, Row, Select, Spin, Statistic, Table, Tag } from 'antd'
+import { toast } from 'sonner'
 import { ArrowLeftOutlined, DisconnectOutlined, LinkOutlined, UserAddOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { formatHours } from '@/lib/format'
@@ -43,10 +44,10 @@ export default function StudentDetailPage() {
         const res = await fetch(`/api/students/${student.id}/link-parent`, { method: 'DELETE' })
         const data = await res.json().catch(() => ({}))
         if (!res.ok) {
-          message.error(data.error || '解绑失败')
+          toast.error(data.error || '解绑失败')
           return
         }
-        message.success('已解绑家长账号')
+        toast.success('已解绑家长账号')
         mutate()
       },
     })
@@ -63,10 +64,10 @@ export default function StudentDetailPage() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        message.error(data.error || '操作失败')
+        toast.error(data.error || '操作失败')
         return
       }
-      message.success(data.message || '绑定成功')
+      toast.success(data.message || '绑定成功')
       setParentModalOpen(false)
       parentForm.resetFields()
       mutate()

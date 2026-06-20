@@ -1,6 +1,7 @@
 'use client'
 
-import { Card, Button, Typography, message, Popconfirm, Spin } from 'antd'
+import { Card, Button, Typography, Popconfirm, Spin } from 'antd'
+import { toast } from 'sonner'
 import { DownloadOutlined, CloudUploadOutlined, FileExcelOutlined, DeleteOutlined, ScanOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import useSWR from 'swr'
@@ -26,8 +27,8 @@ export function BackupTab() {
       const a = document.createElement('a')
       a.href = url; a.download = `backup-${new Date().toISOString().slice(0, 10)}.json`
       a.click(); URL.revokeObjectURL(url)
-      message.success('备份文件已下载')
-    } catch { message.error('备份失败') }
+      toast.success('备份文件已下载')
+    } catch { toast.error('备份失败') }
     setBackingUp(false)
   }
 
@@ -38,7 +39,7 @@ export function BackupTab() {
     const a = document.createElement('a'); a.href = url
     a.download = `学员数据-${new Date().toISOString().slice(0, 10)}.xlsx`
     a.click(); URL.revokeObjectURL(url)
-    message.success('学员数据已导出')
+    toast.success('学员数据已导出')
     setExportStudents(false)
   }
 
@@ -49,7 +50,7 @@ export function BackupTab() {
     const a = document.createElement('a'); a.href = url
     a.download = `财务报表-${new Date().getFullYear()}.xlsx`
     a.click(); URL.revokeObjectURL(url)
-    message.success('财务报表已导出')
+    toast.success('财务报表已导出')
     setExportFinance(false)
   }
 
@@ -60,10 +61,10 @@ export function BackupTab() {
     setCleaning(false)
     if (data.success) {
       const r = data.results
-      message.success(`已永久删除: 班级${r.archivedGroups} 排课${r.cancelledSchedules} 课次${r.cancelledLessons} 试卷${r.deletedPapers} 教师${r.resignedTeachers} 学员${r.inactiveStudents}`)
+      toast.success(`已永久删除: 班级${r.archivedGroups} 排课${r.cancelledSchedules} 课次${r.cancelledLessons} 试卷${r.deletedPapers} 教师${r.resignedTeachers} 学员${r.inactiveStudents}`)
       refreshStats()
     } else {
-      message.error('清理失败')
+      toast.error('清理失败')
     }
   }
 

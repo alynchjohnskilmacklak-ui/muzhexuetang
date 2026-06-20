@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import {
+  useState } from 'react'
 import useSWR from 'swr'
 import {
   Button,
@@ -15,8 +16,8 @@ import {
   Tabs,
   Tag,
   Typography,
-  message,
 } from 'antd'
+import { toast } from 'sonner'
 import { EditOutlined, KeyOutlined, LinkOutlined, PlusOutlined, StopOutlined } from '@ant-design/icons'
 
 type AccountStatus = 'active' | 'disabled' | string
@@ -126,20 +127,20 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
         method: 'PATCH',
         body: JSON.stringify({ action: 'status', userId, status }),
       })
-      message.success(status === 'active' ? '账号已启用' : '账号已停用')
+      toast.success(status === 'active' ? '账号已启用' : '账号已停用')
       mutate()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '操作失败')
+      toast.error(error instanceof Error ? error.message : '操作失败')
     }
   }
 
   const softDelete = async (userId: string) => {
     try {
       await runJson(`/api/settings/accounts?userId=${encodeURIComponent(userId)}`, { method: 'DELETE' })
-      message.success('账号已停用')
+      toast.success('账号已停用')
       mutate()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '操作失败')
+      toast.error(error instanceof Error ? error.message : '操作失败')
     }
   }
 
@@ -149,10 +150,10 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
         method: 'PATCH',
         body: JSON.stringify({ action: 'unbind-student', studentId }),
       })
-      message.success('已解绑学员')
+      toast.success('已解绑学员')
       mutate()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '操作失败')
+      toast.error(error instanceof Error ? error.message : '操作失败')
     }
   }
 
@@ -164,33 +165,33 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
           method: 'POST',
           body: JSON.stringify({ ...values, role: mode }),
         })
-        message.success(payload.initialPassword ? `账号已创建，初始密码：${payload.initialPassword}` : '账号已创建')
+        toast.success(payload.initialPassword ? `账号已创建，初始密码：${payload.initialPassword}` : '账号已创建')
       }
       if (mode === 'edit' && target && 'id' in target) {
         await runJson('/api/settings/accounts', {
           method: 'PATCH',
           body: JSON.stringify({ ...values, action: 'update', userId: target.id }),
         })
-        message.success('账号已更新')
+        toast.success('账号已更新')
       }
       if (mode === 'reset' && target && 'id' in target) {
         await runJson('/api/settings/accounts', {
           method: 'PATCH',
           body: JSON.stringify({ ...values, action: 'reset-password', userId: target.id }),
         })
-        message.success('密码已重置，旧设备会失效')
+        toast.success('密码已重置，旧设备会失效')
       }
       if (mode === 'bind' && target && 'id' in target) {
         await runJson('/api/settings/accounts', {
           method: 'PATCH',
           body: JSON.stringify({ ...values, action: 'bind-students', userId: target.id }),
         })
-        message.success('学员已绑定')
+        toast.success('学员已绑定')
       }
       closeModal()
       mutate()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '操作失败')
+      toast.error(error instanceof Error ? error.message : '操作失败')
     } finally {
       setSubmitting(false)
     }

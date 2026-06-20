@@ -1,7 +1,8 @@
 ﻿'use client'
 
 import { useState, useCallback } from 'react'
-import { Card, message, Dropdown } from 'antd'
+import { Card, Dropdown } from 'antd'
+import { toast } from 'sonner'
 import dynamic from 'next/dynamic'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -32,7 +33,7 @@ export function ScheduleCalendar() {
 
   const handleEventClick = useCallback((info: EventClickArg) => {
     const props = info.event.extendedProps
-    message.info(`${info.event.title.split('\n')[0]} - ${props.teacher} | ${props.room}`)
+    toast.info(`${info.event.title.split('\n')[0]} - ${props.teacher} | ${props.room}`)
   }, [])
 
   const handleEventDrop = useCallback((info: EventDropArg) => {
@@ -51,13 +52,13 @@ export function ScheduleCalendar() {
     })
 
     if (conflict) {
-      message.error('冲突检测：同教师或同教室在此时段已有课程，请重新选择时间！')
+      toast.error('冲突检测：同教师或同教室在此时段已有课程，请重新选择时间！')
       info.revert()
       return
     }
 
     setEvents(prev => prev.map(e => e.id === movedEvent.id ? { ...e, start: newStart.toISOString(), end: newEnd.toISOString() } : e))
-    message.success(`课程已移动到 ${newStart.toLocaleString('zh-CN')}`)
+    toast.success(`课程已移动到 ${newStart.toLocaleString('zh-CN')}`)
   }, [events])
 
   const renderEventContent = (eventInfo: { event: { title: string } }) => {
@@ -83,10 +84,10 @@ export function ScheduleCalendar() {
 
   const handleContextMenuAction = ({ key }: { key: string }) => {
     switch (key) {
-      case 'edit': message.info('打开编辑弹窗'); break
-      case 'copy': message.success('已复制到下周'); break
-      case 'note': message.info('打开备注输入'); break
-      case 'cancel': message.warning('课程已取消'); break
+      case 'edit': toast.info('打开编辑弹窗'); break
+      case 'copy': toast.success('已复制到下周'); break
+      case 'note': toast.info('打开备注输入'); break
+      case 'cancel': toast.warning('课程已取消'); break
     }
   }
 

@@ -1,10 +1,28 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Button, Card, Col, Empty, Form, Input, Modal, Popconfirm, Row, Select, Space,
-  Tabs, Tag, Typography, Upload, message,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState } from 'react'
+import {
+  Button,
+  Card,
+  Col,
+  Empty,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Row,
+  Select,
+  Space,
+  Tabs,
+  Tag,
+  Typography,
+  Upload,
 } from 'antd'
+import { toast } from 'sonner'
 import {
   DeleteOutlined, DownloadOutlined, EyeOutlined, FileTextOutlined, PlusOutlined, UploadOutlined,
 } from '@ant-design/icons'
@@ -79,7 +97,7 @@ export default function TeacherMaterialsPage() {
   const handleUpload = async () => {
     const values = await form.validateFields()
     if (!fileList[0]?.originFileObj) {
-      message.warning('请选择文件')
+      toast.warning('请选择文件')
       return
     }
 
@@ -98,10 +116,10 @@ export default function TeacherMaterialsPage() {
     setUploading(false)
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
-      message.error(err.error || '上传失败')
+      toast.error(err.error || '上传失败')
       return
     }
-    message.success('上传成功')
+    toast.success('上传成功')
     setModalOpen(false)
     form.resetFields()
     setFileList([])
@@ -112,10 +130,10 @@ export default function TeacherMaterialsPage() {
   const handleDelete = async (id: string) => {
     const res = await fetch(`/api/teacher/materials/${id}`, { method: 'DELETE' })
     if (res.ok) {
-      message.success('已删除')
+      toast.success('已删除')
       fetchMaterials()
     } else {
-      message.error('删除失败')
+      toast.error('删除失败')
     }
   }
 

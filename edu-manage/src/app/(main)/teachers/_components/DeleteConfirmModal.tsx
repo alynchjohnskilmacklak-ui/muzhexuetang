@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Modal, Spin, Select, message, Divider } from 'antd'
+import { Modal, Spin, Select, Divider } from 'antd'
+import { toast } from 'sonner'
 import useSWR from 'swr'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -40,15 +41,15 @@ export function DeleteConfirmModal({
       const res = await fetch(url, { method: 'DELETE' })
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
-        message.success(transferTo
+        toast.success(transferTo
           ? `「${teacherName}」已离职，所有学员/课程已转交至 ${data.transferTo || ''}`
           : `「${teacherName}」已办理离职`
         )
         onDeleted()
       } else {
-        message.error(data.error || '操作失败')
+        toast.error(data.error || '操作失败')
       }
-    } catch { message.error('网络错误') }
+    } catch { toast.error('网络错误') }
     setDeleting(false)
     onClose()
   }

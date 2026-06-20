@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import {
+  useState } from 'react'
 import useSWR from 'swr'
 import {
   Button,
@@ -9,7 +10,6 @@ import {
   Drawer,
   Form,
   InputNumber,
-  message,
   Row,
   Segmented,
   Select,
@@ -20,6 +20,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
+import { toast } from 'sonner'
 import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -118,10 +119,10 @@ function SalaryConfigDrawer({ teacherId, teacherName, open, onClose, onSaved }: 
     })
     setSaving(false)
     if (!response.ok) {
-      message.error('保存失败')
+      toast.error('保存失败')
       return
     }
-    message.success('薪资配置已保存')
+    toast.success('薪资配置已保存')
     onSaved()
     onClose()
   }

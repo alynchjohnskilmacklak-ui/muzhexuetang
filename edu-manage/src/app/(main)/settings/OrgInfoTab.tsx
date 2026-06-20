@@ -1,7 +1,8 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Form, Input, InputNumber, Button, Upload, Spin, message } from 'antd'
+import { Card, Form, Input, InputNumber, Button, Upload, Spin } from 'antd'
+import { toast } from 'sonner'
 import { UploadOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -27,10 +28,10 @@ export function OrgInfoTab() {
       body: JSON.stringify(values),
     })
     if (res.ok) {
-      message.success('机构信息已更新')
+      toast.success('机构信息已更新')
       mutate()
     } else {
-      message.error('保存失败')
+      toast.error('保存失败')
     }
     setSaving(false)
   }
@@ -73,7 +74,7 @@ export function OrgInfoTab() {
               if (info.file.status === 'done') {
                 const url = info.file.response?.url || info.file.response?.data?.url
                 if (url) form.setFieldsValue({ logoUrl: url })
-                message.success('Logo 上传成功')
+                toast.success('Logo 上传成功')
               }
             }}
           >

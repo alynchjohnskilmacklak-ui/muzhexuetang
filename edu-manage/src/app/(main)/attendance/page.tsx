@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Drawer, Select, Space, Spin, Empty, Tag, Typography, message, Input } from 'antd'
+import { Button, Card, Drawer, Select, Space, Spin, Empty, Tag, Typography, Input } from 'antd'
+import { toast } from 'sonner'
 import { CheckCircleOutlined, TeamOutlined, EnvironmentOutlined, ClockCircleOutlined, UserOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { format } from 'date-fns'
@@ -121,7 +122,7 @@ export default function AttendancePage() {
       const lessonStart = new Date(`${dateStr}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00`)
       const earliestAllowed = new Date(lessonStart.getTime() - 30 * 60 * 1000)
       if (new Date() < earliestAllowed) {
-        message.warning(`未到考勤时间，${startTimeStr} 开课，最早 ${earliestAllowed.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} 可开始考勤`)
+        toast.warning(`未到考勤时间，${startTimeStr} 开课，最早 ${earliestAllowed.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} 可开始考勤`)
         return
       }
     }
@@ -177,11 +178,11 @@ export default function AttendancePage() {
         body: JSON.stringify({ lessonId, records }),
       })
       if (!res.ok) throw new Error((await res.json()).error || '提交失败')
-      message.success(`考勤提交成功，共 ${records.length} 人`)
+      toast.success(`考勤提交成功，共 ${records.length} 人`)
       mutateData()
       setSelectedSchedule(null)
     } catch (e: unknown) {
-      message.error(e instanceof Error ? e.message : '提交失败')
+      toast.error(e instanceof Error ? e.message : '提交失败')
     } finally { setSubmitting(false) }
   }
 

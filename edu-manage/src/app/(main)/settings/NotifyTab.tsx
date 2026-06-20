@@ -1,7 +1,8 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Switch, InputNumber, Divider, Typography, message } from 'antd'
+import { Card, Switch, InputNumber, Divider, Typography } from 'antd'
+import { toast } from 'sonner'
 import { useState, useCallback } from 'react'
 
 const { Text } = Typography
@@ -16,7 +17,7 @@ export function NotifyTab() {
     await fetch('/api/settings/notify', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values),
     })
-    message.success('通知设置已更新')
+    toast.success('通知设置已更新')
     mutate()
     setSaving(false)
   }, [mutate])

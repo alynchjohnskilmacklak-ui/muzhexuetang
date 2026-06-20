@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
-import { Avatar, Button, Card, Col, Empty, Input, List, Popconfirm, Row, Select, Space, Spin, Tag, Typography, message } from 'antd'
+import { Avatar, Button, Card, Col, Empty, Input, List, Popconfirm, Row, Select, Space, Spin, Tag, Typography } from 'antd'
+import { toast } from 'sonner'
 import { CheckOutlined, DeleteOutlined, MessageOutlined, ReloadOutlined, SendOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -43,20 +44,20 @@ export default function CommunicationsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: item.id, type: item.type }),
     })
-    if (!res.ok) return message.error('标记失败')
-    message.success('已标记为已读')
+    if (!res.ok) return toast.error('标记失败')
+    toast.success('已标记为已读')
     mutate()
   }
 
   const deleteComment = async (item: any) => {
     const res = await fetch(`/api/parent-communications?type=${item.type}&id=${item.id}&targetId=${item.targetId}`, { method: 'DELETE' })
-    if (!res.ok) return message.error('删除失败')
-    message.success('该条关联沟通已清除')
+    if (!res.ok) return toast.error('删除失败')
+    toast.success('该条关联沟通已清除')
     mutate()
   }
 
   const sendReply = async (item: any) => {
-    if (!replyText.trim()) return message.warning('请输入回复内容')
+    if (!replyText.trim()) return toast.warning('请输入回复内容')
     const res = await fetch('/api/parent-communications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -64,9 +65,9 @@ export default function CommunicationsPage() {
     })
     if (!res.ok) {
       const payload = await res.json().catch(() => ({}))
-      return message.error(payload.error || '回复失败')
+      return toast.error(payload.error || '回复失败')
     }
-    message.success('已回复家长')
+    toast.success('已回复家长')
     setReplying('')
     setReplyText('')
     mutate()

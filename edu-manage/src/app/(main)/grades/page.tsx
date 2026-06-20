@@ -1,11 +1,22 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState } from 'react'
 import useSWR from 'swr'
 import {
-  Button, Input, InputNumber, message,
-  Popconfirm, Select, Space, Tag, Upload,
+  Button,
+  Input,
+  InputNumber,
+  Popconfirm,
+  Select,
+  Space,
+  Tag,
+  Upload,
 } from 'antd'
+import { toast } from 'sonner'
 import {
   CheckCircleOutlined, CloseCircleOutlined, DeleteOutlined,
   PlusOutlined, SaveOutlined,
@@ -113,7 +124,7 @@ export default function GradesPage() {
 
   const createPaper = async () => {
     const targetId = studentId || (students.length === 1 ? (students[0] as Record<string, unknown>).id as string : '')
-    if (!targetId) return message.error('请先在左侧选择一位学员')
+    if (!targetId) return toast.error('请先在左侧选择一位学员')
     if (!studentId) setStudentId(targetId)
     try {
       const res = await fetch('/api/exam-papers', {
@@ -128,12 +139,12 @@ export default function GradesPage() {
         }),
       })
       const data = await res.json().catch(() => null)
-      if (!res.ok) return message.error(data?.error || `创建失败：${res.status}`)
-      message.success('试卷草稿已创建')
+      if (!res.ok) return toast.error(data?.error || `创建失败：${res.status}`)
+      toast.success('试卷草稿已创建')
       await mutatePapers()
       setSelectedPaperId(data.id)
     } catch {
-      message.error('创建失败，请检查网络或重新登录')
+      toast.error('创建失败，请检查网络或重新登录')
     }
   }
 
@@ -153,11 +164,11 @@ export default function GradesPage() {
         body: JSON.stringify({ questions }),
       })
       if (!r2.ok) throw new Error('保存题目失败')
-      message.success('草稿已保存')
+      toast.success('草稿已保存')
       mutatePaper()
       mutatePapers()
     } catch {
-      message.error('保存失败')
+      toast.error('保存失败')
     } finally {
       setSaving(false)
     }
@@ -181,11 +192,11 @@ export default function GradesPage() {
       if (!r2.ok) throw new Error('保存题目失败')
       const r3 = await fetch(`/api/exam-papers/${paper.id}/publish`, { method: 'POST' })
       if (!r3.ok) throw new Error('发布失败')
-      message.success('试卷已推送给家长')
+      toast.success('试卷已推送给家长')
       mutatePaper()
       mutatePapers()
     } catch {
-      message.error('推送失败')
+      toast.error('推送失败')
     } finally {
       setPublishing(false)
     }
@@ -193,8 +204,8 @@ export default function GradesPage() {
 
   const deletePaper = async (id: string) => {
     const res = await fetch(`/api/exam-papers/${id}`, { method: 'DELETE' })
-    if (!res.ok) return message.error('删除失败')
-    message.success('试卷已删除')
+    if (!res.ok) return toast.error('删除失败')
+    toast.success('试卷已删除')
     setSelectedPaperId('')
     mutatePapers()
   }
@@ -206,13 +217,13 @@ export default function GradesPage() {
   const addCustomTag = () => {
     const tag = customTag.trim()
     if (!tag) return
-    if (tags.includes(tag)) return message.error('标签已存在')
+    if (tags.includes(tag)) return toast.error('标签已存在')
     setTags((prev) => [...prev, tag])
     setCustomTag('')
   }
 
   const recognizeQuestions = async () => {
-    if (imageUrls.length === 0) return message.warning('\u8bf7\u5148\u4e0a\u4f20\u8bd5\u5377\u56fe\u7247')
+    if (imageUrls.length === 0) return toast.warning('\u8bf7\u5148\u4e0a\u4f20\u8bd5\u5377\u56fe\u7247')
     setRecognizing(true)
     try {
       const res = await fetch('/api/exam-papers/recognize', {
@@ -221,18 +232,18 @@ export default function GradesPage() {
         body: JSON.stringify({ imageUrls, subject }),
       })
       const data = await res.json().catch(() => null)
-      if (!res.ok) { message.error(data?.error || 'AI \u8bc6\u522b\u5931\u8d25'); return }
+      if (!res.ok) { toast.error(data?.error || 'AI \u8bc6\u522b\u5931\u8d25'); return }
       const recognized = Array.isArray(data?.questions) ? data.questions : []
-      if (recognized.length === 0) { message.info('\u672a\u8bc6\u522b\u5230\u9898\u76ee\uff0c\u8bf7\u624b\u52a8\u6dfb\u52a0'); return }
+      if (recognized.length === 0) { toast.info('\u672a\u8bc6\u522b\u5230\u9898\u76ee\uff0c\u8bf7\u624b\u52a8\u6dfb\u52a0'); return }
       setQuestions(recognized.map((q: Record<string, unknown>, i: number) => ({
         order: Number(q.order) || i + 1,
         topic: String(q.topic || ''),
         mastery: ['MASTERED', 'NEEDS_REVIEW', 'NEEDS_PRACTICE'].includes(String(q.mastery)) ? String(q.mastery) : 'NEEDS_REVIEW',
         teacherNote: String(q.teacherNote || ''),
       })))
-      message.success(`AI \u8bc6\u522b\u51fa ${recognized.length} \u9053\u9898\uff0c\u8bf7\u6838\u5bf9\u4fee\u6539`)
+      toast.success(`AI \u8bc6\u522b\u51fa ${recognized.length} \u9053\u9898\uff0c\u8bf7\u6838\u5bf9\u4fee\u6539`)
     } catch {
-      message.error('AI \u8bc6\u522b\u5f02\u5e38\uff0c\u8bf7\u91cd\u8bd5')
+      toast.error('AI \u8bc6\u522b\u5f02\u5e38\uff0c\u8bf7\u91cd\u8bd5')
     } finally {
       setRecognizing(false)
     }
@@ -474,8 +485,8 @@ export default function GradesPage() {
               <Upload.Dragger name="file" action="/api/upload" accept="image/*" multiple maxCount={9}
                 showUploadList={false}
                 beforeUpload={(file) => {
-                  if (!file.type.startsWith('image/')) { message.warning('\u4ec5\u652f\u6301\u56fe\u7247\u6587\u4ef6'); return Upload.LIST_IGNORE }
-                  if (file.size > 10 * 1024 * 1024) { message.warning('\u56fe\u7247\u5927\u5c0f\u4e0d\u80fd\u8d85\u8fc7 10MB'); return Upload.LIST_IGNORE }
+                  if (!file.type.startsWith('image/')) { toast.warning('\u4ec5\u652f\u6301\u56fe\u7247\u6587\u4ef6'); return Upload.LIST_IGNORE }
+                  if (file.size > 10 * 1024 * 1024) { toast.warning('\u56fe\u7247\u5927\u5c0f\u4e0d\u80fd\u8d85\u8fc7 10MB'); return Upload.LIST_IGNORE }
                   return true
                 }}
                 onChange={(info) => {
@@ -483,11 +494,11 @@ export default function GradesPage() {
                   if (info.file.status === 'done') {
                     const url = (info.file.response as { url?: string })?.url
                     const error = (info.file.response as { error?: string })?.error
-                    if (url) { setImageUrls(prev => [...prev, url]); message.success('试卷上传成功') }
-                    else if (error) message.error(`试卷上传失败：${error}`)
-                    else message.error('上传成功但未返回文件地址')
+                    if (url) { setImageUrls(prev => [...prev, url]); toast.success('试卷上传成功') }
+                    else if (error) toast.error(`试卷上传失败：${error}`)
+                    else toast.error('上传成功但未返回文件地址')
                   } else if (info.file.status === 'error') {
-                    message.error('试卷上传失败：网络错误，请重试')
+                    toast.error('试卷上传失败：网络错误，请重试')
                   }
                 }}
                 style={{ borderRadius: 8, background: imageUrls.length > 0 ? '#FCFBF9' : undefined }}

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Modal, Form, Input, Select, DatePicker, InputNumber, Radio, Space, message } from 'antd'
+import { Modal, Form, Input, Select, DatePicker, InputNumber, Radio, Space } from 'antd'
+import { toast } from 'sonner'
 
 interface CourseModalProps {
   open: boolean
@@ -14,7 +15,7 @@ export function CourseModal({ open, onClose }: CourseModalProps) {
 
   const handleOk = async () => {
     const values = await form.validateFields()
-    message.success(courseType === 'single' ? '单次课程已创建' : `周期课程已创建，每周${values.timesPerWeek}次`)
+    toast.success(courseType === 'single' ? '单次课程已创建' : `周期课程已创建，每周${values.timesPerWeek}次`)
     form.resetFields()
     onClose()
   }

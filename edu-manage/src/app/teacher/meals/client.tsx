@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Button, Card, Empty, Radio, Tag, Typography, message, Collapse } from 'antd'
+import { Button, Card, Empty, Radio, Tag, Typography, Collapse } from 'antd'
+import { toast } from 'sonner'
 import { DownOutlined, RightOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 
@@ -80,8 +81,8 @@ export function TeacherMealsClient({
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'submit failed')
       setCurrentReport(data); setEditing(false)
-      message.success(currentReport ? '上报已更新' : '上报已提交')
-    } catch { message.error('就餐上报提交失败') }
+      toast.success(currentReport ? '上报已更新' : '上报已提交')
+    } catch { toast.error('就餐上报提交失败') }
     finally { setSubmitting(false) }
   }
 

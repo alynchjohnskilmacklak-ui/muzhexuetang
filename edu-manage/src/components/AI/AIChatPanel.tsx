@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Avatar, Input, Spin, Tooltip, message } from 'antd'
+import { Avatar, Input, Spin, Tooltip } from 'antd'
+import { toast } from 'sonner'
 import {
   CameraOutlined,
   ClearOutlined,
@@ -204,12 +205,12 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
     const isWord = ['doc', 'docx'].includes(ext)
 
     if (!isImage && !isPdf && !isWord) {
-      message.error('仅支持图片、PDF、Word 文档')
+      toast.error('仅支持图片、PDF、Word 文档')
       return
     }
 
     if (file.size > 20 * 1024 * 1024) {
-      message.error('文件大小不能超过 20MB')
+      toast.error('文件大小不能超过 20MB')
       return
     }
 
@@ -226,14 +227,10 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
     setExtracting(true)
     try {
       const messageKey = 'ai-file-extract'
-      message.loading({
-        content: isPdf ? '正在提取 PDF 内容...' : '正在提取 Word 内容...',
-        key: messageKey,
-        duration: 0,
-      })
+      toast.loading(isPdf ? '正在提取 PDF 内容...' : '正在提取 Word 内容...', { id: messageKey })
 
       const text = isPdf ? await extractPdfText(file) : await extractWordText(file)
-      message.destroy(messageKey)
+      toast.dismiss(messageKey)
 
       setAttachment({
         type: isPdf ? 'pdf' : 'word',
@@ -242,11 +239,11 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
         size: file.size,
         preview: text.slice(0, 100) + (text.length > 100 ? '...' : ''),
       })
-      message.success(`已提取 ${text.length} 字，可直接提问`)
+      toast.success(`已提取 ${text.length} 字，可直接提问`)
     } catch (error) {
       console.error('[AI file extract]', error)
-      message.destroy('ai-file-extract')
-      message.error('文件内容提取失败，请尝试其他文件')
+      toast.dismiss('ai-file-extract')
+      toast.error('文件内容提取失败，请尝试其他文件')
     } finally {
       setExtracting(false)
     }
@@ -267,7 +264,7 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
 
     if (attachment?.type === 'image' && attachment.base64) {
       if (!selectedModel.supportsVision) {
-        message.error('当前模型不支持图片识别，请切换 Kimi 视觉模型')
+        toast.error('当前模型不支持图片识别，请切换 Kimi 视觉模型')
         return
       }
       userContent = [
@@ -439,7 +436,7 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
                 type="button"
                 onClick={() => {
                   setModelId(model.id)
-                  message.info(`已切换到 ${model.label}，本模型有独立上下文`)
+                  toast.info(`已切换到 ${model.label}，本模型有独立上下文`)
                 }}
                 style={{
                   display: 'flex',

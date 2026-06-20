@@ -1,7 +1,8 @@
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space } from 'antd'
+import { Modal, Form, Input, Select, InputNumber, Steps, Row, Col, Button, Space } from 'antd'
+import { toast } from 'sonner'
 import { UserOutlined, PhoneOutlined, BookOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
@@ -83,7 +84,7 @@ export function StudentForm({
       const values = form.getFieldsValue(true)
       if (!values.name || String(values.name).trim().length === 0) {
         setCurrent(0)
-        message.error('请输入姓名')
+        toast.error('请输入姓名')
         return
       }
 
@@ -100,14 +101,14 @@ export function StudentForm({
 
       if (!res.ok) {
         const err = await res.json().catch(() => null)
-        message.error(err?.error || `操作失败：${res.status}`)
+        toast.error(err?.error || `操作失败：${res.status}`)
         return
       }
 
-      message.success(mode === 'edit' ? '学员信息已更新' : '学员添加成功')
+      toast.success(mode === 'edit' ? '学员信息已更新' : '学员添加成功')
       onClose()
     } catch {
-      message.error('提交失败')
+      toast.error('提交失败')
     } finally {
       setLoading(false)
     }

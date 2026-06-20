@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { message, Upload } from 'antd'
+import { Upload } from 'antd'
+import { toast } from 'sonner'
 import type { UploadFile, UploadProps } from 'antd'
 import { InboxOutlined } from '@ant-design/icons'
 import { normalizeUploadUrl } from '@/lib/upload-url'
@@ -27,11 +28,11 @@ export function ImageUploader({ value, onChange }: { value: string[]; onChange: 
     fileList,
     beforeUpload(file) {
       if (!file.type.startsWith('image/')) {
-        message.error('只能上传图片')
+        toast.error('只能上传图片')
         return Upload.LIST_IGNORE
       }
       if (file.size > 10 * 1024 * 1024) {
-        message.error('单张图片不能超过 10MB')
+        toast.error('单张图片不能超过 10MB')
         return Upload.LIST_IGNORE
       }
       return true
@@ -40,8 +41,8 @@ export function ImageUploader({ value, onChange }: { value: string[]; onChange: 
       const nextList = info.fileList.slice(0, 9)
       setFileList(nextList)
 
-      if (info.file.status === 'done') message.success('照片已添加')
-      if (info.file.status === 'error') message.error('照片上传失败，请重新登录后再试')
+      if (info.file.status === 'done') toast.success('照片已添加')
+      if (info.file.status === 'error') toast.error('照片上传失败，请重新登录后再试')
 
       if (info.file.status === 'done' || info.file.status === 'removed') {
         const urls = nextList

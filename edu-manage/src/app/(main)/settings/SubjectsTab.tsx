@@ -1,7 +1,8 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Button, Input, Modal, Form, Popconfirm, Tag, Space, message, ColorPicker } from 'antd'
+import { Card, Button, Input, Modal, Form, Popconfirm, Tag, Space, ColorPicker } from 'antd'
+import { toast } from 'sonner'
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import {
@@ -49,12 +50,12 @@ export function SubjectsTab() {
       await fetch(`/api/settings/subjects/${editing.id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values),
       })
-      message.success('学科已更新')
+      toast.success('学科已更新')
     } else {
       await fetch('/api/settings/subjects', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values),
       })
-      message.success('学科已添加')
+      toast.success('学科已添加')
     }
     setOpen(false); setEditing(null); form.resetFields(); mutate()
   }
@@ -66,7 +67,7 @@ export function SubjectsTab() {
       Modal.warning({ title: '无法删除', content: err.error || err.details || '该学科有关联数据' })
       return
     }
-    message.success(`已删除「${name}」`)
+    toast.success(`已删除「${name}」`)
     mutate()
   }
 

@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { addDays, subDays } from 'date-fns'
-import { Spin, Empty, Modal, Select, Input, message, Typography } from 'antd'
+import { Spin, Empty, Modal, Select, Input, Typography } from 'antd'
+import { toast } from 'sonner'
 import useSWR from 'swr'
 import { useDivision } from '@/contexts/DivisionContext'
 import { MobileSelect } from '@/components/MobileSelect'
@@ -160,7 +161,7 @@ export default function IntensiveSchedulePage() {
 
   const handleCreate = async () => {
     if (!createData.teacherId || !createData.studentId || !createData.subject) {
-      message.warning('请填写老师、学员和科目')
+      toast.warning('请填写老师、学员和科目')
       return
     }
     setSaving(true)
@@ -188,11 +189,11 @@ export default function IntensiveSchedulePage() {
         }
         return
       }
-      message.success('突击全能班排课成功')
+      toast.success('突击全能班排课成功')
       setCreateOpen(false)
       mutate()
     } catch {
-      message.error('网络错误')
+      toast.error('网络错误')
     } finally { setSaving(false) }
   }
 

@@ -2,7 +2,8 @@
 
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Card, Spin, message } from 'antd'
+import { Card, Spin } from 'antd'
+import { toast } from 'sonner'
 import { format, startOfWeek } from 'date-fns'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { RoomMatrixView } from './RoomMatrixView'
@@ -78,10 +79,10 @@ function SchedulePageInner() {
       })
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(payload.error || '保存失败')
-      message.success('课次已更新')
+      toast.success('课次已更新')
       setSelectedLesson(null)
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '保存失败')
+      toast.error(error instanceof Error ? error.message : '保存失败')
     } finally {
       setSavingLesson(false)
     }
@@ -91,10 +92,10 @@ function SchedulePageInner() {
     try {
       const res = await fetch(`/api/schedules/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('取消失败')
-      message.success('已取消该课程')
+      toast.success('已取消该课程')
       setSelectedLesson(null)
     } catch {
-      message.error('取消失败')
+      toast.error('取消失败')
     }
   }
 

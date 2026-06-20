@@ -1,7 +1,8 @@
 'use client'
 
 import useSWR from 'swr'
-import { Alert, Button, Card, Popconfirm, Space, Table, Tag, Typography, message } from 'antd'
+import { Alert, Button, Card, Popconfirm, Space, Table, Tag, Typography } from 'antd'
+import { toast } from 'sonner'
 import { StopOutlined } from '@ant-design/icons'
 
 type AccountStatus = 'active' | 'disabled' | string
@@ -46,10 +47,10 @@ export function TeacherAccountsTab() {
       })
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(payload.error || '操作失败')
-      message.success(status === 'active' ? '账号已恢复' : '账号已停用')
+      toast.success(status === 'active' ? '账号已恢复' : '账号已停用')
       mutate()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '操作失败')
+      toast.error(error instanceof Error ? error.message : '操作失败')
     }
   }
 

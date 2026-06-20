@@ -1,10 +1,26 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Card, Table, Button, Modal, Form, Input, InputNumber,
-  Select, Switch, Typography, Tag, message, Space, DatePicker,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState } from 'react'
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Switch,
+  Typography,
+  Tag,
+  Space,
+  DatePicker,
 } from 'antd'
+import { toast } from 'sonner'
 import type { ColumnsType } from 'antd/es/table'
 import { EditOutlined, ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
@@ -216,11 +232,11 @@ export default function SchoolsManagePage() {
     })
     setSaving(false)
     if (res.ok) {
-      message.success('保存成功')
+      toast.success('保存成功')
       setEditModal({ open: false, school: null })
       fetchSchools()
     } else {
-      message.error('保存失败')
+      toast.error('保存失败')
     }
   }
 

@@ -1,10 +1,31 @@
 ﻿'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Alert, Button, Card, Checkbox, Col, Drawer, Form, Input, message, Radio, Row,
-  Divider, Select, Space, Statistic, Table, Tabs, Tag, Typography,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState } from 'react'
+import {
+  Alert,
+  Button,
+  Card,
+  Checkbox,
+  Col,
+  Drawer,
+  Form,
+  Input,
+  Radio,
+  Row,
+  Divider,
+  Select,
+  Space,
+  Statistic,
+  Table,
+  Tabs,
+  Tag,
+  Typography,
 } from 'antd'
+import { toast } from 'sonner'
 import { SearchOutlined } from '@ant-design/icons'
 
 const { Title, Text } = Typography
@@ -83,7 +104,7 @@ export default function AdminNotificationsPage() {
 
   const handleSend = async () => {
     if (selectedStudents.length === 0) {
-      message.warning('请至少选择一名学员')
+      toast.warning('请至少选择一名学员')
       return
     }
 
@@ -112,16 +133,16 @@ export default function AdminNotificationsPage() {
       }
 
       if (failCount === 0) {
-        message.success(`已成功发送给 ${successCount} 名学员`)
+        toast.success(`已成功发送给 ${successCount} 名学员`)
       } else {
-        message.warning(`成功 ${successCount} 人，失败 ${failCount} 人`)
+        toast.warning(`成功 ${successCount} 人，失败 ${failCount} 人`)
       }
       setSelectedStudents([])
       form.resetFields()
       fetchStats()
       fetchRecords()
     } catch {
-      message.error('发送失败')
+      toast.error('发送失败')
     } finally {
       setSending(false)
     }
@@ -130,9 +151,9 @@ export default function AdminNotificationsPage() {
   const handleResend = async (id: string) => {
     try {
       const res = await fetch(`/api/notifications/${id}/resend`, { method: 'POST' })
-      if (res.ok) { message.success('重发成功'); fetchRecords() }
-      else message.error('重发失败')
-    } catch { message.error('重发失败') }
+      if (res.ok) { toast.success('重发成功'); fetchRecords() }
+      else toast.error('重发失败')
+    } catch { toast.error('重发失败') }
   }
 
   return (

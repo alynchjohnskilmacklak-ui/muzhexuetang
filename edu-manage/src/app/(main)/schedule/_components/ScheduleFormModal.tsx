@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Alert, DatePicker, Form, Input, Modal, Select, Tag, TimePicker, message } from 'antd'
+import { Alert, DatePicker, Form, Input, Modal, Select, Tag, TimePicker } from 'antd'
+import { toast } from 'sonner'
 import dayjs from 'dayjs'
 import useSWR from 'swr'
 import { CLASS_TYPE_OPTIONS, TYPE_LABELS, USAGE_TYPE_LABELS } from '../_types'
@@ -102,14 +103,14 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
       if (!res.ok) {
         if (res.status === 409 && data.conflicts) {
           setConflicts(data.conflicts)
-          message.error(data.error || '存在时间冲突')
+          toast.error(data.error || '存在时间冲突')
         } else {
-          message.error(data.error || '操作失败')
+          toast.error(data.error || '操作失败')
         }
         return
       }
 
-      message.success(editData?.id ? '排课已更新' : '排课已创建')
+      toast.success(editData?.id ? '排课已更新' : '排课已创建')
       onSuccess()
       onClose()
     } catch {
@@ -233,7 +234,7 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
             onChange={(value: string[]) => {
               const limit = getPersonalClassLimit(classType)
               if (limit && value.length > limit) {
-                message.warning(`${TYPE_LABELS[classType] || '课程'}最多只能选择 ${limit} 名学生`)
+                toast.warning(`${TYPE_LABELS[classType] || '课程'}最多只能选择 ${limit} 名学生`)
                 return
               }
               setSelectedStudentIds(value || [])

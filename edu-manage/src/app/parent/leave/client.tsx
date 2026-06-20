@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Card, DatePicker, Form, Input, message, Select, Tag, Typography } from 'antd'
+import { Button, Card, DatePicker, Form, Input, Select, Tag, Typography } from 'antd'
+import { toast } from 'sonner'
 import dayjs from 'dayjs'
 import { format } from 'date-fns'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -56,7 +57,7 @@ export function ParentLeaveClient({
         values.studentId = students[0].id
       }
       if (!values.studentId) {
-        message.warning('请选择子女')
+        toast.warning('请选择子女')
         return
       }
       setSubmitting(true)
@@ -71,16 +72,16 @@ export function ParentLeaveClient({
         }),
       })
       if (res.ok) {
-        message.success('请假通知已发送给老师和管理员')
+        toast.success('请假通知已发送给老师和管理员')
         form.resetFields()
         const data = await res.json()
         setRequests((prev) => [data, ...prev])
       } else {
         const data = await res.json()
-        message.error(data.error || '提交失败，请重试')
+        toast.error(data.error || '提交失败，请重试')
       }
     } catch {
-      message.error('提交失败，请重试')
+      toast.error('提交失败，请重试')
     } finally {
       setSubmitting(false)
     }

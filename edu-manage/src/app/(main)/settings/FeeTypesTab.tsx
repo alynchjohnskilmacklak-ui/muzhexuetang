@@ -1,7 +1,8 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Table, Button, Modal, Form, Input, Switch, Space, Popconfirm, message } from 'antd'
+import { Card, Table, Button, Modal, Form, Input, Switch, Space, Popconfirm } from 'antd'
+import { toast } from 'sonner'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 
@@ -18,20 +19,20 @@ export function FeeTypesTab() {
       await fetch(`/api/settings/fee-types/${editing.id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values),
       })
-      message.success('已更新')
+      toast.success('已更新')
     } else {
       await fetch('/api/settings/fee-types', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values),
       })
-      message.success('已添加')
+      toast.success('已添加')
     }
     setOpen(false); setEditing(null); form.resetFields(); mutate()
   }
 
   const handleDelete = async (id: string) => {
     const res = await fetch(`/api/settings/fee-types/${id}`, { method: 'DELETE' })
-    if (!res.ok) { const e = await res.json(); message.error(e.error) }
-    else { message.success('已删除'); mutate() }
+    if (!res.ok) { const e = await res.json(); toast.error(e.error) }
+    else { toast.success('已删除'); mutate() }
   }
 
   const toggleActive = async (id: string, isActive: boolean) => {

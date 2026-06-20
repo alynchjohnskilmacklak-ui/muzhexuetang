@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Modal, Button, Upload, Table, message, Alert } from 'antd'
+import { Modal, Button, Upload, Table, Alert } from 'antd'
+import { toast } from 'sonner'
 import { DownloadOutlined, InboxOutlined } from '@ant-design/icons'
 import * as XLSX from 'xlsx'
 
@@ -37,7 +38,7 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
   }
 
   const handleImport = async () => {
-    if (errors.length > 0) { message.warning('请先修正错误行再导入'); return }
+    if (errors.length > 0) { toast.warning('请先修正错误行再导入'); return }
     setImporting(true)
     let success = 0, fail = 0
     for (const row of rows) {
@@ -58,7 +59,7 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
         if (res.ok) success++; else fail++
       } catch { fail++ }
     }
-    message.success(`导入完成：成功 ${success} 条，失败 ${fail} 条`)
+    toast.success(`导入完成：成功 ${success} 条，失败 ${fail} 条`)
     setImporting(false)
     onClose()
   }

@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Col, Drawer, Empty, Form, Input, message, Row, Select, Spin, Tag, Upload } from 'antd'
+import { Button, Card, Col, Drawer, Empty, Form, Input, Row, Select, Spin, Tag, Upload } from 'antd'
+import { toast } from 'sonner'
 import { PlusOutlined, ReloadOutlined, SearchOutlined, SendOutlined, WarningOutlined } from '@ant-design/icons'
 import { Image as AntImage } from 'antd'
 import { PageLayout } from '@/components/Layout/PageLayout'
@@ -180,9 +181,9 @@ export default function ClassroomFeedbackAdminPage() {
   const submitOnBehalf = async (status: 'DRAFT' | 'PUBLISHED') => {
     const values = await composeForm.validateFields().catch(() => null)
     if (!values) return
-    if (!composeTeacherId) { message.error('请选择代发老师'); return }
-    if (!values.studentIds?.length) { message.error('请选择学员'); return }
-    if (!values.summary?.trim() && !values.knowledgePoints?.length) { message.error('请填写评语或知识点'); return }
+    if (!composeTeacherId) { toast.error('请选择代发老师'); return }
+    if (!values.studentIds?.length) { toast.error('请选择学员'); return }
+    if (!values.summary?.trim() && !values.knowledgePoints?.length) { toast.error('请填写评语或知识点'); return }
 
     setSubmitting(true)
     try {
@@ -202,8 +203,8 @@ export default function ClassroomFeedbackAdminPage() {
         }),
       })
       const data = await res.json()
-      if (!res.ok) { message.error(data.error || '提交失败'); return }
-      message.success(status === 'PUBLISHED' ? '已代发并通知家长' : '草稿已保存')
+      if (!res.ok) { toast.error(data.error || '提交失败'); return }
+      toast.success(status === 'PUBLISHED' ? '已代发并通知家长' : '草稿已保存')
       setComposeOpen(false)
       composeForm.resetFields()
       setComposeImages([])
@@ -451,8 +452,8 @@ export default function ClassroomFeedbackAdminPage() {
             )}
             <Upload name="file" action="/api/upload" accept="image/*" multiple maxCount={9} showUploadList={false}
               beforeUpload={(file) => {
-                if (!file.type.startsWith('image/')) { message.warning('仅支持图片文件'); return Upload.LIST_IGNORE }
-                if (file.size > 5 * 1024 * 1024) { message.warning('图片大小不能超过 5MB'); return Upload.LIST_IGNORE }
+                if (!file.type.startsWith('image/')) { toast.warning('仅支持图片文件'); return Upload.LIST_IGNORE }
+                if (file.size > 5 * 1024 * 1024) { toast.warning('图片大小不能超过 5MB'); return Upload.LIST_IGNORE }
                 return true
               }}
               onChange={info => {
@@ -460,11 +461,11 @@ export default function ClassroomFeedbackAdminPage() {
                 if (info.file.status === 'done') {
                   const url = (info.file.response as { url?: string })?.url
                   const error = (info.file.response as { error?: string })?.error
-                  if (url) { setComposeImages(prev => [...prev, url]); message.success('图片上传成功') }
-                  else if (error) message.error(`图片上传失败：${error}`)
-                  else message.error('上传成功但未返回图片地址')
+                  if (url) { setComposeImages(prev => [...prev, url]); toast.success('图片上传成功') }
+                  else if (error) toast.error(`图片上传失败：${error}`)
+                  else toast.error('上传成功但未返回图片地址')
                 } else if (info.file.status === 'error') {
-                  message.error('图片上传失败：网络错误，请重试')
+                  toast.error('图片上传失败：网络错误，请重试')
                 }
               }}>
               <Button icon={<PlusOutlined />}>上传图片</Button>

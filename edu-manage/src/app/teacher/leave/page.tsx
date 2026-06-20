@@ -1,7 +1,8 @@
 'use client'
 
 import useSWR from 'swr'
-import { Button, Card, Empty, Input, Modal, Segmented, Skeleton, Space, Tag, Typography, message } from 'antd'
+import { Button, Card, Empty, Input, Modal, Segmented, Skeleton, Space, Tag, Typography } from 'antd'
+import { toast } from 'sonner'
 import { CalendarOutlined, CheckOutlined, CloseOutlined, ReloadOutlined, UserOutlined } from '@ant-design/icons'
 import { useMemo, useState } from 'react'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -58,7 +59,7 @@ export default function TeacherLeavePage() {
 
   const submitAction = async () => {
     if (!action) return
-    const hide = message.loading(action.status === 'approved' ? '正在批准请假...' : '正在驳回请假...', 0)
+    const loadingId = toast.loading(action.status === 'approved' ? '正在批准请假...' : '正在驳回请假...')
     try {
       const res = await fetch(`/api/leave-requests/${action.record.id}`, {
         method: 'PATCH',
@@ -69,14 +70,14 @@ export default function TeacherLeavePage() {
         const payload = await res.json().catch(() => ({}))
         throw new Error(payload.error || '处理失败')
       }
-      message.success(action.status === 'approved' ? '已批准请假' : '已驳回请假')
+      toast.success(action.status === 'approved' ? '已批准请假' : '已驳回请假')
       setAction(null)
       setReplyNote('')
       mutate()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '处理失败')
+      toast.error(error instanceof Error ? error.message : '处理失败')
     } finally {
-      hide()
+      toast.dismiss(loadingId)
     }
   }
 

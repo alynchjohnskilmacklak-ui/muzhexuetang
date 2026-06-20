@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { Alert, Button, Card, Empty, Input, message, Modal, Progress, Space, Tag, Tabs, Typography } from 'antd'
+import { Alert, Button, Card, Empty, Input, Modal, Progress, Space, Tag, Tabs, Typography } from 'antd'
+import { toast } from 'sonner'
 import {
   BookOutlined,
   HeartOutlined,
@@ -172,13 +173,13 @@ export function ParentGrowthClient({
         body: JSON.stringify({ id: feedbackId, parentReply: replyText }),
       })
       if (res.ok) {
-        message.success('回复已发送')
+        toast.success('回复已发送')
         setReplyText('')
         setReplyingId('')
         router.refresh()
       } else {
         const data = await res.json().catch(() => ({}))
-        message.error(data.error || '回复失败')
+        toast.error(data.error || '回复失败')
       }
     } finally {
       setReplySending(false)

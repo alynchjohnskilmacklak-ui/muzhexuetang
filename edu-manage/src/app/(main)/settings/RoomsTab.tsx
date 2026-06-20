@@ -1,7 +1,8 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Table, Button, Modal, Form, Input, InputNumber, Select, Space, Popconfirm, message } from 'antd'
+import { Card, Table, Button, Modal, Form, Input, InputNumber, Select, Space, Popconfirm } from 'antd'
+import { toast } from 'sonner'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 
@@ -20,14 +21,14 @@ export function RoomsTab() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
       })
-      message.success('教室已更新')
+      toast.success('教室已更新')
     } else {
       await fetch('/api/rooms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
       })
-      message.success('教室已添加')
+      toast.success('教室已添加')
     }
     setOpen(false)
     setEditing(null)
@@ -39,9 +40,9 @@ export function RoomsTab() {
     const res = await fetch(`/api/rooms/${id}`, { method: 'DELETE' })
     if (!res.ok) {
       const err = await res.json()
-      message.error(err.error || '删除失败')
+      toast.error(err.error || '删除失败')
     } else {
-      message.success('教室已删除')
+      toast.success('教室已删除')
       mutate()
     }
   }

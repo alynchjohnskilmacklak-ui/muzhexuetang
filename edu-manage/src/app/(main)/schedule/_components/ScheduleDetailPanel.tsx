@@ -1,6 +1,7 @@
 'use client'
 
-import { Drawer, Input, Select, Space, Tag, Typography, message } from 'antd'
+import { Drawer, Input, Select, Space, Tag, Typography } from 'antd'
+import { toast } from 'sonner'
 import { CalendarOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
@@ -86,7 +87,7 @@ export function ScheduleDetailPanel({
                 width: '100%', padding: '8px 0', borderRadius: 6,
                 background: '#E8784A', color: '#fff', border: 'none', fontSize: 14, cursor: 'pointer', fontWeight: 500,
               }}><CalendarOutlined /> 进入班级管理</button>
-              <button onClick={() => { message.info('复制新建请在课程管理中使用批量复制'); router.push('/courses') }} style={{
+              <button onClick={() => { toast.info('复制新建请在课程管理中使用批量复制'); router.push('/courses') }} style={{
                 width: '100%', padding: '8px 0', borderRadius: 6,
                 background: 'transparent', color: '#E8784A', border: '1px solid #E8784A', fontSize: 14, cursor: 'pointer',
               }}>复制新建</button>

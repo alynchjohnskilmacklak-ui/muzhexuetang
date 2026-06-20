@@ -1,7 +1,8 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Switch, Descriptions, Typography, message } from 'antd'
+import { Card, Switch, Descriptions, Typography } from 'antd'
+import { toast } from 'sonner'
 
 const { Text } = Typography
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -13,7 +14,7 @@ export function RolesTab() {
     await fetch('/api/settings/roles', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values),
     })
-    message.success('角色权限已更新')
+    toast.success('角色权限已更新')
     mutate()
   }
 

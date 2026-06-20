@@ -1,7 +1,8 @@
 ﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Card, Empty, Input, Modal, Select, Space, Spin, Typography, message } from 'antd'
+import { Button, Card, Empty, Input, Modal, Select, Space, Spin, Typography } from 'antd'
+import { toast } from 'sonner'
 import { ImportOutlined, PlusOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons'
 import { StudentCard } from './_components/StudentCard'
 import { StudentForm } from './_components/StudentForm'
@@ -136,7 +137,7 @@ export default function StudentsPage() {
       setGrouped(studentPayload || {})
       setGradeCounts(countPayload || {})
     } catch {
-      message.error('学员数据加载失败')
+      toast.error('学员数据加载失败')
     } finally {
       setLoading(false)
     }
@@ -172,14 +173,14 @@ export default function StudentsPage() {
     try {
       const res = await fetch(`/api/students/${deleting.id}`, { method: 'DELETE' })
       if (res.ok) {
-        message.success(`「${deleting.name}」已离校，默认列表不再显示`)
+        toast.success(`「${deleting.name}」已离校，默认列表不再显示`)
         fetchStudents()
       } else {
         const err = await res.json().catch(() => null)
-        message.error(err?.error || `操作失败：${res.status}`)
+        toast.error(err?.error || `操作失败：${res.status}`)
       }
     } catch {
-      message.error('网络错误')
+      toast.error('网络错误')
     }
     setDeleting(null)
   }
