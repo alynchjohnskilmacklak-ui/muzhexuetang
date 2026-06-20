@@ -18,6 +18,7 @@ const RATE_RULES: Array<{ prefix: string; rpm: number }> = [
   { prefix: '/api/auth/check-role',            rpm: 10  },
   { prefix: '/api/auth/change-password',       rpm: 5   },
   { prefix: '/api/ai',                         rpm: 10  },
+  { prefix: '/api/teacher/ai-feedback',        rpm: 6   },
   { prefix: '/api/exam-papers/recognize',      rpm: 6   },
   { prefix: '/api/class-groups',               rpm: 20  },
   { prefix: '/api/attendance/submit',          rpm: 20  },

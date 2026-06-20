@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Card, Divider, Empty, Input, InputNumber, List, Select, Space, Tag, Tabs, Typography, Upload } from 'antd'
+import { Button, Card, Divider, Empty, Input, InputNumber, List, Modal, Select, Space, Tag, Tabs, Typography, Upload } from 'antd'
 import {
   BookOutlined, LineChartOutlined, PlusOutlined,
   RocketOutlined, SaveOutlined, ArrowLeftOutlined, SendOutlined,
-  TrophyOutlined, DownOutlined, UpOutlined,
+  ThunderboltOutlined, TrophyOutlined, DownOutlined, UpOutlined,
 } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -43,6 +43,8 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
   const [suggestions, setSuggestions] = useState('')
   const [saving, setSaving] = useState(false)
   const [materialExpanded, setMaterialExpanded] = useState(false)
+  const [keywords, setKeywords] = useState('')
+  const [aiGenerating, setAiGenerating] = useState(false)
 
   // Goals
   const [goals, setGoals] = useState<any[]>([])
@@ -109,6 +111,41 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
       toast.success('已发布，家长端将显示本期寄语')
     } catch (e: any) { toast.error(e.message) }
     finally { setSaving(false) }
+  }
+
+  async function aiGenerate() {
+    if (summary.trim()) {
+      return new Promise<void>((resolve) => {
+        Modal.confirm({
+          title: '覆盖已有内容',
+          content: '评语/寄语已有内容，AI 生成将覆盖当前文本，确定继续？',
+          okText: '确定覆盖',
+          cancelText: '取消',
+          okButtonProps: { danger: true },
+          onOk: () => resolve(doAiGenerate()),
+          onCancel: () => resolve(),
+        })
+      })
+    }
+    return doAiGenerate()
+  }
+
+  async function doAiGenerate() {
+    setAiGenerating(true)
+    try {
+      const res = await requestJson('/api/teacher/ai-feedback', {
+        method: 'POST',
+        body: JSON.stringify({ studentId, keywords, kind: 'stage' }),
+      })
+      const draft = (res as any).draft
+      if (draft) {
+        setSummary(draft)
+        toast.success(`AI 草稿已生成（${draft.length} 字），请核对修改后发布`)
+      } else {
+        toast.warning('AI 未返回内容，请检查关键词或稍后重试')
+      }
+    } catch (e: any) { toast.error(e.message) }
+    finally { setAiGenerating(false) }
   }
 
   async function addGoal() {
@@ -204,11 +241,12 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
               style={{ marginTop: 6 }}
             />
 
-            <div style={{ marginTop: 10 }}>
-              <Text strong style={{ fontSize: 13 }}>下一步建议</Text>
+            <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Text strong style={{ fontSize: 13, whiteSpace: 'nowrap' }}>下一步建议</Text>
+              <Text type="secondary" style={{ fontSize: 11 }}>（可选）</Text>
             </div>
             <TextArea
-              rows={3}
+              rows={2}
               maxLength={200}
               showCount
               value={suggestions}
@@ -216,6 +254,33 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
               placeholder="例如：接下来重点巩固计算准确率"
               style={{ marginTop: 6 }}
             />
+
+            {/* ── AI Draft Generation ── */}
+            <div style={{ marginTop: 14, padding: '10px 12px', background: '#faf8f5', borderRadius: 10, border: '1px dashed rgba(0,0,0,.1)' }}>
+              <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>
+                ✨ AI 辅助生成草稿 —— 基于真实出勤/掌握/薄弱点数据，关键词决定强调方向
+              </Text>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <Input
+                  size="small"
+                  placeholder="关键词，逗号分隔：进步明显、函数薄弱、课堂专注"
+                  value={keywords}
+                  onChange={e => setKeywords(e.target.value)}
+                  style={{ flex: 1 }}
+                  allowClear
+                />
+                <Button
+                  type="default"
+                  size="small"
+                  icon={<ThunderboltOutlined />}
+                  loading={aiGenerating}
+                  onClick={aiGenerate}
+                  style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                >
+                  AI 生成草稿
+                </Button>
+              </div>
+            </div>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
               <Button icon={<SaveOutlined />} loading={saving} onClick={saveStage} style={{ flex: 1 }}>保存草稿</Button>
