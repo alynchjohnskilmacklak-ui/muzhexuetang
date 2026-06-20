@@ -233,13 +233,13 @@ function FeedbackPageInner() {
       // Tags — union with pre-selected
       const prevTags = new Set(tags)
       const aiTags = (data.tags || []).filter((t: string) => QUICK_TAGS.includes(t))
-      aiTags.forEach(t => prevTags.add(t))
+      aiTags.forEach((t: string) => prevTags.add(t))
       if (prevTags.size > tags.length) { setTags([...prevTags]); filled.add('tags') }
 
       // Knowledge points — union with pre-selected
       const prevKps = new Set(kps)
       const aiKps = (data.knowledgePoints || []).filter((k: string) => QUICK_KPS.includes(k))
-      aiKps.forEach(k => prevKps.add(k))
+      aiKps.forEach((k: string) => prevKps.add(k))
       if (prevKps.size > kps.length) { setKps([...prevKps]); filled.add('kps') }
 
       // Homework
