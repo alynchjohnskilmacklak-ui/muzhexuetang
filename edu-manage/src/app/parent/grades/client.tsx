@@ -8,6 +8,7 @@ import { zhCN } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { fmtDate, fmtDateTime } from '@/lib/format-date'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 
 const { Text } = Typography
@@ -176,7 +177,7 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
                     {item.imageUrls.slice(0, 6).map((url: string) => <Image key={url} src={normalizeUploadUrl(url)} alt="课堂资料" width={96} height={72} style={{ objectFit: 'cover', borderRadius: 8 }} />)}
                   </div>
                 )}
-                <Text type="secondary" style={{ fontSize: 12 }}>{item.teacher?.name} · {new Date(item.createdAt).toLocaleString('zh-CN')}</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>{item.teacher?.name} · {fmtDateTime(item.createdAt)}</Text>
               </div>
             ))}
           </Space>
@@ -370,7 +371,7 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
                             border: `1px solid ${c.author.role === 'parent' ? '#F5C9A3' : '#BBF7D0'}`,
                           }}>
                             <div style={{ fontSize: 11, color: '#98A2B3', marginBottom: 4 }}>
-                              {c.author.name} · {new Date(c.createdAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                              {c.author.name} · {fmtDate(c.createdAt)}
                             </div>
                             <div style={{ fontSize: 13, color: '#1F2329' }}>{c.content}</div>
                           </div>

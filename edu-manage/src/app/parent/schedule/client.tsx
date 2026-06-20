@@ -5,6 +5,7 @@ import { Card, Empty, Select, Tag, Typography } from 'antd'
 import { ClockCircleOutlined, EnvironmentOutlined, TeamOutlined } from '@ant-design/icons'
 import { SCHEDULE_PERIODS, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { fmtFull } from '@/lib/format-date'
 
 const { Title, Text } = Typography
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
@@ -102,7 +103,7 @@ export function ParentScheduleClient({ students, lessons }: { students: any[]; l
             <div key={lesson.id}>
               {(index === 0 || new Date(mobileLessons[index - 1].lessonDate).toDateString() !== new Date(lesson.lessonDate).toDateString()) && (
                 <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12, fontWeight: 600 }}>
-                  {new Date(lesson.lessonDate).toLocaleDateString('zh-CN')}
+                  {fmtFull(lesson.lessonDate)}
                 </Text>
               )}
             <Card bordered={false} style={{ borderRadius: 10, background: '#fff', border: '1px solid #EEE7E1' }} styles={{ body: { padding: 14 } }}>
@@ -111,7 +112,7 @@ export function ParentScheduleClient({ students, lessons }: { students: any[]; l
                 <Tag color={status.color}>{status.text}</Tag>
               </div>
               <div style={{ display: 'grid', gap: 5, fontSize: 12, color: '#5a4e3a' }}>
-                <span><ClockCircleOutlined style={{ marginRight: 5 }} />{new Date(lesson.lessonDate).toLocaleDateString('zh-CN')} {lesson.startTime}-{lesson.endTime}</span>
+                <span><ClockCircleOutlined style={{ marginRight: 5 }} />{fmtFull(lesson.lessonDate)} {lesson.startTime}-{lesson.endTime}</span>
                 <span><TeamOutlined style={{ marginRight: 5 }} />{lesson.teacher?.name || lesson.group?.teacher?.name || '-'}</span>
                 <span><EnvironmentOutlined style={{ marginRight: 5 }} />{lesson.group?.room?.name || '-'}</span>
                 <span>学生：{studentNames}</span>

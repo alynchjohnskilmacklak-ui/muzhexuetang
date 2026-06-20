@@ -5,6 +5,7 @@ import { Card, Empty, Select, Space, Table, Tag, Typography } from 'antd'
 import { ClockCircleOutlined, TeamOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatHourPair, formatHours } from '@/lib/format'
+import { fmtFull } from '@/lib/format-date'
 
 const { Title, Text } = Typography
 
@@ -91,7 +92,7 @@ export function ParentHourRecordsClient({ students, records }: { students: any[]
             return (
               <Card key={record.id} bordered={false} className="parent-card" style={{ borderRadius: 12, border: '1px solid #F0DDD2' }} styles={{ body: { padding: 14 } }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
-                  <Text strong>{new Date(meta.date).toLocaleDateString('zh-CN')} {meta.courseName}</Text>
+                  <Text strong>{fmtFull(meta.date)} {meta.courseName}</Text>
                   <Tag color={status.color}>{status.text}</Tag>
                 </div>
                 <div style={{ display: 'grid', gap: 5, color: '#5a4e3a', fontSize: 13 }}>
@@ -114,7 +115,7 @@ export function ParentHourRecordsClient({ students, records }: { students: any[]
             scroll={{ x: 640 }}
             locale={{ emptyText: '暂无扣课记录' }}
             columns={[
-              { title: '日期', key: 'date', render: (_: unknown, record: any) => new Date(recordMeta(record).date).toLocaleDateString('zh-CN') },
+              { title: '日期', key: 'date', render: (_: unknown, record: any) => fmtFull(recordMeta(record).date) },
               { title: '课程', key: 'course', render: (_: unknown, record: any) => recordMeta(record).courseName },
               { title: '老师', key: 'teacher', render: (_: unknown, record: any) => recordMeta(record).teacherName },
               { title: '状态', dataIndex: 'status', render: (value: string) => <Tag color={(STATUS_LABEL[value] || {}).color}>{STATUS_LABEL[value]?.text || value}</Tag> },

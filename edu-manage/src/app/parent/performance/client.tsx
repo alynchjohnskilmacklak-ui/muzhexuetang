@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { MOOD_META, PERFORMANCE_BADGES, RATING_LABELS } from '@/lib/mood-meta'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { formatHours } from '@/lib/format'
+import { fmtDateTime } from '@/lib/format-date'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 
 type ParentPost = {
@@ -141,7 +142,7 @@ function FeedCard({ post, mutate }: { post: ParentPost; mutate: () => void }) {
             <Avatar src={normalizeUploadUrl(post.teacher?.avatar) || undefined} icon={<UserOutlined />} style={{ background: '#E8784A' }} />
             <div>
               <div style={{ color: '#1F2329', fontWeight: 700 }}>{post.teacher?.name || '老师'}</div>
-              <div style={{ color: '#98A2B3', fontSize: 12 }}>{new Date(post.createdAt).toLocaleString('zh-CN')}</div>
+              <div style={{ color: '#98A2B3', fontSize: 12 }}>{fmtDateTime(post.createdAt)}</div>
             </div>
             <Tag color={mood.color}>{mood.icon} {mood.label}</Tag>
           </Space>

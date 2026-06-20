@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { getDailyQuote } from '@/data/daily-quotes'
 import { formatPercent } from '@/lib/format'
+import { fmtDateTime } from '@/lib/format-date'
 import { TodayStatus } from '@/components/Parent/TodayStatus'
 import { WeeklyReport } from '@/components/Parent/WeeklyReport'
 
@@ -184,7 +185,7 @@ export function ParentDashboardClient({
     activeNotifications[0]?.createdAt,
     ...activeTodayAttendances.map((attendance: any) => attendance.createdAt),
   ].filter(Boolean).map((value) => new Date(value).getTime())
-  const latestUpdate = latestTimes.length ? new Date(Math.max(...latestTimes)).toLocaleString('zh-CN') : '暂无更新'
+  const latestUpdate = latestTimes.length ? fmtDateTime(Math.max(...latestTimes)) : '暂无更新'
   const todayTeachers = [...new Set(todayLessons.map((lesson) => lesson.teacherName).filter(Boolean))]
   const todayRooms = [...new Set(todayLessons.map((lesson) => lesson.roomName).filter(Boolean))]
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
@@ -578,7 +579,7 @@ export function ParentDashboardClient({
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', marginTop: 3, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 10, color: '#98A2B3' }}>
-                        {new Date(n.createdAt).toLocaleString('zh-CN')}
+                        {fmtDateTime(n.createdAt)}
                       </span>
                       <span style={{ fontSize: 11, color: '#E8784A', fontWeight: 600 }}>查看详情</span>
                     </div>
@@ -658,7 +659,7 @@ export function ParentDashboardClient({
                   <Text strong style={{ fontSize: 13 }}>{latestFeedback.teacherName}</Text>
                   <Tag style={{ borderRadius: 9999, fontSize: 10 }}>{latestFeedback.type}</Tag>
                   <Text type="secondary" style={{ fontSize: 11 }}>
-                    {new Date(latestFeedback.date).toLocaleString('zh-CN')}
+                    {fmtDateTime(latestFeedback.date)}
                   </Text>
                 </div>
                 {latestFeedback.studentName && (

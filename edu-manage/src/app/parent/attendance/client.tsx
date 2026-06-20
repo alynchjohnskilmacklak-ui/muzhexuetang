@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatHours } from '@/lib/format'
+import { fmtFull } from '@/lib/format-date'
 
 const { Title, Text } = Typography
 
@@ -127,7 +128,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
                   </div>
                   <div style={{ marginTop: 8, display: 'grid', gap: 4, fontSize: 13, color: '#5a4e3a' }}>
                     <span>{record.lesson?.group?.course?.name || record.lesson?.group?.name || '-'}</span>
-                    <span>{new Date(record.createdAt).toLocaleDateString('zh-CN')}</span>
+                    <span>{fmtFull(record.createdAt)}</span>
                     <span>扣课时：{formatHours(record.hoursDeducted)}</span>
                   </div>
                 </div>
@@ -144,7 +145,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
             { title: '学员', dataIndex: ['student', 'name'], key: 'student', width: 80 },
             { title: '班级', dataIndex: ['lesson', 'group', 'name'], key: 'group', ellipsis: true },
             { title: '课程', dataIndex: ['lesson', 'group', 'course', 'name'], key: 'course', ellipsis: true },
-            { title: '日期', key: 'date', width: 100, render: (_: any, r: any) => new Date(r.createdAt).toLocaleDateString('zh-CN') },
+            { title: '日期', key: 'date', width: 100, render: (_: any, r: any) => fmtFull(r.createdAt) },
             { title: '状态', dataIndex: 'status', key: 'status', width: 80,
               render: (s: string) => {
                 const m = STATUS_MAP[s] || { label: s, color: 'default', bg: 'transparent' }
