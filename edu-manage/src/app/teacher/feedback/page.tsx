@@ -203,23 +203,47 @@ function FeedbackPageInner() {
           selected: { mood, tags, knowledgePoints: kps },
           selectedStudentIds,
           stageMaterial: stageData?.material?.summarySeed?.slice(0, 600) || '',
+          lessonId: lessonId || undefined,
+          groupId: groupId || undefined,
+          courseType: selectedGroup?.course?.type || undefined,
+          currentForm: {
+            mood, overallComment, tags, knowledgePoints: kps,
+            homework, summary, suggestion: summary,
+            stageSummaryText, stageSuggestions,
+          },
         }),
       })
       const data = await res.json()
-      if (!res.ok) { toast.error(data.error || 'AI 生成失败'); return }
+      if (!res.ok) { toast.error(data.error || 'AI 生成失败，请稍后重试'); return }
+
+      // Check if any real content was generated
+      const hasContent = Boolean(
+        data.overallComment?.trim() ||
+        data.suggestion?.trim() ||
+        data.stageSummaryText?.trim() ||
+        data.stageSuggestions?.trim() ||
+        data.summary?.trim() ||
+        data.tags?.length ||
+        data.knowledgePoints?.length ||
+        data.homework?.length,
+      )
+      if (!hasContent) {
+        toast('AI 没有完全识别，请换一句更具体的描述，或先手动选择学生。')
+        return
+      }
 
       const filled = new Set<string>()
 
-      // Student IDs
+      // Student IDs — merge with pre-selected, never clear
       const aiStudentIds: string[] = data.studentIds || []
-      const mergedIds = new Set(selectedStudentIds)
-      aiStudentIds.forEach((id: string) => mergedIds.add(id))
-      if (mergedIds.size > 0) {
-        setSelectedStudentIds([...mergedIds])
+      if (aiStudentIds.length) {
+        const merged = new Set(selectedStudentIds)
+        aiStudentIds.forEach((id: string) => merged.add(id))
+        setSelectedStudentIds([...merged])
         filled.add('students')
       }
       if (data.unknownNames?.length) {
-        toast(`未在本班找到：${data.unknownNames.join('、')}`, { duration: 3000 })
+        toast(`未能在班级中确认：${data.unknownNames.join('、')}`, { duration: 3000 })
       }
 
       // Mood
@@ -258,7 +282,12 @@ function FeedbackPageInner() {
       if (data.stageSuggestions) { setStageSuggestions(data.stageSuggestions); filled.add('stageSuggestion') }
 
       setAiPrefilled(filled)
-      toast.success('已自动填充，请核对后点击发布给家长', { duration: 2500 })
+
+      if (data.needsManualStudentSelection) {
+        toast('AI 已生成反馈内容，请先确认学生后再发布。', { duration: 4000 })
+      } else if (filled.size > 0) {
+        toast.success('已自动填充，请核对后点击发布给家长', { duration: 2500 })
+      }
     } catch (e: any) { toast.error(e.message || 'AI 生成失败') }
     finally { setAiGenerating(false) }
   }

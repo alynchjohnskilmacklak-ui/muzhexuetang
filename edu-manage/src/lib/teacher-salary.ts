@@ -216,6 +216,32 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       return { success: true, error: `当日均已奖励（${allIds.length}人重复）` }
     }
 
+    // ── Determine course type ONCE for the entire feedback ──
+    let feedbackCourseType = 'UNKNOWN'
+
+    // 1) From the associated lesson → course.type
+    if (lesson?.group?.course?.type) {
+      feedbackCourseType = lesson.group.course.type
+    }
+
+    // 2) Default unknown to GROUP (不要误发1元)
+    if (feedbackCourseType === 'UNKNOWN') {
+      feedbackCourseType = 'GROUP'
+    }
+
+    const cfg = await getTeacherSalaryConfig(teacherId)
+    const rate = feedbackCourseType === 'ONE_ON_ONE' ? cfg.feedbackRateOneOne : cfg.feedbackRateGroup
+
+    console.log('[FeedbackBonus] course type resolved', {
+      feedbackId,
+      lessonId: feedback.lessonId,
+      resolvedCourseType: feedbackCourseType,
+      rate,
+      studentIds: feedback.studentIds,
+      eligibleIds,
+      duplicateCount,
+    })
+
     const result = await prisma.$transaction(async (tx) => {
       // Dedup check inside transaction
       const txExisting = await tx.teacherSalaryTransaction.findFirst({
@@ -224,30 +250,13 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       })
       if (txExisting) return { success: true }
 
-      const cfg = await getTeacherSalaryConfig(teacherId, tx)
-
-      // Per-student rate determination
-      let totalAmount = 0
-      for (const sid of eligibleIds) {
-        let isOneOnOne = false
-        if (lesson?.group?.course?.type === 'ONE_ON_ONE') {
-          isOneOnOne = true
-        } else if (!lesson) {
-          const oneOnOneEnroll = await tx.enrollment.count({
-            where: { studentId: sid, status: 'ACTIVE', group: { course: { type: 'ONE_ON_ONE' }, teacherId } },
-          })
-          isOneOnOne = oneOnOneEnroll > 0
-        }
-        const rate = isOneOnOne ? cfg.feedbackRateOneOne : cfg.feedbackRateGroup
-        totalAmount += rate
-      }
-
-      const finalAmount = Number(totalAmount.toFixed(4))
+      const finalAmount = Number((eligibleIds.length * rate).toFixed(4))
       if (finalAmount <= 0) return { success: false, error: '金额为零' }
 
+      const typeLabel = feedbackCourseType === 'ONE_ON_ONE' ? '一对一' : '小班'
       const descParts = [`课堂反馈奖励（有效${eligibleIds.length}人`]
       if (duplicateCount > 0) descParts.push(`，重复${duplicateCount}人`)
-      descParts.push(`，${lesson?.group?.course?.type === 'ONE_ON_ONE' ? '一对一' : '小班'}）`)
+      descParts.push(`，${typeLabel}，${rate}元/人）`)
 
       await tx.teacherSalaryTransaction.create({
         data: {
