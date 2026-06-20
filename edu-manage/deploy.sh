@@ -108,11 +108,28 @@ SELECT format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', :'db_name', :'db_user
 SQL
 
 echo "=== Configure production environment ==="
-if [ -f prisma/schema.pg.prisma ]; then
-  cp prisma/schema.pg.prisma prisma/schema.prisma
-fi
+# schema 已合并为单份 prisma/schema.prisma，无需再 cp schema.pg.prisma
 
-cat > .env <<ENVEOF
+if [ -f .env ]; then
+  # 保留现有 .env，绝不整体覆盖（其中含 DATABASE_URL_JUNIOR/SENIOR、DUAL_DB、
+  # KIMI_API_KEY、DEEPSEEK_API_KEY、STORAGE_DRIVER、UPLOAD_DIR、WXPUSHER_APP_TOKEN 等）。
+  echo "=== 保留现有 .env（不覆盖）==="
+  cp .env "/tmp/${APP_NAME}.env.bak.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
+elif [ -f .env.example ]; then
+  echo "=== 首次部署：从 .env.example 生成 .env，请补全 JUNIOR/SENIOR/AI/STORAGE/WXPUSHER ==="
+  cp .env.example .env
+  # 写入本次部署已确定的基础项，其余变量请人工补全
+  {
+    echo "DATABASE_URL=\"${DATABASE_URL}\""
+    echo "NEXTAUTH_SECRET=\"${NEXTAUTH_SECRET}\""
+    echo "NEXTAUTH_URL=\"${NEXTAUTH_URL}\""
+    echo "AUTH_SECRET=\"${NEXTAUTH_SECRET}\""
+    echo "AUTH_URL=\"${NEXTAUTH_URL}\""
+    echo "AUTH_TRUST_HOST=true"
+  } >> .env
+else
+  echo "=== 首次部署且无 .env.example：生成最小 .env，请补全其余变量 ==="
+  cat > .env <<ENVEOF
 DATABASE_URL="${DATABASE_URL}"
 NEXTAUTH_SECRET="${NEXTAUTH_SECRET}"
 NEXTAUTH_URL="${NEXTAUTH_URL}"
@@ -120,6 +137,7 @@ AUTH_SECRET="${NEXTAUTH_SECRET}"
 AUTH_URL="${NEXTAUTH_URL}"
 AUTH_TRUST_HOST=true
 ENVEOF
+fi
 
 echo "=== Install dependencies ==="
 if [ -f package-lock.json ]; then
@@ -129,8 +147,8 @@ else
 fi
 
 echo "=== Build and migrate ==="
-npx prisma generate
-npx prisma db push
+# 同步 schema 到所有库（双库时 JUNIOR+SENIOR，单库时默认库）
+bash scripts/db-sync-all.sh
 
 if [ "${RUN_SEED}" = "1" ]; then
   echo "=== Seed database ==="

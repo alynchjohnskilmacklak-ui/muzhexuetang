@@ -36,9 +36,8 @@ echo "[4/7] 安装依赖"
 npm install
 
 # ---- 5. Prisma ----
-echo "[5/7] 生成 Prisma Client + 推送 DB"
-./node_modules/.bin/prisma generate
-./node_modules/.bin/prisma db push
+echo "[5/7] 生成 Prisma Client + 同步所有库（双库 JUNIOR+SENIOR）"
+bash scripts/db-sync-all.sh
 
 # ---- 6. 清理旧构建 + 重新构建 ----
 echo "[6/7] 清理旧构建产物"

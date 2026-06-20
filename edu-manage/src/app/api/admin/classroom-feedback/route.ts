@@ -3,7 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { requireAdminUser } from '@/lib/teacher-portal'
-import { isPayableFeedback } from '@/lib/teacher-salary'
+import { isPayableFeedback, triggerFeedbackBonus } from '@/lib/teacher-salary'
 import { divisionWhere } from '@/lib/division'
 
 import { apiHandler } from '@/lib/api-handler'
@@ -187,6 +187,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
       }
       return created
     })
+
+    // 管理员代发并发布时，奖励金应触发一次，归属被代发的老师。
+    // triggerFeedbackBonus 自带去重（同一 feedbackId 不重复发），幂等安全。
+    if (status === 'PUBLISHED') {
+      const bonusResult = await triggerFeedbackBonus(feedback.id)
+      if (!bonusResult.success) {
+        console.warn('[admin:classroom-feedback] triggerFeedbackBonus failed:', feedback.id, bonusResult.error)
+      }
+    }
 
     revalidatePath('/teacher/dashboard')
     revalidatePath('/parent/growth')
