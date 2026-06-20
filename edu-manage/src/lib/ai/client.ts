@@ -61,7 +61,7 @@ export async function callKimi(params: {
         ],
         temperature: params.temperature ?? 1,
         max_tokens: params.maxTokens ?? 300,
-        top_p: 0.9,
+        top_p: 0.95,
       }),
     },
     Number(process.env.AI_TIMEOUT_MS || 45_000),
@@ -84,6 +84,57 @@ export async function callKimi(params: {
 
   const result = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
   return result.choices?.[0]?.message?.content || ''
+}
+
+export async function callDeepSeek(params: {
+  system: string
+  user: string
+  maxTokens?: number
+  temperature?: number
+}): Promise<string> {
+  const baseUrl = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1'
+  const apiKey = process.env.DEEPSEEK_API_KEY || ''
+  const model = process.env.DEEPSEEK_MODEL || 'deepseek-chat'
+
+  if (!apiKey || apiKey.includes('你的') || apiKey.includes('填入')) {
+    throw new AIProviderError('DeepSeek API Key 未配置，请管理员检查 DEEPSEEK_API_KEY', { status: 500, provider: 'deepseek' })
+  }
+
+  const response = await fetchWithTimeout(
+    `${baseUrl.replace(/\/$/, '')}/chat/completions`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: params.system },
+          { role: 'user', content: params.user },
+        ],
+        temperature: params.temperature ?? 0.7,
+        max_tokens: params.maxTokens ?? 500,
+      }),
+    },
+    Number(process.env.AI_TIMEOUT_MS || 45_000),
+  )
+
+  if (!response.ok) {
+    const errText = await response.text()
+    console.error(`[DeepSeek Error ${response.status}]`, errText.slice(0, 300))
+    if (response.status === 401 || response.status === 403) {
+      throw new AIProviderError('DeepSeek 密钥无效或权限不足', { status: 502, provider: 'deepseek' })
+    }
+    if (response.status === 429) {
+      throw new AIProviderError('DeepSeek 调用过于频繁或额度不足，请稍后重试', { status: 429, provider: 'deepseek' })
+    }
+    throw new AIProviderError(
+      `DeepSeek 调用失败：${errText.slice(0, 160) || '请求异常'}`,
+      { status: response.status >= 500 ? 502 : 500, provider: 'deepseek', detail: errText },
+    )
+  }
+
+  const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
+  return data.choices?.[0]?.message?.content ?? ''
 }
 
 export function createSSEFromText(text: string) {

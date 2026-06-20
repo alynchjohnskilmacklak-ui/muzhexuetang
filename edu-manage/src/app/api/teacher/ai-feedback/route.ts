@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { apiHandler } from '@/lib/api-handler'
 import { requireCurrentTeacher, assertTeacherOwnsStudent } from '@/lib/teacher-portal'
 import { getStudentProfile } from '@/lib/student-profile'
-import { callKimi, AIProviderError } from '@/lib/ai/client'
+import { callDeepSeek, AIProviderError } from '@/lib/ai/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -103,7 +103,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     ].join('\n')
 
     try {
-      const raw = await callKimi({ system: sys, user, maxTokens: 500, temperature: 1 })
+      const raw = await callDeepSeek({ system: sys, user, maxTokens: 500 })
       const parsed = parseAIJson(raw)
       if (!parsed || typeof parsed !== 'object') {
         console.error('[ai-feedback classroom] parse failed, raw:', raw.slice(0, 300))
@@ -249,7 +249,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   ].join('\n')
 
   try {
-    const text = await callKimi({ system: sysPrompt, user: userPrompt, maxTokens: 350, temperature: 1 })
+    const text = await callDeepSeek({ system: sysPrompt, user: userPrompt, maxTokens: 350 })
     return NextResponse.json({ draft: (text || '').trim() })
   } catch (error) {
     console.error('[ai-feedback]', error)

@@ -2,20 +2,17 @@
 
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Button, Image as AntImage, Input, Spin, Upload, Tag, Card, Select, Empty } from 'antd'
-import { CheckCircleOutlined, DeleteOutlined, PlusOutlined, SaveOutlined, SendOutlined, SearchOutlined, ThunderboltOutlined, UserOutlined } from '@ant-design/icons'
+import { CheckCircleOutlined, DeleteOutlined, PlusOutlined, SendOutlined, SearchOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { normalizeUploadUrl } from '@/lib/upload-url'
-import { MOODS, QUICK_TAGS, QUICK_KPS, BADGES, FeedbackCard } from '@/components/FeedbackCard'
-import { StudentContextPanel } from '@/components/teacher/StudentContextPanel'
-import { format } from 'date-fns'
+import { MOODS, QUICK_TAGS, QUICK_KPS, BADGES } from '@/components/FeedbackCard'
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 function FeedbackPageInner() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const isMobile = useIsMobile() ?? false
 
@@ -34,6 +31,7 @@ function FeedbackPageInner() {
   const [hwInput, setHwInput] = useState('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [badgeOpen, setBadgeOpen] = useState(false)
+  const [uploadExpanded, setUploadExpanded] = useState(false)
   const [saving, setSaving] = useState(false)
   const [submitDone, setSubmitDone] = useState(false)
 
@@ -49,7 +47,6 @@ function FeedbackPageInner() {
   const [stageSuggestions, setStageSuggestions] = useState('')
   const [stageKeywords, setStageKeywords] = useState('')
   const [stageAiGenerating, setStageAiGenerating] = useState(false)
-  const [stageSaving, setStageSaving] = useState(false)
   const [stageMaterialExpanded, setStageMaterialExpanded] = useState(false)
 
   // Data
@@ -57,10 +54,6 @@ function FeedbackPageInner() {
   const groups: any[] = ctx?.groups || []
   const allLessons: any[] = ctx?.lessons || []
 
-  const [historyDate, setHistoryDate] = useState(new Date().toISOString().slice(0, 10))
-
-  const { data: historyData, mutate } = useSWR(`/api/feedback?limit=50&date=${historyDate}`, fetcher)
-  const history: any[] = Array.isArray(historyData?.feedbacks) ? historyData.feedbacks : []
 
   // Selected group
   const selectedGroup = groups.find((g: any) => g.id === groupId)
@@ -117,55 +110,6 @@ function FeedbackPageInner() {
     }
   }, [stageStudentId, stageDataRaw]) // eslint-disable-line
 
-  const stageSave = async () => {
-    if (!stageStudentId) return
-    setStageSaving(true)
-    try {
-      const res = await fetch('/api/teacher/stage-summary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          studentId: stageStudentId,
-          periodStart: new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().slice(0, 10),
-          periodEnd: new Date().toISOString().slice(0, 10),
-          summary: stageSummaryText,
-          suggestions: stageSuggestions,
-        }),
-      })
-      if (!res.ok) throw new Error((await res.json()).error)
-      toast.success('寄语草稿已保存')
-    } catch (e: any) { toast.error(e.message) }
-    finally { setStageSaving(false) }
-  }
-
-  const stagePublish = async () => {
-    if (!stageStudentId) return
-    setStageSaving(true)
-    try {
-      const res1 = await fetch('/api/teacher/stage-summary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          studentId: stageStudentId,
-          periodStart: new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().slice(0, 10),
-          periodEnd: new Date().toISOString().slice(0, 10),
-          summary: stageSummaryText,
-          suggestions: stageSuggestions,
-        }),
-      })
-      const d1 = await res1.json()
-      if (!res1.ok) throw new Error(d1.error)
-      const res2 = await fetch('/api/teacher/stage-summary', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: d1.stageSummary.id, action: 'publish' }),
-      })
-      if (!res2.ok) throw new Error((await res2.json()).error)
-      toast.success('寄语已发布，家长端将显示本期寄语')
-    } catch (e: any) { toast.error(e.message) }
-    finally { setStageSaving(false) }
-  }
-
   const stageAiGenerate = async () => {
     if (!stageStudentId) return
     setStageAiGenerating(true)
@@ -202,12 +146,13 @@ function FeedbackPageInner() {
   const submit = async (status: 'DRAFT' | 'PUBLISHED') => {
     const targetStudents = selectedStudentIds.length ? selectedStudentIds : selectedLesson?.studentIds || []
     if (!targetStudents.length) { toast.warning('请选择学员'); return }
-    if (!overallComment.trim() && !summary.trim() && !kps.length && !imageUrls.length) {
-      toast.warning('请至少填写评语、知识点或上传资料'); return
+    if (!overallComment.trim() && !summary.trim() && !kps.length && !imageUrls.length && !stageSummaryText.trim()) {
+      toast.warning('请至少填写评语、知识点、寄语或上传资料'); return
     }
     setSaving(true)
     try {
-      const res = await fetch('/api/feedback', {
+      // 1) Classroom feedback
+      const fbRes = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -217,15 +162,43 @@ function FeedbackPageInner() {
           imageUrls, status,
         }),
       })
-      const data = await res.json()
-      if (!res.ok) { toast.error(`发布失败：${data.error || '请检查网络后重试'}`, { duration: 5000 }); return }
+      const fbData = await fbRes.json()
+      if (!fbRes.ok) { toast.error(`反馈发布失败：${fbData.error || '请检查网络后重试'}`, { duration: 5000 }); return }
+
+      // 2) Stage summary (optional, only when PUBLISHED and text non-empty)
+      let stagePublished = false
+      if (status === 'PUBLISHED' && stageStudentId && stageSummaryText.trim()) {
+        const s1 = await fetch('/api/teacher/stage-summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            studentId: stageStudentId,
+            periodStart: new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().slice(0, 10),
+            periodEnd: new Date().toISOString().slice(0, 10),
+            summary: stageSummaryText,
+            suggestions: stageSuggestions,
+          }),
+        })
+        const d1 = await s1.json()
+        if (s1.ok && d1.stageSummary?.id) {
+          await fetch('/api/teacher/stage-summary', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: d1.stageSummary.id, action: 'publish' }),
+          })
+          stagePublished = true
+        }
+      }
+
       if (status === 'PUBLISHED') {
-        toast.success('反馈已发布，家长会立即收到通知', { duration: 4000 })
+        const msg = stagePublished ? '已发布：课堂反馈 + 本期寄语' : '已发布课堂反馈'
+        toast.success(msg, { duration: 4000 })
         setSubmitDone(true); setTimeout(() => setSubmitDone(false), 3000)
         setLessonId(''); setSelectedStudentIds([]); setGroupId('')
         setMood('GOOD'); setTags([]); setKps([]); setBadge('')
         setSummary(''); setOverallComment(''); setHomework([]); setImageUrls([])
-        mutate()
+        setStageSummaryText(''); setStageSuggestions(''); setStageKeywords('')
+        setStageData(null); setStageExpanded(false)
       } else { toast.success('草稿已保存', { duration: 2000 }) }
     } finally { setSaving(false) }
   }
@@ -308,37 +281,6 @@ function FeedbackPageInner() {
 
   const formSection = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* ── AI Input ── */}
-      {groupId && (
-        <Card size="small" style={{ borderRadius: 12, border: '1px dashed #E8784A', background: '#FFFBF7' }}>
-          <div style={{ fontSize: 12, color: '#8d806f', marginBottom: 8 }}>
-            ✨ AI 结构化填充 —— 用一句话描述本节课，AI 自动填表
-          </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <Input
-              size="small"
-              placeholder="例：马紫晨上课积极回答，函数掌握不错，作业全完成"
-              value={aiNote}
-              onChange={e => setAiNote(e.target.value)}
-              onPressEnter={aiGenerateClassroom}
-              style={{ flex: 1, borderRadius: 8 }}
-              allowClear
-              disabled={aiGenerating}
-            />
-            <Button
-              type="primary"
-              size="small"
-              icon={<ThunderboltOutlined />}
-              loading={aiGenerating}
-              onClick={aiGenerateClassroom}
-              style={{ whiteSpace: 'nowrap', flexShrink: 0, background: '#E8784A' }}
-            >
-              AI 生成草稿
-            </Button>
-          </div>
-        </Card>
-      )}
-
       {/* Mood */}
       <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
@@ -432,9 +374,14 @@ function FeedbackPageInner() {
         )}
       </Card>
 
-      {/* Upload */}
+      {/* Upload — collapsible */}
       <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>课堂资料</div>
+        <div style={{ fontSize: 13, fontWeight: 700, display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}
+          onClick={() => setUploadExpanded(!uploadExpanded)}>
+          <span>课堂资料 {imageUrls.length ? `(${imageUrls.length})` : '(可选)'}</span>
+          <span style={{ color: '#98A2B3', fontSize: 12 }}>{uploadExpanded ? '收起' : '展开'}</span>
+        </div>
+        {uploadExpanded && (
         {imageUrls.length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
             <AntImage.PreviewGroup>{imageUrls.map((url, i) => (
@@ -479,6 +426,7 @@ function FeedbackPageInner() {
           }} style={{ borderRadius: 8 }}>
           <div style={{ fontSize: 12, color: '#98A2B3' }}>点击或拖拽上传，单张≤20MB，支持 JPG/PNG/WebP/HEIC</div>
         </Upload.Dragger>
+        )}
       </Card>
 
       {/* ── Stage Summary (only when 1 student selected) ── */}
@@ -562,20 +510,8 @@ function FeedbackPageInner() {
                 style={{ borderRadius: 8 }}
               />
 
-              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                <Button size="small" icon={<SaveOutlined />} loading={stageSaving} onClick={stageSave} style={{ flex: 1 }}>
-                  保存草稿
-                </Button>
-                <Button
-                  type="primary"
-                  size="small"
-                  icon={<SendOutlined />}
-                  loading={stageSaving}
-                  onClick={stagePublish}
-                  style={{ flex: 1, background: '#E8784A', borderColor: '#E8784A' }}
-                >
-                  发布给家长
-                </Button>
+              <div style={{ fontSize: 11, color: '#98A2B3', marginTop: 8 }}>
+                非空时随课堂反馈一并发布（家长端「案」板块）
               </div>
             </div>
           )}
@@ -604,7 +540,7 @@ function FeedbackPageInner() {
 
   return (
     <div style={isMobile ? {} : { display: 'grid', gridTemplateColumns: '340px minmax(0, 1fr)', gap: 20, alignItems: 'start' }}>
-      {/* LEFT: class picker + student selection + history (desktop) */}
+      {/* LEFT: class picker + lesson + AI + student selection (desktop) */}
       {!isMobile && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, position: 'sticky', top: 12, maxHeight: '100vh', overflowY: 'auto' }}>
           <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
@@ -620,6 +556,36 @@ function FeedbackPageInner() {
             <Select size="small" value={lessonId || undefined} onChange={(v: string) => { setLessonId(v || ''); setSelectedStudentIds(v ? (allLessons.find((l: any) => l.id === v)?.studentIds || []) : []) }}
               allowClear placeholder="选择课次" style={{ width: '100%' }} options={lessonOptions} />
           </Card>
+
+          {/* AI input — desktop left column */}
+          {groupId && (
+            <Card size="small" style={{ borderRadius: 12, border: '1px dashed #E8784A', background: '#FFFBF7' }}>
+              <div style={{ fontSize: 12, color: '#8d806f', marginBottom: 8 }}>
+                ✨ AI 结构化填充 —— 一句话描述，自动填表
+              </div>
+              <Input
+                size="small"
+                placeholder="马紫晨上课积极回答，函数掌握不错…"
+                value={aiNote}
+                onChange={e => setAiNote(e.target.value)}
+                onPressEnter={aiGenerateClassroom}
+                style={{ borderRadius: 8, marginBottom: 6 }}
+                allowClear
+                disabled={aiGenerating}
+              />
+              <Button
+                type="primary"
+                size="small"
+                block
+                icon={<ThunderboltOutlined />}
+                loading={aiGenerating}
+                onClick={aiGenerateClassroom}
+                style={{ background: '#E8784A' }}
+              >
+                AI 生成草稿
+              </Button>
+            </Card>
+          )}
 
           {/* Student list — moved to left column */}
           {groupId && (
@@ -672,41 +638,42 @@ function FeedbackPageInner() {
             <div style={{ fontSize: 13, color: '#7A869A', textAlign: 'center', padding: '20px 0' }}>请先选择班级</div>
           )}
 
-          {/* Stats */}
-          <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
-            <div style={{ fontSize: 11, color: '#7A869A', display: 'flex', justifyContent: 'space-between' }}>
-              <span>班级数</span><strong>{groups.length}</strong>
-            </div>
-            <div style={{ fontSize: 11, color: '#7A869A', display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-              <span>近7天课次</span><strong>{allLessons.length}</strong>
-            </div>
-            <div style={{ fontSize: 11, color: '#7A869A', display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-              <span>本月反馈</span><strong>{history.length}</strong>
-            </div>
-          </Card>
-
-          {/* History list */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: 13, fontWeight: 700 }}>历史反馈</div>
-            <div style={{ display: 'flex', gap: 4 }}>
-              <Button size="small" type={historyDate === new Date().toISOString().slice(0, 10) ? 'primary' : 'default'}
-                onClick={() => setHistoryDate(new Date().toISOString().slice(0, 10))}
-                style={{ fontSize: 11 }}>今天</Button>
-              <Button size="small" onClick={() => { const d = new Date(); d.setDate(d.getDate() - 7); setHistoryDate(d.toISOString().slice(0, 10)) }}
-                style={{ fontSize: 11 }}>近7天</Button>
-              <Input type="date" size="small" value={historyDate} onChange={e => setHistoryDate(e.target.value)}
-                style={{ width: 130, fontSize: 11 }} />
-            </div>
-          </div>
-          {history.slice(0, 10).map((item: any) => <FeedbackCard key={item.id} item={item} compact />)}
         </div>
       )}
 
       {/* RIGHT: Form (desktop) / everything (mobile) */}
       <div style={!isMobile ? { position: 'sticky', top: 12, display: 'flex', flexDirection: 'column', gap: 14 } : { display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {/* Mobile: class/lesson picker + student cards */}
+        {/* Mobile: AI input + class/lesson picker + student cards */}
         {isMobile && (
           <>
+            {groupId && (
+              <Card size="small" style={{ borderRadius: 12, border: '1px dashed #E8784A', background: '#FFFBF7' }}>
+                <div style={{ fontSize: 12, color: '#8d806f', marginBottom: 6 }}>
+                  ✨ AI 结构化填充 —— 一句话描述，自动填表
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <Input
+                    size="small"
+                    placeholder="马紫晨上课积极回答，函数掌握不错…"
+                    value={aiNote}
+                    onChange={e => setAiNote(e.target.value)}
+                    style={{ flex: 1, borderRadius: 8 }}
+                    allowClear
+                    disabled={aiGenerating}
+                  />
+                  <Button
+                    type="primary"
+                    size="small"
+                    icon={<ThunderboltOutlined />}
+                    loading={aiGenerating}
+                    onClick={aiGenerateClassroom}
+                    style={{ whiteSpace: 'nowrap', background: '#E8784A' }}
+                  >
+                    生成
+                  </Button>
+                </div>
+              </Card>
+            )}
             <Select size="small" value={groupId || undefined} onChange={(v: string) => { setGroupId(v); setLessonId(''); setSelectedStudentIds([]) }}
               allowClear placeholder="选择班级" style={{ width: '100%' }}
               options={groups.map((g: any) => ({ label: `${g.courseName} (${g.studentCount}人)`, value: g.id }))} />
@@ -754,10 +721,7 @@ function FeedbackPageInner() {
           </>
         )}
 
-        {/* Student context / multi-student info */}
-        {selectedStudentIds.length === 1 && (
-          <StudentContextPanel studentId={selectedStudentIds[0]} />
-        )}
+        {/* Multi-student info */}
         {selectedStudentIds.length > 1 && (
           <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1', background: '#FFFBF7' }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>已选 {selectedStudentIds.length} 位学员</div>
@@ -768,24 +732,6 @@ function FeedbackPageInner() {
         {/* Form (includes AI input, classroom feedback, stage-summary) */}
         {formSection}
 
-        {/* Mobile: History */}
-        {isMobile && (
-          <div style={{ marginTop: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <div style={{ fontSize: 13, fontWeight: 700 }}>历史反馈</div>
-              <div style={{ display: 'flex', gap: 4 }}>
-                <Button size="small" type={historyDate === new Date().toISOString().slice(0, 10) ? 'primary' : 'default'}
-                  onClick={() => setHistoryDate(new Date().toISOString().slice(0, 10))}
-                  style={{ fontSize: 11 }}>今天</Button>
-                <Button size="small" onClick={() => { const d = new Date(); d.setDate(d.getDate() - 7); setHistoryDate(d.toISOString().slice(0, 10)) }}
-                  style={{ fontSize: 11 }}>近7天</Button>
-                <Input type="date" size="small" value={historyDate} onChange={e => setHistoryDate(e.target.value)}
-                  style={{ width: 130, fontSize: 11 }} />
-              </div>
-            </div>
-            {history.slice(0, 5).map((item: any) => <FeedbackCard key={item.id} item={item} compact />)}
-          </div>
-        )}
       </div>
     </div>
   )
