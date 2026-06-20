@@ -96,6 +96,7 @@ export async function callDeepSeek(params: {
   const baseUrl = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1'
   const apiKey = process.env.DEEPSEEK_API_KEY || ''
   const model = process.env.DEEPSEEK_MODEL || 'deepseek-chat'
+  const isKimiCompatible = /moonshot|kimi/i.test(baseUrl) || /moonshot|kimi/i.test(model)
 
   if (!apiKey || apiKey.includes('你的') || apiKey.includes('填入')) {
     throw new AIProviderError('DeepSeek API Key 未配置，请管理员检查 DEEPSEEK_API_KEY', { status: 500, provider: 'deepseek' })
@@ -112,9 +113,10 @@ export async function callDeepSeek(params: {
           { role: 'system', content: params.system },
           { role: 'user', content: params.user },
         ],
-        temperature: params.temperature ?? 0.7,
+        temperature: isKimiCompatible ? 1 : (params.temperature ?? 0.7),
         max_tokens: params.maxTokens ?? 500,
-        ...(params.jsonMode ? { response_format: { type: 'json_object' } } : {}),
+        ...(isKimiCompatible ? { top_p: 0.95 } : {}),
+        ...(params.jsonMode && !isKimiCompatible ? { response_format: { type: 'json_object' } } : {}),
       }),
     },
     Number(process.env.AI_TIMEOUT_MS || 45_000),

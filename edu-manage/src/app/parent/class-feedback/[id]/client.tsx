@@ -9,6 +9,10 @@ import { normalizeUploadUrl } from '@/lib/upload-url'
 
 const { Title, Text, Paragraph } = Typography
 
+function subjectOfTeacher(subjects?: string | null) {
+  return (subjects || '').split(/[，,、\s]+/).filter(Boolean)[0] || ''
+}
+
 export function FeedbackDetailClient({ feedback }: { feedback: any }) {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
@@ -32,7 +36,7 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
         </div>
 
         <Descriptions column={isMobile ? 1 : 2} size="small" style={{ marginBottom: 20 }}>
-          <Descriptions.Item label="老师">{feedback.teacher?.name || '-'}</Descriptions.Item>
+          <Descriptions.Item label="老师">{feedback.teacher?.name || '-'}{subjectOfTeacher(feedback.teacher?.subjects) ? ` · ${subjectOfTeacher(feedback.teacher?.subjects)}` : ''}</Descriptions.Item>
           <Descriptions.Item label="时间">
             {format(new Date(feedback.createdAt), 'yyyy-MM-dd HH:mm')}
           </Descriptions.Item>

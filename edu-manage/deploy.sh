@@ -108,18 +108,12 @@ SELECT format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', :'db_name', :'db_user
 SQL
 
 echo "=== Configure production environment ==="
-if [ -f prisma/schema.pg.prisma ]; then
-  cp prisma/schema.pg.prisma prisma/schema.prisma
+if [ -f .env ]; then
+  echo "=== 保留现有 .env（不覆盖）==="
+else
+  echo "=== 首次部署：从模板生成 .env，请补全 JUNIOR/SENIOR/AI/STORAGE/WXPUSHER ==="
+  cp .env.example .env
 fi
-
-cat > .env <<ENVEOF
-DATABASE_URL="${DATABASE_URL}"
-NEXTAUTH_SECRET="${NEXTAUTH_SECRET}"
-NEXTAUTH_URL="${NEXTAUTH_URL}"
-AUTH_SECRET="${NEXTAUTH_SECRET}"
-AUTH_URL="${NEXTAUTH_URL}"
-AUTH_TRUST_HOST=true
-ENVEOF
 
 echo "=== Install dependencies ==="
 if [ -f package-lock.json ]; then
@@ -129,8 +123,8 @@ else
 fi
 
 echo "=== Build and migrate ==="
-npx prisma generate
-npx prisma db push
+npm run migrate:all
+npm run db:sync:all
 
 if [ "${RUN_SEED}" = "1" ]; then
   echo "=== Seed database ==="
@@ -160,4 +154,4 @@ echo "=== Deploy complete ==="
 echo "URL: ${NEXTAUTH_URL}/login"
 echo "Database user: ${DB_USER}"
 echo "Database name: ${DB_NAME}"
-echo "Database password was generated for this deploy and saved in ${APP_DIR}/.env"
+echo "If this is a first deploy, review ${APP_DIR}/.env and fill production secrets before exposing the app."

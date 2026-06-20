@@ -410,7 +410,7 @@ export function ParentGrowthClient({
         open={!!detailModal}
         onCancel={() => { setDetailModal(null); setReplyingId(''); setReplyText('') }}
         footer={null}
-        width={560}
+        width="min(560px, 92vw)"
       >
         {detailModal && (
           <div>
@@ -469,7 +469,7 @@ export function ParentGrowthClient({
             {detailModal.imageUrls?.length > 0 && (
               <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
                 {detailModal.imageUrls.map((url: string, i: number) => (
-                  <img key={i} src={normalizeUploadUrl(url)} alt={`成长记录图片 ${i + 1}`} style={{ width: 160, height: 120, objectFit: 'cover', borderRadius: 8 }} />
+                  <img key={i} src={normalizeUploadUrl(url)} alt={`成长记录图片 ${i + 1}`} style={{ width: 'min(160px, 100%)', maxWidth: '100%', aspectRatio: '4 / 3', height: 'auto', objectFit: 'cover', borderRadius: 8, flex: '1 1 120px' }} />
                 ))}
               </div>
             )}

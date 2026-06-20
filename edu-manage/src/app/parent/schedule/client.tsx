@@ -125,7 +125,7 @@ export function ParentScheduleClient({ students, lessons }: { students: any[]; l
         </div>
       ) : (
         <Card bordered={false} style={{ borderRadius: 10, overflow: 'auto', background: '#fff' }} bodyStyle={{ padding: 0 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '88px repeat(7, 1fr)', minWidth: 900 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '72px repeat(7, minmax(72px, 1fr))', minWidth: 640 }}>
             <div style={{ padding: 8, background: '#faf8f5', borderBottom: '0.5px solid #EEE7E1' }} />
             {weekDates.map((date, i) => {
               const isToday = date.toDateString() === today.toDateString()

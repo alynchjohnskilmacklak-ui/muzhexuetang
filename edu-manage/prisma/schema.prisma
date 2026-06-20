@@ -169,6 +169,7 @@ model Course {
   color          String     @default("#E8784A")
   isActive       Boolean    @default(true)
   createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   teacherId   String?
   division        String    @default("JUNIOR")
@@ -180,6 +181,7 @@ model Course {
   @@index([isActive])
   @@index([teacherId])
   @@index([division])
+  @@index([division, isActive])
 }
 
 enum GroupStatus {
@@ -284,9 +286,9 @@ enum EnrollStatus {
 model Enrollment {
   id          String       @id @default(cuid())
   studentId   String
-  student     Student      @relation(fields: [studentId], references: [id])
+  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
   groupId     String
-  group       ClassGroup   @relation(fields: [groupId], references: [id])
+  group       ClassGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
   enrolledAt  DateTime     @default(now())
   totalHours  Float        @default(0)
   usedHours   Float        @default(0)
@@ -368,7 +370,7 @@ enum MakeupStatus {
 model MakeupRequest {
   id             String       @id @default(cuid())
   attendanceId   String       @unique
-  attendance     Attendance   @relation(fields: [attendanceId], references: [id])
+  attendance     Attendance   @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
   studentId      String
   student        Student      @relation(fields: [studentId], references: [id])
   status         MakeupStatus @default(PENDING)
@@ -377,9 +379,12 @@ model MakeupRequest {
   resolvedAt     DateTime?
   note           String?
   createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@index([status, createdAt])
   @@index([studentId])
+  @@index([studentId, status])
+  @@index([targetLessonId])
 }
 
 enum AssessType {
@@ -514,9 +519,14 @@ model Room {
   type      String @default("普通教室")
   usageType String @default("GENERAL")
   status    String @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   schedules   Schedule[]
   classGroups ClassGroup[]
+
+  @@index([status])
+  @@index([usageType, status])
 }
 
 model ActivityLog {
@@ -650,6 +660,8 @@ model ClassroomFeedback {
   teacher         Teacher      @relation(fields: [teacherId], references: [id])
   classLessonId   String?
   classLesson     ClassLesson? @relation(fields: [classLessonId], references: [id])
+  feedbackCourseType String?
+  feedbackGroupId String?
   targetType      String       @default("CLASS")
   source          String       @default("teacher")
   studentIds      String[]
@@ -677,6 +689,7 @@ model ClassroomFeedback {
   @@index([teacherId, createdAt])
   @@index([teacherId, status, createdAt])
   @@index([classLessonId])
+  @@index([feedbackGroupId])
   @@index([status])
   @@index([source, createdAt])
   @@index([teacherId, source, status])

@@ -12,6 +12,12 @@ import { MOODS, QUICK_TAGS, QUICK_KPS, BADGES } from '@/components/FeedbackCard'
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
+type FeedbackCourseBucket = 'GROUP' | 'ONE_ON_ONE'
+
+function toFeedbackCourseBucket(value: unknown): FeedbackCourseBucket {
+  return value === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
+}
+
 function FeedbackPageInner() {
   const searchParams = useSearchParams()
   const isMobile = useIsMobile() ?? false
@@ -83,6 +89,12 @@ function FeedbackPageInner() {
   }, [allLessons])
 
   const selectedLesson = allLessons.find((l: any) => l.id === lessonId)
+  const feedbackCourseBucket = useMemo<FeedbackCourseBucket>(() => {
+    if (selectedLesson?.courseType) return toFeedbackCourseBucket(selectedLesson.courseType)
+    return toFeedbackCourseBucket(selectedGroup?.courseType || selectedGroup?.course?.type)
+  }, [selectedLesson?.courseType, selectedGroup?.courseType, selectedGroup?.course?.type])
+  const feedbackSceneLabel = feedbackCourseBucket === 'ONE_ON_ONE' ? '一对一反馈' : '小班反馈'
+  const feedbackRateLabel = feedbackCourseBucket === 'ONE_ON_ONE' ? '1元/人' : '0.5元/人'
 
   // ── Stage summary load when single student selected ──
   const stageStudentId = selectedStudentIds.length === 1 ? selectedStudentIds[0] : null
@@ -137,6 +149,9 @@ function FeedbackPageInner() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           classLessonId: lessonId || null, studentIds: targetStudents,
+          groupId: groupId || selectedLesson?.groupId || null,
+          feedbackGroupId: groupId || selectedLesson?.groupId || null,
+          feedbackCourseType: feedbackCourseBucket,
           mood, tags, knowledgePoints: kps, badge, summary, overallComment,
           homework: homework.map((h, i) => ({ order: i + 1, content: h })),
           imageUrls, status,
@@ -184,11 +199,21 @@ function FeedbackPageInner() {
   }
 
   const aiGenerateClassroom = async () => {
-    if (!aiNote.trim()) { toast.warning('请输入本节课的一句话描述'); return }
-    if (!groupId) { toast.warning('请先选择班级'); return }
+    if (!aiNote.trim()) {
+      toast.warning('请输入一句课堂描述，例如：上课认真听讲，但作业完成还需要加强')
+      return
+    }
+    if (!selectedStudentIds.length && !groupId && !lessonId) {
+      toast.warning('请先选择学生，或选择班级后让 AI 识别学生')
+      return
+    }
     setAiGenerating(true)
     try {
       const roster = groupStudents.map((s: any) => ({ id: s.id, name: s.name }))
+      const selectedStudents = selectedStudentIds.map((id) => {
+        const fromGroup = groupStudents.find((s: any) => s.id === id)
+        return fromGroup ? { id: fromGroup.id, name: fromGroup.name } : { id, name: null }
+      })
       const options = {
         moods: MOODS.map(m => ({ value: m.value, label: m.label })),
         tags: QUICK_TAGS,
@@ -202,10 +227,11 @@ function FeedbackPageInner() {
           roster, options,
           selected: { mood, tags, knowledgePoints: kps },
           selectedStudentIds,
+          selectedStudents,
           stageMaterial: stageData?.material?.summarySeed?.slice(0, 600) || '',
           lessonId: lessonId || undefined,
-          groupId: groupId || undefined,
-          courseType: selectedGroup?.course?.type || undefined,
+          groupId: groupId || selectedLesson?.groupId || undefined,
+          courseType: selectedLesson?.courseType || selectedGroup?.courseType || selectedGroup?.course?.type || undefined,
           currentForm: {
             mood, overallComment, tags, knowledgePoints: kps,
             homework, summary, suggestion: summary,
@@ -216,7 +242,6 @@ function FeedbackPageInner() {
       const data = await res.json()
       if (!res.ok) { toast.error(data.error || 'AI 生成失败，请稍后重试'); return }
 
-      // Check if any real content was generated
       const hasContent = Boolean(
         data.overallComment?.trim() ||
         data.suggestion?.trim() ||
@@ -228,14 +253,13 @@ function FeedbackPageInner() {
         data.homework?.length,
       )
       if (!hasContent) {
-        toast('AI 没有完全识别，请换一句更具体的描述，或先手动选择学生。')
+        toast('AI 没有生成完整内容，请换一句更具体的描述，例如：上课认真听讲，但作业完成还需要加强。')
         return
       }
 
       const filled = new Set<string>()
 
-      // Student IDs — merge with pre-selected, never clear
-      const aiStudentIds: string[] = data.studentIds || []
+      const aiStudentIds: string[] = Array.isArray(data.studentIds) ? data.studentIds : []
       if (aiStudentIds.length) {
         const merged = new Set(selectedStudentIds)
         aiStudentIds.forEach((id: string) => merged.add(id))
@@ -246,52 +270,58 @@ function FeedbackPageInner() {
         toast(`未能在班级中确认：${data.unknownNames.join('、')}`, { duration: 3000 })
       }
 
-      // Mood
       if (data.mood && MOODS.some((m: any) => m.value === data.mood)) {
         setMood(data.mood)
         filled.add('mood')
       }
 
-      // Comment
       if (data.overallComment) {
-        setOverallComment(data.overallComment)
+        setOverallComment(prev => prev.trim() ? prev : data.overallComment)
         filled.add('comment')
       }
 
-      // Tags — union with pre-selected
       const prevTags = new Set(tags)
       const aiTags = (data.tags || []).filter((t: string) => QUICK_TAGS.includes(t))
       aiTags.forEach((t: string) => prevTags.add(t))
       if (prevTags.size > tags.length) { setTags([...prevTags]); filled.add('tags') }
 
-      // Knowledge points — union
       const prevKps = new Set(kps)
       const aiKps = (data.knowledgePoints || []).filter((k: string) => QUICK_KPS.includes(k))
       aiKps.forEach((k: string) => prevKps.add(k))
       if (prevKps.size > kps.length) { setKps([...prevKps]); filled.add('kps') }
 
-      // Homework
-      if (data.homework?.length) { setHomework(data.homework); filled.add('homework') }
+      if (data.homework?.length) {
+        setHomework(prev => prev.length ? prev : data.homework)
+        filled.add('homework')
+      }
 
-      // Suggestion / summary
-      if (data.suggestion) { setSummary(data.suggestion); filled.add('suggestion') }
-      else if (data.summary) { setSummary(data.summary); filled.add('suggestion') }
+      if (data.suggestion) {
+        setSummary(prev => prev.trim() ? prev : data.suggestion)
+        filled.add('suggestion')
+      } else if (data.summary) {
+        setSummary(prev => prev.trim() ? prev : data.summary)
+        filled.add('suggestion')
+      }
 
-      // Stage summary fields
-      if (data.stageSummaryText) { setStageSummaryText(data.stageSummaryText); filled.add('stageSummary') }
-      if (data.stageSuggestions) { setStageSuggestions(data.stageSuggestions); filled.add('stageSuggestion') }
+      if (data.stageSummaryText) {
+        setStageSummaryText(prev => prev.trim() ? prev : data.stageSummaryText)
+        filled.add('stageSummary')
+      }
+      if (data.stageSuggestions) {
+        setStageSuggestions(prev => prev.trim() ? prev : data.stageSuggestions)
+        filled.add('stageSuggestion')
+      }
 
       setAiPrefilled(filled)
 
       if (data.needsManualStudentSelection) {
         toast('AI 已生成反馈内容，请先确认学生后再发布。', { duration: 4000 })
       } else if (filled.size > 0) {
-        toast.success('已自动填充，请核对后点击发布给家长', { duration: 2500 })
+        toast.success('AI 已补齐反馈草稿，请核对后发布给家长', { duration: 2500 })
       }
     } catch (e: any) { toast.error(e.message || 'AI 生成失败') }
     finally { setAiGenerating(false) }
   }
-
   const stageAiGenerate = async (target: 'summary' | 'suggestion') => {
     if (!stageStudentId) return
     setAiGenerating(true)
@@ -305,6 +335,7 @@ function FeedbackPageInner() {
           note: hint,
           roster,
           selectedStudentIds: [stageStudentId],
+          selectedStudents: groupStudents.filter((s: any) => s.id === stageStudentId).map((s: any) => ({ id: s.id, name: s.name })),
           stageMaterial: stageData?.material?.summarySeed?.slice(0, 600) || '',
           options: { moods: [], tags: [], knowledgePoints: [] },
           selected: {},
@@ -711,94 +742,118 @@ function FeedbackPageInner() {
         {/* Mobile: AI input + class/lesson picker + student cards */}
         {isMobile && (
           <>
-            {groupId && (
-              <Card size="small" style={{ borderRadius: 12, border: '1px dashed #E8784A', background: '#FFFBF7' }}>
-                <div style={{ fontSize: 12, color: '#8d806f', marginBottom: 6 }}>
-                  ✨ AI 结构化填充 —— 一句话描述，自动填表
+            <Card size="small" style={{ borderRadius: 14, border: '1px dashed #E8784A', background: '#FFFBF7' }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: '#1a1201', marginBottom: 4 }}>⚡ AI 智能扩写</div>
+              <div style={{ fontSize: 12, color: '#8d806f', lineHeight: 1.6, marginBottom: 10 }}>
+                先选学生，再输入一句课堂表现，AI 会自动补齐评语、建议和标签
+              </div>
+              <Input.TextArea
+                rows={3}
+                placeholder="例如：上课认真听讲，但是作业完成还需要加强"
+                value={aiNote}
+                onChange={e => setAiNote(e.target.value)}
+                style={{ borderRadius: 10, marginBottom: 10 }}
+                allowClear
+                disabled={aiGenerating}
+              />
+              <Button
+                type="primary"
+                block
+                icon={<ThunderboltOutlined />}
+                loading={aiGenerating}
+                disabled={(!selectedStudentIds.length && !groupId && !lessonId) || aiGenerating}
+                onClick={aiGenerateClassroom}
+                style={{ height: 42, borderRadius: 10, background: '#E8784A', fontWeight: 700 }}
+              >
+                生成反馈草稿
+              </Button>
+              {!groupId && <div style={{ fontSize: 12, color: '#B26B45', marginTop: 8 }}>请先选择学生，或选择班级后让 AI 识别学生</div>}
+            </Card>
+
+            <Card size="small" style={{ borderRadius: 14, border: '1px solid #EEE7E1' }}>
+              <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 12 }}>① 选择课程</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#5a4e3a', marginBottom: 6 }}>班级 / 课程</div>
+                  <Select value={groupId || undefined} onChange={(v: string) => { setGroupId(v); setLessonId(''); setSelectedStudentIds([]); setStudentsExpanded(false) }}
+                    allowClear placeholder="选择班级 / 课程" style={{ width: '100%' }}
+                    options={groups.map((g: any) => ({ label: `${g.courseName} (${g.studentCount}人)`, value: g.id }))} />
                 </div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <Input
-                    size="small"
-                    placeholder="马紫晨上课积极回答，函数掌握不错…"
-                    value={aiNote}
-                    onChange={e => setAiNote(e.target.value)}
-                    style={{ flex: 1, borderRadius: 8 }}
-                    allowClear
-                    disabled={aiGenerating}
-                  />
-                  <Button
-                    type="primary"
-                    size="small"
-                    icon={<ThunderboltOutlined />}
-                    loading={aiGenerating}
-                    onClick={aiGenerateClassroom}
-                    style={{ whiteSpace: 'nowrap', background: '#E8784A' }}
-                  >
-                    生成
-                  </Button>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#5a4e3a', marginBottom: 6 }}>关联课次（可选）</div>
+                  <Select value={lessonId || undefined} onChange={(v: string) => {
+                    const lesson = allLessons.find((l: any) => l.id === v)
+                    setLessonId(v || '')
+                    if (lesson?.groupId) setGroupId(lesson.groupId)
+                    setSelectedStudentIds(v ? (lesson?.studentIds || []) : [])
+                    setStudentsExpanded(false)
+                  }} allowClear placeholder="选择课次" style={{ width: '100%' }} options={lessonOptions} />
+                  <div style={{ fontSize: 11, color: '#98A2B3', marginTop: 6 }}>关联课次后，系统会更准确计算反馈奖励</div>
                 </div>
-              </Card>
-            )}
-            <Select size="small" value={groupId || undefined} onChange={(v: string) => { setGroupId(v); setLessonId(''); setSelectedStudentIds([]) }}
-              allowClear placeholder="选择班级" style={{ width: '100%' }}
-              options={groups.map((g: any) => ({ label: `${g.courseName} (${g.studentCount}人)`, value: g.id }))} />
-            <Select size="small" value={lessonId || undefined} onChange={(v: string) => { setLessonId(v || ''); setSelectedStudentIds(v ? (allLessons.find((l: any) => l.id === v)?.studentIds || []) : []) }}
-              allowClear placeholder="关联课次" style={{ width: '100%' }} options={lessonOptions} />
+                {(groupId || lessonId) && (
+                  <div style={{ borderRadius: 10, padding: '9px 10px', background: '#FFF6F1', border: '1px solid rgba(232,120,74,.18)', color: '#B85B32', fontSize: 12, fontWeight: 700 }}>
+                    当前场景：{feedbackSceneLabel} · {feedbackRateLabel}
+                  </div>
+                )}
+              </div>
+            </Card>
 
             {groupId && (
-              <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
+              <Card size="small" style={{ borderRadius: 14, border: '1px solid #EEE7E1' }}>
                 <div
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', gap: 8 }}
                   onClick={() => setStudentsExpanded(!studentsExpanded)}
                 >
-                  <span style={{ fontSize: 13, fontWeight: 700 }}>
-                    {selectedGroup?.courseName || '班级'} ({filteredStudents.length}人)
-                    {selectedStudentIds.length > 0 && (
-                      <span style={{ fontWeight: 400, color: '#E8784A', marginLeft: 6, fontSize: 12 }}>已选 {selectedStudentIds.length} 人</span>
-                    )}
-                  </span>
-                  <span style={{ color: '#98A2B3', fontSize: 12 }}>{studentsExpanded ? '收起 ▲' : '展开 ▼'}</span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 800 }}>② 选择学生</div>
+                    <div style={{ fontSize: 12, color: '#7A869A', marginTop: 2 }}>已选 {selectedStudentIds.length} 人</div>
+                  </div>
+                  <Button size="small" type="link" style={{ color: '#E8784A', padding: 0 }}>
+                    {studentsExpanded ? '收起' : '展开'}
+                  </Button>
                 </div>
                 {selectedStudentIds.length > 0 && (
-                  <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {selectedStudentIds.map((id) => {
                       const s = groupStudents.find((gs: any) => gs.id === id)
                       return s ? (
-                        <Tag key={id} closable color="orange" style={{ borderRadius: 9999, fontSize: 11, margin: 0 }}
+                        <Tag key={id} closable color="orange" style={{ borderRadius: 9999, fontSize: 12, margin: 0, padding: '3px 8px' }}
                           onClose={(e: any) => { e.preventDefault(); toggleStudent(id) }}>{s.name}</Tag>
                       ) : null
                     })}
                   </div>
                 )}
                 {studentsExpanded && (
-                  <div style={{ marginTop: 8 }}>
-                    <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
-                      <Button size="small" onClick={selectAll} style={{ fontSize: 11 }}>全选</Button>
-                      <Button size="small" onClick={clearAll} style={{ fontSize: 11 }}>清空</Button>
+                  <div style={{ marginTop: 12 }}>
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                      <Input prefix={<SearchOutlined />} value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="搜索学生" style={{ flex: 1, borderRadius: 10 }} />
+                      <Button onClick={selectAll}>全选</Button>
+                      <Button onClick={clearAll}>清空</Button>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                      {filteredStudents.map((s: any) => {
-                        const selected = selectedStudentIds.includes(s.id)
-                        return (
-                          <div key={s.id} onClick={() => toggleStudent(s.id)} style={{
-                            padding: 8, borderRadius: 8, cursor: 'pointer', border: selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
-                            background: selected ? '#FFF3EC' : '#fff',
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                              <div style={{ width: 24, height: 24, borderRadius: 6, background: '#F5F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#E8784A' }}>{s.name[0]}</div>
-                              <span style={{ fontSize: 12, fontWeight: 600 }}>{s.name}</span>
+                    {filteredStudents.length === 0 ? (
+                      <Empty description="该班级暂无学生" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                    ) : (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        {filteredStudents.map((s: any) => {
+                          const selected = selectedStudentIds.includes(s.id)
+                          return (
+                            <div key={s.id} onClick={() => toggleStudent(s.id)} style={{
+                              minHeight: 44, padding: '8px 10px', borderRadius: 10, cursor: 'pointer', border: selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
+                              background: selected ? '#FFF3EC' : '#fff', display: 'flex', alignItems: 'center', gap: 8,
+                            }}>
+                              <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F5F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#E8784A', flexShrink: 0 }}>{s.name[0]}</div>
+                              <span style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
                             </div>
-                          </div>
-                        )
-                      })}
-                    </div>
+                          )
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </Card>
             )}
           </>
         )}
-
         {/* Multi-student info */}
         {selectedStudentIds.length > 1 && (
           <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1', background: '#FFFBF7' }}>

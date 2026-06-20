@@ -163,6 +163,22 @@ export async function triggerLessonPay(lessonId: string, prismaClient?: PrismaCl
 
 // ── Feedback bonus ──
 
+type FeedbackCourseBucket = 'GROUP' | 'ONE_ON_ONE'
+
+function toFeedbackCourseBucket(value: unknown): FeedbackCourseBucket {
+  return value === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
+}
+
+function resolveFeedbackCourseBucket(feedback: {
+  feedbackCourseType?: string | null
+  classLesson?: { group?: { course?: { type?: string | null } | null } | null } | null
+}): FeedbackCourseBucket {
+  const lessonCourseType = feedback.classLesson?.group?.course?.type
+  if (lessonCourseType === 'ONE_ON_ONE') return 'ONE_ON_ONE'
+  if (lessonCourseType) return 'GROUP'
+  return toFeedbackCourseBucket(feedback.feedbackCourseType)
+}
+
 export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: PrismaClient): Promise<{ success: boolean; error?: string }> {
   try {
     const prisma = prismaClient ?? await getRequestPrisma()
@@ -188,7 +204,11 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       return { success: true }
     }
 
-    // Gather studentIds already rewarded today for this teacher
+    const currentBucket = resolveFeedbackCourseBucket(feedback)
+    const cfg = await getTeacherSalaryConfig(teacherId)
+    const rate = currentBucket === 'ONE_ON_ONE' ? cfg.feedbackRateOneOne : cfg.feedbackRateGroup
+
+    // Gather student/course-bucket pairs already rewarded today for this teacher.
     const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
     const todayEnd = new Date(todayStart.getTime() + 86400000)
     const todayBonuses = await prisma.teacherSalaryTransaction.findMany({
@@ -196,51 +216,42 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       select: { feedbackId: true },
     })
 
-    const rewardedIds = new Set<string>()
+    const rewardedKeys = new Set<string>()
     for (const b of todayBonuses) {
       if (!b.feedbackId || b.feedbackId === feedbackId) continue
       const fb = await prisma.classroomFeedback.findUnique({
         where: { id: b.feedbackId },
-        select: { studentIds: true },
+        select: {
+          studentIds: true,
+          feedbackCourseType: true,
+          classLesson: { select: { group: { select: { course: { select: { type: true } } } } } },
+        },
       })
-      if (fb) fb.studentIds.forEach((id: string) => rewardedIds.add(id))
+      if (!fb) continue
+      const bucket = resolveFeedbackCourseBucket(fb)
+      fb.studentIds.forEach((id: string) => rewardedKeys.add(`${id}:${bucket}`))
     }
 
-    // Count eligible vs duplicate
     const allIds = feedback.studentIds
-    const eligibleIds = allIds.filter((id: string) => !rewardedIds.has(id))
-    const duplicateCount = allIds.length - eligibleIds.length
+    const eligibleIds = allIds.filter((id: string) => !rewardedKeys.has(`${id}:${currentBucket}`))
+    const duplicateIds = allIds.filter((id: string) => rewardedKeys.has(`${id}:${currentBucket}`))
+    const duplicateCount = duplicateIds.length
+
+    console.log('[FeedbackBonus] resolved', {
+      feedbackId,
+      teacherId,
+      lessonId: feedback.classLessonId,
+      currentBucket,
+      rate,
+      allStudentIds: feedback.studentIds,
+      eligibleIds,
+      duplicateIds,
+    })
 
     if (eligibleIds.length === 0) {
-      console.warn(`[salary] triggerFeedbackBonus: all ${allIds.length} students already rewarded today`, feedbackId)
-      return { success: true, error: `当日均已奖励（${allIds.length}人重复）` }
+      console.warn(`[salary] triggerFeedbackBonus: all ${allIds.length} students already rewarded today for ${currentBucket}`, feedbackId)
+      return { success: true, error: `当日同场景均已奖励（${allIds.length}人重复）` }
     }
-
-    // ── Determine course type ONCE for the entire feedback ──
-    let feedbackCourseType = 'UNKNOWN'
-
-    // 1) From the associated lesson → course.type
-    if (lesson?.group?.course?.type) {
-      feedbackCourseType = lesson.group.course.type
-    }
-
-    // 2) Default unknown to GROUP (不要误发1元)
-    if (feedbackCourseType === 'UNKNOWN') {
-      feedbackCourseType = 'GROUP'
-    }
-
-    const cfg = await getTeacherSalaryConfig(teacherId)
-    const rate = feedbackCourseType === 'ONE_ON_ONE' ? cfg.feedbackRateOneOne : cfg.feedbackRateGroup
-
-    console.log('[FeedbackBonus] course type resolved', {
-      feedbackId,
-      lessonId: feedback.classLessonId,
-      resolvedCourseType: feedbackCourseType,
-      rate,
-      studentIds: feedback.studentIds,
-      eligibleIds,
-      duplicateCount,
-    })
 
     const result = await prisma.$transaction(async (tx) => {
       // Dedup check inside transaction
@@ -253,10 +264,10 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       const finalAmount = Number((eligibleIds.length * rate).toFixed(4))
       if (finalAmount <= 0) return { success: false, error: '金额为零' }
 
-      const typeLabel = feedbackCourseType === 'ONE_ON_ONE' ? '一对一' : '小班'
-      const descParts = [`课堂反馈奖励（有效${eligibleIds.length}人`]
+      const typeLabel = currentBucket === 'ONE_ON_ONE' ? '一对一' : '小班'
+      const descParts = [`课堂反馈奖励（${typeLabel}，有效${eligibleIds.length}人`]
       if (duplicateCount > 0) descParts.push(`，重复${duplicateCount}人`)
-      descParts.push(`，${typeLabel}，${rate}元/人）`)
+      descParts.push(`，${rate}元/人）`)
 
       await tx.teacherSalaryTransaction.create({
         data: {

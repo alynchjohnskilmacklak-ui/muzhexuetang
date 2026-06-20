@@ -28,7 +28,7 @@ export default async function FeedbackDetailPage({ params }: { params: Promise<{
       teacher: visibleTeacherWhere,
     },
     include: {
-      teacher: { select: { id: true, name: true } },
+      teacher: { select: { id: true, name: true, subjects: true } },
       classLesson: {
         include: {
           group: { include: { course: true, room: true } },

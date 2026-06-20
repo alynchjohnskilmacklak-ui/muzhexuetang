@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+import { Prisma, type PrismaClient } from '@prisma/client'
 import { getRequestPrisma } from '@/lib/prisma'
 
 interface HealthIssue {
@@ -14,8 +14,7 @@ export async function runDataHealthCheck(db?: PrismaClient): Promise<HealthIssue
   const issues: HealthIssue[] = []
 
   // 1. Duplicate attendance for same lesson+student
-  const dupAttendance = await prisma.$queryRawUnsafe<{ studentId: string; lessonId: string; cnt: bigint }[]>(
-    `SELECT "studentId", "lessonId", COUNT(*)::int as cnt FROM "Attendance" WHERE "lessonId" IS NOT NULL GROUP BY "studentId", "lessonId" HAVING COUNT(*) > 1 LIMIT 50`
+  const dupAttendance = await prisma.$queryRaw<{ studentId: string; lessonId: string; cnt: bigint }[]>(Prisma.sql`SELECT "studentId", "lessonId", COUNT(*)::int as cnt FROM "Attendance" WHERE "lessonId" IS NOT NULL GROUP BY "studentId", "lessonId" HAVING COUNT(*) > 1 LIMIT 50`
   )
   if (dupAttendance.length > 0) {
     issues.push({
@@ -28,8 +27,7 @@ export async function runDataHealthCheck(db?: PrismaClient): Promise<HealthIssue
   }
 
   // 2. Orphan notifications (studentId refers to non-existing student)
-  const orphanNotifs = await prisma.$queryRawUnsafe<{ id: string; cnt: bigint }[]>(
-    `SELECT n."id", 1 as cnt FROM "Notification" n LEFT JOIN "Student" s ON n."studentId" = s."id" WHERE n."studentId" IS NOT NULL AND s."id" IS NULL LIMIT 50`
+  const orphanNotifs = await prisma.$queryRaw<{ id: string; cnt: bigint }[]>(Prisma.sql`SELECT n."id", 1 as cnt FROM "Notification" n LEFT JOIN "Student" s ON n."studentId" = s."id" WHERE n."studentId" IS NOT NULL AND s."id" IS NULL LIMIT 50`
   )
   if (orphanNotifs.length > 0) {
     issues.push({
@@ -42,8 +40,7 @@ export async function runDataHealthCheck(db?: PrismaClient): Promise<HealthIssue
   }
 
   // 3. Orphan exam papers (studentId refers to non-existing student)
-  const orphanPapers = await prisma.$queryRawUnsafe<{ id: string; cnt: bigint }[]>(
-    `SELECT ep."id", 1 as cnt FROM "ExamPaper" ep LEFT JOIN "Student" s ON ep."studentId" = s."id" WHERE s."id" IS NULL LIMIT 50`
+  const orphanPapers = await prisma.$queryRaw<{ id: string; cnt: bigint }[]>(Prisma.sql`SELECT ep."id", 1 as cnt FROM "ExamPaper" ep LEFT JOIN "Student" s ON ep."studentId" = s."id" WHERE s."id" IS NULL LIMIT 50`
   )
   if (orphanPapers.length > 0) {
     issues.push({
@@ -72,8 +69,7 @@ export async function runDataHealthCheck(db?: PrismaClient): Promise<HealthIssue
   }
 
   // 5. Enrollment hours mismatch
-  const enrollmentMismatch = await prisma.$queryRawUnsafe<{ id: string; cnt: bigint }[]>(
-    `SELECT e."id", 1 as cnt FROM "Enrollment" e WHERE e."remainHours" != (e."totalHours" - e."usedHours") LIMIT 50`
+  const enrollmentMismatch = await prisma.$queryRaw<{ id: string; cnt: bigint }[]>(Prisma.sql`SELECT e."id", 1 as cnt FROM "Enrollment" e WHERE e."remainHours" != (e."totalHours" - e."usedHours") LIMIT 50`
   )
   if (enrollmentMismatch.length > 0) {
     issues.push({
@@ -86,8 +82,7 @@ export async function runDataHealthCheck(db?: PrismaClient): Promise<HealthIssue
   }
 
   // 6. Parents with no binding
-  const unboundParents = await prisma.$queryRawUnsafe<{ id: string; cnt: bigint }[]>(
-    `SELECT u."id", 1 as cnt FROM "User" u LEFT JOIN "Student" s ON u."id" = s."parentId" WHERE u."role" = 'parent' AND s."id" IS NULL LIMIT 50`
+  const unboundParents = await prisma.$queryRaw<{ id: string; cnt: bigint }[]>(Prisma.sql`SELECT u."id", 1 as cnt FROM "User" u LEFT JOIN "Student" s ON u."id" = s."parentId" WHERE u."role" = 'parent' AND s."id" IS NULL LIMIT 50`
   )
   if (unboundParents.length > 0) {
     issues.push({
@@ -100,8 +95,7 @@ export async function runDataHealthCheck(db?: PrismaClient): Promise<HealthIssue
   }
 
   // 7. Resigned teachers with future lessons
-  const futureLessonsForResigned = await prisma.$queryRawUnsafe<{ teacherId: string; cnt: bigint }[]>(
-    `SELECT cl."teacherId", COUNT(*)::int as cnt FROM "ClassLesson" cl JOIN "Teacher" t ON cl."teacherId" = t."id" WHERE t."status" = 'RESIGNED' AND cl."lessonDate" > NOW() AND cl."status" = 'SCHEDULED' GROUP BY cl."teacherId" LIMIT 50`
+  const futureLessonsForResigned = await prisma.$queryRaw<{ teacherId: string; cnt: bigint }[]>(Prisma.sql`SELECT cl."teacherId", COUNT(*)::int as cnt FROM "ClassLesson" cl JOIN "Teacher" t ON cl."teacherId" = t."id" WHERE t."status" = 'RESIGNED' AND cl."lessonDate" > NOW() AND cl."status" = 'SCHEDULED' GROUP BY cl."teacherId" LIMIT 50`
   )
   if (futureLessonsForResigned.length > 0) {
     issues.push({
@@ -114,8 +108,7 @@ export async function runDataHealthCheck(db?: PrismaClient): Promise<HealthIssue
   }
 
   // 8. Archived classes with future lessons
-  const archivedClassFutureLessons = await prisma.$queryRawUnsafe<{ groupId: string; cnt: bigint }[]>(
-    `SELECT cl."groupId", COUNT(*)::int as cnt FROM "ClassLesson" cl JOIN "ClassGroup" cg ON cl."groupId" = cg."id" WHERE cg."status" = 'ARCHIVED' AND cl."lessonDate" > NOW() AND cl."status" = 'SCHEDULED' GROUP BY cl."groupId" LIMIT 50`
+  const archivedClassFutureLessons = await prisma.$queryRaw<{ groupId: string; cnt: bigint }[]>(Prisma.sql`SELECT cl."groupId", COUNT(*)::int as cnt FROM "ClassLesson" cl JOIN "ClassGroup" cg ON cl."groupId" = cg."id" WHERE cg."status" = 'ARCHIVED' AND cl."lessonDate" > NOW() AND cl."status" = 'SCHEDULED' GROUP BY cl."groupId" LIMIT 50`
   )
   if (archivedClassFutureLessons.length > 0) {
     issues.push({
@@ -128,8 +121,7 @@ export async function runDataHealthCheck(db?: PrismaClient): Promise<HealthIssue
   }
 
   // 9. Deleted papers with visible notifications
-  const deletedPaperNotifs = await prisma.$queryRawUnsafe<{ id: string; cnt: bigint }[]>(
-    `SELECT n."id", 1 as cnt FROM "Notification" n JOIN "ExamPaper" ep ON n."relatedId" = ep."id" WHERE n."relatedType" = 'ExamPaper' AND ep."status" = 'DELETED' AND n."status" = 'ACTIVE' LIMIT 50`
+  const deletedPaperNotifs = await prisma.$queryRaw<{ id: string; cnt: bigint }[]>(Prisma.sql`SELECT n."id", 1 as cnt FROM "Notification" n JOIN "ExamPaper" ep ON n."relatedId" = ep."id" WHERE n."relatedType" = 'ExamPaper' AND ep."status" = 'DELETED' AND n."status" = 'ACTIVE' LIMIT 50`
   )
   if (deletedPaperNotifs.length > 0) {
     issues.push({
@@ -142,8 +134,7 @@ export async function runDataHealthCheck(db?: PrismaClient): Promise<HealthIssue
   }
 
   // 10. Students with INACTIVE status but active enrollments
-  const inactiveStudentEnrollments = await prisma.$queryRawUnsafe<{ enrollmentId: string; cnt: bigint }[]>(
-    `SELECT e."id" as "enrollmentId", 1 as cnt FROM "Enrollment" e JOIN "Student" s ON e."studentId" = s."id" WHERE s."status" = 'INACTIVE' AND e."status" = 'ACTIVE' LIMIT 50`
+  const inactiveStudentEnrollments = await prisma.$queryRaw<{ enrollmentId: string; cnt: bigint }[]>(Prisma.sql`SELECT e."id" as "enrollmentId", 1 as cnt FROM "Enrollment" e JOIN "Student" s ON e."studentId" = s."id" WHERE s."status" = 'INACTIVE' AND e."status" = 'ACTIVE' LIMIT 50`
   )
   if (inactiveStudentEnrollments.length > 0) {
     issues.push({

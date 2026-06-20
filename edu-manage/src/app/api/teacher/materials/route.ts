@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
+import { apiHandler } from '@/lib/api-handler'
 import {
   normalizeMaterialAudience,
   normalizeMaterialStatus,
@@ -12,8 +13,7 @@ import { MaterialAudience, MaterialSource } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest) {
-  try {
+export const GET = apiHandler(async (req: NextRequest) => {
     const { user, teacher, prisma } = await requireCurrentTeacher()
     const { searchParams } = new URL(req.url)
     const tab = searchParams.get('tab') || 'all'
@@ -43,14 +43,9 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({ materials })
-  } catch (err) {
-    console.error('[teacher:materials]', err instanceof Error ? err.message : err)
-    return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
-  }
-}
+})
 
-export async function POST(req: NextRequest) {
-  try {
+export const POST = apiHandler(async (req: NextRequest) => {
     const { user, teacher, prisma } = await requireCurrentTeacher()
     const formData = await req.formData()
     const file = formData.get('file') as File | null
@@ -115,8 +110,4 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(material, { status: 201 })
-  } catch (err) {
-    console.error('[teacher:materials]', err instanceof Error ? err.message : err)
-    return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
-  }
-}
+})

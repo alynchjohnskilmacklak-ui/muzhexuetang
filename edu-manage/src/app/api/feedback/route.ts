@@ -15,6 +15,23 @@ function asArr(v: unknown, limit = 20): string[] {
     : []
 }
 
+function isMissingFeedbackContextColumn(error: unknown) {
+  const err = error as { code?: string; meta?: { column?: string }; message?: string }
+  const text = `${err?.meta?.column || ''} ${err?.message || ''}`
+  return err?.code === 'P2022' && /feedbackCourseType|feedbackGroupId/.test(text)
+}
+
+async function createClassroomFeedbackCompat(tx: any, data: Record<string, unknown>) {
+  try {
+    return await tx.classroomFeedback.create({ data })
+  } catch (error) {
+    if (!isMissingFeedbackContextColumn(error)) throw error
+    const { feedbackCourseType: _feedbackCourseType, feedbackGroupId: _feedbackGroupId, ...legacyData } = data
+    console.warn('[feedback] ClassroomFeedback course context columns missing; creating legacy feedback without course context')
+    return tx.classroomFeedback.create({ data: legacyData })
+  }
+}
+
 // GET: list feedbacks (admin sees all, teacher sees own)
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
@@ -80,6 +97,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const body = await req.json()
   const status = body.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT'
   const classLessonId = typeof body.classLessonId === 'string' && body.classLessonId ? body.classLessonId : null
+  const submittedCourseType = body.feedbackCourseType === 'ONE_ON_ONE' || body.courseType === 'ONE_ON_ONE' || body.classType === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
+  let feedbackCourseType = submittedCourseType
+  let feedbackGroupId = typeof body.feedbackGroupId === 'string' && body.feedbackGroupId ? body.feedbackGroupId : typeof body.groupId === 'string' && body.groupId ? body.groupId : null
   const studentIds = asArr(body.studentIds)
   const knowledgePoints = asArr(body.knowledgePoints, 10)
   const imageUrls = asArr(body.imageUrls, 9)
@@ -102,8 +122,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
     teacherName = teacher.name
   } else {
     if (classLessonId) {
-      const lesson = await prisma.classLesson.findUnique({ where: { id: classLessonId }, select: { teacherId: true } })
+      const lesson = await prisma.classLesson.findUnique({
+        where: { id: classLessonId },
+        select: { teacherId: true, groupId: true, group: { select: { course: { select: { type: true } } } } },
+      })
       teacherId = lesson?.teacherId || body.teacherId || ''
+      feedbackGroupId = lesson?.groupId || feedbackGroupId
+      feedbackCourseType = lesson?.group?.course?.type === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : feedbackCourseType
     } else {
       teacherId = body.teacherId || ''
     }
@@ -116,11 +141,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (classLessonId) {
     const lesson = await prisma.classLesson.findFirst({
       where: { id: classLessonId },
-      include: { group: { include: { enrollments: { where: { status: 'ACTIVE' }, include: { student: { select: { id: true } } } } } } },
+      include: { group: { include: { course: { select: { type: true } }, enrollments: { where: { status: 'ACTIVE' }, include: { student: { select: { id: true } } } } } } },
     })
     if (!lesson) return NextResponse.json({ error: '课次不存在' }, { status: 404 })
     const lessonStudentIds = lesson.group.enrollments.map(e => e.student.id)
     resolvedStudentIds = studentIds.length ? studentIds.filter(id => lessonStudentIds.includes(id)) : lessonStudentIds
+    feedbackGroupId = lesson.groupId || feedbackGroupId
+    feedbackCourseType = lesson.group.course?.type === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
   }
   if (!resolvedStudentIds.length && !summary && !knowledgePoints.length) {
     return NextResponse.json({ error: '请选择学员或填写反馈内容' }, { status: 400 })
@@ -132,10 +159,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
     : []
 
   const feedback = await prisma.$transaction(async (tx) => {
-    const created = await tx.classroomFeedback.create({
-      data: {
+    const created = await createClassroomFeedbackCompat(tx, {
         teacherId,
         classLessonId,
+        feedbackCourseType,
+        feedbackGroupId,
         source: isAdmin ? 'admin' : 'teacher',
         targetType: body.targetType === 'STUDENT' ? 'STUDENT' : 'CLASS',
         studentIds: resolvedStudentIds,
@@ -150,8 +178,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         studentRatings,
         status,
         notifySent: status === 'PUBLISHED',
-      },
-    })
+      })
 
     if (status === 'PUBLISHED') {
       for (const student of studentsData) {
@@ -180,7 +207,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         detail: `${resolvedStudentIds.length}名学员 · ${knowledgePoints.join('/') || overallComment || '成长反馈'}`,
         entityType: 'ClassroomFeedback',
         entityId: created.id,
-        metadata: { status, source: isAdmin ? 'admin' : 'teacher', studentCount: resolvedStudentIds.length },
+        metadata: { status, source: isAdmin ? 'admin' : 'teacher', studentCount: resolvedStudentIds.length, feedbackCourseType, feedbackGroupId },
       },
     })
 

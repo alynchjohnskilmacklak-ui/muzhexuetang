@@ -46,6 +46,11 @@ const FILTER_CHIPS = [
 type InitialData = { children: { id: string; name: string }[]; activeStudentId: string | null; profile: StudentProfile }
 const fetcher = (url: string) => fetch(url).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error || '请求失败'); return d })
 
+function formatTeacherLabel(item?: { teacher?: string; teacherSubject?: string }) {
+  if (!item?.teacher) return ''
+  return `${item.teacher} 老师${item.teacherSubject ? ` · ${item.teacherSubject}` : ''}`
+}
+
 /** Compute trend arrow from subject trend data */
 function trendArrow(points: { pct: number }[]): string {
   if (points.length < 2) return ''
@@ -174,15 +179,14 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
         </Card>
 
         {/* Four-square overview */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(118px, 1fr))', gap: 8, marginBottom: 10 }}>
           {[
             { label: '出勤率', value: profile.overview.attendanceRate !== null ? `${profile.overview.attendanceRate}%` : '—', color: '#1D9E75', icon: <CheckCircleOutlined /> },
-            { label: '累计课时', value: `${profile.overview.totalHours}h`, color: '#E8784A', icon: <BookOutlined /> },
             { label: '本期试卷', value: `${profile.overview.paperCount} 份`, color: '#534AB7', icon: <FileTextOutlined />, emptyNote: '老师批改试卷后将更新' },
             { label: '获得徽章', value: `${profile.overview.badgeCount} 枚`, color: '#EF9F27', icon: <TrophyOutlined />, emptyNote: '老师评价后可获徽章' },
           ].map(item => (
-            <Card key={item.label} bordered={false} style={{ borderRadius: 12, textAlign: 'center', border: '1px solid rgba(0,0,0,.06)', padding: '6px 0' }}>
-              <div style={{ color: item.color, fontSize: 16, marginBottom: 2 }}>{item.icon}</div>
+            <Card key={item.label} bordered={false} style={{ borderRadius: 10, textAlign: 'center', border: '1px solid rgba(0,0,0,.06)', padding: '4px 0' }}>
+              <div style={{ color: item.color, fontSize: 14, marginBottom: 1 }}>{item.icon}</div>
               <Text type="secondary" style={{ fontSize: 11 }}>{item.label}</Text>
               <div><Text strong style={{ fontSize: 18, color: item.color }}>{item.value}</Text></div>
               {'emptyNote' in item && profile.overview.paperCount === 0 && <div style={{ fontSize: 10, color: '#B0B8C1', marginTop: 2 }}>{(item as { emptyNote?: string }).emptyNote}</div>}
@@ -262,7 +266,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                       </div>
                       {item.sub && <Text type="secondary" style={{ fontSize: 12 }}>{item.sub.length > 60 ? item.sub.slice(0, 60) + '...' : item.sub}</Text>}
                       <div style={{ marginTop: 2, display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
-                        {item.teacher && <Tag style={{ fontSize: 10, borderRadius: 9999 }}>{item.teacher} 老师</Tag>}
+                        {item.teacher && <Tag style={{ fontSize: 10, borderRadius: 9999 }}>{formatTeacherLabel(item)}</Tag>}
                         {TIMELINE_SOURCE[item.type] && (
                           <span style={{ fontSize: 10, color: TIMELINE_SOURCE[item.type].color, background: `${TIMELINE_SOURCE[item.type].color}14`, padding: '1px 7px', borderRadius: 9999 }}>
                             {TIMELINE_SOURCE[item.type].label}
@@ -321,7 +325,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
             <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>教师寄语</Text>
             {profile.profileCase.teacherSummary ? (
               <div>
-                <Tag color="purple" style={{ borderRadius: 9999, marginBottom: 6, fontSize: 10 }}>{profile.profileCase.teacherSummary.teacherName || '老师'} · {format(new Date(profile.profileCase.teacherSummary.periodStart), 'M/d')} 至 {format(new Date(profile.profileCase.teacherSummary.periodEnd), 'M/d')}</Tag>
+                <Tag color="purple" style={{ borderRadius: 9999, marginBottom: 6, fontSize: 10 }}>{profile.profileCase.teacherSummary.teacherName || '老师'}{profile.profileCase.teacherSummary.teacherSubject ? ` · ${profile.profileCase.teacherSummary.teacherSubject}` : ''} · {format(new Date(profile.profileCase.teacherSummary.periodStart), 'M/d')} 至 {format(new Date(profile.profileCase.teacherSummary.periodEnd), 'M/d')}</Tag>
                 <Paragraph type="secondary" style={{ fontSize: 12, margin: 0, whiteSpace: 'pre-wrap' }}>{profile.profileCase.teacherSummary.summary}</Paragraph>
                 {profile.profileCase.teacherSummary.suggestions && <Paragraph type="secondary" style={{ fontSize: 12, margin: '6px 0 0', whiteSpace: 'pre-wrap' }}>下一步建议：{profile.profileCase.teacherSummary.suggestions}</Paragraph>}
               </div>
@@ -344,7 +348,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
           <div>
             {detailItem.images?.length > 0 && <Image.PreviewGroup><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>{detailItem.images.map((url: string, i: number) => <Image key={i} src={url} alt="" style={{ borderRadius: 8, objectFit: 'cover', width: '100%', height: 120 }} />)}</div></Image.PreviewGroup>}
             <Paragraph style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detailItem.sub || detailItem.content}</Paragraph>
-            {detailItem.teacher && <Tag style={{ borderRadius: 9999, marginTop: 4 }}>{detailItem.teacher} 老师</Tag>}
+            {detailItem.teacher && <Tag style={{ borderRadius: 9999, marginTop: 4 }}>{formatTeacherLabel(detailItem)}</Tag>}
             {detailItem.date && <div style={{ marginTop: 8 }}><Text type="secondary" style={{ fontSize: 11 }}>{format(new Date(detailItem.date), 'yyyy年M月d日 HH:mm')}</Text></div>}
             {detailItem.refType === 'paper' && detailItem.refId && <Button type="link" onClick={() => { setDetailItem(null); router.push(`/parent/archive?paperId=${detailItem.refId}`) }} style={{ padding: 0, marginTop: 8 }}>查看试卷详情</Button>}
             {detailItem.refType === 'post' && detailItem.refId && <Button type="link" onClick={() => { setDetailItem(null); router.push(`/parent/growth?postId=${detailItem.refId}`) }} style={{ padding: 0, marginTop: 8 }}>查看成长动态详情</Button>}
@@ -370,10 +374,9 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
             </div>
 
             {/* Four-square */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
               {[
                 { label: '出勤率', value: profile.overview.attendanceRate !== null ? `${profile.overview.attendanceRate}%` : '—' },
-                { label: '累计课时', value: `${profile.overview.totalHours}h` },
                 { label: '本期试卷', value: `${profile.overview.paperCount} 份` },
                 { label: '获得徽章', value: `${profile.overview.badgeCount} 枚` },
               ].map(item => (
@@ -435,9 +438,9 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                   {fbItems.map((f, i) => (
                     <div key={i} style={{ fontSize: 12, marginBottom: 6, padding: '6px 10px', background: '#F9F7FF', borderRadius: 8, color: '#4B5563' }}>
                       <div style={{ fontWeight: 600, fontSize: 11, color: '#7A869A', marginBottom: 2 }}>
-                        {format(new Date(f.date), 'M月d日')} {f.teacher ? `${f.teacher} 老师` : ''}
+                        {format(new Date(f.date), 'M月d日')} {f.teacher ? `${f.teacher} 老师${f.teacherSubject ? ` · ${f.teacherSubject}` : ''}` : ''}
                       </div>
-                      "{f.sub}"
+                      “{f.sub}”
                     </div>
                   ))}
                 </div>

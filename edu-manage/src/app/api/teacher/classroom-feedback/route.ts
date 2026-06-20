@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonWhere } from '@/lib/teacher-portal'
 import { triggerFeedbackBonus } from '@/lib/teacher-salary'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,8 +10,7 @@ function asStringArray(value: unknown, limit = 100) {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0).slice(0, limit) : []
 }
 
-export async function GET(req: NextRequest) {
-  try {
+export const GET = apiHandler(async (req: NextRequest) => {
     const { teacher, prisma } = await requireCurrentTeacher()
     const limit = Math.min(50, Math.max(1, Number(req.nextUrl.searchParams.get('limit') || 10)))
     const feedbacks = await prisma.classroomFeedback.findMany({
@@ -23,14 +23,9 @@ export async function GET(req: NextRequest) {
       take: limit,
     })
     return NextResponse.json({ feedbacks })
-  } catch (err) {
-    console.error('[teacher:classroom-feedback:GET]', err instanceof Error ? err.message : err)
-    return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
-  }
-}
+})
 
-export async function POST(req: NextRequest) {
-  try {
+export const POST = apiHandler(async (req: NextRequest) => {
     const { user, teacher, prisma } = await requireCurrentTeacher()
     const body = await req.json()
     const classLessonId = typeof body.classLessonId === 'string' && body.classLessonId ? body.classLessonId : null
@@ -150,7 +145,4 @@ export async function POST(req: NextRequest) {
     revalidatePath('/teacher/dashboard')
     revalidatePath('/parent/grades')
     return NextResponse.json(feedback, { status: 201 })
-  } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : '保存课堂反馈失败' }, { status: 500 })
-  }
-}
+})

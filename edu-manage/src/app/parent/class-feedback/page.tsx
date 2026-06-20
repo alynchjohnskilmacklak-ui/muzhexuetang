@@ -35,7 +35,7 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
         teacher: visibleTeacherWhere,
       },
       include: {
-        teacher: { select: { id: true, name: true } },
+        teacher: { select: { id: true, name: true, subjects: true } },
         classLesson: {
           include: {
             group: { include: { course: true, room: true } },
@@ -52,7 +52,7 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
       teacher: visibleTeacherWhere,
     },
     include: {
-      teacher: { select: { id: true, name: true } },
+      teacher: { select: { id: true, name: true, subjects: true } },
       classLesson: { include: { group: { include: { course: true, teacherAssignments: { select: { teacherId: true, subject: true } } } } } },
     },
     orderBy: { createdAt: 'desc' },

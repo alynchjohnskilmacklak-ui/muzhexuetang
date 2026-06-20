@@ -48,6 +48,9 @@ export function apiHandler<T extends Handler>(handler: T): T {
       }
       return await handler(...args)
     } catch (err) {
+      if (err instanceof Error && (err.message === 'TEACHER_UNAUTHORIZED' || err.message === 'ADMIN_UNAUTHORIZED' || err.message === '无权限')) {
+        return NextResponse.json({ error: '无权限' }, { status: 403 })
+      }
       if (err instanceof ValidationError) {
         return NextResponse.json({ error: err.message }, { status: 400 })
       }

@@ -23,7 +23,7 @@ export async function getStudentProfile(
       prisma.examPaper.findMany({
         where: { studentId, status: 'PUBLISHED', paperDate: { gte: from, lte: to } },
         select: {
-          id: true, title: true, subject: true, paperDate: true, teacher: { select: { name: true } },
+          id: true, title: true, subject: true, paperDate: true, teacher: { select: { name: true, subjects: true } },
           questions: { select: { mastery: true, topic: true } },
         },
         orderBy: { paperDate: 'desc' }, take: 50,
@@ -57,12 +57,12 @@ export async function getStudentProfile(
         where: { studentIds: { has: studentId }, status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
         select: { id: true, mood: true, tags: true, knowledgePoints: true, summary: true, overallComment: true,
           homeworkDone: true, inClassRating: true,
-          createdAt: true, teacher: { select: { name: true } } },
+          createdAt: true, teacher: { select: { name: true, subjects: true } } },
         orderBy: { createdAt: 'desc' }, take: 50,
       }),
       prisma.performancePost.findMany({
         where: { studentId, ...visiblePerformancePostWhere, teacher: visibleTeacherWhere, createdAt: { gte: from, lte: to } },
-        select: { id: true, content: true, mood: true, images: true, createdAt: true, teacher: { select: { name: true } } },
+        select: { id: true, content: true, mood: true, images: true, createdAt: true, teacher: { select: { name: true, subjects: true } } },
         orderBy: { createdAt: 'desc' }, take: 50,
       }),
       prisma.attendance.findMany({
@@ -78,7 +78,7 @@ export async function getStudentProfile(
           periodStart: true,
           periodEnd: true,
           publishedAt: true,
-          teacher: { select: { name: true } },
+          teacher: { select: { name: true, subjects: true } },
         },
       }),
     ])
@@ -132,14 +132,17 @@ export async function getStudentProfile(
     ;(trendBySubject[subj] ||= []).push({ date: g.assessment.assessDate, pct: p, name: g.assessment.name })
   }
 
-  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; images?: string[]; refType?: 'feedback' | 'paper' | 'post'; refId?: string }
+  const subjOf = (t?: { subjects?: string | null }) =>
+    (t?.subjects || '').split(/[，,、\s]+/).filter(Boolean)[0] || ''
+
+  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; teacherSubject?: string; images?: string[]; refType?: 'feedback' | 'paper' | 'post'; refId?: string }
   const timeline: TLItem[] = []
   for (const p of papers) {
     const m = p.questions.filter(q => q.mastery === 'MASTERED').length
-    timeline.push({ type: 'paper', title: `${p.title} 已批改`, sub: `掌握 ${m}/${p.questions.length} 题`, date: p.paperDate, teacher: p.teacher?.name, refType: 'paper', refId: p.id })
+    timeline.push({ type: 'paper', title: `${p.title} 已批改`, sub: `掌握 ${m}/${p.questions.length} 题`, date: p.paperDate, teacher: p.teacher?.name, teacherSubject: subjOf(p.teacher), refType: 'paper', refId: p.id })
   }
-  for (const f of feedbacks) timeline.push({ type: 'feedback', title: '课堂反馈', sub: f.overallComment || f.summary || (f.tags || []).join(' '), date: f.createdAt, teacher: f.teacher?.name, refType: 'feedback', refId: f.id })
-  for (const po of posts) timeline.push({ type: 'post', title: '成长动态', sub: po.content, date: po.createdAt, teacher: po.teacher?.name, images: (po.images as string[] | undefined) || undefined, refType: 'post', refId: po.id })
+  for (const f of feedbacks) timeline.push({ type: 'feedback', title: '课堂反馈', sub: f.overallComment || f.summary || (f.tags || []).join(' '), date: f.createdAt, teacher: f.teacher?.name, teacherSubject: subjOf(f.teacher), refType: 'feedback', refId: f.id })
+  for (const po of posts) timeline.push({ type: 'post', title: '成长动态', sub: po.content, date: po.createdAt, teacher: po.teacher?.name, teacherSubject: subjOf(po.teacher), images: (po.images as string[] | undefined) || undefined, refType: 'post', refId: po.id })
   for (const b of badges) timeline.push({ type: 'badge', title: `获得徽章「${b.badgeType}」`, sub: b.description || undefined, date: b.earnedAt })
   for (const g of grades) timeline.push({ type: 'grade', title: `${g.assessment.name}`, sub: `${g.score} 分`, date: g.assessment.assessDate })
   for (const go of goals.filter(x => x.isAchieved && x.achievedAt)) timeline.push({ type: 'goal', title: `达成目标：${go.goalDesc}`, date: go.achievedAt! })
@@ -171,6 +174,7 @@ export async function getStudentProfile(
             summary: stageSummary.summary,
             suggestions: stageSummary.suggestions,
             teacherName: stageSummary.teacher?.name || null,
+            teacherSubject: subjOf(stageSummary.teacher) || null,
             periodStart: stageSummary.periodStart,
             periodEnd: stageSummary.periodEnd,
             publishedAt: stageSummary.publishedAt,

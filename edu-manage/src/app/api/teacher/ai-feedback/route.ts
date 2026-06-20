@@ -8,110 +8,192 @@ export const dynamic = 'force-dynamic'
 
 const aiRateBucket = new Map<string, { count: number; resetAt: number }>()
 
+type Mood = 'GREAT' | 'GOOD' | 'OKAY' | 'NEEDS_ATTENTION'
+type Intent = 'stage' | 'suggestion' | 'classroom'
+type AIJson = Record<string, unknown>
+interface RosterEntry { id: string; name: string }
+interface SelectedStudent { id: string; name?: string | null }
+
 function checkTeacherAILimit(teacherId: string) {
   const now = Date.now()
   const bucket = aiRateBucket.get(teacherId)
   if (bucket && now < bucket.resetAt && bucket.count >= 8) return false
-  if (!bucket || now >= bucket.resetAt) {
-    aiRateBucket.set(teacherId, { count: 1, resetAt: now + 60_000 })
-  } else {
-    bucket.count += 1
-  }
+  if (!bucket || now >= bucket.resetAt) aiRateBucket.set(teacherId, { count: 1, resetAt: now + 60_000 })
+  else bucket.count += 1
   if (aiRateBucket.size > 500) {
-    for (const [k, v] of aiRateBucket) { if (now >= v.resetAt) aiRateBucket.delete(k) }
+    for (const [k, v] of aiRateBucket) if (now >= v.resetAt) aiRateBucket.delete(k)
   }
   return true
 }
 
-function parseAIJson(raw: string): any | null {
-  let s = (raw || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
-  const a = s.indexOf('{'), b = s.lastIndexOf('}')
-  if (a !== -1 && b !== -1 && b > a) s = s.slice(a, b + 1)
-  try { return JSON.parse(s) } catch { return null }
+function parseAIJson(raw: string): AIJson | null {
+  const candidates: string[] = []
+  const trimmed = (raw || '').trim()
+  candidates.push(trimmed)
+  candidates.push(trimmed.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim())
+  const start = trimmed.indexOf('{')
+  const end = trimmed.lastIndexOf('}')
+  if (start >= 0 && end > start) candidates.push(trimmed.slice(start, end + 1))
+
+  for (const candidate of candidates) {
+    if (!candidate) continue
+    try {
+      const parsed = JSON.parse(candidate)
+      return parsed && typeof parsed === 'object' ? parsed as AIJson : null
+    } catch {
+      // try the next candidate
+    }
+  }
+  return null
 }
 
-function detectIntent(note: string): 'stage' | 'suggestion' | 'classroom' {
-  if (/教师寄语|本期寄语|阶段小结|学情小结|阶段报告|学期总结|生成寄语|写寄语|写个寄语|写一段寄语|生成一段寄语/.test(note)) return 'stage'
+function cleanRawText(raw: string) {
+  return raw
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```\s*$/i, '')
+    .replace(/^\s*[{\[]/, '')
+    .replace(/[}\]]\s*$/, '')
+    .trim()
+}
+
+function detectIntent(note: string): Intent {
+  if (/教师寄语|本期寄语|阶段小结|学情小结|阶段报告|学期总结|生成寄语|写个寄语|写一段评语|帮我生成教师评语|帮我补齐评语/.test(note)) return 'stage'
   if (/下一步建议|写建议|生成建议|接下来|后续建议|给个建议/.test(note)) return 'suggestion'
   return 'classroom'
 }
 
-// ── Local fuzzy student resolution ──
-interface RosterEntry { id: string; name: string }
+function inferMoodFromNote(note: string): Mood {
+  if (/走神|不认真|没完成|没有完成|需要加强|拖拉|粗心|不仔细|不稳定/.test(note)) return 'OKAY'
+  if (/非常好|很好|主动|进步明显|特别积极|状态很好/.test(note)) return 'GREAT'
+  if (/积极|认真|不错|进步|稳定|听讲/.test(note)) return 'GOOD'
+  return 'GOOD'
+}
+
+function inferTagsFromNote(note: string): string[] {
+  const tags: string[] = []
+  const add = (tag: string) => { if (!tags.includes(tag)) tags.push(tag) }
+  if (/认真|听讲|专注/.test(note)) add('认真听讲')
+  if (/积极|主动|回答/.test(note)) add('积极回答')
+  if (/进步|提升/.test(note)) add('有进步')
+  if (/作业.*(不好|没完成|没有完成|需要|拖拉)|没完成.*作业/.test(note)) add('作业需加强')
+  if (/计算|准确率/.test(note)) add('计算能力')
+  if (/审题|不仔细|粗心/.test(note)) add('审题需加强')
+  return tags.slice(0, 4)
+}
+
+function inferKnowledgePointsFromNote(note: string, options: string[]) {
+  if (!options.length) return []
+  return options.filter((kp) => note.includes(kp)).slice(0, 4)
+}
+
+function inferHomeworkFromNote(note: string): string[] {
+  if (!/作业/.test(note)) return []
+  return ['按要求完成并订正本节课相关作业']
+}
+
+function buildFallbackSuggestion(note: string): string {
+  if (/作业/.test(note)) return '接下来建议先保证作业按时、独立完成，再及时订正错题，把课堂听懂的内容真正巩固下来。'
+  if (/审题|粗心|不仔细/.test(note)) return '接下来做题时建议先放慢审题速度，圈出关键信息，完成后再检查计算和单位，减少会做但失分的情况。'
+  if (/计算|准确率/.test(note)) return '接下来建议继续保持计算训练，做完后养成回看检查的习惯，让正确率更稳定。'
+  if (/走神|专注|不认真/.test(note)) return '接下来建议课堂上先把注意力稳定住，跟紧老师的提问和板书，课后再用少量练习巩固。'
+  return '接下来建议继续保持课堂参与度，课后及时复盘本节课内容，把已经听懂的部分落实到练习中。'
+}
+
+function buildFallbackComment(note: string, studentNames: string[]): string {
+  const names = studentNames.length ? studentNames : ['孩子']
+  const subject = names.length === 1 ? `${names[0]}同学` : `${names.join('、')}几位同学`
+  if (/帮我补齐|写得自然|补齐评语|生成反馈/.test(note)) {
+    return `${subject}本节课整体学习状态比较稳定，能够跟着课堂节奏完成主要学习任务。后续建议继续把课堂上的理解落实到课后练习中，遇到不确定的地方及时标记并订正，这样进步会更扎实。`
+  }
+  if (/作业.*(不好|没完成|没有完成|需要|拖拉)|没完成.*作业/.test(note)) {
+    return `${subject}今天课堂上能够跟着老师的节奏听讲，说明课堂注意力和理解状态是在线的。不过从作业完成情况来看，课后落实还需要继续加强。建议接下来先保证作业按时、独立完成，再逐步提高正确率。`
+  }
+  if (/审题|粗心|不仔细/.test(note)) {
+    return `${subject}今天在课堂学习中能看出有思考和参与，基础计算也在逐步稳定。需要提醒的是，做题时审题还要再细一些，先看清条件和问题，再下笔计算，会更容易减少不必要的失误。`
+  }
+  if (/计算|准确率/.test(note)) {
+    return `${subject}今天在计算相关内容上有进步，课堂上能跟着老师的思路完成练习。接下来建议继续保持练习量，同时做完后主动检查关键步骤，让准确率更加稳定。`
+  }
+  if (/走神|专注|不认真/.test(note)) {
+    return `${subject}今天课堂中偶尔会出现注意力不够集中的情况，但在老师提醒后能够回到学习节奏。接下来希望先把课堂专注度稳定住，跟紧每一步讲解，课后巩固效果也会更好。`
+  }
+  if (/积极|主动|认真|不错|进步|听讲/.test(note)) {
+    return `${subject}今天课堂状态不错，能够认真听讲并积极参与互动，说明对本节课内容有在主动思考。接下来继续保持这种课堂投入度，课后再及时复盘巩固，学习效果会更稳定。`
+  }
+  return `${subject}本节课整体表现比较平稳，能够完成课堂中的主要学习任务。接下来建议继续跟紧课堂节奏，课后及时复盘和订正，把当天学到的内容真正沉淀下来。`
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string' && item.trim() !== '').map((item) => item.trim()) : []
+}
 
 function resolveStudentsFromContext(params: {
   note: string
   roster: RosterEntry[]
   selectedStudentIds: string[]
-}): { matchedIds: string[]; matchedNames: string[]; unknownNames: string[]; needsManual: boolean } {
-  const { note, roster, selectedStudentIds } = params
+  selectedStudents: SelectedStudent[]
+}) {
+  const { note, roster, selectedStudentIds, selectedStudents } = params
+  const rosterById = new Map(roster.map((s) => [s.id, s.name]))
+  const selectedById = new Map(selectedStudents.map((s) => [s.id, s.name || null]))
 
-  // Priority 1: teacher already selected students → use them directly
   if (selectedStudentIds.length > 0) {
-    const names = selectedStudentIds
-      .map((id) => roster.find((s) => s.id === id)?.name)
-      .filter(Boolean) as string[]
-    return { matchedIds: selectedStudentIds, matchedNames: names, unknownNames: [], needsManual: false }
+    const matchedNames = selectedStudentIds.map((id) => selectedById.get(id) || rosterById.get(id) || '孩子')
+    return { matchedIds: selectedStudentIds, matchedNames, unknownNames: [] as string[], needsManual: false }
   }
 
-  // Priority 2: try to match from roster using note text
-  const cleanNote = note.replace(/同学|老师说|今天|本节课|课堂|表现|作业|很|非常|比较/g, '').trim()
   const matchedIds: string[] = []
   const matchedNames: string[] = []
   const unknownNames: string[] = []
 
-  // Extract potential name fragments from note
-  const nameHints: string[] = []
-  // "赵亦昊同学" → "赵亦昊"
-  const surnameStudentRe = /([一-龥]{1,2})(同学)/g
-  let m
-  while ((m = surnameStudentRe.exec(note)) !== null) { nameHints.push(m[1]) }
-  // "小赵" → "赵"
-  const nickRe = /小([一-龥])/g
-  while ((m = nickRe.exec(note)) !== null) { nameHints.push(m[1]) }
-
-  for (const hint of nameHints) {
-    // Try exact match first
-    let found = roster.find((s) => s.name === hint)
-    if (!found && hint.length === 1) {
-      // Surname only: find students with that surname
-      const matches = roster.filter((s) => s.name.startsWith(hint))
-      if (matches.length === 1) found = matches[0]
-      else if (matches.length > 1) {
-        unknownNames.push(hint + '（多位' + hint + '姓同学）')
-        continue
-      }
-    }
-    // Partial name match
-    if (!found && hint.length >= 2) {
-      const partials = roster.filter((s) => s.name.includes(hint))
-      if (partials.length === 1) found = partials[0]
-      else if (partials.length > 1) {
-        unknownNames.push(hint + '（不确定是哪位）')
-        continue
-      }
-    }
-    if (found && !matchedIds.includes(found.id)) {
-      matchedIds.push(found.id)
-      matchedNames.push(found.name)
-    } else if (!found) {
-      unknownNames.push(hint)
+  for (const student of roster) {
+    if (student.name && note.includes(student.name) && !matchedIds.includes(student.id)) {
+      matchedIds.push(student.id)
+      matchedNames.push(student.name)
     }
   }
 
-  // Substring check: try matching long substrings of note against roster names
   if (!matchedIds.length) {
-    for (const s of roster) {
-      if (s.name.length >= 2 && (note.includes(s.name) || cleanNote.includes(s.name.slice(1)))) {
-        matchedIds.push(s.id)
-        matchedNames.push(s.name)
+    for (const student of roster) {
+      const name = student.name || ''
+      if (name.length >= 2 && note.includes(name.slice(1)) && !matchedIds.includes(student.id)) {
+        matchedIds.push(student.id)
+        matchedNames.push(student.name)
         break
       }
     }
   }
 
-  const needsManual = matchedIds.length === 0
-  return { matchedIds, matchedNames, unknownNames, needsManual }
+  return { matchedIds, matchedNames, unknownNames, needsManual: matchedIds.length === 0 }
+}
+
+function buildFallbackResponse(opts: {
+  note: string
+  intent: Intent
+  resolved: ReturnType<typeof resolveStudentsFromContext>
+  kpOptions: string[]
+  raw?: string
+}) {
+  const { note, intent, resolved, kpOptions, raw } = opts
+  const rawComment = raw ? cleanRawText(raw) : ''
+  const comment = rawComment || buildFallbackComment(note, resolved.matchedNames)
+  const suggestion = buildFallbackSuggestion(note)
+  return {
+    intent,
+    studentIds: resolved.matchedIds,
+    studentNames: resolved.matchedNames,
+    unknownNames: resolved.unknownNames,
+    needsManualStudentSelection: resolved.matchedIds.length === 0,
+    mood: inferMoodFromNote(note),
+    overallComment: intent === 'suggestion' ? '' : comment.slice(0, 400),
+    tags: inferTagsFromNote(note),
+    knowledgePoints: inferKnowledgePointsFromNote(note, kpOptions),
+    homework: inferHomeworkFromNote(note),
+    summary: '',
+    suggestion,
+    stageSummaryText: intent === 'stage' ? comment.slice(0, 500) : '',
+    stageSuggestions: intent === 'suggestion' || intent === 'stage' ? suggestion.slice(0, 200) : '',
+  }
 }
 
 export const POST = apiHandler(async (req: NextRequest) => {
@@ -125,6 +207,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     studentId?: string; keywords?: string; kind?: 'feedback' | 'stage'
     mode?: 'classroom'; note?: string
     roster?: RosterEntry[]
+    selectedStudents?: SelectedStudent[]
     options?: { moods?: Array<{ value: string; label: string }>; tags?: string[]; knowledgePoints?: string[] }
     selected?: { mood?: string; tags?: string[]; knowledgePoints?: string[] }
     selectedStudentIds?: string[]
@@ -135,148 +218,85 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   const note = (typeof body.note === 'string' && body.note.trim()) || ''
 
-  if (!note) {
-    // Fall through to legacy stage/feedback mode (single-student + keywords)
-    const sid = typeof body.studentId === 'string' ? body.studentId : ''
-    if (!sid) return NextResponse.json({ error: '请输入描述内容' }, { status: 400 })
-    // proceed to legacy mode below
-  }
-
-  // ── Smart unified path ──
   if (note) {
-    const roster = Array.isArray(body.roster) ? body.roster : []
-    const selectedStudentIds = Array.isArray(body.selectedStudentIds) ? body.selectedStudentIds : []
-    const resolved = resolveStudentsFromContext({ note, roster, selectedStudentIds })
-    const selected = body.selected || {}
-    const currentForm = body.currentForm || {}
-
-    // Build resolved student info for the prompt
-    let studentContext = ''
-    if (resolved.matchedIds.length > 0) {
-      studentContext = `【已确认的学生】${resolved.matchedNames.join('、')}（ID: ${resolved.matchedIds.join(', ')}）—— 请围绕以上学生生成反馈，不要尝试识别其他学生。`
-    } else if (roster.length > 0) {
-      studentContext = `【班级学员（可从中识别）】${roster.map((s) => s.name).join('、')}\n→ 注意：老师可能用简称（如"紫晨"→"马紫晨"）、昵称（"小马"→姓马的同学）。若无法唯一确认，不要强行匹配。`
-    }
-
+    const roster = Array.isArray(body.roster) ? body.roster.filter((s) => typeof s?.id === 'string') : []
+    const selectedStudentIds = Array.isArray(body.selectedStudentIds) ? body.selectedStudentIds.filter((id): id is string => typeof id === 'string') : []
+    const selectedStudents = Array.isArray(body.selectedStudents) ? body.selectedStudents.filter((s) => typeof s?.id === 'string') : []
+    const resolved = resolveStudentsFromContext({ note, roster, selectedStudentIds, selectedStudents })
     const options = body.options || {}
     const moods = Array.isArray(options.moods) ? options.moods : []
     const tagOptions = Array.isArray(options.tags) ? options.tags : []
     const kpOptions = Array.isArray(options.knowledgePoints) ? options.knowledgePoints : []
-    const stageMaterial = typeof body.stageMaterial === 'string' ? body.stageMaterial : ''
     const detectedIntent = detectIntent(note)
+    const currentForm = body.currentForm || {}
+    const stageMaterial = typeof body.stageMaterial === 'string' ? body.stageMaterial : ''
+
+    const confirmedStudentText = resolved.matchedIds.length
+      ? `【已确认学生】${resolved.matchedNames.join('、') || '孩子'}。这些就是本次反馈对象，老师输入可以不包含学生姓名，必须直接围绕他们生成反馈。`
+      : '【已确认学生】无。若能从班级名单和老师描述中唯一识别学生，请匹配；不能唯一识别时仍然生成反馈内容，并标记需要老师手动选择学生。'
 
     const sys = [
-      '你是课外辅导老师助理。根据老师给出的上下文生成结构化课堂反馈。',
-      '【写作铁律】',
-      '- 面向家长，称呼孩子名字+"同学"，绝对不要用"该生""该同学"',
-      '- 语气像老师课后和家长聊天——温暖、具体、真实',
-      '- 肯定进步，也温和指出方向，不夸张不空洞',
-      '- 禁止编造：分数、排名、考试成绩、未提及的事件',
-      '- 评语要有血肉，不要写成"表现良好继续加油"',
-      '- 示例风格："赵亦昊同学今天课堂上能够主动举手回答问题，说明对知识点有在积极思考。作业方面如果能再认真一点，把会做的题稳定拿住，提升会很明显。"',
-      '【输出要求】只输出 JSON，不要 ``` 包裹，不要解释文字。',
+      '你是课外辅导老师的课堂反馈写作助手。你不是关键词提取器，而是要把老师的一句话扩写成完整、自然、家长可读的课堂反馈。',
+      '如果【已确认学生】不为空，老师输入可以不包含学生姓名。此时必须直接围绕已确认学生生成反馈，不得因为描述里没有姓名而拒绝。',
+      '老师输入常常很短，例如“上课认真听讲，但是作业完成不好”。你的任务是扩写成家长能看懂的完整反馈。',
+      '不要机械重复老师原话，要补充成自然、具体、温暖的老师表达。',
+      '写作要求：面向家长；使用“学生姓名+同学”；不要使用“该生”“该同学”；不编造分数、排名、考试成绩；不编造老师没说过的具体事件；语气自然。',
+      '必须尽量完成：mood、overallComment、suggestion、2-4个tags；能判断知识点才填knowledgePoints；提到作业才填homework。',
+      '只输出 JSON，不要 Markdown，不要解释。',
     ].join('\n')
 
-    const userParts = [
-      `【老师的描述】${note}`,
-      '',
-      studentContext,
-      ...(moods.length ? [`【可选课堂状态】${moods.map((m) => `${m.value}=${m.label}`).join(' / ')}`] : []),
-      ...(tagOptions.length ? [`【可选表现标签】${tagOptions.join('、')}`] : []),
-      ...(kpOptions.length ? [`【可选知识点】${kpOptions.join('、')}`] : []),
-      '',
+    const user = [
+      `【老师输入】${note}`,
+      confirmedStudentText,
+      roster.length ? `【班级学生】${roster.map((s) => `${s.name}(${s.id})`).join('、')}` : '【班级学生】无',
+      moods.length ? `【可选状态】${moods.map((m) => `${m.value}=${m.label}`).join(' / ')}` : '',
+      tagOptions.length ? `【可选标签】${tagOptions.join('、')}` : '',
+      kpOptions.length ? `【可选知识点】${kpOptions.join('、')}` : '',
       `【主要意图】${detectedIntent}`,
-      `【当前已选】状态=${selected.mood || '未选'} 标签=${selected.tags?.join('、') || '无'} 知识点=${selected.knowledgePoints?.join('、') || '无'}`,
-      `【表单已有内容】评语=${currentForm.overallComment || '空'} 建议=${currentForm.suggestion || '空'} 寄语=${currentForm.stageSummaryText || '空'}`,
-      ...(stageMaterial ? ['', '【阶段数据（仅 stageSummaryText 参考，不得编数字）】', stageMaterial.slice(0, 800)] : []),
-      '',
-      '【JSON 结构（仅输出此 JSON）】',
-      '{',
-      '  "intent": "classroom|stage|suggestion|mixed",',
-      '  "mood": "GREAT|GOOD|OKAY|NEEDS_ATTENTION",',
-      '  "overallComment": "50-100字家长评语，自然温暖，用孩子名字",',
-      '  "tags": ["从可选标签中选，最多4个"],',
-      '  "knowledgePoints": ["从可选知识点中选"],',
-      '  "homework": ["作业内容"],',
-      '  "suggestion": "下一步建议，一句话",',
-      '  "stageSummaryText": "阶段寄语（intent=stage时重点填写）",',
-      '  "stageSuggestions": "阶段建议"',
-      '}',
-      '',
-      '【重要】',
-      ...(resolved.matchedIds.length
-        ? ['- studentContext 中已有确认的学生，请直接围绕他们生成，无需再识别姓名']
-        : ['- 若可从描述中确认学生，请从班级学员中匹配；若无法唯一确认，不要强行匹配']),
-      '- 以上字段均可单独有值；不要因为某字段为空就拒绝生成',
-      '- 不要输出 studentNames / studentIds / needsManualStudentSelection 字段（后端已处理）',
-    ]
-    const user = userParts.join('\n')
+      `【当前表单】状态=${currentForm.mood || '未选'}；已有评语=${currentForm.overallComment || '空'}；已有建议=${currentForm.suggestion || currentForm.summary || '空'}；已有寄语=${currentForm.stageSummaryText || '空'}`,
+      stageMaterial ? `【阶段素材】${stageMaterial.slice(0, 800)}` : '',
+      '【返回 JSON】',
+      '{"intent":"classroom|stage|suggestion|mixed","mood":"GREAT|GOOD|OKAY|NEEDS_ATTENTION","overallComment":"完整家长反馈","tags":["从可选标签中选"],"knowledgePoints":["从可选知识点中选"],"homework":["作业内容"],"summary":"","suggestion":"下一步建议","stageSummaryText":"阶段寄语","stageSuggestions":"阶段建议"}',
+    ].filter(Boolean).join('\n')
 
     try {
-      const raw = await callDeepSeek({ system: sys, user, maxTokens: 600, jsonMode: true })
+      const raw = await callDeepSeek({ system: sys, user, maxTokens: 700, jsonMode: true })
       const parsed = parseAIJson(raw)
+      if (!parsed) return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, raw }))
 
-      // Build response with local resolution + AI content
-      const aiMood = parsed?.mood || 'GOOD'
       const validMoods = moods.map((m) => m.value)
-      const mood = validMoods.includes(aiMood) ? aiMood : 'GOOD'
-
-      const aiTags: string[] = (Array.isArray(parsed?.tags) ? parsed.tags : [])
-        .filter((t: unknown) => typeof t === 'string' && tagOptions.includes(t as string)).slice(0, 4)
-      const aiKps: string[] = (Array.isArray(parsed?.knowledgePoints) ? parsed.knowledgePoints : [])
-        .filter((k: unknown) => typeof k === 'string' && kpOptions.includes(k as string))
-      const homework: string[] = (Array.isArray(parsed?.homework) ? parsed.homework : [])
-        .filter((h: unknown) => typeof h === 'string' && (h as string).trim()).map((h: string) => h.trim())
-
+      const parsedMood = typeof parsed.mood === 'string' ? parsed.mood : inferMoodFromNote(note)
       const result = {
-        intent: parsed?.intent || detectedIntent,
+        intent: typeof parsed.intent === 'string' ? parsed.intent : detectedIntent,
         studentIds: resolved.matchedIds,
         studentNames: resolved.matchedNames,
-        unknownNames: resolved.unknownNames.length ? resolved.unknownNames : undefined,
-        needsManualStudentSelection: resolved.needsManual,
-        mood,
-        overallComment: typeof parsed?.overallComment === 'string' ? parsed.overallComment.trim() : '',
-        tags: aiTags,
-        knowledgePoints: aiKps,
-        homework,
-        summary: typeof parsed?.summary === 'string' ? parsed.summary.trim() : '',
-        suggestion: typeof parsed?.suggestion === 'string' ? parsed.suggestion.trim() : '',
-        stageSummaryText: typeof parsed?.stageSummaryText === 'string' ? parsed.stageSummaryText.trim() : '',
-        stageSuggestions: typeof parsed?.stageSuggestions === 'string' ? parsed.stageSuggestions.trim() : '',
+        unknownNames: resolved.unknownNames,
+        needsManualStudentSelection: resolved.matchedIds.length === 0,
+        mood: validMoods.includes(parsedMood) ? parsedMood : inferMoodFromNote(note),
+        overallComment: typeof parsed.overallComment === 'string' ? parsed.overallComment.trim() : '',
+        tags: stringArray(parsed.tags).filter((t) => tagOptions.includes(t)).slice(0, 4),
+        knowledgePoints: stringArray(parsed.knowledgePoints).filter((kp) => kpOptions.includes(kp)),
+        homework: stringArray(parsed.homework),
+        summary: typeof parsed.summary === 'string' ? parsed.summary.trim() : '',
+        suggestion: typeof parsed.suggestion === 'string' ? parsed.suggestion.trim() : '',
+        stageSummaryText: typeof parsed.stageSummaryText === 'string' ? parsed.stageSummaryText.trim() : '',
+        stageSuggestions: typeof parsed.stageSuggestions === 'string' ? parsed.stageSuggestions.trim() : '',
       }
 
-      // Even if JSON parse failed, we still have local resolution → return what we have
-      if (!parsed || typeof parsed !== 'object') {
-        console.warn('[ai-feedback smart] AI returned unparseable JSON, using local resolution only', raw.slice(0, 200))
-        // Still return success with what we have locally
-      }
-
-      return NextResponse.json(result)
+      const hasContent = Boolean(
+        result.overallComment || result.suggestion || result.summary || result.stageSummaryText || result.stageSuggestions ||
+        result.tags.length || result.knowledgePoints.length || result.homework.length
+      )
+      return NextResponse.json(hasContent ? result : buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, raw }))
     } catch (error) {
       console.error('[ai-feedback smart]', error)
-      if (error instanceof AIProviderError) {
-        return NextResponse.json({ error: 'AI 服务暂时不可用，请稍后重试' }, { status: 502 })
-      }
-      // Don't return 500 with raw error — return a fallback with manual flag
-      return NextResponse.json({
-        intent: detectedIntent,
-        studentIds: resolved.matchedIds,
-        studentNames: resolved.matchedNames,
-        needsManualStudentSelection: resolved.matchedIds.length === 0,
-        mood: 'GOOD',
-        overallComment: '',
-        tags: [], knowledgePoints: [], homework: [],
-        summary: '', suggestion: '', stageSummaryText: '', stageSuggestions: '',
-        unknownNames: resolved.unknownNames.length ? resolved.unknownNames : undefined,
-      })
+      return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions }))
     }
   }
 
-  // ── Legacy stage/feedback mode ──
   const studentId = typeof body.studentId === 'string' ? body.studentId : ''
   const kind = body.kind === 'stage' ? 'stage' : 'feedback'
-
-  if (!studentId) return NextResponse.json({ error: '缺少 studentId' }, { status: 400 })
+  if (!studentId) return NextResponse.json({ error: '请输入描述内容' }, { status: 400 })
 
   const owned = await assertTeacherOwnsStudent(teacher.id, studentId, prisma)
   if (!owned) return NextResponse.json({ error: '你无权为这名学员生成反馈' }, { status: 403 })
@@ -288,7 +308,6 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const keywords = (typeof body.keywords === 'string' && body.keywords.trim()) || ''
   const subjects = p.record.trendBySubject.map((t) => t.subject).filter(Boolean)
   const uniqueSubjects = [...new Set(subjects.length ? subjects : [])]
-
   const facts: string[] = [
     `学生：${p.identity.name}（${p.identity.grade ?? '未知年级'}）`,
     `科目：${uniqueSubjects.length ? uniqueSubjects.join('、') : '暂无科目记录'}`,
@@ -298,22 +317,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (p.study.weaknesses.length) facts.push(`薄弱点：${p.study.weaknesses.slice(0, 4).map((w) => `${w.topic}（错${w.mistakeCount}次）`).join('、')}`)
   if (p.habits.homeworkDoneRate !== null) facts.push(`作业完成率：${p.habits.homeworkDoneRate}%`)
   if (p.habits.inClassAvg !== null) facts.push(`课堂表现均分：${p.habits.inClassAvg}/5`)
-  if (p.record.trendBySubject.length) {
-    const trends = p.record.trendBySubject.map((t) => { const l = t.points.at(-1); return l ? `${t.subject} ${l.name} ${l.pct}%` : null }).filter(Boolean).slice(0, 4)
-    if (trends.length) facts.push(`近期成绩：${trends.join('；')}`)
-  }
-  const highlights = p.record.timeline.filter((item) => ['feedback', 'badge', 'post'].includes(item.type)).slice(0, 3)
-  if (highlights.length) facts.push(`近期亮点：${highlights.map((h) => h.title).join('；')}`)
 
   const sysPrompt = kind === 'stage'
-    ? '你是老师，给家长写阶段小结（~100字）。温暖具体，基于数据给方向。只输出正文。'
-    : '你是老师，给家长写课堂反馈（~100字）。温暖具体，基于事实。只输出正文。'
-
-  const userPrompt = [
-    '【真实数据，严禁编造】', facts.join('\n'), '',
-    keywords ? `【关键词】${keywords}` : '', '',
-    '要求：~100字，家长口吻，称呼名字+同学，不用"该生"，肯定进步→客观现状→下一步建议，只输出正文。',
-  ].join('\n')
+    ? '你是老师，给家长写阶段小结（约100字）。温暖具体，基于数据给方向。只输出正文。'
+    : '你是老师，给家长写课堂反馈（约100字）。温暖具体，基于事实。只输出正文。'
+  const userPrompt = ['【真实数据，严禁编造】', facts.join('\n'), keywords ? `【关键词】${keywords}` : '', '要求：称呼名字+同学，不用“该生”，肯定进步、说明现状、给下一步建议。'].filter(Boolean).join('\n')
 
   try {
     const text = await callDeepSeek({ system: sysPrompt, user: userPrompt, maxTokens: 350 })

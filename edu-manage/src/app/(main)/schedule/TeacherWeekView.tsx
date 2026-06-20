@@ -149,8 +149,8 @@ export function TeacherWeekView({
         <div style={{ overflowX: 'auto', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8 }}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: `80px repeat(6, 1fr)`,
-            minWidth: 720,
+            gridTemplateColumns: `72px repeat(6, minmax(88px, 1fr))`,
+            minWidth: 600,
           }}>
             {/* Header */}
             <div style={{ borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', background: 'var(--color-background-secondary, #faf8f5)' }} />

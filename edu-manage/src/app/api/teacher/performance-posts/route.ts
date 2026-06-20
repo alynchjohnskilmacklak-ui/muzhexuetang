@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
+import { apiHandler } from '@/lib/api-handler'
 import { MOOD_META } from '@/lib/performance'
 
 export const dynamic = 'force-dynamic'
@@ -13,8 +14,7 @@ function normalizeIds(body: any) {
   return typeof body.studentId === 'string' && body.studentId ? [body.studentId] : []
 }
 
-export async function GET() {
-  try {
+export const GET = apiHandler(async () => {
     const { teacher, prisma } = await requireCurrentTeacher()
     const posts = await prisma.performancePost.findMany({
       where: { teacherId: teacher.id, deletedAt: null },
@@ -26,13 +26,9 @@ export async function GET() {
       take: 80,
     })
     return NextResponse.json(posts)
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-}
+})
 
-export async function POST(request: NextRequest) {
-  try {
+export const POST = apiHandler(async (request: NextRequest) => {
     const { user, teacher, prisma } = await requireCurrentTeacher()
     const body = await request.json()
     const studentIds = normalizeIds(body)
@@ -101,7 +97,4 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({ count: posts.length, posts }, { status: 201 })
-  } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : '发布失败' }, { status: 500 })
-  }
-}
+})

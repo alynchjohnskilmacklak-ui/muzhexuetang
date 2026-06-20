@@ -1,50 +1,70 @@
 #!/usr/bin/env bash
-# 从 tar 包部署 — 支持单库/双库 schema 同步
-# 用法: bash deploy-from-tar.sh [tar檔案路徑]
+# Deploy edu-manage from a tar/tar.gz package on the server.
+# Usage: bash scripts/deploy-from-tar.sh /tmp/edu-manage-xxx.tar
 set -euo pipefail
 
-TAR_FILE="${1:-/tmp/edu-manage.tar.gz}"
+APP_NAME="${APP_NAME:-edu-manage}"
+TAR_FILE="${1:-/tmp/edu-manage.tar}"
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+BUILD_LOG="${PROJECT_DIR}/build.log"
+
 cd "$PROJECT_DIR"
 
-load_env() {
-  local key="$1"; local val="${!key:-}"
-  if [ -z "$val" ] && [ -f "$PROJECT_DIR/.env" ]; then
-    val="$(grep -E "^${key}=" "$PROJECT_DIR/.env" | tail -1 | cut -d= -f2- | sed 's/^"//; s/"$//' || true)"
-  fi
-  echo "$val"
-}
+if [ ! -f "$TAR_FILE" ]; then
+  echo "[deploy] ERROR: package not found: $TAR_FILE" >&2
+  exit 1
+fi
 
-echo "[deploy] 备份 .env"
+echo "[deploy] project: $PROJECT_DIR"
+echo "[deploy] package: $TAR_FILE"
+
+echo "[deploy] backup .env"
 cp .env /tmp/edu-manage.env.bak 2>/dev/null || true
 
-echo "[deploy] 清理旧文件"
-rm -rf src prisma public scripts AGENTS.md DESIGN.md next.config.ts tsconfig.json postcss.config.mjs eslint.config.mjs
+echo "[deploy] stop current PM2 process"
+pm2 stop "$APP_NAME" 2>/dev/null || true
 
-echo "[deploy] 解压 tar"
-tar -xzf "$TAR_FILE"
+echo "[deploy] clean old source and build artifacts"
+rm -rf .next src prisma public scripts AGENTS.md DESIGN.md next.config.ts tsconfig.json postcss.config.mjs eslint.config.mjs package.json package-lock.json
 
-echo "[deploy] 恢复 .env"
+echo "[deploy] extract package"
+case "$TAR_FILE" in
+  *.tar.gz|*.tgz) tar -xzf "$TAR_FILE" -C "$PROJECT_DIR" ;;
+  *) tar -xf "$TAR_FILE" -C "$PROJECT_DIR" ;;
+esac
+
+echo "[deploy] restore .env"
 cp /tmp/edu-manage.env.bak .env 2>/dev/null || true
 
-echo "[deploy] npm install"
+echo "[deploy] install dependencies"
 npm install
 
-echo "[deploy] Build and migrate (both DBs)"
-bash scripts/db-sync-all.sh
+echo "[deploy] run Prisma migrations"
+npm run migrate:all
+npm run db:sync:all
 
-echo "[deploy] npm run build"
-npm run build
+echo "[deploy] build standalone app"
+rm -rf .next
+npm run build 2>&1 | tee "$BUILD_LOG"
 
-echo "[deploy] 复制 static"
-cp -r .next/static .next/standalone/.next/static 2>/dev/null || true
+if [ ! -f .next/standalone/server.js ]; then
+  echo "[deploy] ERROR: .next/standalone/server.js was not generated" >&2
+  echo "[deploy] Check next.config.ts output='standalone' and build log: $BUILD_LOG" >&2
+  exit 1
+fi
 
-echo "[deploy] PM2 重启"
-pm2 delete edu-manage 2>/dev/null || true
-pm2 start node --name edu-manage -- .next/standalone/server.js
+echo "[deploy] sync standalone static assets"
+mkdir -p .next/standalone/.next
+cp -r .next/static .next/standalone/.next/static
+cp -r public .next/standalone/public 2>/dev/null || true
+
+echo "[deploy] recreate PM2 process with fixed cwd"
+pm2 delete "$APP_NAME" 2>/dev/null || true
+pm2 start .next/standalone/server.js --name "$APP_NAME" --cwd "$PROJECT_DIR" --update-env
 pm2 save
 
-echo "[deploy] 预热"
-curl -s http://localhost:3000/login > /dev/null || true
+echo "[deploy] smoke test"
+curl -fsSI http://127.0.0.1:3000/login >/dev/null
+pm2 status "$APP_NAME"
 
-echo "=== DEPLOY OK ==="
+echo "[deploy] OK"

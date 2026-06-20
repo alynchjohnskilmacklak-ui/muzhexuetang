@@ -3,7 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { requireAdminUser } from '@/lib/teacher-portal'
-import { isPayableFeedback } from '@/lib/teacher-salary'
+import { isPayableFeedback, triggerFeedbackBonus } from '@/lib/teacher-salary'
 import { divisionWhere } from '@/lib/division'
 
 import { apiHandler } from '@/lib/api-handler'
@@ -187,6 +187,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
       }
       return created
     })
+
+    if (status === 'PUBLISHED') {
+      await triggerFeedbackBonus(feedback.id, prisma)
+    }
 
     revalidatePath('/teacher/dashboard')
     revalidatePath('/parent/growth')

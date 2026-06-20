@@ -10,6 +10,7 @@
     "lint": "eslint",
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
+    "db:sync:all": "bash scripts/db-sync-all.sh",
     "db:generate": "prisma generate",
     "migrate:all": "bash scripts/migrate-all.sh",
     "db:seed": "tsx prisma/seed.ts",

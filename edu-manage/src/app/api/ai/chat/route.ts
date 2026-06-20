@@ -297,7 +297,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         stream: streamEnabled,
         temperature,
         max_tokens: 4096,
-        top_p: 0.9,
+        top_p: modelId === 'kimi' ? 0.95 : 0.9,
         frequency_penalty: 0.1,
       }),
     }, Number(process.env.AI_TIMEOUT_MS || 60_000))

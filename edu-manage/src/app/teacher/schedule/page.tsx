@@ -213,7 +213,7 @@ export default function TeacherSchedulePage() {
         scheduleType === 'group' ? (
           groupLessons.length === 0 ? <Empty description="本周暂无精品班课" /> : (
             <Card bordered={false} style={{ borderRadius: 10, overflow: 'auto' }} styles={{ body: { padding: 0 } }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '90px repeat(7, 1fr)', minWidth: 940 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '72px repeat(7, minmax(72px, 1fr))', minWidth: 640 }}>
                 <div style={{ padding: 8, background: 'var(--color-background-secondary, #faf8f5)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)' }} />
                 {weekDates.map((date, i) => {
                   const today = date.toDateString() === new Date().toDateString()
@@ -262,7 +262,7 @@ export default function TeacherSchedulePage() {
         ) : (
           intensiveLessons.length === 0 ? <Empty description="本周暂无突击全能班课程" /> : (
             <Card bordered={false} style={{ borderRadius: 10, overflow: 'auto' }} styles={{ body: { padding: 0 } }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '80px repeat(7, 1fr)', minWidth: 860 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '72px repeat(7, minmax(72px, 1fr))', minWidth: 640 }}>
                 <div style={{ padding: 8, background: 'var(--color-background-secondary, #faf8f5)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)' }} />
                 {weekDates.map((date, i) => {
                   const today = date.toDateString() === new Date().toDateString()
