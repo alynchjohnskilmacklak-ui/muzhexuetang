@@ -8,11 +8,14 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      // 生产环境去掉 'unsafe-eval'；开发环境保留以兼容 Next HMR
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV !== 'production' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
+      // img-src 保留 https:：图片可能来自可配置的 OSS/外链，收窄到单域名会导致图片不显示
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https:",
+      // 浏览器只与同源 API 通信（AI/OSS/WxPusher 均为服务端调用），收紧到 'self'
+      "connect-src 'self'",
       "frame-src 'self' https://phet.colorado.edu https://www.geogebra.org https://www.desmos.com https://www.falstad.com https://chemcollective.org",
       "frame-ancestors 'none'",
     ].join('; '),
