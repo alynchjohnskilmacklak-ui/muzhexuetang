@@ -382,50 +382,52 @@ function FeedbackPageInner() {
           <span style={{ color: '#98A2B3', fontSize: 12 }}>{uploadExpanded ? '收起' : '展开'}</span>
         </div>
         {uploadExpanded && (
-        {imageUrls.length > 0 && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-            <AntImage.PreviewGroup>{imageUrls.map((url, i) => (
-              <div key={i} style={{ position: 'relative' }}>
-                <AntImage src={normalizeUploadUrl(url)} width={64} height={64} style={{ objectFit: 'cover', borderRadius: 8 }} />
-                <button onClick={() => setImageUrls(prev => prev.filter((_, j) => j !== i))}
-                  style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#E24B4A', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11 }}>×</button>
+          <div>
+            {imageUrls.length > 0 && (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                <AntImage.PreviewGroup>{imageUrls.map((url, i) => (
+                  <div key={i} style={{ position: 'relative' }}>
+                    <AntImage src={normalizeUploadUrl(url)} width={64} height={64} style={{ objectFit: 'cover', borderRadius: 8 }} />
+                    <button onClick={() => setImageUrls(prev => prev.filter((_, j) => j !== i))}
+                      style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#E24B4A', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11 }}>×</button>
+                  </div>
+                ))}</AntImage.PreviewGroup>
               </div>
-            ))}</AntImage.PreviewGroup>
+            )}
+            <Upload.Dragger name="file" accept="image/*" multiple maxCount={9} showUploadList={false}
+              beforeUpload={(file) => {
+                if (!file.type.startsWith('image/') && !/\.(heic|heif|avif)$/i.test(file.name)) { toast.warning('仅支持图片文件（JPG/PNG/WebP/HEIC）'); return Upload.LIST_IGNORE }
+                if (file.size > 20 * 1024 * 1024) { toast.warning('图片不能超过 20MB，请压缩后重新上传'); return Upload.LIST_IGNORE }
+                return true
+              }}
+              customRequest={async ({ file, onSuccess, onError }) => {
+                const formData = new FormData()
+                formData.append('file', file as File)
+                formData.append('uploadType', 'teacher-feedback')
+                try {
+                  const res = await fetch('/api/upload', { method: 'POST', body: formData })
+                  const data = await res.json()
+                  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+                  onSuccess?.(data)
+                } catch (err) {
+                  onError?.(err instanceof Error ? err : new Error('上传失败'))
+                }
+              }}
+              onChange={info => {
+                if (info.file.status === 'uploading') return
+                if (info.file.status === 'done') {
+                  const url = (info.file.response as any)?.url
+                  const error = (info.file.response as any)?.error
+                  if (url) setImageUrls(prev => [...prev, url])
+                  else toast.error(error || '上传失败', { duration: 5000 })
+                } else if (info.file.status === 'error') {
+                  const err = (info.file as any)?.error
+                  toast.error((err as Error)?.message || '上传失败：请检查网络连接后重试', { duration: 5000 })
+                }
+              }} style={{ borderRadius: 8 }}>
+              <div style={{ fontSize: 12, color: '#98A2B3' }}>点击或拖拽上传，单张≤20MB，支持 JPG/PNG/WebP/HEIC</div>
+            </Upload.Dragger>
           </div>
-        )}
-        <Upload.Dragger name="file" accept="image/*" multiple maxCount={9} showUploadList={false}
-          beforeUpload={(file) => {
-            if (!file.type.startsWith('image/') && !/\.(heic|heif|avif)$/i.test(file.name)) { toast.warning('仅支持图片文件（JPG/PNG/WebP/HEIC）'); return Upload.LIST_IGNORE }
-            if (file.size > 20 * 1024 * 1024) { toast.warning('图片不能超过 20MB，请压缩后重新上传'); return Upload.LIST_IGNORE }
-            return true
-          }}
-          customRequest={async ({ file, onSuccess, onError }) => {
-            const formData = new FormData()
-            formData.append('file', file as File)
-            formData.append('uploadType', 'teacher-feedback')
-            try {
-              const res = await fetch('/api/upload', { method: 'POST', body: formData })
-              const data = await res.json()
-              if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
-              onSuccess?.(data)
-            } catch (err) {
-              onError?.(err instanceof Error ? err : new Error('上传失败'))
-            }
-          }}
-          onChange={info => {
-            if (info.file.status === 'uploading') return
-            if (info.file.status === 'done') {
-              const url = (info.file.response as any)?.url
-              const error = (info.file.response as any)?.error
-              if (url) setImageUrls(prev => [...prev, url])
-              else toast.error(error || '上传失败', { duration: 5000 })
-            } else if (info.file.status === 'error') {
-              const err = (info.file as any)?.error
-              toast.error((err as Error)?.message || '上传失败：请检查网络连接后重试', { duration: 5000 })
-            }
-          }} style={{ borderRadius: 8 }}>
-          <div style={{ fontSize: 12, color: '#98A2B3' }}>点击或拖拽上传，单张≤20MB，支持 JPG/PNG/WebP/HEIC</div>
-        </Upload.Dragger>
         )}
       </Card>
 
