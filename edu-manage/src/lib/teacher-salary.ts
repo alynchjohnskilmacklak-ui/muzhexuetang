@@ -234,7 +234,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
 
     console.log('[FeedbackBonus] course type resolved', {
       feedbackId,
-      lessonId: feedback.lessonId,
+      lessonId: feedback.classLessonId,
       resolvedCourseType: feedbackCourseType,
       rate,
       studentIds: feedback.studentIds,
