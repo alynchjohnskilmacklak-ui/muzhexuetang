@@ -3,8 +3,8 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
-import { Avatar, Badge, Button, Card, Empty, Input, Progress, Segmented, Select, Skeleton, Space, Tag, Typography } from 'antd'
-import { FileTextOutlined, MessageOutlined, ProfileOutlined, SearchOutlined, UserOutlined, WarningFilled } from '@ant-design/icons'
+import { Avatar, Button, Card, Empty, Input, Segmented, Select, Skeleton, Tag, Typography } from 'antd'
+import { FileTextOutlined, ProfileOutlined, SearchOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatHourPair, formatHours, formatPercent } from '@/lib/format'
 
@@ -31,12 +31,19 @@ type TeacherStudent = {
   }>
 }
 
-function feedbackLabel(days: number) {
-  if (days === 0) return { text: '课堂反馈：今天', color: '#1D9E75' }
-  if (days <= 3) return { text: `课堂反馈：${days}天前`, color: '#8d806f' }
-  if (days <= 7) return { text: `课堂反馈：${days}天前`, color: '#f5a623' }
-  if (days === 999) return { text: '尚未发布课堂反馈', color: '#D4537E' }
-  return { text: `${days}天未发布课堂反馈`, color: '#D4537E' }
+function avatarColor(name: string) {
+  const palette = ['#E8784A', '#534AB7', '#1D9E75', '#5B8FF9', '#f5a623', '#8892f0', '#FF6B6B']
+  let h = 0
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) | 0
+  return palette[Math.abs(h) % palette.length]
+}
+
+function getStatusChip(student: TeacherStudent) {
+  const remain = Number(student.remainHours || 0)
+  const days = Number(student.daysSinceLastFeedback || 999)
+  if (remain <= 2) return { text: '课时不足', color: '#E24B4A' }
+  if (days > 7) return { text: '未反馈', color: '#D4537E' }
+  return { text: '已反馈', color: '#1D9E75' }
 }
 
 export default function TeacherStudentsPage() {
@@ -81,9 +88,17 @@ export default function TeacherStudentsPage() {
     const remain = Number(student.remainHours || 0)
     const total = Number(student.totalHours || 0)
     const used = Math.max(0, total - remain)
-    const usedRate = total ? Math.round((used / total) * 100) : 0
-    const feedback = feedbackLabel(Number(student.daysSinceLastFeedback || 999))
-    const numberStyle = { fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' } as const
+    const status = getStatusChip(student)
+    const initial = (student.name || '?')[0]
+    const gradeGender = [student.grade, student.gender].filter(Boolean).join(' · ')
+    const remainColor = remain <= 2 ? '#E24B4A' : remain <= 15 ? '#f5a623' : '#1F2329'
+    const subjects = [
+      ...new Set(
+        (student.enrollments || [])
+          .flatMap((e) => (e.group?.teacherAssignments || []).map((a) => a?.subject).filter(Boolean) as string[]),
+      ),
+    ].slice(0, 3)
+
     return (
       <Card
         key={student.id}
@@ -91,62 +106,95 @@ export default function TeacherStudentsPage() {
         style={{
           width: '100%',
           borderRadius: 10,
-          borderLeft: remain <= 2 ? '4px solid #D4537E' : '4px solid transparent',
+          borderLeft: remain <= 2 ? '3px solid #E24B4A' : '3px solid transparent',
+          cursor: 'pointer',
         }}
-        styles={{ body: { padding: isMobile ? 14 : 24 } }}
+        styles={{ body: { padding: isMobile ? 12 : 14 } }}
+        onClick={() => router.push(`/teacher/student/${student.id}`)}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
-          <Space align="start" style={{ minWidth: 0 }}>
-            <Avatar icon={<UserOutlined />} style={{ background: '#E8784A', flexShrink: 0 }} />
-            <div style={{ minWidth: 0 }}>
-              <Text strong style={{ fontSize: isMobile ? 16 : 14 }}>{student.name}</Text>
-              <div style={{ fontSize: 12, color: '#8d806f', marginTop: 2 }}>
-                {student.grade || '-'} / {student.gender || '-'} / {student.school || '-'}
-              </div>
-            </div>
-          </Space>
-          {remain <= 2 && <Badge dot color="#D4537E"><WarningFilled style={{ color: '#D4537E' }} /></Badge>}
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 10, marginBottom: 12 }}>
-          <div style={{ background: '#faf8f5', borderRadius: 8, padding: isMobile ? 10 : 12, minWidth: 0 }}>
-            <Text type="secondary" style={{ fontSize: 12 }}>剩余课时</Text>
-            <div style={{ color: remain <= 2 ? '#D4537E' : remain <= 15 ? '#f5a623' : '#1F2329', fontSize: isMobile ? 20 : 22, fontWeight: 700, ...numberStyle }}>
-              {formatHours(remain)}
-            </div>
+        {/* Row 1: Avatar + Name + Grade·Gender + Status Chip */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <Avatar
+            size={36}
+            style={{ background: avatarColor(student.name || ''), flexShrink: 0, fontSize: 16, fontWeight: 600 }}
+          >
+            {initial}
+          </Avatar>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <Text strong style={{ fontSize: 15 }}>{student.name}</Text>
+            {gradeGender && (
+              <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>
+                {gradeGender}
+              </Text>
+            )}
           </div>
-          <div style={{ background: '#faf8f5', borderRadius: 8, padding: isMobile ? 10 : 12, minWidth: 0 }}>
-            <Text type="secondary" style={{ fontSize: 12 }}>出勤率</Text>
-            <div style={{ color: '#1D9E75', fontSize: isMobile ? 20 : 22, fontWeight: 700, ...numberStyle }}>
-              {formatPercent(student.attendanceRate)}
-            </div>
+          <Tag
+            color={status.color}
+            style={{ margin: 0, flexShrink: 0, fontSize: 11, borderRadius: 6 }}
+          >
+            {status.text}
+          </Tag>
+        </div>
+
+        {/* Row 2: Subject tags */}
+        {subjects.length > 0 && (
+          <div style={{ marginBottom: 6, marginLeft: 46, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            {subjects.map((s, i) => (
+              <Tag key={i} style={{ fontSize: 11, margin: 0, lineHeight: '18px' }}>{s}</Tag>
+            ))}
           </div>
-        </div>
+        )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
-          <Text type="secondary">已用/总课时</Text>
-          <Text style={numberStyle}>{total ? formatHourPair(used, total) : '0/0'}</Text>
-        </div>
-        <Progress percent={usedRate} showInfo={false} strokeColor={usedRate <= 30 ? '#1D9E75' : usedRate <= 70 ? '#f5a623' : '#D4537E'} />
-        <div style={{ color: feedback.color, fontSize: 12, marginTop: 10 }}>{feedback.text}</div>
-
-        <Space wrap style={{ marginTop: 10 }}>
-          {student.enrollments?.slice(0, 3).map((enrollment) => (
-            <Tag key={enrollment.id}>{enrollment.group?.teacherAssignments?.[0]?.subject || enrollment.group?.course?.name || '课程'}</Tag>
-          ))}
-        </Space>
-
+        {/* Row 3: Metrics in one line */}
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, minmax(0, 1fr))',
-            gap: 8,
-            marginTop: 14,
+            fontSize: 12,
+            color: '#5a4e3a',
+            marginBottom: 10,
+            marginLeft: 46,
+            display: 'flex',
+            gap: 14,
+            flexWrap: 'wrap',
           }}
         >
-          <Button type="primary" icon={<ProfileOutlined />} onClick={() => router.push(`/teacher/student/${student.id}`)}
-            style={{ gridColumn: isMobile ? 'span 1' : 'span 2' }}>学生工作台</Button>
-          <Button icon={<FileTextOutlined />} onClick={() => router.push(`/teacher/students/${student.id}`)}>基础档案</Button>
+          <span>
+            出勤{' '}
+            <b style={{ color: '#1D9E75' }}>{formatPercent(student.attendanceRate)}</b>
+          </span>
+          <span>
+            剩余{' '}
+            <b style={{ color: remainColor }}>{formatHours(remain)}</b>
+          </span>
+          <span>
+            已用 <b>{total ? formatHourPair(used, total) : '0/0'}</b>
+          </span>
+        </div>
+
+        {/* Row 4: Action buttons */}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button
+            type="primary"
+            size="small"
+            icon={<ProfileOutlined />}
+            onClick={(e) => {
+              e.stopPropagation()
+              router.push(`/teacher/student/${student.id}`)
+            }}
+            style={{ flex: 1, background: '#E8784A', borderColor: '#E8784A' }}
+          >
+            工作台
+          </Button>
+          <Button
+            size="small"
+            icon={<FileTextOutlined />}
+            onClick={(e) => {
+              e.stopPropagation()
+              router.push(`/teacher/students/${student.id}`)
+            }}
+            style={{ flex: 1 }}
+          >
+            档案
+          </Button>
         </div>
       </Card>
     )
@@ -235,31 +283,37 @@ export default function TeacherStudentsPage() {
         </div>
       </Card>
 
-      {!filtered.length ? <Empty description="暂无匹配学员" /> : (
+      {!filtered.length ? (
+        <Empty description="暂无匹配学员" />
+      ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {[
             { key: 'oneOnOne', label: '一对一', color: '#534AB7', students: groupedStudents.oneOnOne },
             { key: 'smallGroup', label: '小组课', color: '#D4537E', students: groupedStudents.smallGroup },
             { key: 'group', label: '精品班课', color: '#E8784A', students: groupedStudents.group },
-          ].filter((group) => group.students.length > 0).map((group) => (
-            <div key={group.key}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <div style={{ width: 4, height: 18, borderRadius: 2, background: group.color }} />
-                <span style={{ fontWeight: 700, fontSize: 15, color: '#1F2329' }}>{group.label}</span>
-                <span style={{ fontSize: 12, color: '#98A2B3' }}>{group.students.length} 位学员</span>
+          ]
+            .filter((group) => group.students.length > 0)
+            .map((group) => (
+              <div key={group.key}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <div style={{ width: 4, height: 18, borderRadius: 2, background: group.color }} />
+                  <span style={{ fontWeight: 700, fontSize: 15, color: '#1F2329' }}>{group.label}</span>
+                  <span style={{ fontSize: 12, color: '#98A2B3' }}>{group.students.length} 位学员</span>
+                </div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile
+                      ? 'minmax(0, 1fr)'
+                      : 'repeat(auto-fill, minmax(270px, 1fr))',
+                    gap: isMobile ? 12 : 14,
+                    minWidth: 0,
+                  }}
+                >
+                  {group.students.map(renderStudentCard)}
+                </div>
               </div>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(auto-fill, minmax(280px, 1fr))',
-                  gap: isMobile ? 12 : 14,
-                  minWidth: 0,
-                }}
-              >
-                {group.students.map(renderStudentCard)}
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
     </div>

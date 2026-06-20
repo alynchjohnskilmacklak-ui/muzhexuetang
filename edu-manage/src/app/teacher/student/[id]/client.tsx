@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Card, Descriptions, Empty, Input, InputNumber, List, Popconfirm, Select, Space, Tag, Typography, Upload, Progress, Segmented } from 'antd'
+import { Button, Card, Divider, Empty, Input, InputNumber, List, Select, Space, Tag, Tabs, Typography, Upload } from 'antd'
 import {
-  CheckCircleOutlined, DeleteOutlined, FileTextOutlined, PlusOutlined,
+  BookOutlined, LineChartOutlined, PlusOutlined,
   RocketOutlined, SaveOutlined, ArrowLeftOutlined, SendOutlined,
-  BookOutlined, TrophyOutlined, ClockCircleOutlined, LineChartOutlined,
+  TrophyOutlined, DownOutlined, UpOutlined,
 } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -35,13 +35,14 @@ const MASTERY_LEVELS = [
 
 export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherId }: { studentId: string; studentName: string; teacherId: string }) {
   const router = useRouter()
-  const [tab, setTab] = useState('overview')
+  const [tab, setTab] = useState('feedback')
 
   // Stage summary
   const [stageData, setStageData] = useState<any>(null)
   const [summary, setSummary] = useState('')
   const [suggestions, setSuggestions] = useState('')
   const [saving, setSaving] = useState(false)
+  const [materialExpanded, setMaterialExpanded] = useState(false)
 
   // Goals
   const [goals, setGoals] = useState<any[]>([])
@@ -70,13 +71,15 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
   const [feedbackSaving, setFeedbackSaving] = useState(false)
 
   useEffect(() => {
-    // Load stage summary
-    fetcher(`/api/teacher/stage-summary?studentId=${studentId}&months=3`).then(d => setStageData(d)).catch(() => {})
-    // Load goals
+    fetcher(`/api/teacher/stage-summary?studentId=${studentId}&months=3`).then(d => {
+      setStageData(d)
+      if (d.draft) {
+        setSummary(d.draft.summary || '')
+        setSuggestions(d.draft.suggestions || '')
+      }
+    }).catch(() => {})
     fetcher(`/api/teacher/learning-goals?studentId=${studentId}`).then(d => setGoals(d.goals || [])).catch(() => {})
-    // Load weaknesses
     fetcher(`/api/teacher/weaknesses?studentId=${studentId}`).then(d => setWeaknesses(d.weaknesses || [])).catch(() => {})
-    // Load mastery records
     fetcher(`/api/teacher/mastery?studentId=${studentId}`).then(d => setMasteryRecords(d.records || [])).catch(() => {})
   }, [studentId])
 
@@ -156,93 +159,118 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
 
   const cardStyle = { borderRadius: 12, border: '1px solid #F0DDD2' }
 
-  return (
-    <div style={{ maxWidth: 800, margin: '0 auto', paddingBottom: 88 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => router.push('/teacher/students')}>返回</Button>
-        <Title level={3} style={{ margin: 0 }}>{studentName} · 学生工作台</Title>
-      </div>
+  const tabItems = [
+    {
+      key: 'feedback',
+      label: <span><SendOutlined style={{ marginRight: 4 }} />成长反馈</span>,
+      children: (
+        <div>
+          {/* ── Stage Summary Section ── */}
+          <Card bordered={false} style={cardStyle} title={<span><RocketOutlined /> 阶段学情寄语（家长端「案」板块）</span>}>
+            {/* Auto-material card — collapsible */}
+            {stageData?.material && (
+              <div style={{ background: '#FFF8F4', borderRadius: 10, padding: 12, marginBottom: 14 }}>
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                  onClick={() => setMaterialExpanded(!materialExpanded)}
+                >
+                  <Text strong style={{ fontSize: 13, color: '#5a4e3a' }}>自动素材参考</Text>
+                  <Button type="link" size="small" icon={materialExpanded ? <UpOutlined /> : <DownOutlined />}>
+                    {materialExpanded ? '收起' : '展开'}
+                  </Button>
+                </div>
+                {materialExpanded && (
+                  <>
+                    <Space wrap style={{ marginTop: 8 }}>
+                      <Tag color="green">出勤 {stageData.material.overview.attendanceRate ?? '暂无'}%</Tag>
+                      <Tag color="blue">掌握 {stageData.material.overview.masteryRate ?? '暂无'}%</Tag>
+                    </Space>
+                    <Paragraph style={{ whiteSpace: 'pre-wrap', margin: '10px 0 0', fontSize: 13, color: '#5a4e3a', lineHeight: 1.6 }}>
+                      {stageData.material.summarySeed}
+                    </Paragraph>
+                  </>
+                )}
+              </div>
+            )}
 
-      <Segmented block
-        value={tab}
-        onChange={setTab}
-        options={[
-          { label: '阶段寄语', value: 'overview', icon: <RocketOutlined /> },
-          { label: '成长反馈', value: 'feedback', icon: <SendOutlined /> },
-          { label: '知识掌握', value: 'mastery', icon: <BookOutlined /> },
-          { label: '学习目标', value: 'goals', icon: <TrophyOutlined /> },
-          { label: '薄弱点', value: 'weakness', icon: <LineChartOutlined /> },
-        ]}
-        style={{ marginBottom: 14 }}
-      />
+            <Text strong style={{ fontSize: 13 }}>教师寄语 / 小结</Text>
+            <TextArea
+              rows={5}
+              maxLength={500}
+              showCount
+              value={summary}
+              onChange={e => setSummary(e.target.value)}
+              placeholder="结合自动素材，写给家长看的阶段学情小结"
+              style={{ marginTop: 6 }}
+            />
 
-      {/* Stage Summary */}
-      {tab === 'overview' && (
-        <Card bordered={false} style={cardStyle} title={<span><RocketOutlined /> 阶段学情寄语（家长端「案」板块）</span>}>
-          {stageData?.material && (
-            <div style={{ background: '#FFF8F4', borderRadius: 10, padding: 12, marginBottom: 12 }}>
-              <Space wrap>
-                <Tag color="green">出勤 {stageData.material.overview.attendanceRate ?? '暂无'}%</Tag>
-                <Tag color="blue">掌握 {stageData.material.overview.masteryRate ?? '暂无'}%</Tag>
-              </Space>
-              <Paragraph style={{ whiteSpace: 'pre-wrap', margin: '10px 0 0' }}>{stageData.material.summarySeed}</Paragraph>
+            <div style={{ marginTop: 10 }}>
+              <Text strong style={{ fontSize: 13 }}>下一步建议</Text>
             </div>
-          )}
-          <Text strong>教师寄语/小结</Text>
-          <TextArea rows={5} value={summary} onChange={e => setSummary(e.target.value)} placeholder="结合自动素材，写给家长看的阶段学情小结" />
-          <div style={{ marginTop: 10 }}><Text strong>下一步建议</Text></div>
-          <TextArea rows={3} value={suggestions} onChange={e => setSuggestions(e.target.value)} placeholder="例如：接下来重点巩固计算准确率" />
-          <Space style={{ marginTop: 12 }}>
-            <Button icon={<SaveOutlined />} loading={saving} onClick={saveStage}>保存草稿</Button>
-            <Button type="primary" icon={<RocketOutlined />} loading={saving} onClick={publishStage}>发布给家长</Button>
-          </Space>
-        </Card>
-      )}
+            <TextArea
+              rows={3}
+              maxLength={200}
+              showCount
+              value={suggestions}
+              onChange={e => setSuggestions(e.target.value)}
+              placeholder="例如：接下来重点巩固计算准确率"
+              style={{ marginTop: 6 }}
+            />
 
-      {/* Growth Feedback */}
-      {tab === 'feedback' && (
-        <Card bordered={false} style={cardStyle} title={<span><SendOutlined /> 成长反馈</span>}>
-          <Text strong style={{ display: 'block', marginBottom: 6 }}>反馈内容</Text>
-          <TextArea rows={3} value={feedbackText} onChange={e => setFeedbackText(e.target.value)} placeholder="写一句话描述孩子的课堂表现或成长亮点..." />
-
-          <div style={{ marginTop: 12, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <div><Text type="secondary">情绪</Text>
-              <Select size="small" value={feedbackMood} onChange={setFeedbackMood} style={{ width: 100 }}
-                options={[
-                  { value: 'GREAT', label: '😄 很棒' }, { value: 'GOOD', label: '🙂 良好' },
-                  { value: 'OKAY', label: '😐 平稳' }, { value: 'NEEDS_ATTENTION', label: '😟 需关注' },
-                ]} />
+            <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+              <Button icon={<SaveOutlined />} loading={saving} onClick={saveStage} style={{ flex: 1 }}>保存草稿</Button>
+              <Button type="primary" icon={<RocketOutlined />} loading={saving} onClick={publishStage} style={{ flex: 1 }}>发布给家长</Button>
             </div>
-            <div><Text type="secondary">作业完成</Text>
-              <Select size="small" value={homeworkDone} onChange={setHomeworkDone} style={{ width: 80 }} allowClear placeholder="-"
-                options={[{ value: true, label: '✅ 完成' }, { value: false, label: '❌ 未完成' }]} />
+          </Card>
+
+          <Divider style={{ margin: '16px 0' }} />
+
+          {/* ── Single Lesson Feedback Section ── */}
+          <Card bordered={false} style={cardStyle} title={<span><SendOutlined /> 本次课堂反馈</span>}>
+            <Text strong style={{ display: 'block', marginBottom: 6, fontSize: 13 }}>反馈内容</Text>
+            <TextArea rows={3} maxLength={300} showCount value={feedbackText} onChange={e => setFeedbackText(e.target.value)} placeholder="写一句话描述孩子的课堂表现或成长亮点..." />
+
+            <div style={{ marginTop: 12, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <div><Text type="secondary" style={{ fontSize: 12 }}>情绪</Text>
+                <Select size="small" value={feedbackMood} onChange={setFeedbackMood} style={{ width: 100 }}
+                  options={[
+                    { value: 'GREAT', label: '😄 很棒' }, { value: 'GOOD', label: '🙂 良好' },
+                    { value: 'OKAY', label: '😐 平稳' }, { value: 'NEEDS_ATTENTION', label: '😟 需关注' },
+                  ]} />
+              </div>
+              <div><Text type="secondary" style={{ fontSize: 12 }}>作业完成</Text>
+                <Select size="small" value={homeworkDone} onChange={setHomeworkDone} style={{ width: 80 }} allowClear placeholder="-"
+                  options={[{ value: true, label: '✅ 完成' }, { value: false, label: '❌ 未完成' }]} />
+              </div>
+              <div><Text type="secondary" style={{ fontSize: 12 }}>课堂表现 1-5</Text>
+                <InputNumber size="small" min={1} max={5} value={inClassRating} onChange={setInClassRating} style={{ width: 60 }} />
+              </div>
             </div>
-            <div><Text type="secondary">课堂表现 1-5</Text>
-              <InputNumber size="small" min={1} max={5} value={inClassRating} onChange={setInClassRating} style={{ width: 60 }} />
+
+            <div style={{ marginTop: 12 }}><Text type="secondary" style={{ fontSize: 12 }}>标签（逗号分隔）</Text>
+              <Input size="small" value={feedbackTags} onChange={e => setFeedbackTags(e.target.value)} placeholder="积极,专注,进步" />
             </div>
-          </div>
 
-          <div style={{ marginTop: 12 }}><Text type="secondary">标签（逗号分隔）</Text>
-            <Input size="small" value={feedbackTags} onChange={e => setFeedbackTags(e.target.value)} placeholder="积极,专注,进步" />
-          </div>
+            <div style={{ marginTop: 12 }}>
+              <Upload.Dragger name="file" action="/api/upload" accept="image/*" multiple maxCount={9} showUploadList={false}
+                data={{ uploadType: 'teacher-feedback' }}
+                beforeUpload={file => { if (file.size > 5*1024*1024) { toast.warning('图片不超过5MB'); return Upload.LIST_IGNORE }; return true }}
+                onChange={info => { if (info.file.status === 'done') { const url = (info.file.response as any)?.url; if (url) setImageUrls(p => [...p, url]) } }}>
+                <div style={{ fontSize: 13, color: '#98A2B3' }}>拖拽上传课堂照片（≤5MB）</div>
+              </Upload.Dragger>
+              {imageUrls.length > 0 && <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>{imageUrls.map((url, i) => <img key={i} src={url} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 6 }} />)}</div>}
+            </div>
 
-          <div style={{ marginTop: 12 }}>
-            <Upload.Dragger name="file" action="/api/upload" accept="image/*" multiple maxCount={9} showUploadList={false}
-              data={{ uploadType: 'teacher-feedback' }}
-              beforeUpload={file => { if (file.size > 5*1024*1024) { toast.warning('图片不超过5MB'); return Upload.LIST_IGNORE }; return true }}
-              onChange={info => { if (info.file.status === 'done') { const url = (info.file.response as any)?.url; if (url) setImageUrls(p => [...p, url]) } }}>
-              <div style={{ fontSize: 13, color: '#98A2B3' }}>拖拽上传课堂照片（≤5MB）</div>
-            </Upload.Dragger>
-            {imageUrls.length > 0 && <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>{imageUrls.map((url, i) => <img key={i} src={url} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 6 }} />)}</div>}
-          </div>
-
-          <Button type="primary" icon={<SendOutlined />} loading={feedbackSaving} onClick={submitFeedback}
-            style={{ marginTop: 14, background: '#E8784A', border: 'none' }}>发布反馈</Button>
-        </Card>
-      )}
-
-      {/* Mastery Push */}
-      {tab === 'mastery' && (
+            <Button type="primary" icon={<SendOutlined />} loading={feedbackSaving} onClick={submitFeedback}
+              style={{ marginTop: 14, background: '#E8784A', border: 'none' }}>发布反馈</Button>
+          </Card>
+        </div>
+      ),
+    },
+    {
+      key: 'mastery',
+      label: <span><BookOutlined style={{ marginRight: 4 }} />知识掌握</span>,
+      children: (
         <div>
           <Card bordered={false} style={cardStyle} title={<span><BookOutlined /> 知识点掌握推送</span>}>
             <Space direction="vertical" style={{ width: '100%' }}>
@@ -261,10 +289,12 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
             )}
           </Card>
         </div>
-      )}
-
-      {/* Goals */}
-      {tab === 'goals' && (
+      ),
+    },
+    {
+      key: 'goals',
+      label: <span><TrophyOutlined style={{ marginRight: 4 }} />学习目标</span>,
+      children: (
         <Card bordered={false} style={cardStyle} title="学习目标">
           <Space style={{ width: '100%' }}>
             <Input placeholder="学科" value={goalSubject} onChange={e => setGoalSubject(e.target.value)} style={{ width: 100 }} />
@@ -277,10 +307,12 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
             ]}>{goal.subject}：{goal.goalDesc}</List.Item>
           )} />
         </Card>
-      )}
-
-      {/* Weakness */}
-      {tab === 'weakness' && (
+      ),
+    },
+    {
+      key: 'weakness',
+      label: <span><LineChartOutlined style={{ marginRight: 4 }} />薄弱点</span>,
+      children: (
         <Card bordered={false} style={cardStyle} title="薄弱点">
           <Space direction="vertical" style={{ width: '100%' }}>
             <Input placeholder="知识点/题型" value={weakTopic} onChange={e => setWeakTopic(e.target.value)} />
@@ -292,7 +324,23 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
             <List.Item><List.Item.Meta title={<Space><Text strong>{w.topic}</Text><Tag color="volcano">错 {w.mistakeCount}</Tag></Space>} description={w.suggestion || '暂无建议'} /></List.Item>
           )} />
         </Card>
-      )}
+      ),
+    },
+  ]
+
+  return (
+    <div style={{ maxWidth: 800, margin: '0 auto', paddingBottom: 88 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => router.push('/teacher/students')}>返回</Button>
+        <Title level={3} style={{ margin: 0 }}>{studentName} · 学生工作台</Title>
+      </div>
+
+      <Tabs
+        activeKey={tab}
+        onChange={setTab}
+        items={tabItems}
+        tabBarStyle={{ marginBottom: 14 }}
+      />
     </div>
   )
 }

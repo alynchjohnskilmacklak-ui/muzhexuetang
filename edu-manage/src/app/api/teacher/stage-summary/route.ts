@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { format } from 'date-fns'
 import { apiHandler } from '@/lib/api-handler'
 import { getStudentProfile } from '@/lib/student-profile'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
@@ -20,7 +21,7 @@ function buildDraftMaterial(profile: NonNullable<Awaited<ReturnType<typeof getSt
   const highlights = profile.record.timeline
     .filter((item) => ['feedback', 'post', 'badge'].includes(item.type))
     .slice(0, 5)
-    .map((item) => `${item.date} ${item.title}`)
+    .map((item) => `${format(new Date(item.date), 'M月d日')} ${item.title}`)
 
   return {
     overview: {
