@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useSearchParams } from 'next/navigation'
-import { Button, Image as AntImage, Input, Spin, Upload, Tag, Card, Select, Empty } from 'antd'
+import { Button, Image as AntImage, Input, Modal, Spin, Upload, Tag, Card, Select, Empty } from 'antd'
 import { CheckCircleOutlined, DeleteOutlined, PlusOutlined, SendOutlined, SearchOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -14,9 +14,48 @@ import { fmtDate } from '@/lib/format-date'
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 type FeedbackCourseBucket = 'GROUP' | 'ONE_ON_ONE'
+type AiFeedbackResult = {
+  studentIds?: string[]
+  studentNames?: string[]
+  unknownNames?: string[]
+  needsManualStudentSelection?: boolean
+  mood?: string
+  overallComment?: string
+  summary?: string
+  suggestion?: string
+  tags?: string[]
+  knowledgePoints?: string[]
+  homework?: string[]
+  stageSummaryText?: string
+  stageSuggestions?: string
+}
+type BonusPreview = {
+  courseBucket: FeedbackCourseBucket
+  label: string
+  rate: number
+  selectedCount: number
+  eligibleCount: number
+  duplicateCount: number
+  total: number
+  message: string
+}
 
 function toFeedbackCourseBucket(value: unknown): FeedbackCourseBucket {
   return value === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
+}
+
+function mergeUnique<T>(base: T[], extra: T[]) {
+  return [...new Set([...(base || []), ...(extra || [])].filter(Boolean))]
+}
+
+function appendText(base: string, extra?: string) {
+  const clean = (extra || '').trim()
+  if (!clean) return base
+  return base.trim() ? `${base.trim()}\n\n${clean}` : clean
+}
+
+function money(value: number) {
+  return Number(value.toFixed(2)).toString()
 }
 
 function FeedbackPageInner() {
@@ -42,11 +81,17 @@ function FeedbackPageInner() {
   const [studentsExpanded, setStudentsExpanded] = useState(false)
   const [saving, setSaving] = useState(false)
   const [submitDone, setSubmitDone] = useState(false)
+  const [bonusPreview, setBonusPreview] = useState<BonusPreview | null>(null)
+  const [bonusLoading, setBonusLoading] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [lastSubmitAt, setLastSubmitAt] = useState(0)
 
   // AI generation
   const [aiNote, setAiNote] = useState('')
   const [aiGenerating, setAiGenerating] = useState(false)
   const [aiPrefilled, setAiPrefilled] = useState<Set<string>>(new Set())
+  const [aiSuggestion, setAiSuggestion] = useState<AiFeedbackResult | null>(null)
+  const [aiSuggestionUsed, setAiSuggestionUsed] = useState(false)
 
   // Stage summary (only when 1 student selected)
   const [stageExpanded, setStageExpanded] = useState(false)
@@ -96,6 +141,34 @@ function FeedbackPageInner() {
   }, [selectedLesson?.courseType, selectedGroup?.courseType, selectedGroup?.course?.type])
   const feedbackSceneLabel = feedbackCourseBucket === 'ONE_ON_ONE' ? '一对一反馈' : '小班反馈'
   const feedbackRateLabel = feedbackCourseBucket === 'ONE_ON_ONE' ? '1元/人' : '0.5元/人'
+  const selectedStudentNames = selectedStudentIds
+    .map((id) => groupStudents.find((student: any) => student.id === id)?.name)
+    .filter(Boolean) as string[]
+
+  useEffect(() => {
+    const targetStudents = selectedStudentIds.length ? selectedStudentIds : selectedLesson?.studentIds || []
+    if (!targetStudents.length) {
+      setBonusPreview(null)
+      return
+    }
+    let cancelled = false
+    setBonusLoading(true)
+    fetch('/api/feedback/bonus-preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        studentIds: targetStudents,
+        lessonId: lessonId || null,
+        groupId: groupId || selectedLesson?.groupId || null,
+        feedbackCourseType: feedbackCourseBucket,
+      }),
+    })
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => { if (!cancelled) setBonusPreview(data) })
+      .catch(() => { if (!cancelled) setBonusPreview(null) })
+      .finally(() => { if (!cancelled) setBonusLoading(false) })
+    return () => { cancelled = true }
+  }, [selectedStudentIds, selectedLesson?.studentIds, selectedLesson?.groupId, lessonId, groupId, feedbackCourseBucket])
 
   // ── Stage summary load when single student selected ──
   const stageStudentId = selectedStudentIds.length === 1 ? selectedStudentIds[0] : null
@@ -137,14 +210,16 @@ function FeedbackPageInner() {
   const toggleKp = (kp: string) => setKps(prev => prev.includes(kp) ? prev.filter(k => k !== kp) : [...prev, kp])
 
   const submit = async (status: 'DRAFT' | 'PUBLISHED') => {
+    if (saving || (status === 'PUBLISHED' && Date.now() - lastSubmitAt < 3000)) return
     const targetStudents = selectedStudentIds.length ? selectedStudentIds : selectedLesson?.studentIds || []
     if (!targetStudents.length) { toast.warning('请选择学员'); return }
-    if (!overallComment.trim() && !summary.trim() && !kps.length && !imageUrls.length && !stageSummaryText.trim()) {
-      toast.warning('请至少填写评语、知识点、寄语或上传资料'); return
+    if (!overallComment.trim() && !summary.trim() && !kps.length && !homework.length && !imageUrls.length && !stageSummaryText.trim() && !stageSuggestions.trim()) {
+      toast.warning('请至少填写评语、建议、知识点、作业、本期寄语或上传资料'); return
     }
+    if (status === 'PUBLISHED' && aiSuggestion && !aiSuggestionUsed && !window.confirm('AI 已生成建议但尚未采用，是否继续发布？')) return
+    if (status === 'PUBLISHED' && bonusPreview?.selectedCount && bonusPreview.eligibleCount === 0 && !window.confirm('本次反馈将发布给家长，但今日同场景已奖励过，不重复计奖。')) return
     setSaving(true)
     try {
-      // 1) Classroom feedback
       const fbRes = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -156,12 +231,12 @@ function FeedbackPageInner() {
           mood, tags, knowledgePoints: kps, badge, summary, overallComment,
           homework: homework.map((h, i) => ({ order: i + 1, content: h })),
           imageUrls, status,
+          clientRequestId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         }),
       })
       const fbData = await fbRes.json()
       if (!fbRes.ok) { toast.error(`反馈发布失败：${fbData.error || '请检查网络后重试'}`, { duration: 5000 }); return }
 
-      // 2) Stage summary (optional, only when PUBLISHED and text non-empty)
       let stagePublished = false
       if (status === 'PUBLISHED' && stageStudentId && stageSummaryText.trim()) {
         const s1 = await fetch('/api/teacher/stage-summary', {
@@ -187,18 +262,25 @@ function FeedbackPageInner() {
       }
 
       if (status === 'PUBLISHED') {
-        const msg = stagePublished ? '已发布给家长（课堂反馈 + 本期寄语）' : '已发布给家长，并计入反馈奖励'
-        toast.success(msg, { duration: 4000 })
+        const bonus = fbData.bonus
+        const bonusMsg = bonus?.success
+          ? bonus.amount > 0
+            ? bonus.message
+            : '本次反馈已记录，今日同场景已奖励过，不重复计奖'
+          : '奖励统计稍后可在工资流水中查看'
+        const msg = stagePublished ? `已发布给家长，本期寄语已同步，${bonusMsg}` : `已发布给家长，${bonusMsg}`
+        toast.success(msg, { duration: 5000 })
+        setLastSubmitAt(Date.now())
         setSubmitDone(true); setTimeout(() => setSubmitDone(false), 3000)
         setLessonId(''); setSelectedStudentIds([]); setGroupId('')
         setMood('GOOD'); setTags([]); setKps([]); setBadge('')
         setSummary(''); setOverallComment(''); setHomework([]); setImageUrls([])
         setStageSummaryText(''); setStageSuggestions('')
+        setAiSuggestion(null); setAiSuggestionUsed(false); setAiPrefilled(new Set())
         setStageData(null); setStageExpanded(false)
       } else { toast.success('草稿已保存', { duration: 2000 }) }
     } finally { setSaving(false) }
   }
-
   const aiGenerateClassroom = async () => {
     if (!aiNote.trim()) {
       toast.warning('请输入一句课堂描述，例如：上课认真听讲，但作业完成还需要加强')
@@ -258,67 +340,22 @@ function FeedbackPageInner() {
         return
       }
 
-      const filled = new Set<string>()
-
       const aiStudentIds: string[] = Array.isArray(data.studentIds) ? data.studentIds : []
       if (aiStudentIds.length) {
         const merged = new Set(selectedStudentIds)
         aiStudentIds.forEach((id: string) => merged.add(id))
         setSelectedStudentIds([...merged])
-        filled.add('students')
       }
       if (data.unknownNames?.length) {
         toast(`未能在班级中确认：${data.unknownNames.join('、')}`, { duration: 3000 })
       }
 
-      if (data.mood && MOODS.some((m: any) => m.value === data.mood)) {
-        setMood(data.mood)
-        filled.add('mood')
-      }
-
-      if (data.overallComment) {
-        setOverallComment(prev => prev.trim() ? prev : data.overallComment)
-        filled.add('comment')
-      }
-
-      const prevTags = new Set(tags)
-      const aiTags = (data.tags || []).filter((t: string) => QUICK_TAGS.includes(t))
-      aiTags.forEach((t: string) => prevTags.add(t))
-      if (prevTags.size > tags.length) { setTags([...prevTags]); filled.add('tags') }
-
-      const prevKps = new Set(kps)
-      const aiKps = (data.knowledgePoints || []).filter((k: string) => QUICK_KPS.includes(k))
-      aiKps.forEach((k: string) => prevKps.add(k))
-      if (prevKps.size > kps.length) { setKps([...prevKps]); filled.add('kps') }
-
-      if (data.homework?.length) {
-        setHomework(prev => prev.length ? prev : data.homework)
-        filled.add('homework')
-      }
-
-      if (data.suggestion) {
-        setSummary(prev => prev.trim() ? prev : data.suggestion)
-        filled.add('suggestion')
-      } else if (data.summary) {
-        setSummary(prev => prev.trim() ? prev : data.summary)
-        filled.add('suggestion')
-      }
-
-      if (data.stageSummaryText) {
-        setStageSummaryText(prev => prev.trim() ? prev : data.stageSummaryText)
-        filled.add('stageSummary')
-      }
-      if (data.stageSuggestions) {
-        setStageSuggestions(prev => prev.trim() ? prev : data.stageSuggestions)
-        filled.add('stageSuggestion')
-      }
-
-      setAiPrefilled(filled)
-
+      setAiSuggestion(data)
+      setAiSuggestionUsed(false)
       if (data.needsManualStudentSelection) {
         toast('AI 已生成反馈内容，请先确认学生后再发布。', { duration: 4000 })
-      } else if (filled.size > 0) {
-        toast.success('AI 已补齐反馈草稿，请核对后发布给家长', { duration: 2500 })
+      } else {
+        toast.success('AI 已生成反馈建议，请核对后选择采用方式', { duration: 3000 })
       }
     } catch (e: any) { toast.error(e.message || 'AI 生成失败') }
     finally { setAiGenerating(false) }
@@ -360,12 +397,78 @@ function FeedbackPageInner() {
     finally { setAiGenerating(false) }
   }
 
+  const hasTeacherWrittenContent = () => Boolean(
+    overallComment.trim() || summary.trim() || tags.length || kps.length || homework.length || stageSummaryText.trim() || stageSuggestions.trim()
+  )
+
+  const adoptAiSuggestion = (mode: 'all' | 'empty' | 'append') => {
+    if (!aiSuggestion) return
+    if (mode === 'all' && hasTeacherWrittenContent() && !window.confirm('当前已有手写内容，是否覆盖？')) return
+
+    const useIf = (current: string, next?: string) => {
+      if (mode === 'append') return appendText(current, next)
+      if (mode === 'empty') return current.trim() ? current : (next || '')
+      return next !== undefined ? next : current
+    }
+
+    if (aiSuggestion.mood && MOODS.some((m: any) => m.value === aiSuggestion.mood)) setMood(aiSuggestion.mood)
+    setOverallComment((prev) => useIf(prev, aiSuggestion.overallComment))
+    setSummary((prev) => useIf(prev, aiSuggestion.suggestion || aiSuggestion.summary))
+    setStageSummaryText((prev) => useIf(prev, aiSuggestion.stageSummaryText))
+    setStageSuggestions((prev) => useIf(prev, aiSuggestion.stageSuggestions))
+    setTags((prev) => mode === 'all' ? mergeUnique([], aiSuggestion.tags || []) : mergeUnique(prev, aiSuggestion.tags || []))
+    setKps((prev) => mode === 'all' ? mergeUnique([], aiSuggestion.knowledgePoints || []) : mergeUnique(prev, aiSuggestion.knowledgePoints || []))
+    setHomework((prev) => mode === 'all' ? mergeUnique([], aiSuggestion.homework || []) : mergeUnique(prev, aiSuggestion.homework || []))
+    setAiSuggestionUsed(true)
+    setAiPrefilled(new Set(['mood', 'comment', 'suggestion', 'tags', 'kps', 'homework', 'stageSummary', 'stageSuggestion']))
+    toast.success(mode === 'append' ? '已追加 AI 建议' : '已采用 AI 建议')
+  }
+
+  const ignoreAiSuggestion = () => {
+    setAiSuggestion(null)
+    setAiSuggestionUsed(true)
+  }
   const aiPrefillMark = (key: string) => aiPrefilled.has(key)
     ? <Tag color="processing" style={{ fontSize: 10, marginLeft: 6, borderRadius: 4 }}>AI 预填</Tag>
     : null
 
   const formSection = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {isMobile && <div style={{ fontSize: 15, fontWeight: 800, color: '#1a1201' }}>④ 反馈内容</div>}
+      {(bonusPreview || bonusLoading) && (
+        <Card size="small" style={{ borderRadius: 14, border: '1px solid rgba(232,120,74,.22)', background: '#FFF6F1' }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#B85B32', marginBottom: 4 }}>反馈奖励预览</div>
+          <div style={{ fontSize: 12, color: '#7A4A2A', lineHeight: 1.7 }}>
+            {bonusLoading ? '正在计算预计奖励...' : bonusPreview?.message}
+          </div>
+        </Card>
+      )}
+      {aiSuggestion && (
+        <Card size="small" style={{ borderRadius: 14, border: '1px solid rgba(232,120,74,.28)', background: '#FFF8F4' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', marginBottom: 10 }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#1a1201' }}>AI 建议卡片</div>
+              <div style={{ fontSize: 12, color: '#8d806f', marginTop: 2 }}>请核对后选择采用方式，AI 不会自动覆盖你的手写内容</div>
+            </div>
+            <Button size="small" type="text" onClick={ignoreAiSuggestion}>忽略</Button>
+          </div>
+          <div style={{ display: 'grid', gap: 8, fontSize: 12, color: '#5a4e3a', lineHeight: 1.7 }}>
+            {aiSuggestion.mood && <div><strong>课堂状态：</strong>{MOODS.find((m: any) => m.value === aiSuggestion.mood)?.label || aiSuggestion.mood}</div>}
+            {aiSuggestion.overallComment && <div><strong>评语：</strong>{aiSuggestion.overallComment}</div>}
+            {(aiSuggestion.suggestion || aiSuggestion.summary) && <div><strong>下一步建议：</strong>{aiSuggestion.suggestion || aiSuggestion.summary}</div>}
+            {!!aiSuggestion.tags?.length && <div><strong>表现标签：</strong>{aiSuggestion.tags.join('、')}</div>}
+            {!!aiSuggestion.knowledgePoints?.length && <div><strong>知识点：</strong>{aiSuggestion.knowledgePoints.join('、')}</div>}
+            {!!aiSuggestion.homework?.length && <div><strong>作业布置：</strong>{aiSuggestion.homework.join('；')}</div>}
+            {aiSuggestion.stageSummaryText && <div><strong>本期寄语：</strong>{aiSuggestion.stageSummaryText}</div>}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, auto)', gap: 8, marginTop: 12 }}>
+            <Button size="small" type="primary" onClick={() => adoptAiSuggestion('all')} style={{ background: '#E8784A' }}>全部采用</Button>
+            <Button size="small" onClick={() => adoptAiSuggestion('empty')}>只采用空白项</Button>
+            <Button size="small" onClick={() => adoptAiSuggestion('append')}>追加到已有内容</Button>
+            <Button size="small" onClick={ignoreAiSuggestion}>忽略</Button>
+          </div>
+        </Card>
+      )}
       {/* Mood */}
       <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
@@ -529,7 +632,7 @@ function FeedbackPageInner() {
             style={{ fontSize: 13, fontWeight: 700, display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }}
             onClick={() => setStageExpanded(!stageExpanded)}
           >
-            <span>📋 本期寄语（家长端可见）{stageExpanded ? '' : ' — 点击展开'}</span>
+            <span>本期寄语（家长端可见）{stageExpanded ? '' : '，点击展开'}</span>
             <span style={{ color: '#98A2B3', fontSize: 12 }}>{stageExpanded ? '收起' : '展开'}</span>
           </div>
           {stageExpanded && (
@@ -561,7 +664,7 @@ function FeedbackPageInner() {
               )}
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                <span style={{ fontSize: 12, fontWeight: 600 }}>教师寄语</span>
+                <span style={{ fontSize: 12, fontWeight: 600 }}>本期寄语（家长端可见）</span>
                 <Button type="link" size="small" icon={<ThunderboltOutlined />} loading={aiGenerating}
                   onClick={() => stageAiGenerate('summary')}
                   style={{ fontSize: 11, padding: 0 }}>AI 写寄语</Button>
@@ -602,16 +705,35 @@ function FeedbackPageInner() {
 
       {/* Submit */}
       <div style={{
-        display: 'flex', gap: 10,
+        display: 'flex', gap: 10, flexWrap: isMobile ? 'wrap' : 'nowrap',
         padding: isMobile ? '12px 0 calc(96px + env(safe-area-inset-bottom))' : '0 0 24px',
       }}>
-        <Button block onClick={() => submit('DRAFT')} loading={saving} style={{ flex: 1 }}>保存草稿</Button>
+        <Button block onClick={() => setPreviewOpen(true)} style={{ flex: isMobile ? '1 0 100%' : 1 }}>预览家长端</Button>
+        <Button block onClick={() => submit('DRAFT')} loading={saving} disabled={saving} style={{ flex: 1 }}>保存草稿</Button>
         <Button block type="primary" icon={submitDone ? <CheckCircleOutlined /> : <SendOutlined />}
-          onClick={() => submit('PUBLISHED')} loading={saving}
+          onClick={() => submit('PUBLISHED')} loading={saving} disabled={saving || submitDone}
           style={{ flex: 2, background: submitDone ? '#1D9E75' : '#E8784A', borderColor: submitDone ? '#1D9E75' : '#E8784A', fontWeight: 700 }}>
           {submitDone ? '已发布' : saving ? '发布中...' : '发布给家长'}
         </Button>
       </div>
+      <Modal title="家长端预览" open={previewOpen} onCancel={() => setPreviewOpen(false)} footer={null} width="min(560px, 92vw)">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, color: '#1a1201' }}>
+          {selectedStudentIds.length > 1 && (
+            <div style={{ borderRadius: 10, padding: '8px 10px', background: '#FFF6F1', color: '#B85B32', fontSize: 12 }}>
+              当前为多名学生共同反馈，家长端将只看到自己孩子相关内容
+            </div>
+          )}
+          <div style={{ fontSize: 16, fontWeight: 800 }}>{selectedStudentNames.join('、') || '已选学员'}</div>
+          <div><Tag color="orange">{MOODS.find((m: any) => m.value === mood)?.label || mood}</Tag>{tags.map(tag => <Tag key={tag}>{tag}</Tag>)}</div>
+          {overallComment && <div><strong>老师评语</strong><div style={{ marginTop: 4, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{overallComment}</div></div>}
+          {summary && <div><strong>下一步建议</strong><div style={{ marginTop: 4, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{summary}</div></div>}
+          {!!kps.length && <div><strong>知识点</strong><div style={{ marginTop: 4 }}>{kps.join('、')}</div></div>}
+          {!!homework.length && <div><strong>作业布置</strong><ol style={{ margin: '6px 0 0', paddingLeft: 20 }}>{homework.map((item, i) => <li key={i}>{item}</li>)}</ol></div>}
+          {stageSummaryText && <div><strong>本期寄语（家长端可见）</strong><div style={{ marginTop: 4, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{stageSummaryText}</div></div>}
+          {stageSuggestions && <div><strong>后续建议</strong><div style={{ marginTop: 4, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{stageSuggestions}</div></div>}
+          <div style={{ fontSize: 12, color: '#98A2B3' }}>发布时间：发布后实时显示 · 老师：当前登录教师</div>
+        </div>
+      </Modal>
     </div>
   )
 
@@ -659,7 +781,7 @@ function FeedbackPageInner() {
                 onClick={aiGenerateClassroom}
                 style={{ background: '#E8784A' }}
               >
-                AI 生成草稿
+                生成反馈建议
               </Button>
             </Card>
           )}
@@ -747,33 +869,7 @@ function FeedbackPageInner() {
         {/* Mobile: AI input + class/lesson picker + student cards */}
         {isMobile && (
           <>
-            <Card size="small" style={{ borderRadius: 14, border: '1px dashed #E8784A', background: '#FFFBF7' }}>
-              <div style={{ fontSize: 15, fontWeight: 800, color: '#1a1201', marginBottom: 4 }}>⚡ AI 智能扩写</div>
-              <div style={{ fontSize: 12, color: '#8d806f', lineHeight: 1.6, marginBottom: 10 }}>
-                先选学生，再输入一句课堂表现，AI 会自动补齐评语、建议和标签
-              </div>
-              <Input.TextArea
-                rows={3}
-                placeholder="例如：上课认真听讲，但是作业完成还需要加强"
-                value={aiNote}
-                onChange={e => setAiNote(e.target.value)}
-                style={{ borderRadius: 10, marginBottom: 10 }}
-                allowClear
-                disabled={aiGenerating}
-              />
-              <Button
-                type="primary"
-                block
-                icon={<ThunderboltOutlined />}
-                loading={aiGenerating}
-                disabled={(!selectedStudentIds.length && !groupId && !lessonId) || aiGenerating}
-                onClick={aiGenerateClassroom}
-                style={{ height: 42, borderRadius: 10, background: '#E8784A', fontWeight: 700 }}
-              >
-                生成反馈草稿
-              </Button>
-              {!groupId && <div style={{ fontSize: 12, color: '#B26B45', marginTop: 8 }}>请先选择学生，或选择班级后让 AI 识别学生</div>}
-            </Card>
+
 
             <Card size="small" style={{ borderRadius: 14, border: '1px solid #EEE7E1' }}>
               <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 12 }}>① 选择课程</div>
@@ -798,6 +894,9 @@ function FeedbackPageInner() {
                 {(groupId || lessonId) && (
                   <div style={{ borderRadius: 10, padding: '9px 10px', background: '#FFF6F1', border: '1px solid rgba(232,120,74,.18)', color: '#B85B32', fontSize: 12, fontWeight: 700 }}>
                     当前场景：{feedbackSceneLabel} · {feedbackRateLabel}
+                    <div style={{ fontWeight: 500, marginTop: 4 }}>
+                      {bonusLoading ? '正在计算预计奖励...' : bonusPreview ? `已选${bonusPreview.selectedCount}人，预计奖励${money(bonusPreview.total)}元` : '请选择学员后查看预计奖励'}
+                    </div>
                   </div>
                 )}
               </div>
@@ -866,6 +965,34 @@ function FeedbackPageInner() {
                 )}
               </Card>
             )}
+            <Card size="small" style={{ borderRadius: 14, border: '1px dashed #E8784A', background: '#FFFBF7' }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: '#1a1201', marginBottom: 4 }}>③ AI 智能扩写</div>
+              <div style={{ fontSize: 12, color: '#8d806f', lineHeight: 1.6, marginBottom: 10 }}>
+                先选学生，再输入一句课堂表现，AI 会自动补齐评语、建议和标签
+              </div>
+              <Input.TextArea
+                rows={3}
+                placeholder="例如：上课认真听讲，但是作业完成还需要加强"
+                value={aiNote}
+                onChange={e => setAiNote(e.target.value)}
+                style={{ borderRadius: 10, marginBottom: 10 }}
+                allowClear
+                disabled={aiGenerating}
+              />
+              <Button
+                type="primary"
+                block
+                icon={<ThunderboltOutlined />}
+                loading={aiGenerating}
+                disabled={(!selectedStudentIds.length && !groupId && !lessonId) || aiGenerating}
+                onClick={aiGenerateClassroom}
+                style={{ height: 42, borderRadius: 10, background: '#E8784A', fontWeight: 700 }}
+              >
+                生成反馈建议
+              </Button>
+              {!groupId && <div style={{ fontSize: 12, color: '#B26B45', marginTop: 8 }}>请先选择学生，或选择班级后让 AI 识别学生</div>}
+            </Card>
+
           </>
         )}
         {/* Multi-student info */}

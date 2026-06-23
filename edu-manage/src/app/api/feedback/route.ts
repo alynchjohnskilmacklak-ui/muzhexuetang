@@ -214,16 +214,17 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return created
   })
 
+  let bonus: Awaited<ReturnType<typeof triggerFeedbackBonus>> | null = null
   if (status === 'PUBLISHED' && !isAdmin) {
-    const bonusResult = await triggerFeedbackBonus(feedback.id)
-    if (!bonusResult.success) {
-      console.warn('[feedback] triggerFeedbackBonus failed:', feedback.id, bonusResult.error)
+    bonus = await triggerFeedbackBonus(feedback.id)
+    if (!bonus.success) {
+      console.warn('[feedback] triggerFeedbackBonus failed:', feedback.id, bonus.error)
     }
   }
 
   revalidatePath('/teacher/dashboard')
   revalidatePath('/parent/archive')
-  return NextResponse.json(feedback, { status: 201 })
+  return NextResponse.json({ feedback, bonus }, { status: 201 })
 })
 
 // PATCH: parent reply or admin reply
