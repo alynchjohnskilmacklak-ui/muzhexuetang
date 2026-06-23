@@ -180,6 +180,7 @@ model Course {
   @@index([isActive])
   @@index([teacherId])
   @@index([division])
+  @@index([subject, grade])
 }
 
 enum GroupStatus {
@@ -405,7 +406,7 @@ model Assessment {
 model GradeRecord {
   id           String     @id @default(cuid())
   assessmentId String
-  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
   studentId    String
   student      Student    @relation(fields: [studentId], references: [id])
   score        Float
@@ -508,15 +509,19 @@ model Fee {
 }
 
 model Room {
-  id        String @id @default(cuid())
-  name      String @unique
-  capacity  Int    @default(30)
-  type      String @default("普通教室")
-  usageType String @default("GENERAL")
-  status    String @default("active")
+  id        String   @id @default(cuid())
+  name      String   @unique
+  capacity  Int      @default(30)
+  type      String   @default("普通教室")
+  usageType String   @default("GENERAL")
+  status    String   @default("active")
+  createdAt DateTime @default(now())
 
   schedules   Schedule[]
   classGroups ClassGroup[]
+
+  @@index([status])
+  @@index([type])
 }
 
 model ActivityLog {
@@ -618,7 +623,7 @@ model PerformancePost {
   teacherId      String
   teacher        Teacher      @relation(fields: [teacherId], references: [id])
   classLessonId  String?
-  classLesson    ClassLesson? @relation(fields: [classLessonId], references: [id])
+  classLesson    ClassLesson? @relation(fields: [classLessonId], references: [id], onDelete: SetNull)
   type           PostType     @default(DAILY)
   mood           MoodLevel    @default(GOOD)
   content        String
@@ -649,7 +654,7 @@ model ClassroomFeedback {
   teacherId       String
   teacher         Teacher      @relation(fields: [teacherId], references: [id])
   classLessonId   String?
-  classLesson     ClassLesson? @relation(fields: [classLessonId], references: [id])
+  classLesson     ClassLesson? @relation(fields: [classLessonId], references: [id], onDelete: SetNull)
   targetType      String       @default("CLASS")
   source          String       @default("teacher")
   studentIds      String[]
@@ -978,7 +983,7 @@ model ExamPaper {
   teacherId      String
   teacher        Teacher          @relation(fields: [teacherId], references: [id])
   classLessonId  String?
-  classLesson    ClassLesson?     @relation(fields: [classLessonId], references: [id])
+  classLesson    ClassLesson?     @relation(fields: [classLessonId], references: [id], onDelete: SetNull)
   title          String
   subject        String
   paperDate      DateTime

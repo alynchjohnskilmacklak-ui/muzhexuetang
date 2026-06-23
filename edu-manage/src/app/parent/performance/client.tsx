@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { Avatar, Button, Card, Empty, Image as AntImage, Input, Rate, Space, Tag } from 'antd'
 import { HeartFilled, HeartOutlined, MessageOutlined, StarOutlined, UserOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
@@ -183,6 +184,7 @@ function FeedCard({ post, mutate }: { post: ParentPost; mutate: () => void }) {
 
 export default function PerformanceClient({ student, initialPosts }: { student: Student; initialPosts: ParentPost[] }) {
   const [visibleLimit, setVisibleLimit] = useState(10)
+  const isMobile = useIsMobile() ?? false
   const { data, mutate, isLoading } = useSWR(student ? `/api/performance?studentId=${student.id}&limit=${visibleLimit}` : null, fetcher, {
     fallbackData: { posts: initialPosts },
     refreshInterval: 300_000,
@@ -206,7 +208,7 @@ export default function PerformanceClient({ student, initialPosts }: { student: 
             <div style={{ color: '#98A2B3' }}>{student.grade || '未设年级'} · {student.mainTeacher?.name || '未分配老师'}</div>
           </div>
         </Space>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12, marginTop: 18 }}>
           {[['动态', posts.length], ['平均评分', avg || '-'], ['已获徽章', student.achievementBadges?.length || 0], ['剩余课时', formatHours(student.remainHours)]].map(([label, value]) => (
             <div key={label} style={{ background: '#FCFBF9', borderRadius: 8, padding: 12 }}>
               <div style={{ color: '#98A2B3', fontSize: 12 }}>{label}</div>

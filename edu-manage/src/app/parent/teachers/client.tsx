@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { Card, Empty, Image, Tag, Typography } from 'antd'
 import { BookOutlined, TeamOutlined } from '@ant-design/icons'
 import { normalizeUploadUrl } from '@/lib/upload-url'
@@ -33,6 +34,7 @@ const PHOTO_H = 140
 
 function TeacherRow({ teacher }: { teacher: TeacherInfo }) {
   const [imgFailed, setImgFailed] = useState(false)
+  const isMobile = useIsMobile() ?? false
   const subjects = teacher.subjects ? teacher.subjects.split(',').map(s => s.trim()).filter(Boolean) : []
   const firstSubject = subjects[0] || ''
   const style = SUBJECT_STYLES[firstSubject] || DEFAULT_STYLE
@@ -41,12 +43,13 @@ function TeacherRow({ teacher }: { teacher: TeacherInfo }) {
 
   return (
     <div style={{
-      display: 'flex', gap: 20, padding: '20px 0',
+      display: 'flex', gap: 16, padding: '20px 0',
       borderBottom: '1px solid #F3EDE7',
       alignItems: 'flex-start',
+      flexDirection: isMobile ? 'column' : 'row',
     }}>
       {/* Photo area */}
-      <div style={{ width: PHOTO_W, height: PHOTO_H, flexShrink: 0, borderRadius: 12, overflow: 'hidden', background: '#f8f8f8', border: '1px solid #F0DDD2' }}>
+      <div style={{ width: isMobile ? '100%' : PHOTO_W, height: isMobile ? 180 : PHOTO_H, flexShrink: 0, borderRadius: 12, overflow: 'hidden', background: '#f8f8f8', border: '1px solid #F0DDD2' }}>
         {showAvatar ? (
           <Image
             src={normalizeUploadUrl(teacher.avatar)}

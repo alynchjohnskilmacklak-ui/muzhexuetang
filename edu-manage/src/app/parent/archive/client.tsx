@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { Card, Empty, Select, Tag, Typography, Progress, Spin, Modal, Image, Button, Collapse } from 'antd'
 import {
   FileTextOutlined, MessageOutlined, HeartOutlined, TrophyOutlined,
@@ -58,6 +59,7 @@ function trendArrow(points: { pct: number }[]): string {
 
 export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   const router = useRouter()
+  const isMobile = useIsMobile() ?? false
   const reportRef = useRef<HTMLDivElement>(null)
   const [studentId, setStudentId] = useState(initial.activeStudentId || '')
   const [months, setMonths] = useState(6)
@@ -370,7 +372,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
             </div>
 
             {/* Four-square */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
               {[
                 { label: '出勤率', value: profile.overview.attendanceRate !== null ? `${profile.overview.attendanceRate}%` : '—' },
                 { label: '累计课时', value: `${profile.overview.totalHours}h` },
