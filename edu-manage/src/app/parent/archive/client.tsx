@@ -1,18 +1,19 @@
-'use client'
+﻿'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Card, Empty, Select, Tag, Typography, Progress, Spin, Modal, Image, Button, Collapse } from 'antd'
 import {
   FileTextOutlined, MessageOutlined, HeartOutlined, TrophyOutlined,
   RiseOutlined, FlagOutlined, BookOutlined, CheckCircleOutlined,
   DashboardOutlined, DownloadOutlined,
 } from '@ant-design/icons'
-import { format } from 'date-fns'
 import { toast } from 'sonner'
 import useSWR from 'swr'
 import ReactECharts from 'echarts-for-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import type { StudentProfile } from '@/lib/student-profile'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import { fmtDate, fmtDateTime } from '@/lib/format-date'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -61,10 +62,22 @@ function trendArrow(points: { pct: number }[]): string {
   return ''
 }
 
+function timelineKey(item: { type?: string; refId?: string; id?: string }, index: number) {
+  return `${item.type || 'item'}-${item.refId || item.id || index}`
+}
+
+function localDateKey(value: Date | string) {
+  const d = new Date(value)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 export function ParentArchiveClient({ initial }: { initial: InitialData }) {
+  const isMobile = useIsMobile() ?? false
   const router = useRouter()
+  const searchParams = useSearchParams()
   const reportRef = useRef<HTMLDivElement>(null)
-  const [studentId, setStudentId] = useState(initial.activeStudentId || '')
+  const timelineRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const [studentId, setStudentId] = useState(searchParams.get('studentId') || initial.activeStudentId || '')
   const [months, setMonths] = useState(6)
   const [timeFilter, setTimeFilter] = useState('')
   const [studyOpen, setStudyOpen] = useState(false)
@@ -82,10 +95,34 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
 
   const children = data?.children || initial.children
   const profile = data?.profile as StudentProfile | null | undefined
+  const feedbackId = searchParams.get('feedbackId')
+  const postId = searchParams.get('postId')
+  const focusDate = searchParams.get('date')
+
+  useEffect(() => {
+    const timeline = profile?.record.timeline || []
+    if (!timeline.length) return
+
+    const targetIndex = timeline.findIndex((item: any) => {
+      if (feedbackId && item.refId === feedbackId) return true
+      if (postId && item.refId === postId) return true
+      if (focusDate && localDateKey(item.date) === focusDate) return true
+      return false
+    })
+    if (targetIndex < 0) return
+
+    const target = timeline[targetIndex] as any
+    const key = timelineKey(target, targetIndex)
+    setTimeFilter('')
+    window.setTimeout(() => {
+      timelineRefs.current[key]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      if (feedbackId || postId) setDetailItem(target)
+    }, 80)
+  }, [feedbackId, postId, focusDate, profile])
 
   const handleTimelineClick = (item: any) => {
     if (item.images?.length) { setDetailItem(item); return }
-    if (item.refType === 'feedback' && item.refId) { router.push(`/parent/class-feedback/${item.refId}`); return }
+    if (item.refType === 'feedback' && item.refId) { setDetailItem(item); return }
     if (item.refType === 'paper' && item.refId) { setDetailItem(item); return }
     if (item.refType === 'post' && item.refId) { setDetailItem(item); return }
   }
@@ -251,18 +288,21 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
             const filtered = profile.record.timeline.filter(item => !timeFilter || FILTER_CHIPS.find(c => c.key === timeFilter)?.types?.includes(item.type))
             return filtered.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {filtered.map((item, i) => (
-                  <div key={`${item.type}-${i}`} onClick={() => handleTimelineClick(item)} style={{
+                {filtered.map((item, i) => {
+                  const key = timelineKey(item, i)
+                  const isFocused = (feedbackId && item.refId === feedbackId) || (postId && item.refId === postId) || (focusDate && localDateKey(item.date) === focusDate)
+                  return (
+                  <div key={key} ref={(node) => { timelineRefs.current[key] = node }} onClick={() => handleTimelineClick(item)} style={{
                     display: 'flex', gap: 0, cursor: (item.images?.length || item.refType) ? 'pointer' : 'default',
-                    background: item.type === 'badge' || item.type === 'goal' ? 'rgba(239,159,39,.04)' : 'transparent',
-                    borderRadius: 8, overflow: 'hidden',
+                    background: isFocused ? '#FFF3EC' : item.type === 'badge' || item.type === 'goal' ? 'rgba(239,159,39,.04)' : 'transparent',
+                    borderRadius: 8, overflow: 'hidden', outline: isFocused ? '1px solid rgba(232,120,74,.35)' : 'none',
                   }}>
                     {/* D2: Left color strip */}
                     <div style={{ width: 3, flexShrink: 0, background: TYPE_COLOR[item.type], borderRadius: '3px 0 0 3px', margin: '8px 0' }} />
                     <div style={{ flex: 1, minWidth: 0, padding: '8px 10px 8px 8px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                         <Text strong style={{ fontSize: 13 }}>{item.title}</Text>
-                        <Text type="secondary" style={{ fontSize: 11, flexShrink: 0 }}>{format(new Date(item.date), 'M月d日')}</Text>
+                        <Text type="secondary" style={{ fontSize: 11, flexShrink: 0 }}>{fmtDate(item.date)}</Text>
                       </div>
                       {item.sub && <Text type="secondary" style={{ fontSize: 12 }}>{item.sub.length > 60 ? item.sub.slice(0, 60) + '...' : item.sub}</Text>}
                       <div style={{ marginTop: 2, display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
@@ -284,7 +324,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                       {((item.images && item.images.length > 0) || item.refType) && <div style={{ fontSize: 10, color: '#E8784A', marginTop: 4 }}>{item.refType === 'feedback' ? '查看反馈详情 →' : (item.images && item.images.length > 0) ? '查看图片 →' : item.refType ? '查看详情 →' : ''}</div>}
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
             ) : <Text type="secondary" style={{ fontSize: 13 }}>暂无成长记录</Text>
           })()}
@@ -325,7 +365,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
             <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>教师寄语</Text>
             {profile.profileCase.teacherSummary ? (
               <div>
-                <Tag color="purple" style={{ borderRadius: 9999, marginBottom: 6, fontSize: 10 }}>{profile.profileCase.teacherSummary.teacherName || '老师'}{profile.profileCase.teacherSummary.teacherSubject ? ` · ${profile.profileCase.teacherSummary.teacherSubject}` : ''} · {format(new Date(profile.profileCase.teacherSummary.periodStart), 'M/d')} 至 {format(new Date(profile.profileCase.teacherSummary.periodEnd), 'M/d')}</Tag>
+                <Tag color="purple" style={{ borderRadius: 9999, marginBottom: 6, fontSize: 10 }}>{profile.profileCase.teacherSummary.teacherName || '老师'}{profile.profileCase.teacherSummary.teacherSubject ? ` · ${profile.profileCase.teacherSummary.teacherSubject}` : ''} · {fmtDate(profile.profileCase.teacherSummary.periodStart)} 至 {fmtDate(profile.profileCase.teacherSummary.periodEnd)}</Tag>
                 <Paragraph type="secondary" style={{ fontSize: 12, margin: 0, whiteSpace: 'pre-wrap' }}>{profile.profileCase.teacherSummary.summary}</Paragraph>
                 {profile.profileCase.teacherSummary.suggestions && <Paragraph type="secondary" style={{ fontSize: 12, margin: '6px 0 0', whiteSpace: 'pre-wrap' }}>下一步建议：{profile.profileCase.teacherSummary.suggestions}</Paragraph>}
               </div>
@@ -343,21 +383,21 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
       </>)}
 
       {/* Image detail Modal */}
-      <Modal open={!!detailItem} onCancel={() => setDetailItem(null)} footer={null} width={560} title={detailItem?.title || '详情'}>
+      <Modal open={!!detailItem} onCancel={() => setDetailItem(null)} footer={null} width="min(560px, 92vw)" title={detailItem?.title || '详情'}>
         {detailItem && (
           <div>
             {detailItem.images?.length > 0 && <Image.PreviewGroup><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>{detailItem.images.map((url: string, i: number) => <Image key={i} src={url} alt="" style={{ borderRadius: 8, objectFit: 'cover', width: '100%', height: 120 }} />)}</div></Image.PreviewGroup>}
             <Paragraph style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detailItem.sub || detailItem.content}</Paragraph>
             {detailItem.teacher && <Tag style={{ borderRadius: 9999, marginTop: 4 }}>{formatTeacherLabel(detailItem)}</Tag>}
-            {detailItem.date && <div style={{ marginTop: 8 }}><Text type="secondary" style={{ fontSize: 11 }}>{format(new Date(detailItem.date), 'yyyy年M月d日 HH:mm')}</Text></div>}
+            {detailItem.date && <div style={{ marginTop: 8 }}><Text type="secondary" style={{ fontSize: 11 }}>{fmtDateTime(detailItem.date)}</Text></div>}
             {detailItem.refType === 'paper' && detailItem.refId && <Button type="link" onClick={() => { setDetailItem(null); router.push(`/parent/archive?paperId=${detailItem.refId}`) }} style={{ padding: 0, marginTop: 8 }}>查看试卷详情</Button>}
-            {detailItem.refType === 'post' && detailItem.refId && <Button type="link" onClick={() => { setDetailItem(null); router.push(`/parent/growth?postId=${detailItem.refId}`) }} style={{ padding: 0, marginTop: 8 }}>查看成长动态详情</Button>}
+            {detailItem.refType === 'post' && detailItem.refId && <Button type="link" onClick={() => { setDetailItem(null); router.push(`/parent/archive?postId=${detailItem.refId}`) }} style={{ padding: 0, marginTop: 8 }}>查看成长动态详情</Button>}
           </div>
         )}
       </Modal>
 
       {/* C1+C2: Expanded report Modal with PDF download */}
-      <Modal open={reportOpen} onCancel={() => setReportOpen(false)} width={650} title="本期学情报告"
+      <Modal open={reportOpen} onCancel={() => setReportOpen(false)} width="min(650px, 92vw)" title="本期学情报告"
         footer={<div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <Button onClick={() => setReportOpen(false)}>关闭</Button>
           <Button type="primary" icon={<DownloadOutlined />} loading={downloading} onClick={downloadReport} style={{ background: '#E8784A', border: 'none' }}>下载 PDF</Button>
@@ -374,7 +414,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
             </div>
 
             {/* Four-square */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
               {[
                 { label: '出勤率', value: profile.overview.attendanceRate !== null ? `${profile.overview.attendanceRate}%` : '—' },
                 { label: '本期试卷', value: `${profile.overview.paperCount} 份` },
@@ -421,7 +461,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#EF9F27', marginBottom: 6 }}>本期进步</div>
                   {badgeItems.slice(0, 5).map((b, i) => (
                     <div key={i} style={{ fontSize: 12, marginBottom: 4, color: '#4B5563' }}>
-                      {format(new Date(b.date), 'M月d日')} 获得「{b.title.replace('获得徽章「', '').replace('」', '')}」{b.sub ? ` — ${b.sub}` : ''}
+                      {fmtDate(b.date)} 获得「{b.title.replace('获得徽章「', '').replace('」', '')}」{b.sub ? ` — ${b.sub}` : ''}
                     </div>
                   ))}
                 </div>
@@ -438,7 +478,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                   {fbItems.map((f, i) => (
                     <div key={i} style={{ fontSize: 12, marginBottom: 6, padding: '6px 10px', background: '#F9F7FF', borderRadius: 8, color: '#4B5563' }}>
                       <div style={{ fontWeight: 600, fontSize: 11, color: '#7A869A', marginBottom: 2 }}>
-                        {format(new Date(f.date), 'M月d日')} {f.teacher ? `${f.teacher} 老师${f.teacherSubject ? ` · ${f.teacherSubject}` : ''}` : ''}
+                        {fmtDate(f.date)} {f.teacher ? `${f.teacher} 老师${f.teacherSubject ? ` · ${f.teacherSubject}` : ''}` : ''}
                       </div>
                       “{f.sub}”
                     </div>

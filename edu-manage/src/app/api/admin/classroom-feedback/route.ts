@@ -193,7 +193,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
 
     revalidatePath('/teacher/dashboard')
-    revalidatePath('/parent/growth')
+    revalidatePath('/parent/archive')
     return NextResponse.json(feedback, { status: 201 })
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : '创建失败' }, { status: 500 })

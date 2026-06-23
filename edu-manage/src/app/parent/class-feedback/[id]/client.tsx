@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 import { Button, Card, Descriptions, Empty, Image, Tag, Typography } from 'antd'
 import { ArrowLeftOutlined, BookOutlined, ClockCircleOutlined, EnvironmentOutlined, TeamOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
-import { format } from 'date-fns'
+import { fmtDateTime } from '@/lib/format-date'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 
@@ -38,7 +38,7 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
         <Descriptions column={isMobile ? 1 : 2} size="small" style={{ marginBottom: 20 }}>
           <Descriptions.Item label="老师">{feedback.teacher?.name || '-'}{subjectOfTeacher(feedback.teacher?.subjects) ? ` · ${subjectOfTeacher(feedback.teacher?.subjects)}` : ''}</Descriptions.Item>
           <Descriptions.Item label="时间">
-            {format(new Date(feedback.createdAt), 'yyyy-MM-dd HH:mm')}
+            {fmtDateTime(feedback.createdAt)}
           </Descriptions.Item>
           {feedback.classLesson?.group?.course && (
             <>

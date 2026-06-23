@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Card, Descriptions, Tag, Typography, Empty, Avatar, Button, Form, Input, Modal } from 'antd'
 import { useRouter } from 'next/navigation'
 import { UserOutlined, TeamOutlined, MailOutlined, CalendarOutlined, LockOutlined, RightOutlined } from '@ant-design/icons'
-import { format } from 'date-fns'
+import { fmtFull } from '@/lib/format-date'
 import { toast } from 'sonner'
 
 const { Title, Text } = Typography
@@ -52,7 +52,7 @@ export function ParentProfileClient({
         <Descriptions column={{ xs: 1, sm: 2 }} size="small" bordered>
           <Descriptions.Item label={<><MailOutlined /> 账号邮箱</>}>{user.email}</Descriptions.Item>
           <Descriptions.Item label={<><CalendarOutlined /> 注册时间</>}>
-            {format(new Date(user.createdAt), 'yyyy-MM-dd')}
+            {fmtFull(user.createdAt)}
           </Descriptions.Item>
         </Descriptions>
         <div style={{ marginTop: 16 }}>

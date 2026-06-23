@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 import { Alert, Button, Card, Descriptions, Tag, Typography } from 'antd'
 import { ArrowLeftOutlined, BookOutlined, StarOutlined, FileTextOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
-import { format } from 'date-fns'
+import { fmtDateTime } from '@/lib/format-date'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 
 const { Title, Text, Paragraph } = Typography
@@ -41,7 +41,7 @@ export function NotificationDetailClient({
     : notification.relatedType === 'CLASSROOM_FEEDBACK'
       ? { label: '去课堂反馈查看', href: '/parent/class-feedback' }
       : notification.relatedType === 'PERFORMANCE_FEEDBACK'
-        ? { label: '去成长动态查看', href: '/parent/growth' }
+        ? { label: '去成长档案查看', href: '/parent/archive' }
         : null
 
   return (
@@ -64,11 +64,11 @@ export function NotificationDetailClient({
 
         <Descriptions column={1} size="small" style={{ marginBottom: 16 }}>
           <Descriptions.Item label="时间">
-            {format(new Date(notification.createdAt), 'yyyy-MM-dd HH:mm:ss')}
+            {fmtDateTime(notification.createdAt)}
           </Descriptions.Item>
           {notification.readAt && (
             <Descriptions.Item label="已读时间">
-              {format(new Date(notification.readAt), 'yyyy-MM-dd HH:mm:ss')}
+              {fmtDateTime(notification.readAt)}
             </Descriptions.Item>
           )}
         </Descriptions>

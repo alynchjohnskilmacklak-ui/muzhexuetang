@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import {
@@ -11,7 +11,7 @@ import {
 } from '@ant-design/icons'
 import { toast } from 'sonner'
 import useSWR from 'swr'
-import { format } from 'date-fns'
+import { fmtDateTime } from '@/lib/format-date'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { SUBJECT_COLORS } from '@/constants/subjects'
 
@@ -67,7 +67,7 @@ function ChatBubble({ reply, isOwn }: { reply: Reply; isOwn: boolean }) {
           marginBottom: 4,
           textAlign: isOwn ? 'right' : 'left',
         }}>
-          {reply.authorName} · {format(new Date(reply.createdAt), 'MM-dd HH:mm')}
+          {reply.authorName} · {fmtDateTime(reply.createdAt)}
         </div>
         <div style={{
           background: isOwn ? '#E8784A' : '#fff',

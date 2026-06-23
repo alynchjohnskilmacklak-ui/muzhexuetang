@@ -11,9 +11,9 @@ import {
 } from '@ant-design/icons'
 import { toast } from 'sonner'
 import useSWR from 'swr'
-import { format } from 'date-fns'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { SUBJECT_COLORS } from '@/constants/subjects'
+import { fmtDateTime } from '@/lib/format-date'
 
 const { Text, Title } = Typography
 const { TextArea } = Input
@@ -49,7 +49,7 @@ function ChatBubble({ reply }: { reply: Reply }) {
       </Avatar>
       <div style={{ maxWidth: '70%' }}>
         <div style={{ fontSize: 11, color: '#9a8e7a', marginBottom: 4, textAlign: isTeacher ? 'right' : 'left' }}>
-          {reply.authorName} · {format(new Date(reply.createdAt), 'MM-dd HH:mm')}
+          {reply.authorName} · {fmtDateTime(reply.createdAt)}
         </div>
         <div style={{
           background: isTeacher ? '#1D9E75' : '#fff',

@@ -10,6 +10,7 @@ import { MOOD_META, PERFORMANCE_BADGES, RATING_LABELS } from '@/lib/mood-meta'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { formatHours } from '@/lib/format'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 type ParentPost = {
   id: string
@@ -100,6 +101,7 @@ function BadgeWall({ badges }: { badges: NonNullable<Student>['achievementBadges
 }
 
 function FeedCard({ post, mutate }: { post: ParentPost; mutate: () => void }) {
+  const isMobile = useIsMobile() ?? false
   const [replyOpen, setReplyOpen] = useState(false)
   const [content, setContent] = useState('')
   const [sending, setSending] = useState(false)
@@ -153,8 +155,10 @@ function FeedCard({ post, mutate }: { post: ParentPost; mutate: () => void }) {
           })}</Space>}
           {!!post.images.length && (
             <AntImage.PreviewGroup>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 88px)', gap: 8, marginBottom: 12 }}>
-                {post.images.map((src) => <AntImage key={src} src={normalizeUploadUrl(src)} alt="课堂照片" width={88} height={88} style={{ objectFit: 'cover', borderRadius: 8 }} />)}
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(3, minmax(0, 1fr))' : 'repeat(3, 88px)', gap: 8, marginBottom: 12, maxWidth: isMobile ? 320 : undefined }}>
+                {post.images.map((src) => (
+                  <AntImage key={src} src={normalizeUploadUrl(src)} alt="课堂照片" width={isMobile ? '100%' : 88} height={88} style={{ objectFit: 'cover', borderRadius: 8, width: '100%' }} />
+                ))}
               </div>
             </AntImage.PreviewGroup>
           )}
@@ -181,6 +185,7 @@ function FeedCard({ post, mutate }: { post: ParentPost; mutate: () => void }) {
 }
 
 export default function PerformanceClient({ student, initialPosts }: { student: Student; initialPosts: ParentPost[] }) {
+  const isMobile = useIsMobile() ?? false
   const [visibleLimit, setVisibleLimit] = useState(10)
   const { data, mutate, isLoading } = useSWR(student ? `/api/performance?studentId=${student.id}&limit=${visibleLimit}` : null, fetcher, {
     fallbackData: { posts: initialPosts },
@@ -205,7 +210,7 @@ export default function PerformanceClient({ student, initialPosts }: { student: 
             <div style={{ color: '#98A2B3' }}>{student.grade || '未设年级'} · {student.mainTeacher?.name || '未分配老师'}</div>
           </div>
         </Space>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, 1fr)', gap: 12, marginTop: 18 }}>
           {[['动态', posts.length], ['平均评分', avg || '-'], ['已获徽章', student.achievementBadges?.length || 0], ['剩余课时', formatHours(student.remainHours)]].map(([label, value]) => (
             <div key={label} style={{ background: '#FCFBF9', borderRadius: 8, padding: 12 }}>
               <div style={{ color: '#98A2B3', fontSize: 12 }}>{label}</div>

@@ -1,10 +1,12 @@
-'use client'
+﻿'use client'
 
 import useSWR from 'swr'
-import { Button, Card, Empty, Input, Modal, Segmented, Skeleton, Space, Tag, Typography, message } from 'antd'
+import { Button, Card, Empty, Input, Modal, Segmented, Skeleton, Space, Tag, Typography } from 'antd'
 import { CalendarOutlined, CheckOutlined, CloseOutlined, ReloadOutlined, UserOutlined } from '@ant-design/icons'
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { fmtDate, fmtDateTime } from '@/lib/format-date'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -35,12 +37,12 @@ function statusMeta(status: string) {
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+  return fmtDate(value)
 }
 
 function formatTime(value?: string) {
   if (!value) return ''
-  return new Date(value).toLocaleString('zh-CN', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return fmtDateTime(value)
 }
 
 export default function TeacherLeavePage() {
@@ -58,7 +60,7 @@ export default function TeacherLeavePage() {
 
   const submitAction = async () => {
     if (!action) return
-    const hide = message.loading(action.status === 'approved' ? '正在批准请假...' : '正在驳回请假...', 0)
+    const toastId = toast.loading(action.status === 'approved' ? '正在批准请假...' : '正在驳回请假...')
     try {
       const res = await fetch(`/api/leave-requests/${action.record.id}`, {
         method: 'PATCH',
@@ -69,14 +71,14 @@ export default function TeacherLeavePage() {
         const payload = await res.json().catch(() => ({}))
         throw new Error(payload.error || '处理失败')
       }
-      message.success(action.status === 'approved' ? '已批准请假' : '已驳回请假')
+      toast.success(action.status === 'approved' ? '已批准请假' : '已驳回请假')
       setAction(null)
       setReplyNote('')
       mutate()
     } catch (error) {
-      message.error(error instanceof Error ? error.message : '处理失败')
+      toast.error(error instanceof Error ? error.message : '处理失败')
     } finally {
-      hide()
+      toast.dismiss(toastId)
     }
   }
 

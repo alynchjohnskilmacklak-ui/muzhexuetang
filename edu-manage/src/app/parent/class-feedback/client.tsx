@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Button, Card, Empty, Tag, Typography, Modal, Input, Descriptions, Image, Space } from 'antd'
 import { BookOutlined, ClockCircleOutlined, CameraOutlined, MessageOutlined, ArrowRightOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
-import { format } from 'date-fns'
+import { fmtDate, fmtDateTime } from '@/lib/format-date'
 import { toast } from 'sonner'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 import { normalizeUploadUrl } from '@/lib/upload-url'
@@ -108,7 +108,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
                   <Tag color="green" style={{ borderRadius: 9999, fontSize: 10 }}>已回复</Tag>
                 )}
                 <Text type="secondary" style={{ fontSize: 11, marginLeft: 'auto' }}>
-                  {format(new Date(f.createdAt), 'MM-dd HH:mm')}
+                  {fmtDateTime(f.createdAt)}
                 </Text>
               </div>
 
@@ -178,7 +178,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
             <Descriptions column={isMobile ? 1 : 2} size="small" style={{ marginBottom: 16 }}>
               <Descriptions.Item label="老师">{detailModal.teacher?.name || '-'}</Descriptions.Item>
               <Descriptions.Item label="发布时间">
-                {format(new Date(detailModal.createdAt), 'yyyy-MM-dd HH:mm')}
+                {fmtDateTime(detailModal.createdAt)}
               </Descriptions.Item>
               {detailModal.classLesson?.group?.course && (
                 <>
@@ -190,7 +190,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
                     {detailModal.classLesson.group.room?.name || '-'}
                   </Descriptions.Item>
                   <Descriptions.Item label="上课时间">
-                    {format(new Date(detailModal.classLesson.lessonDate), 'MM/dd')} {detailModal.classLesson.startTime}-{detailModal.classLesson.endTime}
+                    {fmtDate(detailModal.classLesson.lessonDate)} {detailModal.classLesson.startTime}-{detailModal.classLesson.endTime}
                   </Descriptions.Item>
                 </>
               )}
@@ -274,7 +274,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
                 <div style={{ background: '#FFF3E8', borderRadius: 8, padding: 12, marginBottom: 10 }}>
                   <Text style={{ fontSize: 13, color: '#4B5563' }}>{localReply || detailModal.parentReply}</Text>
                   <div style={{ fontSize: 11, color: '#B0B8C1', marginTop: 4 }}>
-                    已回复{detailModal.parentRepliedAt ? ` · ${format(new Date(detailModal.parentRepliedAt), 'MM-dd HH:mm')}` : ''}
+                    已回复{detailModal.parentRepliedAt ? ` · ${fmtDateTime(detailModal.parentRepliedAt)}` : ''}
                   </div>
                 </div>
               ) : (

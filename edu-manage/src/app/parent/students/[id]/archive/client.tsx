@@ -6,7 +6,7 @@ import {
   BookOutlined, CameraOutlined, TrophyOutlined,
   LineChartOutlined, FileTextOutlined, ClockCircleOutlined,
 } from '@ant-design/icons'
-import { format } from 'date-fns'
+import { fmtDate, fmtDateTime } from '@/lib/format-date'
 
 const { Title, Text } = Typography
 
@@ -119,7 +119,7 @@ function OverviewTab({ data }: { data: ArchiveData }) {
         {c.recentLessons.length === 0 ? <Empty description="暂无近期课程" image={Empty.PRESENTED_IMAGE_SIMPLE} /> : (
           c.recentLessons.slice(0, 5).map((l: any) => (
             <div key={l.id} style={{ padding: '6px 0', borderBottom: '1px solid #f5f0eb', fontSize: 13 }}>
-              <Text>{format(new Date(l.lessonDate), 'MM/dd')} {l.startTime}-{l.endTime}</Text>
+              <Text>{fmtDate(l.lessonDate)} {l.startTime}-{l.endTime}</Text>
               <Text type="secondary" style={{ marginLeft: 12 }}>{l.courseName} · {l.teacherName}</Text>
             </div>
           ))
@@ -135,7 +135,7 @@ function FeedbacksTab({ feedbacks }: { feedbacks: any[] }) {
     <Card key={f.id} bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', marginBottom: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
         <Text strong>{f.teacher?.name || '老师'}</Text>
-        <Text type="secondary" style={{ fontSize: 12 }}>{format(new Date(f.createdAt), 'yyyy-MM-dd HH:mm')}</Text>
+        <Text type="secondary" style={{ fontSize: 12 }}>{fmtDateTime(f.createdAt)}</Text>
       </div>
       {f.tags?.length > 0 && <div style={{ marginBottom: 8 }}>{f.tags.map((t: string) => <Tag key={t} color="orange" style={{ borderRadius: 9999 }}>{t}</Tag>)}</div>}
       {f.knowledgePoints?.length > 0 && <Text type="secondary" style={{ fontSize: 12 }}>知识点：{f.knowledgePoints.join('、')}</Text>}
@@ -182,7 +182,7 @@ function TimelineTab({ timeline, profile }: { timeline: any[]; profile: any }) {
           {item.sub && <div style={{ fontSize: 12, color: '#7A869A' }}>{item.sub}</div>}
           {item.content && <div style={{ fontSize: 12, color: '#4A5568', marginTop: 2 }}>{item.content}</div>}
           <div style={{ fontSize: 11, color: '#B0B8C1', marginTop: 4 }}>
-            {format(new Date(item.date), 'MM/dd HH:mm')}
+            {fmtDateTime(item.date)}
             {item.teacher ? ` · ${item.teacher}` : ''}
           </div>
         </div>
@@ -219,7 +219,7 @@ function GradesTab({ profile }: { profile: any }) {
             </div>
           )}
           <div style={{ fontSize: 11, color: '#B0B8C1', marginTop: 4 }}>
-            {profileCase.teacherSummary.teacherName} · {profileCase.teacherSummary.periodStart && format(new Date(profileCase.teacherSummary.periodStart), 'MM/dd')}-{profileCase.teacherSummary.periodEnd && format(new Date(profileCase.teacherSummary.periodEnd), 'MM/dd')}
+            {profileCase.teacherSummary.teacherName} · {profileCase.teacherSummary.periodStart && fmtDate(profileCase.teacherSummary.periodStart)}-{profileCase.teacherSummary.periodEnd && fmtDate(profileCase.teacherSummary.periodEnd)}
           </div>
         </Card>
       )}
@@ -273,7 +273,7 @@ function AttendanceTab({ attendance, courses }: { attendance: any; courses: any 
             dataSource={a.records.slice(0, 30)}
             rowKey="id"
             columns={[
-              { title: '日期', dataIndex: 'lessonDate', render: (d: Date) => format(new Date(d), 'MM/dd') },
+              { title: '日期', dataIndex: 'lessonDate', render: (d: Date) => fmtDate(d) },
               { title: '时间', render: (_: any, r: any) => `${r.startTime}-${r.endTime}` },
               { title: '课程', dataIndex: 'courseName' },
               {
@@ -302,7 +302,7 @@ function FilesTab({ files }: { files: any[] }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <Text strong>{f.name}</Text>
-          <div style={{ fontSize: 11, color: '#B0B8C1' }}>{f.mimeType} · {Math.round(f.size / 1024)}KB · {format(new Date(f.createdAt), 'MM/dd')}</div>
+          <div style={{ fontSize: 11, color: '#B0B8C1' }}>{f.mimeType} · {Math.round(f.size / 1024)}KB · {fmtDate(f.createdAt)}</div>
         </div>
         <a href={f.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12 }}>查看</a>
       </div>

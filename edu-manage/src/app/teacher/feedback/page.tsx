@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { MOODS, QUICK_TAGS, QUICK_KPS, BADGES } from '@/components/FeedbackCard'
+import { fmtDate } from '@/lib/format-date'
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
@@ -83,7 +84,7 @@ function FeedbackPageInner() {
         label: `${l.groupName} · ${l.startTime} (${l.studentIds.length}人)`, value: l.id,
       })) }] : []),
       ...(grouped.recent.length ? [{ label: `近7天 (${grouped.recent.length})`, options: grouped.recent.map((l: any) => ({
-        label: `${l.groupName} · ${new Date(l.lessonDate).toLocaleDateString('zh-CN', { month:'numeric', day:'numeric' })} ${l.startTime}`, value: l.id,
+        label: `${l.groupName} · ${fmtDate(l.lessonDate)} ${l.startTime}`, value: l.id,
       })) }] : []),
     ]
   }, [allLessons])
@@ -599,13 +600,10 @@ function FeedbackPageInner() {
         </Card>
       )}
 
-      {/* Submit — fixed bottom bar on mobile */}
+      {/* Submit */}
       <div style={{
-        display: 'flex', gap: 10, paddingBottom: isMobile ? 'calc(12px + env(safe-area-inset-bottom))' : 24,
-        ...(isMobile ? {
-          position: 'fixed', bottom: 'calc(72px + env(safe-area-inset-bottom))', left: 0, right: 0, zIndex: 1000,
-          background: '#fff', padding: '10px 16px', borderTop: '1px solid #EEE7E1', boxShadow: '0 -2px 8px rgba(0,0,0,.06)',
-        } : {}),
+        display: 'flex', gap: 10,
+        padding: isMobile ? '12px 0 calc(96px + env(safe-area-inset-bottom))' : '0 0 24px',
       }}>
         <Button block onClick={() => submit('DRAFT')} loading={saving} style={{ flex: 1 }}>保存草稿</Button>
         <Button block type="primary" icon={submitDone ? <CheckCircleOutlined /> : <SendOutlined />}
@@ -614,8 +612,6 @@ function FeedbackPageInner() {
           {submitDone ? '已发布' : saving ? '发布中...' : '发布给家长'}
         </Button>
       </div>
-      {/* Spacer for fixed bar on mobile */}
-      {isMobile && <div style={{ height: 152 }} />}
     </div>
   )
 
@@ -705,7 +701,16 @@ function FeedbackPageInner() {
                     <Button size="small" onClick={clearAll} style={{ fontSize: 11 }}>清空</Button>
                   </div>
                   {filteredStudents.length === 0 ? (
-                    <Empty description="该班级暂无学员" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                    <Empty
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description={
+                        <div style={{ lineHeight: 1.7 }}>
+                          <div>该班级暂无学员</div>
+                          <div style={{ fontSize: 12, color: '#999' }}>可能尚未排课、学员未入班，或学部选择有误</div>
+                          <div style={{ fontSize: 12, color: '#999' }}>请到「学员管理」确认入班，或切换上方学部/班级</div>
+                        </div>
+                      }
+                    />
                   ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                       {filteredStudents.map((s: any) => {
@@ -831,7 +836,16 @@ function FeedbackPageInner() {
                       <Button onClick={clearAll}>清空</Button>
                     </div>
                     {filteredStudents.length === 0 ? (
-                      <Empty description="该班级暂无学生" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                      <Empty
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={
+                          <div style={{ lineHeight: 1.7 }}>
+                            <div>该班级暂无学员</div>
+                            <div style={{ fontSize: 12, color: '#999' }}>可能尚未排课、学员未入班，或学部选择有误</div>
+                            <div style={{ fontSize: 12, color: '#999' }}>请到「学员管理」确认入班，或切换上方学部/班级</div>
+                          </div>
+                        }
+                      />
                     ) : (
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                         {filteredStudents.map((s: any) => {

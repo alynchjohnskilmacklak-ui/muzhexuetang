@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { requireTeacherPage } from '@/lib/teacher-portal'
 import { formatHours } from '@/lib/format'
+import { fmtDate } from '@/lib/format-date'
 
 export default async function TeacherStudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const teacher = await requireTeacherPage()
@@ -156,7 +157,7 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
                         {moodMap[post.mood] || post.mood}
                       </span>
                       <span style={{ fontSize: 11, color: '#98A2B3' }}>
-                        {post.createdAt.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                        {fmtDate(post.createdAt)}
                       </span>
                     </div>
                     <div style={{ fontSize: 13, color: '#1F2329', lineHeight: 1.5 }}>{post.content}</div>
@@ -188,7 +189,7 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
                         {attendance.lesson!.group.course.name}
                       </div>
                       <div style={{ fontSize: 11, color: '#8d806f', marginTop: 2 }}>
-                        {attendance.lesson!.lessonDate.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })} {attendance.lesson!.startTime}
+                        {fmtDate(attendance.lesson!.lessonDate)} {attendance.lesson!.startTime}
                       </div>
                     </div>
                     <span style={{ fontSize: 12, padding: '2px 10px', borderRadius: 9999, background: status.bg, color: status.color, fontWeight: 600, whiteSpace: 'nowrap' }}>

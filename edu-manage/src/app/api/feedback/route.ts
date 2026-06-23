@@ -222,7 +222,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   revalidatePath('/teacher/dashboard')
-  revalidatePath('/parent/growth')
+  revalidatePath('/parent/archive')
   return NextResponse.json(feedback, { status: 201 })
 })
 

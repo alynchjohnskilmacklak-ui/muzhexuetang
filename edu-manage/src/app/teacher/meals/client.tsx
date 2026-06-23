@@ -1,9 +1,11 @@
-'use client'
+﻿'use client'
 
 import { useMemo, useState } from 'react'
-import { Button, Card, Empty, Radio, Tag, Typography, message, Collapse } from 'antd'
+import { Button, Card, Empty, Radio, Tag, Typography, Collapse } from 'antd'
 import { DownOutlined, RightOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import { toast } from 'sonner'
+import { fmtDateTime, fmtFull } from '@/lib/format-date'
 
 const { Title, Text } = Typography
 
@@ -80,8 +82,8 @@ export function TeacherMealsClient({
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'submit failed')
       setCurrentReport(data); setEditing(false)
-      message.success(currentReport ? '上报已更新' : '上报已提交')
-    } catch { message.error('就餐上报提交失败') }
+      toast.success(currentReport ? '上报已更新' : '上报已提交')
+    } catch { toast.error('就餐上报提交失败') }
     finally { setSubmitting(false) }
   }
 
@@ -91,7 +93,7 @@ export function TeacherMealsClient({
     <div>
       <Title level={4} style={{ marginTop: 0 }}>就餐上报</Title>
       <Card style={{ marginBottom: 16, borderRadius: 12 }}>
-        <Text type="secondary">{dayjs(reportDate).format('YYYY-MM-DD')} 今日菜单</Text>
+        <Text type="secondary">{fmtFull(reportDate)} 今日菜单</Text>
         <div style={{ fontSize: 24, fontWeight: 700, marginTop: 8 }}>{menu.mainDish}</div>
         <Text style={{ display: 'block', marginTop: 6 }}>{menu.sideDish || '菜品待补充'}</Text>
         {menu.allowDouble && <Tag color="orange" style={{ marginTop: 10 }}>允许双份主食</Tag>}
@@ -100,7 +102,7 @@ export function TeacherMealsClient({
       <Card title={currentReport && !editing ? '已提交' : '今日就餐上报'} style={{ borderRadius: 12 }}>
         {currentReport && !editing ? (
           <>
-            <Text type="secondary">提交时间 {dayjs(currentReport.submittedAt).format('YYYY-MM-DD HH:mm')}</Text>
+            <Text type="secondary">提交时间 {fmtDateTime(currentReport.submittedAt)}</Text>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', margin: '12px 0' }}>
               <Tag color="blue">就餐 {currentReport.totalCount} 人</Tag>
               <Tag color="green">单份 {currentReport.riceSingle} 人</Tag>

@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { Card, Empty, Spin, Tag, Typography } from 'antd'
-import { ClockCircleOutlined, EnvironmentOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
+import { BellOutlined, ClockCircleOutlined, CoffeeOutlined, EnvironmentOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
 import { SCHEDULE_PERIODS, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -39,6 +39,7 @@ function getWeekRange(offset = 0) {
 
 export default function TeacherSchedulePage() {
   const isMobile = useIsMobile() ?? false
+  const isTablet = useIsMobile(1025) ?? false
   const [scheduleType, setScheduleType] = useState<'group'|'intensive'>('group')
   const [weekOffset, setWeekOffset] = useState(0)
   const { start, end } = getWeekRange(weekOffset)
@@ -171,7 +172,7 @@ export default function TeacherSchedulePage() {
                           const accent = scheduleType === 'group' ? '#E8784A' : intensiveCfg.color
                           const lessonSubject = lesson.subject || lesson.group?.course?.subject
                           return (
-                            <div key={lesson.id} style={{ border: '1px solid #EEE7E1', borderLeft: `4px solid ${accent}`, borderRadius: 10, padding: '10px 12px', background: '#fff', minWidth: 0 }}>
+                            <div key={lesson.id} style={{ border: '1px solid #EEE7E1', borderTop: `3px solid ${accent}`, borderRadius: 10, padding: '10px 12px', background: '#fff', minWidth: 0 }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                                 <span style={{ color: accent, fontWeight: 700, fontSize: 13 }}>
                                   {lesson.startTime || '-'}{lesson.endTime ? `–${lesson.endTime}` : ''}
@@ -213,7 +214,7 @@ export default function TeacherSchedulePage() {
         scheduleType === 'group' ? (
           groupLessons.length === 0 ? <Empty description="本周暂无精品班课" /> : (
             <Card bordered={false} style={{ borderRadius: 10, overflow: 'auto' }} styles={{ body: { padding: 0 } }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '72px repeat(7, minmax(72px, 1fr))', minWidth: 640 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isTablet ? '56px repeat(7, minmax(58px, 1fr))' : '72px repeat(7, minmax(72px, 1fr))', minWidth: isTablet ? 0 : 640 }}>
                 <div style={{ padding: 8, background: 'var(--color-background-secondary, #faf8f5)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)' }} />
                 {weekDates.map((date, i) => {
                   const today = date.toDateString() === new Date().toDateString()
@@ -231,8 +232,8 @@ export default function TeacherSchedulePage() {
                       <div style={{ minHeight: h, background: PERIOD_BG[period.type], borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', padding: '2px 8px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end' }}>
                         {period.type === 'CLASS' && <><div style={{ fontSize: 10, fontWeight: 500, color: '#E8784A' }}>{period.name}</div><div style={{ fontSize: 8, fontFamily: 'monospace', color: 'var(--color-text-tertiary, #98A2B3)' }}>{period.start}–{period.end}</div></>}
                         {period.type === 'BREAK' && <span style={{ fontSize: 9, fontStyle: 'italic', color: 'var(--color-text-tertiary, #98A2B3)' }}>课间</span>}
-                        {period.type === 'BIG_BREAK' && <span style={{ fontSize: 9, fontWeight: 500, color: '#534AB7' }}>🔔大课间</span>}
-                        {period.type === 'LUNCH' && <span style={{ fontSize: 9, fontWeight: 500, color: '#1D9E75' }}>🍱午休</span>}
+                        {period.type === 'BIG_BREAK' && <span style={{ fontSize: 9, fontWeight: 500, color: '#534AB7', display: 'inline-flex', alignItems: 'center', gap: 3 }}><BellOutlined />大课间</span>}
+                        {period.type === 'LUNCH' && <span style={{ fontSize: 9, fontWeight: 500, color: '#1D9E75', display: 'inline-flex', alignItems: 'center', gap: 3 }}><CoffeeOutlined />午休</span>}
                       </div>
                       {weekDates.map((date, dayIdx) => {
                         const items = groupGrid[`${dayIdx}-${period.id}`] || []
@@ -240,7 +241,7 @@ export default function TeacherSchedulePage() {
                         return (
                           <div key={dayIdx} style={{ minHeight: h, overflow: 'hidden', borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', padding: 3, background: PERIOD_BG[period.type] }}>
                             {hasItem ? items.map((l: any) => (
-                              <div key={l.id} style={{ borderLeft: '3px solid #E8784A', background: 'rgba(232,120,74,.1)', borderRadius: 5, padding: '5px 7px', minHeight: 58, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                              <div key={l.id} style={{ background: 'rgba(232,120,74,.1)', borderRadius: 5, padding: '5px 7px', minHeight: 58, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                 <div style={{ fontSize: 11, fontWeight: 500, color: '#E8784A', lineHeight: 1.3 }}>{l.group?.course?.name || l.group?.name || '-'}</div>
                                 <div style={{ fontSize: 10, color: '#993C1D', lineHeight: 1.3 }}><EnvironmentOutlined style={{ fontSize: 9 }} /> {l.group?.room?.name || '-'}</div>
                                 <div style={{ fontSize: 10, color: '#993C1D', lineHeight: 1.3 }}><TeamOutlined style={{ fontSize: 9 }} /> {l.group?.enrollments?.length || 0}人</div>
@@ -262,7 +263,7 @@ export default function TeacherSchedulePage() {
         ) : (
           intensiveLessons.length === 0 ? <Empty description="本周暂无突击全能班课程" /> : (
             <Card bordered={false} style={{ borderRadius: 10, overflow: 'auto' }} styles={{ body: { padding: 0 } }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '72px repeat(7, minmax(72px, 1fr))', minWidth: 640 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isTablet ? '56px repeat(7, minmax(58px, 1fr))' : '72px repeat(7, minmax(72px, 1fr))', minWidth: isTablet ? 0 : 640 }}>
                 <div style={{ padding: 8, background: 'var(--color-background-secondary, #faf8f5)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)' }} />
                 {weekDates.map((date, i) => {
                   const today = date.toDateString() === new Date().toDateString()
@@ -279,7 +280,7 @@ export default function TeacherSchedulePage() {
                   return (
                     <div key={slot.id} style={{ display: 'contents' }}>
                       <div style={{ minHeight: h, borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', padding: '4px 8px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end', background: isNoon ? 'rgba(29,158,117,.04)' : '#fafafa' }}>
-                        {isNoon ? <span style={{ fontSize: 9, fontWeight: 500, color: '#1D9E75' }}>🍱午休</span> :
+                        {isNoon ? <span style={{ fontSize: 9, fontWeight: 500, color: '#1D9E75', display: 'inline-flex', alignItems: 'center', gap: 3 }}><CoffeeOutlined />午休</span> :
                           <><div style={{ fontSize: 11, fontWeight: 500, color: '#534AB7' }}>{slot.start.split(':')[0]}:00</div><div style={{ fontSize: 9, fontFamily: 'monospace', color: 'var(--color-text-tertiary, #98A2B3)' }}>至 {slot.end}</div></>
                         }
                       </div>
@@ -293,7 +294,7 @@ export default function TeacherSchedulePage() {
                               const cfg = INTENSIVE_CONFIG[ct] || INTENSIVE_CONFIG.ONE_ON_ONE
                               const studentName = l.group?.enrollments?.[0]?.student?.name || ''
                               return (
-                                <div key={l.id} style={{ borderLeft: `3px solid ${cfg.color}`, background: cfg.bg, borderRadius: 5, padding: '5px 7px', minHeight: 56, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                <div key={l.id} style={{ background: cfg.bg, borderRadius: 5, padding: '5px 7px', minHeight: 56, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                   <div style={{ fontSize: 9, fontWeight: 500, color: cfg.color, background: `${cfg.color}18`, padding: '0 4px', borderRadius: 3, alignSelf: 'flex-start', marginBottom: 3 }}>{cfg.label}</div>
                                   <div style={{ fontSize: 11, fontWeight: 600, color: cfg.color, lineHeight: 1.3 }}>{l.teacher?.name || l.teacherId || '-'}</div>
                                   <div style={{ fontSize: 11, color: cfg.color, lineHeight: 1.3 }}><UserOutlined style={{ fontSize: 10 }} /> {studentName}</div>

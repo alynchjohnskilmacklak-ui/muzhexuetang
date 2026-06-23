@@ -1,34 +1,54 @@
 #!/usr/bin/env bash
-# 对两个库（或单库）执行 prisma db push。纯加列/加表安全幂等。
+# Sync Prisma schema to the active database set.
+# In DUAL_DB=true mode this pushes to DATABASE_URL_JUNIOR and DATABASE_URL_SENIOR.
+# In single database mode this pushes to DATABASE_URL, falling back to DATABASE_URL_JUNIOR.
 set -euo pipefail
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$(dirname "$SCRIPT_DIR")"   # 项目根
+cd "$(dirname "$SCRIPT_DIR")"
 
 read_env() {
-  local key="$1" val="${!1:-}"
-  if [ -z "$val" ] && [ -f .env ]; then
-    val="$(grep -E "^${key}=" .env | tail -1 | cut -d= -f2- | sed 's/^"//; s/"$//' || true)"
+  local key="$1"
+  local value="${!key:-}"
+
+  if [ -z "$value" ] && [ -f .env ]; then
+    value="$(
+      grep -E "^${key}=" .env 2>/dev/null \
+        | tail -n 1 \
+        | cut -d= -f2- \
+        | sed "s/^\"//; s/\"$//; s/^'//; s/'$//" \
+        || true
+    )"
   fi
-  echo "$val"
+
+  printf '%s' "$value"
 }
 
-DUAL="$(read_env DUAL_DB)"
-JUNIOR="$(read_env DATABASE_URL_JUNIOR)"
-SENIOR="$(read_env DATABASE_URL_SENIOR)"
-LEGACY="$(read_env DATABASE_URL)"
-
 push_one() {
-  local label="$1" url="$2"
-  if [ -z "$url" ]; then echo "[db-sync] 跳过 $label（连接串为空）"; return 0; fi
-  echo "[db-sync] === $label ==="
+  local label="$1"
+  local url="$2"
+
+  if [ -z "$url" ]; then
+    echo "[db-sync] skip ${label}: database URL is empty"
+    return 0
+  fi
+
+  echo "[db-sync] === ${label} ==="
   DATABASE_URL="$url" npx prisma db push --skip-generate
 }
 
+DUAL_DB_VALUE="$(read_env DUAL_DB)"
+DATABASE_URL_JUNIOR_VALUE="$(read_env DATABASE_URL_JUNIOR)"
+DATABASE_URL_SENIOR_VALUE="$(read_env DATABASE_URL_SENIOR)"
+DATABASE_URL_VALUE="$(read_env DATABASE_URL)"
+
 npx prisma generate
-if [ "${DUAL:-false}" = "true" ]; then
-  push_one "初中部 JUNIOR" "$JUNIOR"
-  push_one "高中部 SENIOR" "$SENIOR"
+
+if [ "${DUAL_DB_VALUE:-false}" = "true" ]; then
+  push_one "JUNIOR" "$DATABASE_URL_JUNIOR_VALUE"
+  push_one "SENIOR" "$DATABASE_URL_SENIOR_VALUE"
 else
-  push_one "默认库" "${LEGACY:-$JUNIOR}"
+  push_one "DEFAULT" "${DATABASE_URL_VALUE:-$DATABASE_URL_JUNIOR_VALUE}"
 fi
-echo "[db-sync] 完成。"
+
+echo "[db-sync] done"

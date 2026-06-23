@@ -193,7 +193,7 @@ export function ParentDashboardClient({
 
   const goCalendarDay = (day: number) => {
     const d = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    router.push(`/parent/growth?date=${d}`)
+    router.push(`/parent/archive?date=${d}`)
   }
 
   const openNotification = (n: any) => {
@@ -645,7 +645,7 @@ export function ParentDashboardClient({
             bordered={false}
             style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', height: '100%' }}
             title={<span style={{ fontSize: 15, fontWeight: 600 }}>老师最新关注</span>}
-            extra={latestFeedback && <a onClick={() => router.push('/parent/growth')} style={{ fontSize: 12, color: '#E8784A' }}>查看全部 →</a>}
+            extra={latestFeedback && <a onClick={() => router.push('/parent/archive')} style={{ fontSize: 12, color: '#E8784A' }}>查看全部 →</a>}
           >
             {latestFeedback ? (
               <div>
@@ -673,7 +673,7 @@ export function ParentDashboardClient({
                   </Tag>
                 )}
                 <div style={{ marginTop: 10 }}>
-                  <a onClick={() => router.push(`/parent/growth?feedbackId=${latestFeedback.id}`)} style={{ fontSize: 12, color: '#E8784A' }}>
+                  <a onClick={() => router.push(`/parent/archive?feedbackId=${latestFeedback.id}`)} style={{ fontSize: 12, color: '#E8784A' }}>
                     查看详情 →
                   </a>
                 </div>

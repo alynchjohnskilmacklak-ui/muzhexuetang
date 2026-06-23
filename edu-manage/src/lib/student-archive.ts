@@ -357,13 +357,13 @@ async function fetchTimeline(prisma: PrismaClient, studentId: string, from: Date
     id: f.id, type: 'feedback', title: '课堂反馈', content: f.summary || null,
     date: f.createdAt, teacher: f.teacher?.name || null, studentId,
     sourceId: f.id, images: f.imageUrls || [],
-    href: `/parent/growth?studentId=${studentId}&feedbackId=${f.id}`,
+    href: `/parent/archive?studentId=${studentId}&feedbackId=${f.id}`,
   })
   for (const p of posts) items.push({
     id: p.id, type: 'post', title: '成长动态', content: p.content,
     date: p.createdAt, teacher: p.teacher?.name || null, studentId,
     sourceId: p.id, images: p.images || [],
-    href: `/parent/growth?studentId=${studentId}&postId=${p.id}`,
+    href: `/parent/archive?studentId=${studentId}&postId=${p.id}`,
   })
   for (const b of badges) items.push({
     id: b.id, type: 'badge', title: `获得徽章「${b.badgeType}」`, content: b.description || null,

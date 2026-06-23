@@ -6,6 +6,7 @@ import { zhCN } from 'date-fns/locale'
 import { Spin, Empty, Select, Typography } from 'antd'
 import useSWR from 'swr'
 import { SCHEDULE_PERIODS, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const { Text } = Typography
 
@@ -52,6 +53,7 @@ export function TeacherWeekView({
 }: {
   onLessonClick: (lesson: Record<string, unknown>) => void
 }) {
+  const isTablet = useIsMobile(1025) ?? false
   const [selectedTeacherId, setSelectedTeacherId] = useState<string | undefined>()
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
 
@@ -149,8 +151,8 @@ export function TeacherWeekView({
         <div style={{ overflowX: 'auto', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8 }}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: `72px repeat(6, minmax(88px, 1fr))`,
-            minWidth: 600,
+            gridTemplateColumns: isTablet ? `56px repeat(6, minmax(72px, 1fr))` : `72px repeat(6, minmax(88px, 1fr))`,
+            minWidth: isTablet ? 0 : 600,
           }}>
             {/* Header */}
             <div style={{ borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', background: 'var(--color-background-secondary, #faf8f5)' }} />

@@ -75,7 +75,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
               link: '/parent/performance',
               relatedType: 'PERFORMANCE_FEEDBACK',
               relatedId: post.id,
-              href: `/parent/growth?feedbackId=${post.id}`,
+              href: `/parent/archive?feedbackId=${post.id}`,
             },
           })
           await tx.performancePost.update({ where: { id: post.id }, data: { notifySent: true } })

@@ -1,16 +1,17 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import useSWR from 'swr'
 import {
   Button, Card, Empty, Form, Image, Input, Modal, Select, Skeleton, Space,
-  Tag, Typography, Upload, message, Row, Col, List, Popconfirm,
+  Tag, Typography, Upload, Row, Col, List, Popconfirm,
 } from 'antd'
 import {
   DeleteOutlined, EyeOutlined, FileImageOutlined,
   InboxOutlined, PlusOutlined, SendOutlined,
 } from '@ant-design/icons'
 import type { UploadFile } from 'antd'
+import { toast } from 'sonner'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -64,12 +65,12 @@ export function TeacherPapersClient() {
       const values = await form.validateFields()
       const uploadingFiles = fileList.filter(f => f.status === 'uploading')
       if (uploadingFiles.length > 0) {
-        message.warning(`还有 ${uploadingFiles.length} 张图片正在上传，请稍候再试`)
+        toast.warning(`还有 ${uploadingFiles.length} 张图片正在上传，请稍候再试`)
         return
       }
       const imageUrls = fileList.filter(f => f.status === 'done').map(f => f.response?.url || f.url || '').filter(Boolean)
       if (imageUrls.length === 0) {
-        message.error('请至少上传一张图片')
+        toast.error('请至少上传一张图片')
         return
       }
       setSubmitting(true)
@@ -89,13 +90,13 @@ export function TeacherPapersClient() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      message.success(shouldPublish ? '✅ 已成功推送给家长' : '草稿已保存', 3)
+      toast.success(shouldPublish ? '已成功推送给家长' : '草稿已保存')
       setModalOpen(false)
       form.resetFields()
       setFileList([])
       mutate()
     } catch (e: unknown) {
-      message.error(e instanceof Error ? e.message : '保存失败', 4)
+      toast.error('请至少上传一张图片')
     } finally {
       setSubmitting(false)
     }

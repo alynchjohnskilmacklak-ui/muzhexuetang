@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 import { Card, Descriptions, Empty, Image, Tag, Typography, Button } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
-import { format } from 'date-fns'
+import { fmtFull } from '@/lib/format-date'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 
 const { Title, Text, Paragraph } = Typography
@@ -35,7 +35,7 @@ export function PaperDetailClient({ paper }: { paper: any }) {
           <Descriptions.Item label="学生">{paper.student?.name || '-'}</Descriptions.Item>
           <Descriptions.Item label="教师">{paper.teacher?.name || '-'}</Descriptions.Item>
           <Descriptions.Item label="科目"><Tag>{paper.subject}</Tag></Descriptions.Item>
-          <Descriptions.Item label="日期">{paper.paperDate ? format(new Date(paper.paperDate), 'yyyy-MM-dd') : '-'}</Descriptions.Item>
+          <Descriptions.Item label="日期">{paper.paperDate ? fmtFull(paper.paperDate) : '-'}</Descriptions.Item>
         </Descriptions>
 
         {/* Questions / Knowledge points */}

@@ -1,8 +1,10 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, Typography, message } from 'antd'
+import { Card, Typography } from 'antd'
 import dayjs from 'dayjs'
+import { toast } from 'sonner'
+import { fmtDate } from '@/lib/format-date'
 
 const { Title, Text } = Typography
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六']
@@ -42,9 +44,9 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
       })
       if (res.ok) {
         setChoices(prev => ({ ...prev, [studentId]: eating }))
-        message.success(eating ? '已选择用餐' : '已选择不用餐', 1)
-      } else message.error('提交失败')
-    } catch { message.error('网络错误') }
+        toast.success(eating ? '已选择用餐' : '已选择不用餐')
+      } else toast.error('提交失败')
+    } catch { toast.error('网络错误') }
     finally { setSubmitting(false) }
   }
 
@@ -160,7 +162,7 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
               background: isToday ? 'rgba(232,117,69,.06)' : 'transparent', borderRadius: isToday ? 8 : 0, margin: isToday ? '4px -8px' : 0, paddingLeft: isToday ? 8 : 0, paddingRight: isToday ? 8 : 0,
             }}>
               <Text strong style={{ fontSize: 13, minWidth: 32 }}>{day}</Text>
-              <Text type="secondary" style={{ fontSize: 11, minWidth: 52 }}>{monday.add(i, 'day').format('M月D日')}</Text>
+              <Text type="secondary" style={{ fontSize: 11, minWidth: 52 }}>{fmtDate(monday.add(i, 'day').toDate())}</Text>
               <div style={{ flex: 1 }}>
                 {menu ? <Text style={{ fontSize: 13 }}>{menu.mainDish}</Text> : <Text type="secondary" style={{ fontSize: 12 }}>菜单待公布</Text>}
                 {menu?.sideDish && <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>{menu.sideDish}</Text>}

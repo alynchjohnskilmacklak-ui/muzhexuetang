@@ -1,9 +1,10 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Card, DatePicker, Form, Input, message, Select, Tag, Typography } from 'antd'
+import { Button, Card, DatePicker, Form, Input, Select, Tag, Typography } from 'antd'
 import dayjs from 'dayjs'
-import { format } from 'date-fns'
+import { fmtDate, fmtDateTime } from '@/lib/format-date'
+import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { ResponsiveTable } from '@/components/Layout/ResponsiveTable'
 
@@ -56,7 +57,7 @@ export function ParentLeaveClient({
         values.studentId = students[0].id
       }
       if (!values.studentId) {
-        message.warning('请选择子女')
+        toast.warning('请选择子女')
         return
       }
       setSubmitting(true)
@@ -71,16 +72,16 @@ export function ParentLeaveClient({
         }),
       })
       if (res.ok) {
-        message.success('请假通知已发送给老师和管理员')
+        toast.success('请假通知已发送给老师和管理员')
         form.resetFields()
         const data = await res.json()
         setRequests((prev) => [data, ...prev])
       } else {
         const data = await res.json()
-        message.error(data.error || '提交失败，请重试')
+        toast.error(data.error || '提交失败，请重试')
       }
     } catch {
-      message.error('提交失败，请重试')
+      toast.error('提交失败，请重试')
     } finally {
       setSubmitting(false)
     }
@@ -121,7 +122,7 @@ export function ParentLeaveClient({
               placeholder="选择要请假的课次（可不选）"
               getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
               options={filteredSchedules.map((schedule) => ({
-                label: `${schedule.title} · ${format(new Date(schedule.startTime), 'MM-dd HH:mm')}`,
+                label: `${schedule.title} · ${fmtDateTime(schedule.startTime)}`,
                 value: schedule.id,
               }))}
             />
@@ -168,10 +169,10 @@ export function ParentLeaveClient({
                   <Tag color={meta.color} style={{ margin: 0 }}>{meta.label}</Tag>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 5, fontSize: 13, color: '#5a4e3a' }}>
-                  <div>请假日期：{format(new Date(r.leaveDate), 'yyyy-MM-dd')}</div>
+                  <div>请假日期：{fmtDate(r.leaveDate)}</div>
                   <div>课程：{r.courseName || '未指定课程'}</div>
                   <div>原因：{r.reason}</div>
-                  <div>提交时间：{format(new Date(r.createdAt), 'MM-dd HH:mm')}</div>
+                  <div>提交时间：{fmtDateTime(r.createdAt)}</div>
                   <div>回执：{r.replyNote || meta.reply}</div>
                 </div>
               </div>
@@ -180,14 +181,14 @@ export function ParentLeaveClient({
           columns={[
             { title: '子女', dataIndex: 'studentName', key: 'studentName', width: 80 },
             { title: '课程', dataIndex: 'courseName', key: 'courseName' },
-            { title: '日期', dataIndex: 'leaveDate', key: 'leaveDate', width: 110, render: (value: string) => format(new Date(value), 'yyyy-MM-dd') },
+            { title: '日期', dataIndex: 'leaveDate', key: 'leaveDate', width: 110, render: (value: string) => fmtDate(value) },
             { title: '原因', dataIndex: 'reason', key: 'reason', ellipsis: true },
             { title: '状态', dataIndex: 'status', key: 'status', width: 90, render: (value: string) => {
               const meta = leaveStatusMeta(value)
               return <Tag color={meta.color}>{meta.label}</Tag>
             } },
             { title: '回执', key: 'replyNote', render: (_: unknown, record: typeof requests[number]) => record.replyNote || leaveStatusMeta(record.status).reply },
-            { title: '提交时间', dataIndex: 'createdAt', key: 'createdAt', width: 100, render: (value: string) => format(new Date(value), 'MM-dd HH:mm') },
+            { title: '提交时间', dataIndex: 'createdAt', key: 'createdAt', width: 100, render: (value: string) => fmtDateTime(value) },
           ]}
         />
       </Card>

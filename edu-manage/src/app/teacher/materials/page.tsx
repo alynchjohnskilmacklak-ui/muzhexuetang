@@ -1,14 +1,16 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Button, Card, Col, Empty, Form, Input, Modal, Popconfirm, Row, Select, Space,
-  Tabs, Tag, Typography, Upload, message,
+  Tabs, Tag, Typography, Upload,
 } from 'antd'
 import {
   DeleteOutlined, DownloadOutlined, EyeOutlined, FileTextOutlined, PlusOutlined, UploadOutlined,
 } from '@ant-design/icons'
 import type { UploadFile } from 'antd/es/upload/interface'
+import { toast } from 'sonner'
+import { fmtDate } from '@/lib/format-date'
 import { GRADE_SUBJECTS, GRADES, SUBJECT_COLORS } from '@/data/subjects'
 import {
   materialAudienceText,
@@ -79,7 +81,7 @@ export default function TeacherMaterialsPage() {
   const handleUpload = async () => {
     const values = await form.validateFields()
     if (!fileList[0]?.originFileObj) {
-      message.warning('请选择文件')
+      toast.warning('请选择文件')
       return
     }
 
@@ -98,10 +100,10 @@ export default function TeacherMaterialsPage() {
     setUploading(false)
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
-      message.error(err.error || '上传失败')
+      toast.error(err.error || '上传失败')
       return
     }
-    message.success('上传成功')
+    toast.success('上传成功')
     setModalOpen(false)
     form.resetFields()
     setFileList([])
@@ -112,10 +114,10 @@ export default function TeacherMaterialsPage() {
   const handleDelete = async (id: string) => {
     const res = await fetch(`/api/teacher/materials/${id}`, { method: 'DELETE' })
     if (res.ok) {
-      message.success('已删除')
+      toast.success('已删除')
       fetchMaterials()
     } else {
-      message.error('删除失败')
+      toast.error('删除失败')
     }
   }
 
@@ -192,7 +194,7 @@ export default function TeacherMaterialsPage() {
                   {material.tags?.map((tag) => <Tag key={tag}>{tag}</Tag>)}
                 </Space>
                 <Text type="secondary" style={{ fontSize: 12, marginTop: 10 }}>
-                  上传者：{material.teacher?.name || material.uploader?.name || '我'} · {new Date(material.createdAt).toLocaleDateString('zh-CN')} · {material.downloads} 次
+                  上传者：{material.teacher?.name || material.uploader?.name || '我'} · {fmtDate(material.createdAt)} · {material.downloads} 次
                 </Text>
                 <Space style={{ marginTop: 'auto', paddingTop: 14 }}>
                   <Button icon={<EyeOutlined />} onClick={() => handlePreview(material)}>预览</Button>

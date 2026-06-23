@@ -3,12 +3,11 @@
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { Button, Card, Image, Input, Space, Tag, Typography } from 'antd'
-import { format } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
+import { fmtDate } from '@/lib/format-date'
 
 const { Text } = Typography
 
@@ -228,7 +227,7 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
                         </span>
                         {paper.paperDate && (
                           <span style={{ fontSize: 11, color: '#C4BAB0' }}>
-                            {format(new Date(paper.paperDate), 'M月d日', { locale: zhCN })}
+                            {fmtDate(paper.paperDate)}
                           </span>
                         )}
                       </div>
@@ -370,7 +369,7 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
                             border: `1px solid ${c.author.role === 'parent' ? '#F5C9A3' : '#BBF7D0'}`,
                           }}>
                             <div style={{ fontSize: 11, color: '#98A2B3', marginBottom: 4 }}>
-                              {c.author.name} · {new Date(c.createdAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                              {c.author.name} · {fmtDate(c.createdAt)}
                             </div>
                             <div style={{ fontSize: 13, color: '#1F2329' }}>{c.content}</div>
                           </div>

@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
-import { Button, Card, Empty, List, Tag, Typography, message } from 'antd'
+import { Button, Card, Empty, List, Tag, Typography } from 'antd'
 import {
   BellOutlined,
   BookOutlined,
@@ -10,7 +10,8 @@ import {
   FileTextOutlined,
   StarOutlined,
 } from '@ant-design/icons'
-import { format } from 'date-fns'
+import { toast } from 'sonner'
+import { fmtDateTime } from '@/lib/format-date'
 import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -52,7 +53,7 @@ export function ParentNotificationsClient({
       })
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
     } catch {
-      message.error('操作失败')
+      toast.error('操作失败')
     }
   }
 
@@ -64,9 +65,9 @@ export function ParentNotificationsClient({
         body: JSON.stringify({ all: true }),
       })
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-      message.success('全部已读')
+      toast.success('全部已读')
     } catch {
-      message.error('操作失败')
+      toast.error('操作失败')
     }
   }
 
@@ -150,7 +151,7 @@ export function ParentNotificationsClient({
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginTop: 6, flexWrap: 'wrap' }}>
                         <Text type="secondary" style={{ fontSize: 11 }}>
-                          {format(new Date(n.createdAt), 'yyyy-MM-dd HH:mm')}
+                          {fmtDateTime(n.createdAt)}
                         </Text>
                         <Text style={{ fontSize: 12, color: '#E8784A', fontWeight: 600 }}>查看详情</Text>
                       </div>
