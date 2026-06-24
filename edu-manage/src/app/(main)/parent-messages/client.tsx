@@ -7,7 +7,7 @@ import {
   MessageOutlined, UserOutlined,
 } from '@ant-design/icons'
 import { toast } from 'sonner'
-import useSWR from 'swr'
+import { usePausableSWR } from '@/lib/use-pausable-swr'
 import { format, formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -102,7 +102,7 @@ export function AdminMessagesClient() {
   const [closing, setClosing] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  const { data, mutate } = useSWR('/api/messages', fetcher, {
+  const { data, mutate } = usePausableSWR('/api/messages', fetcher, {
     refreshInterval: 5_000, revalidateOnFocus: true, revalidateOnReconnect: true,
   })
   const allMessages: Message[] = data?.messages || []

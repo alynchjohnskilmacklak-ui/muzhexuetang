@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonWhere } from '@/lib/teacher-portal'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,26 +10,22 @@ function asStringArray(value: unknown, limit = 100) {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0).slice(0, limit) : []
 }
 
-export async function GET(req: NextRequest) {
-  try {
-    const { teacher } = await requireCurrentTeacher()
-    const limit = Math.min(50, Math.max(1, Number(req.nextUrl.searchParams.get('limit') || 10)))
-    const feedbacks = await prisma.classroomFeedback.findMany({
-      where: { teacherId: teacher.id },
-      include: {
-        classLesson: { include: { group: { include: { course: true } } } },
-        teacher: { select: { id: true, name: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-    })
-    return NextResponse.json({ feedbacks })
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-}
+export const GET = apiHandler(async (req: NextRequest) => {
+  const { teacher } = await requireCurrentTeacher()
+  const limit = Math.min(50, Math.max(1, Number(req.nextUrl.searchParams.get('limit') || 10)))
+  const feedbacks = await prisma.classroomFeedback.findMany({
+    where: { teacherId: teacher.id },
+    include: {
+      classLesson: { include: { group: { include: { course: true } } } },
+      teacher: { select: { id: true, name: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+  })
+  return NextResponse.json({ feedbacks })
+})
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   try {
     const { user, teacher } = await requireCurrentTeacher()
     const body = await req.json()
@@ -140,4 +137,4 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : '保存课堂反馈失败' }, { status: 500 })
   }
-}
+})

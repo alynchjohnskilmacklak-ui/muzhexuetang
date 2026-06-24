@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { normalizeMaterialAudience, normalizeMaterialStatus } from '@/lib/material-visibility'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +18,7 @@ async function assertOwnMaterial(id: string) {
   return { user, teacher, material }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
     const { id } = await params
     const { material } = await assertOwnMaterial(id)
@@ -41,9 +42,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
-}
+})
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export const DELETE = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   try {
     const { id } = await params
     const { material } = await assertOwnMaterial(id)
@@ -58,4 +59,4 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
-}
+})

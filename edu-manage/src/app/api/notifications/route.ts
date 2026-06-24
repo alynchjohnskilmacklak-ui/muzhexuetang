@@ -107,7 +107,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
     await prisma.notification.update({
       where: { id: notification.id },
-      data: { pushStatus, pushError },
+      data: {
+        pushStatus,
+        pushError,
+        attempts: { increment: 1 },
+        sentAt: pushStatus === 'sent' ? new Date() : undefined,
+        lastError: pushStatus === 'failed' ? pushError : undefined,
+      },
     })
   }
 

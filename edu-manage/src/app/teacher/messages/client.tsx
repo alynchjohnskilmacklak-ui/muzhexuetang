@@ -10,7 +10,7 @@ import {
   MessageOutlined, SendOutlined, UserOutlined,
 } from '@ant-design/icons'
 import { toast } from 'sonner'
-import useSWR from 'swr'
+import { usePausableSWR } from '@/lib/use-pausable-swr'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { SUBJECT_COLORS } from '@/constants/subjects'
 import { fmtDateTime } from '@/lib/format-date'
@@ -122,7 +122,7 @@ export function TeacherMessagesClient() {
   const [closing, setClosing] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  const { data, mutate } = useSWR('/api/messages', fetcher, {
+  const { data, mutate } = usePausableSWR('/api/messages', fetcher, {
     refreshInterval: 5_000,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,

@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/nextjs'
+
 export interface PushResult {
   success: boolean
   error?: string
@@ -46,6 +48,7 @@ export async function sendWxMessage(
     }
     return { success: false, error: data.msg || '发送失败' }
   } catch (e: unknown) {
+    Sentry.captureException(e, { extra: { location: 'wxpusher' } })
     return { success: false, error: (e as Error).message }
   }
 }
@@ -89,6 +92,7 @@ export async function createBindQrcode(userId: string): Promise<{
     }
     return { success: false, error: data.msg || '二维码创建失败' }
   } catch (e: unknown) {
+    Sentry.captureException(e, { extra: { location: 'wxpusher' } })
     return { success: false, error: (e as Error).message }
   }
 }

@@ -37,6 +37,9 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     data: {
       pushStatus: result.success ? 'sent' : 'failed',
       pushError: result.success ? null : (result.error || null),
+      attempts: { increment: 1 },
+      sentAt: result.success ? new Date() : undefined,
+      lastError: result.success ? null : (result.error || null),
     },
   })
 

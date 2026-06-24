@@ -10,7 +10,7 @@ import {
   UserOutlined, CloseOutlined, CheckCircleOutlined,
 } from '@ant-design/icons'
 import { toast } from 'sonner'
-import useSWR from 'swr'
+import { usePausableSWR } from '@/lib/use-pausable-swr'
 import { fmtDateTime } from '@/lib/format-date'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { SUBJECT_COLORS } from '@/constants/subjects'
@@ -166,7 +166,7 @@ export function ParentMessagesClient({
     return students[0]?.id ?? ''
   })
   const [filterChildId, setFilterChildId] = useState<string>(activeChildId)
-  const { data, mutate } = useSWR('/api/messages', fetcher, {
+  const { data, mutate } = usePausableSWR('/api/messages', fetcher, {
     fallbackData: { messages: initialMessages },
     refreshInterval: 5_000,
     revalidateOnFocus: true,

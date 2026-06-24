@@ -323,11 +323,17 @@ export default function AdminNotificationsPage() {
                     },
                   },
                   {
-                    title: '微信推送', dataIndex: 'pushStatus', key: 'pushStatus', width: 100,
-                    render: (value: string) => {
+                    title: '微信推送', dataIndex: 'pushStatus', key: 'pushStatus', width: 140,
+                    render: (value: string, record: any) => {
                       if (value === 'none') return <span style={{ color: '#62666d' }}>-</span>
-                      if (value === 'sent') return <Tag color="success">已推送</Tag>
-                      if (value === 'failed') return <Tag color="error">推送失败</Tag>
+                      if (value === 'sent') return <Tag color="success">已推送{record.attempts > 0 ? `(第${record.attempts}次)` : ''}</Tag>
+                      if (value === 'failed') return (
+                        <Space direction="vertical" size={0}>
+                          <Tag color="error">推送失败</Tag>
+                          {record.attempts > 0 && <span style={{ fontSize: 11, color: '#62666d' }}>重试{record.attempts}次</span>}
+                          {record.lastError && <span style={{ fontSize: 11, color: '#c41d7f' }} title={record.lastError}>{record.lastError.slice(0, 20)}{record.lastError.length > 20 ? '…' : ''}</span>}
+                        </Space>
+                      )
                       if (value === 'no_bind') return <Tag color="warning">未绑定</Tag>
                       return <span>{value}</span>
                     },

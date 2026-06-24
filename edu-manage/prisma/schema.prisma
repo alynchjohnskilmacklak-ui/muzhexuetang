@@ -590,6 +590,9 @@ model Notification {
   senderId    String?
   pushStatus  String   @default("none")
   pushError   String?
+  attempts    Int      @default(0)
+  lastError   String?
+  sentAt      DateTime?
   createdAt   DateTime @default(now())
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1173,6 +1176,19 @@ model LeaveRequest {
   @@index([studentId, createdAt])
 }
 
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([tokenHash])
+}
+
 model LoginRecord {
   id         String   @id @default(cuid())
   userId     String?
@@ -1220,7 +1236,10 @@ model TeacherSalaryTransaction {
   lessonDate  DateTime?
   createdAt   DateTime @default(now())
 
+  @@unique([lessonId, type])
+  @@unique([feedbackId, type])
   @@index([teacherId, createdAt])
+  @@index([teacherId, lessonDate])
   @@index([lessonId])
   @@index([feedbackId])
 }

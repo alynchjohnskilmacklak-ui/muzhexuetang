@@ -2,61 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonWhere, todayRange } from '@/lib/teacher-portal'
 import { calculateAttendanceDeductHours } from '@/lib/attendance-hours'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
 const VALID_STATUS = new Set(['PRESENT', 'LEAVE', 'ABSENT', 'MAKEUP'])
 
-export async function GET(request: NextRequest) {
-  try {
-    const { teacher } = await requireCurrentTeacher()
-    const { start: today, end: todayEnd } = todayRange()
-    const lessonId = request.nextUrl.searchParams.get('lessonId')
-    const lessonWhere = teacherLessonWhere(teacher.id)
+export const GET = apiHandler(async (request: NextRequest) => {
+  const { teacher } = await requireCurrentTeacher()
+  const { start: today, end: todayEnd } = todayRange()
+  const lessonId = request.nextUrl.searchParams.get('lessonId')
+  const lessonWhere = teacherLessonWhere(teacher.id)
 
-    if (lessonId) {
-      const lesson = await prisma.classLesson.findFirst({
-        where: { id: lessonId, ...lessonWhere },
-        include: {
-          group: {
-            include: {
-              course: true,
-              room: true,
-              teacher: { select: { id: true, name: true } },
-              teacherAssignments: { include: { teacher: { select: { id: true, name: true, subjects: true } } } },
-              enrollments: { where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } }, include: { student: true } },
-            },
-          },
-          attendances: true,
-        },
-      })
-      if (!lesson) return NextResponse.json({ error: '不可操作此课次' }, { status: 403 })
-      return NextResponse.json({
-        lesson: {
-          id: lesson.id,
-          startTime: lesson.startTime,
-          endTime: lesson.endTime,
-          courseName: lesson.group.course.name,
-          groupName: lesson.group.name,
-          subject: lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject,
-          room: lesson.group.room?.name,
-          status: lesson.status,
-          hoursDeducted: !!lesson.hoursDeductedAt,
-          attendanceSubmitted: !!lesson.attendanceSubmittedAt,
-        },
-        students: lesson.group.enrollments.map((enrollment) => ({
-          studentId: enrollment.student.id,
-          enrollmentId: enrollment.id,
-          name: enrollment.student.name,
-          grade: enrollment.student.grade,
-          remainHours: enrollment.remainHours,
-          status: lesson.attendances.find((attendance) => attendance.studentId === enrollment.student.id)?.status || 'PRESENT',
-        })),
-      })
-    }
-
-    const lessons = await prisma.classLesson.findMany({
-      where: { ...lessonWhere, lessonDate: { gte: today, lt: todayEnd } },
+  if (lessonId) {
+    const lesson = await prisma.classLesson.findFirst({
+      where: { id: lessonId, ...lessonWhere },
       include: {
         group: {
           include: {
@@ -64,34 +24,71 @@ export async function GET(request: NextRequest) {
             room: true,
             teacher: { select: { id: true, name: true } },
             teacherAssignments: { include: { teacher: { select: { id: true, name: true, subjects: true } } } },
-            enrollments: { where: { status: 'ACTIVE' }, select: { id: true } },
+            enrollments: { where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } }, include: { student: true } },
           },
         },
-        attendances: { select: { id: true, status: true, studentId: true } },
+        attendances: true,
       },
-      orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
     })
-    return NextResponse.json(lessons.map((lesson) => ({
-      id: lesson.id,
-      startTime: lesson.startTime,
-      endTime: lesson.endTime,
-      time: `${lesson.startTime}-${lesson.endTime}`,
-      courseName: lesson.group.course.name,
-      groupName: lesson.group.name,
-      subject: lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject,
-      room: lesson.group.room?.name || '-',
-      status: lesson.status,
-      studentCount: lesson.group.enrollments.length,
-      attendanceCount: lesson.attendances.length,
-      allPresent: lesson.attendances.length > 0 && lesson.attendances.every((attendance) => attendance.status === 'PRESENT'),
-      hoursDeducted: !!lesson.hoursDeductedAt,
-    })))
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
+    if (!lesson) return NextResponse.json({ error: '不可操作此课次' }, { status: 403 })
+    return NextResponse.json({
+      lesson: {
+        id: lesson.id,
+        startTime: lesson.startTime,
+        endTime: lesson.endTime,
+        courseName: lesson.group.course.name,
+        groupName: lesson.group.name,
+        subject: lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject,
+        room: lesson.group.room?.name,
+        status: lesson.status,
+        hoursDeducted: !!lesson.hoursDeductedAt,
+        attendanceSubmitted: !!lesson.attendanceSubmittedAt,
+      },
+      students: lesson.group.enrollments.map((enrollment) => ({
+        studentId: enrollment.student.id,
+        enrollmentId: enrollment.id,
+        name: enrollment.student.name,
+        grade: enrollment.student.grade,
+        remainHours: enrollment.remainHours,
+        status: lesson.attendances.find((attendance) => attendance.studentId === enrollment.student.id)?.status || 'PRESENT',
+      })),
+    })
   }
-}
 
-export async function POST(request: NextRequest) {
+  const lessons = await prisma.classLesson.findMany({
+    where: { ...lessonWhere, lessonDate: { gte: today, lt: todayEnd } },
+    include: {
+      group: {
+        include: {
+          course: true,
+          room: true,
+          teacher: { select: { id: true, name: true } },
+          teacherAssignments: { include: { teacher: { select: { id: true, name: true, subjects: true } } } },
+          enrollments: { where: { status: 'ACTIVE' }, select: { id: true } },
+        },
+      },
+      attendances: { select: { id: true, status: true, studentId: true } },
+    },
+    orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
+  })
+  return NextResponse.json(lessons.map((lesson) => ({
+    id: lesson.id,
+    startTime: lesson.startTime,
+    endTime: lesson.endTime,
+    time: `${lesson.startTime}-${lesson.endTime}`,
+    courseName: lesson.group.course.name,
+    groupName: lesson.group.name,
+    subject: lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject,
+    room: lesson.group.room?.name || '-',
+    status: lesson.status,
+    studentCount: lesson.group.enrollments.length,
+    attendanceCount: lesson.attendances.length,
+    allPresent: lesson.attendances.length > 0 && lesson.attendances.every((attendance) => attendance.status === 'PRESENT'),
+    hoursDeducted: !!lesson.hoursDeductedAt,
+  })))
+})
+
+export const POST = apiHandler(async (request: NextRequest) => {
   try {
     const { user, teacher } = await requireCurrentTeacher()
     const body = await request.json()
@@ -223,4 +220,4 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ error: error instanceof Error ? error.message : '提交失败' }, { status: 500 })
   }
-}
+})

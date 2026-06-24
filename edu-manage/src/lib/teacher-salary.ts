@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import { getRequestPrisma } from '@/lib/prisma'
 import type { Prisma, PrismaClient } from '@prisma/client'
 
@@ -144,11 +145,21 @@ export async function triggerLessonPay(lessonId: string, prismaClient?: PrismaCl
         ? `${cfg.oneOnOneRates[grade || ''] ?? 25}元/小时`
         : `${isSeniorGrade(grade) ? cfg.groupRateSenior : cfg.groupRateJunior}元/小时`
 
-      await tx.teacherSalaryTransaction.create({
+      const salaryTx = await tx.teacherSalaryTransaction.create({
         data: {
           teacherId, type: 'LESSON_PAY', amount, lessonId,
           lessonDate: lesson.lessonDate,
           description: `${lesson.group.name}（${lesson.group.lessonMinutes}分钟 x ${rateLabel}）`,
+        },
+      })
+      await tx.activityLog.create({
+        data: {
+          teacherId,
+          action: 'SALARY_LESSON_PAY',
+          entityType: 'TeacherSalaryTransaction',
+          entityId: salaryTx.id,
+          detail: `课时费 ¥${amount}：${lesson.group.name}`,
+          metadata: { lessonId, amount, lessonDate: lesson.lessonDate, courseType: lesson.group.course.type },
         },
       })
       return { success: true }
@@ -156,6 +167,7 @@ export async function triggerLessonPay(lessonId: string, prismaClient?: PrismaCl
     return result
   } catch (err) {
     console.error('[salary] triggerLessonPay failed:', lessonId, err instanceof Error ? err.message : err)
+    Sentry.captureException(err, { extra: { lessonId, location: 'triggerLessonPay' } })
     return { success: false, error: err instanceof Error ? err.message : '薪资计算失败' }
   }
 }
@@ -396,6 +408,16 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
           description: descParts.join(''),
         },
       })
+      await tx.activityLog.create({
+        data: {
+          teacherId,
+          action: 'SALARY_FEEDBACK_BONUS',
+          entityType: 'TeacherSalaryTransaction',
+          entityId: feedbackId,
+          detail: `反馈奖励 ¥${finalAmount}：${typeLabel} ${preview.eligibleCount}人 × ¥${formatMoney(preview.rate)}`,
+          metadata: { feedbackId, amount: finalAmount, eligibleCount: preview.eligibleCount, duplicateCount: preview.duplicateCount, rate: preview.rate, courseBucket: preview.courseBucket },
+        },
+      })
       return { success: true }
     })
     if (!result.success) return result
@@ -410,6 +432,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
     }
   } catch (err) {
     console.error('[salary] triggerFeedbackBonus failed:', feedbackId, err instanceof Error ? err.message : err)
+    Sentry.captureException(err, { extra: { feedbackId, location: 'triggerFeedbackBonus' } })
     return { success: false, error: err instanceof Error ? err.message : '反馈奖励计算失败' }
   }
 }

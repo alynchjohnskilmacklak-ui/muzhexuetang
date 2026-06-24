@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 import { checkRateLimit } from './rate-limit'
 import { ValidationError } from './api-validate'
 
@@ -54,6 +55,7 @@ export function apiHandler<T extends Handler>(handler: T): T {
       if (err instanceof ValidationError) {
         return NextResponse.json({ error: err.message }, { status: 400 })
       }
+      Sentry.captureException(err, { extra: { url: (args[0] as NextRequest)?.url } })
       const isDev = process.env.NODE_ENV !== 'production'
       const message = isDev && err instanceof Error ? err.message : '服务器错误，请稍后重试'
       const req = args[0] as NextRequest | undefined

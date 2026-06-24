@@ -10,46 +10,43 @@ import {
   teacherVisibleMaterialWhere,
 } from '@/lib/material-visibility'
 import { MaterialAudience, MaterialSource } from '@prisma/client'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest) {
-  try {
-    const { user, teacher } = await requireCurrentTeacher()
-    const { searchParams } = new URL(req.url)
-    const tab = searchParams.get('tab') || 'all'
-    const grade = searchParams.get('grade') || undefined
-    const subject = searchParams.get('subject') || undefined
+export const GET = apiHandler(async (req: NextRequest) => {
+  const { user, teacher } = await requireCurrentTeacher()
+  const { searchParams } = new URL(req.url)
+  const tab = searchParams.get('tab') || 'all'
+  const grade = searchParams.get('grade') || undefined
+  const subject = searchParams.get('subject') || undefined
 
-    const tabWhere =
-      tab === 'student'
-        ? { status: 'PUBLISHED' as const, audience: { in: [MaterialAudience.STUDENT, MaterialAudience.BOTH] } }
-        : tab === 'teacher'
-        ? { status: 'PUBLISHED' as const, audience: { in: [MaterialAudience.TEACHER, MaterialAudience.BOTH] } }
-        : tab === 'mine'
-        ? teacherOwnMaterialWhere(teacher.id, user.id)
-        : teacherVisibleMaterialWhere(teacher.id, user.id)
+  const tabWhere =
+    tab === 'student'
+      ? { status: 'PUBLISHED' as const, audience: { in: [MaterialAudience.STUDENT, MaterialAudience.BOTH] } }
+      : tab === 'teacher'
+      ? { status: 'PUBLISHED' as const, audience: { in: [MaterialAudience.TEACHER, MaterialAudience.BOTH] } }
+      : tab === 'mine'
+      ? teacherOwnMaterialWhere(teacher.id, user.id)
+      : teacherVisibleMaterialWhere(teacher.id, user.id)
 
-    const materials = await prisma.studyMaterial.findMany({
-      where: {
-        ...tabWhere,
-        ...(grade ? { grade } : {}),
-        ...(subject ? { subject } : {}),
-      },
-      include: {
-        uploader: { select: { name: true } },
-        teacher: { select: { id: true, name: true } },
-      },
-      orderBy: [{ isPinned: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
-    })
+  const materials = await prisma.studyMaterial.findMany({
+    where: {
+      ...tabWhere,
+      ...(grade ? { grade } : {}),
+      ...(subject ? { subject } : {}),
+    },
+    include: {
+      uploader: { select: { name: true } },
+      teacher: { select: { id: true, name: true } },
+    },
+    orderBy: [{ isPinned: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
+  })
 
-    return NextResponse.json({ materials })
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-  }
-}
+  return NextResponse.json({ materials })
+})
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   try {
     const { user, teacher } = await requireCurrentTeacher()
     const formData = await req.formData()
@@ -118,4 +115,4 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
-}
+})

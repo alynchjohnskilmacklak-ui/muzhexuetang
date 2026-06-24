@@ -175,9 +175,9 @@ async function validateDatabaseUser(
     return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
   }
 
-  if (user.status === 'disabled') {
+  if (user.status === 'disabled' || user.status === 'INACTIVE' || user.status === 'inactive') {
     if (options.recordAttempt) await recordLoginFailure(email, 'disabled', user.id, meta, division)
-    return { ok: false, error: '账号已停用', code: 'DISABLED' }
+    return { ok: false, error: '账号已停用，请联系管理员', code: 'DISABLED' }
   }
 
   const pwdOk = await verifyPassword(password, user.password)

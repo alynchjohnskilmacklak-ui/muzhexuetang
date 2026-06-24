@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 import { MOOD_META } from '@/lib/performance'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,25 +15,21 @@ function normalizeIds(body: any) {
   return typeof body.studentId === 'string' && body.studentId ? [body.studentId] : []
 }
 
-export async function GET() {
-  try {
-    const { teacher } = await requireCurrentTeacher()
-    const posts = await prisma.performancePost.findMany({
-      where: { teacherId: teacher.id, deletedAt: null },
-      include: {
-        student: { select: { id: true, name: true, grade: true } },
-        comments: { include: { author: { select: { name: true, role: true } } }, orderBy: { createdAt: 'desc' } },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 80,
-    })
-    return NextResponse.json(posts)
-  } catch {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-}
+export const GET = apiHandler(async () => {
+  const { teacher } = await requireCurrentTeacher()
+  const posts = await prisma.performancePost.findMany({
+    where: { teacherId: teacher.id, deletedAt: null },
+    include: {
+      student: { select: { id: true, name: true, grade: true } },
+      comments: { include: { author: { select: { name: true, role: true } } }, orderBy: { createdAt: 'desc' } },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 80,
+  })
+  return NextResponse.json(posts)
+})
 
-export async function POST(request: NextRequest) {
+export const POST = apiHandler(async (request: NextRequest) => {
   try {
     const { user, teacher } = await requireCurrentTeacher()
     const body = await request.json()
@@ -105,4 +102,4 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : '发布失败' }, { status: 500 })
   }
-}
+})
