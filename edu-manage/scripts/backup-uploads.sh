@@ -2,7 +2,7 @@
 # Backup /opt/edu-manage/uploads to OSS with rotation (keep 7 days).
 # Requires: tar, ossutil (or aliyun CLI) configured with credentials.
 
-set -euo pipefail
+set -eu
 
 UPLOAD_DIR="${UPLOAD_DIR:-/opt/edu-manage/uploads}"
 BACKUP_TMP="${BACKUP_TMP:-/tmp/edu-backups}"

@@ -3,7 +3,7 @@
 # Requires: pg_dump, gzip, ossutil (or aliyun CLI) configured.
 # Set DATABASE_URL_JUNIOR / DATABASE_URL_SENIOR or derive from DATABASE_URL.
 
-set -euo pipefail
+set -eu
 
 BACKUP_TMP="${BACKUP_TMP:-/tmp/edu-backups}"
 OSS_BUCKET="${OSS_BUCKET:-}"

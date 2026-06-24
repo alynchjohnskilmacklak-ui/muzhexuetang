@@ -22,6 +22,7 @@ import {
   Typography,
 } from 'antd'
 import {
+  CloudUploadOutlined,
   DeleteOutlined,
   DownloadOutlined,
   EditOutlined,
@@ -37,10 +38,11 @@ import {
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { DATA_ADMIN_ENTITIES, type EntityKey } from '@/lib/data-admin/entities'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import BackupRestorePanel from '@/components/DataAdmin/BackupRestorePanel'
 
 const { Text } = Typography
 
-const ENTITY_TABS: { key: EntityKey | 'health'; label: string; icon: string }[] = [
+const ENTITY_TABS: { key: EntityKey | 'health' | 'backup-restore'; label: string; icon: string }[] = [
   { key: 'students', label: '学员', icon: 'user' },
   { key: 'teachers', label: '教师', icon: 'team' },
   { key: 'class-groups', label: '班级', icon: 'book' },
@@ -53,6 +55,7 @@ const ENTITY_TABS: { key: EntityKey | 'health'; label: string; icon: string }[] 
   { key: 'materials', label: '学习资料', icon: 'read' },
   { key: 'meals', label: '就餐', icon: 'coffee' },
   { key: 'health', label: '数据健康', icon: 'safety' },
+  { key: 'backup-restore', label: '备份与恢复', icon: 'cloud' },
 ]
 
 const STATUS_FILTER_MAP: Record<EntityKey, { label: string; value: string }[]> = {
@@ -274,7 +277,7 @@ function HourAdjustmentModal({
 
 export function DataAdminClient() {
   const isMobile = useIsMobile() ?? false
-  const [activeTab, setActiveTab] = useState<EntityKey | 'health'>('students')
+  const [activeTab, setActiveTab] = useState<EntityKey | 'health' | 'backup-restore'>('students')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [page, setPage] = useState(1)
@@ -300,7 +303,7 @@ export function DataAdminClient() {
   const def = isHealthTab ? null : DATA_ADMIN_ENTITIES[entityKey]
 
   const buildUrl = useCallback(() => {
-    if (isHealthTab) return null
+    if (isHealthTab || activeTab === 'backup-restore') return null
     const params = new URLSearchParams()
     if (search) params.set('search', search)
     if (statusFilter) params.set('status', statusFilter)
@@ -308,7 +311,7 @@ export function DataAdminClient() {
     params.set('limit', String(limit))
     if (includeDeleted) params.set('includeDeleted', 'true')
     return `/api/admin/data-admin/${entityKey}?${params.toString()}`
-  }, [entityKey, search, statusFilter, page, limit, includeDeleted, isHealthTab])
+  }, [entityKey, search, statusFilter, page, limit, includeDeleted, isHealthTab, activeTab])
 
   const { data, mutate, isLoading } = useSWR(buildUrl, async (url: string) => {
     const res = await fetch(url)
@@ -624,12 +627,12 @@ export function DataAdminClient() {
       <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: 0 }}>
         <Tabs
           activeKey={activeTab}
-          onChange={(k) => setActiveTab(k as EntityKey | 'health')}
+          onChange={(k) => setActiveTab(k as EntityKey | 'health' | 'backup-restore')}
           items={ENTITY_TABS.map((t) => ({
             key: t.key,
             label: (
               <span>
-                {t.key === 'health' ? <SafetyOutlined style={{ marginRight: 6 }} /> : null}
+                {t.key === 'health' ? <SafetyOutlined style={{ marginRight: 6 }} /> : t.key === 'backup-restore' ? <CloudUploadOutlined style={{ marginRight: 6 }} /> : null}
                 {t.label}
               </span>
             ),
@@ -638,7 +641,9 @@ export function DataAdminClient() {
         />
       </div>
 
-      {isHealthTab ? (
+      {activeTab === 'backup-restore' ? (
+        <BackupRestorePanel />
+      ) : isHealthTab ? (
         <div>
           {healthData?.data ? (
             healthData.data.length === 0 ? (

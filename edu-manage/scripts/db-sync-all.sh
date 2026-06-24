@@ -2,7 +2,7 @@
 # Sync Prisma schema to the active database set.
 # In DUAL_DB=true mode this pushes to DATABASE_URL_JUNIOR and DATABASE_URL_SENIOR.
 # In single database mode this pushes to DATABASE_URL, falling back to DATABASE_URL_JUNIOR.
-set -euo pipefail
+set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$(dirname "$SCRIPT_DIR")"

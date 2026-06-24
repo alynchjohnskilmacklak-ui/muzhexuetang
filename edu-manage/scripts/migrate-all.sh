@@ -2,7 +2,7 @@
 # Run Prisma migrations for either single-db or dual-db production setups.
 # If the known StageSummary migration already created its table but was recorded
 # as failed, mark it as applied and retry once.
-set -euo pipefail
+set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"

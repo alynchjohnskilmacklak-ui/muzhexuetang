@@ -12,7 +12,7 @@
 #   OSSUTIL_BUCKET    Optional OSS target, e.g. oss://muzhe-backup/edu-manage/
 #   RSYNC_REMOTE      Optional rsync target, e.g. user@host:/data/edu-manage-backup/
 
-set -euo pipefail
+set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"

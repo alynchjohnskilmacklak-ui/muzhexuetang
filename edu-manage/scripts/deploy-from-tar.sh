@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Deploy edu-manage from a tar/tar.gz package on the server.
 # Usage: bash scripts/deploy-from-tar.sh /tmp/edu-manage-xxx.tar
-set -euo pipefail
+set -eu
 
 APP_NAME="${APP_NAME:-edu-manage}"
 TAR_FILE="${1:-/tmp/edu-manage.tar}"
