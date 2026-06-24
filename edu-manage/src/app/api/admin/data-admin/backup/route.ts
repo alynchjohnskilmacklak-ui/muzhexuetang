@@ -15,11 +15,13 @@ const BACKUP_DIR = process.env.BACKUP_DIR || '/data/backups/edu-manage'
 
 export const POST = apiHandler(async () => {
   const user = await requireSuperAdmin()
-  const projectRoot = path.resolve(process.cwd())
+  const APP_ROOT = process.env.APP_ROOT || '/opt/edu-manage'
+  const scriptPath = process.env.BACKUP_SCRIPT || `${APP_ROOT}/scripts/backup-now.sh`
 
-  const { stdout, stderr } = await execAsync('bash scripts/backup-now.sh', {
-    cwd: projectRoot,
+  const { stdout, stderr } = await execAsync(`bash ${scriptPath}`, {
+    cwd: APP_ROOT,
     timeout: 300_000,
+    env: { ...process.env },
   })
 
   if (stderr) {
