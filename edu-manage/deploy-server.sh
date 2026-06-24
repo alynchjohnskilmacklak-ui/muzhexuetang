@@ -34,7 +34,7 @@ tar -xzf "${TAR_FILE}" -C "${APP_DIR}"
 echo "=== 4. 数据库迁移 ==="
 cd "${APP_DIR}"
 npx prisma generate
-npx prisma db push
+bash scripts/db-sync-all.sh
 
 echo "=== 5. 启动服务 ==="
 npm install -g pm2 2>/dev/null || true

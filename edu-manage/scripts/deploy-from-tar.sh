@@ -41,7 +41,8 @@ npm install
 
 echo "[deploy] run Prisma migrations"
 npm run migrate:all
-npm run db:sync:all
+npx prisma generate
+bash scripts/db-sync-all.sh
 
 echo "[deploy] build standalone app"
 rm -rf .next

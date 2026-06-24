@@ -29,8 +29,8 @@ push_one() {
   local url="$2"
 
   if [ -z "$url" ]; then
-    echo "[db-sync] skip ${label}: database URL is empty"
-    return 0
+    echo "[db-sync] ERROR: ${label} database URL is empty" >&2
+    return 1
   fi
 
   echo "[db-sync] === ${label} ==="
@@ -41,8 +41,6 @@ DUAL_DB_VALUE="$(read_env DUAL_DB)"
 DATABASE_URL_JUNIOR_VALUE="$(read_env DATABASE_URL_JUNIOR)"
 DATABASE_URL_SENIOR_VALUE="$(read_env DATABASE_URL_SENIOR)"
 DATABASE_URL_VALUE="$(read_env DATABASE_URL)"
-
-npx prisma generate
 
 if [ "${DUAL_DB_VALUE:-false}" = "true" ]; then
   push_one "JUNIOR" "$DATABASE_URL_JUNIOR_VALUE"

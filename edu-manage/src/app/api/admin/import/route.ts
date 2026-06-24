@@ -34,7 +34,7 @@ function parseCsvToRows(csv: string): ImportRow[] {
 
   const headers = headerLine.split(',').map(h => h.trim().replace(/"/g, ''))
   return dataLines.map((line, idx) => {
-    const values = line.split(',').map(v => v.trim().replace(/^"(.*)"$/s, '$1'))
+    const values = line.split(',').map(v => v.trim().replace(/^"([\s\S]*)"$/, '$1'))
     const row: Record<string, string> = {}
     headers.forEach((h, i) => { row[h] = values[i] || '' })
     const importRow: ImportRow = {

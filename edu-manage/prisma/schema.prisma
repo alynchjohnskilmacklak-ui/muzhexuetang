@@ -38,6 +38,7 @@ model User {
   volunteerConsultations VolunteerConsultation[]
   mealMenus              MealMenu[]              @relation("MealMenuCreator")
   loginRecords           LoginRecord[]
+  passwordResetTokens    PasswordResetToken[]
   uploadedMaterials      StudyMaterial[]         @relation("MaterialUploader")
   parentMessages         ParentMessage[]         @relation("ParentMessages")
 

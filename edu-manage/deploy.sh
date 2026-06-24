@@ -124,7 +124,8 @@ fi
 
 echo "=== Build and migrate ==="
 npm run migrate:all
-npm run db:sync:all
+npx prisma generate
+bash scripts/db-sync-all.sh
 
 if [ "${RUN_SEED}" = "1" ]; then
   echo "=== Seed database ==="

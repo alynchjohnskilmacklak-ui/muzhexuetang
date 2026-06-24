@@ -2,6 +2,10 @@ import * as Sentry from '@sentry/nextjs'
 import { getRequestPrisma } from '@/lib/prisma'
 import type { Prisma, PrismaClient } from '@prisma/client'
 
+function isUniqueConstraintError(error: unknown): error is { code: 'P2002' } {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002'
+}
+
 export const DEFAULT_GROUP_RATE_JUNIOR = 22
 export const DEFAULT_GROUP_RATE_SENIOR = 26
 export const DEFAULT_ONE_ON_ONE_RATES: Record<string, number> = {
@@ -115,7 +119,10 @@ export function calcLessonPay(opts: {
   return Number((ratePerHour * lessonMinutes / 60).toFixed(4))
 }
 
-export async function triggerLessonPay(lessonId: string, prismaClient?: PrismaClient): Promise<{ success: boolean; error?: string }> {
+export async function triggerLessonPay(
+  lessonId: string,
+  prismaClient?: PrismaClient,
+): Promise<{ success: boolean; skipped?: boolean; error?: string }> {
   try {
     const prisma = prismaClient ?? await getRequestPrisma()
     const lesson = await prisma.classLesson.findUnique({
@@ -166,6 +173,10 @@ export async function triggerLessonPay(lessonId: string, prismaClient?: PrismaCl
     })
     return result
   } catch (err) {
+    if (isUniqueConstraintError(err)) {
+      console.warn('[salary] triggerLessonPay: concurrent duplicate skipped', lessonId)
+      return { success: true, skipped: true }
+    }
     console.error('[salary] triggerLessonPay failed:', lessonId, err instanceof Error ? err.message : err)
     Sentry.captureException(err, { extra: { lessonId, location: 'triggerLessonPay' } })
     return { success: false, error: err instanceof Error ? err.message : '薪资计算失败' }
@@ -192,6 +203,7 @@ export type FeedbackBonusPreview = {
 
 export type FeedbackBonusResult = {
   success: boolean
+  skipped?: boolean
   error?: string
   courseBucket?: FeedbackCourseBucket
   rate?: number
@@ -431,6 +443,14 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       message: `本次按${preview.label}计入奖励：${preview.eligibleCount}人 × ${formatMoney(preview.rate)}元 = ${formatMoney(preview.total)}元`,
     }
   } catch (err) {
+    if (isUniqueConstraintError(err)) {
+      console.warn('[salary] triggerFeedbackBonus: concurrent duplicate skipped', feedbackId)
+      return {
+        success: true,
+        skipped: true,
+        message: '本次反馈已记录，奖励流水已存在',
+      }
+    }
     console.error('[salary] triggerFeedbackBonus failed:', feedbackId, err instanceof Error ? err.message : err)
     Sentry.captureException(err, { extra: { feedbackId, location: 'triggerFeedbackBonus' } })
     return { success: false, error: err instanceof Error ? err.message : '反馈奖励计算失败' }
