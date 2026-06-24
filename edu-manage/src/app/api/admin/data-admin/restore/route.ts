@@ -27,58 +27,85 @@ function loadEnv(key: string): string {
   return val
 }
 
+function findDump(backupDir: string, keyword: string): string {
+  const files = fs.readdirSync(backupDir)
+  const dump = files.find((f) => f.includes(keyword) && f.endsWith('.dump'))
+  if (!dump) throw new Error(`备份目录中找不到包含 "${keyword}" 的 .dump 文件`)
+  return path.join(backupDir, dump)
+}
+
+async function restoreOne(dumpPath: string, dbUrl: string): Promise<string> {
+  const pgUrl = dbUrl.split('?')[0]
+  const cmd = `pg_restore --clean --if-exists --no-owner --no-acl --dbname="${pgUrl}" "${dumpPath}"`
+  console.log('[restore]', cmd)
+  const { stdout, stderr } = await execAsync(cmd, { timeout: 600_000 })
+  if (stderr) console.warn('[restore] stderr:', stderr)
+  return stdout.slice(-500)
+}
+
 export const POST = apiHandler(async (req: NextRequest) => {
   const body = await req.json()
   const auth = await assertDangerAuth(body)
 
-  const backupFile: string = body.backupFile || ''
+  const backupDir: string = body.backupFile || ''
   const targetDivision: string = body.targetDivision || ''
 
-  if (!backupFile || typeof backupFile !== 'string') {
-    return NextResponse.json({ error: '请选择备份文件' }, { status: 400 })
+  if (!backupDir || typeof backupDir !== 'string') {
+    return NextResponse.json({ error: '请选择备份' }, { status: 400 })
   }
 
-  // Prevent path traversal: backup must be under BACKUP_DIR
-  const resolved = path.resolve(backupFile)
+  // Prevent path traversal
+  const resolved = path.resolve(backupDir)
   const allowed = path.resolve(BACKUP_DIR)
   if (!resolved.startsWith(allowed)) {
-    return NextResponse.json({ error: '备份文件路径不在允许目录内' }, { status: 400 })
+    return NextResponse.json({ error: '备份路径不在允许目录内' }, { status: 400 })
   }
 
-  if (!fs.existsSync(resolved)) {
-    return NextResponse.json({ error: '备份文件不存在' }, { status: 400 })
+  if (!fs.existsSync(resolved) || !fs.statSync(resolved).isDirectory()) {
+    return NextResponse.json({ error: '备份目录不存在' }, { status: 400 })
   }
 
-  // Determine target database URL
-  let dbUrl: string
-  if (targetDivision === 'SENIOR') {
-    dbUrl = loadEnv('DATABASE_URL_SENIOR')
-  } else if (targetDivision === 'JUNIOR') {
-    dbUrl = loadEnv('DATABASE_URL_JUNIOR')
+  let output = ''
+
+  if (targetDivision === 'BOTH') {
+    // 初中部
+    const juniorDump = findDump(resolved, 'chuzhong')
+    const juniorUrl = loadEnv('DATABASE_URL_JUNIOR') || loadEnv('DATABASE_URL')
+    if (!juniorUrl) return NextResponse.json({ error: '未找到初中部数据库连接' }, { status: 500 })
+    output += await restoreOne(juniorDump, juniorUrl)
+
+    // 高中部
+    const seniorDump = findDump(resolved, 'gaozhong')
+    const seniorUrl = loadEnv('DATABASE_URL_SENIOR') || loadEnv('DATABASE_URL')
+    if (!seniorUrl) return NextResponse.json({ error: '未找到高中部数据库连接' }, { status: 500 })
+    output += await restoreOne(seniorDump, seniorUrl)
+
+    await createActivityLog(auth.userId, 'MANUAL_RESTORE', 'System', 'restore', {
+      backupDir: resolved,
+      divisions: ['JUNIOR', 'SENIOR'],
+    })
+  } else if (targetDivision === 'SENIOR') {
+    const dumpPath = findDump(resolved, 'gaozhong')
+    const dbUrl = loadEnv('DATABASE_URL_SENIOR') || loadEnv('DATABASE_URL')
+    if (!dbUrl) return NextResponse.json({ error: '未找到高中部数据库连接' }, { status: 500 })
+    output = await restoreOne(dumpPath, dbUrl)
+
+    await createActivityLog(auth.userId, 'MANUAL_RESTORE', 'System', 'restore', {
+      backupDir: resolved,
+      division: 'SENIOR',
+    })
   } else {
-    dbUrl = loadEnv('DATABASE_URL') || loadEnv('DATABASE_URL_JUNIOR')
+    // JUNIOR (default)
+    const dumpPath = findDump(resolved, 'chuzhong')
+    const dbUrl = loadEnv('DATABASE_URL_JUNIOR') || loadEnv('DATABASE_URL')
+    if (!dbUrl) return NextResponse.json({ error: '未找到初中部数据库连接' }, { status: 500 })
+    output = await restoreOne(dumpPath, dbUrl)
+
+    await createActivityLog(auth.userId, 'MANUAL_RESTORE', 'System', 'restore', {
+      backupDir: resolved,
+      division: 'JUNIOR',
+    })
   }
 
-  if (!dbUrl) {
-    return NextResponse.json({ error: '未找到目标数据库连接' }, { status: 500 })
-  }
-
-  // Strip Prisma ?schema=public query param for pg_restore
-  const pgUrl = dbUrl.split('?')[0]
-
-  const cmd = `pg_restore --clean --if-exists --no-owner --no-acl --dbname="${pgUrl}" "${resolved}"`
-  console.log('[restore] executing restore...')
-
-  const { stdout, stderr } = await execAsync(cmd, { timeout: 600_000 })
-
-  if (stderr) {
-    console.warn('[restore] stderr:', stderr)
-  }
-
-  await createActivityLog(auth.userId, 'MANUAL_RESTORE', 'System', 'restore', {
-    backupFile: resolved,
-    division: targetDivision || 'DEFAULT',
-  })
-
-  return NextResponse.json({ success: true, message: '数据已恢复', output: stdout.slice(-500) })
+  return NextResponse.json({ success: true, message: '数据已恢复', output })
 })
