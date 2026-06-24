@@ -2,7 +2,7 @@
 
 import { NextAuthProvider } from './NextAuthProvider'
 import { AntdRegistry } from '@ant-design/nextjs-registry'
-import { ConfigProvider } from 'antd'
+import { ConfigProvider, App as AntdApp } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import { SWRConfig } from 'swr'
 import { Toaster } from 'sonner'
@@ -35,7 +35,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         locale={zhCN}
         theme={ANTD_THEME}
       >
-        <NextAuthProvider>{children}</NextAuthProvider>
+        <NextAuthProvider>
+          <AntdApp>
+            {children}
+          </AntdApp>
+        </NextAuthProvider>
         <Toaster position="top-center" richColors style={{ zIndex: 10000 }} />
       </ConfigProvider>
     </AntdRegistry>

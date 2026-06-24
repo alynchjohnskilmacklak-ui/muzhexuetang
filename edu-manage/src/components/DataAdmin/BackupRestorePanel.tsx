@@ -4,14 +4,13 @@ import { useCallback, useState } from 'react'
 import useSWR from 'swr'
 import {
   Alert,
+  App,
   Button,
   Card,
   Checkbox,
   Divider,
   Empty,
   Input,
-  message,
-  Modal,
   Select,
   Space,
   Spin,
@@ -58,6 +57,8 @@ function buildResetPhrase(division: string, selected: string[], cats: CleanupCat
 }
 
 export default function BackupRestorePanel() {
+  const { message, modal } = App.useApp()
+
   // ---- Backup state ----
   const [backing, setBacking] = useState(false)
   const { data: historyData, mutate: refreshHistory, isLoading: historyLoading } = useSWR(
@@ -110,7 +111,7 @@ export default function BackupRestorePanel() {
       message.warning('请选择备份')
       return
     }
-    Modal.confirm({
+    modal.confirm({
       title: '确认恢复',
       icon: <WarningOutlined />,
       content: `将用备份覆盖 ${restoreDivision === 'BOTH' ? '全部' : restoreDivision === 'SENIOR' ? '高中部' : '初中部'} 数据。此操作不可撤销。`,
@@ -153,7 +154,7 @@ export default function BackupRestorePanel() {
       message.warning('请至少选择一个清理类别')
       return
     }
-    Modal.confirm({
+    modal.confirm({
       title: '确认清空数据',
       icon: <WarningOutlined />,
       content: (
