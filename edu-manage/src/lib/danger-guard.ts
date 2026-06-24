@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs'
-import { requireRole } from '@/lib/get-user'
+import { requireSuperAdmin } from '@/lib/get-user'
 import { getRequestPrisma } from '@/lib/prisma'
 import { ValidationError } from '@/lib/api-validate'
 
@@ -24,7 +24,7 @@ export interface DangerAuthResult {
  * 绝不硬编码密码 — repo 是公开的。
  */
 export async function assertDangerAuth(body: DangerAuthBody): Promise<DangerAuthResult> {
-  const user = await requireRole(['SUPER_ADMIN'])
+  const user = await requireSuperAdmin()
 
   if (!body.password || typeof body.password !== 'string' || body.password.trim().length === 0) {
     throw new ValidationError('请输入密码')

@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { assertDangerAuth } from '@/lib/danger-guard'
 import { getPrismaForDivision, isDualDbEnabled, getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
-import { requireRole } from '@/lib/get-user'
+import { requireSuperAdmin } from '@/lib/get-user'
 import { createActivityLog } from '@/lib/data-admin/entities-server'
 import { deleteFile } from '@/lib/storage'
 
@@ -145,7 +145,7 @@ const CLEANUP_CATEGORIES: Record<string, CleanupCategory> = {
 }
 
 export const GET = apiHandler(async () => {
-  await requireRole(['SUPER_ADMIN'])
+  await requireSuperAdmin()
   const categories = Object.entries(CLEANUP_CATEGORIES).map(([key, val]) => ({
     key,
     label: val.label,

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireRole } from '@/lib/get-user'
+import { requireSuperAdmin } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { createActivityLog } from '@/lib/data-admin/entities-server'
 import { exec } from 'child_process'
@@ -14,7 +14,7 @@ const execAsync = promisify(exec)
 const BACKUP_DIR = process.env.BACKUP_DIR || '/data/backups/edu-manage'
 
 export const POST = apiHandler(async () => {
-  const user = await requireRole(['SUPER_ADMIN'])
+  const user = await requireSuperAdmin()
   const projectRoot = path.resolve(process.cwd())
 
   const { stdout, stderr } = await execAsync('bash scripts/backup-now.sh', {
@@ -41,7 +41,7 @@ export const POST = apiHandler(async () => {
 })
 
 export const GET = apiHandler(async () => {
-  await requireRole(['SUPER_ADMIN'])
+  await requireSuperAdmin()
 
   const manualDir = path.join(BACKUP_DIR)
   const history: {
