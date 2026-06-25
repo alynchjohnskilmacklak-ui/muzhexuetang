@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { AI_PROMPTS, SCIENCE_ANSWER_RULES, type AIRole, type ModelId } from '@/data/ai-prompts'
 import { AIProviderError, createSSEFromText, fetchWithTimeout } from '@/lib/ai/client'
+import { captureException } from '@/lib/monitoring'
 import { getModelCapability } from '@/lib/ai/models'
 import { normalizeAIAnswer } from '@/lib/ai/normalize-answer'
 
@@ -333,6 +334,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
       },
     })
   } catch (error) {
+    if (!(error instanceof AIProviderError)) {
+      captureException(error, { modelId, context: 'ai/chat' })
+    }
     console.error(`[AI ${modelId}]`, error)
     if (error instanceof AIProviderError) {
       return NextResponse.json({ error: `${modelId} ${error.message}` }, { status: error.status || 500 })

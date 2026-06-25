@@ -16,4 +16,5 @@ jobs:
       - run: npx prisma validate
       - run: npx tsc --noEmit
       - run: npm run lint
+      - run: bash scripts/check-prisma-usage.sh
       - run: npm test

@@ -41,10 +41,16 @@ export async function GET(
 
   const where: Record<string, unknown> = {}
 
-  const studentLinked = ['exam-papers', 'notifications', 'materials', 'performance-posts', 'enrollments', 'attendances', 'classroom-feedbacks'] as EntityKey[]
+  // Entities whose Prisma model has a `student` relation — filter via student.division.
+  // ClassroomFeedback uses studentIds (String[]) not a relation; StudyMaterial has no student field.
+  // Both are excluded here; dual-DB routing already isolates by division.
+  const studentLinked = ['exam-papers', 'notifications', 'performance-posts', 'enrollments', 'attendances'] as EntityKey[]
+  // Entities with neither a student relation nor a direct division field — skip filter entirely.
+  const noFilterEntities = ['materials', 'classroom-feedbacks'] as EntityKey[]
+
   if (studentLinked.includes(entityKey)) {
     where.student = { division }
-  } else {
+  } else if (!noFilterEntities.includes(entityKey)) {
     Object.assign(where, { division })
   }
 

@@ -1,4 +1,5 @@
 import { getRequestPrisma } from '@/lib/prisma'
+import { captureException } from '@/lib/monitoring'
 import type { Prisma, PrismaClient } from '@prisma/client'
 
 export const DEFAULT_GROUP_RATE_JUNIOR = 22
@@ -156,6 +157,7 @@ export async function triggerLessonPay(lessonId: string, prismaClient?: PrismaCl
     })
     return result
   } catch (err) {
+    captureException(err, { lessonId, context: 'triggerLessonPay' })
     console.error('[salary] triggerLessonPay failed:', lessonId, err instanceof Error ? err.message : err)
     return { success: false, error: err instanceof Error ? err.message : '薪资计算失败' }
   }
@@ -270,6 +272,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
     })
     return result
   } catch (err) {
+    captureException(err, { feedbackId, context: 'triggerFeedbackBonus' })
     console.error('[salary] triggerFeedbackBonus failed:', feedbackId, err instanceof Error ? err.message : err)
     return { success: false, error: err instanceof Error ? err.message : '反馈奖励计算失败' }
   }

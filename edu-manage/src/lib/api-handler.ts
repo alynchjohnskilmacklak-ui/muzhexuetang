@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit } from './rate-limit'
 import { ValidationError } from './api-validate'
+import { captureException } from './monitoring'
 
 type Handler = (...args: any[]) => Promise<Response>
 
@@ -59,6 +60,7 @@ export function apiHandler<T extends Handler>(handler: T): T {
       const isDev = process.env.NODE_ENV !== 'production'
       const message = isDev && err instanceof Error ? err.message : '服务器错误，请稍后重试'
       const req = args[0] as NextRequest | undefined
+      captureException(err, { url: req?.url })
       console.error('[API Error]', req?.url, err)
       return NextResponse.json({ error: message }, { status: 500 })
     }

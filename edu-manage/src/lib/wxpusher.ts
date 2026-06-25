@@ -1,3 +1,5 @@
+import { captureException } from '@/lib/monitoring'
+
 export interface PushResult {
   success: boolean
   error?: string
@@ -46,6 +48,7 @@ export async function sendWxMessage(
     }
     return { success: false, error: data.msg || '发送失败' }
   } catch (e: unknown) {
+    captureException(e, { uid, context: 'wxpusher/sendWxMessage' })
     return { success: false, error: (e as Error).message }
   }
 }
