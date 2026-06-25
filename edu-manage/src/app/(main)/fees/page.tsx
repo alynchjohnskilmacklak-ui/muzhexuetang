@@ -1,18 +1,12 @@
-'use client'
+import { PageLayout } from '@/components/Layout/PageLayout'
+import { FeesClient } from './client'
 
-import { Card, Typography, Empty } from 'antd'
-
-const { Title, Paragraph } = Typography
+export const dynamic = 'force-dynamic'
 
 export default function FeesPage() {
   return (
-    <div>
-      <Title level={4} style={{ marginBottom: 16 }}>收费管理</Title>
-      <Card bordered={false} style={{ borderRadius: 8, minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Empty description="收费管理模块开发中">
-          <Paragraph type="secondary">此功能将在下一阶段实现</Paragraph>
-        </Empty>
-      </Card>
-    </div>
+    <PageLayout title="收费管理" subtitle="纯管理端手动收费台账，不推送家长">
+      <FeesClient />
+    </PageLayout>
   )
 }

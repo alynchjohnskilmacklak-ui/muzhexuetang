@@ -142,6 +142,56 @@ const CLEANUP_CATEGORIES: Record<string, CleanupCategory> = {
       return { count: r.count, fileKeys }
     },
   },
+  achievementBadge: {
+    label: '成长徽章',
+    preset: true,
+    run: async (p, division) => {
+      const r = await p.achievementBadge.deleteMany({
+        where: { student: { division } },
+      })
+      return { count: r.count }
+    },
+  },
+  hourTransaction: {
+    label: '课时记录',
+    preset: true,
+    run: async (p, division) => {
+      const r = await p.hourTransaction.deleteMany({
+        where: { student: { division } },
+      })
+      return { count: r.count }
+    },
+  },
+  learningGoal: {
+    label: '学习目标',
+    preset: true,
+    run: async (p, division) => {
+      const r = await p.learningGoal.deleteMany({
+        where: { student: { division } },
+      })
+      return { count: r.count }
+    },
+  },
+  leaveRequest: {
+    label: '请假记录',
+    preset: true,
+    run: async (p, division) => {
+      const r = await p.leaveRequest.deleteMany({
+        where: { student: { division } },
+      })
+      return { count: r.count }
+    },
+  },
+  fee: {
+    label: '收费记录',
+    preset: true,
+    run: async (p, division) => {
+      const r = await p.fee.deleteMany({
+        where: { student: { division } },
+      })
+      return { count: r.count }
+    },
+  },
 }
 
 export const GET = apiHandler(async () => {

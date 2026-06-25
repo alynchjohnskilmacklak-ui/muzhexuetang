@@ -34,6 +34,16 @@ async function main() {
     create: { id: 't6', name: '胡思同', gender: '男', phone: '13800001006', email: 'husitong@tea.com', subjects: '数学', bio: '8年数学教学经验', employmentType: 'FULL_TIME', education: '硕士', university: '南京大学', major: '应用数学', monthlyHours: 36, division: 'JUNIOR' },
   })
 
+  // ── 收费类型 ──────────────────────────────────────────────
+  const feeTypes = ['1对1', '班课', '资料费', '其他']
+  for (let i = 0; i < feeTypes.length; i++) {
+    await prisma.feeType.upsert({
+      where: { name: feeTypes[i] },
+      update: { order: i },
+      create: { name: feeTypes[i], order: i }
+    })
+  }
+
   console.log('Seed complete')
   console.log('  超级管理员: renwentao@nuc.com / ren031213  (division=ALL)')
   console.log('  管理员:     mashaokun@nuc.com  / mashaokun (division=JUNIOR)')

@@ -500,6 +500,9 @@ model Fee {
   status    String    @default("pending")
   paidAt    DateTime?
   dueDate   DateTime?
+  hours     Float?    // 课时数(资料费等可为空/0)
+  campus    String?   // 校区
+  operator  String?   // 经办人
   notes     String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -511,6 +514,7 @@ model Fee {
   @@index([studentId, createdAt])
   @@index([createdAt])
   @@index([division])
+  @@index([campus])
 }
 
 model Room {
