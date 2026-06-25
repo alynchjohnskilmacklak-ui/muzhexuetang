@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
 import { PaperDetailClient } from './client'
 import { parentVisibleExamPaperWhere } from '@/lib/business-visibility'
@@ -11,8 +11,9 @@ export default async function PaperDetailPage({ params }: { params: Promise<{ id
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
+  const db = await getRequestPrisma()
 
-  const paper = await prisma.examPaper.findFirst({
+  const paper = await db.examPaper.findFirst({
     where: {
       id,
       ...parentVisibleExamPaperWhere(userId),

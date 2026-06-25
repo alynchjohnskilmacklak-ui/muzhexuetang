@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import ExamClient from './client'
 import { parentActiveStudentWhere, parentVisibleExamPaperWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
 
@@ -10,16 +10,17 @@ export default async function ParentGradesPage({ searchParams }: { searchParams?
   const session = await auth()
   if (!session?.user) redirect('/login')
 
+  const db = await getRequestPrisma()
   const parentId = (session.user as { id: string }).id
   const params = await searchParams
   const childId = params?.childId || ''
-  const children = await prisma.student.findMany({
+  const children = await db.student.findMany({
     where: parentActiveStudentWhere(parentId),
     select: { id: true },
   })
   const childIds = children.map((student) => student.id)
   const scopedChildIds = childId && childIds.includes(childId) ? [childId] : childIds
-  const papers = await prisma.examPaper.findMany({
+  const papers = await db.examPaper.findMany({
     where: { ...parentVisibleExamPaperWhere(parentId), studentId: { in: scopedChildIds } },
     include: {
       student: { select: { id: true, name: true, grade: true } },
@@ -30,7 +31,7 @@ export default async function ParentGradesPage({ searchParams }: { searchParams?
     },
     orderBy: { paperDate: 'desc' },
   })
-  const feedbacks = childIds.length ? await prisma.classroomFeedback.findMany({
+  const feedbacks = childIds.length ? await db.classroomFeedback.findMany({
     where: {
       status: 'PUBLISHED',
       studentIds: { hasSome: scopedChildIds },

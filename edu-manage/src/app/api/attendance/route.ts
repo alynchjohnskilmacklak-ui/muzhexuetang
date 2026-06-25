@@ -33,7 +33,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     if (teacherIdParam) where.teacherId = teacherIdParam
     where.division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
   } else if (role === 'teacher') {
-    const teacher = await resolveTeacherForUser(session.user as { id: string; email?: string | null; name?: string | null; role?: string | null })
+    const teacher = await resolveTeacherForUser(session.user as { id: string; email?: string | null; name?: string | null; role?: string | null }, prisma)
     if (!teacher) return NextResponse.json({ error: '未绑定教师身份' }, { status: 403 })
     where.teacherId = teacher.id
   } else {

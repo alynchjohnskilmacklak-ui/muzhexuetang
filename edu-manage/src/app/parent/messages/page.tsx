@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { ParentMessagesClient } from './client'
 import { parentActiveStudentWhere } from '@/lib/business-visibility'
 
@@ -10,15 +10,16 @@ export default async function ParentMessagesPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
+  const db = await getRequestPrisma()
 
-  const students = await prisma.student.findMany({
+  const students = await db.student.findMany({
     where: parentActiveStudentWhere(userId),
     select: { id: true, name: true, grade: true },
   })
 
   const studentIds = students.map(s => s.id)
 
-  const enrollments = await prisma.enrollment.findMany({
+  const enrollments = await db.enrollment.findMany({
     where: {
       studentId: { in: studentIds },
       status: 'ACTIVE',
@@ -64,7 +65,7 @@ export default async function ParentMessagesPage() {
 
   const teachers = Array.from(teacherMap.values()).sort((a, b) => a.name.localeCompare(b.name, 'zh'))
 
-  const messages = await prisma.parentMessage.findMany({
+  const messages = await db.parentMessage.findMany({
     where: { parentId: userId },
     include: {
       student: { select: { id: true, name: true } },

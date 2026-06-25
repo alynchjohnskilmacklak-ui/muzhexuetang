@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { startOfMealWeek, templateToMenuLike, type EffectiveMealMenu } from '@/lib/meals'
 import { redirect } from 'next/navigation'
 import { ParentMealsClient } from './client'
@@ -9,13 +9,14 @@ export const dynamic = 'force-dynamic'
 export default async function ParentMealsPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
+  const db = await getRequestPrisma()
   const weekStart = startOfMealWeek(new Date())!
   const [menus, templates] = await Promise.all([
-    prisma.mealMenu.findMany({
+    db.mealMenu.findMany({
       where: { weekStart, mealType: 'lunch', dayOfWeek: { gte: 1, lte: 6 } },
       orderBy: { dayOfWeek: 'asc' },
     }),
-    prisma.mealTemplate.findMany({
+    db.mealTemplate.findMany({
       where: { isActive: true, weekday: { gte: 1, lte: 6 } },
       orderBy: { weekday: 'asc' },
     }),

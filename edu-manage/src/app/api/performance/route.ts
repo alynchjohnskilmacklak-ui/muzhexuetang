@@ -66,7 +66,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       email: user.email as string,
       name: user.name as string,
       role: user.role,
-    })
+    }, prisma)
     if (!resolved) return NextResponse.json({ posts: [], total: 0, page, limit })
     Object.assign(where, { teacherId: resolved.id })
   }
@@ -106,9 +106,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (!['admin', 'teacher'].includes(user.role || '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const teacher = await resolveTeacherForUser({ id: user.id, email: user.email, name: user.name, role: user.role })
-  if (!teacher) return NextResponse.json({ error: '没有匹配到教师档案，请先创建教师资料' }, { status: 400 })
   const prisma = await getRequestPrisma()
+
+  const teacher = await resolveTeacherForUser({ id: user.id, email: user.email, name: user.name, role: user.role }, prisma)
+  if (!teacher) return NextResponse.json({ error: '没有匹配到教师档案，请先创建教师资料' }, { status: 400 })
 
   const body = await req.json()
   const rawIds = Array.isArray(body.studentIds)

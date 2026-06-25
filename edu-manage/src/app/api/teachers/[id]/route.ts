@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { getRequestPrisma, prisma as prismaFallback } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
+import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -12,7 +13,7 @@ async function requireSession() {
   return session
 }
 
-async function getEffectiveTeacherStudents(teacherId: string, client = prismaFallback) {
+async function getEffectiveTeacherStudents(teacherId: string, client: PrismaClient) {
   const groups = await client.classGroup.findMany({
     where: {
       status: { not: 'ARCHIVED' },
@@ -81,7 +82,7 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
 
   if (!teacher) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const effective = await getEffectiveTeacherStudents(id)
+  const effective = await getEffectiveTeacherStudents(id, prisma)
   return NextResponse.json({
     ...teacher,
     students: effective.students,
@@ -152,7 +153,7 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
   })
   if (!teacher) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const effective = await getEffectiveTeacherStudents(id)
+  const effective = await getEffectiveTeacherStudents(id, prisma)
   const userId = (session.user as { id?: string }).id
   const affectedParents = await prisma.student.findMany({
     where: {

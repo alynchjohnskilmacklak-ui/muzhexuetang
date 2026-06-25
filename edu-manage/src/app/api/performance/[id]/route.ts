@@ -31,7 +31,7 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
   if (user.role === 'teacher') {
-    const teacher = await resolveTeacherForUser(user)
+    const teacher = await resolveTeacherForUser(user, prisma)
     if (!teacher || teacher.id !== post.teacherId) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
@@ -52,7 +52,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   if (!post) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   if (user.role !== 'admin') {
-    const teacher = await resolveTeacherForUser({ id: user.id, email: user.email, name: user.name, role: user.role })
+    const teacher = await resolveTeacherForUser({ id: user.id, email: user.email, name: user.name, role: user.role }, prisma)
     if (!teacher || teacher.id !== post.teacherId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -89,7 +89,7 @@ export const DELETE = apiHandler(async (_req: NextRequest, { params }: { params:
   if (!post) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   if (user.role !== 'admin') {
-    const teacher = await resolveTeacherForUser({ id: user.id, email: user.email, name: user.name, role: user.role })
+    const teacher = await resolveTeacherForUser({ id: user.id, email: user.email, name: user.name, role: user.role }, prisma)
     if (!teacher || teacher.id !== post.teacherId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

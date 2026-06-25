@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ParentFeesClient } from './client'
 import { parentActiveStudentWhere } from '@/lib/business-visibility'
@@ -10,6 +10,7 @@ export default async function ParentFeesPage({ searchParams }: { searchParams?: 
   const session = await auth()
   if (!session?.user) redirect('/login')
 
+  const db = await getRequestPrisma()
   const userId = (session.user as { id: string }).id
   const params = await searchParams
   const childId = params?.childId || ''
@@ -17,7 +18,7 @@ export default async function ParentFeesPage({ searchParams }: { searchParams?: 
     ? { ...parentActiveStudentWhere(userId), id: childId }
     : parentActiveStudentWhere(userId)
 
-  const fees = await prisma.fee.findMany({
+  const fees = await db.fee.findMany({
     where: { student: studentWhere, OR: [{ courseId: null }, { course: { isActive: true } }] },
     include: { student: true, course: true },
     orderBy: { createdAt: 'desc' },

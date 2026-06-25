@@ -155,6 +155,10 @@ export const GET = apiHandler(async () => {
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {
+  if (!isDualDbEnabled()) {
+    return NextResponse.json({ error: '双库未启用，禁止清理数据' }, { status: 400 })
+  }
+
   const prisma = await getRequestPrisma()
   const body = await req.json()
 
@@ -174,7 +178,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   let totalFilesDeleted = 0
 
   for (const div of divisions) {
-    const divPrisma = isDualDbEnabled() ? getPrismaForDivision(div) : prisma
+    const divPrisma = getPrismaForDivision(div)
     results[div] = {}
 
     for (const catKey of selectedCats) {

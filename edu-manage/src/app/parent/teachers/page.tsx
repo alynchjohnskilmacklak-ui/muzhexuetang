@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ParentTeachersClient } from './client'
 
@@ -9,7 +9,8 @@ export default async function ParentTeachersPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
-  const teachers = await prisma.teacher.findMany({
+  const db = await getRequestPrisma()
+  const teachers = await db.teacher.findMany({
     where: { status: { not: 'RESIGNED' } },
     select: {
       id: true,

@@ -70,14 +70,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (targetDivision === 'BOTH') {
     // 初中部
     const juniorDump = findDump(resolved, 'chuzhong')
-    const juniorUrl = loadEnv('DATABASE_URL_JUNIOR') || loadEnv('DATABASE_URL')
-    if (!juniorUrl) return NextResponse.json({ error: '未找到初中部数据库连接' }, { status: 500 })
+    const juniorUrl = loadEnv('DATABASE_URL_JUNIOR')
+    if (!juniorUrl) return NextResponse.json({ error: '未找到初中部数据库连接(DATABASE_URL_JUNIOR)' }, { status: 500 })
     output += await restoreOne(juniorDump, juniorUrl)
 
     // 高中部
     const seniorDump = findDump(resolved, 'gaozhong')
-    const seniorUrl = loadEnv('DATABASE_URL_SENIOR') || loadEnv('DATABASE_URL')
-    if (!seniorUrl) return NextResponse.json({ error: '未找到高中部数据库连接' }, { status: 500 })
+    const seniorUrl = loadEnv('DATABASE_URL_SENIOR')
+    if (!seniorUrl) return NextResponse.json({ error: '未找到高中部数据库连接(DATABASE_URL_SENIOR)' }, { status: 500 })
     output += await restoreOne(seniorDump, seniorUrl)
 
     await createActivityLog(auth.userId, 'MANUAL_RESTORE', 'System', 'restore', {
@@ -86,8 +86,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
     })
   } else if (targetDivision === 'SENIOR') {
     const dumpPath = findDump(resolved, 'gaozhong')
-    const dbUrl = loadEnv('DATABASE_URL_SENIOR') || loadEnv('DATABASE_URL')
-    if (!dbUrl) return NextResponse.json({ error: '未找到高中部数据库连接' }, { status: 500 })
+    const dbUrl = loadEnv('DATABASE_URL_SENIOR')
+    if (!dbUrl) return NextResponse.json({ error: '未找到高中部数据库连接(DATABASE_URL_SENIOR)' }, { status: 500 })
     output = await restoreOne(dumpPath, dbUrl)
 
     await createActivityLog(auth.userId, 'MANUAL_RESTORE', 'System', 'restore', {
@@ -97,8 +97,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
   } else {
     // JUNIOR (default)
     const dumpPath = findDump(resolved, 'chuzhong')
-    const dbUrl = loadEnv('DATABASE_URL_JUNIOR') || loadEnv('DATABASE_URL')
-    if (!dbUrl) return NextResponse.json({ error: '未找到初中部数据库连接' }, { status: 500 })
+    const dbUrl = loadEnv('DATABASE_URL_JUNIOR')
+    if (!dbUrl) return NextResponse.json({ error: '未找到初中部数据库连接(DATABASE_URL_JUNIOR)' }, { status: 500 })
     output = await restoreOne(dumpPath, dbUrl)
 
     await createActivityLog(auth.userId, 'MANUAL_RESTORE', 'System', 'restore', {

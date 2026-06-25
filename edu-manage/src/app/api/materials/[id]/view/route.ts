@@ -43,7 +43,7 @@ export const GET = apiHandler(async (
       email: user.email,
       name: user.name,
       role: user.role,
-    })
+    }, prisma)
     if (teacher) {
       const matched = await prisma.studyMaterial.findFirst({
         where: { id, ...teacherVisibleMaterialWhere(teacher.id, user.id) },

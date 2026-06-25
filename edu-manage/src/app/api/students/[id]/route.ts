@@ -40,7 +40,7 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
   if (user.role === 'teacher') {
-    const teacher = await resolveTeacherForUser(user)
+    const teacher = await resolveTeacherForUser(user, prisma)
     if (!teacher) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     const isAssigned = student.enrollments.some(
       e => e.group?.teacherAssignments?.some(ta => ta.teacherId === teacher.id)

@@ -1,13 +1,14 @@
 import { notFound } from 'next/navigation'
 import { PageLayout } from '@/components/Layout/PageLayout'
-import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
+import { getPrismaForDivision, getRequestPrisma, isDualDbEnabled } from '@/lib/prisma'
+import type { PrismaClient } from '@prisma/client'
 import { FeedItem } from '../_components/FeedItem'
 
 export const dynamic = 'force-dynamic'
 
-export default async function PerformanceDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const post = await prisma.performancePost.findFirst({
+async function findPost(db: PrismaClient, id: string) {
+  return db.performancePost.findFirst({
     where: { id, deletedAt: null },
     include: {
       student: { select: { id: true, name: true, grade: true } },
@@ -17,6 +18,22 @@ export default async function PerformanceDetailPage({ params }: { params: Promis
       badges: true,
     },
   })
+}
+
+export default async function PerformanceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const session = await auth()
+
+  let post = null
+  if (session?.user) {
+    post = await findPost(await getRequestPrisma(), id)
+  } else if (isDualDbEnabled()) {
+    post = (await findPost(getPrismaForDivision('JUNIOR'), id))
+        ?? (await findPost(getPrismaForDivision('SENIOR'), id))
+  } else {
+    post = await findPost(getPrismaForDivision('JUNIOR'), id)
+  }
+
   if (!post) notFound()
 
   return (

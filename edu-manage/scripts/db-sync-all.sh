@@ -45,6 +45,13 @@ DATABASE_URL_VALUE="$(read_env DATABASE_URL)"
 if [ "${DUAL_DB_VALUE:-false}" = "true" ]; then
   push_one "JUNIOR" "$DATABASE_URL_JUNIOR_VALUE"
   push_one "SENIOR" "$DATABASE_URL_SENIOR_VALUE"
+  # Also push to DATABASE_URL — some pages use the default prisma client
+  # which connects to DATABASE_URL. This ensures that DB is also schema-synced.
+  if [ -n "${DATABASE_URL_VALUE:-}" ] && \
+     [ "$DATABASE_URL_VALUE" != "$DATABASE_URL_JUNIOR_VALUE" ] && \
+     [ "$DATABASE_URL_VALUE" != "$DATABASE_URL_SENIOR_VALUE" ]; then
+    push_one "DEFAULT (DATABASE_URL)" "$DATABASE_URL_VALUE"
+  fi
 else
   push_one "DEFAULT" "${DATABASE_URL_VALUE:-$DATABASE_URL_JUNIOR_VALUE}"
 fi

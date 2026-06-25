@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ParentScheduleClient } from './client'
 import { parentActiveEnrollmentWhere, parentActiveStudentWhere, parentVisibleLessonWhere } from '@/lib/business-visibility'
@@ -11,8 +11,9 @@ export default async function ParentSchedulePage() {
   if (!session?.user) redirect('/login')
 
   const userId = (session.user as { id: string }).id
+  const db = await getRequestPrisma()
 
-  const students = await prisma.student.findMany({
+  const students = await db.student.findMany({
     where: parentActiveStudentWhere(userId),
     select: { id: true, name: true, grade: true },
   })
@@ -25,7 +26,7 @@ export default async function ParentSchedulePage() {
   sunday.setDate(monday.getDate() + 6)
   sunday.setHours(23, 59, 59, 999)
 
-  const lessons = await prisma.classLesson.findMany({
+  const lessons = await db.classLesson.findMany({
     where: {
       ...parentVisibleLessonWhere(userId),
       lessonDate: { gte: monday, lte: sunday },

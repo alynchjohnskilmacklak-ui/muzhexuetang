@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { ParentLeaveClient } from './client'
@@ -10,8 +10,9 @@ export default async function ParentLeavePage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
+  const db = await getRequestPrisma()
 
-  const students = await prisma.student.findMany({
+  const students = await db.student.findMany({
     where: parentLinkedStudentWhere(userId),
     select: { id: true, name: true },
   })
@@ -22,7 +23,7 @@ export default async function ParentLeavePage() {
 
   const childStudentIds = students.map(s => s.id)
 
-  const upcomingLessons = await prisma.classLesson.findMany({
+  const upcomingLessons = await db.classLesson.findMany({
     where: {
       lessonDate: { gte: now, lte: twoWeeksLater },
       status: { in: ['SCHEDULED', 'IN_PROGRESS'] },
@@ -60,7 +61,7 @@ export default async function ParentLeavePage() {
     return true
   })
 
-  const leaveRequests = await prisma.leaveRequest.findMany({
+  const leaveRequests = await db.leaveRequest.findMany({
     where: { student: { parentId: userId } },
     include: {
       student: { select: { name: true } },

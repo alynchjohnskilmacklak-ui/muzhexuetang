@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { parentActiveEnrollmentWhere, parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { ParentHourRecordsClient } from './client'
@@ -10,8 +10,9 @@ export default async function ParentHourRecordsPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
+  const db = await getRequestPrisma()
 
-  const students = await prisma.student.findMany({
+  const students = await db.student.findMany({
     where: parentLinkedStudentWhere(userId),
     select: {
       id: true,
@@ -32,7 +33,7 @@ export default async function ParentHourRecordsPage() {
     orderBy: { name: 'asc' },
   })
 
-  const attendances = await prisma.attendance.findMany({
+  const attendances = await db.attendance.findMany({
     where: {
       student: parentLinkedStudentWhere(userId),
       hoursDeducted: { gt: 0 },
@@ -63,7 +64,7 @@ export default async function ParentHourRecordsPage() {
     take: 200,
   })
 
-  const hourTransactions = await prisma.hourTransaction.findMany({
+  const hourTransactions = await db.hourTransaction.findMany({
     where: {
       student: parentLinkedStudentWhere(userId),
     },

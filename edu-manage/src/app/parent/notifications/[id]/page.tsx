@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { NotificationDetailClient } from './client'
 import {
@@ -16,15 +16,16 @@ export default async function NotificationDetailPage({ params }: { params: Promi
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
+  const db = await getRequestPrisma()
 
-  const notification = await prisma.notification.findFirst({
+  const notification = await db.notification.findFirst({
     where: { id, userId, ...visibleNotificationWhere },
   })
 
   if (!notification) redirect('/parent/notifications')
 
   const parentStudentIds = (
-    await prisma.student.findMany({
+    await db.student.findMany({
       where: parentLinkedStudentWhere(userId),
       select: { id: true },
     })
@@ -32,7 +33,7 @@ export default async function NotificationDetailPage({ params }: { params: Promi
 
   // Mark as read on server side
   if (!notification.read) {
-    await prisma.notification.update({
+    await db.notification.update({
       where: { id },
       data: { read: true, readAt: new Date() },
     })
@@ -43,7 +44,7 @@ export default async function NotificationDetailPage({ params }: { params: Promi
   if (notification.relatedType && notification.relatedId) {
     switch (notification.relatedType) {
       case 'CLASSROOM_FEEDBACK': {
-        relatedData = await prisma.classroomFeedback.findFirst({
+        relatedData = await db.classroomFeedback.findFirst({
           where: { id: notification.relatedId, ...visibleClassroomFeedbackWhere, studentIds: { hasSome: parentStudentIds } },
           include: {
             teacher: { select: { id: true, name: true } },
@@ -53,7 +54,7 @@ export default async function NotificationDetailPage({ params }: { params: Promi
         break
       }
       case 'PERFORMANCE_FEEDBACK': {
-        relatedData = await prisma.performancePost.findFirst({
+        relatedData = await db.performancePost.findFirst({
           where: { id: notification.relatedId, ...visiblePerformancePostWhere, studentId: { in: parentStudentIds } },
           include: {
             student: { select: { id: true, name: true } },
@@ -63,7 +64,7 @@ export default async function NotificationDetailPage({ params }: { params: Promi
         break
       }
       case 'EXAM_PAPER': {
-        relatedData = await prisma.examPaper.findFirst({
+        relatedData = await db.examPaper.findFirst({
           where: { id: notification.relatedId, status: 'PUBLISHED', studentId: { in: parentStudentIds } },
           include: {
             student: { select: { id: true, name: true } },

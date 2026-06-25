@@ -76,7 +76,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     email: user.email,
     name: user.name,
     role: user.role,
-  })
+  }, prisma)
   if (!teacher) {
     return NextResponse.json({ error: '没有匹配到教师档案，请先在教师管理中创建至少一位在职教师' }, { status: 400 })
   }

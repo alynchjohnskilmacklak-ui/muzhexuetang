@@ -38,7 +38,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       email: user.email,
       name: user.name,
       role,
-    })
+    }, prisma)
     if (!teacher) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     visibilityWhere = teacherVisibleMaterialWhere(teacher.id, user.id)
   }

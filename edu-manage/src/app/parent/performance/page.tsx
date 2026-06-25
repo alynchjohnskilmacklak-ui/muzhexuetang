@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import PerformanceClient from './client'
 import { parentActiveStudentWhere, parentVisiblePerformancePostWhere } from '@/lib/business-visibility'
 
@@ -10,6 +10,7 @@ export default async function ParentPerformancePage({ searchParams }: { searchPa
   const session = await auth()
   const userId = (session?.user as { id?: string } | undefined)?.id
   if (!userId) redirect('/login')
+  const db = await getRequestPrisma()
   const params = await searchParams
   const childId = params?.childId || ''
 
@@ -17,7 +18,7 @@ export default async function ParentPerformancePage({ searchParams }: { searchPa
     ? { ...parentActiveStudentWhere(userId), id: childId }
     : parentActiveStudentWhere(userId)
 
-  const student = await prisma.student.findFirst({
+  const student = await db.student.findFirst({
     where: studentWhere,
     include: {
       mainTeacher: { select: { id: true, name: true } },
@@ -29,7 +30,7 @@ export default async function ParentPerformancePage({ searchParams }: { searchPa
     return <PerformanceClient student={null} initialPosts={[]} />
   }
 
-  const initialPosts = await prisma.performancePost.findMany({
+  const initialPosts = await db.performancePost.findMany({
     where: { ...parentVisiblePerformancePostWhere(userId), studentId: student.id },
     include: {
       teacher: { select: { id: true, name: true, avatar: true } },

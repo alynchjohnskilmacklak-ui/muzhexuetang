@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import type { PrismaClient } from '@prisma/client'
+import { getPrismaForDivision, isDualDbEnabled, prisma } from '@/lib/prisma'
 import { sendWxMessage, buildFeedbackContent, buildSafeHomeContent } from '@/lib/wxpusher'
 
 export const dynamic = 'force-dynamic'
@@ -11,14 +12,8 @@ function backoffDelay(attempt: number): number {
   return Math.min(BASE_DELAY_MS * Math.pow(2, attempt), 30 * 60_000)
 }
 
-export async function GET(req: NextRequest) {
-  const token = req.nextUrl.searchParams.get('token')
-  if (token !== process.env.CRON_SECRET && token !== process.env.HEALTH_TOKEN) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const now = Date.now()
-  const failedNotifications = await prisma.notification.findMany({
+async function retryForDb(db: PrismaClient, now: number) {
+  const failedNotifications = await db.notification.findMany({
     where: {
       pushStatus: 'failed',
       attempts: { lt: MAX_RETRIES },
@@ -40,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     const wxpusherUid = n.student?.parent?.wxpusherUid
     if (!wxpusherUid) {
-      await prisma.notification.update({
+      await db.notification.update({
         where: { id: n.id },
         data: { pushStatus: 'no_bind', pushError: '家长未绑定微信', lastError: '家长未绑定微信' },
       })
@@ -56,7 +51,7 @@ export async function GET(req: NextRequest) {
     const result = await sendWxMessage(wxpusherUid, msgContent, summary)
 
     if (result.success) {
-      await prisma.notification.update({
+      await db.notification.update({
         where: { id: n.id },
         data: {
           pushStatus: 'sent',
@@ -69,7 +64,7 @@ export async function GET(req: NextRequest) {
       results.push({ id: n.id, status: 'sent' })
     } else {
       const newAttempts = n.attempts + 1
-      await prisma.notification.update({
+      await db.notification.update({
         where: { id: n.id },
         data: {
           attempts: newAttempts,
@@ -82,5 +77,25 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  return results
+}
+
+export async function GET(req: NextRequest) {
+  const token = req.nextUrl.searchParams.get('token')
+  if (token !== process.env.CRON_SECRET && token !== process.env.HEALTH_TOKEN) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const now = Date.now()
+
+  if (isDualDbEnabled()) {
+    const [juniorResults, seniorResults] = await Promise.all([
+      retryForDb(getPrismaForDivision('JUNIOR'), now),
+      retryForDb(getPrismaForDivision('SENIOR'), now),
+    ])
+    return NextResponse.json({ processed: juniorResults.length + seniorResults.length, results: [...juniorResults, ...seniorResults] })
+  }
+
+  const results = await retryForDb(prisma, now)
   return NextResponse.json({ processed: results.length, results })
 }

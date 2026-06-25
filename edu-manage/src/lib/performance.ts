@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma'
 import type { PrismaClient } from '@prisma/client'
 import { chineseToPinyin } from '@/lib/pinyin'
 
@@ -6,7 +5,7 @@ export { MOOD_META, PERFORMANCE_BADGES, QUICK_TAGS, RATING_LABELS } from '@/lib/
 
 export async function resolveTeacherForUser(
   user: { id: string; email?: string | null; name?: string | null; role?: string | null },
-  prismaClient: PrismaClient = prisma,
+  prismaClient: PrismaClient,
 ) {
   const db = prismaClient
   const loginEmail = user.email?.toLowerCase() || ''

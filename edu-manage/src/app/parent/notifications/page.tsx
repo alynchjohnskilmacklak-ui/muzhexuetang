@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ParentNotificationsClient } from './client'
 import {
@@ -12,8 +12,9 @@ export default async function ParentNotificationsPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
+  const db = await getRequestPrisma()
 
-  const notifications = await prisma.notification.findMany({
+  const notifications = await db.notification.findMany({
     where: { userId, ...visibleNotificationWhere },
     orderBy: { createdAt: 'desc' },
     take: 150,

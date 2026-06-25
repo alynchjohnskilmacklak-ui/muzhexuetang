@@ -20,7 +20,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   if (content.length > 200) return NextResponse.json({ error: '留言不能超过200字' }, { status: 400 })
 
   const teacher = ['teacher', 'admin'].includes(user.role || '')
-    ? await resolveTeacherForUser({ id: user.id, name: user.name, role: user.role })
+    ? await resolveTeacherForUser({ id: user.id, name: user.name, role: user.role }, prisma)
     : null
   const post = await prisma.performancePost.findFirst({
     where: teacher

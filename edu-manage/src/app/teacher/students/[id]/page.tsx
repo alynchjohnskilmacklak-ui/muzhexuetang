@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import { requireTeacherPage } from '@/lib/teacher-portal'
 import { formatHours } from '@/lib/format'
 import { fmtDate } from '@/lib/format-date'
@@ -8,7 +8,8 @@ import { fmtDate } from '@/lib/format-date'
 export default async function TeacherStudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const teacher = await requireTeacherPage()
   const { id } = await params
-  const student = await prisma.student.findFirst({
+  const db = await getRequestPrisma()
+  const student = await db.student.findFirst({
     where: {
       id,
       status: { not: 'INACTIVE' },
