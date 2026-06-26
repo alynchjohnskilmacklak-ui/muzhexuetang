@@ -7,8 +7,8 @@ type Handler = (...args: any[]) => Promise<Response>
 
 /** 不同路径的请求体大小限制 */
 function getBodyLimit(path: string): number {
-  if (path.startsWith('/api/materials/upload')) return 50 * 1024 * 1024  // 50MB
-  if (path.startsWith('/api/upload'))           return 25 * 1024 * 1024  // 25MB (20MB + form overhead)
+  if (path.startsWith('/api/materials/upload')) return 210 * 1024 * 1024 // 200MB + overhead
+  if (path.startsWith('/api/upload'))           return 30 * 1024 * 1024  // 30MB
   if (path.startsWith('/api/exam-papers'))      return 10 * 1024 * 1024
   if (path.startsWith('/api/volunteer'))        return 10 * 1024 * 1024
   return 5 * 1024 * 1024  // 默认 5MB

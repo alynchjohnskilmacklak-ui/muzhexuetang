@@ -37,10 +37,16 @@ interface Material {
   status: string
   tags: string[]
   isPinned: boolean
+  storageDriver: string | null
   createdAt: string
   uploader?: { name: string | null }
   teacher?: { id: string; name: string } | null
 }
+
+const OSS_DOC_EXTS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx']
+const OSS_MAX_SIZE = 200 * 1024 * 1024 // 200MB
+const LOCAL_MAX_SIZE = 30 * 1024 * 1024 // 30MB
+const LOCAL_EXTS = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.zip', '.rar', '.7z']
 
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState<Material[]>([])
@@ -53,6 +59,7 @@ export default function MaterialsPage() {
   const [filterSubject, setFilterSubject] = useState('')
   const [filterAudience, setFilterAudience] = useState('')
   const [filterTeacherId, setFilterTeacherId] = useState('')
+  const [ossEnabled, setOssEnabled] = useState(false)
   const [form] = Form.useForm()
   const selectedGrade = Form.useWatch('grade', form)
   const [fileList, setFileList] = useState<UploadFile[]>([])
@@ -73,6 +80,7 @@ export default function MaterialsPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     setFilterTeacherId(params.get('teacherId') || '')
+    fetch('/api/materials/oss-signature').then(r => r.json()).then(d => setOssEnabled(!!d.enabled)).catch(() => setOssEnabled(false))
   }, [])
 
   useEffect(() => { fetchMaterials() }, [fetchMaterials])
@@ -86,35 +94,122 @@ export default function MaterialsPage() {
 
   const handleUpload = async () => {
     const values = await form.validateFields()
-    if (!fileList[0]?.originFileObj) {
+    const file = fileList[0]?.originFileObj as File | undefined
+    if (!file) {
       message.warning('请选择文件')
       return
     }
 
-    setUploading(true)
-    const formData = new FormData()
-    formData.append('file', fileList[0].originFileObj as File)
-    formData.append('title', values.title)
-    formData.append('grade', values.grade)
-    formData.append('subject', values.subject)
-    formData.append('audience', values.audience)
-    formData.append('status', 'PUBLISHED')
-    formData.append('isPinned', String(Boolean(values.isPinned)))
-    if (values.description) formData.append('description', values.description)
-    if (values.tags) formData.append('tags', values.tags)
-
-    const res = await fetch('/api/materials/upload', { method: 'POST', body: formData })
-    setUploading(false)
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      message.error(err.error || '上传失败')
-      return
+    // 校验文件类型和大小
+    const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase()
+    if (ossEnabled) {
+      if (!OSS_DOC_EXTS.includes(ext)) {
+        message.error('仅支持 PDF、Word、Excel、PPT 文档格式')
+        return
+      }
+      if (file.size > OSS_MAX_SIZE) {
+        message.error('文件大小不能超过 200MB')
+        return
+      }
+    } else {
+      if (!LOCAL_EXTS.includes(ext)) {
+        message.error('仅支持 PDF、Word、Excel、PPT、图片和压缩包格式')
+        return
+      }
+      if (file.size > LOCAL_MAX_SIZE) {
+        message.error('文件大小不能超过 30MB')
+        return
+      }
     }
-    message.success('上传成功')
-    setUploadOpen(false)
-    form.resetFields()
-    setFileList([])
-    fetchMaterials()
+
+    setUploading(true)
+    try {
+      if (ossEnabled) {
+        // OSS 直传：获取签名 → 浏览器直传 OSS → 轻接口写元数据
+        const sigRes = await fetch('/api/materials/oss-signature', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName: file.name, contentType: file.type }),
+        })
+        if (!sigRes.ok) {
+          const err = await sigRes.json().catch(() => ({}))
+          message.error(err.error || '获取上传签名失败')
+          setUploading(false)
+          return
+        }
+        const sig = await sigRes.json()
+
+        const ossForm = new FormData()
+        ossForm.append('key', sig.key)
+        ossForm.append('policy', sig.policy)
+        ossForm.append('signature', sig.signature)
+        ossForm.append('OSSAccessKeyId', sig.accessKeyId)
+        ossForm.append('success_action_status', '200')
+        ossForm.append('file', file)
+
+        const ossRes = await fetch(`https://${sig.host}`, { method: 'POST', body: ossForm })
+        if (!ossRes.ok) {
+          const errText = await ossRes.text().catch(() => '')
+          message.error('OSS 上传失败: ' + (errText || ossRes.statusText))
+          setUploading(false)
+          return
+        }
+
+        // 轻接口写元数据
+        const metaRes = await fetch('/api/materials/upload', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key: sig.key,
+            fileName: file.name,
+            fileSize: file.size,
+            contentType: file.type,
+            title: values.title,
+            grade: values.grade,
+            subject: values.subject,
+            audience: values.audience,
+            status: 'PUBLISHED',
+            isPinned: Boolean(values.isPinned),
+            description: values.description || undefined,
+            tags: values.tags || undefined,
+          }),
+        })
+        if (!metaRes.ok) {
+          const err = await metaRes.json().catch(() => ({}))
+          message.error(err.error || '保存资料信息失败')
+          setUploading(false)
+          return
+        }
+      } else {
+        // 本地 FormData 上传
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('title', values.title)
+        formData.append('grade', values.grade)
+        formData.append('subject', values.subject)
+        formData.append('audience', values.audience)
+        formData.append('status', 'PUBLISHED')
+        formData.append('isPinned', String(Boolean(values.isPinned)))
+        if (values.description) formData.append('description', values.description)
+        if (values.tags) formData.append('tags', values.tags)
+
+        const res = await fetch('/api/materials/upload', { method: 'POST', body: formData })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          message.error(err.error || '上传失败')
+          setUploading(false)
+          return
+        }
+      }
+
+      message.success('上传成功')
+      setUploadOpen(false)
+      form.resetFields()
+      setFileList([])
+      fetchMaterials()
+    } finally {
+      setUploading(false)
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -138,8 +233,19 @@ export default function MaterialsPage() {
       return
     }
     if (['pdf', 'image'].includes(material.fileType)) {
+      // OSS 文件返回 JSON { type, url }，本地文件返回二进制
+      const url = `/api/materials/${material.id}/view`
+      if (material.storageDriver === 'aliyun-oss') {
+        const res = await fetch(url)
+        const data = await res.json()
+        if (data.url) {
+          setPreviewType(material.fileType as 'pdf' | 'image')
+          setPreviewUrl(data.url)
+        }
+        return
+      }
       setPreviewType(material.fileType as 'pdf' | 'image')
-      setPreviewUrl(`/api/materials/${material.id}/view`)
+      setPreviewUrl(url)
       return
     }
     window.open(`/api/materials/${material.id}/view?download=1`, '_blank')
@@ -293,7 +399,7 @@ export default function MaterialsPage() {
             <TextArea rows={3} maxLength={200} showCount />
           </Form.Item>
           <Form.Item label="上传文件" required>
-            <Upload beforeUpload={() => false} maxCount={1} fileList={fileList} onChange={({ fileList: list }) => setFileList(list)} accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z">
+            <Upload beforeUpload={() => false} maxCount={1} fileList={fileList} onChange={({ fileList: list }) => setFileList(list)} accept={ossEnabled ? '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx' : '.pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z'}>
               <Button icon={<UploadOutlined />} style={{ minHeight: 40 }}>选择文件</Button>
             </Upload>
           </Form.Item>

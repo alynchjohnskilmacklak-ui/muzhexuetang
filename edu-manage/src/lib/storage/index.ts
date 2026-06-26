@@ -16,6 +16,7 @@
 import { writeFile, mkdir, unlink } from 'fs/promises'
 import { join, extname } from 'path'
 import { createReadStream } from 'fs'
+import crypto from 'crypto'
 
 // ---- types ----
 
@@ -23,6 +24,15 @@ export interface UploadResult {
   url: string
   storageKey: string
   storageDriver: 'local' | 'aliyun-oss'
+}
+
+export interface PostSignature {
+  host: string
+  accessKeyId: string
+  policy: string
+  signature: string
+  key: string
+  expire: number
 }
 
 export interface StorageDriver {
@@ -110,6 +120,44 @@ class AliyunOssDriver implements StorageDriver {
     const baseUrl = process.env.ALIYUN_OSS_PUBLIC_BASE_URL || `https://${process.env.ALIYUN_OSS_BUCKET}.${process.env.ALIYUN_OSS_REGION}.aliyuncs.com`
     return `${baseUrl}/${key}`
   }
+
+  /** 生成浏览器直传 PostObject 签名 */
+  async generatePostSignature(key: string, options?: { maxSize?: number; expireSeconds?: number; contentType?: string }): Promise<PostSignature> {
+    const client = await this.getClient() as { signatureUrl(name: string, opts?: Record<string, unknown>): string }
+    const region = process.env.ALIYUN_OSS_REGION || 'oss-cn-hangzhou'
+    const bucket = process.env.ALIYUN_OSS_BUCKET || ''
+    const accessKeyId = process.env.ALIYUN_OSS_ACCESS_KEY_ID || ''
+    const accessKeySecret = process.env.ALIYUN_OSS_ACCESS_KEY_SECRET || ''
+    const host = `${bucket}.${region}.aliyuncs.com`
+    const expireSeconds = options?.expireSeconds ?? 300
+    const maxSize = options?.maxSize ?? 200 * 1024 * 1024
+    const now = new Date()
+    const expireDate = new Date(now.getTime() + expireSeconds * 1000)
+
+    const policy = {
+      expiration: expireDate.toISOString(),
+      conditions: [
+        { bucket },
+        ['content-length-range', 0, maxSize],
+        { key },
+      ],
+    }
+    if (options?.contentType) {
+      (policy.conditions as Array<unknown>).push(['starts-with', '$Content-Type', options.contentType])
+    }
+
+    const policyBase64 = Buffer.from(JSON.stringify(policy)).toString('base64')
+    const signature = crypto.createHmac('sha1', accessKeySecret).update(policyBase64).digest('base64')
+
+    return { host, accessKeyId, policy: policyBase64, signature, key, expire: expireSeconds }
+  }
+
+  /** 生成私有 bucket 的限时签名下载 URL */
+  async generateSignedUrl(key: string, options?: { expireSeconds?: number }): Promise<string> {
+    const client = await this.getClient() as { signatureUrl(name: string, opts?: Record<string, unknown>): string }
+    const expireSeconds = options?.expireSeconds ?? 300
+    return client.signatureUrl(key, { expires: expireSeconds })
+  }
 }
 
 // ---- factory ----
@@ -184,4 +232,27 @@ export async function deleteFile(key: string): Promise<void> {
 export function getFileUrl(key: string): string {
   const driver = getDriver()
   return driver.getUrl(key)
+}
+
+/** OSS 是否启用 */
+export function isOssEnabled(): boolean {
+  return (process.env.STORAGE_DRIVER || 'local') === 'aliyun-oss'
+}
+
+/** 生成 OSS 浏览器直传签名 */
+export async function generateOssPostSignature(key: string, options?: { maxSize?: number; expireSeconds?: number; contentType?: string }): Promise<PostSignature> {
+  const driver = getDriver()
+  if (!(driver instanceof AliyunOssDriver)) {
+    throw new Error('OSS 未启用')
+  }
+  return driver.generatePostSignature(key, options)
+}
+
+/** 生成 OSS 限时签名下载 URL（私有 bucket） */
+export async function generateOssSignedUrl(key: string, options?: { expireSeconds?: number }): Promise<string> {
+  const driver = getDriver()
+  if (!(driver instanceof AliyunOssDriver)) {
+    throw new Error('OSS 未启用')
+  }
+  return driver.generateSignedUrl(key, options)
 }

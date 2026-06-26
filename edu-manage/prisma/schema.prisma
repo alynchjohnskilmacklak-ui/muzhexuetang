@@ -942,10 +942,11 @@ model StudyMaterial {
   status      MaterialStatus   @default(PUBLISHED)
   teacherId   String?
   tags        String[]         @default([])
-  isPinned    Boolean          @default(false)
-  sortOrder   Int              @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isPinned      Boolean          @default(false)
+  sortOrder     Int              @default(0)
+  storageDriver String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   uploader User     @relation("MaterialUploader", fields: [uploadedBy], references: [id])
   teacher  Teacher? @relation(fields: [teacherId], references: [id])
