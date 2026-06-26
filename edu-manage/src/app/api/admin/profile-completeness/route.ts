@@ -6,7 +6,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (req: NextRequest) => {
-  await requireRole(['ADMIN', 'SUPER_ADMIN'])
+  await requireRole(['admin'])
   const prisma = await getRequestPrisma()
 
   const monthsParam = Number(req.nextUrl.searchParams.get('months'))

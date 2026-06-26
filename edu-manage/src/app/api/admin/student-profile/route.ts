@@ -7,7 +7,7 @@ import { getStudentProfile } from '@/lib/student-profile'
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (req: NextRequest) => {
-  await requireRole(['ADMIN', 'SUPER_ADMIN'])
+  await requireRole(['admin'])
   const prisma = await getRequestPrisma()
   const studentId = req.nextUrl.searchParams.get('studentId') || ''
   if (!studentId) return NextResponse.json({ error: '缺少 studentId' }, { status: 400 })
