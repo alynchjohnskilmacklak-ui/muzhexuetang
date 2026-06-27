@@ -128,8 +128,9 @@ export default function VolunteerSimPage() {
   const [filterLocation, setFilterLocation] = useState<string>('全部')
   const [onlyAccessible, setOnlyAccessible] = useState(true)
 
-  const [allocationSlot, setAllocationSlot] = useState<DBSchool | null>(null)
-  const [tongzhaoSlots, setTongzhaoSlots] = useState<(DBSchool | null)[]>(Array(6).fill(null))
+  const [allocationSlots, setAllocationSlots] = useState<(DBSchool | null)[]>(Array(3).fill(null))
+  const [shifanSlots, setShifanSlots] = useState<(DBSchool | null)[]>(Array(6).fill(null))
+  const [putongSlots, setPutongSlots] = useState<(DBSchool | null)[]>(Array(6).fill(null))
 
   const [detailSchool, setDetailSchool] = useState<ProcessedSchool | null>(null)
   const [exportingPdf, setExportingPdf] = useState(false)
@@ -259,8 +260,9 @@ export default function VolunteerSimPage() {
       setInputSchool(values.schoolName)
       setInputRank(values.schoolRank)
       setSubmitted(true)
-      setAllocationSlot(null)
-      setTongzhaoSlots(Array(6).fill(null))
+      setAllocationSlots(Array(3).fill(null))
+      setShifanSlots(Array(6).fill(null))
+      setPutongSlots(Array(6).fill(null))
       setTimeout(() => {
         document.getElementById('sim-result')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }, 150)
@@ -276,8 +278,9 @@ export default function VolunteerSimPage() {
     setInputScore(null)
     setInputSchool('')
     setInputRank(null)
-    setAllocationSlot(null)
-    setTongzhaoSlots(Array(6).fill(null))
+    setAllocationSlots(Array(3).fill(null))
+    setShifanSlots(Array(6).fill(null))
+    setPutongSlots(Array(6).fill(null))
     setFilterTag('全部')
     setFilterType('全部')
     setFilterLocation('全部')
@@ -285,35 +288,74 @@ export default function VolunteerSimPage() {
   }
 
   const addToAllocation = useCallback((school: DBSchool) => {
-    setAllocationSlot(school)
-  }, [])
-
-  const removeAllocation = useCallback(() => {
-    setAllocationSlot(null)
-  }, [])
-
-  const addToTongzhao = useCallback((school: DBSchool) => {
-    setTongzhaoSlots(prev => {
-      const idx = prev.findIndex(s => s?.schoolId === school.schoolId)
-      if (idx !== -1) return prev
-      const emptyIdx = prev.findIndex(s => s === null)
-      if (emptyIdx === -1) return prev
+    setAllocationSlots(prev => {
+      if (prev.some(item => item?.schoolId === school.schoolId)) return prev
+      const emptyIndex = prev.findIndex(item => item === null)
+      if (emptyIndex === -1) {
+        toast.warning('分配生最多3个')
+        return prev
+      }
       const next = [...prev]
-      next[emptyIdx] = school
+      next[emptyIndex] = school
       return next
     })
   }, [])
 
-  const removeTongzhao = useCallback((index: number) => {
-    setTongzhaoSlots(prev => {
+  const removeAllocation = useCallback((index: number) => {
+    setAllocationSlots(prev => {
       const next = [...prev]
       next[index] = null
       return next
     })
   }, [])
 
-  const swapTongzhao = useCallback((from: number, to: number) => {
-    setTongzhaoSlots(prev => {
+  const addToShifan = useCallback((school: DBSchool) => {
+    setShifanSlots(prev => {
+      if (prev.some(item => item?.schoolId === school.schoolId)) return prev
+      const emptyIndex = prev.findIndex(item => item === null)
+      if (emptyIndex === -1) {
+        toast.warning('省示范最多6个')
+        return prev
+      }
+      const next = [...prev]
+      next[emptyIndex] = school
+      return next
+    })
+  }, [])
+
+  const removeShifan = useCallback((index: number) => {
+    setShifanSlots(prev => {
+      const next = [...prev]
+      next[index] = null
+      return next
+    })
+  }, [])
+
+  const addToPutong = useCallback((school: DBSchool) => {
+    setPutongSlots(prev => {
+      if (prev.some(item => item?.schoolId === school.schoolId)) return prev
+      const emptyIndex = prev.findIndex(item => item === null)
+      if (emptyIndex === -1) {
+        toast.warning('普高最多6个')
+        return prev
+      }
+      const next = [...prev]
+      next[emptyIndex] = school
+      return next
+    })
+  }, [])
+
+  const removePutong = useCallback((index: number) => {
+    setPutongSlots(prev => {
+      const next = [...prev]
+      next[index] = null
+      return next
+    })
+  }, [])
+
+  const swapSlots = useCallback((segment: 'allocation' | 'shifan' | 'putong', from: number, to: number) => {
+    const setter = segment === 'allocation' ? setAllocationSlots : segment === 'shifan' ? setShifanSlots : setPutongSlots
+    setter(prev => {
       const next = [...prev]
       const tmp = next[from]
       next[from] = next[to]
@@ -323,11 +365,22 @@ export default function VolunteerSimPage() {
   }, [])
 
   const isInBasket = useCallback((schoolId: string) => {
-    if (allocationSlot?.schoolId === schoolId) return true
-    return tongzhaoSlots.some(s => s?.schoolId === schoolId)
-  }, [allocationSlot, tongzhaoSlots])
+    return [...allocationSlots, ...shifanSlots, ...putongSlots].some(s => s?.schoolId === schoolId)
+  }, [allocationSlots, shifanSlots, putongSlots])
 
-  const tongzhaoFilled = tongzhaoSlots.filter(Boolean).length
+  const allocationFilled = allocationSlots.filter(Boolean).length
+  const shifanFilled = shifanSlots.filter(Boolean).length
+  const putongFilled = putongSlots.filter(Boolean).length
+
+  const canUseAllocation = useCallback((school: DBSchool) => {
+    const quota = getAllocationQuota(school)
+    return quota > 0 && inputRank !== null && inputRank <= quota
+  }, [getAllocationQuota, inputRank])
+
+  const getSchoolSegment = useCallback((school: DBSchool): 'allocation' | 'shifan' | 'putong' => {
+    if (canUseAllocation(school)) return 'allocation'
+    return school.type === '省示范' ? 'shifan' : 'putong'
+  }, [canUseAllocation])
 
   const exportPdf = async () => {
     const el = reportRef.current
@@ -424,7 +477,7 @@ export default function VolunteerSimPage() {
             {[
               { step: '1', text: '输入学生中考成绩、就读初中和本校排名', color: C.primary },
               { step: '2', text: '查看全市排名、分配生推荐和学校匹配结果', color: C.success },
-              { step: '3', text: '从推荐列表中挑选7个志愿（1分配生+6统招）加入底部志愿篮', color: C.purple },
+              { step: '3', text: '分配生3个 + 省级示范6个 + 普通高中6个，共15个志愿', color: C.purple },
             ].map((item) => (
               <div key={item.step} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{
@@ -675,7 +728,7 @@ export default function VolunteerSimPage() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                   <span style={{ fontSize: 16 }}>📋</span>
-                  <Text strong style={{ fontSize: 15, color: C.ink }}>分配生志愿（只能填1所）</Text>
+                  <Text strong style={{ fontSize: 15, color: C.ink }}>第一批 C段·分配生类（最多3所）</Text>
                 </div>
 
                 {/* Top recommendation */}
@@ -701,7 +754,7 @@ export default function VolunteerSimPage() {
                         <Text style={{ fontSize: 13, color: C.inkMuted, lineHeight: 1.7 }}>
                           {isFallback
                             ? `排名高于该档（前${topBand.bandLo - 1}名通常会竞争更好的学校），可作为稳妥选择，但可能浪费分配生机会。`
-                            : `你校内第${topBand.bandLo < topBand.bandHi ? `${topBand.bandLo}-${topBand.bandHi}` : topBand.bandLo}名，落在${topBand.highSchoolName}名额区间（第${topBand.bandLo}-${topBand.bandHi}名）${topBand.allocationLine ? `，分数${inputScore}已超分配线约${inputScore! - topBand.allocationLine.value}分` : ''}，可重点考虑。分配生只能填1所，建议填报此校。`}
+                            : `你校内第${topBand.bandLo < topBand.bandHi ? `${topBand.bandLo}-${topBand.bandHi}` : topBand.bandLo}名，落在${topBand.highSchoolName}名额区间（第${topBand.bandLo}-${topBand.bandHi}名）${topBand.allocationLine ? `，分数${inputScore}已超分配线约${inputScore! - topBand.allocationLine.value}分` : ''}，可重点考虑。2026年第一批C段最多填报3所分配生志愿。`}
                         </Text>
                         <div style={{ marginTop: 10 }}>
                           {topDb ? (
@@ -709,10 +762,10 @@ export default function VolunteerSimPage() {
                               type="primary"
                               size="small"
                               style={{ background: C.primary, borderColor: C.primary }}
-                              disabled={!!allocationSlot}
+                              disabled={allocationFilled >= 3 || isInBasket(topDb.schoolId)}
                               onClick={() => addToAllocation(topDb)}
                             >
-                              {allocationSlot ? '分配生位已占用' : '设为首选分配生志愿'}
+                              {isInBasket(topDb.schoolId) ? '已在志愿篮' : `加入分配生（${allocationFilled}/3）`}
                             </Button>
                           ) : (
                             <Text style={{ fontSize: 12, color: C.inkSubtle }}>
@@ -732,7 +785,7 @@ export default function VolunteerSimPage() {
                     marginBottom: 12,
                   }}>
                     <Text style={{ fontSize: 13, color: C.warning }}>
-                      当前分数与排名条件下，该校无可推荐或可保底的分配生选项。建议重点考虑平行统招志愿。
+                      当前分数与排名条件下，该校无可推荐或可保底的分配生选项。建议重点考虑省级示范文化类或普通高中文化类志愿。
                     </Text>
                   </div>
                 )}
@@ -755,10 +808,10 @@ export default function VolunteerSimPage() {
                               {b.allocationLine ? `${b.allocationLine.label} ${b.allocationLine.value}分 · ` : ''}名额第{b.bandLo}-{b.bandHi}名
                             </Text>
                             {db && (
-                              <Button size="small" disabled={!!allocationSlot}
+                              <Button size="small" disabled={allocationFilled >= 3 || isInBasket(db.schoolId)}
                                 style={{ marginLeft: 'auto', fontSize: 11 }}
                                 onClick={() => addToAllocation(db)}>
-                                {allocationSlot ? '已占用' : '选为分配生'}
+                                {isInBasket(db.schoolId) ? '已在志愿篮' : `加入分配生（${allocationFilled}/3）`}
                               </Button>
                             )}
                           </div>
@@ -887,11 +940,17 @@ export default function VolunteerSimPage() {
               <TieredSchoolList
                 schools={filteredSchools}
                 isInBasket={isInBasket}
-                allocationSlot={allocationSlot}
-                tongzhaoSlots={tongzhaoSlots}
-                tongzhaoFilled={tongzhaoFilled}
+                allocationSlots={allocationSlots}
+                shifanSlots={shifanSlots}
+                putongSlots={putongSlots}
+                allocationFilled={allocationFilled}
+                shifanFilled={shifanFilled}
+                putongFilled={putongFilled}
+                canUseAllocation={canUseAllocation}
+                getSchoolSegment={getSchoolSegment}
                 addToAllocation={addToAllocation}
-                addToTongzhao={addToTongzhao}
+                addToShifan={addToShifan}
+                addToPutong={addToPutong}
                 onDetail={setDetailSchool}
               />
             )}
@@ -1072,23 +1131,32 @@ export default function VolunteerSimPage() {
                 display: 'flex', gap: 12, marginTop: 24, paddingTop: 16,
                 borderTop: `1px solid ${C.hairline}`,
               }}>
-                {detailSchool.tag === '分配生机会' && detailSchool.accessible && (
+                {canUseAllocation(detailSchool) && detailSchool.accessible && (
                   <Button
                     type="primary"
-                    disabled={!!allocationSlot}
+                    disabled={allocationFilled >= 3 || isInBasket(detailSchool.schoolId)}
                     style={{ background: C.primary, borderColor: C.primary }}
                     onClick={() => { addToAllocation(detailSchool); setDetailSchool(null) }}
                   >
-                    {allocationSlot ? '分配生位已占用' : '加入分配生志愿'}
+                    {isInBasket(detailSchool.schoolId) ? '已在志愿篮' : `加入分配生（${allocationFilled}/3）`}
                   </Button>
                 )}
                 {detailSchool.accessible ? (
-                  <Button
-                    disabled={tongzhaoFilled >= 6 || isInBasket(detailSchool.schoolId)}
-                    onClick={() => { addToTongzhao(detailSchool); setDetailSchool(null) }}
-                  >
-                    {isInBasket(detailSchool.schoolId) ? '已在志愿篮' : tongzhaoFilled >= 6 ? '统招已满（6/6）' : '加入平行统招志愿'}
-                  </Button>
+                  detailSchool.type === '省示范' ? (
+                    <Button
+                      disabled={shifanFilled >= 6 || isInBasket(detailSchool.schoolId)}
+                      onClick={() => { addToShifan(detailSchool); setDetailSchool(null) }}
+                    >
+                      {isInBasket(detailSchool.schoolId) ? '已在志愿篮' : `加入省示范（${shifanFilled}/6）`}
+                    </Button>
+                  ) : (
+                    <Button
+                      disabled={putongFilled >= 6 || isInBasket(detailSchool.schoolId)}
+                      onClick={() => { addToPutong(detailSchool); setDetailSchool(null) }}
+                    >
+                      {isInBasket(detailSchool.schoolId) ? '已在志愿篮' : `加入普高（${putongFilled}/6）`}
+                    </Button>
+                  )
                 ) : (
                   <Button disabled>新乐暂不可报，无法加入志愿</Button>
                 )}
@@ -1114,7 +1182,7 @@ export default function VolunteerSimPage() {
           padding: '16px 24px',
           zIndex: 50,
         }}>
-          {tongzhaoFilled >= 6 && allocationSlot && (
+          {allocationFilled >= 3 && shifanFilled >= 6 && putongFilled >= 6 && (
             <div style={{
               textAlign: 'center',
               marginBottom: 10,
@@ -1122,83 +1190,21 @@ export default function VolunteerSimPage() {
               fontSize: 13,
               fontWeight: 600,
             }}>
-              志愿已填满，共7个
+              志愿已填满，共15个
             </div>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: isMobile ? 12 : 20, flexDirection: isMobile ? 'column' : 'row' }}>
-            {/* Allocation slot */}
-            <div style={{ flexShrink: 0, width: isMobile ? '100%' : undefined }}>
-              <Text style={{ fontSize: 12, color: C.inkSubtle, display: 'block', marginBottom: 6 }}>
-                分配生志愿
-              </Text>
-              {allocationSlot ? (
-                <div style={{
-                  width: isMobile ? '100%' : 130,
-                  padding: '10px 12px',
-                  borderRadius: 10,
-                  background: C.primaryBg,
-                  border: `1px solid ${C.primary}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                }}>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: C.primary }}>
-                      {allocationSlot.name.length > 6 ? allocationSlot.name.slice(0, 6) + '…' : allocationSlot.name}
-                    </div>
-                    <div style={{ fontSize: 11, color: C.inkSubtle }}>{allocationSlot.tongZhao}分</div>
-                  </div>
-                  <CloseOutlined
-                    style={{ color: C.inkSubtle, fontSize: 12 }}
-                    onClick={removeAllocation}
-                  />
-                </div>
-              ) : (
-                <div style={{
-                  width: isMobile ? '100%' : 130,
-                  padding: '10px 12px',
-                  borderRadius: 10,
-                  background: C.surface3,
-                  border: `1px dashed ${C.hairlineStrong}`,
-                  color: C.inkSubtle,
-                  fontSize: 13,
-                  textAlign: 'center',
-                }}>
-                  空位
-                </div>
-              )}
-            </div>
-
-            {/* Divider */}
-            {!isMobile && <div style={{ width: 1, background: C.hairline, alignSelf: 'stretch', flexShrink: 0 }} />}
-
-            {/* Tongzhao slots */}
-            <div style={{ flex: 1 }}>
-              <Text style={{ fontSize: 12, color: C.inkSubtle, display: 'block', marginBottom: 6 }}>
-                平行统招志愿（按意愿从高到低）
-              </Text>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                {tongzhaoSlots.map((slot, idx) => (
-                  <SlotItem
-                    key={idx}
-                    index={idx}
-                    school={slot}
-                    onRemove={() => removeTongzhao(idx)}
-                    onSwap={(targetIdx: number) => swapTongzhao(idx, targetIdx)}
-                    allSlots={tongzhaoSlots}
-                  />
-                ))}
-              </div>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <VolunteerSegmentBlock title="第一批 C段·分配生类" subtitle="最多3个" segment="allocation" slots={allocationSlots} isMobile={isMobile} onRemove={removeAllocation} onSwap={(from, to) => swapSlots('allocation', from, to)} />
+            <VolunteerSegmentBlock title="第一批 D段·省级示范文化类" subtitle="最多6个" segment="shifan" slots={shifanSlots} isMobile={isMobile} onRemove={removeShifan} onSwap={(from, to) => swapSlots('shifan', from, to)} />
+            <VolunteerSegmentBlock title="第二批 C段·普通高中文化类" subtitle="最多6个" segment="putong" slots={putongSlots} isMobile={isMobile} onRemove={removePutong} onSwap={(from, to) => swapSlots('putong', from, to)} />
           </div>
 
           <div style={{ display:'flex', gap:12, justifyContent:'center', marginTop:16, flexWrap:'wrap' }}>
             <Button
               type="primary"
               icon={<FilePdfOutlined />}
-              disabled={!submitted || (!allocationSlot && tongzhaoFilled === 0)}
+              disabled={!submitted || allocationFilled + shifanFilled + putongFilled === 0}
               loading={exportingPdf}
               onClick={exportPdf}
             >导出志愿方案 PDF</Button>
@@ -1219,9 +1225,10 @@ export default function VolunteerSimPage() {
             inputRank={inputRank}
             marketRankResult={marketRankResult}
             percentileResult={percentileResult}
-            allocationSlot={allocationSlot}
+            allocationSlots={allocationSlots}
             allocationTop={allocationTop}
-            tongzhaoSlots={tongzhaoSlots}
+            shifanSlots={shifanSlots}
+            putongSlots={putongSlots}
             processedSchools={processedSchools}
           />
         )}
@@ -1231,6 +1238,9 @@ export default function VolunteerSimPage() {
           <SharePoster
             marketRankResult={marketRankResult}
             percentileResult={percentileResult}
+            allocationSlots={allocationSlots}
+            shifanSlots={shifanSlots}
+            putongSlots={putongSlots}
           />
         )}
       </div>
@@ -1248,9 +1258,10 @@ function ReportDocument({
   inputRank,
   marketRankResult,
   percentileResult,
-  allocationSlot,
+  allocationSlots,
   allocationTop,
-  tongzhaoSlots,
+  shifanSlots,
+  putongSlots,
   processedSchools,
 }: {
   inputScore: number | null
@@ -1258,12 +1269,12 @@ function ReportDocument({
   inputRank: number | null
   marketRankResult: RankResult
   percentileResult: PercentileResult
-  allocationSlot: DBSchool | null
+  allocationSlots: (DBSchool | null)[]
   allocationTop: AllocationTopResult
-  tongzhaoSlots: (DBSchool | null)[]
+  shifanSlots: (DBSchool | null)[]
+  putongSlots: (DBSchool | null)[]
   processedSchools: ProcessedSchool[]
 }) {
-  const filledTongzhao = tongzhaoSlots.filter(Boolean) as DBSchool[]
   const rankText = marketRankResult?.rank != null ? marketRankResult.rank.toLocaleString() : '—'
   const percentileText = percentileResult?.percentile && percentileResult.percentile !== '—' ? `${percentileResult.percentile}%` : '—'
 
@@ -1285,50 +1296,14 @@ function ReportDocument({
         </div>
       </section>
 
-      <section style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 12 }}>分配生志愿（C 段，1 所）</div>
-        {allocationSlot ? (
-          <div style={{ border: '1px solid #f5c9b3', background: '#fff3ec', borderRadius: 10, padding: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
-              <div style={{ fontSize: 17, fontWeight: 700, color: '#E8784A' }}>{allocationSlot.name}</div>
-              <div style={{ fontSize: 14, color: C.inkMuted }}>统招线 {allocationSlot.tongZhao} 分</div>
-            </div>
-            {allocationTop && (
-              <div style={{ marginTop: 10, fontSize: 13, lineHeight: 1.7, color: C.inkMuted }}>
-                推荐理由：{allocationTop.band.note}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div style={{ border: '1px dashed #e5ddd0', background: C.surface3, borderRadius: 10, padding: 16, color: C.inkSubtle }}>未选择</div>
-        )}
-      </section>
-
-      <section style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 12 }}>平行统招志愿（D 段，最多 6 所）</div>
-        {filledTongzhao.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {filledTongzhao.map((slot, index) => {
-              const processed = processedSchools.find((school) => school.schoolId === slot.schoolId)
-              const tag = processed?.tag ?? '稳妥'
-              const gap = processed?.gap ?? slot.tongZhao - slot.tongZhao
-              const cfg = SCORE_TAG_CONFIG[tag]
-              return (
-                <div key={`${slot.schoolId}-${index}`} style={{ display: 'grid', gridTemplateColumns: '48px 1fr 100px 116px', alignItems: 'center', gap: 12, border: '1px solid #EEE7E1', borderRadius: 10, padding: '12px 14px' }}>
-                  <div style={{ fontSize: 13, color: C.inkSubtle }}>第{index + 1}志愿</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>{slot.name}</div>
-                  <div style={{ fontSize: 13, color: C.inkMuted }}>统招线 {slot.tongZhao}</div>
-                  <div style={{ display: 'inline-flex', justifyContent: 'center', border: `1px solid ${cfg.border}`, background: cfg.bg, color: cfg.color, borderRadius: 999, padding: '4px 10px', fontSize: 12, fontWeight: 700 }}>
-                    {cfg.label}{gap >= 0 ? ` +${gap}` : ` ${gap}`}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div style={{ border: '1px dashed #e5ddd0', background: C.surface3, borderRadius: 10, padding: 16, color: C.inkSubtle }}>未选择</div>
-        )}
-      </section>
+      <ReportVolunteerSegment title="第一批 C段·分配生类（最多3所）" slots={allocationSlots} processedSchools={processedSchools} />
+      {allocationTop && allocationSlots.some(Boolean) && (
+        <div style={{ margin: '-14px 0 24px', fontSize: 12, lineHeight: 1.7, color: C.inkMuted }}>
+          分配生参考：{allocationTop.band.note}
+        </div>
+      )}
+      <ReportVolunteerSegment title="第一批 D段·省级示范文化类（最多6所）" slots={shifanSlots} processedSchools={processedSchools} />
+      <ReportVolunteerSegment title="第二批 C段·普通高中文化类（最多6所）" slots={putongSlots} processedSchools={processedSchools} />
 
       <div style={{ background: C.surface3, borderRadius: 10, padding: 14, fontSize: 12, lineHeight: 1.8, color: C.inkMuted }}>
         {DISCLAIMER_TEXT}
@@ -1349,9 +1324,15 @@ function ReportMetric({ label, value }: { label: string; value: string }) {
 function SharePoster({
   marketRankResult,
   percentileResult,
+  allocationSlots,
+  shifanSlots,
+  putongSlots,
 }: {
   marketRankResult: RankResult
   percentileResult: PercentileResult
+  allocationSlots: (DBSchool | null)[]
+  shifanSlots: (DBSchool | null)[]
+  putongSlots: (DBSchool | null)[]
 }) {
   const rankText = marketRankResult?.rank != null
     ? `全市位次 第 ${marketRankResult.rank.toLocaleString()} 名`
@@ -1377,10 +1358,22 @@ function SharePoster({
 
       <div style={{ marginTop: 120, background: '#ffffff', border: '1px solid #f5c9b3', borderRadius: 24, padding: '36px 34px', boxShadow: '0 18px 50px #f5c9b3' }}>
         <div style={{ fontSize: 31, fontWeight: 800, color: C.ink, lineHeight: 1.45 }}>
-          系统已生成 7 个梯度志愿建议 —— 冲刺 / 稳妥 / 保底一目了然
+          系统支持 15 个文化生志愿 —— 分配生3个 / 省示范6个 / 普高6个
         </div>
-        <div style={{ marginTop: 24, fontSize: 28, fontWeight: 700, color: '#E8784A', lineHeight: 1.45 }}>
-          分配生名额怎么排？自己真算不清，找老师
+        <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {[
+            { label: '第一批 C段·分配生', slots: allocationSlots },
+            { label: '第一批 D段·省示范', slots: shifanSlots },
+            { label: '第二批 C段·普高', slots: putongSlots },
+          ].map(section => {
+            const names = section.slots.filter(Boolean).map(item => item!.name)
+            return (
+              <div key={section.label} style={{ fontSize: 20, color: C.inkMuted, lineHeight: 1.45 }}>
+                <strong style={{ color: '#E8784A' }}>{section.label}：</strong>
+                {names.length > 0 ? names.join('、') : '暂未选择'}
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -1453,21 +1446,91 @@ function FeatureSection({ label, content, missing }: { label: string; content: s
   )
 }
 
+type VolunteerSegment = 'allocation' | 'shifan' | 'putong'
+
+function VolunteerSegmentBlock({
+  title, subtitle, segment, slots, isMobile, onRemove, onSwap,
+}: {
+  title: string
+  subtitle: string
+  segment: VolunteerSegment
+  slots: (DBSchool | null)[]
+  isMobile: boolean
+  onRemove: (index: number) => void
+  onSwap: (from: number, to: number) => void
+}) {
+  return (
+    <div style={{ background: C.canvas, border: `1px solid ${C.hairline}`, borderRadius: 10, padding: isMobile ? 10 : 12 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+        <Text strong style={{ color: C.ink, fontSize: 13 }}>{title}</Text>
+        <Text style={{ color: C.inkSubtle, fontSize: 11 }}>{subtitle}</Text>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+        {slots.map((school, index) => (
+          <SlotItem
+            key={`${segment}-${index}`}
+            index={index}
+            segment={segment}
+            school={school}
+            onRemove={() => onRemove(index)}
+            onSwap={(targetIndex) => onSwap(index, targetIndex)}
+            allSlots={slots}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ReportVolunteerSegment({ title, slots, processedSchools }: {
+  title: string
+  slots: (DBSchool | null)[]
+  processedSchools: ProcessedSchool[]
+}) {
+  const filled = slots.filter(Boolean) as DBSchool[]
+  return (
+    <section style={{ marginBottom: 24 }}>
+      <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 12 }}>{title}</div>
+      {filled.length > 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filled.map((school, index) => {
+            const processed = processedSchools.find(item => item.schoolId === school.schoolId)
+            const cfg = SCORE_TAG_CONFIG[processed?.tag ?? '稳妥']
+            const lineRank = getMarketRank(school.tongZhao).rank
+            return (
+              <div key={`${school.schoolId}-${index}`} style={{ display: 'grid', gridTemplateColumns: '58px 1fr 150px 100px', alignItems: 'center', gap: 12, border: '1px solid #EEE7E1', borderRadius: 10, padding: '10px 14px' }}>
+                <div style={{ fontSize: 12, color: C.inkSubtle }}>志愿{index + 1}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>{school.name}</div>
+                <div style={{ fontSize: 12, color: C.inkMuted }}>录取线 {school.tongZhao}分 · {lineRank === null ? '位次暂无' : `约第${lineRank.toLocaleString()}名`}</div>
+                <div style={{ textAlign: 'center', border: `1px solid ${cfg.border}`, background: cfg.bg, color: cfg.color, borderRadius: 999, padding: '3px 8px', fontSize: 11, fontWeight: 700 }}>{cfg.label}</div>
+              </div>
+            )
+          })}
+        </div>
+      ) : <div style={{ border: '1px dashed #e5ddd0', background: C.surface3, borderRadius: 10, padding: 14, color: C.inkSubtle }}>未选择</div>}
+    </section>
+  )
+}
+
 function SlotItem({
-  index, school, onRemove, onSwap, allSlots,
+  index, segment, school, onRemove, onSwap, allSlots,
 }: {
   index: number
+  segment: VolunteerSegment
   school: DBSchool | null
   onRemove: () => void
   onSwap: (targetIdx: number) => void
   allSlots: (DBSchool | null)[]
 }) {
   const [swapping, setSwapping] = useState(false)
+  const numeral = ['①','②','③','④','⑤','⑥'][index]
+  const segmentLabel = segment === 'allocation' ? '分配生' : segment === 'shifan' ? '省示范' : '普高'
+  const lineRank = school ? getMarketRank(school.tongZhao).rank : null
 
   if (school) {
     return (
       <div style={{
-        width: 130, padding: '10px 12px', borderRadius: 10,
+        minWidth: 0, padding: '10px 12px', borderRadius: 10,
         background: C.surface3, border: `1px solid ${C.hairline}`,
         position: 'relative',
       }}>
@@ -1476,12 +1539,14 @@ function SlotItem({
             <div style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>
               {school.name.length > 6 ? school.name.slice(0, 6) + '…' : school.name}
             </div>
-            <div style={{ fontSize: 11, color: C.inkSubtle }}>{school.tongZhao}分</div>
+            <div style={{ fontSize: 11, color: C.inkSubtle }}>
+              {school.tongZhao}分{lineRank !== null ? ` · 约第${lineRank.toLocaleString()}名` : ''}
+            </div>
           </div>
           <CloseOutlined style={{ color: C.inkSubtle, fontSize: 12, cursor: 'pointer' }} onClick={onRemove} />
         </div>
         <div style={{ marginTop: 6, display: 'flex', gap: 4 }}>
-          <Text style={{ fontSize: 10, color: C.primary }}>统招{['①','②','③','④','⑤','⑥'][index]}</Text>
+          <Text style={{ fontSize: 10, color: C.primary }}>{segmentLabel}志愿{numeral}</Text>
           {swapping ? (
             <div style={{ display: 'flex', gap: 2 }}>
               {allSlots.map((_, i) => (
@@ -1514,11 +1579,13 @@ function SlotItem({
 
   return (
     <div style={{
-      width: 130, padding: '10px 12px', borderRadius: 10,
+      minWidth: 0, minHeight: 62, padding: '10px 12px', borderRadius: 10,
       background: C.surface3, border: `1px dashed ${C.hairlineStrong}`,
-      color: C.inkSubtle, fontSize: 13, textAlign: 'center',
+      color: C.inkSubtle, fontSize: 12, textAlign: 'center',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
     }}>
-      空位{['①','②','③','④','⑤','⑥'][index]}
+      <span>志愿{numeral}</span>
+      <span style={{ fontSize: 11 }}>空位</span>
     </div>
   )
 }
@@ -1546,16 +1613,23 @@ const TIER_SECTION_SUBTLE: Record<string, string> = {
 }
 
 function TieredSchoolList({
-  schools, isInBasket, allocationSlot, tongzhaoSlots, tongzhaoFilled,
-  addToAllocation, addToTongzhao, onDetail,
+  schools, isInBasket, allocationSlots, shifanSlots, putongSlots,
+  allocationFilled, shifanFilled, putongFilled, canUseAllocation, getSchoolSegment,
+  addToAllocation, addToShifan, addToPutong, onDetail,
 }: {
   schools: ProcessedSchool[]
   isInBasket: (id: string) => boolean
-  allocationSlot: DBSchool | null
-  tongzhaoSlots: (DBSchool | null)[]
-  tongzhaoFilled: number
+  allocationSlots: (DBSchool | null)[]
+  shifanSlots: (DBSchool | null)[]
+  putongSlots: (DBSchool | null)[]
+  allocationFilled: number
+  shifanFilled: number
+  putongFilled: number
+  canUseAllocation: (school: DBSchool) => boolean
+  getSchoolSegment: (school: DBSchool) => 'allocation' | 'shifan' | 'putong'
   addToAllocation: (s: DBSchool) => void
-  addToTongzhao: (s: DBSchool) => void
+  addToShifan: (s: DBSchool) => void
+  addToPutong: (s: DBSchool) => void
   onDetail: (s: ProcessedSchool) => void
 }) {
   const grouped = useMemo(() => {
@@ -1567,13 +1641,10 @@ function TieredSchoolList({
     return map
   }, [schools])
 
-  const allocFull = !!allocationSlot
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {Array.from(grouped.entries()).map(([tier, tierSchools]) => {
         const cfg = SCORE_TAG_CONFIG[tier as ScoreTag]
-        const isAllocGroup = tier === '分配生机会'
         return (
           <div key={tier}>
             {/* Section header */}
@@ -1600,7 +1671,16 @@ function TieredSchoolList({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {tierSchools.map(school => {
                 const inBasket = isInBasket(school.schoolId)
-                const tongzhaoFull = tongzhaoFilled >= 6
+                const allocationEligible = canUseAllocation(school)
+                const primarySegment = getSchoolSegment(school)
+                const academicSegment = primarySegment === 'allocation'
+                  ? (school.type === '省示范' ? 'shifan' : 'putong')
+                  : primarySegment
+                const selectedSegment = allocationSlots.some(item => item?.schoolId === school.schoolId)
+                  ? '分配生'
+                  : shifanSlots.some(item => item?.schoolId === school.schoolId)
+                    ? '省示范'
+                    : putongSlots.some(item => item?.schoolId === school.schoolId) ? '普高' : null
 
                 return (
                   <div
@@ -1632,25 +1712,25 @@ function TieredSchoolList({
                         )}
                       </div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
-                        {isAllocGroup && school.accessible && (
-                          allocFull && allocationSlot?.schoolId === school.schoolId ? (
-                            <Button size="small" disabled style={{ fontSize: 11 }}>已选</Button>
-                          ) : (
-                            <Button size="small" disabled={allocFull}
-                              style={{ fontSize: 11, borderColor: C.primary, color: C.primary }}
-                              onClick={() => addToAllocation(school)}>
-                              +分配生
-                            </Button>
-                          )
+                        {allocationEligible && school.accessible && (
+                          <Button size="small" disabled={allocationFilled >= 3 || inBasket}
+                            style={{ fontSize: 11, borderColor: C.primary, color: C.primary }}
+                            onClick={() => addToAllocation(school)}>
+                            {selectedSegment ? `已加入${selectedSegment}` : `加入分配生（${allocationFilled}/3）`}
+                          </Button>
                         )}
-                        {inBasket && tongzhaoSlots.some(s => s?.schoolId === school.schoolId) ? (
-                          <Button size="small" disabled style={{ fontSize: 11 }}>已选</Button>
-                        ) : (
-                          school.accessible && (
-                            <Button size="small" disabled={tongzhaoFull}
+                        {school.accessible && (
+                          academicSegment === 'shifan' ? (
+                            <Button size="small" disabled={shifanFilled >= 6 || inBasket}
                               style={{ fontSize: 11 }}
-                              onClick={() => addToTongzhao(school)}>
-                              {tongzhaoFull ? '已满' : '+统招'}
+                              onClick={() => addToShifan(school)}>
+                              {selectedSegment ? `已加入${selectedSegment}` : `加入省示范（${shifanFilled}/6）`}
+                            </Button>
+                          ) : (
+                            <Button size="small" disabled={putongFilled >= 6 || inBasket}
+                              style={{ fontSize: 11 }}
+                              onClick={() => addToPutong(school)}>
+                              {selectedSegment ? `已加入${selectedSegment}` : `加入普高（${putongFilled}/6）`}
                             </Button>
                           )
                         )}
