@@ -5,7 +5,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { MaterialSource } from '@prisma/client'
 import { normalizeMaterialAudience, normalizeMaterialStatus } from '@/lib/material-visibility'
 import { apiHandler } from '@/lib/api-handler'
-import { uploadBuffer, safeFilename, isOssEnabled } from '@/lib/storage'
+import { uploadBuffer, safeFilename, isOssEnabled, StorageConfigurationError } from '@/lib/storage'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +34,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const userId = requireAdmin(session)
   if (!userId) return NextResponse.json({ error: '无权限' }, { status: 403 })
 
-  const formData = await req.formData()
+  let formData: FormData
+  try {
+    formData = await req.formData()
+  } catch {
+    return NextResponse.json(
+      { error: '上传请求格式错误，请使用 multipart/form-data', code: 'INVALID_FORM_DATA' },
+      { status: 400 }
+    )
+  }
   const file = formData.get('file') as File | null
   const title = formData.get('title') as string | null
   const grade = formData.get('grade') as string | null
@@ -57,18 +65,29 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '仅支持 PDF、Word、Excel、PPT、图片和压缩包格式' }, { status: 400 })
   }
 
-  const maxSize = isOssEnabled() ? 200 * 1024 * 1024 : 30 * 1024 * 1024
+  const maxSize = isOssEnabled() ? 200 * 1024 * 1024 : 50 * 1024 * 1024
   if (file.size > maxSize) {
     const limitMB = Math.round(maxSize / 1024 / 1024)
     return NextResponse.json({ error: `文件大小不能超过 ${limitMB}MB` }, { status: 400 })
   }
 
   const prisma = await getRequestPrisma()
-  const result = await uploadBuffer(Buffer.from(await file.arrayBuffer()), {
-    originalName: file.name,
-    mimeType: file.type,
-    prefix: 'materials',
-  })
+  let result
+  try {
+    result = await uploadBuffer(Buffer.from(await file.arrayBuffer()), {
+      originalName: file.name,
+      mimeType: file.type,
+      prefix: 'materials',
+    })
+  } catch (err) {
+    if (err instanceof StorageConfigurationError) {
+      return NextResponse.json(
+        { error: err.message, code: err.code },
+        { status: err.status }
+      )
+    }
+    throw err
+  }
 
   const material = await prisma.studyMaterial.create({
     data: {

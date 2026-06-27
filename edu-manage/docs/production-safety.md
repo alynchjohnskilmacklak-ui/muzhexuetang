@@ -42,8 +42,17 @@ Required production constraint until Redis is introduced:
 
 ```bash
 pm2 delete edu-manage || true
-pm2 start .next/standalone/server.js --name edu-manage --cwd /opt/edu-manage --instances 1
+pm2 start npm --name edu-manage -- start -- -p 3000
 pm2 save
+```
+
+If deployment logs show `EADDRINUSE: address already in use :::3000`, another Next.js process is already bound to the production port. Check and remove the duplicate process before restarting the single `edu-manage` process:
+
+```bash
+pm2 list
+lsof -i :3000
+pm2 delete 多余进程
+pm2 restart edu-manage --update-env
 ```
 
 Known limitation: deploying or restarting PM2 clears rate-limit and account-lock counters. If PM2 cluster mode is enabled, these protections become per-process and are not reliable. Redis migration is the long-term fix.

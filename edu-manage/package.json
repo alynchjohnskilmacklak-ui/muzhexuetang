@@ -44,6 +44,7 @@
     "@fullcalendar/timegrid": "^6.1.20",
     "@prisma/client": "^5.22.0",
     "@sentry/nextjs": "^10.60.0",
+    "ali-oss": "^6.23.0",
     "antd": "^5.29.3",
     "bcryptjs": "^3.0.3",
     "date-fns": "^4.1.0",

@@ -45,8 +45,25 @@ interface Material {
 
 const OSS_DOC_EXTS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx']
 const OSS_MAX_SIZE = 200 * 1024 * 1024 // 200MB
-const LOCAL_MAX_SIZE = 30 * 1024 * 1024 // 30MB
+const LOCAL_MAX_SIZE = 50 * 1024 * 1024 // 50MB
 const LOCAL_EXTS = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.zip', '.rar', '.7z']
+
+async function readApiError(res: Response, fallback: string) {
+  const data = await res.json().catch(() => ({}))
+  const error = typeof data.error === 'string' ? data.error : fallback
+  const code = typeof data.code === 'string' ? data.code : undefined
+  return { error, code }
+}
+
+function uploadFailureMessage(error: string, code?: string) {
+  if (code === 'OSS_SDK_MISSING') {
+    return '资料上传失败：OSS 依赖未安装，请联系管理员在服务器安装 ali-oss 并重启服务。'
+  }
+  if (code === 'OSS_CONFIG_MISSING') {
+    return `资料上传失败：${error}，请联系管理员配置 OSS。`
+  }
+  return `资料上传失败：${error}`
+}
 
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState<Material[]>([])
@@ -117,7 +134,7 @@ export default function MaterialsPage() {
         return
       }
       if (file.size > LOCAL_MAX_SIZE) {
-        message.error('文件大小不能超过 30MB')
+        message.error('文件大小不能超过 50MB')
         return
       }
     }
@@ -132,8 +149,8 @@ export default function MaterialsPage() {
           body: JSON.stringify({ fileName: file.name, contentType: file.type }),
         })
         if (!sigRes.ok) {
-          const err = await sigRes.json().catch(() => ({}))
-          message.error(err.error || '获取上传签名失败')
+          const err = await readApiError(sigRes, '获取上传签名失败')
+          message.error(uploadFailureMessage(err.error, err.code))
           setUploading(false)
           return
         }
@@ -150,7 +167,7 @@ export default function MaterialsPage() {
         const ossRes = await fetch(`https://${sig.host}`, { method: 'POST', body: ossForm })
         if (!ossRes.ok) {
           const errText = await ossRes.text().catch(() => '')
-          message.error('OSS 上传失败: ' + (errText || ossRes.statusText))
+          message.error('资料上传失败：OSS 上传失败，' + (errText || ossRes.statusText))
           setUploading(false)
           return
         }
@@ -175,8 +192,8 @@ export default function MaterialsPage() {
           }),
         })
         if (!metaRes.ok) {
-          const err = await metaRes.json().catch(() => ({}))
-          message.error(err.error || '保存资料信息失败')
+          const err = await readApiError(metaRes, '保存资料信息失败')
+          message.error(uploadFailureMessage(err.error, err.code))
           setUploading(false)
           return
         }
@@ -195,8 +212,8 @@ export default function MaterialsPage() {
 
         const res = await fetch('/api/materials/upload', { method: 'POST', body: formData })
         if (!res.ok) {
-          const err = await res.json().catch(() => ({}))
-          message.error(err.error || '上传失败')
+          const err = await readApiError(res, '上传失败')
+          message.error(uploadFailureMessage(err.error, err.code))
           setUploading(false)
           return
         }

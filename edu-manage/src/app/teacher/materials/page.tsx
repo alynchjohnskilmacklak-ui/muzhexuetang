@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Button, Card, Col, Empty, Form, Input, Modal, Popconfirm, Row, Select, Space,
+  Button, Col, Empty, Form, Input, Modal, Popconfirm, Row, Select, Skeleton, Space,
   Tabs, Tag, Typography, Upload,
 } from 'antd'
 import {
@@ -14,13 +14,10 @@ import { fmtDate } from '@/lib/format-date'
 import { GRADE_SUBJECTS, GRADES, SUBJECT_COLORS } from '@/data/subjects'
 import {
   materialAudienceText,
-  materialFileColor,
   materialFileLabel,
-  materialSourceLabel,
-  materialStatusLabel,
 } from '@/lib/material-format'
 
-const { Title, Text, Paragraph } = Typography
+const { Title, Text } = Typography
 const { TextArea } = Input
 
 type TabKey = 'all' | 'student' | 'teacher' | 'mine'
@@ -42,6 +39,54 @@ interface Material {
   createdAt: string
   uploader?: { name: string | null }
   teacher?: { id: string; name: string } | null
+}
+
+const FILE_TYPE_STYLE: Record<string, { color: string; bg: string }> = {
+  pdf: { color: '#E24B4A', bg: 'rgba(226,75,74,.10)' },
+  word: { color: '#185FA5', bg: 'rgba(24,95,165,.10)' },
+  doc: { color: '#185FA5', bg: 'rgba(24,95,165,.10)' },
+  docx: { color: '#185FA5', bg: 'rgba(24,95,165,.10)' },
+  ppt: { color: '#E8784A', bg: 'rgba(232,120,74,.12)' },
+  pptx: { color: '#E8784A', bg: 'rgba(232,120,74,.12)' },
+  excel: { color: '#1D9E75', bg: 'rgba(29,158,117,.10)' },
+  xls: { color: '#1D9E75', bg: 'rgba(29,158,117,.10)' },
+  xlsx: { color: '#1D9E75', bg: 'rgba(29,158,117,.10)' },
+}
+
+const AUDIENCE_STYLE: Record<string, { color: string; bg: string }> = {
+  STUDENT: { color: '#1D9E75', bg: 'rgba(29,158,117,.10)' },
+  TEACHER: { color: '#185FA5', bg: 'rgba(24,95,165,.10)' },
+  BOTH: { color: '#E8784A', bg: 'rgba(232,120,74,.12)' },
+}
+
+function rgbaFromHex(hex: string | undefined, alpha: number) {
+  if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return `rgba(232,120,74,${alpha})`
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
+function getFileStyle(material: Pick<Material, 'fileType' | 'fileName'>) {
+  const ext = material.fileName?.split('.').pop()?.toLowerCase() || ''
+  return FILE_TYPE_STYLE[material.fileType] || FILE_TYPE_STYLE[ext] || { color: '#7a7fad', bg: 'rgba(122,127,173,.12)' }
+}
+
+function softTagStyle(color?: string) {
+  return {
+    color: color || '#5a4e3a',
+    backgroundColor: rgbaFromHex(color, 0.10),
+    border: `1px solid ${rgbaFromHex(color, 0.20)}`,
+  }
+}
+
+function audienceTagStyle(audience: string) {
+  const style = AUDIENCE_STYLE[audience] || AUDIENCE_STYLE.BOTH
+  return {
+    color: style.color,
+    backgroundColor: style.bg,
+    border: `1px solid ${style.bg}`,
+  }
 }
 
 export default function TeacherMaterialsPage() {
@@ -140,24 +185,23 @@ export default function TeacherMaterialsPage() {
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 220 }}>
-          <Title level={4} style={{ margin: 0 }}>学习资料</Title>
-          <Text type="secondary">查看学生版、教师版资料，并上传通用练习、讲义、教案或复习资料。</Text>
+    <div className="teacher-materials-page">
+      <div className="materials-header">
+        <div className="materials-heading">
+          <Title level={4} className="materials-title">学习资料</Title>
+          <Text type="secondary" className="materials-subtitle">上传与查看教学资料</Text>
         </div>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>上传资料</Button>
       </div>
 
-      <Card style={{ marginBottom: 16, borderRadius: 8 }}>
-        <Space wrap>
-          <Select placeholder="全部年级" allowClear style={{ width: 140 }} value={grade || undefined} onChange={(value) => { setGrade(value || ''); setSubject('') }} options={GRADES.map((item) => ({ label: item, value: item }))} />
-          <Select placeholder="全部科目" allowClear style={{ width: 140 }} value={subject || undefined} onChange={(value) => setSubject(value || '')} options={subjectOptions} />
-          {(grade || subject) && <Button onClick={() => { setGrade(''); setSubject('') }}>清空筛选</Button>}
-        </Space>
-      </Card>
+      <div className="materials-filters">
+        <Select placeholder="全部年级" allowClear className="materials-select" value={grade || undefined} onChange={(value) => { setGrade(value || ''); setSubject('') }} options={GRADES.map((item) => ({ label: item, value: item }))} />
+        <Select placeholder="全部科目" allowClear className="materials-select" value={subject || undefined} onChange={(value) => setSubject(value || '')} options={subjectOptions} />
+        {(grade || subject) && <Button className="clear-filter" onClick={() => { setGrade(''); setSubject('') }}>清空筛选</Button>}
+      </div>
 
       <Tabs
+        className="materials-tabs"
         activeKey={tab}
         onChange={(key) => setTab(key as TabKey)}
         items={[
@@ -168,47 +212,45 @@ export default function TeacherMaterialsPage() {
         ]}
       />
 
-      {materials.length === 0 && !loading ? (
-        <Card><Empty description="暂无资料" /></Card>
+      {loading ? (
+        <div className="materials-list">
+          <Skeleton active paragraph={{ rows: 3 }} />
+          <Skeleton active paragraph={{ rows: 3 }} />
+          <Skeleton active paragraph={{ rows: 3 }} />
+        </div>
+      ) : materials.length === 0 ? (
+        <div className="materials-empty"><Empty description="暂无资料,点击右上角上传" /></div>
       ) : (
-        <Row gutter={[12, 12]}>
+        <div className="materials-list">
           {materials.map((material) => (
-            <Col key={material.id} xs={24} md={12} xl={8}>
-              <Card loading={loading} style={{ borderRadius: 8, height: '100%' }} styles={{ body: { display: 'flex', flexDirection: 'column', minHeight: 230 } }}>
-                <Space align="start" style={{ width: '100%' }}>
-                  <FileTextOutlined style={{ color: materialFileColor(material.fileType), fontSize: 28, marginTop: 2 }} />
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <Text strong style={{ display: 'block', fontSize: 15 }} ellipsis={{ tooltip: material.title }}>{material.title}</Text>
-                    <Space size={4} wrap style={{ marginTop: 8 }}>
-                      <Tag>{material.grade}</Tag>
-                      <Tag color={SUBJECT_COLORS[material.subject] || 'default'}>{material.subject}</Tag>
-                      <Tag color={materialFileColor(material.fileType)}>{materialFileLabel(material.fileType)}</Tag>
-                    </Space>
-                  </div>
+            <div key={material.id} className="material-card">
+              <div className="file-icon" style={{ color: getFileStyle(material).color, backgroundColor: getFileStyle(material).bg }}>
+                <FileTextOutlined />
+              </div>
+              <div className="material-body">
+                <Text strong className="material-title" ellipsis={{ tooltip: material.title }}>{material.title}</Text>
+                <Space size={4} wrap className="material-tags">
+                  <Tag className="material-tag">{material.grade}</Tag>
+                  <Tag className="material-tag" style={softTagStyle(SUBJECT_COLORS[material.subject])}>{material.subject}</Tag>
+                  <Tag className="material-tag" style={{ color: getFileStyle(material).color, backgroundColor: getFileStyle(material).bg, border: `1px solid ${getFileStyle(material).bg}` }}>{materialFileLabel(material.fileType)}</Tag>
+                  <Tag className="material-tag" style={audienceTagStyle(material.audience)}>{materialAudienceText(material.audience)}</Tag>
                 </Space>
-                {material.description && <Paragraph type="secondary" ellipsis={{ rows: 2 }} style={{ marginTop: 10, marginBottom: 8 }}>{material.description}</Paragraph>}
-                <Space size={4} wrap>
-                  <Tag color={material.audience === 'TEACHER' ? 'orange' : material.audience === 'BOTH' ? 'blue' : 'green'}>{materialAudienceText(material.audience)}</Tag>
-                  <Tag>{materialSourceLabel(material.source)}</Tag>
-                  {tab === 'mine' && <Tag color={material.status === 'DRAFT' ? 'default' : 'success'}>{materialStatusLabel(material.status)}</Tag>}
-                  {material.tags?.map((tag) => <Tag key={tag}>{tag}</Tag>)}
-                </Space>
-                <Text type="secondary" style={{ fontSize: 12, marginTop: 10 }}>
-                  上传者：{material.teacher?.name || material.uploader?.name || '我'} · {fmtDate(material.createdAt)} · {material.downloads} 次
+                <Text type="secondary" className="material-meta" ellipsis>
+                  {material.teacher?.name || material.uploader?.name || '我'} · {fmtDate(material.createdAt)} · 下载{material.downloads || 0}次
                 </Text>
-                <Space style={{ marginTop: 'auto', paddingTop: 14 }}>
-                  <Button icon={<EyeOutlined />} onClick={() => handlePreview(material)}>预览</Button>
-                  <Button icon={<DownloadOutlined />} onClick={() => window.open(`/api/materials/${material.id}/view?download=1`, '_blank')}>下载</Button>
+              </div>
+              <div className="material-actions">
+                <Button type="text" icon={<EyeOutlined />} onClick={() => handlePreview(material)}><span className="action-label">预览</span></Button>
+                <Button type="text" icon={<DownloadOutlined />} onClick={() => window.open(`/api/materials/${material.id}/view?download=1`, '_blank')}><span className="action-label">下载</span></Button>
                   {tab === 'mine' && (
                     <Popconfirm title="确认删除该资料？" onConfirm={() => handleDelete(material.id)}>
-                      <Button danger icon={<DeleteOutlined />}>删除</Button>
+                    <Button type="text" danger icon={<DeleteOutlined />}><span className="action-label">删除</span></Button>
                     </Popconfirm>
                   )}
-                </Space>
-              </Card>
-            </Col>
+              </div>
+            </div>
           ))}
-        </Row>
+        </div>
       )}
 
       <Modal
@@ -267,6 +309,171 @@ export default function TeacherMaterialsPage() {
         {previewUrl && previewType === 'word' && <iframe src={previewUrl} title="Word预览" style={{ width: '100%', height: '80vh', border: 0 }} />}
         {previewUrl && previewType === 'image' && <div style={{ textAlign: 'center', padding: 16 }}><img src={previewUrl} alt="" style={{ maxWidth: '100%', maxHeight: '78vh', objectFit: 'contain' }} /></div>}
       </Modal>
+
+      <style jsx>{`
+        .teacher-materials-page {
+          width: 100%;
+        }
+
+        .materials-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 12px;
+        }
+
+        .materials-heading {
+          min-width: 0;
+        }
+
+        .materials-title {
+          margin: 0 !important;
+          color: #1a1201 !important;
+        }
+
+        .materials-subtitle {
+          font-size: 13px;
+        }
+
+        .materials-filters {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 6px;
+          flex-wrap: wrap;
+        }
+
+        .materials-select {
+          width: 144px;
+        }
+
+        .clear-filter {
+          min-height: 32px;
+        }
+
+        .materials-tabs {
+          margin-bottom: 8px;
+        }
+
+        .materials-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .material-card {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          min-height: 128px;
+          padding: 16px;
+          border: 1px solid rgba(0,0,0,.06);
+          border-radius: 10px;
+          background: #fff;
+          box-shadow: 0 8px 20px rgba(26,18,1,.035);
+        }
+
+        .file-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 48px;
+          font-size: 24px;
+        }
+
+        .material-body {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .material-title {
+          display: block;
+          max-width: 100%;
+          font-size: 16px;
+          line-height: 1.35;
+          color: #1a1201;
+        }
+
+        .material-tags {
+          min-height: 22px;
+        }
+
+        :global(.material-tag) {
+          height: 22px;
+          line-height: 20px;
+          margin-inline-end: 0;
+          border-radius: 999px;
+          padding: 0 8px;
+          font-size: 12px;
+          color: #5a4e3a;
+          background: #f5f2ee;
+          border: 1px solid rgba(0,0,0,.06);
+        }
+
+        .material-meta {
+          display: block;
+          font-size: 12px;
+          color: #9a8e7a;
+        }
+
+        .material-actions {
+          flex: 0 0 78px;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 4px;
+        }
+
+        .materials-empty {
+          min-height: 240px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px dashed rgba(0,0,0,.10);
+          border-radius: 10px;
+          background: #fff;
+        }
+
+        @media (max-width: 560px) {
+          .materials-header {
+            align-items: flex-start;
+          }
+
+          .materials-select {
+            flex: 1 1 calc(50% - 4px);
+            min-width: 132px;
+          }
+
+          .material-card {
+            gap: 10px;
+            padding: 12px;
+            min-height: 120px;
+          }
+
+          .file-icon {
+            width: 44px;
+            height: 44px;
+            flex-basis: 44px;
+            font-size: 22px;
+          }
+
+          .material-actions {
+            flex-basis: 36px;
+            align-items: center;
+          }
+
+          .action-label {
+            display: none;
+          }
+        }
+      `}</style>
     </div>
   )
 }

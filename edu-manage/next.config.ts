@@ -23,13 +23,13 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
-  outputFileTracingRoot: process.cwd(),
   distDir: process.env.NEXT_DIST_DIR || '.next',
+  outputFileTracingRoot: process.cwd(),
   poweredByHeader: false,
   compress: true,
   experimental: {
     optimizePackageImports: ['antd', '@ant-design/icons', 'lodash', 'date-fns'],
+    proxyClientMaxBodySize: '210mb',
     serverActions: {
       bodySizeLimit: '50mb',
     },

@@ -42,6 +42,92 @@ export interface StorageDriver {
   getUrl(key: string): string
 }
 
+export type StorageErrorCode =
+  | 'OSS_SDK_MISSING'
+  | 'OSS_CONFIG_MISSING'
+  | 'OSS_SIGNATURE_FAILED'
+  | 'OSS_ACCESS_DENIED'
+  | 'OSS_BUCKET_NOT_FOUND'
+
+export class StorageConfigurationError extends Error {
+  code: StorageErrorCode
+  status: number
+
+  constructor(code: StorageErrorCode, message: string, status = 500) {
+    super(message)
+    this.name = 'StorageConfigurationError'
+    this.code = code
+    this.status = status
+  }
+}
+
+function isAliOssModuleMissing(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && 'code' in err && (err as { code?: unknown }).code === 'MODULE_NOT_FOUND'
+}
+
+function requiredOssEnvMissing(): string[] {
+  return [
+    'ALIYUN_OSS_REGION',
+    'ALIYUN_OSS_BUCKET',
+    'ALIYUN_OSS_ENDPOINT',
+    'ALIYUN_OSS_ACCESS_KEY_ID',
+    'ALIYUN_OSS_ACCESS_KEY_SECRET',
+    'ALIYUN_OSS_PUBLIC_BASE_URL',
+  ].filter((key) => !process.env[key])
+}
+
+function assertAliyunOssReady(): void {
+  try { require.resolve('ali-oss') }
+  catch (err) {
+    if (isAliOssModuleMissing(err)) {
+      throw new StorageConfigurationError(
+        'OSS_SDK_MISSING',
+        'OSS 依赖未安装，请在服务器执行 npm install ali-oss 并重新构建',
+        500
+      )
+    }
+    throw err
+  }
+
+  if (requiredOssEnvMissing().length > 0) {
+    throw new StorageConfigurationError(
+      'OSS_CONFIG_MISSING',
+      'OSS 配置不完整，请检查 ALIYUN_OSS_REGION / BUCKET / ACCESS_KEY',
+      500
+    )
+  }
+}
+
+function ossEndpointHost(): string {
+  const endpoint = process.env.ALIYUN_OSS_ENDPOINT || ''
+  return endpoint.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+}
+
+function ossPostHost(bucket: string): string {
+  const endpoint = ossEndpointHost()
+  if (!endpoint) return `${bucket}.${process.env.ALIYUN_OSS_REGION}.aliyuncs.com`
+  return endpoint.startsWith(`${bucket}.`) ? endpoint : `${bucket}.${endpoint}`
+}
+
+function classifyOssError(err: unknown, fallbackCode: StorageErrorCode = 'OSS_SIGNATURE_FAILED'): StorageConfigurationError {
+  if (err instanceof StorageConfigurationError) return err
+  const raw = err as { code?: unknown; status?: unknown; statusCode?: unknown; name?: unknown; message?: unknown }
+  const text = String(raw?.message || raw?.code || raw?.name || '')
+  const status = typeof raw?.status === 'number'
+    ? raw.status
+    : typeof raw?.statusCode === 'number'
+      ? raw.statusCode
+      : 500
+
+  if (status === 403 || /AccessDenied|InvalidAccessKeyId|SignatureDoesNotMatch|Forbidden/i.test(text)) {
+    return new StorageConfigurationError('OSS_ACCESS_DENIED', 'OSS AccessKey 无效或无权访问 Bucket', 403)
+  }
+  if (status === 404 || /NoSuchBucket|BucketNotFound/i.test(text)) {
+    return new StorageConfigurationError('OSS_BUCKET_NOT_FOUND', 'OSS Bucket 不存在或 Endpoint/Region 配置错误', 404)
+  }
+  return new StorageConfigurationError(fallbackCode, 'OSS 签名或上传失败，请检查 OSS 配置后重试', status)
+}
+
 // ---- local driver ----
 
 const UPLOAD_ROOT = process.env.UPLOAD_DIR || join(process.cwd(), 'public', 'uploads')
@@ -80,19 +166,24 @@ class AliyunOssDriver implements StorageDriver {
 
   private async getClient(): Promise<unknown> {
     if (this._client) return this._client
+    assertAliyunOssReady()
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const OSS = require('ali-oss')
       this._client = new OSS({
-        region: process.env.ALIYUN_OSS_REGION || 'oss-cn-hangzhou',
-        bucket: process.env.ALIYUN_OSS_BUCKET || '',
+        region: process.env.ALIYUN_OSS_REGION,
+        bucket: process.env.ALIYUN_OSS_BUCKET,
         endpoint: process.env.ALIYUN_OSS_ENDPOINT,
-        accessKeyId: process.env.ALIYUN_OSS_ACCESS_KEY_ID || '',
-        accessKeySecret: process.env.ALIYUN_OSS_ACCESS_KEY_SECRET || '',
+        accessKeyId: process.env.ALIYUN_OSS_ACCESS_KEY_ID,
+        accessKeySecret: process.env.ALIYUN_OSS_ACCESS_KEY_SECRET,
       })
       return this._client
     } catch (err) {
-      throw new Error(`OSS SDK 未安装或配置错误: ${err instanceof Error ? err.message : 'unknown'}`)
+      console.error('[storage] ali-oss client init failed', {
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+      })
+      throw classifyOssError(err)
     }
   }
 
@@ -102,12 +193,16 @@ class AliyunOssDriver implements StorageDriver {
 
   async putBuffer(key: string, buffer: Buffer, _mimeType: string): Promise<UploadResult> {
     const client = await this.getClient() as { put(key: string, buf: Buffer): Promise<{ url: string; name: string }> }
-    const result = await client.put(key, buffer)
-    const baseUrl = process.env.ALIYUN_OSS_PUBLIC_BASE_URL || `https://${process.env.ALIYUN_OSS_BUCKET}.${process.env.ALIYUN_OSS_REGION}.aliyuncs.com`
-    return {
-      url: `${baseUrl}/${result.name}`,
-      storageKey: result.name,
-      storageDriver: 'aliyun-oss',
+    try {
+      const result = await client.put(key, buffer)
+      const baseUrl = process.env.ALIYUN_OSS_PUBLIC_BASE_URL || `https://${ossPostHost(process.env.ALIYUN_OSS_BUCKET || '')}`
+      return {
+        url: `${baseUrl.replace(/\/+$/, '')}/${result.name}`,
+        storageKey: result.name,
+        storageDriver: 'aliyun-oss',
+      }
+    } catch (err) {
+      throw classifyOssError(err)
     }
   }
 
@@ -117,18 +212,16 @@ class AliyunOssDriver implements StorageDriver {
   }
 
   getUrl(key: string): string {
-    const baseUrl = process.env.ALIYUN_OSS_PUBLIC_BASE_URL || `https://${process.env.ALIYUN_OSS_BUCKET}.${process.env.ALIYUN_OSS_REGION}.aliyuncs.com`
-    return `${baseUrl}/${key}`
+    const baseUrl = process.env.ALIYUN_OSS_PUBLIC_BASE_URL || `https://${ossPostHost(process.env.ALIYUN_OSS_BUCKET || '')}`
+    return `${baseUrl.replace(/\/+$/, '')}/${key}`
   }
 
   /** 生成浏览器直传 PostObject 签名 */
   async generatePostSignature(key: string, options?: { maxSize?: number; expireSeconds?: number; contentType?: string }): Promise<PostSignature> {
-    const client = await this.getClient() as { signatureUrl(name: string, opts?: Record<string, unknown>): string }
-    const region = process.env.ALIYUN_OSS_REGION || 'oss-cn-hangzhou'
     const bucket = process.env.ALIYUN_OSS_BUCKET || ''
     const accessKeyId = process.env.ALIYUN_OSS_ACCESS_KEY_ID || ''
     const accessKeySecret = process.env.ALIYUN_OSS_ACCESS_KEY_SECRET || ''
-    const host = `${bucket}.${region}.aliyuncs.com`
+    const host = ossPostHost(bucket)
     const expireSeconds = options?.expireSeconds ?? 300
     const maxSize = options?.maxSize ?? 200 * 1024 * 1024
     const now = new Date()
@@ -147,16 +240,40 @@ class AliyunOssDriver implements StorageDriver {
     }
 
     const policyBase64 = Buffer.from(JSON.stringify(policy)).toString('base64')
-    const signature = crypto.createHmac('sha1', accessKeySecret).update(policyBase64).digest('base64')
+    let signature: string
+    try {
+      signature = crypto.createHmac('sha1', accessKeySecret).update(policyBase64).digest('base64')
+    } catch (err) {
+      throw classifyOssError(err, 'OSS_SIGNATURE_FAILED')
+    }
 
     return { host, accessKeyId, policy: policyBase64, signature, key, expire: expireSeconds }
   }
 
   /** 生成私有 bucket 的限时签名下载 URL */
   async generateSignedUrl(key: string, options?: { expireSeconds?: number }): Promise<string> {
-    const client = await this.getClient() as { signatureUrl(name: string, opts?: Record<string, unknown>): string }
+    let client: { signatureUrl(name: string, opts?: Record<string, unknown>): string }
+    try {
+      client = await this.getClient() as { signatureUrl(name: string, opts?: Record<string, unknown>): string }
+    } catch (err) {
+      console.error('[storage] OSS signed URL client init failed', {
+        key,
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+      })
+      throw err
+    }
     const expireSeconds = options?.expireSeconds ?? 300
-    return client.signatureUrl(key, { expires: expireSeconds })
+    try {
+      return client.signatureUrl(key, { expires: expireSeconds })
+    } catch (err) {
+      console.error('[storage] OSS signed URL generation failed', {
+        key,
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+      })
+      throw classifyOssError(err, 'OSS_SIGNATURE_FAILED')
+    }
   }
 }
 
@@ -170,13 +287,7 @@ const drivers: Record<string, StorageDriver> = {
 function getDriver(): StorageDriver {
   const configured = process.env.STORAGE_DRIVER || 'local'
   if (configured === 'aliyun-oss') {
-    try { require.resolve('ali-oss') }
-    catch {
-      throw new Error('STORAGE_DRIVER=aliyun-oss 但未安装 ali-oss，请 npm install ali-oss 或改用 STORAGE_DRIVER=local')
-    }
-    if (!process.env.ALIYUN_OSS_BUCKET) {
-      throw new Error('STORAGE_DRIVER=aliyun-oss 但 ALIYUN_OSS_BUCKET 未配置')
-    }
+    assertAliyunOssReady()
   }
   const driver = drivers[configured]
   if (!driver) {

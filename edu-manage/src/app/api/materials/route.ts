@@ -9,7 +9,6 @@ import {
 } from '@/lib/material-visibility'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { apiHandler } from '@/lib/api-handler'
-import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,7 +44,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   const page = Math.max(1, Number(searchParams.get('page') || 1))
   const limit = Math.min(200, Math.max(1, Number(searchParams.get('limit') || 20)))
-  const division = getRequestDivision(user, searchParams.get('division'))
   const where = {
     ...visibilityWhere,
     ...(grade ? { grade } : {}),
@@ -53,7 +51,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ...(audience && role === 'admin' ? { audience: audience as MaterialAudience } : {}),
     ...(source && role === 'admin' ? { source: source as MaterialSource } : {}),
     ...(teacherId && role === 'admin' ? { teacherId } : {}),
-    ...(role === 'admin' ? { teacher: { division } } : {}),
   }
 
   const [materials, total] = await Promise.all([

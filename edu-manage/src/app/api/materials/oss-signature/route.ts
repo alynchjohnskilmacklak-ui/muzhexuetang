@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
-import { safeFilename, generateOssPostSignature, isOssEnabled } from '@/lib/storage'
+import { safeFilename, generateOssPostSignature, isOssEnabled, StorageConfigurationError } from '@/lib/storage'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +14,7 @@ export const GET = apiHandler(async () => {
 
 export const POST = apiHandler(async (req: NextRequest) => {
   if (!isOssEnabled()) {
-    return NextResponse.json({ error: 'OSS 未启用' }, { status: 400 })
+    return NextResponse.json({ error: 'OSS 未启用', code: 'OSS_CONFIG_MISSING' }, { status: 400 })
   }
 
   const session = await auth()
@@ -37,11 +37,29 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   const key = `materials/${safeFilename(fileName, 'material')}`
-  const sig = await generateOssPostSignature(key, {
-    maxSize: MAX_SIZE,
-    expireSeconds: 300,
-    contentType: contentType || undefined,
-  })
+  let sig
+  try {
+    sig = await generateOssPostSignature(key, {
+      maxSize: MAX_SIZE,
+      expireSeconds: 300,
+      contentType: contentType || undefined,
+    })
+  } catch (err) {
+    console.error('[materials/oss-signature] failed to generate OSS post signature', {
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+    })
+    if (err instanceof StorageConfigurationError) {
+      return NextResponse.json(
+        { error: err.message, code: err.code },
+        { status: err.status }
+      )
+    }
+    return NextResponse.json(
+      { error: 'OSS 签名失败，请检查 OSS 配置后重试', code: 'OSS_SIGNATURE_FAILED' },
+      { status: 500 }
+    )
+  }
 
   return NextResponse.json(sig)
 })

@@ -1,11 +1,27 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, Col, Empty, Modal, Row, Skeleton, Tag, Typography } from 'antd'
-import { BookOutlined, EyeOutlined, FileTextOutlined } from '@ant-design/icons'
+import { Button, Empty, Modal, Select, Skeleton, Space, Tag, Typography } from 'antd'
+import { DownloadOutlined, EyeOutlined, FileTextOutlined } from '@ant-design/icons'
 import { GRADE_SUBJECTS, GRADES, SUBJECT_COLORS } from '@/data/subjects'
+import { fmtDate } from '@/lib/format-date'
+import { materialFileLabel } from '@/lib/material-format'
 
 const { Title, Text } = Typography
+
+const COPY = {
+  defaultGrade: '\u521d\u4e00',
+  title: '\u5b66\u4e60\u8d44\u6599',
+  subtitle: '\u8001\u5e08\u4e3a\u5b69\u5b50\u51c6\u5907\u7684\u5b66\u4e60\u6750\u6599',
+  allSubjects: '\u5168\u90e8\u79d1\u76ee',
+  empty: '\u8001\u5e08\u8fd8\u6ca1\u6709\u4e0a\u4f20\u5b66\u4e60\u8d44\u6599',
+  teacher: '\u8001\u5e08',
+  download: '\u4e0b\u8f7d',
+  preview: '\u9884\u89c8',
+  pdfPreview: 'PDF\u9884\u89c8',
+  wordPreview: 'Word\u9884\u89c8',
+  copyright: '\u672c\u8d44\u6599\u4ec5\u4f9b\u5728\u7ebf\u67e5\u770b\uff0c\u7248\u6743\u5f52\u7267\u54f2\u5b66\u5802\u6240\u6709',
+}
 
 interface Material {
   id: string
@@ -15,11 +31,46 @@ interface Material {
   fileName: string
   fileType: string
   description: string | null
+  downloads?: number
+  teacher?: { id: string; name: string } | null
   createdAt: string
 }
 
+const FILE_TYPE_STYLE: Record<string, { color: string; bg: string }> = {
+  pdf: { color: '#E24B4A', bg: 'rgba(226,75,74,.10)' },
+  word: { color: '#185FA5', bg: 'rgba(24,95,165,.10)' },
+  doc: { color: '#185FA5', bg: 'rgba(24,95,165,.10)' },
+  docx: { color: '#185FA5', bg: 'rgba(24,95,165,.10)' },
+  ppt: { color: '#E8784A', bg: 'rgba(232,120,74,.12)' },
+  pptx: { color: '#E8784A', bg: 'rgba(232,120,74,.12)' },
+  excel: { color: '#1D9E75', bg: 'rgba(29,158,117,.10)' },
+  xls: { color: '#1D9E75', bg: 'rgba(29,158,117,.10)' },
+  xlsx: { color: '#1D9E75', bg: 'rgba(29,158,117,.10)' },
+}
+
+function rgbaFromHex(hex: string | undefined, alpha: number) {
+  if (!hex || !/^#[0-9a-f]{6}$/i.test(hex)) return `rgba(232,120,74,${alpha})`
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
+function softTagStyle(color?: string) {
+  return {
+    color: color || '#5a4e3a',
+    backgroundColor: rgbaFromHex(color, 0.10),
+    border: `1px solid ${rgbaFromHex(color, 0.20)}`,
+  }
+}
+
+function getFileStyle(material: Pick<Material, 'fileType' | 'fileName'>) {
+  const ext = material.fileName?.split('.').pop()?.toLowerCase() || ''
+  return FILE_TYPE_STYLE[material.fileType] || FILE_TYPE_STYLE[ext] || { color: '#7a7fad', bg: 'rgba(122,127,173,.12)' }
+}
+
 export default function ParentMaterialsPage() {
-  const [selectedGrade, setSelectedGrade] = useState<string>('初一')
+  const [selectedGrade, setSelectedGrade] = useState<string>(COPY.defaultGrade)
   const [selectedSubject, setSelectedSubject] = useState<string>('')
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(false)
@@ -57,122 +108,57 @@ export default function ParentMaterialsPage() {
     setPreviewUrl(`/api/materials/${material.id}/view`)
   }
 
+  const handleDownload = (material: Material) => {
+    window.open(`/api/materials/${material.id}/view?download=1`, '_blank')
+  }
+
   return (
-    <div>
-      <div style={{ marginBottom: 20 }}>
-        <Title level={5} style={{ marginBottom: 4, fontSize: 16 }}>
-          <BookOutlined style={{ marginRight: 8, color: '#E87545' }} />
-          学习资料
-        </Title>
-        <Text type="secondary" style={{ fontSize: 13 }}>选择年级和学科，查看老师上传的学习资料</Text>
+    <div className="parent-materials-page">
+      <div className="materials-header">
+        <Title level={5} className="materials-title">{COPY.title}</Title>
+        <Text type="secondary" className="materials-subtitle">{COPY.subtitle}</Text>
       </div>
 
-      <div style={{ marginBottom: 16 }}>
-        <Text style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, display: 'block' }}>选择年级</Text>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          {GRADES.map((grade) => (
-            <div
-              key={grade}
-              onClick={() => { setSelectedGrade(grade); setSelectedSubject('') }}
-              style={{
-                padding: '8px 20px',
-                borderRadius: 24,
-                cursor: 'pointer',
-                fontSize: 14,
-                fontWeight: selectedGrade === grade ? 600 : 400,
-                backgroundColor: selectedGrade === grade ? '#E87545' : 'rgba(0,0,0,.04)',
-                color: selectedGrade === grade ? '#fff' : '#5a4e3a',
-                border: selectedGrade === grade ? '1px solid #E87545' : '1px solid rgba(0,0,0,.08)',
-                transition: 'all 0.2s',
-              }}
-            >
-              {grade}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ marginBottom: 20 }}>
-        <Text style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, display: 'block' }}>选择学科</Text>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <div
-            onClick={() => setSelectedSubject('')}
-            style={{
-              padding: '6px 16px',
-              borderRadius: 20,
-              cursor: 'pointer',
-              fontSize: 13,
-              backgroundColor: !selectedSubject ? '#E8784A' : 'rgba(0,0,0,.04)',
-              color: !selectedSubject ? '#fff' : '#5a4e3a',
-              border: !selectedSubject ? '1px solid #E8784A' : '1px solid rgba(0,0,0,.08)',
-              transition: 'all 0.2s',
-            }}
-          >
-            全部
-          </div>
-          {subjects.map((subject) => (
-            <div
-              key={subject}
-              onClick={() => setSelectedSubject(subject)}
-              style={{
-                padding: '6px 16px',
-                borderRadius: 20,
-                cursor: 'pointer',
-                fontSize: 13,
-                backgroundColor: selectedSubject === subject ? (SUBJECT_COLORS[subject] || '#E8784A') : 'rgba(0,0,0,.04)',
-                color: selectedSubject === subject ? '#fff' : '#5a4e3a',
-                border: selectedSubject === subject ? `1px solid ${SUBJECT_COLORS[subject] || '#E8784A'}` : '1px solid rgba(0,0,0,.08)',
-                transition: 'all 0.2s',
-              }}
-            >
-              {subject}
-            </div>
-          ))}
-        </div>
+      <div className="materials-filters">
+        <Select className="materials-select" value={selectedGrade} onChange={(value) => { setSelectedGrade(value); setSelectedSubject('') }} options={GRADES.map((grade) => ({ label: grade, value: grade }))} />
+        <Select className="materials-select" placeholder={COPY.allSubjects} allowClear value={selectedSubject || undefined} onChange={(value) => setSelectedSubject(value || '')} options={subjects.map((subject) => ({ label: subject, value: subject }))} />
       </div>
 
       {loading ? (
-        <Skeleton active />
+        <div className="materials-list">
+          <Skeleton active paragraph={{ rows: 3 }} />
+          <Skeleton active paragraph={{ rows: 3 }} />
+          <Skeleton active paragraph={{ rows: 3 }} />
+        </div>
       ) : materials.length === 0 ? (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={<Text type="secondary">{selectedSubject ? `${selectedGrade}${selectedSubject}暂无资料` : `${selectedGrade}暂无资料`}</Text>} />
+        <div className="materials-empty">
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={COPY.empty} />
+        </div>
       ) : (
-        <Row gutter={[12, 12]}>
+        <div className="materials-list">
           {materials.map((material) => (
-            <Col key={material.id} xs={24} sm={12} md={8}>
-              <Card hoverable onClick={() => handleView(material)} style={{ borderRadius: 12, cursor: 'pointer' }} styles={{ body: { padding: '14px 16px' } }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <div style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    flexShrink: 0,
-                    backgroundColor: material.fileType === 'pdf' ? 'rgba(255,77,79,.1)' : 'rgba(22,119,255,.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                    <FileTextOutlined style={{ fontSize: 20, color: material.fileType === 'pdf' ? '#ff4d4f' : '#1677ff' }} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <Text strong style={{ fontSize: 14, display: 'block' }} ellipsis>{material.title}</Text>
-                    <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-                      <Tag style={{ fontSize: 11, margin: 0 }}>{material.grade}</Tag>
-                      <Tag color={SUBJECT_COLORS[material.subject]} style={{ fontSize: 11, margin: 0 }}>{material.subject}</Tag>
-                      <Tag color={material.fileType === 'pdf' ? 'red' : material.fileType === 'word' ? 'blue' : 'cyan'} style={{ fontSize: 11, margin: 0 }}>
-                        {material.fileType === 'pdf' ? 'PDF' : material.fileType === 'word' ? 'Word' : '图片'}
-                      </Tag>
-                    </div>
-                    {material.description && <Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 4 }} ellipsis>{material.description}</Text>}
-                    <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 4 }}>
-                      <EyeOutlined style={{ marginRight: 4 }} />
-                      点击查看
-                    </Text>
-                  </div>
-                </div>
-              </Card>
-            </Col>
+            <div key={material.id} className="material-card">
+              <div className="file-icon" style={{ color: getFileStyle(material).color, backgroundColor: getFileStyle(material).bg }}>
+                <FileTextOutlined />
+              </div>
+              <div className="material-body">
+                <Text strong className="material-title" ellipsis={{ tooltip: material.title }}>{material.title}</Text>
+                <Space size={4} wrap className="material-tags">
+                  <Tag className="material-tag">{material.grade}</Tag>
+                  <Tag className="material-tag" style={softTagStyle(SUBJECT_COLORS[material.subject])}>{material.subject}</Tag>
+                  <Tag className="material-tag" style={{ color: getFileStyle(material).color, backgroundColor: getFileStyle(material).bg, border: `1px solid ${getFileStyle(material).bg}` }}>{materialFileLabel(material.fileType)}</Tag>
+                </Space>
+                <Text type="secondary" className="material-meta" ellipsis>
+                  {material.teacher?.name || COPY.teacher} · {fmtDate(material.createdAt)}
+                </Text>
+              </div>
+              <div className="material-actions">
+                <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleDownload(material)}>{COPY.download}</Button>
+                <Button icon={<EyeOutlined />} onClick={() => handleView(material)}>{COPY.preview}</Button>
+              </div>
+            </div>
           ))}
-        </Row>
+        </div>
       )}
 
       <Modal
@@ -184,17 +170,161 @@ export default function ParentMaterialsPage() {
         style={{ top: 10 }}
         styles={{ body: { padding: 0 } }}
       >
-        {previewUrl && previewType === 'pdf' && <iframe src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`} style={{ width: '100%', height: '85vh', border: 'none' }} title="PDF预览" />}
-        {previewUrl && previewType === 'word' && <iframe src={previewUrl} style={{ width: '100%', height: '85vh', border: 'none' }} title="Word预览" />}
+        {previewUrl && previewType === 'pdf' && <iframe src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`} style={{ width: '100%', height: '85vh', border: 'none' }} title={COPY.pdfPreview} />}
+        {previewUrl && previewType === 'word' && <iframe src={previewUrl} style={{ width: '100%', height: '85vh', border: 'none' }} title={COPY.wordPreview} />}
         {previewUrl && previewType === 'image' && (
           <div style={{ textAlign: 'center', padding: 16, background: '#f0f0f0' }}>
             <img src={previewUrl} alt={previewTitle} style={{ maxWidth: '100%', maxHeight: '82vh', objectFit: 'contain' }} onContextMenu={(event) => event.preventDefault()} draggable={false} />
           </div>
         )}
         <div style={{ padding: '8px 16px', backgroundColor: '#fff8f6', borderTop: '1px solid rgba(0,0,0,.06)', textAlign: 'center' }}>
-          <Text type="secondary" style={{ fontSize: 12 }}>本资料仅供在线查看，版权归牧哲学堂所有</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>{COPY.copyright}</Text>
         </div>
       </Modal>
+
+      <style jsx>{`
+        .parent-materials-page {
+          width: 100%;
+        }
+
+        .materials-header {
+          margin-bottom: 12px;
+        }
+
+        .materials-title {
+          margin: 0 0 4px !important;
+          font-size: 18px !important;
+          color: #1a1201 !important;
+        }
+
+        .materials-subtitle {
+          font-size: 13px;
+        }
+
+        .materials-filters {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 14px;
+          flex-wrap: wrap;
+        }
+
+        .materials-select {
+          width: 148px;
+        }
+
+        .materials-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .material-card {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          min-height: 124px;
+          padding: 16px;
+          border: 1px solid rgba(0,0,0,.06);
+          border-radius: 10px;
+          background: #fff;
+          box-shadow: 0 8px 20px rgba(26,18,1,.035);
+        }
+
+        .file-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 48px;
+          font-size: 24px;
+        }
+
+        .material-body {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .material-title {
+          display: block;
+          max-width: 100%;
+          font-size: 16px;
+          line-height: 1.35;
+          color: #1a1201;
+        }
+
+        :global(.material-tag) {
+          height: 22px;
+          line-height: 20px;
+          margin-inline-end: 0;
+          border-radius: 999px;
+          padding: 0 8px;
+          font-size: 12px;
+          color: #5a4e3a;
+          background: #f5f2ee;
+          border: 1px solid rgba(0,0,0,.06);
+        }
+
+        .material-meta {
+          display: block;
+          font-size: 12px;
+          color: #9a8e7a;
+        }
+
+        .material-actions {
+          flex: 0 0 92px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .material-actions :global(.ant-btn) {
+          min-height: 36px;
+          border-radius: 10px;
+        }
+
+        .materials-empty {
+          min-height: 220px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px dashed rgba(0,0,0,.10);
+          border-radius: 10px;
+          background: #fff;
+        }
+
+        @media (max-width: 560px) {
+          .materials-select {
+            flex: 1 1 calc(50% - 4px);
+            min-width: 132px;
+          }
+
+          .material-card {
+            gap: 10px;
+            padding: 12px;
+            min-height: 120px;
+          }
+
+          .file-icon {
+            width: 44px;
+            height: 44px;
+            flex-basis: 44px;
+            font-size: 22px;
+          }
+
+          .material-actions {
+            flex-basis: 78px;
+          }
+
+          .material-actions :global(.ant-btn) {
+            padding-inline: 8px;
+          }
+        }
+      `}</style>
     </div>
   )
 }
