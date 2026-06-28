@@ -27,6 +27,10 @@
     "security:check": "node scripts/security-check.mjs",
     "school:missing": "tsx scripts/check-school-info-missing.ts",
     "school:update-info": "tsx scripts/update-school-info-verified.ts",
+    "import:master-schools": "tsx scripts/import-master-schools.ts",
+    "import:yifenyidang": "tsx scripts/import-yifenyidang.ts",
+    "import:allocation": "tsx scripts/import-allocation.ts",
+    "import:enrollment": "tsx scripts/import-enrollment.ts",
     "check:garbled": "tsx scripts/check-garbled-text.ts",
     "test": "vitest run"
   },

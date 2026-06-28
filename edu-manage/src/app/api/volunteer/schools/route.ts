@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   const prisma = getPrismaForDivision('JUNIOR')
   const schools = await prisma.highSchoolInfo.findMany({
+    where: { xinleStatus: { isEmpty: false } },
     orderBy: [{ tongZhao: 'desc' }],
     select: {
       id: true,
@@ -44,9 +45,23 @@ export async function GET() {
       infoVerifiedAt: true,
       infoConfidence: true,
       acceptsOtherCounty: true,
+      xinleLine: true,
+      xinleStatus: true,
+      isProvincialDemo: true,
+      xinleFenpeiQuota: true,
     },
   })
-  return NextResponse.json({ schools }, {
+  const [allocationRows, rankRows] = await Promise.all([
+    prisma.allocationQuota.findMany({ where: { year: 2025 }, select: { juniorSchool: true, seniorSchool: true, quota: true } }),
+    prisma.yifenYidang.findMany({ where: { year: 2025 }, select: { score: true, cumulative: true }, orderBy: { score: 'desc' } }),
+  ])
+  const allocationQuotas: Record<string, Record<string, number>> = {}
+  for (const row of allocationRows) {
+    allocationQuotas[row.juniorSchool] ||= {}
+    allocationQuotas[row.juniorSchool][row.seniorSchool] = row.quota
+  }
+  const scoreRanks = Object.fromEntries(rankRows.map((row) => [row.score, row.cumulative]))
+  return NextResponse.json({ schools, allocationQuotas, scoreRanks }, {
     headers: {
       'Cache-Control': 'public, max-age=3600, stale-while-revalidate=300',
     },

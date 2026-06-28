@@ -7,24 +7,20 @@ import {
 } from 'antd'
 import {
   ArrowLeftOutlined, TrophyOutlined,
-  CloseOutlined, FilePdfOutlined, ShareAltOutlined, SwapOutlined,
+  CloseOutlined, FilePdfOutlined, FormOutlined, ShareAltOutlined, SwapOutlined,
 } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import {
   CONTROL_LINES_2025,
-  getAllocationBands,
   getAllocationLine,
-  getAllocationQuotaByName,
   getMarketPercentile,
   getMarketRank,
   getScoreTag,
-  getTopRecommendation,
-  isXinleAccessible,
+  nameMatches,
   SCORE_TAG_CONFIG,
   XINLE_ALLOCATION_2025,
-  type AllocationBand,
   type ScoreTag,
 } from '@/data/volunteer-2025'
 
@@ -68,6 +64,11 @@ interface DBSchool {
   infoVerifiedAt: string | null
   infoConfidence: string | null
   acceptsOtherCounty: boolean
+  xinleFenpeiQuota: number
+  xinleLine: number | null
+  xinleStatus: string[]
+  isProvincialDemo: boolean
+  lineRank?: number | null
 }
 
 interface ProcessedSchool extends DBSchool {
@@ -78,7 +79,8 @@ interface ProcessedSchool extends DBSchool {
 }
 
 const TAG_OPTIONS: ('全部' | ScoreTag)[] = ['全部', '分配生机会', '保底', '稳妥', '冲刺', '差距较大', '暂未达线']
-const TYPE_OPTIONS = ['全部', '省示范', '市重点', '县中', '民办']
+const TYPE_OPTIONS = ['全部', '省示范', '普通高中', '市重点', '县中', '民办']
+const AVAILABILITY_OPTIONS = ['全部', '统招可报', '分配生可报', '仅供参考'] as const
 
 // Warm light theme tokens — module scope for all functions
 const C = {
@@ -122,11 +124,14 @@ export default function VolunteerSimPage() {
   const [loading, setLoading] = useState(false)
   const [schoolsReady, setSchoolsReady] = useState(false)
   const [schoolsError, setSchoolsError] = useState(false)
+  const [allocationQuotaMap, setAllocationQuotaMap] = useState<Record<string, Record<string, number>>>({})
+  const [scoreRankMap, setScoreRankMap] = useState<Record<string, number>>({})
 
   const [filterTag, setFilterTag] = useState<string>('全部')
   const [filterType, setFilterType] = useState<string>('全部')
   const [filterLocation, setFilterLocation] = useState<string>('全部')
-  const [onlyAccessible, setOnlyAccessible] = useState(true)
+  const [availabilityFilter, setAvailabilityFilter] = useState<(typeof AVAILABILITY_OPTIONS)[number]>('全部')
+  const [onlyAccessible, setOnlyAccessible] = useState(false)
 
   const [allocationSlots, setAllocationSlots] = useState<(DBSchool | null)[]>(Array(3).fill(null))
   const [shifanSlots, setShifanSlots] = useState<(DBSchool | null)[]>(Array(6).fill(null))
@@ -150,7 +155,11 @@ export default function VolunteerSimPage() {
   useEffect(() => {
     fetch('/api/volunteer/schools')
       .then(r => r.json())
-      .then(d => setSchools(Array.isArray(d?.schools) ? d.schools : []))
+      .then(d => {
+        setSchools(Array.isArray(d?.schools) ? d.schools : [])
+        setAllocationQuotaMap(d?.allocationQuotas || {})
+        setScoreRankMap(d?.scoreRanks || {})
+      })
       .catch((error) => { console.warn('学校数据加载失败', error); setSchoolsError(true) })
       .finally(() => setSchoolsReady(true))
   }, [])
@@ -163,10 +172,28 @@ export default function VolunteerSimPage() {
 
   const getAllocationQuota = useCallback((school: DBSchool): number => {
     if (!inputSchool) return 0
-    return getAllocationQuotaByName(school.name, school.fullName, inputSchool)
-  }, [inputSchool])
+    const quotaMap = allocationQuotaMap[inputSchool]
+    if (quotaMap) {
+      if (quotaMap[school.name] != null) return quotaMap[school.name]
+      if (quotaMap[school.fullName] != null) return quotaMap[school.fullName]
+      for (const [key, quota] of Object.entries(quotaMap)) {
+        if (nameMatches(school.name, school.fullName, key)) return quota
+      }
+    }
+    return 0
+  }, [allocationQuotaMap, inputSchool])
 
-  const marketRankResult = submitted && inputScore !== null ? getMarketRank(inputScore) : null
+  const getRankForScore = useCallback((score: number) => {
+    if (scoreRankMap[String(score)] != null) return scoreRankMap[String(score)]
+    for (let candidate = score + 1; candidate <= 780; candidate++) {
+      if (scoreRankMap[String(candidate)] != null) return scoreRankMap[String(candidate)]
+    }
+    return getMarketRank(score).rank
+  }, [scoreRankMap])
+
+  const marketRankResult = submitted && inputScore !== null
+    ? { rank: getRankForScore(inputScore), message: undefined as string | undefined }
+    : null
   const percentileResult = submitted && inputScore !== null ? getMarketPercentile(inputScore) : null
 
   const processedSchools = useMemo((): ProcessedSchool[] => {
@@ -175,16 +202,17 @@ export default function VolunteerSimPage() {
       .map(school => {
         const quota = getAllocationQuota(school)
         const allocationLine = getAllocationLine(school)
+        const effectiveLine = school.xinleLine ?? school.tongZhao
         const tag = getScoreTag(
           inputScore,
-          school.tongZhao,
+          effectiveLine,
           allocationLine,
           quota,
           inputRank ?? 9999
         )
-        const gap = inputScore - school.tongZhao
-        const accessible = school.xinleAccessibleOverride ?? isXinleAccessible({...school, acceptsOtherCounty: school.acceptsOtherCounty})
-        return { ...school, allocationLine, tag, gap, quota, accessible }
+        const gap = inputScore - effectiveLine
+        const accessible = school.xinleStatus.includes('统招可报')
+        return { ...school, tongZhao: effectiveLine, lineRank: getRankForScore(effectiveLine), allocationLine, tag, gap, quota, accessible }
       })
       .sort((a, b) => {
         if (a.accessible !== b.accessible) return a.accessible ? -1 : 1
@@ -193,17 +221,20 @@ export default function VolunteerSimPage() {
         if (pa !== pb) return pa - pb
         return b.tongZhao - a.tongZhao
       })
-  }, [schools, submitted, inputScore, inputRank, getAllocationQuota])
+  }, [schools, submitted, inputScore, inputRank, getAllocationQuota, getRankForScore])
 
   const filteredSchools = useMemo(() => {
     return processedSchools.filter(s => {
       if (onlyAccessible && !s.accessible) return false
+      if (availabilityFilter !== '全部' && !s.xinleStatus.includes(availabilityFilter)) return false
       if (filterTag !== '全部' && s.tag !== filterTag) return false
-      if (filterType !== '全部' && s.type !== filterType) return false
+      if (filterType === '省示范' && !s.isProvincialDemo) return false
+      if (filterType === '普通高中' && s.isProvincialDemo) return false
+      if (!['全部', '省示范', '普通高中'].includes(filterType) && s.type !== filterType) return false
       if (filterLocation !== '全部' && s.location !== filterLocation) return false
       return true
     })
-  }, [processedSchools, onlyAccessible, filterTag, filterType, filterLocation])
+  }, [processedSchools, onlyAccessible, availabilityFilter, filterTag, filterType, filterLocation])
 
   // Tag counts reflect current visibility scope
   const tagCounts = useMemo(() => {
@@ -225,31 +256,6 @@ export default function VolunteerSimPage() {
     }
     return { total: accessible.length, counts }
   }, [processedSchools])
-
-  // Allocation cascade bands
-  const allocationBands = useMemo(() => {
-    if (!submitted || inputScore === null || !inputSchool || inputRank === null) return null
-    return getAllocationBands(
-      inputSchool, inputRank, inputScore,
-      (allocKey) => {
-        const s = schools.find(school => {
-          if (!school?.name || !school?.fullName) return false
-          return (
-            school.name === allocKey ||
-            school.fullName === allocKey ||
-            school.fullName.includes(allocKey) ||
-            school.name.replace(/[(（][^)）]*[)）]\s*$/, '').trim() === allocKey
-          )
-        })
-        return s ? { yiTong: s.yiTong, tongZhao: s.tongZhao, allocationLine: s.allocationLine } : null
-      }
-    )
-  }, [submitted, inputScore, inputSchool, inputRank, schools])
-
-  const allocationTop = useMemo(() => {
-    if (!allocationBands) return null
-    return getTopRecommendation(allocationBands)
-  }, [allocationBands])
 
   const handleSimulate = async () => {
     try {
@@ -284,7 +290,8 @@ export default function VolunteerSimPage() {
     setFilterTag('全部')
     setFilterType('全部')
     setFilterLocation('全部')
-    setOnlyAccessible(true)
+    setAvailabilityFilter('全部')
+    setOnlyAccessible(false)
   }
 
   const addToAllocation = useCallback((school: DBSchool) => {
@@ -372,15 +379,52 @@ export default function VolunteerSimPage() {
   const shifanFilled = shifanSlots.filter(Boolean).length
   const putongFilled = putongSlots.filter(Boolean).length
 
+  const hasAllocationOption = useCallback((school: DBSchool) => {
+    const quota = getAllocationQuota(school)
+    return school.xinleStatus.includes('分配生可报') && school.xinleFenpeiQuota > 0 && quota > 0
+  }, [getAllocationQuota])
+
   const canUseAllocation = useCallback((school: DBSchool) => {
     const quota = getAllocationQuota(school)
-    return quota > 0 && inputRank !== null && inputRank <= quota
-  }, [getAllocationQuota, inputRank])
+    return hasAllocationOption(school) && inputRank !== null && inputRank <= quota
+  }, [getAllocationQuota, hasAllocationOption, inputRank])
+
+  const canRecommendAllocation = useCallback((school: DBSchool) => {
+    const quota = getAllocationQuota(school)
+    return hasAllocationOption(school) && inputRank !== null && inputRank <= quota * 1.3
+  }, [getAllocationQuota, hasAllocationOption, inputRank])
 
   const getSchoolSegment = useCallback((school: DBSchool): 'allocation' | 'shifan' | 'putong' => {
-    if (canUseAllocation(school)) return 'allocation'
-    return school.type === '省示范' ? 'shifan' : 'putong'
-  }, [canUseAllocation])
+    if (canRecommendAllocation(school)) return 'allocation'
+    return school.isProvincialDemo ? 'shifan' : 'putong'
+  }, [canRecommendAllocation])
+
+  const allocationSchoolsForSelectedJunior = useMemo(
+    () => processedSchools.filter((school) => hasAllocationOption(school)),
+    [processedSchools, hasAllocationOption]
+  )
+  const officialAllocationOptions = useMemo(() => {
+    if (inputRank === null) return []
+    return allocationSchoolsForSelectedJunior
+      .filter((school) => inputRank <= getAllocationQuota(school) * 1.3)
+      .sort((a, b) => {
+        const aQuota = getAllocationQuota(a)
+        const bQuota = getAllocationQuota(b)
+        const aEligible = inputRank <= aQuota
+        const bEligible = inputRank <= bQuota
+        if (aEligible !== bEligible) return aEligible ? -1 : 1
+        return bQuota - aQuota
+      })
+  }, [allocationSchoolsForSelectedJunior, getAllocationQuota, inputRank])
+  const recommendedAllocationId = officialAllocationOptions[0]?.schoolId || null
+  const shifanAvailableCount = useMemo(
+    () => processedSchools.filter((school) => school.accessible && school.isProvincialDemo).length,
+    [processedSchools]
+  )
+  const putongAvailableCount = useMemo(
+    () => processedSchools.filter((school) => school.accessible && !school.isProvincialDemo).length,
+    [processedSchools]
+  )
 
   const exportPdf = async () => {
     const el = reportRef.current
@@ -436,6 +480,15 @@ export default function VolunteerSimPage() {
     } finally {
       setExportingPoster(false)
     }
+  }
+
+  const openOfficialForm = () => {
+    sessionStorage.setItem('volunteer_form_data', JSON.stringify({
+      allocation: allocationSlots,
+      shifan: shifanSlots,
+      putong: putongSlots,
+    }))
+    router.push('/volunteer-sim/official-form')
   }
 
   return (
@@ -506,7 +559,7 @@ export default function VolunteerSimPage() {
         items={[{
           key: 'disclaimer',
           label: <span style={{ color: C.warning, fontSize: 13, fontWeight: 500 }}>重要提示：本系统仅供模拟参考，非官方录取结果</span>,
-          children: <span style={{ color: C.inkMuted, fontSize: 13, lineHeight: 1.8 }}>本系统基于2025年石家庄中考一分一档表、全市统招线和各初中分配生名额进行模拟，仅供志愿填报参考。全市排名基于一分一档表测算。梯度标签（冲刺/稳妥/保底）基于2025年分数线静态计算，不代表2026年实际录取结果。分配生级联推荐基于"全校按分数优先填报"的理想假设，实际录取受考生意愿、分配生控制线、同校竞争等因素影响。最终录取以石家庄市教育考试院和学校官方公布为准。</span>,
+          children: <span style={{ color: C.inkMuted, fontSize: 13, lineHeight: 1.8 }}>本系统基于2025年石家庄中考一分一档表、全市统招线和“初中×高中”精确分配生名额进行模拟，仅供志愿填报参考。全市排名基于一分一档表测算。梯度标签（冲刺/稳妥/保底）基于2025年分数线静态计算，不代表2026年实际录取结果。分配生资格仅按本校排名与该高中给本校的精确名额比较，不使用报名人数估算；实际录取仍受考生意愿、控制线、同校竞争等因素影响。最终录取以石家庄市教育考试院和学校官方公布为准。</span>,
         }]}
       />
 
@@ -706,6 +759,12 @@ export default function VolunteerSimPage() {
                 共 {accessibleSummary.total} 所新乐可报学校
               </Text>
               <span style={{ color: C.inkSubtle }}>·</span>
+              <Text style={{ fontSize: 12, color: C.inkMuted }}>分配生C段 {officialAllocationOptions.length} 所</Text>
+              <span style={{ color: C.inkSubtle }}>·</span>
+              <Text style={{ fontSize: 12, color: C.inkMuted }}>省示范D段 {shifanAvailableCount} 所</Text>
+              <span style={{ color: C.inkSubtle }}>·</span>
+              <Text style={{ fontSize: 12, color: C.inkMuted }}>普高二批C段 {putongAvailableCount} 所</Text>
+              <span style={{ color: C.inkSubtle }}>·</span>
               {TAG_OPTIONS.filter(t => t !== '全部').map(t => {
                 const cfg = SCORE_TAG_CONFIG[t]
                 return (
@@ -717,181 +776,72 @@ export default function VolunteerSimPage() {
               }).reduce((prev, curr) => <>{prev} <span style={{ color: C.inkSubtle }}>·</span> {curr}</>)}
             </div>
 
-            {/* Allocation cascade analysis */}
-            {allocationBands && allocationBands.length > 0 && (
-              <div style={{
-                background: C.surface1,
-                border: `1px solid ${C.hairline}`,
-                borderRadius: 12,
-                padding: '16px 20px',
-                marginBottom: 16,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  <span style={{ fontSize: 16 }}>📋</span>
-                  <Text strong style={{ fontSize: 15, color: C.ink }}>第一批 C段·分配生类（最多3所）</Text>
+            {officialAllocationOptions.length > 0 && (
+              <div style={{ background: C.surface1, border: `1px solid ${C.hairline}`, borderRadius: 12, padding: '16px 20px', marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+                  <div>
+                    <Text strong style={{ fontSize: 15, color: C.ink }}>第一批 C段·分配生自选</Text>
+                    <Text style={{ display: 'block', fontSize: 12, color: C.inkSubtle, marginTop: 2 }}>
+                      仅展示对{inputSchool}有精确名额且你的本校排名达到“有资格/接近”的学校，最多自选3所
+                    </Text>
+                  </div>
+                  <Text style={{ fontSize: 12, color: C.primary }}>{allocationFilled}/3</Text>
                 </div>
-
-                {/* Top recommendation */}
-                {allocationTop ? (
-                  (() => {
-                    const topBand = allocationTop.band
-                    const topDb = schools.find(s => s.name === topBand.highSchoolName || s.fullName.includes(topBand.highSchoolName))
-                    const isFallback = allocationTop.source === 'fallback_safe'
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+                  {officialAllocationOptions.map((school) => {
+                    const quota = getAllocationQuota(school)
+                    const eligible = canUseAllocation(school)
+                    const close = !eligible && inputRank !== null && inputRank <= quota * 1.3
+                    const recommended = school.schoolId === recommendedAllocationId
                     return (
-                      <div style={{
-                        background: isFallback ? C.warningBg : C.primaryBg,
-                        border: `1px solid ${isFallback ? C.warningBorder : C.primary}`,
-                        borderRadius: 10,
-                        padding: '14px 18px',
-                        marginBottom: 12,
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                          <span style={{ fontSize: 14 }}>{isFallback ? '🔶' : '💡'}</span>
-                          <Text strong style={{ fontSize: 15, color: isFallback ? C.warning : C.primary }}>
-                            {isFallback ? '稳妥选择：' : '分配生志愿首选建议：'}【{topBand.highSchoolName}】
-                          </Text>
-                        </div>
-                        <Text style={{ fontSize: 13, color: C.inkMuted, lineHeight: 1.7 }}>
-                          {isFallback
-                            ? `排名高于该档（前${topBand.bandLo - 1}名通常会竞争更好的学校），可作为稳妥选择，但可能浪费分配生机会。`
-                            : `你校内第${topBand.bandLo < topBand.bandHi ? `${topBand.bandLo}-${topBand.bandHi}` : topBand.bandLo}名，落在${topBand.highSchoolName}名额区间（第${topBand.bandLo}-${topBand.bandHi}名）${topBand.allocationLine ? `，分数${inputScore}已超分配线约${inputScore! - topBand.allocationLine.value}分` : ''}，可重点考虑。2026年第一批C段最多填报3所分配生志愿。`}
-                        </Text>
-                        <div style={{ marginTop: 10 }}>
-                          {topDb ? (
-                            <Button
-                              type="primary"
-                              size="small"
-                              style={{ background: C.primary, borderColor: C.primary }}
-                              disabled={allocationFilled >= 3 || isInBasket(topDb.schoolId)}
-                              onClick={() => addToAllocation(topDb)}
-                            >
-                              {isInBasket(topDb.schoolId) ? '已在志愿篮' : `加入分配生（${allocationFilled}/3）`}
-                            </Button>
-                          ) : (
-                            <Text style={{ fontSize: 12, color: C.inkSubtle }}>
-                              该校尚未录入数据库，请通过管理端补充后即可选择。
+                      <div key={`official-allocation-${school.schoolId}`} style={{ background: eligible ? C.successBg : close ? C.warningBg : C.surface3, border: `1px solid ${eligible ? C.successBorder : close ? C.warningBorder : C.hairline}`, borderRadius: 10, padding: '10px 12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                          <div style={{ minWidth: 0 }}>
+                            <Text strong style={{ color: C.ink, fontSize: 13 }}>{school.name}</Text>
+                            <div style={{ marginTop: 4, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                              <Tag color={eligible ? 'success' : close ? 'warning' : 'default'} style={{ margin: 0, fontSize: 11 }}>
+                                {eligible ? `✅有资格（本校${quota}个名额）` : '△接近'}
+                              </Tag>
+                              {recommended && <Tag color="orange" style={{ margin: 0, fontSize: 11 }}>★ 推荐</Tag>}
+                            </div>
+                            <Text style={{ display: 'block', color: C.inkSubtle, fontSize: 11, marginTop: 5 }}>
+                              你的本校排名第{inputRank}名 · 该校给本校名额{quota}个
                             </Text>
-                          )}
+                          </div>
+                          <Button size="small" disabled={allocationFilled >= 3 || isInBasket(school.schoolId)} onClick={() => addToAllocation(school)}>
+                            {isInBasket(school.schoolId) ? '已选' : '加入C段'}
+                          </Button>
                         </div>
                       </div>
                     )
-                  })()
-                ) : (
-                  <div style={{
-                    background: C.warningBg,
-                    border: `1px solid ${C.warningBorder}`,
-                    borderRadius: 10,
-                    padding: '12px 18px',
-                    marginBottom: 12,
-                  }}>
-                    <Text style={{ fontSize: 13, color: C.warning }}>
-                      当前分数与排名条件下，该校无可推荐或可保底的分配生选项。建议重点考虑省级示范文化类或普通高中文化类志愿。
-                    </Text>
-                  </div>
-                )}
-
-                {/* 推荐组（不含首选） */}
-                {allocationBands.filter(b => b.tag === '推荐' && b !== allocationTop?.band).length > 0 && (
-                  <div style={{ marginBottom: 10 }}>
-                    <Text strong style={{ fontSize: 13, color: C.inkMuted }}>其他匹配选项：</Text>
-                    <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {allocationBands.filter(b => b.tag === '推荐' && b !== allocationTop?.band).map(b => {
-                        const db = schools.find(s => s.name === b.highSchoolName || s.fullName.includes(b.highSchoolName))
-                        return (
-                          <div key={b.highSchoolName} style={{
-                            display: 'flex', alignItems: 'center', gap: 8,
-                            padding: '8px 14px', borderRadius: 8,
-                            background: C.surface3, border: `1px solid ${C.hairline}`,
-                          }}>
-                            <span style={{ fontSize: 13, color: C.ink }}>◎ {b.highSchoolName}</span>
-                            <Text style={{ fontSize: 12, color: C.inkSubtle }}>
-                              {b.allocationLine ? `${b.allocationLine.label} ${b.allocationLine.value}分 · ` : ''}名额第{b.bandLo}-{b.bandHi}名
-                            </Text>
-                            {db && (
-                              <Button size="small" disabled={allocationFilled >= 3 || isInBasket(db.schoolId)}
-                                style={{ marginLeft: 'auto', fontSize: 11 }}
-                                onClick={() => addToAllocation(db)}>
-                                {isInBasket(db.schoolId) ? '已在志愿篮' : `加入分配生（${allocationFilled}/3）`}
-                              </Button>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* 保底组 */}
-                {allocationBands.filter(b => b.tag === '保底').length > 0 && (
-                  <div style={{ marginBottom: 10 }}>
-                    <Text strong style={{ fontSize: 13, color: C.success }}>保底选项（排名优于该档，可重点考虑）：</Text>
-                    <div style={{ marginTop: 4, fontSize: 12, color: C.inkSubtle, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                      {allocationBands.filter(b => b.tag === '保底').map(b => (
-                        <span key={b.highSchoolName} style={{
-                          background: C.successBg, padding: '3px 8px', borderRadius: 6,
-                          border: `1px solid ${C.successBorder}`, color: C.success,
-                        }}>
-                          {b.highSchoolName}{b.allocationLine ? `（${b.allocationLine.label}${b.allocationLine.value}分）` : ''}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 排名不足 */}
-                {allocationBands.filter(b => b.tag === '排名不足').length > 0 && (
-                  <div style={{
-                    padding: '10px 14px', borderRadius: 8, marginBottom: 8,
-                    background: C.warningBg, border: `1px solid ${C.warningBorder}`,
-                  }}>
-                    <Text style={{ fontSize: 12, color: C.warning }}>
-                      ⚠️ 以下学校存在校内排名竞争风险，难以争取：
-                    </Text>
-                    <div style={{ marginTop: 4, fontSize: 12, color: C.inkSubtle }}>
-                      {allocationBands.filter(b => b.tag === '排名不足').map(b =>
-                        `${b.highSchoolName}（校内前${b.bandHi}名）`
-                      ).join('、')}
-                    </div>
-                  </div>
-                )}
-
-                {/* 分数不足 */}
-                {allocationBands.filter(b => b.tag === '分数不足').length > 0 && (
-                  <div style={{
-                    padding: '8px 14px', borderRadius: 8, marginBottom: 8,
-                    background: C.surface3, border: `1px solid ${C.hairline}`,
-                  }}>
-                    <Text style={{ fontSize: 12, color: C.inkSubtle }}>
-                      以下学校分数未达分配线：{allocationBands.filter(b => b.tag === '分数不足').map(b =>
-                        `${b.highSchoolName}（需≥${b.allocationLine?.value ?? '?'}分）`
-                      ).join('、')}
-                    </Text>
-                  </div>
-                )}
-
-                {/* Disclaimer */}
-                <div style={{
-                  marginTop: 12, padding: '8px 14px', borderRadius: 8,
-                  background: C.surface3, border: `1px solid ${C.hairline}`,
-                }}>
-                  <Text style={{ fontSize: 11, color: C.inkSubtle, lineHeight: 1.6 }}>
-                    说明：级联模型基于“全校学生按分数优先选最好学校”的理想假设，实际中部分学生有偏好（如宁可就近上新乐一中也不去市区），会使各档边界浮动。分配线仅使用数据库录入的官方分配生录取线；未录入时页面不展示分配线。真实录取受考生填报意愿、分配生控制线、同校竞争、当年政策影响，最终以石家庄市教育考试院和学校官方公布为准。
-                  </Text>
+                  })}
                 </div>
               </div>
             )}
-
-            {/* No allocation data warning */}
-            {allocationBands && allocationBands.length === 0 && (
+            {officialAllocationOptions.length === 0 && (
               <div style={{
                 background: C.warningBg, border: `1px solid ${C.warningBorder}`,
                 borderRadius: 10, padding: '12px 16px', marginBottom: 16,
               }}>
                 <Text style={{ fontSize: 13, color: C.warning }}>
-                  该初中（{inputSchool}）目前无分配生名额数据，请检查分配表是否覆盖此初中，或联系管理员核实。
+                  {allocationSchoolsForSelectedJunior.length === 0
+                    ? `该初中（${inputSchool}）目前无精确分配生名额数据，请检查分配表是否覆盖此初中。`
+                    : `你的本校排名暂未进入任何学校名额的“有资格/接近”范围，因此不展示分配生推荐。`}
                 </Text>
               </div>
             )}
+
+            <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+              {AVAILABILITY_OPTIONS.map((status) => {
+                const count = status === '全部' ? processedSchools.length : processedSchools.filter((school) => school.xinleStatus.includes(status)).length
+                const selected = availabilityFilter === status
+                return (
+                  <Button key={status} size="small" type={selected ? 'primary' : 'default'} onClick={() => setAvailabilityFilter(status)}>
+                    {status} {count}
+                  </Button>
+                )
+              })}
+            </div>
 
             {/* Category tabs */}
             <div style={{
@@ -946,7 +896,7 @@ export default function VolunteerSimPage() {
                 allocationFilled={allocationFilled}
                 shifanFilled={shifanFilled}
                 putongFilled={putongFilled}
-                canUseAllocation={canUseAllocation}
+                hasAllocationOption={canRecommendAllocation}
                 getSchoolSegment={getSchoolSegment}
                 addToAllocation={addToAllocation}
                 addToShifan={addToShifan}
@@ -984,7 +934,7 @@ export default function VolunteerSimPage() {
                   </Tag>
                 ) : (
                   <Tag style={{ margin: 0, background: C.surface3, color: C.inkSubtle, border: `1px solid ${C.hairline}` }}>
-                    ⊘ 新乐暂不可报
+                    新乐不可统招报，仅供了解全市行情
                   </Tag>
                 )}
               </div>
@@ -1040,7 +990,7 @@ export default function VolunteerSimPage() {
                 {detailSchool.yiTong && (
                   <ScoreBlock label={detailSchool.type === '民办' ? '市区统招分' : '一统线'} value={`${detailSchool.yiTong}分`} />
                 )}
-                <ScoreBlock label="统招线" value={`${detailSchool.tongZhao}分`} sub={`距统招线 ${detailSchool.gap >= 0 ? `高出${detailSchool.gap}` : `差${Math.abs(detailSchool.gap)}`}分`} />
+                <ScoreBlock label="新乐对照线" value={`${detailSchool.tongZhao}分`} sub={`${detailSchool.lineRank ? `约第${detailSchool.lineRank.toLocaleString()}名 · ` : ''}距线${detailSchool.gap >= 0 ? `高出${detailSchool.gap}` : `差${Math.abs(detailSchool.gap)}`}分`} />
                 {detailSchool.allocationLine && (
                   <ScoreBlock label="分配生录取线" value={`${detailSchool.allocationLine}分`} />
                 )}
@@ -1131,7 +1081,7 @@ export default function VolunteerSimPage() {
                 display: 'flex', gap: 12, marginTop: 24, paddingTop: 16,
                 borderTop: `1px solid ${C.hairline}`,
               }}>
-                {canUseAllocation(detailSchool) && detailSchool.accessible && (
+                {canRecommendAllocation(detailSchool) && (
                   <Button
                     type="primary"
                     disabled={allocationFilled >= 3 || isInBasket(detailSchool.schoolId)}
@@ -1142,7 +1092,7 @@ export default function VolunteerSimPage() {
                   </Button>
                 )}
                 {detailSchool.accessible ? (
-                  detailSchool.type === '省示范' ? (
+                  detailSchool.isProvincialDemo ? (
                     <Button
                       disabled={shifanFilled >= 6 || isInBasket(detailSchool.schoolId)}
                       onClick={() => { addToShifan(detailSchool); setDetailSchool(null) }}
@@ -1158,7 +1108,7 @@ export default function VolunteerSimPage() {
                     </Button>
                   )
                 ) : (
-                  <Button disabled>新乐暂不可报，无法加入志愿</Button>
+                  <Button disabled>新乐不可统招报，仅供了解全市行情</Button>
                 )}
               </div>
               <div style={{ height: 24 }} />
@@ -1214,6 +1164,12 @@ export default function VolunteerSimPage() {
               loading={exportingPoster}
               onClick={exportPoster}
             >生成分享海报</Button>
+            <Button
+              type="primary"
+              icon={<FormOutlined />}
+              disabled={!submitted}
+              onClick={openOfficialForm}
+            >前往志愿填报</Button>
           </div>
         </div>
       )}
@@ -1226,7 +1182,6 @@ export default function VolunteerSimPage() {
             marketRankResult={marketRankResult}
             percentileResult={percentileResult}
             allocationSlots={allocationSlots}
-            allocationTop={allocationTop}
             shifanSlots={shifanSlots}
             putongSlots={putongSlots}
             processedSchools={processedSchools}
@@ -1250,8 +1205,6 @@ export default function VolunteerSimPage() {
 
 type RankResult = ReturnType<typeof getMarketRank> | null
 type PercentileResult = ReturnType<typeof getMarketPercentile> | null
-type AllocationTopResult = { band: AllocationBand; source: 'recommended' | 'fallback_safe' } | null
-
 function ReportDocument({
   inputScore,
   inputSchool,
@@ -1259,7 +1212,6 @@ function ReportDocument({
   marketRankResult,
   percentileResult,
   allocationSlots,
-  allocationTop,
   shifanSlots,
   putongSlots,
   processedSchools,
@@ -1270,7 +1222,6 @@ function ReportDocument({
   marketRankResult: RankResult
   percentileResult: PercentileResult
   allocationSlots: (DBSchool | null)[]
-  allocationTop: AllocationTopResult
   shifanSlots: (DBSchool | null)[]
   putongSlots: (DBSchool | null)[]
   processedSchools: ProcessedSchool[]
@@ -1297,11 +1248,6 @@ function ReportDocument({
       </section>
 
       <ReportVolunteerSegment title="第一批 C段·分配生类（最多3所）" slots={allocationSlots} processedSchools={processedSchools} />
-      {allocationTop && allocationSlots.some(Boolean) && (
-        <div style={{ margin: '-14px 0 24px', fontSize: 12, lineHeight: 1.7, color: C.inkMuted }}>
-          分配生参考：{allocationTop.band.note}
-        </div>
-      )}
       <ReportVolunteerSegment title="第一批 D段·省级示范文化类（最多6所）" slots={shifanSlots} processedSchools={processedSchools} />
       <ReportVolunteerSegment title="第二批 C段·普通高中文化类（最多6所）" slots={putongSlots} processedSchools={processedSchools} />
 
@@ -1496,7 +1442,7 @@ function ReportVolunteerSegment({ title, slots, processedSchools }: {
           {filled.map((school, index) => {
             const processed = processedSchools.find(item => item.schoolId === school.schoolId)
             const cfg = SCORE_TAG_CONFIG[processed?.tag ?? '稳妥']
-            const lineRank = getMarketRank(school.tongZhao).rank
+            const lineRank = processed?.lineRank ?? getMarketRank(school.tongZhao).rank
             return (
               <div key={`${school.schoolId}-${index}`} style={{ display: 'grid', gridTemplateColumns: '58px 1fr 150px 100px', alignItems: 'center', gap: 12, border: '1px solid #EEE7E1', borderRadius: 10, padding: '10px 14px' }}>
                 <div style={{ fontSize: 12, color: C.inkSubtle }}>志愿{index + 1}</div>
@@ -1525,7 +1471,7 @@ function SlotItem({
   const [swapping, setSwapping] = useState(false)
   const numeral = ['①','②','③','④','⑤','⑥'][index]
   const segmentLabel = segment === 'allocation' ? '分配生' : segment === 'shifan' ? '省示范' : '普高'
-  const lineRank = school ? getMarketRank(school.tongZhao).rank : null
+  const lineRank = school ? school.lineRank ?? getMarketRank(school.tongZhao).rank : null
 
   if (school) {
     return (
@@ -1614,7 +1560,7 @@ const TIER_SECTION_SUBTLE: Record<string, string> = {
 
 function TieredSchoolList({
   schools, isInBasket, allocationSlots, shifanSlots, putongSlots,
-  allocationFilled, shifanFilled, putongFilled, canUseAllocation, getSchoolSegment,
+  allocationFilled, shifanFilled, putongFilled, hasAllocationOption, getSchoolSegment,
   addToAllocation, addToShifan, addToPutong, onDetail,
 }: {
   schools: ProcessedSchool[]
@@ -1625,7 +1571,7 @@ function TieredSchoolList({
   allocationFilled: number
   shifanFilled: number
   putongFilled: number
-  canUseAllocation: (school: DBSchool) => boolean
+  hasAllocationOption: (school: DBSchool) => boolean
   getSchoolSegment: (school: DBSchool) => 'allocation' | 'shifan' | 'putong'
   addToAllocation: (s: DBSchool) => void
   addToShifan: (s: DBSchool) => void
@@ -1671,10 +1617,10 @@ function TieredSchoolList({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {tierSchools.map(school => {
                 const inBasket = isInBasket(school.schoolId)
-                const allocationEligible = canUseAllocation(school)
+                const allocationEligible = hasAllocationOption(school)
                 const primarySegment = getSchoolSegment(school)
                 const academicSegment = primarySegment === 'allocation'
-                  ? (school.type === '省示范' ? 'shifan' : 'putong')
+                  ? (school.isProvincialDemo ? 'shifan' : 'putong')
                   : primarySegment
                 const selectedSegment = allocationSlots.some(item => item?.schoolId === school.schoolId)
                   ? '分配生'
@@ -1705,14 +1651,19 @@ function TieredSchoolList({
                         }}>
                           {cfg.label}
                         </Tag>
-                        <Text style={{ fontSize: 11, color: C.inkSubtle }}>{school.type}</Text>
+                        <Text style={{ fontSize: 11, color: C.inkSubtle }}>{school.isProvincialDemo ? '省示范' : school.type}</Text>
                         <Text style={{ fontSize: 11, color: C.inkSubtle }}>{school.location}</Text>
+                        {school.xinleStatus.map((status) => (
+                          <Tag key={status} color={status === '统招可报' ? 'success' : status === '分配生可报' ? 'orange' : 'default'} style={{ margin: 0, fontSize: 10 }}>
+                            {status}
+                          </Tag>
+                        ))}
                         {!school.accessible && (
-                          <Text style={{ fontSize: 11, color: C.inkSubtle }}>新乐暂不可报</Text>
+                          <Text style={{ fontSize: 11, color: C.inkSubtle }}>新乐不可统招报，仅供了解全市行情</Text>
                         )}
                       </div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
-                        {allocationEligible && school.accessible && (
+                        {allocationEligible && (
                           <Button size="small" disabled={allocationFilled >= 3 || inBasket}
                             style={{ fontSize: 11, borderColor: C.primary, color: C.primary }}
                             onClick={() => addToAllocation(school)}>
@@ -1749,7 +1700,7 @@ function TieredSchoolList({
                           </Text>
                         )}
                         <Text style={{ fontSize: 13 }}>
-                          统招
+                          新乐线
                           <Text strong style={{ color: school.gap >= 0 ? C.success : C.error, fontSize: 15, margin: '0 2px' }}>
                             {school.tongZhao}
                           </Text>
@@ -1757,6 +1708,9 @@ function TieredSchoolList({
                           <Text style={{ fontSize: 11, marginLeft: 3, color: school.gap >= 0 ? C.success : C.error }}>
                             ({school.gap >= 0 ? `高${school.gap}` : `差${Math.abs(school.gap)}`})
                           </Text>
+                        </Text>
+                        <Text style={{ display: 'block', fontSize: 11, color: C.inkSubtle }}>
+                          {school.lineRank ? `换算位次约第${school.lineRank.toLocaleString()}名` : '换算位次暂无'}
                         </Text>
                       </div>
                     </div>

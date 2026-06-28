@@ -1263,6 +1263,10 @@ model HighSchoolInfo {
   tongZhao         Int
   allocationLine   Int?
   acceptsOtherCounty Boolean @default(false)
+  xinleLine       Int?
+  xinleStatus     String[] @default([])
+  isProvincialDemo Boolean @default(false)
+  xinleFenpeiQuota Int?
   xinleAccessible   Boolean  @default(true)
   xinleAccessibleOverride Boolean?
   xinleAllocationId String?
@@ -1282,6 +1286,38 @@ model HighSchoolInfo {
   infoConfidence   String?   @default("unknown")
   updatedAt        DateTime @updatedAt
   updatedBy        String?
+}
+
+model YifenYidang {
+  id         String @id @default(cuid())
+  year       Int
+  score      Int
+  count      Int
+  cumulative Int
+
+  @@unique([year, score])
+  @@index([year, cumulative])
+}
+
+model AllocationQuota {
+  id           String @id @default(cuid())
+  year         Int
+  juniorSchool String
+  seniorSchool String
+  quota        Int
+
+  @@unique([year, juniorSchool, seniorSchool])
+  @@index([year, juniorSchool])
+}
+
+model JuniorEnrollment {
+  id           String @id @default(cuid())
+  year         Int
+  juniorSchool String
+  count        Int
+
+  @@unique([year, juniorSchool])
+  @@index([year])
 }
 
 // ── 家长留言 ──────────────────────────────────────────────
