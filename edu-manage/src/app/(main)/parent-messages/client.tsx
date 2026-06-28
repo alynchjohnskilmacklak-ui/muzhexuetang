@@ -103,7 +103,7 @@ export function AdminMessagesClient() {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const { data, mutate } = usePausableSWR('/api/messages', fetcher, {
-    refreshInterval: 5_000, revalidateOnFocus: true, revalidateOnReconnect: true,
+    refreshInterval: 15_000, revalidateOnFocus: true, revalidateOnReconnect: true,
   })
   const allMessages: Message[] = data?.messages || []
 

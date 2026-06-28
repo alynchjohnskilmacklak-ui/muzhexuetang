@@ -168,7 +168,7 @@ export function ParentMessagesClient({
   const [filterChildId, setFilterChildId] = useState<string>(activeChildId)
   const { data, mutate } = usePausableSWR('/api/messages', fetcher, {
     fallbackData: { messages: initialMessages },
-    refreshInterval: 5_000,
+    refreshInterval: 15_000,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
   })

@@ -123,7 +123,7 @@ export function TeacherMessagesClient() {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const { data, mutate } = usePausableSWR('/api/messages', fetcher, {
-    refreshInterval: 5_000,
+    refreshInterval: 15_000,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
   })

@@ -10,7 +10,7 @@ const globalForPrisma = globalThis as unknown as {
 
 function buildUrl(rawUrl: string | undefined): string | undefined {
   if (!rawUrl) return undefined
-  return `${rawUrl}${rawUrl.includes('?') ? '&' : '?'}connection_limit=20&pool_timeout=30&connect_timeout=10`
+  return `${rawUrl}${rawUrl.includes('?') ? '&' : '?'}connection_limit=30&pool_timeout=30&connect_timeout=10`
 }
 
 function createClient(url: string | undefined): PrismaClient {

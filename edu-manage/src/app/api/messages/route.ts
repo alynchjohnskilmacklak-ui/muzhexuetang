@@ -24,13 +24,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
     if (!user.teacherId) {
       return NextResponse.json({ messages: [] })
     }
-    const taughtGroups = await prisma.classGroupTeacher.findMany({
-      where: { teacherId: user.teacherId },
-      select: { groupId: true },
-    })
-    const groupIds = taughtGroups.map((g) => g.groupId)
     const enrollments = await prisma.enrollment.findMany({
-      where: { groupId: { in: groupIds }, status: 'ACTIVE' },
+      where: {
+        status: 'ACTIVE',
+        group: { teacherAssignments: { some: { teacherId: user.teacherId } } },
+      },
       select: { studentId: true },
     })
     const taughtStudentIds = Array.from(new Set(enrollments.map((e) => e.studentId)))
@@ -64,6 +62,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       teacher: { select: { id: true, name: true } },
       replies: {
         orderBy: { createdAt: 'asc' },
+        take: 50,
       },
     },
     orderBy: { updatedAt: 'desc' },
