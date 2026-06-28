@@ -1,0 +1,1692 @@
+{
+ "year": 2025,
+ "note": "分配生明细(含新乐一中),juniorSchool在seniorSchool的名额",
+ "total": 337,
+ "data": [
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "新乐一中",
+   "quota": 38
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "辛集中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "正定中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "石家庄润德学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "承安中学",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "新乐一中",
+   "quota": 16
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "正定中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "新乐一中",
+   "quota": 32
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "正定中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "石家庄润德学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "新乐一中",
+   "quota": 28
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "正定中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "新乐一中",
+   "quota": 68
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "辛集中学",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "正定中学",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "石家庄润德学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "seniorSchool": "行唐县启明中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "新乐一中",
+   "quota": 29
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "正定中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "新乐一中",
+   "quota": 25
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "正定中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "新乐一中",
+   "quota": 21
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "正定中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "新乐一中",
+   "quota": 65
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "辛集中学",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "正定中学",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "石家庄实验",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "石家庄二实验",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "石家庄润德学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "新乐一中",
+   "quota": 71
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "辛集中学",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "正定中学",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "石家庄润德学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "seniorSchool": "行唐县启明中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "新乐一中",
+   "quota": 131
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "辛集中学",
+   "quota": 6
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "正定中学",
+   "quota": 7
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 6
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 9
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "石家庄润德学校",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 9
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 6
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 9
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "seniorSchool": "行唐县启明中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "新乐一中",
+   "quota": 104
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "辛集中学",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "正定中学",
+   "quota": 6
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "石家庄实验",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "石家庄二实验",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 7
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "石家庄润德学校",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 7
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 7
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "seniorSchool": "行唐县启明中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "新乐一中",
+   "quota": 121
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "辛集中学",
+   "quota": 6
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "正定中学",
+   "quota": 7
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 6
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 9
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "石家庄润德学校",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 8
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 6
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 8
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "东城中学",
+   "seniorSchool": "行唐县启明中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "新乐一中",
+   "quota": 27
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "正定中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "新乐一中",
+   "quota": 177
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "辛集中学",
+   "quota": 8
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "正定中学",
+   "quota": 10
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "石家庄实验",
+   "quota": 8
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "石家庄二实验",
+   "quota": 7
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 13
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 7
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "石家庄润德学校",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 6
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 3
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 4
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 12
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 8
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 12
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 5
+  },
+  {
+   "juniorSchool": "实验学校",
+   "seniorSchool": "行唐县启明中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "新乐一中",
+   "quota": 30
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "正定中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "石家庄润德学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "中山中学",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "童心学校",
+   "seniorSchool": "新乐一中",
+   "quota": 11
+  },
+  {
+   "juniorSchool": "童心学校",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "童心学校",
+   "seniorSchool": "正定中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "童心学校",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "童心学校",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "童心学校",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "童心学校",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "童心学校",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "新乐一中",
+   "quota": 19
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "正定中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "大流中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "新乐一中",
+   "quota": 32
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "正定中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "石家庄润德学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "石家庄一中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "东王中学",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "邯邰学校",
+   "seniorSchool": "新乐一中",
+   "quota": 14
+  },
+  {
+   "juniorSchool": "邯邰学校",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "邯邰学校",
+   "seniorSchool": "正定中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "邯邰学校",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "邯邰学校",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "邯邰学校",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "邯邰学校",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "邯邰学校",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "邯邰学校",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "邯邰学校",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "seniorSchool": "新乐一中",
+   "quota": 15
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "seniorSchool": "正定中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "新乐一中",
+   "quota": 25
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "正定中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "石家庄敬业中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "青同学校",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "协神学校",
+   "seniorSchool": "新乐一中",
+   "quota": 8
+  },
+  {
+   "juniorSchool": "协神学校",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "协神学校",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "协神学校",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "新乐一中",
+   "quota": 23
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "辛集中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "正定中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "石家庄实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "石家庄二实验",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "石家庄二中实验学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "河北正中实验中学",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "河北联邦外国语学校",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "石家庄精英中学",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "石家庄金石高级中学有限公司",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "石家庄卓越中学（东校区）",
+   "quota": 1
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "石家庄卓越中学（西校区）",
+   "quota": 2
+  },
+  {
+   "juniorSchool": "博林中学",
+   "seniorSchool": "石家庄精英新华中学",
+   "quota": 1
+  }
+ ]
+}

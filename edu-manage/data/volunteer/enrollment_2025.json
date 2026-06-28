@@ -1,0 +1,106 @@
+{
+ "year": 2025,
+ "note": "各初中中考报名人数",
+ "data": [
+  {
+   "juniorSchool": "承安中学",
+   "count": 38
+  },
+  {
+   "juniorSchool": "正莫中学",
+   "count": 16
+  },
+  {
+   "juniorSchool": "大岳中学",
+   "count": 32
+  },
+  {
+   "juniorSchool": "杜固学校",
+   "count": 28
+  },
+  {
+   "juniorSchool": "赤支中学",
+   "count": 68
+  },
+  {
+   "juniorSchool": "彭家庄学校",
+   "count": 29
+  },
+  {
+   "juniorSchool": "岗头中学",
+   "count": 25
+  },
+  {
+   "juniorSchool": "马头铺中学",
+   "count": 21
+  },
+  {
+   "juniorSchool": "第二实验学校",
+   "count": 65
+  },
+  {
+   "juniorSchool": "荟文中学",
+   "count": 71
+  },
+  {
+   "juniorSchool": "新开路中学",
+   "count": 131
+  },
+  {
+   "juniorSchool": "东长寿学校",
+   "count": 104
+  },
+  {
+   "juniorSchool": "东城中学",
+   "count": 121
+  },
+  {
+   "juniorSchool": "东阳学校",
+   "count": 27
+  },
+  {
+   "juniorSchool": "实验学校",
+   "count": 177
+  },
+  {
+   "juniorSchool": "中山中学",
+   "count": 30
+  },
+  {
+   "juniorSchool": "童心学校",
+   "count": 11
+  },
+  {
+   "juniorSchool": "大流中学",
+   "count": 19
+  },
+  {
+   "juniorSchool": "东王中学",
+   "count": 32
+  },
+  {
+   "juniorSchool": "邯邰学校",
+   "count": 14
+  },
+  {
+   "juniorSchool": "化皮学校",
+   "count": 15
+  },
+  {
+   "juniorSchool": "青同学校",
+   "count": 25
+  },
+  {
+   "juniorSchool": "协神学校",
+   "count": 8
+  },
+  {
+   "juniorSchool": "博林中学",
+   "count": 23
+  },
+  {
+   "juniorSchool": "超击武校",
+   "count": 0
+  }
+ ]
+}

@@ -248,7 +248,7 @@ export default function OfficialVolunteerFormPage() {
         <div className="actions">
           <button type="button" className="btn btn-save" onClick={saveSimulation}>保存志愿</button>
           <button type="button" className="btn btn-back" onClick={exportPdf} disabled={exporting}>{exporting ? '正在导出...' : '导出PDF'}</button>
-          <button type="button" className="btn btn-back" onClick={() => router.back()}>返回</button>
+          <button type="button" className="btn btn-back" onClick={() => router.push('/volunteer-sim')}>返回</button>
         </div>
       </div>
 

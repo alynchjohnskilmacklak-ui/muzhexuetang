@@ -52,6 +52,7 @@ const adminNavItems = [
   { key: '/volunteer', icon: <ReadOutlined />, label: '志愿咨询' },
   { key: '/volunteer-sim', icon: <ExperimentOutlined />, label: '中考模拟' },
   { key: '/volunteer-sim/schools', icon: <ReadOutlined />, label: '高中学校库' },
+  { key: '/volunteer-sim/rank-query', icon: <BarChartOutlined />, label: '一分一档' },
   { key: '/materials', icon: <ReadOutlined />, label: '学习资料' },
   { key: '/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
   { key: '/ai', icon: <MessageFilled />, label: 'AI 助手' },
@@ -69,7 +70,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   const visibleNavItems = useMemo(() => {
     if (!isSenior) return adminNavItems
-    const juniorOnlyKeys = new Set(['/volunteer', '/volunteer-sim', '/volunteer-sim/schools'])
+    const juniorOnlyKeys = new Set(['/volunteer', '/volunteer-sim', '/volunteer-sim/schools', '/volunteer-sim/rank-query'])
     return adminNavItems.filter((item) => !juniorOnlyKeys.has(item.key))
   }, [isSenior])
 

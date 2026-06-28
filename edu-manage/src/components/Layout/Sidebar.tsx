@@ -91,6 +91,7 @@ const menuItems: MenuProps['items'] = [
       { key: '/volunteer', label: '志愿咨询' },
       { key: '/volunteer-sim', label: '中考模拟测算' },
       { key: '/volunteer-sim/schools', label: '高中学校库' },
+      { key: '/volunteer-sim/rank-query', label: '一分一档位次' },
     ],
   },
   { key: '/reports', icon: <BarChartOutlined />, label: '数据报表' },
@@ -166,7 +167,7 @@ export function Sidebar({
     ? ['finance-group']
     : (baseKey === '/parent-messages' || baseKey === '/notifications')
     ? ['comm-group']
-    : (baseKey === '/volunteer' || baseKey === '/volunteer-sim' || baseKey === '/volunteer-sim/schools')
+    : (baseKey === '/volunteer' || baseKey === '/volunteer-sim' || baseKey === '/volunteer-sim/schools' || baseKey === '/volunteer-sim/rank-query')
     ? ['volunteer-group']
     : (baseKey === '/materials' || baseKey === '/phet' || baseKey === '/ai')
     ? ['resource-group']

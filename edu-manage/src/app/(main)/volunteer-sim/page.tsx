@@ -81,6 +81,22 @@ interface ProcessedSchool extends DBSchool {
 const TAG_OPTIONS: ('全部' | ScoreTag)[] = ['全部', '分配生机会', '保底', '稳妥', '冲刺', '差距较大', '暂未达线']
 const TYPE_OPTIONS = ['全部', '省示范', '普通高中', '市重点', '县中', '民办']
 const AVAILABILITY_OPTIONS = ['全部', '统招可报', '分配生可报', '仅供参考'] as const
+const VOLUNTEER_SIM_STATE_KEY = 'volunteer_sim_state'
+
+type PersistedVolunteerSimState = {
+  inputScore: number | null
+  inputRank: number | null
+  inputSchool: string
+  submitted: boolean
+  allocationSlots: (DBSchool | null)[]
+  shifanSlots: (DBSchool | null)[]
+  putongSlots: (DBSchool | null)[]
+}
+
+function normalizeStoredSlots(slots: unknown, length: number): (DBSchool | null)[] {
+  if (!Array.isArray(slots)) return Array(length).fill(null)
+  return Array.from({ length }, (_, index) => slots[index] && typeof slots[index] === 'object' ? slots[index] as DBSchool : null)
+}
 
 // Warm light theme tokens — module scope for all functions
 const C = {
@@ -114,11 +130,13 @@ export default function VolunteerSimPage() {
   const [form] = Form.useForm()
   const reportRef = useRef<HTMLDivElement>(null)
   const posterRef = useRef<HTMLDivElement>(null)
+  const skipNextPersistRef = useRef(false)
 
   const [inputScore, setInputScore] = useState<number | null>(null)
   const [inputSchool, setInputSchool] = useState<string>('')
   const [inputRank, setInputRank] = useState<number | null>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [stateRestored, setStateRestored] = useState(false)
 
   const [schools, setSchools] = useState<DBSchool[]>([])
   const [loading, setLoading] = useState(false)
@@ -151,6 +169,49 @@ export default function VolunteerSimPage() {
     localStorage.setItem('volunteer_sim_onboarding_done', '1')
     setShowOnboarding(false)
   }
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(VOLUNTEER_SIM_STATE_KEY)
+      if (raw) {
+        const stored = JSON.parse(raw) as Partial<PersistedVolunteerSimState>
+        const restoredScore = typeof stored.inputScore === 'number' ? stored.inputScore : null
+        const restoredRank = typeof stored.inputRank === 'number' ? stored.inputRank : null
+        const restoredSchool = typeof stored.inputSchool === 'string' ? stored.inputSchool : ''
+        setInputScore(restoredScore)
+        setInputRank(restoredRank)
+        setInputSchool(restoredSchool)
+        setSubmitted(stored.submitted === true)
+        setAllocationSlots(normalizeStoredSlots(stored.allocationSlots, 3))
+        setShifanSlots(normalizeStoredSlots(stored.shifanSlots, 6))
+        setPutongSlots(normalizeStoredSlots(stored.putongSlots, 6))
+        form.setFieldsValue({ score: restoredScore, schoolName: restoredSchool || undefined, schoolRank: restoredRank })
+      }
+    } catch (error) {
+      console.warn('恢复志愿模拟状态失败', error)
+      sessionStorage.removeItem(VOLUNTEER_SIM_STATE_KEY)
+    } finally {
+      setStateRestored(true)
+    }
+  }, [form])
+
+  useEffect(() => {
+    if (!stateRestored) return
+    if (skipNextPersistRef.current) {
+      skipNextPersistRef.current = false
+      return
+    }
+    const state: PersistedVolunteerSimState = {
+      inputScore,
+      inputRank,
+      inputSchool,
+      submitted,
+      allocationSlots,
+      shifanSlots,
+      putongSlots,
+    }
+    sessionStorage.setItem(VOLUNTEER_SIM_STATE_KEY, JSON.stringify(state))
+  }, [stateRestored, inputScore, inputRank, inputSchool, submitted, allocationSlots, shifanSlots, putongSlots])
 
   useEffect(() => {
     fetch('/api/volunteer/schools')
@@ -279,6 +340,9 @@ export default function VolunteerSimPage() {
   }
 
   const handleReset = () => {
+    skipNextPersistRef.current = true
+    sessionStorage.removeItem(VOLUNTEER_SIM_STATE_KEY)
+    sessionStorage.removeItem('volunteer_form_data')
     form.resetFields()
     setSubmitted(false)
     setInputScore(null)
@@ -389,33 +453,19 @@ export default function VolunteerSimPage() {
     return hasAllocationOption(school) && inputRank !== null && inputRank <= quota
   }, [getAllocationQuota, hasAllocationOption, inputRank])
 
-  const canRecommendAllocation = useCallback((school: DBSchool) => {
-    const quota = getAllocationQuota(school)
-    return hasAllocationOption(school) && inputRank !== null && inputRank <= quota * 1.3
-  }, [getAllocationQuota, hasAllocationOption, inputRank])
-
   const getSchoolSegment = useCallback((school: DBSchool): 'allocation' | 'shifan' | 'putong' => {
-    if (canRecommendAllocation(school)) return 'allocation'
+    if (hasAllocationOption(school)) return 'allocation'
     return school.isProvincialDemo ? 'shifan' : 'putong'
-  }, [canRecommendAllocation])
+  }, [hasAllocationOption])
 
   const allocationSchoolsForSelectedJunior = useMemo(
     () => processedSchools.filter((school) => hasAllocationOption(school)),
     [processedSchools, hasAllocationOption]
   )
-  const officialAllocationOptions = useMemo(() => {
-    if (inputRank === null) return []
-    return allocationSchoolsForSelectedJunior
-      .filter((school) => inputRank <= getAllocationQuota(school) * 1.3)
-      .sort((a, b) => {
-        const aQuota = getAllocationQuota(a)
-        const bQuota = getAllocationQuota(b)
-        const aEligible = inputRank <= aQuota
-        const bEligible = inputRank <= bQuota
-        if (aEligible !== bEligible) return aEligible ? -1 : 1
-        return bQuota - aQuota
-      })
-  }, [allocationSchoolsForSelectedJunior, getAllocationQuota, inputRank])
+  const officialAllocationOptions = useMemo(
+    () => [...allocationSchoolsForSelectedJunior].sort((a, b) => getAllocationQuota(b) - getAllocationQuota(a)),
+    [allocationSchoolsForSelectedJunior, getAllocationQuota]
+  )
   const recommendedAllocationId = officialAllocationOptions[0]?.schoolId || null
   const shifanAvailableCount = useMemo(
     () => processedSchools.filter((school) => school.accessible && school.isProvincialDemo).length,
@@ -483,6 +533,15 @@ export default function VolunteerSimPage() {
   }
 
   const openOfficialForm = () => {
+    sessionStorage.setItem(VOLUNTEER_SIM_STATE_KEY, JSON.stringify({
+      inputScore,
+      inputRank,
+      inputSchool,
+      submitted,
+      allocationSlots,
+      shifanSlots,
+      putongSlots,
+    } satisfies PersistedVolunteerSimState))
     sessionStorage.setItem('volunteer_form_data', JSON.stringify({
       allocation: allocationSlots,
       shifan: shifanSlots,
@@ -782,7 +841,7 @@ export default function VolunteerSimPage() {
                   <div>
                     <Text strong style={{ fontSize: 15, color: C.ink }}>第一批 C段·分配生自选</Text>
                     <Text style={{ display: 'block', fontSize: 12, color: C.inkSubtle, marginTop: 2 }}>
-                      仅展示对{inputSchool}有精确名额且你的本校排名达到“有资格/接近”的学校，最多自选3所
+                      展示所有对{inputSchool}有精确名额的高中，按本校名额从多到少排列，最多自选3所
                     </Text>
                   </div>
                   <Text style={{ fontSize: 12, color: C.primary }}>{allocationFilled}/3</Text>
@@ -791,21 +850,21 @@ export default function VolunteerSimPage() {
                   {officialAllocationOptions.map((school) => {
                     const quota = getAllocationQuota(school)
                     const eligible = canUseAllocation(school)
-                    const close = !eligible && inputRank !== null && inputRank <= quota * 1.3
+                    const hopeful = !eligible && inputRank !== null && inputRank <= quota * 1.5
                     const recommended = school.schoolId === recommendedAllocationId
                     return (
-                      <div key={`official-allocation-${school.schoolId}`} style={{ background: eligible ? C.successBg : close ? C.warningBg : C.surface3, border: `1px solid ${eligible ? C.successBorder : close ? C.warningBorder : C.hairline}`, borderRadius: 10, padding: '10px 12px' }}>
+                      <div key={`official-allocation-${school.schoolId}`} style={{ background: eligible ? C.successBg : hopeful ? C.warningBg : C.surface3, border: `1px solid ${eligible ? C.successBorder : hopeful ? C.warningBorder : C.hairline}`, borderRadius: 10, padding: '10px 12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
                           <div style={{ minWidth: 0 }}>
                             <Text strong style={{ color: C.ink, fontSize: 13 }}>{school.name}</Text>
                             <div style={{ marginTop: 4, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                              <Tag color={eligible ? 'success' : close ? 'warning' : 'default'} style={{ margin: 0, fontSize: 11 }}>
-                                {eligible ? `✅有资格（本校${quota}个名额）` : '△接近'}
+                              <Tag color={eligible ? 'success' : hopeful ? 'warning' : 'default'} style={{ margin: 0, fontSize: 11 }}>
+                                {eligible ? '✅有资格（稳）' : hopeful ? '△有希望（冲）' : '资格较难，可冲'}
                               </Tag>
-                              {recommended && <Tag color="orange" style={{ margin: 0, fontSize: 11 }}>★ 推荐</Tag>}
+                              {recommended && <Tag color="orange" style={{ margin: 0, fontSize: 11 }}>⭐推荐（保底稳妥）</Tag>}
                             </div>
                             <Text style={{ display: 'block', color: C.inkSubtle, fontSize: 11, marginTop: 5 }}>
-                              你的本校排名第{inputRank}名 · 该校给本校名额{quota}个
+                              本校名额{quota}个 · 你的本校排名第{inputRank}名 · 该校给新乐总名额{school.xinleFenpeiQuota}个
                             </Text>
                           </div>
                           <Button size="small" disabled={allocationFilled >= 3 || isInBasket(school.schoolId)} onClick={() => addToAllocation(school)}>
@@ -818,15 +877,13 @@ export default function VolunteerSimPage() {
                 </div>
               </div>
             )}
-            {officialAllocationOptions.length === 0 && (
+            {allocationSchoolsForSelectedJunior.length === 0 && (
               <div style={{
                 background: C.warningBg, border: `1px solid ${C.warningBorder}`,
                 borderRadius: 10, padding: '12px 16px', marginBottom: 16,
               }}>
                 <Text style={{ fontSize: 13, color: C.warning }}>
-                  {allocationSchoolsForSelectedJunior.length === 0
-                    ? `该初中（${inputSchool}）目前无精确分配生名额数据，请检查分配表是否覆盖此初中。`
-                    : `你的本校排名暂未进入任何学校名额的“有资格/接近”范围，因此不展示分配生推荐。`}
+                  该初中（{inputSchool}）目前无精确分配生名额数据，请检查分配表是否覆盖此初中。
                 </Text>
               </div>
             )}
@@ -896,7 +953,7 @@ export default function VolunteerSimPage() {
                 allocationFilled={allocationFilled}
                 shifanFilled={shifanFilled}
                 putongFilled={putongFilled}
-                hasAllocationOption={canRecommendAllocation}
+                hasAllocationOption={hasAllocationOption}
                 getSchoolSegment={getSchoolSegment}
                 addToAllocation={addToAllocation}
                 addToShifan={addToShifan}
@@ -1081,7 +1138,7 @@ export default function VolunteerSimPage() {
                 display: 'flex', gap: 12, marginTop: 24, paddingTop: 16,
                 borderTop: `1px solid ${C.hairline}`,
               }}>
-                {canRecommendAllocation(detailSchool) && (
+                {hasAllocationOption(detailSchool) && (
                   <Button
                     type="primary"
                     disabled={allocationFilled >= 3 || isInBasket(detailSchool.schoolId)}

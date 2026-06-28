@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Avatar, Badge, Dropdown, Layout, Menu, Space, Tooltip } from 'antd'
 import {
   BankOutlined,
+  BarChartOutlined,
   BellOutlined,
   BookOutlined,
   CalendarOutlined,
@@ -95,6 +96,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长主页', badge: unread.papers + unread.posts },
     { key: '/parent/volunteer/schools', icon: <BankOutlined />, label: '高中学校库' },
     { key: '/parent/volunteer', icon: <ReadOutlined />, label: '志愿咨询' },
+    { key: '/parent/volunteer/rank-query', icon: <BarChartOutlined />, label: '一分一档位次' },
     { key: '/parent/teachers', icon: <TeamOutlined />, label: '教师信息' },
     { key: '/parent/notifications', icon: <BellOutlined />, label: '通知', badge: unread.notifications },
     { key: '/parent/messages', icon: <CommentOutlined />, label: '我的留言', badge: unread.messages },
@@ -118,7 +120,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
 
   const bottomKeys = ['/parent/dashboard', '/parent/schedule', '/parent/class-feedback', '/parent/archive']
   // More items sorted by importance
-  const morePriority = ['/parent/notifications', '/parent/messages', '/parent/meals', '/parent/leave', '/parent/hour-records', '/parent/materials', '/parent/volunteer', '/parent/volunteer/schools', '/parent/teachers', '/parent/phet', '/parent/ai', '/parent/bind', '/parent/profile']
+  const morePriority = ['/parent/notifications', '/parent/messages', '/parent/meals', '/parent/leave', '/parent/hour-records', '/parent/materials', '/parent/volunteer', '/parent/volunteer/schools', '/parent/volunteer/rank-query', '/parent/teachers', '/parent/phet', '/parent/ai', '/parent/bind', '/parent/profile']
   const moreItems = navItems.filter(item => !bottomKeys.includes(item.key)).sort((a, b) => morePriority.indexOf(a.key) - morePriority.indexOf(b.key))
   const currentKey = resolveActiveKey(pathname, navItems, '/parent/dashboard')
 
