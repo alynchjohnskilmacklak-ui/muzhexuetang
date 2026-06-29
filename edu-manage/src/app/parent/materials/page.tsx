@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { Button, Empty, Modal, Select, Skeleton, Space, Tag, Typography } from 'antd'
-import { DownloadOutlined, EyeOutlined, FileTextOutlined } from '@ant-design/icons'
+import { DownloadOutlined, ExportOutlined, EyeOutlined, FileTextOutlined } from '@ant-design/icons'
+import { toast } from 'sonner'
 import { GRADE_SUBJECTS, GRADES, SUBJECT_COLORS } from '@/data/subjects'
 import { fmtDate } from '@/lib/format-date'
 import { materialFileLabel } from '@/lib/material-format'
@@ -20,6 +21,7 @@ const COPY = {
   preview: '\u9884\u89c8',
   pdfPreview: 'PDF\u9884\u89c8',
   wordPreview: 'Word\u9884\u89c8',
+  openPdf: '\u5728\u65b0\u6807\u7b7e\u6253\u5f00PDF',
   copyright: '\u672c\u8d44\u6599\u4ec5\u4f9b\u5728\u7ebf\u67e5\u770b\uff0c\u7248\u6743\u5f52\u7267\u54f2\u5b66\u5802\u6240\u6709',
 }
 
@@ -91,21 +93,40 @@ export default function ParentMaterialsPage() {
     fetchMaterials()
   }, [selectedGrade, selectedSubject])
 
+  useEffect(() => () => {
+    if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl)
+  }, [previewUrl])
+
   const subjects = GRADE_SUBJECTS[selectedGrade] || []
 
   const handleView = async (material: Material) => {
-    setPreviewTitle(material.title)
-    if (material.fileType === 'word') {
-      const res = await fetch(`/api/materials/${material.id}/view`)
-      const data = await res.json()
-      if (data.viewerUrl) {
-        setPreviewType('word')
-        setPreviewUrl(data.viewerUrl)
+    const endpoint = `/api/materials/${material.id}/view`
+    try {
+      const res = await fetch(endpoint)
+      const contentType = res.headers.get('content-type') || ''
+      if (!res.ok) {
+        const errorData = contentType.includes('application/json') ? await res.json() : null
+        throw new Error(errorData?.error || '\u8d44\u6599\u9884\u89c8\u52a0\u8f7d\u5931\u8d25')
       }
-      return
+
+      let nextType = material.fileType as 'pdf' | 'image' | 'word'
+      let nextUrl: string
+      if (contentType.includes('application/json')) {
+        const data = await res.json() as { type?: string; url?: string; viewerUrl?: string }
+        nextUrl = data.viewerUrl || data.url || ''
+        if (data.type === 'word' || data.type === 'pdf' || data.type === 'image') nextType = data.type
+        if (!nextUrl) throw new Error('\u9884\u89c8\u5730\u5740\u65e0\u6548')
+      } else {
+        nextUrl = URL.createObjectURL(await res.blob())
+      }
+
+      setPreviewTitle(material.title)
+      setPreviewType(nextType)
+      setPreviewUrl(nextUrl)
+    } catch (error) {
+      console.error('\u5bb6\u957f\u7aef\u8d44\u6599\u9884\u89c8\u5931\u8d25', error)
+      toast.error(error instanceof Error ? error.message : '\u8d44\u6599\u9884\u89c8\u52a0\u8f7d\u5931\u8d25')
     }
-    setPreviewType(material.fileType as 'pdf' | 'image')
-    setPreviewUrl(`/api/materials/${material.id}/view`)
   }
 
   const handleDownload = (material: Material) => {
@@ -170,6 +191,11 @@ export default function ParentMaterialsPage() {
         style={{ top: 10 }}
         styles={{ body: { padding: 0 } }}
       >
+        {previewUrl && previewType === 'pdf' && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 0' }}>
+            <Button icon={<ExportOutlined />} onClick={() => window.open(previewUrl, '_blank', 'noopener,noreferrer')}>{COPY.openPdf}</Button>
+          </div>
+        )}
         {previewUrl && previewType === 'pdf' && <iframe src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`} style={{ width: '100%', height: '85vh', border: 'none' }} title={COPY.pdfPreview} />}
         {previewUrl && previewType === 'word' && <iframe src={previewUrl} style={{ width: '100%', height: '85vh', border: 'none' }} title={COPY.wordPreview} />}
         {previewUrl && previewType === 'image' && (

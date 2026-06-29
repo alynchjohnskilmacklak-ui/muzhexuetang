@@ -37,6 +37,9 @@ export default function RankQueryPage() {
     let curScore = 678
     let curSeg = 0
     let dragging = false
+    let startX = 0
+    let startY = 0
+    let isHorizontal = false
     let W = 0
     let H = 0
     let dpr = 1
@@ -138,18 +141,52 @@ export default function RankQueryPage() {
     }
     function pickFromEvent(e: MouseEvent | TouchEvent) {
       const rect = cv.getBoundingClientRect()
-      const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX
+      const clientX = 'touches' in e ? (e.touches[0] || e.changedTouches[0])?.clientX : e.clientX
       if (clientX == null) return
-        const s = scoreFromX(clientX - rect.left)
+      const s = scoreFromX(clientX - rect.left)
       if (s >= minS && s <= maxS) { curScore = s; scoreInput.value = String(s); update() }
     }
 
     const onMouseDown = (e: MouseEvent) => { dragging = true; pickFromEvent(e) }
     const onMouseMove = (e: MouseEvent) => { if (dragging) pickFromEvent(e) }
     const onMouseUp = () => { dragging = false }
-    const onTouchStart = (e: TouchEvent) => { dragging = true; pickFromEvent(e); e.preventDefault() }
-    const onTouchMove = (e: TouchEvent) => { if (dragging) { pickFromEvent(e); e.preventDefault() } }
-    const onTouchEnd = () => { dragging = false }
+    const onTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0]
+      if (!touch) return
+      startX = touch.clientX
+      startY = touch.clientY
+      isHorizontal = false
+      dragging = false
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0]
+      if (!touch) return
+      const dx = Math.abs(touch.clientX - startX)
+      const dy = Math.abs(touch.clientY - startY)
+      if (!isHorizontal && !dragging) {
+        if (dy > dx && dy > 6) return
+        if (dx > dy && dx > 6) {
+          isHorizontal = true
+          dragging = true
+        }
+      }
+      if (isHorizontal) {
+        e.preventDefault()
+        pickFromEvent(e)
+      }
+    }
+    const onTouchEnd = (e: TouchEvent) => {
+      const touch = e.changedTouches[0]
+      const dx = touch ? Math.abs(touch.clientX - startX) : 0
+      const dy = touch ? Math.abs(touch.clientY - startY) : 0
+      if (!isHorizontal && Math.max(dx, dy) <= 6) pickFromEvent(e)
+      dragging = false
+      isHorizontal = false
+    }
+    const onTouchCancel = () => {
+      dragging = false
+      isHorizontal = false
+    }
     const onInput = (e: Event) => { const v = parseInt((e.target as HTMLInputElement).value); if (!Number.isNaN(v)) { curScore = v; update() } }
     const quickButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('.quick button'))
     const quickHandlers = quickButtons.map(button => {
@@ -164,6 +201,7 @@ export default function RankQueryPage() {
     cv.addEventListener('touchstart', onTouchStart, { passive: false })
     cv.addEventListener('touchmove', onTouchMove, { passive: false })
     cv.addEventListener('touchend', onTouchEnd)
+    cv.addEventListener('touchcancel', onTouchCancel)
     scoreInput.addEventListener('input', onInput)
     window.addEventListener('resize', resize)
 
@@ -198,6 +236,7 @@ export default function RankQueryPage() {
       cv.removeEventListener('touchstart', onTouchStart)
       cv.removeEventListener('touchmove', onTouchMove)
       cv.removeEventListener('touchend', onTouchEnd)
+      cv.removeEventListener('touchcancel', onTouchCancel)
       scoreInput.removeEventListener('input', onInput)
       window.removeEventListener('resize', resize)
       quickHandlers.forEach(({ button, handler }) => button.removeEventListener('click', handler))
@@ -311,7 +350,7 @@ export default function RankQueryPage() {
         .chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
         .chart-head h3{font-size:14px;font-weight:700}
         .chart-head .hint{font-size:11.5px;color:var(--ink-soft)}
-        #chart{width:100%;height:300px;display:block;touch-action:none;cursor:crosshair}
+        #chart{width:100%;height:300px;display:block;touch-action:pan-y;cursor:crosshair}
         .axis-note{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:4px}
         /* band table */
         .band{margin-top:18px}
@@ -354,7 +393,7 @@ export default function RankQueryPage() {
           .chart-card{margin-top:16px}
           .chart-head{align-items:flex-start;gap:8px}
           .chart-head .hint{max-width:48%;text-align:right;line-height:1.4}
-          #chart{height:240px}
+          #chart{height:230px}
           .axis-note{font-size:10px;line-height:1.5}
           .band{margin-top:12px;padding:16px 10px}
           .seg-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}

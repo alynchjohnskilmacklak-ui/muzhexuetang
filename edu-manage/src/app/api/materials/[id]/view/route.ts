@@ -82,7 +82,7 @@ export const GET = apiHandler(async (
 
   // OSS 文件：生成签名 URL
   if (material.storageDriver === 'aliyun-oss') {
-    const signedUrl = await generateOssSignedUrl(material.fileUrl, { expireSeconds: 300 })
+    const signedUrl = await generateOssSignedUrl(material.fileUrl, { expireSeconds: 600 })
 
     // Word 文档用 Google Docs 预览（非下载模式）
     if (material.fileType === 'word' && !download) {

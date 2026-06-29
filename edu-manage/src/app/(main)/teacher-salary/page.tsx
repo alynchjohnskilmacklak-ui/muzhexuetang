@@ -8,8 +8,10 @@ import {
   Col,
   Drawer,
   Form,
+  Input,
   InputNumber,
   message,
+  Modal,
   Row,
   Segmented,
   Select,
@@ -20,7 +22,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
-import { EditOutlined, EyeOutlined } from '@ant-design/icons'
+import { DeleteOutlined, DollarOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 const { Text, Title } = Typography
@@ -37,6 +39,7 @@ const ONE_ON_ONE_GRADES = ['初一', '初二', '初三', '高一', '高二', '�
 const TYPE_META: Record<string, { color: string; label: string }> = {
   LESSON_PAY: { color: '#1D9E75', label: '课时薪资' },
   FEEDBACK_BONUS: { color: '#E8784A', label: '反馈奖励' },
+  manual_adjust: { color: '#534AB7', label: '手动调整' },
 }
 
 interface TeacherOption {
@@ -54,11 +57,75 @@ interface SalarySummary {
 
 interface SalaryTransaction {
   id: string
+  teacherId: string
   teacherName: string
   type: string
   amount: number
   description?: string | null
   createdAt: string
+}
+
+function SalaryAdjustmentModal({ teacherId, teacherName, open, onClose, onSaved }: {
+  teacherId: string
+  teacherName: string
+  open: boolean
+  onClose: () => void
+  onSaved: () => void
+}) {
+  const [form] = Form.useForm()
+  const [saving, setSaving] = useState(false)
+
+  const handleSubmit = async () => {
+    const values = await form.validateFields()
+    setSaving(true)
+    try {
+      const response = await fetch('/api/admin/salary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teacherId, amount: values.amount, description: values.description.trim() }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || '调整失败')
+      message.success('工资调整已记录')
+      form.resetFields()
+      onSaved()
+      onClose()
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '调整失败')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Modal
+      title={`手动调整工资 · ${teacherName}`}
+      open={open}
+      onCancel={onClose}
+      onOk={handleSubmit}
+      confirmLoading={saving}
+      okText="确定调整"
+      cancelText="取消"
+      destroyOnHidden
+    >
+      <Form form={form} layout="vertical" preserve={false}>
+        <Form.Item
+          label="调整金额（元）"
+          name="amount"
+          extra="正数表示增加工资，负数表示扣减工资"
+          rules={[
+            { required: true, message: '请输入调整金额' },
+            { validator: (_, value) => typeof value === 'number' && Number.isFinite(value) && value !== 0 ? Promise.resolve() : Promise.reject(new Error('金额必须是非0有效数字')) },
+          ]}
+        >
+          <InputNumber precision={2} step={10} placeholder="例如：100 或 -50" style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item label="调整原因" name="description" rules={[{ required: true, whitespace: true, message: '请填写调整原因' }]}>
+          <Input.TextArea rows={3} maxLength={200} showCount placeholder="例如：6月优势工资补差" />
+        </Form.Item>
+      </Form>
+    </Modal>
+  )
 }
 
 interface SalaryPayload {
@@ -178,6 +245,7 @@ export default function TeacherSalaryAdminPage() {
   const [filterTeacher, setFilterTeacher] = useState('')
   const [configDrawer, setConfigDrawer] = useState({ open: false, teacherId: '', teacherName: '' })
   const [feedbackDrawer, setFeedbackDrawer] = useState({ open: false, teacherId: '', teacherName: '' })
+  const [adjustmentModal, setAdjustmentModal] = useState({ open: false, teacherId: '', teacherName: '' })
   const query = filterTeacher ? `period=${period}&teacherId=${filterTeacher}` : `period=${period}`
   const { data, isLoading, mutate } = useSWR<SalaryPayload>(`/api/admin/salary?${query}`, fetcher)
 
@@ -185,6 +253,26 @@ export default function TeacherSalaryAdminPage() {
   const summary = data?.summary ?? []
   const transactions = data?.transactions ?? []
   const totalAll = summary.reduce((sum, item) => sum + item.total, 0)
+
+  const deleteManualAdjustment = (transaction: SalaryTransaction) => {
+    Modal.confirm({
+      title: '删除手动调整',
+      content: `确定删除“${transaction.description || '手动调整'}”这条流水吗？删除后工资合计会同步变化。`,
+      okText: '删除',
+      okType: 'danger',
+      cancelText: '取消',
+      async onOk() {
+        const response = await fetch(`/api/admin/salary?id=${encodeURIComponent(transaction.id)}`, { method: 'DELETE' })
+        const data = await response.json()
+        if (!response.ok) {
+          message.error(data.error || '删除失败')
+          throw new Error(data.error || '删除失败')
+        }
+        message.success('手动调整已删除')
+        await mutate()
+      },
+    })
+  }
 
   const summaryColumns = [
     { title: '教师', dataIndex: 'name', key: 'name', render: (name: string) => <Text strong>{name}</Text> },
@@ -194,11 +282,12 @@ export default function TeacherSalaryAdminPage() {
     {
       title: '操作',
       key: 'action',
-      width: 150,
+      width: 220,
       render: (_: unknown, row: SalarySummary) => (
         <Space size={6}>
           <Button size="small" icon={<EditOutlined />} onClick={() => setConfigDrawer({ open: true, teacherId: row.teacherId, teacherName: row.name })}>配置</Button>
           <Button size="small" icon={<EyeOutlined />} onClick={() => setFeedbackDrawer({ open: true, teacherId: row.teacherId, teacherName: row.name })}>反馈</Button>
+          <Button size="small" icon={<DollarOutlined />} onClick={() => setAdjustmentModal({ open: true, teacherId: row.teacherId, teacherName: row.name })}>调整</Button>
         </Space>
       ),
     },
@@ -209,7 +298,16 @@ export default function TeacherSalaryAdminPage() {
     { title: '教师', dataIndex: 'teacherName', key: 'teacherName', width: 100 },
     { title: '类型', dataIndex: 'type', key: 'type', width: 110, render: (value: string) => <Tag color={TYPE_META[value]?.color ?? 'default'} style={{ borderRadius: 999 }}>{TYPE_META[value]?.label ?? value}</Tag> },
     { title: '说明', dataIndex: 'description', key: 'description', ellipsis: true, render: (value?: string | null) => value || '-' },
-    { title: '金额', dataIndex: 'amount', key: 'amount', width: 100, align: 'right' as const, render: (value: number) => <Text strong style={{ color: '#1D9E75' }}>+¥{value.toFixed(2)}</Text> },
+    {
+      title: '金额', dataIndex: 'amount', key: 'amount', width: 110, align: 'right' as const,
+      render: (value: number) => <Text strong style={{ color: value >= 0 ? '#1D9E75' : '#E24B4A' }}>{value >= 0 ? '+' : '-'}¥{Math.abs(value).toFixed(2)}</Text>,
+    },
+    {
+      title: '操作', key: 'action', width: 80, align: 'center' as const,
+      render: (_: unknown, row: SalaryTransaction) => row.type === 'manual_adjust'
+        ? <Button danger type="text" size="small" icon={<DeleteOutlined />} onClick={() => deleteManualAdjustment(row)}>删除</Button>
+        : null,
+    },
   ]
 
   return (
@@ -256,6 +354,7 @@ export default function TeacherSalaryAdminPage() {
       </Space>
 
       <SalaryConfigDrawer {...configDrawer} onClose={() => setConfigDrawer((prev) => ({ ...prev, open: false }))} onSaved={() => mutate()} />
+      <SalaryAdjustmentModal {...adjustmentModal} onClose={() => setAdjustmentModal((prev) => ({ ...prev, open: false }))} onSaved={() => mutate()} />
       <Drawer open={feedbackDrawer.open} onClose={() => setFeedbackDrawer((prev) => ({ ...prev, open: false }))} title={`课堂反馈 · ${feedbackDrawer.teacherName}`} width={isMobile ? '100%' : 860}>
         {feedbackDrawer.open && <FeedbackTab teacherId={feedbackDrawer.teacherId} />}
       </Drawer>
