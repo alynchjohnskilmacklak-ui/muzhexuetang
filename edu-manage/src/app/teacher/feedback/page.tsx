@@ -21,6 +21,7 @@ type AiFeedbackResult = {
   needsManualStudentSelection?: boolean
   mood?: string
   overallComment?: string
+  perStudentComments?: Array<{ studentId: string; studentName: string; comment: string }>
   summary?: string
   suggestion?: string
   tags?: string[]
@@ -73,6 +74,7 @@ function FeedbackPageInner() {
   const [badge, setBadge] = useState('')
   const [summary, setSummary] = useState('')
   const [overallComment, setOverallComment] = useState('')
+  const [perStudentComments, setPerStudentComments] = useState<Record<string, string>>({})
   const [homework, setHomework] = useState<string[]>([])
   const [hwInput, setHwInput] = useState('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
@@ -98,8 +100,6 @@ function FeedbackPageInner() {
   const [stageData, setStageData] = useState<any>(null)
   const [stageSummaryText, setStageSummaryText] = useState('')
   const [stageSuggestions, setStageSuggestions] = useState('')
-  const [stageMaterialExpanded, setStageMaterialExpanded] = useState(false)
-
   // Data
   const { data: ctx } = useSWR('/api/teacher/feedback-context', fetcher)
   const groups: any[] = ctx?.groups || []
@@ -146,7 +146,7 @@ function FeedbackPageInner() {
     .filter(Boolean) as string[]
 
   useEffect(() => {
-    const targetStudents = selectedStudentIds.length ? selectedStudentIds : selectedLesson?.studentIds || []
+    const targetStudents: string[] = selectedStudentIds.length ? selectedStudentIds : selectedLesson?.studentIds || []
     if (!targetStudents.length) {
       setBonusPreview(null)
       return
@@ -211,31 +211,68 @@ function FeedbackPageInner() {
 
   const submit = async (status: 'DRAFT' | 'PUBLISHED') => {
     if (saving || (status === 'PUBLISHED' && Date.now() - lastSubmitAt < 3000)) return
-    const targetStudents = selectedStudentIds.length ? selectedStudentIds : selectedLesson?.studentIds || []
+    const targetStudents: string[] = selectedStudentIds.length ? selectedStudentIds : selectedLesson?.studentIds || []
     if (!targetStudents.length) { toast.warning('请选择学员'); return }
-    if (!overallComment.trim() && !summary.trim() && !kps.length && !homework.length && !imageUrls.length && !stageSummaryText.trim() && !stageSuggestions.trim()) {
+    const individualComments = targetStudents
+      .map((studentId) => ({ studentId, comment: perStudentComments[studentId]?.trim() || '' }))
+      .filter((item) => item.comment)
+    const hasIndividualComments = targetStudents.length > 1 && Object.keys(perStudentComments).length > 0
+    if (status === 'PUBLISHED' && hasIndividualComments && individualComments.length !== targetStudents.length) {
+      const missingNames = targetStudents
+        .filter((studentId) => !perStudentComments[studentId]?.trim())
+        .map((studentId) => groupStudents.find((student: any) => student.id === studentId)?.name || '未命名学生')
+      toast.warning(`请先补全${missingNames.join('、')}的专属评语`)
+      return
+    }
+    const useIndividualComments = status === 'PUBLISHED' && hasIndividualComments
+    if (!overallComment.trim() && !individualComments.length && !summary.trim() && !kps.length && !homework.length && !imageUrls.length && !stageSummaryText.trim() && !stageSuggestions.trim()) {
       toast.warning('请至少填写评语、建议、知识点、作业、本期寄语或上传资料'); return
     }
     if (status === 'PUBLISHED' && aiSuggestion && !aiSuggestionUsed && !window.confirm('AI 已生成建议但尚未采用，是否继续发布？')) return
     if (status === 'PUBLISHED' && bonusPreview?.selectedCount && bonusPreview.eligibleCount === 0 && !window.confirm('本次反馈将发布给家长，但今日同场景已奖励过，不重复计奖。')) return
     setSaving(true)
     try {
-      const fbRes = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          classLessonId: lessonId || null, studentIds: targetStudents,
-          groupId: groupId || selectedLesson?.groupId || null,
-          feedbackGroupId: groupId || selectedLesson?.groupId || null,
-          feedbackCourseType: feedbackCourseBucket,
-          mood, tags, knowledgePoints: kps, badge, summary, overallComment,
-          homework: homework.map((h, i) => ({ order: i + 1, content: h })),
-          imageUrls, status,
-          clientRequestId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        }),
-      })
-      const fbData = await fbRes.json()
-      if (!fbRes.ok) { toast.error(`反馈发布失败：${fbData.error || '请检查网络后重试'}`, { duration: 5000 }); return }
+      let fbData: any = {}
+      if (useIndividualComments) {
+        for (const [index, item] of individualComments.entries()) {
+          const studentName = groupStudents.find((student: any) => student.id === item.studentId)?.name || '该学生'
+          const fbRes = await fetch('/api/teacher/classroom-feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              classLessonId: lessonId || null,
+              targetType: 'STUDENT',
+              studentIds: [item.studentId],
+              mood, tags, knowledgePoints: kps, badge, summary, overallComment: item.comment,
+              homework: homework.map((h, homeworkIndex) => ({ order: homeworkIndex + 1, content: h })),
+              imageUrls, status,
+              clientRequestId: `${Date.now()}-${index}-${Math.random().toString(36).slice(2)}`,
+            }),
+          })
+          const data = await fbRes.json()
+          if (!fbRes.ok) {
+            toast.error(`${studentName}的反馈发布失败：${data.error || '请检查网络后重试'}`, { duration: 5000 })
+            return
+          }
+        }
+      } else {
+        const fbRes = await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            classLessonId: lessonId || null, studentIds: targetStudents,
+            groupId: groupId || selectedLesson?.groupId || null,
+            feedbackGroupId: groupId || selectedLesson?.groupId || null,
+            feedbackCourseType: feedbackCourseBucket,
+            mood, tags, knowledgePoints: kps, badge, summary, overallComment,
+            homework: homework.map((h, i) => ({ order: i + 1, content: h })),
+            imageUrls, status,
+            clientRequestId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          }),
+        })
+        fbData = await fbRes.json()
+        if (!fbRes.ok) { toast.error(`反馈发布失败：${fbData.error || '请检查网络后重试'}`, { duration: 5000 }); return }
+      }
 
       let stagePublished = false
       if (status === 'PUBLISHED' && stageStudentId && stageSummaryText.trim()) {
@@ -268,13 +305,15 @@ function FeedbackPageInner() {
             ? bonus.message
             : '本次反馈已记录，今日同场景已奖励过，不重复计奖'
           : '奖励统计稍后可在工资流水中查看'
-        const msg = stagePublished ? `已发布给家长，本期寄语已同步，${bonusMsg}` : `已发布给家长，${bonusMsg}`
+        const msg = useIndividualComments
+          ? `已分别发布给 ${individualComments.length} 名学生家长`
+          : stagePublished ? `已发布给家长，本期寄语已同步，${bonusMsg}` : `已发布给家长，${bonusMsg}`
         toast.success(msg, { duration: 5000 })
         setLastSubmitAt(Date.now())
         setSubmitDone(true); setTimeout(() => setSubmitDone(false), 3000)
         setLessonId(''); setSelectedStudentIds([]); setGroupId('')
         setMood('GOOD'); setTags([]); setKps([]); setBadge('')
-        setSummary(''); setOverallComment(''); setHomework([]); setImageUrls([])
+        setSummary(''); setOverallComment(''); setPerStudentComments({}); setHomework([]); setImageUrls([])
         setStageSummaryText(''); setStageSuggestions('')
         setAiSuggestion(null); setAiSuggestionUsed(false); setAiPrefilled(new Set())
         setStageData(null); setStageExpanded(false)
@@ -327,6 +366,7 @@ function FeedbackPageInner() {
 
       const hasContent = Boolean(
         data.overallComment?.trim() ||
+        data.perStudentComments?.length ||
         data.suggestion?.trim() ||
         data.stageSummaryText?.trim() ||
         data.stageSuggestions?.trim() ||
@@ -398,7 +438,7 @@ function FeedbackPageInner() {
   }
 
   const hasTeacherWrittenContent = () => Boolean(
-    overallComment.trim() || summary.trim() || tags.length || kps.length || homework.length || stageSummaryText.trim() || stageSuggestions.trim()
+    overallComment.trim() || Object.values(perStudentComments).some((comment) => comment.trim()) || summary.trim() || tags.length || kps.length || homework.length || stageSummaryText.trim() || stageSuggestions.trim()
   )
 
   const adoptAiSuggestion = (mode: 'all' | 'empty' | 'append') => {
@@ -412,7 +452,19 @@ function FeedbackPageInner() {
     }
 
     if (aiSuggestion.mood && MOODS.some((m: any) => m.value === aiSuggestion.mood)) setMood(aiSuggestion.mood)
-    setOverallComment((prev) => useIf(prev, aiSuggestion.overallComment))
+    const aiStudentComments = aiSuggestion.perStudentComments || []
+    if (aiStudentComments.length === 1) {
+      setOverallComment((prev) => useIf(prev, aiStudentComments[0].comment || aiSuggestion.overallComment))
+      setPerStudentComments({})
+    } else {
+      setOverallComment((prev) => useIf(prev, aiSuggestion.overallComment))
+      if (aiStudentComments.length > 1) {
+        setPerStudentComments((prev) => Object.fromEntries(aiStudentComments.map((item) => [
+          item.studentId,
+          useIf(prev[item.studentId] || '', item.comment),
+        ])))
+      }
+    }
     setSummary((prev) => useIf(prev, aiSuggestion.suggestion || aiSuggestion.summary))
     setStageSummaryText((prev) => useIf(prev, aiSuggestion.stageSummaryText))
     setStageSuggestions((prev) => useIf(prev, aiSuggestion.stageSuggestions))
@@ -426,6 +478,7 @@ function FeedbackPageInner() {
 
   const ignoreAiSuggestion = () => {
     setAiSuggestion(null)
+    setPerStudentComments({})
     setAiSuggestionUsed(true)
   }
   const aiPrefillMark = (key: string) => aiPrefilled.has(key)
@@ -455,6 +508,7 @@ function FeedbackPageInner() {
           <div style={{ display: 'grid', gap: 8, fontSize: 12, color: '#5a4e3a', lineHeight: 1.7 }}>
             {aiSuggestion.mood && <div><strong>课堂状态：</strong>{MOODS.find((m: any) => m.value === aiSuggestion.mood)?.label || aiSuggestion.mood}</div>}
             {aiSuggestion.overallComment && <div><strong>评语：</strong>{aiSuggestion.overallComment}</div>}
+            {!!aiSuggestion.perStudentComments?.length && <div><strong>逐人评语：</strong>已为 {aiSuggestion.perStudentComments.length} 名学生分别生成</div>}
             {(aiSuggestion.suggestion || aiSuggestion.summary) && <div><strong>下一步建议：</strong>{aiSuggestion.suggestion || aiSuggestion.summary}</div>}
             {!!aiSuggestion.tags?.length && <div><strong>表现标签：</strong>{aiSuggestion.tags.join('、')}</div>}
             {!!aiSuggestion.knowledgePoints?.length && <div><strong>知识点：</strong>{aiSuggestion.knowledgePoints.join('、')}</div>}
@@ -490,8 +544,23 @@ function FeedbackPageInner() {
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
           评语{aiPrefillMark('comment')}
         </div>
-        <Input.TextArea value={overallComment} onChange={e => setOverallComment(e.target.value)}
-          rows={3} placeholder="对本次课的整体点评，家长会直接看到" maxLength={300} showCount style={{ borderRadius: 8 }} />
+        {selectedStudentIds.length > 1 && Object.keys(perStudentComments).length > 1 ? (
+          <div style={{ display: 'grid', gap: 10 }}>
+            {selectedStudentIds.filter((id) => perStudentComments[id] !== undefined).map((studentId) => {
+              const studentName = groupStudents.find((student: any) => student.id === studentId)?.name || '学生'
+              return (
+                <div key={studentId} style={{ padding: 10, borderRadius: 10, background: '#FFF8F4', border: '1px solid rgba(232,120,74,.18)' }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#5a4e3a', marginBottom: 6 }}>{studentName}</div>
+                  <Input.TextArea value={perStudentComments[studentId]} onChange={e => setPerStudentComments((prev) => ({ ...prev, [studentId]: e.target.value }))}
+                    rows={4} placeholder={`${studentName}的专属评语`} maxLength={400} showCount style={{ borderRadius: 8 }} />
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <Input.TextArea value={overallComment} onChange={e => setOverallComment(e.target.value)}
+            rows={3} placeholder="对本次课的整体点评，家长会直接看到" maxLength={300} showCount style={{ borderRadius: 8 }} />
+        )}
       </Card>
 
       {/* Tags + KP */}
@@ -637,32 +706,6 @@ function FeedbackPageInner() {
           </div>
           {stageExpanded && (
             <div style={{ marginTop: 10 }}>
-              {/* Auto-material (collapsible) */}
-              {stageData?.material && (
-                <div style={{ background: '#FFF8F4', borderRadius: 10, padding: 10, marginBottom: 10 }}>
-                  <div
-                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
-                    onClick={() => setStageMaterialExpanded(!stageMaterialExpanded)}
-                  >
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#5a4e3a' }}>自动素材参考</span>
-                    <Button type="link" size="small" style={{ fontSize: 11, padding: 0 }}>
-                      {stageMaterialExpanded ? '收起' : '展开'}
-                    </Button>
-                  </div>
-                  {stageMaterialExpanded && (
-                    <>
-                      <div style={{ marginTop: 6, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                        <Tag color="green" style={{ fontSize: 11 }}>出勤 {stageData.material.overview.attendanceRate ?? '暂无'}%</Tag>
-                        <Tag color="blue" style={{ fontSize: 11 }}>掌握 {stageData.material.overview.masteryRate ?? '暂无'}%</Tag>
-                      </div>
-                      <div style={{ whiteSpace: 'pre-wrap', margin: '8px 0 0', fontSize: 12, color: '#5a4e3a', lineHeight: 1.5 }}>
-                        {stageData.material.summarySeed}
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                 <span style={{ fontSize: 12, fontWeight: 600 }}>本期寄语（家长端可见）</span>
                 <Button type="link" size="small" icon={<ThunderboltOutlined />} loading={aiGenerating}

@@ -158,13 +158,21 @@ export async function getStudentProfile(
   let runningBadgeTotal = 0
   const badgeCumulative = badgeAsc.map(badge => ({ date: badge.earnedAt.toISOString(), total: ++runningBadgeTotal }))
 
-  const POSITIVE_TAG_HINTS = ['表扬', '主动', '进步', '认真', '积极', '优秀', '专注', '提问', '帮助', '榜样']
+  // 与教师端 QUICK_TAGS 对齐，并兼容 AI 生成或手输的自由标签。
+  const POSITIVE_TAGS = new Set(['积极发言', '专注听讲', '作业优秀', '进步明显', '思维活跃', '独立解题', '状态好', '阅读理解', '计算训练'])
+  const NEGATIVE_TAGS = new Set(['需加强'])
+  const POSITIVE_HINTS = ['表扬', '主动', '进步', '认真', '积极', '优秀', '专注', '提问', '帮助', '榜样', '出色', '用心']
+  const isPositiveTag = (tag: string) => {
+    if (NEGATIVE_TAGS.has(tag)) return false
+    if (POSITIVE_TAGS.has(tag)) return true
+    return POSITIVE_HINTS.some(hint => tag.includes(hint))
+  }
   const tagCounter = new Map<string, number>()
   const praisingTeacherSet = new Set<string>()
   let praiseFeedbackCount = 0
   for (const signal of growthSignals) {
     for (const tag of signal.tags) tagCounter.set(tag, (tagCounter.get(tag) || 0) + 1)
-    const hasPositive = signal.positiveByType || signal.tags.some(tag => POSITIVE_TAG_HINTS.some(hint => tag.includes(hint)))
+    const hasPositive = signal.positiveByType || signal.tags.some(isPositiveTag)
     if (hasPositive) {
       praiseFeedbackCount += 1
       if (signal.teacherName) praisingTeacherSet.add(signal.teacherName)

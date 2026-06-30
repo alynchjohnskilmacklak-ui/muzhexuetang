@@ -13,6 +13,22 @@ type Intent = 'stage' | 'suggestion' | 'classroom'
 type AIJson = Record<string, unknown>
 interface RosterEntry { id: string; name: string }
 interface SelectedStudent { id: string; name?: string | null }
+interface PerStudentComment { studentId: string; studentName: string; comment: string }
+
+const JUNIOR_QUOTES = [
+  '千里之行，始于足下。',
+  '不积跬步，无以至千里。',
+  '书山有路勤为径，学海无涯苦作舟。',
+  '宝剑锋从磨砺出，梅花香自苦寒来。',
+  '业精于勤，荒于嬉；行成于思，毁于随。',
+  '少壮不努力，老大徒伤悲。',
+  '天行健，君子以自强不息。',
+  '锲而不舍，金石可镂。',
+  '读书破万卷，下笔如有神。',
+  '学而不思则罔，思而不学则殆。',
+  '一分耕耘，一分收获。',
+  '勤能补拙是良训，一分辛苦一分才。',
+]
 
 function checkTeacherAILimit(teacherId: string) {
   const now = Date.now()
@@ -123,6 +139,80 @@ function buildFallbackComment(note: string, studentNames: string[]): string {
   return `${subject}本节课整体表现比较平稳，能够完成课堂中的主要学习任务。接下来建议继续跟紧课堂节奏，课后及时复盘和订正，把当天学到的内容真正沉淀下来。`
 }
 
+function appendUniqueQuote(comment: string, index: number, usedQuotes: Set<string>): string {
+  const quoted = comment.match(/「([^」]+)」\s*[。！？]?\s*$/)?.[1]?.trim()
+  if (quoted && !usedQuotes.has(quoted)) {
+    usedQuotes.add(quoted)
+    return comment
+  }
+
+  let quote = JUNIOR_QUOTES[index % JUNIOR_QUOTES.length]
+  for (let offset = 0; offset < JUNIOR_QUOTES.length; offset += 1) {
+    const candidate = JUNIOR_QUOTES[(index + offset) % JUNIOR_QUOTES.length]
+    if (!usedQuotes.has(candidate)) {
+      quote = candidate
+      break
+    }
+  }
+  usedQuotes.add(quote)
+  const withoutDuplicateEnding = comment.replace(/\s*「[^」]+」\s*[。！？]?\s*$/, '').trim()
+  return `${withoutDuplicateEnding}「${quote}」`
+}
+
+function normalizeStudentComment(params: {
+  comment: string
+  studentName: string
+  allStudentNames: string[]
+  note: string
+  index: number
+  usedQuotes: Set<string>
+}): string {
+  const { studentName, allStudentNames, note, index, usedQuotes } = params
+  let comment = params.comment.trim() || buildFallbackComment(note, [studentName])
+  for (const otherName of allStudentNames) {
+    if (otherName !== studentName && otherName) comment = comment.replaceAll(otherName, studentName)
+  }
+  if (!comment.includes(studentName)) comment = `${studentName}同学${comment}`
+  return appendUniqueQuote(comment.slice(0, 350), index, usedQuotes).slice(0, 400)
+}
+
+function buildPerStudentComments(
+  note: string,
+  resolved: ReturnType<typeof resolveStudentsFromContext>,
+  source: unknown,
+  fallbackOverallComment = '',
+): PerStudentComment[] {
+  const parsedItems = Array.isArray(source) ? source : []
+  const byStudentId = new Map<string, string>()
+  for (const item of parsedItems) {
+    if (!item || typeof item !== 'object') continue
+    const candidate = item as Record<string, unknown>
+    const studentId = String(candidate.studentId || '')
+    if (!resolved.matchedIds.includes(studentId) || typeof candidate.comment !== 'string') continue
+    byStudentId.set(studentId, candidate.comment)
+  }
+
+  const usedQuotes = new Set<string>()
+  return resolved.matchedIds.map((studentId, index) => {
+    const studentName = resolved.matchedNames[index] || '孩子'
+    const modelComment = byStudentId.get(studentId)
+      || (resolved.matchedIds.length === 1 ? fallbackOverallComment : '')
+      || buildFallbackComment(note, [studentName])
+    return {
+      studentId,
+      studentName,
+      comment: normalizeStudentComment({
+        comment: modelComment,
+        studentName,
+        allStudentNames: resolved.matchedNames,
+        note,
+        index,
+        usedQuotes,
+      }),
+    }
+  })
+}
+
 function stringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string' && item.trim() !== '').map((item) => item.trim()) : []
 }
@@ -186,6 +276,7 @@ function buildFallbackResponse(opts: {
     needsManualStudentSelection: resolved.matchedIds.length === 0,
     mood: inferMoodFromNote(note),
     overallComment: intent === 'suggestion' ? '' : comment.slice(0, 400),
+    perStudentComments: buildPerStudentComments(note, resolved, [], rawComment),
     tags: inferTagsFromNote(note),
     knowledgePoints: inferKnowledgePointsFromNote(note, kpOptions),
     homework: inferHomeworkFromNote(note),
@@ -232,7 +323,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const stageMaterial = typeof body.stageMaterial === 'string' ? body.stageMaterial : ''
 
     const confirmedStudentText = resolved.matchedIds.length
-      ? `【已确认学生】${resolved.matchedNames.join('、') || '孩子'}。这些就是本次反馈对象，老师输入可以不包含学生姓名，必须直接围绕他们生成反馈。`
+      ? `【已确认学生】${resolved.matchedIds.map((id, index) => `${resolved.matchedNames[index] || '孩子'}(${id})`).join('、')}。这些就是本次反馈对象，老师输入可以不包含学生姓名，必须直接围绕他们生成反馈。`
       : '【已确认学生】无。若能从班级名单和老师描述中唯一识别学生，请匹配；不能唯一识别时仍然生成反馈内容，并标记需要老师手动选择学生。'
 
     const sys = [
@@ -241,6 +332,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
       '老师输入常常很短，例如“上课认真听讲，但是作业完成不好”。你的任务是扩写成家长能看懂的完整反馈。',
       '不要机械重复老师原话，要补充成自然、具体、温暖的老师表达。',
       '写作要求：面向家长；使用“学生姓名+同学”；不要使用“该生”“该同学”；不编造分数、排名、考试成绩；不编造老师没说过的具体事件；语气自然。',
+      '为【已确认学生】中的每一个学生分别生成一段独立评语，输出到 perStudentComments 数组，每项包含 studentId、studentName、comment。',
+      '每段 comment 只能出现该学生本人的姓名，绝不能出现其他同学姓名。内容自然连贯，不加小标题、不列点：先写基于老师输入的今日课堂表现，再给一句可执行的努力方向，最后用「」引用一句适合初中生的学习、坚持或成长类名言。不同学生尽量使用不同名言。',
       '必须尽量完成：mood、overallComment、suggestion、2-4个tags；能判断知识点才填knowledgePoints；提到作业才填homework。',
       '只输出 JSON，不要 Markdown，不要解释。',
     ].join('\n')
@@ -256,16 +349,17 @@ export const POST = apiHandler(async (req: NextRequest) => {
       `【当前表单】状态=${currentForm.mood || '未选'}；已有评语=${currentForm.overallComment || '空'}；已有建议=${currentForm.suggestion || currentForm.summary || '空'}；已有寄语=${currentForm.stageSummaryText || '空'}`,
       stageMaterial ? `【阶段素材】${stageMaterial.slice(0, 800)}` : '',
       '【返回 JSON】',
-      '{"intent":"classroom|stage|suggestion|mixed","mood":"GREAT|GOOD|OKAY|NEEDS_ATTENTION","overallComment":"完整家长反馈","tags":["从可选标签中选"],"knowledgePoints":["从可选知识点中选"],"homework":["作业内容"],"summary":"","suggestion":"下一步建议","stageSummaryText":"阶段寄语","stageSuggestions":"阶段建议"}',
+      '{"intent":"classroom|stage|suggestion|mixed","mood":"GREAT|GOOD|OKAY|NEEDS_ATTENTION","overallComment":"兼容旧流程的完整家长反馈","perStudentComments":[{"studentId":"已确认学生id","studentName":"已确认学生姓名","comment":"该生专属三部分评语"}],"tags":["从可选标签中选"],"knowledgePoints":["从可选知识点中选"],"homework":["作业内容"],"summary":"","suggestion":"下一步建议","stageSummaryText":"阶段寄语","stageSuggestions":"阶段建议"}',
     ].filter(Boolean).join('\n')
 
     try {
-      const raw = await callDeepSeek({ system: sys, user, maxTokens: 700, jsonMode: true })
+      const raw = await callDeepSeek({ system: sys, user, maxTokens: 1800, jsonMode: true })
       const parsed = parseAIJson(raw)
       if (!parsed) return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, raw }))
 
       const validMoods = moods.map((m) => m.value)
       const parsedMood = typeof parsed.mood === 'string' ? parsed.mood : inferMoodFromNote(note)
+      const parsedOverallComment = typeof parsed.overallComment === 'string' ? parsed.overallComment.trim() : ''
       const result = {
         intent: typeof parsed.intent === 'string' ? parsed.intent : detectedIntent,
         studentIds: resolved.matchedIds,
@@ -273,7 +367,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
         unknownNames: resolved.unknownNames,
         needsManualStudentSelection: resolved.matchedIds.length === 0,
         mood: validMoods.includes(parsedMood) ? parsedMood : inferMoodFromNote(note),
-        overallComment: typeof parsed.overallComment === 'string' ? parsed.overallComment.trim() : '',
+        overallComment: parsedOverallComment,
+        perStudentComments: buildPerStudentComments(note, resolved, parsed.perStudentComments, parsedOverallComment),
         tags: stringArray(parsed.tags).filter((t) => tagOptions.includes(t)).slice(0, 4),
         knowledgePoints: stringArray(parsed.knowledgePoints).filter((kp) => kpOptions.includes(kp)),
         homework: stringArray(parsed.homework),
@@ -284,7 +379,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       }
 
       const hasContent = Boolean(
-        result.overallComment || result.suggestion || result.summary || result.stageSummaryText || result.stageSuggestions ||
+        result.overallComment || result.perStudentComments.length || result.suggestion || result.summary || result.stageSummaryText || result.stageSuggestions ||
         result.tags.length || result.knowledgePoints.length || result.homework.length
       )
       return NextResponse.json(hasContent ? result : buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, raw }))

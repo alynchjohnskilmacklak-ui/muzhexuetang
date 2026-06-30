@@ -42,7 +42,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     // New fields
     const { mood, tags, badge, overallComment } = body
 
-    if (!summary && !knowledgePoints.length && !homework.length && !imageUrls.length) {
+    if (!summary && !overallComment && !knowledgePoints.length && !homework.length && !imageUrls.length) {
       return NextResponse.json({ error: '请至少填写课堂内容、作业或上传资料' }, { status: 400 })
     }
 
@@ -103,6 +103,20 @@ export const POST = apiHandler(async (req: NextRequest) => {
           notifySent: status === 'PUBLISHED',
         },
       })
+
+      // 课堂反馈里的闪光徽章需要同步到成就徽章表，家长成长页才能统计到。
+      if (status === 'PUBLISHED' && badge) {
+        for (const student of students) {
+          await tx.achievementBadge.create({
+            data: {
+              studentId: student.id,
+              teacherId: teacher.id,
+              badgeType: badge,
+              description: summary || overallComment || null,
+            },
+          })
+        }
+      }
 
       if (status === 'PUBLISHED') {
         for (const student of students) {

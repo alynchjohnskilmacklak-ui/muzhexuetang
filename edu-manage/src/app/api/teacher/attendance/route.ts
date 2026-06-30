@@ -224,7 +224,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
               })
             }
           }
-          if (status === 'LEAVE' && group.course.type === 'ONE_ON_ONE') {
+          if (status === 'LEAVE' || status === 'ABSENT') {
             const existingMakeup = await tx.makeupRequest.findFirst({
               where: { attendanceId: attendance.id },
             })
@@ -234,7 +234,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
               })
             }
           }
-        } else if (status === 'LEAVE' && group.course.type === 'ONE_ON_ONE') {
+        } else if (status === 'LEAVE' || status === 'ABSENT') {
           const existingMakeup = await tx.makeupRequest.findFirst({
             where: { attendanceId: attendance.id },
           })

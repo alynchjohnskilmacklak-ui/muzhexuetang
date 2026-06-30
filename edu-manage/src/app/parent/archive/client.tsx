@@ -63,7 +63,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   const reportRef = useRef<HTMLDivElement>(null)
   const timelineRefs = useRef<Record<string, HTMLElement | null>>({})
   const [studentId, setStudentId] = useState(searchParams.get('studentId') || initial.activeStudentId || '')
-  const [months, setMonths] = useState(6)
+  const [months, setMonths] = useState(1)
   const [timeFilter, setTimeFilter] = useState('')
   const [studyOpen, setStudyOpen] = useState(false)
   const [habitOpen, setHabitOpen] = useState(false)
@@ -75,7 +75,9 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
 
   const query = studentId ? `/api/parent/profile?studentId=${studentId}&months=${months}` : null
   const { data, isLoading } = useSWR(query, fetcher, {
-    fallbackData: initial.profile && studentId === initial.activeStudentId ? { children: initial.children, activeStudentId: initial.activeStudentId, profile: initial.profile } : undefined,
+    fallbackData: initial.profile && studentId === initial.activeStudentId && months === 6
+      ? { children: initial.children, activeStudentId: initial.activeStudentId, profile: initial.profile }
+      : undefined,
     revalidateOnFocus: true, dedupingInterval: 30_000,
     onError: () => toast.error('加载档案失败，请刷新重试'),
   })
@@ -190,12 +192,27 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   const latestTeacherUpdate = teacherUpdates[0]
   const highlights = profile?.growth.highlights
   const hasHighlights = Boolean(highlights && (highlights.badgeTotal > 0 || highlights.praiseCount > 0 || highlights.topTags.length > 0))
-  const hasTrendData = Boolean(moodTrendOption || profile?.growth.badgeCumulative.length || profile?.habits.attendanceRate !== null)
   const hasStudyData = Boolean(profile && (profile.study.mastery.total > 0 || profile.study.weaknesses.length > 0 || profile.study.radar.length > 0))
   const hasHabitData = Boolean(profile && (profile.habits.moodTimeline.length > 0 || profile.habits.homeworkDoneRate !== null || profile.habits.inClassAvg !== null))
+  const attendanceText = profile?.overview.attendanceRate !== null && profile?.overview.attendanceRate !== undefined
+    ? `${profile.overview.attendanceRate}%`
+    : '待记录'
+  const moodDelta = moodWeekly.length >= 2 ? moodWeekly[moodWeekly.length - 1].avg - moodWeekly[0].avg : null
+  const latestMoodAvg = moodWeekly[moodWeekly.length - 1]?.avg
+  const statusSummary = profile
+    ? moodWeekly.length < 2
+      ? `${profile.identity.name} 本期出勤 ${attendanceText}，老师正在记录课堂表现`
+      : latestMoodAvg !== undefined && latestMoodAvg >= 3.5 && profile.overview.attendanceRate === 100
+        ? '孩子最近状态很棒 🌟 课堂投入、出勤满勤'
+        : moodDelta !== null && moodDelta >= 0.5
+          ? '孩子最近在进步 📈 课堂状态持续向好'
+          : moodDelta !== null && moodDelta <= -0.5
+            ? '最近状态有些波动，建议和老师聊聊 💬'
+            : `${profile.identity.name} 本期出勤 ${attendanceText}，老师正在记录课堂表现`
+    : ''
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 4px' }}>
+    <div style={{ width: '100%', maxWidth: isMobile ? '100%' : 860, margin: '0 auto', padding: '0 4px' }}>
       {/* Top bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
         <div><Title level={4} style={{ margin: 0 }}>成长主页</Title><Text type="secondary" style={{ fontSize: 13 }}>记录孩子每一次成长的足迹</Text></div>
@@ -208,9 +225,9 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
       {!profile && !isLoading && <Card bordered={false} style={{ borderRadius: 14, textAlign: 'center', minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Empty description="该学员暂无档案数据，老师更新学情后将在此展示" image={Empty.PRESENTED_IMAGE_SIMPLE} /></Card>}
 
       {profile && (<>
-        {/* Student overview */}
+        {/* Identity and compact metrics */}
         <Card bordered={false} className="parent-growth-overview">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+          <div className="parent-growth-identity">
             <div>
               <Text strong style={{ fontSize: 20 }}>{profile.identity.name}</Text>
               <div style={{ display: 'flex', gap: 5, marginTop: 5, flexWrap: 'wrap' }}>
@@ -223,20 +240,26 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
               <div><Text strong style={{ fontSize: 20, color: '#E8784A' }}>{profile.identity.totalHours}</Text><Text type="secondary" style={{ fontSize: 12 }}>h</Text></div>
             </div>
           </div>
+          <div className="parent-growth-metrics">
+            {[
+              { label: '出勤', value: attendanceText, empty: profile.overview.attendanceRate === null, color: '#1D9E75', icon: <CheckCircleOutlined /> },
+              { label: '试卷', value: profile.overview.paperCount > 0 ? `${profile.overview.paperCount} 份` : '暂无', empty: profile.overview.paperCount === 0, color: '#534AB7', icon: <FileTextOutlined /> },
+              { label: '徽章', value: profile.overview.badgeCount > 0 ? `${profile.overview.badgeCount} 枚` : '暂无', empty: profile.overview.badgeCount === 0, color: '#EF9F27', icon: <TrophyOutlined /> },
+            ].map(item => (
+              <div key={item.label} className={`parent-growth-metric${item.empty ? ' is-empty' : ''}`}>
+                <span style={{ color: item.empty ? '#98A2B3' : item.color }}>{item.icon}</span>
+                <div><Text type="secondary">{item.label}</Text><Text strong style={{ color: item.empty ? '#98A2B3' : item.color }}>{item.value}</Text></div>
+              </div>
+            ))}
+          </div>
         </Card>
 
-        {/* Compact metrics */}
-        <Card bordered={false} className="parent-growth-metrics">
-          {[
-            { label: '出勤', value: profile.overview.attendanceRate !== null ? `${profile.overview.attendanceRate}%` : '待记录', color: '#1D9E75', icon: <CheckCircleOutlined /> },
-            { label: '试卷', value: `${profile.overview.paperCount} 份`, color: '#534AB7', icon: <FileTextOutlined /> },
-            { label: '徽章', value: `${profile.overview.badgeCount} 枚`, color: '#EF9F27', icon: <TrophyOutlined /> },
-          ].map(item => (
-            <div key={item.label} className="parent-growth-metric">
-              <span style={{ color: item.color }}>{item.icon}</span>
-              <div><Text type="secondary">{item.label}</Text><Text strong style={{ color: item.color }}>{item.value}</Text></div>
-            </div>
-          ))}
+        {/* Parent-facing status conclusion */}
+        <Card bordered={false} className="parent-growth-status">
+          <Text strong className="parent-growth-status-title">{statusSummary}</Text>
+          <Text type="secondary" className="parent-growth-status-meta">
+            出勤 {attendanceText} · 表扬 {highlights?.praiseCount || 0} 次 · 徽章 {highlights?.badgeTotal || 0} 枚
+          </Text>
         </Card>
 
         {/* Latest teacher update: one clear source of truth */}
@@ -256,30 +279,41 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
         {hasHighlights && highlights && <Card bordered={false} className="parent-growth-highlights">
           <div className="parent-growth-section-head">
             <div><TrophyOutlined /><Text strong>本期亮点</Text></div>
-            <Text type="secondary">表扬 {highlights.praiseCount} 次 · 徽章 {highlights.badgeTotal} 枚</Text>
           </div>
-          {highlights.topTags.length > 0 && <div className="parent-growth-tags">{highlights.topTags.slice(0, 5).map(item => <Tag key={item.tag}>{item.tag} ×{item.count}</Tag>)}</div>}
+          {highlights.topTags.length > 0 && <div className="parent-growth-tags">{highlights.topTags.map(item => <Tag color="orange" key={item.tag}>{item.tag} ×{item.count}</Tag>)}</div>}
+          {highlights.badgesByType.length > 0 && <div className="parent-growth-badges">{highlights.badgesByType.map(item => <Tag color="gold" key={item.type}>{item.type} ×{item.count}</Tag>)}</div>}
         </Card>}
 
-        {/* Trend details are collapsed by default on mobile to avoid empty-screen fatigue */}
+        {/* Classroom state is the primary growth visualization. */}
         <Card bordered={false} className="parent-growth-trends">
+          <div className="parent-growth-section-head">
+            <div><RiseOutlined /><Text strong>课堂状态走向</Text></div>
+          </div>
+          <div className="parent-growth-primary-trend">
+            {moodTrendOption ? <><ReactECharts style={{ width: '100%', height: 220 }} option={moodTrendOption} opts={{ renderer: 'svg' }} /><Text className="parent-growth-trend-reading">{moodTrendText}</Text></> : <Text type="secondary">数据积累中，多上几次课后这里会显示孩子的课堂状态走向</Text>}
+          </div>
           <button className="parent-growth-trend-trigger" onClick={() => setTrendOpen(value => !value)} aria-expanded={trendOpen}>
-            <span><RiseOutlined />成长趋势</span>
-            <span>{hasTrendData ? (trendOpen ? '收起' : '查看趋势') : '数据积累中'} <RightOutlined className={trendOpen ? 'is-open' : ''} /></span>
+            <span>查看更多趋势</span>
+            <span>{trendOpen ? '收起' : '徽章与出勤'} <RightOutlined className={trendOpen ? 'is-open' : ''} /></span>
           </button>
           {trendOpen && <div className="parent-growth-trend-content">
-            <Text strong>课堂状态</Text>
-            {moodTrendOption ? <><ReactECharts style={{ width: '100%', height: 190 }} option={moodTrendOption} opts={{ renderer: 'svg' }} /><Text style={{ display: 'block', textAlign: 'center', fontSize: 12 }}>{moodTrendText}</Text></> : <Text type="secondary">再积累几次课堂反馈后，将显示状态走向</Text>}
-            {profile.growth.badgeCumulative.length > 0 && <><Text strong>徽章累计</Text><ReactECharts style={{ width: '100%', height: 170 }} option={{
+            {profile.growth.badgeCumulative.length > 0 ? <><Text strong>徽章累计</Text><ReactECharts style={{ width: '100%', height: 170 }} option={{
               tooltip: { trigger: 'axis' }, grid: { left: 38, right: 16, top: 18, bottom: 28 },
               xAxis: { type: 'category', data: profile.growth.badgeCumulative.map(point => fmtDate(point.date).replace('月', '/').replace('日', '')), axisLabel: { fontSize: 10, color: '#5a4e3a' } },
               yAxis: { type: 'value', minInterval: 1, axisLabel: { fontSize: 10, color: '#5a4e3a' } },
               series: [{ type: 'line', step: 'end', data: profile.growth.badgeCumulative.map(point => point.total), lineStyle: { color: '#EF9F27', width: 2 }, itemStyle: { color: '#EF9F27' }, areaStyle: { color: 'rgba(239,159,39,.12)' } }],
-            }} opts={{ renderer: 'svg' }} /></>}
-            {profile.habits.attendanceRate !== null && <div><Text strong>出勤率</Text><Progress percent={profile.habits.attendanceRate} strokeColor="#1D9E75" trailColor="rgba(0,0,0,.05)" /></div>}
+            }} opts={{ renderer: 'svg' }} /></> : <Text type="secondary">暂无徽章累计数据</Text>}
+            {profile.habits.attendanceRate !== null ? <div><Text strong>出勤率</Text><Progress percent={profile.habits.attendanceRate} strokeColor="#1D9E75" trailColor="rgba(0,0,0,.05)" /></div> : <Text type="secondary">暂无出勤数据</Text>}
           </div>}
         </Card>
 
+        {/* Secondary details stay below the primary story and are collapsed by default. */}
+        <Collapse
+          className="parent-growth-more"
+          items={[{
+            key: 'more',
+            label: <span><BookOutlined />展开看更多学习详情与成长记录</span>,
+            children: (<>
         {/* Optional detail groups only appear when they contain useful data */}
         {(hasStudyData || hasHabitData) && <Collapse className="parent-growth-details" ghost size="small" activeKey={[...(studyOpen ? ['study'] : []), ...(habitOpen ? ['habit'] : [])]} onChange={k => { setStudyOpen(k.includes('study')); setHabitOpen(k.includes('habit')) }}
           items={[
@@ -405,6 +439,9 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
               </div>
           </div>}
         </Card>}
+            </>),
+          }]}
+        />
 
         {/* Report button */}
         <div className="parent-growth-report-action">
