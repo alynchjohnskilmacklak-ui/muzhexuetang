@@ -199,6 +199,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         remainHours: body.remainHours ? parseFloat(body.remainHours) : 0,
         tags: JSON.stringify(body.tags || []),
         status: 'TRIAL',
+        membershipLevel: body.membershipLevel || 'NORMAL',
       },
     })
 

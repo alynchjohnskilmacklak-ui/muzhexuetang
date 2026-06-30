@@ -11,6 +11,7 @@ import { getDailyQuote } from '@/data/daily-quotes'
 import { formatPercent } from '@/lib/format'
 import { TodayStatus } from '@/components/Parent/TodayStatus'
 import { WeeklyReport } from '@/components/Parent/WeeklyReport'
+import { fillName, MEMBERSHIP_SERVICE_CARD, MEMBERSHIP_THEME, MEMBERSHIP_WELCOME, resolveMembership } from '@/constants/membership'
 
 const { Title, Text } = Typography
 
@@ -80,6 +81,8 @@ export function ParentDashboardClient({
   const dailyQuote = getDailyQuote()
   const childIdFromUrl = searchParams.get('childId') || ''
   const [activeChildId, setActiveChildId] = useState(childIdFromUrl || students[0]?.id || '')
+  const [welcomeMounted, setWelcomeMounted] = useState(false)
+  const [welcomeVisible, setWelcomeVisible] = useState(false)
 
   useEffect(() => {
     if (childIdFromUrl) setActiveChildId(childIdFromUrl)
@@ -90,6 +93,29 @@ export function ParentDashboardClient({
     () => students.find((student: any) => student.id === activeChildId) || students[0],
     [activeChildId, students]
   )
+  const membershipLevel = resolveMembership(activeStudent?.membershipLevel)
+  const membershipTheme = MEMBERSHIP_THEME[membershipLevel]
+
+  useEffect(() => {
+    if (!activeStudent?.id) return
+    const storageKey = `mz_welcome_${activeStudent.id}`
+    if (sessionStorage.getItem(storageKey)) {
+      setWelcomeMounted(false)
+      setWelcomeVisible(false)
+      return
+    }
+
+    sessionStorage.setItem(storageKey, '1')
+    setWelcomeMounted(true)
+    const showTimer = window.setTimeout(() => setWelcomeVisible(true), 20)
+    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 6000)
+    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 6600)
+    return () => {
+      window.clearTimeout(showTimer)
+      window.clearTimeout(fadeTimer)
+      window.clearTimeout(unmountTimer)
+    }
+  }, [activeStudent?.id])
 
   const selectChild = (childId: string) => {
     window.location.href = `/parent/dashboard?childId=${childId}`
@@ -232,6 +258,22 @@ export function ParentDashboardClient({
 
   return (
     <div>
+      {welcomeMounted && (
+        <div style={{
+          marginBottom: 16, padding: '14px 16px', borderRadius: 12,
+          background: membershipTheme.bg, border: `1px solid ${membershipTheme.border}`,
+          color: membershipTheme.text, opacity: welcomeVisible ? 1 : 0,
+          transition: 'opacity .6s ease',
+        }}>
+          <div style={{ color: membershipTheme.accent, fontSize: 14, fontWeight: 700, lineHeight: 1.6 }}>
+            {fillName(MEMBERSHIP_WELCOME[membershipLevel].title, activeStudent?.name || '')}
+          </div>
+          <div style={{ marginTop: 4, fontSize: 12, lineHeight: 1.7 }}>
+            {MEMBERSHIP_WELCOME[membershipLevel].body}
+          </div>
+        </div>
+      )}
+
       {/* Sticky child switcher */}
       {students.length > 1 && (
         <div style={{
@@ -390,6 +432,27 @@ export function ParentDashboardClient({
           </div>
         </div>
       </div>
+
+      {(membershipLevel === 'VIP' || membershipLevel === 'SVIP') && (() => {
+        const service = MEMBERSHIP_SERVICE_CARD[membershipLevel]
+        return (
+          <div style={{
+            marginBottom: 20, padding: isMobile ? '16px' : '18px 20px', borderRadius: 14,
+            background: membershipTheme.bg, border: `1px solid ${membershipTheme.border}`,
+            color: membershipTheme.text,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, color: membershipTheme.accent, fontSize: 15, fontWeight: 700 }}>
+              {membershipLevel === 'SVIP' && <span style={{ color: membershipTheme.gold }}>★</span>}
+              {service.title}
+            </div>
+            <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.75 }}>{service.body}</div>
+            <div style={{ marginTop: 8, fontSize: 13 }}>
+              {service.hotlineLabel}：<strong style={{ color: membershipTheme.accent, fontWeight: 700 }}>{service.hotline}</strong>
+            </div>
+            <div style={{ marginTop: 8, fontSize: 12, lineHeight: 1.7 }}>{service.footer}</div>
+          </div>
+        )
+      })()}
 
       <TodayStatus activeChildId={students.length > 1 ? activeChildId : undefined} />
       <WeeklyReport activeChildId={activeChildId} />

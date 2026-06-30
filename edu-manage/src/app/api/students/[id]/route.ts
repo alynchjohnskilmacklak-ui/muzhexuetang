@@ -90,6 +90,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
       mainTeacherId: body.mainTeacherId,
       remainHours: body.remainHours,
       status: body.status,
+      membershipLevel: body.membershipLevel ?? undefined,
     },
   })
 

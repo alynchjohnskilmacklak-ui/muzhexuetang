@@ -47,8 +47,8 @@ type NavItem = Omit<MobileNavItem, 'children'> & {
 }
 
 const navItems: NavItem[] = [
+  { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
   { key: 'teaching-group', icon: <CalendarOutlined />, label: '教学工作', children: [
-    { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
     { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '我的课表' },
     { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
     { key: '/teacher/feedback', icon: <MessageOutlined />, label: '成长反馈', badgeKey: 'unpublished' },

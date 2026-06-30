@@ -8,29 +8,29 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  password    String
-  name        String
-  role        String   @default("parent")
-  division    String   @default("JUNIOR")
-  avatar      String?
-  status      String   @default("active")
-  wxpusherUid String?
-  teacherId   String?  @unique
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  password            String
+  name                String
+  role                String    @default("parent")
+  division            String    @default("JUNIOR")
+  avatar              String?
+  status              String    @default("active")
+  wxpusherUid         String?
+  teacherId           String?   @unique
   currentSessionToken String?
   lastLoginAt         DateTime?
   lastLoginIp         String?
   lastLoginDevice     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  teacher                Teacher?               @relation(fields: [teacherId], references: [id])
+  teacher                Teacher?                @relation(fields: [teacherId], references: [id])
   sessions               Session[]
   students               Student[]
   activityLogs           ActivityLog[]
   notifications          Notification[]
-  sentNotifications      Notification[]  @relation("SenderNotifications")
+  sentNotifications      Notification[]          @relation("SenderNotifications")
   postReactions          PostReaction[]
   postComments           PostComment[]
   paperReactions         PaperReaction[]
@@ -46,30 +46,31 @@ model User {
 }
 
 model Student {
-  id            String    @id @default(cuid())
-  name          String
-  gender        String?
-  birthYear     Int?
-  grade         String?
-  school        String?
-  phone         String?
-  email         String?
-  parentName    String?
-  parentPhone   String?
-  parentUserId  String?
-  status        String    @default("TRIAL")
-  source        String?
-  notes         String?
-  tags          String    @default("[]")
-  remainHours   Float     @default(0)
-  totalHours    Float     @default(0)
-  enrolledAt    DateTime  @default(now())
-  leftAt        DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  parentId      String?
-  mainTeacherId String?
-  division      String    @default("JUNIOR")
+  id              String    @id @default(cuid())
+  name            String
+  gender          String?
+  birthYear       Int?
+  grade           String?
+  school          String?
+  phone           String?
+  email           String?
+  parentName      String?
+  parentPhone     String?
+  parentUserId    String?
+  status          String    @default("TRIAL")
+  membershipLevel String    @default("NORMAL")
+  source          String?
+  notes           String?
+  tags            String    @default("[]")
+  remainHours     Float     @default(0)
+  totalHours      Float     @default(0)
+  enrolledAt      DateTime  @default(now())
+  leftAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  parentId        String?
+  mainTeacherId   String?
+  division        String    @default("JUNIOR")
 
   parent            User?              @relation(fields: [parentId], references: [id])
   mainTeacher       Teacher?           @relation(fields: [mainTeacherId], references: [id])
@@ -124,14 +125,14 @@ model Teacher {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  user               User?
+  user User?
 
   courses            Course[]
   schedules          Schedule[]
   students           Student[]
   classGroups        ClassGroup[]
   classGroupTeachers ClassGroupTeacher[]
-  classLessons       ClassLesson[]       @relation("ClassLessonTeacher")
+  classLessons       ClassLesson[]              @relation("ClassLessonTeacher")
   highlights         ClassHighlight[]
   performancePosts   PerformancePost[]
   achievementBadges  AchievementBadge[]
@@ -173,7 +174,7 @@ model Course {
   updatedAt      DateTime   @updatedAt
 
   teacherId   String?
-  division        String    @default("JUNIOR")
+  division    String       @default("JUNIOR")
   teacher     Teacher?     @relation(fields: [teacherId], references: [id])
   schedules   Schedule[]
   fees        Fee[]
@@ -195,7 +196,7 @@ enum GroupStatus {
 model ClassGroup {
   id               String      @id @default(cuid())
   name             String
-  division        String    @default("JUNIOR")
+  division         String      @default("JUNIOR")
   courseId         String
   course           Course      @relation(fields: [courseId], references: [id])
   teacherId        String
@@ -248,23 +249,23 @@ enum LessonStatus {
 }
 
 model ClassLesson {
-  id                  String       @id @default(cuid())
-  division        String    @default("JUNIOR")
-  groupId             String
-  group               ClassGroup   @relation(fields: [groupId], references: [id])
-  teacherId           String?
-  teacher             Teacher?     @relation("ClassLessonTeacher", fields: [teacherId], references: [id])
-  subject             String?
-  lessonDate          DateTime
-  startTime           String
-  endTime             String
-  status              LessonStatus @default(SCHEDULED)
-  cancelReason        String?
-  postponeFrom        DateTime?
-  note                String?
-  hoursDeductedAt     DateTime?
+  id                    String       @id @default(cuid())
+  division              String       @default("JUNIOR")
+  groupId               String
+  group                 ClassGroup   @relation(fields: [groupId], references: [id])
+  teacherId             String?
+  teacher               Teacher?     @relation("ClassLessonTeacher", fields: [teacherId], references: [id])
+  subject               String?
+  lessonDate            DateTime
+  startTime             String
+  endTime               String
+  status                LessonStatus @default(SCHEDULED)
+  cancelReason          String?
+  postponeFrom          DateTime?
+  note                  String?
+  hoursDeductedAt       DateTime?
   attendanceSubmittedAt DateTime?
-  createdAt           DateTime     @default(now())
+  createdAt             DateTime     @default(now())
 
   attendances        Attendance[]
   performancePosts   PerformancePost[]
@@ -296,8 +297,8 @@ model Enrollment {
   remainHours Float        @default(0)
   status      EnrollStatus @default(ACTIVE)
 
-  attendances       Attendance[]
-  hourTransactions  HourTransaction[]
+  attendances      Attendance[]
+  hourTransactions HourTransaction[]
 
   @@unique([studentId, groupId])
   @@index([status, remainHours])
@@ -335,20 +336,20 @@ enum AttStatus {
 }
 
 model Attendance {
-  id            String      @id @default(cuid())
+  id            String       @id @default(cuid())
   lessonId      String?
   lesson        ClassLesson? @relation(fields: [lessonId], references: [id])
   studentId     String
-  student       Student     @relation(fields: [studentId], references: [id])
+  student       Student      @relation(fields: [studentId], references: [id])
   enrollmentId  String?
   enrollment    Enrollment?  @relation(fields: [enrollmentId], references: [id])
   scheduleId    String?
   schedule      Schedule?    @relation(fields: [scheduleId], references: [id])
-  status        AttStatus   @default(PRESENT)
+  status        AttStatus    @default(PRESENT)
   actualMinutes Int?
-  hoursDeducted Float       @default(0)
-  notifySent    Boolean     @default(false)
-  createdAt     DateTime    @default(now())
+  hoursDeducted Float        @default(0)
+  notifySent    Boolean      @default(false)
+  createdAt     DateTime     @default(now())
 
   makeupRequest MakeupRequest?
 
@@ -466,9 +467,9 @@ model Schedule {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  course      Course              @relation(fields: [courseId], references: [id])
-  teacher     Teacher             @relation(fields: [teacherId], references: [id])
-  room          Room?               @relation(fields: [roomId], references: [id])
+  course        Course            @relation(fields: [courseId], references: [id])
+  teacher       Teacher           @relation(fields: [teacherId], references: [id])
+  room          Room?             @relation(fields: [roomId], references: [id])
   students      ScheduleStudent[]
   attendances   Attendance[]
   leaveRequests LeaveRequest[]
@@ -492,7 +493,7 @@ model ScheduleStudent {
 
 model Fee {
   id        String    @id @default(cuid())
-  division        String    @default("JUNIOR")
+  division  String    @default("JUNIOR")
   studentId String
   courseId  String?
   amount    Float
@@ -500,9 +501,9 @@ model Fee {
   status    String    @default("pending")
   paidAt    DateTime?
   dueDate   DateTime?
-  hours     Float?    // 课时数(资料费等可为空/0)
-  campus    String?   // 校区
-  operator  String?   // 经办人
+  hours     Float? // 课时数(资料费等可为空/0)
+  campus    String? // 校区
+  operator  String? // 经办人
   notes     String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -518,12 +519,12 @@ model Fee {
 }
 
 model Room {
-  id        String @id @default(cuid())
-  name      String @unique
-  capacity  Int    @default(30)
-  type      String @default("普通教室")
-  usageType String @default("GENERAL")
-  status    String @default("active")
+  id        String   @id @default(cuid())
+  name      String   @unique
+  capacity  Int      @default(30)
+  type      String   @default("普通教室")
+  usageType String   @default("GENERAL")
+  status    String   @default("active")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -579,26 +580,26 @@ model DeletedRecord {
 }
 
 model Notification {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
   title       String
   content     String
-  type        String   @default("INFO")
+  type        String    @default("INFO")
   link        String?
   relatedType String?
   relatedId   String?
   href        String?
-  read        Boolean  @default(false)
+  read        Boolean   @default(false)
   readAt      DateTime?
-  status      String   @default("ACTIVE")
+  status      String    @default("ACTIVE")
   studentId   String?
   senderId    String?
-  pushStatus  String   @default("none")
+  pushStatus  String    @default("none")
   pushError   String?
-  attempts    Int      @default(0)
+  attempts    Int       @default(0)
   lastError   String?
   sentAt      DateTime?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   student Student? @relation(fields: [studentId], references: [id])
@@ -663,36 +664,36 @@ model PerformancePost {
 }
 
 model ClassroomFeedback {
-  id              String       @id @default(cuid())
-  teacherId       String
-  teacher         Teacher      @relation(fields: [teacherId], references: [id])
-  classLessonId   String?
-  classLesson     ClassLesson? @relation(fields: [classLessonId], references: [id])
+  id                 String       @id @default(cuid())
+  teacherId          String
+  teacher            Teacher      @relation(fields: [teacherId], references: [id])
+  classLessonId      String?
+  classLesson        ClassLesson? @relation(fields: [classLessonId], references: [id])
   feedbackCourseType String?
-  feedbackGroupId String?
-  targetType      String       @default("CLASS")
-  source          String       @default("teacher")
-  studentIds      String[]
-  knowledgePoints String[]
-  summary         String?      @db.Text
-  mood            String?
-  tags            String[]     @default([])
-  badge           String?
-  overallComment  String?
-  homework        Json?
-  homeworkDone   Boolean?
-  inClassRating  Int?
-  imageUrls       String[]
-  imageTypes      Json?
-  studentRatings  Json?
-  parentReply     String?
-  parentRepliedAt DateTime?
-  adminReply      String?
-  adminRepliedAt  DateTime?
-  status          String       @default("DRAFT")
-  notifySent      Boolean      @default(false)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  feedbackGroupId    String?
+  targetType         String       @default("CLASS")
+  source             String       @default("teacher")
+  studentIds         String[]
+  knowledgePoints    String[]
+  summary            String?      @db.Text
+  mood               String?
+  tags               String[]     @default([])
+  badge              String?
+  overallComment     String?
+  homework           Json?
+  homeworkDone       Boolean?
+  inClassRating      Int?
+  imageUrls          String[]
+  imageTypes         Json?
+  studentRatings     Json?
+  parentReply        String?
+  parentRepliedAt    DateTime?
+  adminReply         String?
+  adminRepliedAt     DateTime?
+  status             String       @default("DRAFT")
+  notifySent         Boolean      @default(false)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 
   @@index([teacherId, createdAt])
   @@index([teacherId, status, createdAt])
@@ -859,8 +860,8 @@ model MealMenu {
   updatedAt   DateTime @updatedAt
   createdBy   String
 
-  creator User         @relation("MealMenuCreator", fields: [createdBy], references: [id])
-  reports MealReport[]
+  creator       User               @relation("MealMenuCreator", fields: [createdBy], references: [id])
+  reports       MealReport[]
   parentChoices ParentMealChoice[]
 
   @@unique([weekStart, dayOfWeek, mealType])
@@ -868,21 +869,21 @@ model MealMenu {
 }
 
 model MealTemplate {
-  id        String    @id @default(cuid())
-  weekday   Int
-  title     String?
-  breakfast String?
-  lunch     String?
-  dinner    String?
-  snack     String?
-  note      String?
-  allowDouble Boolean @default(true)
-  isActive  Boolean   @default(true)
-  startDate DateTime?
-  endDate   DateTime?
-  division  String    @default("JUNIOR")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String    @id @default(cuid())
+  weekday     Int
+  title       String?
+  breakfast   String?
+  lunch       String?
+  dinner      String?
+  snack       String?
+  note        String?
+  allowDouble Boolean   @default(true)
+  isActive    Boolean   @default(true)
+  startDate   DateTime?
+  endDate     DateTime?
+  division    String    @default("JUNIOR")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([weekday, isActive])
 }
@@ -926,27 +927,27 @@ model ParentMealChoice {
 }
 
 model StudyMaterial {
-  id          String   @id @default(cuid())
-  title       String
-  grade       String
-  subject     String
-  fileUrl     String
-  fileName    String
-  fileSize    Int
-  fileType    String
-  description String?
-  downloads   Int      @default(0)
-  uploadedBy  String
-  audience    MaterialAudience @default(STUDENT)
-  source      MaterialSource   @default(ADMIN)
-  status      MaterialStatus   @default(PUBLISHED)
-  teacherId   String?
-  tags        String[]         @default([])
+  id            String           @id @default(cuid())
+  title         String
+  grade         String
+  subject       String
+  fileUrl       String
+  fileName      String
+  fileSize      Int
+  fileType      String
+  description   String?
+  downloads     Int              @default(0)
+  uploadedBy    String
+  audience      MaterialAudience @default(STUDENT)
+  source        MaterialSource   @default(ADMIN)
+  status        MaterialStatus   @default(PUBLISHED)
+  teacherId     String?
+  tags          String[]         @default([])
   isPinned      Boolean          @default(false)
   sortOrder     Int              @default(0)
   storageDriver String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   uploader User     @relation("MaterialUploader", fields: [uploadedBy], references: [id])
   teacher  Teacher? @relation(fields: [teacherId], references: [id])
@@ -1111,16 +1112,17 @@ model StageSummary {
 }
 
 model SystemConfig {
-  id        String   @id @default("singleton")
-  orgName   String   @default("牧哲学堂")
-  orgNameEn String   @default("MOREJOY Education")
-  phone     String?
-  address   String?
-  founded   Int?
-  website   String?
-  logoUrl   String?
-  schedulePeriods Json?
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default("singleton")
+  orgName            String   @default("牧哲学堂")
+  orgNameEn          String   @default("MOREJOY Education")
+  phone              String?
+  address            String?
+  founded            Int?
+  website            String?
+  logoUrl            String?
+  schedulePeriods    Json?
+  membershipBenefits String?  @db.Text
+  updatedAt          DateTime @updatedAt
 }
 
 model Subject {
@@ -1218,30 +1220,30 @@ model LoginRecord {
 
 // Teacher salary configuration. Each teacher can override the system defaults.
 model TeacherSalaryConfig {
-  id                  String   @id @default(cuid())
-  teacherId           String   @unique
-  teacher             Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  groupRateJunior     Float?
-  groupRateSenior     Float?
-  oneOnOneRates       Json?
-  feedbackRateGroup   Float?
-  feedbackRateOneOne  Float?
-  updatedAt           DateTime @updatedAt
-  updatedBy           String?
+  id                 String   @id @default(cuid())
+  teacherId          String   @unique
+  teacher            Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  groupRateJunior    Float?
+  groupRateSenior    Float?
+  oneOnOneRates      Json?
+  feedbackRateGroup  Float?
+  feedbackRateOneOne Float?
+  updatedAt          DateTime @updatedAt
+  updatedBy          String?
 }
 
 // Teacher salary transaction generated by attendance and classroom feedback.
 model TeacherSalaryTransaction {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   teacherId   String
-  teacher     Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacher     Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   type        String
   amount      Float
   lessonId    String?
   feedbackId  String?
   description String?
   lessonDate  DateTime?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   @@unique([lessonId, type])
   @@unique([feedbackId, type])
@@ -1252,43 +1254,43 @@ model TeacherSalaryTransaction {
 }
 
 model HighSchoolInfo {
-  id               String   @id @default(cuid())
-  schoolId         String   @unique
-  name             String
-  fullName         String
-  type             String
-  batch            String?
-  category         String?
-  location         String
-  address          String?
-  distanceFromXinle String?
-  yiTong           Int?
-  tongZhao         Int
-  allocationLine   Int?
-  acceptsOtherCounty Boolean @default(false)
-  xinleLine       Int?
-  xinleStatus     String[] @default([])
-  isProvincialDemo Boolean @default(false)
-  xinleFenpeiQuota Int?
-  xinleAccessible   Boolean  @default(true)
+  id                      String    @id @default(cuid())
+  schoolId                String    @unique
+  name                    String
+  fullName                String
+  type                    String
+  batch                   String?
+  category                String?
+  location                String
+  address                 String?
+  distanceFromXinle       String?
+  yiTong                  Int?
+  tongZhao                Int
+  allocationLine          Int?
+  acceptsOtherCounty      Boolean   @default(false)
+  xinleLine               Int?
+  xinleStatus             String[]  @default([])
+  isProvincialDemo        Boolean   @default(false)
+  xinleFenpeiQuota        Int?
+  xinleAccessible         Boolean   @default(true)
   xinleAccessibleOverride Boolean?
-  xinleAllocationId String?
-  enrollment       Int?
-  boardingAvail    Boolean  @default(false)
-  boardingFee      String?
-  tuitionFee       String?
-  keyFeature       String?
-  gaokaoRate       String?
-  intro            String?
-  tips             String?
-  website          String?
-  phone            String?
-  sourceUrl        String?
-  sourceNote       String?
-  infoVerifiedAt   DateTime?
-  infoConfidence   String?   @default("unknown")
-  updatedAt        DateTime @updatedAt
-  updatedBy        String?
+  xinleAllocationId       String?
+  enrollment              Int?
+  boardingAvail           Boolean   @default(false)
+  boardingFee             String?
+  tuitionFee              String?
+  keyFeature              String?
+  gaokaoRate              String?
+  intro                   String?
+  tips                    String?
+  website                 String?
+  phone                   String?
+  sourceUrl               String?
+  sourceNote              String?
+  infoVerifiedAt          DateTime?
+  infoConfidence          String?   @default("unknown")
+  updatedAt               DateTime  @updatedAt
+  updatedBy               String?
 }
 
 model YifenYidang {
@@ -1325,20 +1327,20 @@ model JuniorEnrollment {
 
 // ── 家长留言 ──────────────────────────────────────────────
 model ParentMessage {
-  id          String   @id @default(cuid())
-  parentId    String
-  parent      User     @relation("ParentMessages", fields: [parentId], references: [id], onDelete: Cascade)
-  studentId   String?
-  student     Student? @relation(fields: [studentId], references: [id])
-  teacherId   String?
-  teacher     Teacher? @relation("TeacherMessages", fields: [teacherId], references: [id])
-  subject     String?
-  title       String
-  status      String   @default("OPEN")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  parentId  String
+  parent    User     @relation("ParentMessages", fields: [parentId], references: [id], onDelete: Cascade)
+  studentId String?
+  student   Student? @relation(fields: [studentId], references: [id])
+  teacherId String?
+  teacher   Teacher? @relation("TeacherMessages", fields: [teacherId], references: [id])
+  subject   String?
+  title     String
+  status    String   @default("OPEN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  replies     ParentMessageReply[]
+  replies ParentMessageReply[]
 
   @@index([parentId, createdAt])
   @@index([teacherId, status, createdAt])
@@ -1346,16 +1348,16 @@ model ParentMessage {
 }
 
 model ParentMessageReply {
-  id              String         @id @default(cuid())
+  id              String        @id @default(cuid())
   messageId       String
-  message         ParentMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  message         ParentMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
   authorId        String
   authorName      String
   role            String
   content         String
-  isReadByParent  Boolean        @default(false)
-  isReadByTeacher Boolean        @default(false)
-  createdAt       DateTime       @default(now())
+  isReadByParent  Boolean       @default(false)
+  isReadByTeacher Boolean       @default(false)
+  createdAt       DateTime      @default(now())
 
   @@index([messageId, createdAt])
 }

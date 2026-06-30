@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import { StatusBadge } from './StatusBadge'
 import { formatHours } from '@/lib/format'
+import { MEMBERSHIP_THEME, resolveMembership } from '@/constants/membership'
 
 const { Text } = Typography
 
@@ -43,6 +44,7 @@ type StudentCardProps = {
     remainHours: number
     totalHours: number
     source?: string | null
+    membershipLevel?: string
     courseType?: string | null
     mainTeacher?: { id: string; name: string } | null
     schedules?: Array<{ schedule: { course?: { id: string; name: string } | null } }>
@@ -55,6 +57,9 @@ export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
   const router = useRouter()
   const isLowHours = student.remainHours <= 3 && student.status === 'ACTIVE'
   const bgColor = getAvatarColor(student.name)
+  const membershipLevel = resolveMembership(student.membershipLevel)
+  const membershipTheme = MEMBERSHIP_THEME[membershipLevel]
+  const hasMembershipBadge = membershipLevel === 'VIP' || membershipLevel === 'SVIP'
 
   return (
     <div
@@ -78,6 +83,9 @@ export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
         if (actions) actions.style.opacity = '0'
       }}
     >
+      {hasMembershipBadge && (
+        <span style={{ position: 'absolute', top: 0, left: 10, right: 10, height: 2, borderRadius: 999, background: membershipTheme.accent }} />
+      )}
       {isLowHours && (
         <Tooltip title="课时不足">
           <span style={{ position: 'absolute', top: 10, right: 10, width: 8, height: 8, borderRadius: 99, background: '#e03e2d' }} />
@@ -88,8 +96,16 @@ export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
         <div style={{ width: 30, height: 30, borderRadius: 8, background: bgColor, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 700, flexShrink: 0 }}>
           {student.name.charAt(0)}
         </div>
-        <div style={{ minWidth: 0 }}>
-          <Text strong style={{ color: '#1F2329', fontSize: 13, display: 'block', lineHeight: 1.25 }}>{student.name}</Text>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Text strong style={{ color: '#1F2329', fontSize: 13, lineHeight: 1.25 }}>{student.name}</Text>
+            {hasMembershipBadge && (
+              <span style={{ background: membershipTheme.bg, color: membershipTheme.accent, border: `1px solid ${membershipTheme.border}`, borderRadius: 999, fontSize: 10, padding: '1px 7px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
+                {membershipLevel === 'SVIP' && <span style={{ color: membershipTheme.gold, marginRight: 3 }}>★</span>}
+                {membershipTheme.badge}
+              </span>
+            )}
+          </div>
           <Text style={{ color: '#98A2B3', fontSize: 11, display: 'block', maxWidth: 180, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {[student.grade || '未设年级', student.school].filter(Boolean).join(' · ')}
           </Text>

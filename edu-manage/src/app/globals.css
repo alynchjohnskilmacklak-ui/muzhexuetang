@@ -1725,3 +1725,61 @@ button:focus:not(:focus-visible) {
     width: 100%;
   }
 }
+
+/* ---- 统一弹窗外观（全局兜底，作用于所有 AntD Modal）---- */
+.ant-modal .ant-modal-content { border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 16px 48px rgba(26,18,1,.14); }
+.ant-modal .ant-modal-header { margin: 0; padding: 18px 22px; border-bottom: 1px solid rgba(0,0,0,.06); background: #fff; }
+.ant-modal .ant-modal-title { font-size: 17px; font-weight: 700; color: #1a1201; line-height: 1.4; }
+.ant-modal .ant-modal-body { padding: 20px 22px; }
+.ant-modal .ant-modal-footer { margin: 0; padding: 14px 22px; border-top: 1px solid rgba(0,0,0,.06); }
+.ant-modal .ant-modal-close { top: 15px; inset-inline-end: 16px; }
+
+.membership-markdown {
+  color: #5a4e3a;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.membership-markdown h1,
+.membership-markdown h2,
+.membership-markdown h3 {
+  margin: 1.4em 0 .6em;
+  color: #1a1201;
+  line-height: 1.35;
+}
+
+.membership-markdown h1:first-child {
+  margin-top: 0;
+}
+
+.membership-markdown p,
+.membership-markdown ul,
+.membership-markdown ol,
+.membership-markdown blockquote {
+  margin: .7em 0;
+}
+
+.membership-markdown blockquote {
+  padding: 10px 14px;
+  border-left: 3px solid #E8784A;
+  border-radius: 0 8px 8px 0;
+  background: #fff6f1;
+}
+
+.membership-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.membership-markdown th,
+.membership-markdown td {
+  padding: 9px 11px;
+  border: 1px solid rgba(0,0,0,.08);
+  text-align: left;
+  vertical-align: top;
+}
+
+.membership-markdown th {
+  background: #faf8f5;
+  color: #1a1201;
+}

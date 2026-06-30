@@ -5,6 +5,7 @@ import { Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Butt
 import { UserOutlined, PhoneOutlined, BookOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
+import { MEMBERSHIP_OPTIONS } from '@/constants/membership'
 
 const STATUS_OPTIONS = [
   { label: '潜客', value: 'LEAD' },
@@ -40,10 +41,12 @@ export function StudentForm({
         form.setFieldsValue({
           ...initialData,
           birthYear: initialData.birthYear ? String(initialData.birthYear) : undefined,
+          membershipLevel: initialData.membershipLevel || 'NORMAL',
         })
       } else {
         form.resetFields()
         form.setFieldValue('division', division)
+        form.setFieldValue('membershipLevel', 'NORMAL')
       }
       fetch('/api/teachers?limit=50').then(r => r.json()).then(d => {
         setTeachers(Array.isArray(d) ? d : (d.teachers || []))
@@ -239,6 +242,11 @@ export function StudentForm({
                 </Form.Item>
               </Col>
             )}
+            <Col span={12}>
+              <Form.Item name="membershipLevel" label="会员等级">
+                <Select options={MEMBERSHIP_OPTIONS} />
+              </Form.Item>
+            </Col>
           </Row>
         )}
       </Form>

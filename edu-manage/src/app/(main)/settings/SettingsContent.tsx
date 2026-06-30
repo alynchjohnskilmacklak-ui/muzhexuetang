@@ -7,6 +7,7 @@ import {
   BankOutlined, EditOutlined, HomeOutlined, DollarOutlined,
   BellOutlined, SafetyOutlined, CloudOutlined, FileSearchOutlined,
   TeamOutlined, UserOutlined,
+  CrownOutlined,
 } from '@ant-design/icons'
 import { OrgInfoTab } from './OrgInfoTab'
 import { SubjectsTab } from './SubjectsTab'
@@ -19,6 +20,7 @@ import { LogsTab } from './LogsTab'
 import { AdminsTab } from './AdminsTab'
 import { TeacherAccountsTab } from './TeacherAccountsTab'
 import { ParentAccountsTab } from './ParentAccountsTab'
+import { MembershipTab } from './MembershipTab'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 const tabs = [
@@ -30,6 +32,7 @@ const tabs = [
   { key: 'roles', icon: <SafetyOutlined />, label: '角色权限' },
   { key: 'teacher-accounts', icon: <UserOutlined />, label: '教师账号' },
   { key: 'parent-accounts', icon: <TeamOutlined />, label: '家长账号' },
+  { key: 'membership', icon: <CrownOutlined />, label: '会员权益' },
   { key: 'backup', icon: <CloudOutlined />, label: '数据备份' },
   { key: 'logs', icon: <FileSearchOutlined />, label: '操作日志' },
   { key: 'admins', icon: <TeamOutlined />, label: '账号管理' },
@@ -89,6 +92,7 @@ function SettingsTabs({ currentUserId }: { currentUserId: string }) {
         {activeTab === 'admins' && <AdminsTab currentUserId={currentUserId} />}
         {activeTab === 'teacher-accounts' && <TeacherAccountsTab />}
         {activeTab === 'parent-accounts' && <ParentAccountsTab />}
+        {activeTab === 'membership' && <MembershipTab />}
       </div>
     </div>
   )

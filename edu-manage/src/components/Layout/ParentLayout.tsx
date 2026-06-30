@@ -12,6 +12,7 @@ import {
   ClockCircleOutlined,
   CoffeeOutlined,
   CommentOutlined,
+  CrownOutlined,
   ExperimentOutlined,
   FileTextOutlined,
   HomeOutlined,
@@ -92,8 +93,8 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   }
 
   const navItems: MobileNavItem[] = [
+    { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
     { key: 'growth-group', icon: <HomeOutlined />, label: '学习与成长', children: [
-      { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
       { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课程表' },
       { key: '/parent/class-feedback', icon: <BookOutlined />, label: '成长反馈' },
       { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长主页', badge: unread.papers + unread.posts },
@@ -119,6 +120,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
       { key: '/parent/ai', icon: <MessageFilled />, label: 'AI 助手' },
     ] },
     { key: 'account-group', icon: <IdcardOutlined />, label: '账户设置', children: [
+      { key: '/parent/benefits', icon: <CrownOutlined />, label: '会员权益' },
       { key: '/parent/bind', icon: <WechatOutlined />, label: '绑定微信' },
       { key: '/parent/profile', icon: <IdcardOutlined />, label: '个人中心' },
     ] },

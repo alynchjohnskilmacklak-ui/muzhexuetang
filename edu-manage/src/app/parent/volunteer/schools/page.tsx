@@ -62,7 +62,7 @@ function validScore(value?: number | null) {
   return typeof value === 'number' && value > 0 ? value : null
 }
 
-function ParentSchoolCard({ school, onClick, detailed = false }: { school: School; onClick?: () => void; detailed?: boolean }) {
+function ParentSchoolCard({ school, onClick, detailed = false, bare = false }: { school: School; onClick?: () => void; detailed?: boolean; bare?: boolean }) {
   const accessible = school.xinleAccessible === true
   const allocationScore = validScore(school.allocationLine) ?? validScore(school.xinleLine)
   const metaItems = [
@@ -79,17 +79,17 @@ function ParentSchoolCard({ school, onClick, detailed = false }: { school: Schoo
         width: '100%',
         maxWidth: '100%',
         marginBottom: 10,
-        padding: detailed ? 18 : 14,
+        padding: bare ? 0 : detailed ? 18 : 14,
         borderRadius: 14,
-        border: `1px solid ${C.hairline}`,
-        borderLeft: `3px solid ${accessible ? C.success : C.error}`,
-        background: C.surface,
-        opacity: accessible ? 1 : 0.72,
+        border: bare ? 'none' : `1px solid ${C.hairline}`,
+        borderLeft: bare ? 'none' : `3px solid ${accessible ? C.success : C.error}`,
+        background: bare ? 'transparent' : C.surface,
+        opacity: bare ? 1 : accessible ? 1 : 0.72,
         cursor: onClick ? 'pointer' : 'default',
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+      {!bare && <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
         <div style={{ minWidth: 0 }}>
           <Text strong style={{ display: 'block', color: C.ink, fontSize: 15 }}>{school.name}</Text>
           <Text style={{ display: 'block', marginTop: 3, color: C.subtle, fontSize: 11.5 }}>
@@ -99,7 +99,7 @@ function ParentSchoolCard({ school, onClick, detailed = false }: { school: Schoo
         <Tag color={accessible ? 'green' : 'red'} style={{ flexShrink: 0, margin: 0, borderRadius: 999 }}>
           {accessible ? '可报名' : '不可报'}
         </Tag>
-      </div>
+      </div>}
 
       {!accessible && (
         <div style={{ marginTop: 10, padding: '7px 10px', borderRadius: 8, background: '#f5f2ee', color: C.error, fontSize: 12, fontWeight: 600 }}>
@@ -218,8 +218,15 @@ export default function ParentSchoolsPage() {
         共 {schools.length} 所 · 可报名 {accessibleCount} 所 · 数据以官方招生计划为准
       </footer>}
 
-      <Modal title={detailSchool?.name} open={!!detailSchool} onCancel={() => setDetailSchool(null)} footer={null} width={isMobile ? 'calc(100vw - 24px)' : 600} style={{ top: isMobile ? 12 : 30 }}>
-        {detailSchool && <ParentSchoolCard school={detailSchool} detailed />}
+      <Modal title={detailSchool && (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {detailSchool.name}
+          <Tag color={detailSchool.xinleAccessible ? 'green' : 'red'} style={{ borderRadius: 999, margin: 0 }}>
+            {detailSchool.xinleAccessible ? '可报名' : '不可报'}
+          </Tag>
+        </span>
+      )} open={!!detailSchool} onCancel={() => setDetailSchool(null)} footer={null} width={isMobile ? 'calc(100vw - 24px)' : 600} style={{ top: isMobile ? 12 : 30 }}>
+        {detailSchool && <ParentSchoolCard school={detailSchool} detailed bare />}
       </Modal>
     </div>
   )
