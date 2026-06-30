@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { AIChatPanel } from '@/components/AI/AIChatPanel'
-import { MODEL_CONFIG } from '@/data/ai-prompts'
-import { Tag, Typography } from 'antd'
+import { Typography } from 'antd'
 
 const { Text } = Typography
 
@@ -27,30 +26,19 @@ const ABOUT_SUGGESTED = [
 
 export default function ParentAIPage() {
   const [quickAsk, setQuickAsk] = useState<string | null>(null)
+  const [showMoreAbout, setShowMoreAbout] = useState(false)
 
   return (
-    <div>
+    <div style={{ padding: '0 4px' }}>
       <div style={{
-        borderRadius: 8,
-        marginBottom: 20,
+        borderRadius: 14,
+        marginBottom: 12,
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-        boxShadow: '0 8px 32px rgba(0,0,0,.2)',
-        position: 'relative',
+        background: 'linear-gradient(135deg, #FFF6F1 0%, #FFFBF7 100%)',
+        border: '1px solid rgba(232,120,74,.2)',
       }}>
-        {[[-30, -30, 140], [80, -20, 80], [60, -10, 60]].map(([top, right, size], index) => (
-          <div key={index} style={{
-            position: 'absolute',
-            top,
-            right,
-            width: size,
-            height: size,
-            borderRadius: '50%',
-            backgroundColor: `rgba(232,117,69,${0.06 + index * 0.03})`,
-          }} />
-        ))}
-        <div style={{ position: 'relative', padding: '24px 28px 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <div style={{ padding: '16px 18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <div style={{
               width: 42,
               height: 42,
@@ -66,58 +54,26 @@ export default function ParentAIPage() {
               AI
             </div>
             <div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: 0 }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#1a1201', letterSpacing: 0 }}>
                 牧哲学堂 · AI 智学中心
               </div>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', marginTop: 2 }}>
+              <div style={{ fontSize: 11, color: '#9a8e7a', marginTop: 2 }}>
                 MUZHE AI LEARNING CENTER
               </div>
             </div>
           </div>
 
-          <Text style={{ fontSize: 13.5, color: 'rgba(255,255,255,.8)', lineHeight: 1.9, display: 'block', marginBottom: 16 }}>
-            汇聚当前最先进的大语言模型，为牧哲学堂每一位学生、家长与教师提供
-            <span style={{ color: '#E87545', fontWeight: 600 }}>7×24小时智能辅导服务</span>。
-            无论是题目解析、知识梳理，还是拍照解题，让AI成为你最贴心的学习伙伴。
+          <Text style={{ fontSize: 13, color: '#5a4e3a', lineHeight: 1.75, display: 'block' }}>
+            汇聚 DeepSeek、MiMo、Kimi 多个大模型，为孩子提供 7×24 小时智能辅导：题目解析、知识梳理、拍照解题。
           </Text>
-
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            {MODEL_CONFIG.map((model) => (
-              <div key={model.id} style={{
-                padding: '8px 14px',
-                borderRadius: 8,
-                backgroundColor: 'rgba(255,255,255,.06)',
-                border: `1px solid ${model.color}40`,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                backdropFilter: 'blur(10px)',
-              }}>
-                <span style={{ fontSize: 18, color: model.color, fontWeight: 800 }}>{model.icon}</span>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{model.name}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)' }}>{model.desc}</div>
-                </div>
-                <Tag style={{
-                  backgroundColor: model.badgeColor,
-                  color: '#fff',
-                  border: 'none',
-                  fontSize: 10,
-                  padding: '0 5px',
-                }}>
-                  {model.badge}
-                </Tag>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
       {/* 了解牧哲学堂 — 快捷提问 */}
       <div style={{
         borderRadius: 12,
-        marginBottom: 20,
-        padding: '18px 20px',
+        marginBottom: 12,
+        padding: '14px 16px',
         background: 'linear-gradient(135deg, #FFF6F1 0%, #FFFBF7 100%)',
         border: '1px solid rgba(232,120,74,.2)',
       }}>
@@ -125,21 +81,21 @@ export default function ParentAIPage() {
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          marginBottom: 12,
+          marginBottom: 10,
         }}>
           <span style={{ fontSize: 20 }}>🏫</span>
           <span style={{ fontSize: 15, fontWeight: 700, color: '#E8784A' }}>了解牧哲学堂</span>
-          <span style={{ fontSize: 12, color: '#9a8e7a' }}>点击下方问题，AI 为你详细介绍</span>
+          <span style={{ fontSize: 11, color: '#9a8e7a' }}>点击问题，AI 为你详细介绍</span>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {ABOUT_SUGGESTED.map((q) => (
+          {ABOUT_SUGGESTED.slice(0, showMoreAbout ? ABOUT_SUGGESTED.length : 3).map((q) => (
             <button
               key={q}
               type="button"
               onClick={() => setQuickAsk(q)}
               style={{
-                padding: '10px 16px',
-                borderRadius: 20,
+                padding: '7px 12px',
+                borderRadius: 14,
                 cursor: 'pointer',
                 backgroundColor: '#fff',
                 border: '1px solid rgba(232,120,74,.25)',
@@ -161,15 +117,34 @@ export default function ParentAIPage() {
               {q}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => setShowMoreAbout(value => !value)}
+            aria-expanded={showMoreAbout}
+            style={{
+              padding: '7px 12px',
+              borderRadius: 14,
+              cursor: 'pointer',
+              backgroundColor: 'transparent',
+              border: '1px solid rgba(232,120,74,.18)',
+              fontSize: 12,
+              color: '#E8784A',
+              fontWeight: 600,
+            }}
+          >
+            {showMoreAbout ? '收起问题 ⌃' : '更多问题 ⌄'}
+          </button>
         </div>
       </div>
 
-      <AIChatPanel
-        aiRole="parent"
-        suggestedQuestions={SUGGESTED}
-        quickAsk={quickAsk}
-        onQuickAskHandled={() => setQuickAsk(null)}
-      />
+      <div style={{ marginBottom: 12 }}>
+        <AIChatPanel
+          aiRole="parent"
+          suggestedQuestions={SUGGESTED}
+          quickAsk={quickAsk}
+          onQuickAskHandled={() => setQuickAsk(null)}
+        />
+      </div>
     </div>
   )
 }

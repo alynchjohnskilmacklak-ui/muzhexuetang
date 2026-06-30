@@ -1257,6 +1257,8 @@ model HighSchoolInfo {
   name             String
   fullName         String
   type             String
+  batch            String?
+  category         String?
   location         String
   address          String?
   distanceFromXinle String?

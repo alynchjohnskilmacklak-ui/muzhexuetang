@@ -21,6 +21,8 @@ export async function GET() {
       name: true,
       fullName: true,
       type: true,
+      batch: true,
+      category: true,
       location: true,
       address: true,
       distanceFromXinle: true,

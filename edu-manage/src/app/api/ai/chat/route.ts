@@ -298,7 +298,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         temperature,
         max_tokens: 4096,
         top_p: modelId === 'kimi' ? 0.95 : 0.9,
-        frequency_penalty: 0.1,
+        ...(modelId === 'kimi' ? {} : { frequency_penalty: 0.1 }),
       }),
     }, Number(process.env.AI_TIMEOUT_MS || 60_000))
 

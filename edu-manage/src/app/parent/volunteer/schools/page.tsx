@@ -1,215 +1,228 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Input, Select, Typography, Modal, Skeleton } from 'antd'
-import { SearchOutlined, BankOutlined } from '@ant-design/icons'
-import { SchoolCard } from '@/components/Volunteer/SchoolCard'
+import { Input, Modal, Skeleton, Tag, Typography } from 'antd'
+import { BankOutlined, EnvironmentOutlined, HomeOutlined, SearchOutlined, WalletOutlined } from '@ant-design/icons'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const { Title, Text } = Typography
 
 type School = {
-  id: string; schoolId: string; name: string; fullName?: string; type: string; location: string
-  address: string | null; distanceFromXinle: string | null
-  yiTong: number | null; tongZhao: number; allocationLine: number | null; enrollment: number | null
-  boardingAvail: boolean; boardingFee: string | null; tuitionFee: string | null
-  keyFeature: string | null; gaokaoRate: string | null
-  intro: string | null; tips: string | null
-  website: string | null; phone: string | null
+  id: string
+  schoolId: string
+  name: string
+  fullName?: string
+  type: string
+  batch?: string | null
+  category?: string | null
+  location: string
+  address: string | null
+  distanceFromXinle: string | null
+  yiTong: number | null
+  tongZhao: number
+  allocationLine: number | null
+  xinleLine?: number | null
+  enrollment: number | null
+  boardingAvail: boolean
+  boardingFee: string | null
+  tuitionFee: string | null
+  keyFeature: string | null
+  gaokaoRate: string | null
+  intro: string | null
+  tips: string | null
+  website: string | null
+  phone: string | null
   xinleAccessible?: boolean
+  isProvincialDemo?: boolean
 }
 
-const TYPE_GROUPS = ['省示范', '市重点', '县中', '民办'] as const
+type FilterKey = 'all' | 'accessible' | 'provincial' | 'public' | 'private'
 
-const GROUP_META: Record<string, { label: string; subtitle: string }> = {
-  '省示范': { label: '省级示范高中', subtitle: '重点高中，设分配生名额' },
-  '市重点': { label: '市级重点高中', subtitle: '市级优质教育资源' },
-  '县中': { label: '县级中学', subtitle: '县区范围内招生为主' },
-  '民办': { label: '民办学校', subtitle: '灵活招生，部分跨区' },
-}
+const FILTERS: Array<{ key: FilterKey; label: string }> = [
+  { key: 'all', label: '全部' },
+  { key: 'accessible', label: '可报名' },
+  { key: 'provincial', label: '省示范' },
+  { key: 'public', label: '公办' },
+  { key: 'private', label: '民办' },
+]
 
-// Warm light tokens
 const C = {
   canvas: '#faf8f5',
-  surface1: '#ffffff',
-  surface3: '#f5f2ee',
+  surface: '#ffffff',
   hairline: 'rgba(0,0,0,.06)',
-  hairlineStrong: 'rgba(0,0,0,.12)',
   ink: '#1a1201',
-  inkMuted: '#5a4e3a',
-  inkSubtle: '#9a8e7a',
+  muted: '#5a4e3a',
+  subtle: '#9a8e7a',
   primary: '#E8784A',
-  primaryBg: '#fff3ec',
   success: '#1D9E75',
-  successBg: '#eaf7f1',
+  error: '#D9534F',
+}
+
+function validScore(value?: number | null) {
+  return typeof value === 'number' && value > 0 ? value : null
+}
+
+function ParentSchoolCard({ school, onClick, detailed = false }: { school: School; onClick?: () => void; detailed?: boolean }) {
+  const accessible = school.xinleAccessible === true
+  const allocationScore = validScore(school.allocationLine) ?? validScore(school.xinleLine)
+  const metaItems = [
+    school.distanceFromXinle ? { icon: <EnvironmentOutlined />, text: `距新乐 ${school.distanceFromXinle}` } : null,
+    { icon: <HomeOutlined />, text: school.boardingAvail ? '可住宿' : '走读' },
+    school.tuitionFee ? { icon: <WalletOutlined />, text: `学费 ${school.tuitionFee}` } : null,
+    school.boardingFee ? { icon: <WalletOutlined />, text: `住宿 ${school.boardingFee}` } : null,
+  ].filter(Boolean) as Array<{ icon: React.ReactNode; text: string }>
+
+  return (
+    <article
+      onClick={onClick}
+      style={{
+        width: '100%',
+        maxWidth: '100%',
+        marginBottom: 10,
+        padding: detailed ? 18 : 14,
+        borderRadius: 14,
+        border: `1px solid ${C.hairline}`,
+        borderLeft: `3px solid ${accessible ? C.success : C.error}`,
+        background: C.surface,
+        opacity: accessible ? 1 : 0.72,
+        cursor: onClick ? 'pointer' : 'default',
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+        <div style={{ minWidth: 0 }}>
+          <Text strong style={{ display: 'block', color: C.ink, fontSize: 15 }}>{school.name}</Text>
+          <Text style={{ display: 'block', marginTop: 3, color: C.subtle, fontSize: 11.5 }}>
+            {[school.batch, school.type].filter(Boolean).join(' · ')}
+          </Text>
+        </div>
+        <Tag color={accessible ? 'green' : 'red'} style={{ flexShrink: 0, margin: 0, borderRadius: 999 }}>
+          {accessible ? '可报名' : '不可报'}
+        </Tag>
+      </div>
+
+      {!accessible && (
+        <div style={{ marginTop: 10, padding: '7px 10px', borderRadius: 8, background: '#f5f2ee', color: C.error, fontSize: 12, fontWeight: 600 }}>
+          新乐考生不可报名
+        </div>
+      )}
+
+      {accessible && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+          <div style={{ minWidth: 92, padding: '8px 10px', borderRadius: 10, background: '#fff6f1' }}>
+            <Text style={{ display: 'block', color: C.subtle, fontSize: 10.5 }}>统招线</Text>
+            <Text strong style={{ color: validScore(school.tongZhao) ? C.primary : C.subtle, fontSize: 14 }}>
+              {validScore(school.tongZhao) ? `${school.tongZhao} 分` : '待更新'}
+            </Text>
+          </div>
+          <div style={{ minWidth: 92, padding: '8px 10px', borderRadius: 10, background: '#eaf7f1' }}>
+            <Text style={{ display: 'block', color: C.subtle, fontSize: 10.5 }}>分配线</Text>
+            <Text strong style={{ color: allocationScore ? C.success : C.subtle, fontSize: 14 }}>
+              {allocationScore ? `${allocationScore} 分` : '待更新'}
+            </Text>
+          </div>
+        </div>
+      )}
+
+      {metaItems.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px', marginTop: 11, color: C.muted, fontSize: 11.5 }}>
+          {metaItems.map(item => <span key={item.text}>{item.icon}<span style={{ marginLeft: 4 }}>{item.text}</span></span>)}
+        </div>
+      )}
+
+      {school.keyFeature && <Text style={{ display: 'block', marginTop: 10, color: C.muted, fontSize: 12, lineHeight: 1.6 }}>{school.keyFeature}</Text>}
+      {detailed && school.intro && <Text style={{ display: 'block', marginTop: 12, color: C.muted, fontSize: 13, lineHeight: 1.75 }}>{school.intro}</Text>}
+      {detailed && school.tips && <div style={{ marginTop: 12, padding: 10, borderRadius: 10, background: C.canvas, color: C.muted, fontSize: 12, lineHeight: 1.7 }}>{school.tips}</div>}
+    </article>
+  )
 }
 
 export default function ParentSchoolsPage() {
+  const isMobile = useIsMobile() ?? false
   const [schools, setSchools] = useState<School[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [filterType, setFilterType] = useState('')
-  const [filterLocation, setFilterLocation] = useState('')
+  const [filter, setFilter] = useState<FilterKey>('all')
   const [detailSchool, setDetailSchool] = useState<School | null>(null)
 
   useEffect(() => {
     fetch('/api/schools')
-      .then(r => r.json())
-      .then(d => { setSchools(d.schools || []); setLoading(false) })
-      .catch((error) => { console.warn('学校数据加载失败', error); setLoading(false) })
+      .then(response => response.json())
+      .then(data => { setSchools(data.schools || []); setLoading(false) })
+      .catch(error => { console.warn('学校数据加载失败', error); setLoading(false) })
   }, [])
 
-  const filtered = useMemo(() => {
-    return schools.filter((s) => {
-      const matchSearch = !search
-        || s.name.includes(search)
-        || s.location.includes(search)
-        || (s.keyFeature || '').includes(search)
-        || (s.intro || '').includes(search)
-      const matchType = !filterType || s.type === filterType
-      const matchLocation = !filterLocation || s.location === filterLocation
-      return matchSearch && matchType && matchLocation
-    })
-  }, [schools, search, filterType, filterLocation])
+  const filtered = useMemo(() => schools.filter(school => {
+    const matchSearch = !search
+      || school.name.includes(search)
+      || school.location.includes(search)
+      || (school.category || '').includes(search)
+      || (school.batch || '').includes(search)
+      || (school.keyFeature || '').includes(search)
+    const matchFilter = filter === 'all'
+      || (filter === 'accessible' && school.xinleAccessible === true)
+      || (filter === 'provincial' && (school.isProvincialDemo || school.type === '省示范' || school.batch === '第一批 省级示范性高中'))
+      || (filter === 'public' && !school.type.includes('民办'))
+      || (filter === 'private' && school.type.includes('民办'))
+    return matchSearch && matchFilter
+  }), [schools, search, filter])
 
-  const locations = [...new Set(schools.map((s) => s.location))] as string[]
-
-  // Group filtered schools by type for tiered display
   const grouped = useMemo(() => {
-    const map = new Map<string, School[]>()
-    for (const t of TYPE_GROUPS) {
-      const group = filtered.filter(s => s.type === t)
-      if (group.length > 0) map.set(t, group)
+    const groups = new Map<string, School[]>()
+    for (const school of filtered) {
+      const category = school.category || '其它学校'
+      const group = groups.get(category) || []
+      group.push(school)
+      groups.set(category, group)
     }
-    // Ungrouped
-    const ungrouped = filtered.filter(s => !TYPE_GROUPS.includes(s.type as typeof TYPE_GROUPS[number]))
-    if (ungrouped.length > 0) map.set('其他', ungrouped)
-    return map
+    return Array.from(groups.entries())
   }, [filtered])
 
+  const accessibleCount = schools.filter(school => school.xinleAccessible === true).length
+
   return (
-    <div style={{ color: C.ink }}>
-      {/* Header */}
-      <div style={{ marginBottom: 24 }}>
-        <Title level={5} style={{ margin: 0, marginBottom: 2, fontSize: 16, color: C.ink }}>
-          高中学校信息
-        </Title>
-        <Text style={{ fontSize: 13, color: C.inkSubtle }}>
-          了解石家庄及新乐周边高中学校详细信息，助力志愿填报
+    <div style={{ width: '100%', maxWidth: '100%', color: C.ink, padding: isMobile ? '0 2px' : 0 }}>
+      <header style={{ marginBottom: 14, padding: '14px 16px', borderRadius: 14, background: '#fff6f1', border: '1px solid rgba(232,120,74,.18)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <img src="/picture/牧哲学堂logo.jpg" alt="牧哲学堂" style={{ width: 28, height: 28, borderRadius: 7, objectFit: 'cover', flexShrink: 0 }} />
+          <Title level={5} style={{ margin: 0, color: C.ink, fontSize: isMobile ? 16 : 18 }}>高中学校库 · 新乐可报名一览</Title>
+        </div>
+        <Text style={{ display: 'block', marginTop: 7, color: C.muted, fontSize: 12, lineHeight: 1.6 }}>
+          绿色 = 新乐考生可报名，灰色 = 不可报名。数据由牧哲学堂整理，仅供参考。
         </Text>
+      </header>
+
+      <div style={{ marginBottom: 12 }}>
+        <Input prefix={<SearchOutlined style={{ color: C.subtle }} />} placeholder="搜索学校、批次或类别" value={search} onChange={event => setSearch(event.target.value)} allowClear />
       </div>
 
-      {/* Search & Filter bar — sticky on mobile */}
-      <div className="school-filter-bar" style={{
-        background: C.surface1,
-        border: `1px solid ${C.hairline}`,
-        borderRadius: 12,
-        padding: '12px 16px',
-        marginBottom: 20,
-        display: 'flex',
-        gap: 10,
-        flexWrap: 'wrap',
-        alignItems: 'center',
-      }}>
-        <Input
-          prefix={<SearchOutlined style={{ color: C.inkSubtle }} />}
-          placeholder="搜索学校名称、特色..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ flex: 1, minWidth: 180 }}
-          allowClear
-          size="middle"
-        />
-        <Select
-          placeholder="学校类型"
-          allowClear
-          getPopupContainer={() => document.body}
-          listHeight={240}
-          style={{ width: 120 }}
-          size="middle"
-          value={filterType || undefined}
-          onChange={v => setFilterType(v || '')}
-          options={TYPE_GROUPS.map(t => ({ label: t, value: t }))}
-        />
-        <Select
-          placeholder="所在地"
-          allowClear
-          getPopupContainer={() => document.body}
-          listHeight={240}
-          style={{ width: 120 }}
-          size="middle"
-          value={filterLocation || undefined}
-          onChange={v => setFilterLocation(v || '')}
-          options={locations.map(l => ({ label: l, value: l }))}
-        />
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', whiteSpace: 'nowrap', paddingBottom: 3, scrollbarWidth: 'none' }}>
+        {FILTERS.map(item => {
+          const active = filter === item.key
+          return <button key={item.key} type="button" onClick={() => setFilter(item.key)} style={{ flexShrink: 0, padding: '6px 13px', borderRadius: 999, border: `1px solid ${active ? C.primary : 'rgba(0,0,0,.1)'}`, background: active ? '#fff3ec' : C.surface, color: active ? C.primary : C.muted, fontSize: 12.5, fontWeight: active ? 700 : 500, cursor: 'pointer' }}>{item.key === 'accessible' ? '✓ 可报名' : item.label}</button>
+        })}
       </div>
 
-      {/* School list — grouped by tier */}
       {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {[1, 2, 3, 4].map(i => (
-            <Skeleton key={i} active paragraph={{ rows: 2 }} title={{ width: 200 }}
-              style={{ background: C.surface1, borderRadius: 14, padding: '16px 20px', border: `1px solid ${C.hairline}` }} />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div style={{
-          textAlign: 'center', padding: 60, color: C.inkSubtle,
-          background: C.surface1, borderRadius: 14, border: `1px solid ${C.hairline}`,
-        }}>
-          <BankOutlined style={{ fontSize: 40, marginBottom: 12, color: C.hairline }} />
-          <div style={{ fontSize: 15 }}>没有找到匹配的学校</div>
-          <div style={{ fontSize: 13, marginTop: 4 }}>尝试调整搜索或筛选条件</div>
-        </div>
+        <div>{[1, 2, 3, 4].map(item => <Skeleton key={item} active paragraph={{ rows: 2 }} style={{ marginBottom: 10, padding: 16, borderRadius: 14, background: C.surface }} />)}</div>
+      ) : grouped.length === 0 ? (
+        <div style={{ padding: 50, textAlign: 'center', borderRadius: 14, background: C.surface, color: C.subtle }}><BankOutlined style={{ display: 'block', marginBottom: 10, fontSize: 36 }} />没有找到匹配的学校</div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-          {Array.from(grouped.entries()).map(([type, groupSchools]) => {
-            const meta = GROUP_META[type] || { label: type, subtitle: '' }
-            return (
-              <div key={type}>
-                {/* Group header */}
-                <div style={{
-                  display: 'flex', alignItems: 'baseline', gap: 8,
-                  marginBottom: 12, paddingBottom: 8,
-                  borderBottom: `1px solid ${C.hairline}`,
-                }}>
-                  <span style={{
-                    width: 6, height: 6, borderRadius: '50%',
-                    background: C.primary, flexShrink: 0,
-                  }} />
-                  <Text strong style={{ fontSize: 14, color: C.ink }}>{meta.label}</Text>
-                  <Text style={{ fontSize: 12, color: C.inkSubtle }}>{meta.subtitle}</Text>
-                  <Text style={{ fontSize: 11, color: C.inkSubtle, marginLeft: 'auto' }}>
-                    {groupSchools.length}所
-                  </Text>
-                </div>
-
-                {/* List rows */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {groupSchools.map(school => (
-                    <SchoolCard
-                      key={school.schoolId}
-                      school={school}
-                      compact
-                      onClick={() => setDetailSchool(school)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )
-          })}
-        </div>
+        <div>{grouped.map(([category, groupSchools]) => <section key={category} style={{ marginBottom: 22 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, paddingLeft: 9, borderLeft: `3px solid ${C.primary}` }}>
+            <Text strong style={{ color: C.ink, fontSize: 14 }}>{category}</Text>
+            <Text style={{ marginLeft: 'auto', color: C.subtle, fontSize: 11 }}>{groupSchools.length} 所</Text>
+          </div>
+          {groupSchools.map(school => <ParentSchoolCard key={school.schoolId} school={school} onClick={() => setDetailSchool(school)} />)}
+        </section>)}</div>
       )}
 
-      {/* Detail Modal */}
-      <Modal
-        title={detailSchool?.name}
-        open={!!detailSchool}
-        onCancel={() => setDetailSchool(null)}
-        footer={null}
-        width={600}
-        style={{ top: 30 }}
-      >
-        {detailSchool && <SchoolCard school={detailSchool} compact={false} />}
+      {!loading && <footer style={{ padding: '4px 0 18px', textAlign: 'center', color: C.subtle, fontSize: 11.5 }}>
+        共 {schools.length} 所 · 可报名 {accessibleCount} 所 · 数据以官方招生计划为准
+      </footer>}
+
+      <Modal title={detailSchool?.name} open={!!detailSchool} onCancel={() => setDetailSchool(null)} footer={null} width={isMobile ? 'calc(100vw - 24px)' : 600} style={{ top: isMobile ? 12 : 30 }}>
+        {detailSchool && <ParentSchoolCard school={detailSchool} detailed />}
       </Modal>
     </div>
   )
