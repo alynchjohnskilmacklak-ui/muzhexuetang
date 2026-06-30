@@ -27,6 +27,7 @@
     "security:check": "node scripts/security-check.mjs",
     "school:missing": "tsx scripts/check-school-info-missing.ts",
     "school:update-info": "tsx scripts/update-school-info-verified.ts",
+    "school:update-all": "tsx scripts/update-school-info-comprehensive.ts",
     "import:master-schools": "tsx scripts/import-master-schools.ts",
     "import:yifenyidang": "tsx scripts/import-yifenyidang.ts",
     "import:allocation": "tsx scripts/import-allocation.ts",
