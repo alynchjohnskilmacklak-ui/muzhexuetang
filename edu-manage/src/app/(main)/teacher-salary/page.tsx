@@ -246,6 +246,8 @@ export default function TeacherSalaryAdminPage() {
   const [configDrawer, setConfigDrawer] = useState({ open: false, teacherId: '', teacherName: '' })
   const [feedbackDrawer, setFeedbackDrawer] = useState({ open: false, teacherId: '', teacherName: '' })
   const [adjustmentModal, setAdjustmentModal] = useState({ open: false, teacherId: '', teacherName: '' })
+  const [pendingDelete, setPendingDelete] = useState<SalaryTransaction | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const query = filterTeacher ? `period=${period}&teacherId=${filterTeacher}` : `period=${period}`
   const { data, isLoading, mutate } = useSWR<SalaryPayload>(`/api/admin/salary?${query}`, fetcher)
 
@@ -254,24 +256,21 @@ export default function TeacherSalaryAdminPage() {
   const transactions = data?.transactions ?? []
   const totalAll = summary.reduce((sum, item) => sum + item.total, 0)
 
-  const deleteManualAdjustment = (transaction: SalaryTransaction) => {
-    Modal.confirm({
-      title: '删除手动调整',
-      content: `确定删除“${transaction.description || '手动调整'}”这条流水吗？删除后工资合计会同步变化。`,
-      okText: '删除',
-      okType: 'danger',
-      cancelText: '取消',
-      async onOk() {
-        const response = await fetch(`/api/admin/salary?id=${encodeURIComponent(transaction.id)}`, { method: 'DELETE' })
-        const data = await response.json()
-        if (!response.ok) {
-          message.error(data.error || '删除失败')
-          throw new Error(data.error || '删除失败')
-        }
-        message.success('手动调整已删除')
-        await mutate()
-      },
-    })
+  const deleteManualAdjustment = async () => {
+    if (!pendingDelete) return
+    setDeleting(true)
+    try {
+      const response = await fetch(`/api/admin/salary?id=${encodeURIComponent(pendingDelete.id)}`, { method: 'DELETE' })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.error || '删除失败')
+      message.success('手动调整已删除')
+      setPendingDelete(null)
+      await mutate()
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '删除失败')
+    } finally {
+      setDeleting(false)
+    }
   }
 
   const summaryColumns = [
@@ -305,7 +304,7 @@ export default function TeacherSalaryAdminPage() {
     {
       title: '操作', key: 'action', width: 80, align: 'center' as const,
       render: (_: unknown, row: SalaryTransaction) => row.type === 'manual_adjust'
-        ? <Button danger type="text" size="small" icon={<DeleteOutlined />} onClick={() => deleteManualAdjustment(row)}>删除</Button>
+        ? <Button danger type="text" size="small" icon={<DeleteOutlined />} onClick={() => setPendingDelete(row)}>删除</Button>
         : null,
     },
   ]
@@ -355,6 +354,19 @@ export default function TeacherSalaryAdminPage() {
 
       <SalaryConfigDrawer {...configDrawer} onClose={() => setConfigDrawer((prev) => ({ ...prev, open: false }))} onSaved={() => mutate()} />
       <SalaryAdjustmentModal {...adjustmentModal} onClose={() => setAdjustmentModal((prev) => ({ ...prev, open: false }))} onSaved={() => mutate()} />
+      <Modal
+        title="删除手动调整"
+        open={Boolean(pendingDelete)}
+        onCancel={() => setPendingDelete(null)}
+        onOk={deleteManualAdjustment}
+        okText="删除"
+        okButtonProps={{ danger: true }}
+        cancelText="取消"
+        confirmLoading={deleting}
+        destroyOnHidden
+      >
+        <Text>确定删除“{pendingDelete?.description || '手动调整'}”这条流水吗？删除后工资合计会同步变化。</Text>
+      </Modal>
       <Drawer open={feedbackDrawer.open} onClose={() => setFeedbackDrawer((prev) => ({ ...prev, open: false }))} title={`课堂反馈 · ${feedbackDrawer.teacherName}`} width={isMobile ? '100%' : 860}>
         {feedbackDrawer.open && <FeedbackTab teacherId={feedbackDrawer.teacherId} />}
       </Drawer>

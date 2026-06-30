@@ -62,7 +62,7 @@ export async function getStudentProfile(
       }),
       prisma.performancePost.findMany({
         where: { studentId, ...visiblePerformancePostWhere, teacher: visibleTeacherWhere, createdAt: { gte: from, lte: to } },
-        select: { id: true, content: true, mood: true, images: true, createdAt: true, teacher: { select: { name: true, subjects: true } } },
+        select: { id: true, type: true, content: true, mood: true, tags: true, images: true, createdAt: true, teacher: { select: { name: true, subjects: true } } },
         orderBy: { createdAt: 'desc' }, take: 50,
       }),
       prisma.attendance.findMany({
@@ -124,6 +124,62 @@ export async function getStudentProfile(
     ? Math.round((inClassRatings.reduce((s, r) => s + r.rating, 0) / inClassRatings.length) * 10) / 10
     : null
 
+  // ── 成长：按周课堂状态、徽章累计和正向亮点 ──
+  const MOOD_SCORE: Record<string, number> = { GREAT: 4, GOOD: 3, OKAY: 2, NEEDS_ATTENTION: 1 }
+  const weekStartOf = (date: Date) => {
+    const value = new Date(date)
+    const day = value.getDay()
+    value.setDate(value.getDate() - (day === 0 ? 6 : day - 1))
+    value.setHours(0, 0, 0, 0)
+    return value.toISOString()
+  }
+  const growthSignals = [
+    ...feedbacks.map(item => ({ mood: item.mood, tags: item.tags || [], createdAt: item.createdAt, teacherName: item.teacher?.name || null, positiveByType: false })),
+    ...posts.map(item => ({ mood: item.mood, tags: item.tags || [], createdAt: item.createdAt, teacherName: item.teacher?.name || null, positiveByType: item.type === 'HIGHLIGHT' })),
+  ]
+  const weekBuckets = new Map<string, number[]>()
+  for (const signal of growthSignals) {
+    if (!signal.mood || !(signal.mood in MOOD_SCORE)) continue
+    const weekStart = weekStartOf(signal.createdAt)
+    const scores = weekBuckets.get(weekStart) || []
+    scores.push(MOOD_SCORE[signal.mood])
+    weekBuckets.set(weekStart, scores)
+  }
+  const moodWeekly = [...weekBuckets.entries()]
+    .map(([weekStart, scores]) => ({
+      weekStart,
+      avg: Math.round((scores.reduce((sum, score) => sum + score, 0) / scores.length) * 10) / 10,
+      count: scores.length,
+    }))
+    .sort((a, b) => a.weekStart.localeCompare(b.weekStart))
+    .slice(-8)
+
+  const badgeAsc = [...badges].sort((a, b) => a.earnedAt.getTime() - b.earnedAt.getTime())
+  let runningBadgeTotal = 0
+  const badgeCumulative = badgeAsc.map(badge => ({ date: badge.earnedAt.toISOString(), total: ++runningBadgeTotal }))
+
+  const POSITIVE_TAG_HINTS = ['表扬', '主动', '进步', '认真', '积极', '优秀', '专注', '提问', '帮助', '榜样']
+  const tagCounter = new Map<string, number>()
+  const praisingTeacherSet = new Set<string>()
+  let praiseFeedbackCount = 0
+  for (const signal of growthSignals) {
+    for (const tag of signal.tags) tagCounter.set(tag, (tagCounter.get(tag) || 0) + 1)
+    const hasPositive = signal.positiveByType || signal.tags.some(tag => POSITIVE_TAG_HINTS.some(hint => tag.includes(hint)))
+    if (hasPositive) {
+      praiseFeedbackCount += 1
+      if (signal.teacherName) praisingTeacherSet.add(signal.teacherName)
+    }
+  }
+  const badgeTypeCounter = new Map<string, number>()
+  for (const badge of badges) badgeTypeCounter.set(badge.badgeType, (badgeTypeCounter.get(badge.badgeType) || 0) + 1)
+  const highlights = {
+    badgeTotal: badges.length,
+    badgesByType: [...badgeTypeCounter.entries()].map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count),
+    praiseCount: praiseFeedbackCount + badges.length,
+    topTags: [...tagCounter.entries()].map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count).slice(0, 8),
+    praisingTeachers: [...praisingTeacherSet],
+  }
+
   // ── 档：成绩趋势（按学科，归一化为百分比）+ 统一时间线 ──
   const trendBySubject: Record<string, { date: Date; pct: number; name: string }[]> = {}
   for (const g of grades) {
@@ -163,6 +219,7 @@ export async function getStudentProfile(
       radar,
     },
     habits: { attendanceRate, moodTimeline, homeworkDoneRate, inClassAvg, inClassRatings },
+    growth: { moodWeekly, badgeCumulative, highlights },
     record: {
       trendBySubject: Object.entries(trendBySubject).map(([subject, points]) => ({ subject, points })),
       timeline: timeline.slice(0, 40),

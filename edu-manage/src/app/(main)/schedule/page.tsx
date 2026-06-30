@@ -12,8 +12,12 @@ import { MobileRoomView } from './MobileRoomView'
 import { OneOnOneModal } from './OneOnOneModal'
 import { ScheduleDetailPanel } from './_components/ScheduleDetailPanel'
 import { ScheduleFormModal } from './_components/ScheduleFormModal'
-import { SCHEDULE_PERIODS } from '@/lib/schedule-periods'
+import { SchedulePeriodSettingsModal } from './_components/SchedulePeriodSettingsModal'
+import { SchedulePeriod } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
+import { useDivision } from '@/contexts/DivisionContext'
+import { useSWRConfig } from 'swr'
 
 const VIEW_TABS = [
   { key: 'room-matrix', label: '教室矩阵' },
@@ -33,6 +37,8 @@ function SchedulePageInner() {
   const router = useRouter()
   const searchParamsHook = useSearchParams()
   const isMobile = useIsMobile() ?? false
+  const { division } = useDivision()
+  const { mutate: mutateSWR } = useSWRConfig()
   const requestedView = searchParamsHook.get('view')
   const urlView = requestedView || (isMobile ? 'teacher-week' : 'room-matrix')
 
@@ -45,8 +51,10 @@ function SchedulePageInner() {
   const [editLesson, setEditLesson] = useState<Record<string, string>>({})
   const [savingLesson, setSavingLesson] = useState(false)
   const [scheduleFormOpen, setScheduleFormOpen] = useState(false)
+  const [periodSettingsOpen, setPeriodSettingsOpen] = useState(false)
+  const { periods, mutate: mutatePeriods } = useSchedulePeriods(division)
 
-  const handleRoomCellClick = (_room: Record<string, unknown>, _period: typeof SCHEDULE_PERIODS[number]) => {
+  const handleRoomCellClick = (_room: Record<string, unknown>, _period: SchedulePeriod) => {
     setScheduleFormOpen(true)
   }
 
@@ -141,6 +149,12 @@ function SchedulePageInner() {
           }}>
             + 新建排课
           </button>
+          <button onClick={() => setPeriodSettingsOpen(true)} style={{
+            padding: '7px 14px', borderRadius: 6, background: '#fff', color: '#5a4e3a',
+            border: '1px solid #EEE7E1', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+          }}>
+            时间段设置
+          </button>
         </div>
       </Card>
 
@@ -175,6 +189,15 @@ function SchedulePageInner() {
 
       <OneOnOneModal open={oneOnOneOpen} onClose={() => setOneOnOneOpen(false)}
         defaultDate={oneOnOneDate} onSuccess={() => setOneOnOneOpen(false)} />
+      <SchedulePeriodSettingsModal
+        open={periodSettingsOpen}
+        periods={periods}
+        onClose={() => setPeriodSettingsOpen(false)}
+        onSaved={() => {
+          mutatePeriods()
+          mutateSWR(key => typeof key === 'string' && key.startsWith('/api/schedules/'))
+        }}
+      />
     </PageLayout>
   )
 }

@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { Card, Empty, Select, Tag, Typography } from 'antd'
 import { ClockCircleOutlined, EnvironmentOutlined, TeamOutlined } from '@ant-design/icons'
-import { SCHEDULE_PERIODS, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
+import { findSchedulePeriod, PERIOD_BG, SchedulePeriod } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { fmtDate } from '@/lib/format-date'
 
@@ -37,7 +37,7 @@ function getLessonStatus(lesson: any): { text: string; color: string; deducted: 
   return { text: '待老师确认', color: 'orange', deducted: '待确认' }
 }
 
-export function ParentScheduleClient({ students, lessons }: { students: any[]; lessons: any[] }) {
+export function ParentScheduleClient({ students, lessons, periods }: { students: any[]; lessons: any[]; periods: SchedulePeriod[] }) {
   const isMobile = useIsMobile() ?? false
   const isTablet = useIsMobile(1025) ?? false
   const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || '')
@@ -60,16 +60,16 @@ export function ParentScheduleClient({ students, lessons }: { students: any[]; l
   const grid = useMemo(() => {
     const map: Record<string, any[]> = {}
     for (let d = 0; d < 7; d++) {
-      for (const p of SCHEDULE_PERIODS) map[`${d}-${p.id}`] = []
+      for (const p of periods) map[`${d}-${p.id}`] = []
     }
     childLessons.forEach((l: any) => {
       const ld = new Date(l.lessonDate)
       const dayIdx = (ld.getDay() + 6) % 7
-      const period = SCHEDULE_PERIODS.find(p => p.type === 'CLASS' && p.start === l.startTime)
+      const period = findSchedulePeriod(periods, l.startTime)
       if (period) map[`${dayIdx}-${period.id}`]?.push(l)
     })
     return map
-  }, [childLessons])
+  }, [childLessons, periods])
 
   const selectedStudent = students.find(s => s.id === selectedStudentId)
   const mobileLessons = useMemo(() => [...childLessons].sort((a, b) =>
@@ -138,7 +138,7 @@ export function ParentScheduleClient({ students, lessons }: { students: any[]; l
                 </div>
               )
             })}
-            {SCHEDULE_PERIODS.map(period => {
+            {periods.map(period => {
               const h = period.type === 'CLASS' ? 70 : period.type === 'BIG_BREAK' ? 20 : period.type === 'LUNCH' ? 24 : 16
               return (
                 <div key={period.id} style={{ display: 'contents' }}>

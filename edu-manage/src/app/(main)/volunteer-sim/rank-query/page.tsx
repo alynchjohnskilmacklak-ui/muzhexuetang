@@ -120,8 +120,6 @@ export default function RankQueryPage() {
       const idx = curScore >= 780 && curScore <= 800 ? 0 : SEGMENTS.findIndex(sg => curScore <= sg[0] && curScore >= sg[1])
       if (idx >= 0 && idx !== curSeg) { curSeg = idx; buildTabs() }
       buildTable()
-      const current = tbodyEl.querySelector('tr.cur')
-      if (current) current.scrollIntoView({ block: 'nearest' })
     }
     function update() {
       const isTopBand = curScore >= 780 && curScore <= 800

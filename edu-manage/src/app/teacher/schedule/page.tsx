@@ -4,8 +4,9 @@ import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { Card, Empty, Spin, Tag, Typography } from 'antd'
 import { BellOutlined, ClockCircleOutlined, CoffeeOutlined, EnvironmentOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
-import { SCHEDULE_PERIODS, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
+import { findSchedulePeriod, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
 
 const { Title, Text } = Typography
 const fetcher = (url: string) => fetch(url).then(r => r.json())
@@ -42,6 +43,7 @@ export default function TeacherSchedulePage() {
   const isTablet = useIsMobile(1025) ?? false
   const [scheduleType, setScheduleType] = useState<'group'|'intensive'>('group')
   const [weekOffset, setWeekOffset] = useState(0)
+  const { periods } = useSchedulePeriods()
   const { start, end } = getWeekRange(weekOffset)
   const startDate = start.toISOString().slice(0,10)
   const endDate = end.toISOString().slice(0,10)
@@ -77,16 +79,16 @@ export default function TeacherSchedulePage() {
   const groupGrid = useMemo(() => {
     const map: Record<string, any[]> = {}
     for (let d = 0; d < 7; d++) {
-      for (const p of SCHEDULE_PERIODS) map[`${d}-${p.id}`] = []
+      for (const p of periods) map[`${d}-${p.id}`] = []
     }
     for (const lesson of groupLessons) {
       const ld = new Date(lesson.lessonDate)
       const dayIdx = (ld.getDay() + 6) % 7
-      const period = SCHEDULE_PERIODS.find(p => p.type === 'CLASS' && p.start === lesson.startTime)
+      const period = findSchedulePeriod(periods, lesson.startTime)
       if (period) map[`${dayIdx}-${period.id}`]?.push(lesson)
     }
     return map
-  }, [groupLessons])
+  }, [groupLessons, periods])
 
   // Intensive grid: day × hour slot
   const intensiveGrid = useMemo(() => {
@@ -225,7 +227,7 @@ export default function TeacherSchedulePage() {
                     </div>
                   )
                 })}
-                {SCHEDULE_PERIODS.map(period => {
+                {periods.map(period => {
                   const h = period.type === 'CLASS' ? PERIOD_HEIGHTS.CLASS : period.type === 'BIG_BREAK' ? 20 : period.type === 'LUNCH' ? 22 : 16
                   return (
                     <div key={period.id} style={{ display: 'contents' }}>

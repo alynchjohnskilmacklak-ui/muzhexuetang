@@ -6,6 +6,7 @@ set -euo pipefail
 APP_DIR="${APP_DIR:-/opt/edu-manage}"
 PORT="${1:-3000}"
 TAR_FILE="$(ls -t edu-manage-deploy-*.tar.gz 2>/dev/null | head -1)"
+UPLOAD_BACKUP_DIR="/tmp/edu-manage-uploads-backup"
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "请用 root 执行: sudo bash deploy-server.sh"
@@ -26,19 +27,34 @@ fi
 echo "=== 2. 停止旧服务 ==="
 pm2 delete edu-manage 2>/dev/null || true
 
-echo "=== 3. 解压到 ${APP_DIR} ==="
+echo "=== 3. 备份环境变量和上传文件 ==="
+cp "${APP_DIR}/.env" /tmp/edu-manage.env.bak 2>/dev/null || true
+rm -rf "${UPLOAD_BACKUP_DIR}"
+mkdir -p "${UPLOAD_BACKUP_DIR}"
+cp -r "${APP_DIR}/public/uploads" "${UPLOAD_BACKUP_DIR}/" 2>/dev/null || true
+
+echo "=== 4. 解压到 ${APP_DIR} ==="
 rm -rf "${APP_DIR}"
 mkdir -p "${APP_DIR}"
 tar -xzf "${TAR_FILE}" -C "${APP_DIR}"
 
-echo "=== 4. 数据库迁移 ==="
+echo "=== 5. 恢复环境变量和上传文件 ==="
 cd "${APP_DIR}"
+cp /tmp/edu-manage.env.bak .env 2>/dev/null || true
+mkdir -p public
+cp -r "${UPLOAD_BACKUP_DIR}/uploads" public/ 2>/dev/null || true
+
+echo "=== 6. 安装依赖并执行迁移 ==="
+npm install
+npm run migrate:all
 npx prisma generate
 bash scripts/db-sync-all.sh
+rm -rf .next
+npm run build
 
-echo "=== 5. 启动服务 ==="
+echo "=== 7. 启动服务 ==="
 npm install -g pm2 2>/dev/null || true
-pm2 start npm --name edu-manage -- start -- -p "${PORT}"
+pm2 start npm --name edu-manage --cwd "${APP_DIR}" -- start -- -p "${PORT}"
 pm2 save
 pm2 startup systemd -u root --hp /root 2>/dev/null || true
 

@@ -3,6 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ParentScheduleClient } from './client'
 import { parentActiveEnrollmentWhere, parentActiveStudentWhere, parentVisibleLessonWhere } from '@/lib/business-visibility'
+import { normalizeSchedulePeriods } from '@/lib/schedule-periods'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,10 +14,10 @@ export default async function ParentSchedulePage() {
   const userId = (session.user as { id: string }).id
   const db = await getRequestPrisma()
 
-  const students = await db.student.findMany({
+  const [students, config] = await Promise.all([db.student.findMany({
     where: parentActiveStudentWhere(userId),
     select: { id: true, name: true, grade: true },
-  })
+  }), db.systemConfig.findUnique({ where: { id: 'singleton' }, select: { schedulePeriods: true } })])
 
   const today = new Date()
   const monday = new Date(today)
@@ -38,5 +39,5 @@ export default async function ParentSchedulePage() {
     orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
   })
 
-  return <ParentScheduleClient students={JSON.parse(JSON.stringify(students))} lessons={JSON.parse(JSON.stringify(lessons))} />
+  return <ParentScheduleClient students={JSON.parse(JSON.stringify(students))} lessons={JSON.parse(JSON.stringify(lessons))} periods={normalizeSchedulePeriods(config?.schedulePeriods)} />
 }

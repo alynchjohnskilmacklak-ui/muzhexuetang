@@ -7,7 +7,7 @@ import { addDays, subDays } from 'date-fns'
 import { Spin, Empty } from 'antd'
 import useSWR from 'swr'
 import { useDivision } from '@/contexts/DivisionContext'
-import { SCHEDULE_PERIODS, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
+import { normalizeSchedulePeriods, PERIOD_HEIGHTS, PERIOD_BG, SchedulePeriod } from '@/lib/schedule-periods'
 
 const TYPE_LABELS: Record<string, string> = {
   GROUP: '精品班课', ONE_ON_ONE: '一对一', SMALL_GROUP: '小组课',
@@ -32,7 +32,7 @@ export function RoomMatrixView({
 }: {
   selectedDate: Date
   setSelectedDate: (d: Date) => void
-  onCellClick: (room: Record<string, unknown>, period: typeof SCHEDULE_PERIODS[number]) => void
+  onCellClick: (room: Record<string, unknown>, period: SchedulePeriod) => void
   onLessonClick: (lesson: Record<string, unknown>) => void
   onNewCourseClick?: () => void
 }) {
@@ -42,6 +42,7 @@ export function RoomMatrixView({
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
 
   const matrix = (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown> | Record<string, unknown>[]>>
+  const periods = normalizeSchedulePeriods(daily?.periods)
   const allRooms: Record<string, unknown>[] = Array.isArray(roomsData) ? roomsData : []
   const rooms = allRooms.filter(r => {
     const t = (r.type as string || '').toLowerCase()
@@ -95,7 +96,7 @@ export function RoomMatrixView({
                 <div style={{ fontSize: 9, color: '#E8784A', marginTop: 2, fontWeight: 500 }}>课表</div>
               </div>
             ))}
-            {SCHEDULE_PERIODS.map(period => (
+            {periods.map(period => (
               <div key={period.id} style={{ display: 'contents' }}>
                 <div style={{
                   minHeight: PERIOD_HEIGHTS[period.type], background: PERIOD_BG[period.type],

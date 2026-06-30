@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatHours } from '@/lib/format'
-import { fmtDate } from '@/lib/format-date'
+import { fmtDate, fmtDateTime } from '@/lib/format-date'
 
 const { Title, Text } = Typography
 
@@ -16,6 +16,23 @@ const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> =
   LEAVE: { label: '请假', color: '#BA7517', bg: '#FAEEDA' },
   ABSENT: { label: '旷课', color: '#E24B4A', bg: '#FCEBEB' },
   MAKEUP: { label: '补课', color: '#534AB7', bg: '#EEEDFE' },
+}
+
+function MakeupStatusLine({ record }: { record: any }) {
+  if (!['ABSENT', 'LEAVE'].includes(record.status)) return null
+  const makeup = record.makeupRequest
+  if (makeup?.status === 'CANCELLED') return null
+  if (!makeup) return <Text type="secondary" style={{ fontSize: 12 }}>补课待安排</Text>
+  if (makeup.status === 'PENDING') return <Tag color="orange" style={{ margin: 0 }}>补课安排中</Tag>
+  if (makeup.status === 'COMPLETED') return <Tag style={{ margin: 0 }}>已补课完成</Tag>
+  if (makeup.status === 'ARRANGED') return (
+    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
+      <Tag color="green" style={{ margin: 0 }}>已安排补课</Tag>
+      {makeup.makeupDate && <Text style={{ fontSize: 12 }}>{fmtDateTime(makeup.makeupDate)}</Text>}
+      {makeup.note && <Text type="secondary" style={{ fontSize: 12 }}>{makeup.note}</Text>}
+    </div>
+  )
+  return null
 }
 
 export function ParentAttendanceClient({ records, students }: { records: any[]; students: any[] }) {
@@ -39,6 +56,8 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
     present: filteredRecords.filter((r: any) => r.status === 'PRESENT').length,
     leave: filteredRecords.filter((r: any) => r.status === 'LEAVE').length,
     absent: filteredRecords.filter((r: any) => r.status === 'ABSENT').length,
+    arrangedCount: filteredRecords.filter((r: any) => r.makeupRequest?.status === 'ARRANGED').length,
+    pendingCount: filteredRecords.filter((r: any) => r.makeupRequest?.status === 'PENDING').length,
     totalHours: filteredRecords.filter((r: any) => r.status === 'PRESENT' || r.status === 'ABSENT')
       .reduce((s: number, r: any) => s + (r.hoursDeducted || 0), 0),
     total: filteredRecords.length,
@@ -82,6 +101,12 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
           </Card>
         ))}
       </div>
+
+      {stats.absent > 0 && (
+        <div style={{ margin: '-6px 0 16px', padding: '8px 12px', borderRadius: 10, background: '#FFF3EC', color: '#5a4e3a', fontSize: 12 }}>
+          本月 {stats.absent} 次缺勤 · {stats.arrangedCount} 次已安排补课 · {stats.pendingCount} 次待安排
+        </div>
+      )}
 
       {/* Monthly Calendar */}
       <Card bordered={false} style={{ borderRadius: 10, background: '#fff', border: '1px solid #EEE7E1', marginBottom: 16 }} title={`${today.getMonth() + 1}月考勤日历`}>
@@ -130,6 +155,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
                     <span>{record.lesson?.group?.course?.name || record.lesson?.group?.name || '-'}</span>
                     <span>{fmtDate(record.createdAt)}</span>
                     <span>扣课时：{formatHours(record.hoursDeducted)}</span>
+                    <div style={{ marginTop: 4, paddingLeft: 8 }}><MakeupStatusLine record={record} /></div>
                   </div>
                 </div>
               )
@@ -147,9 +173,9 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
             { title: '课程', dataIndex: ['lesson', 'group', 'course', 'name'], key: 'course', ellipsis: true },
             { title: '日期', key: 'date', width: 100, render: (_: any, r: any) => fmtDate(r.createdAt) },
             { title: '状态', dataIndex: 'status', key: 'status', width: 80,
-              render: (s: string) => {
+              render: (s: string, record: any) => {
                 const m = STATUS_MAP[s] || { label: s, color: 'default', bg: 'transparent' }
-                return <Tag color={m.color}>{m.label}</Tag>
+                return <div style={{ display: 'grid', gap: 5 }}><Tag color={m.color} style={{ width: 'fit-content', margin: 0 }}>{m.label}</Tag><MakeupStatusLine record={record} /></div>
               }},
             { title: '扣课时', dataIndex: 'hoursDeducted', key: 'hours', width: 70,
               render: (v: number) => v > 0 ? <Text style={{ color: '#E24B4A' }}>-{formatHours(v)}</Text> : <Text type="secondary">0</Text> },

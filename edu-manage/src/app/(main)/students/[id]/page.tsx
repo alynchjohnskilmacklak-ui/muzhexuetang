@@ -4,9 +4,10 @@ import { useState } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
 import { Button, Card, Col, Descriptions, Empty, Form, Input, Modal, Progress, Radio, Row, Select, Spin, Statistic, Table, Tag, message } from 'antd'
-import { ArrowLeftOutlined, DisconnectOutlined, LinkOutlined, UserAddOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, DisconnectOutlined, HeartOutlined, LinkOutlined, MessageOutlined, UserAddOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { formatHours } from '@/lib/format'
+import { ImageUploader } from '@/app/(main)/performance/_components/ImageUploader'
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
@@ -22,6 +23,14 @@ export default function StudentDetailPage() {
   const [parentModalOpen, setParentModalOpen] = useState(false)
   const [parentMode, setParentMode] = useState<'existing' | 'new'>('existing')
   const [linkingParent, setLinkingParent] = useState(false)
+  const [quickPraiseOpen, setQuickPraiseOpen] = useState(false)
+  const [growthFeedbackOpen, setGrowthFeedbackOpen] = useState(false)
+  const [submittingFeedback, setSubmittingFeedback] = useState(false)
+  const [quickPraise, setQuickPraise] = useState('')
+  const [feedbackContent, setFeedbackContent] = useState('')
+  const [feedbackMood, setFeedbackMood] = useState('GOOD')
+  const [feedbackTags, setFeedbackTags] = useState<string[]>([])
+  const [feedbackImages, setFeedbackImages] = useState<string[]>([])
   const [parentForm] = Form.useForm()
   const parentAccounts = Array.isArray(parentAccountsData?.accounts) ? parentAccountsData.accounts : []
 
@@ -87,11 +96,56 @@ export default function StudentDetailPage() {
     }
   }
 
+  const submitStudentFeedback = async (quick: boolean) => {
+    const content = (quick ? quickPraise : feedbackContent).trim()
+    if (!content) {
+      message.error(quick ? '请填写表扬内容' : '请填写成长反馈')
+      return
+    }
+    setSubmittingFeedback(true)
+    try {
+      const res = await fetch('/api/performance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentId: student.id,
+          type: quick ? 'HIGHLIGHT' : 'DAILY',
+          mood: quick ? 'GREAT' : feedbackMood,
+          visibility: 'PARENT_ONLY',
+          content,
+          tags: quick ? ['表扬'] : feedbackTags,
+          images: quick ? [] : feedbackImages,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || '发送失败')
+      message.success(quick ? '表扬已发送给家长' : '成长反馈已发送给家长')
+      if (quick) {
+        setQuickPraise('')
+        setQuickPraiseOpen(false)
+      } else {
+        setFeedbackContent('')
+        setFeedbackMood('GOOD')
+        setFeedbackTags([])
+        setFeedbackImages([])
+        setGrowthFeedbackOpen(false)
+      }
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '发送失败，请重试')
+    } finally {
+      setSubmittingFeedback(false)
+    }
+  }
+
   return (
     <PageLayout
       title={student.name}
       subtitle={`${student.grade || '未设年级'} · ${student.school || '未填写学校'} · ${student.status || '-'}`}
-      actions={<Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/students')}>返回学员管理</Button>}
+      actions={<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <Button icon={<HeartOutlined />} style={{ background: '#1D9E75', borderColor: '#1D9E75', color: '#ffffff' }} onClick={() => setQuickPraiseOpen(true)}>快速表扬</Button>
+        <Button icon={<MessageOutlined />} style={{ background: '#534AB7', borderColor: '#534AB7', color: '#ffffff' }} onClick={() => setGrowthFeedbackOpen(true)}>成长反馈</Button>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/students')}>返回学员管理</Button>
+      </div>}
     >
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={12} lg={6}><Metric title="剩余课时" value={formatHours(remainHours)} /></Col>
@@ -171,6 +225,38 @@ export default function StudentDetailPage() {
           </Card>
         </Col>
       </Row>
+
+      <Modal
+        title={`快速表扬 · ${student.name}`}
+        open={quickPraiseOpen}
+        onCancel={() => setQuickPraiseOpen(false)}
+        onOk={() => submitStudentFeedback(true)}
+        confirmLoading={submittingFeedback}
+        okText="发送表扬"
+        cancelText="取消"
+        okButtonProps={{ style: { background: '#1D9E75', borderColor: '#1D9E75' } }}
+      >
+        <Input.TextArea value={quickPraise} onChange={event => setQuickPraise(event.target.value)} maxLength={300} showCount rows={4} placeholder="如：今天主动帮同学讲题，很棒！" />
+      </Modal>
+
+      <Modal
+        title={`成长反馈 · ${student.name}`}
+        open={growthFeedbackOpen}
+        onCancel={() => setGrowthFeedbackOpen(false)}
+        onOk={() => submitStudentFeedback(false)}
+        confirmLoading={submittingFeedback}
+        okText="发送反馈"
+        cancelText="取消"
+        width={640}
+        okButtonProps={{ style: { background: '#534AB7', borderColor: '#534AB7' } }}
+      >
+        <div style={{ display: 'grid', gap: 16 }}>
+          <div><div style={{ marginBottom: 6 }}>反馈内容</div><Input.TextArea value={feedbackContent} onChange={event => setFeedbackContent(event.target.value)} maxLength={300} showCount rows={5} placeholder="记录孩子今天的课堂表现与成长变化" /></div>
+          <div><div style={{ marginBottom: 6 }}>课堂状态</div><Radio.Group value={feedbackMood} onChange={event => setFeedbackMood(event.target.value)} optionType="button" buttonStyle="solid" options={[{ label: '很棒', value: 'GREAT' }, { label: '良好', value: 'GOOD' }, { label: '一般', value: 'OKAY' }, { label: '需关注', value: 'NEEDS_ATTENTION' }]} /></div>
+          <div><div style={{ marginBottom: 6 }}>表现标签</div><Select mode="tags" value={feedbackTags} onChange={setFeedbackTags} maxCount={20} maxTagCount="responsive" tokenSeparators={[',', '，', '、']} placeholder="输入标签后回车，如：主动提问" style={{ width: '100%' }} /></div>
+          <div><div style={{ marginBottom: 6 }}>课堂图片（可选）</div><ImageUploader value={feedbackImages} onChange={setFeedbackImages} /></div>
+        </div>
+      </Modal>
 
       <Modal
         title={student.parent ? '更换或合并家长账号' : '绑定家长账号'}

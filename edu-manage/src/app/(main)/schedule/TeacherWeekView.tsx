@@ -5,8 +5,9 @@ import { format, addDays, startOfWeek } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { Spin, Empty, Select, Typography } from 'antd'
 import useSWR from 'swr'
-import { SCHEDULE_PERIODS, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
+import { findSchedulePeriod, PERIOD_HEIGHTS, PERIOD_BG, SchedulePeriod } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
 
 const { Text } = Typography
 
@@ -33,19 +34,8 @@ const TYPE_LABELS: Record<string, string> = {
 
 const fetcher = (url: string) => fetch(url).then(r => r.ok ? r.json() : Promise.reject('load error'))
 
-function findBestPeriodId(startTime: string): string | null {
-  const exact = SCHEDULE_PERIODS.find(p => p.type === 'CLASS' && p.start === startTime)
-  if (exact) return exact.id
-
-  const [hour, minute = 0] = startTime.split(':').map(Number)
-  const startMin = hour * 60 + minute
-  const within = SCHEDULE_PERIODS.find(p => {
-    if (p.type !== 'CLASS') return false
-    const [periodHour, periodMinute = 0] = p.start.split(':').map(Number)
-    const [endHour, endMinute = 0] = p.end.split(':').map(Number)
-    return periodHour * 60 + periodMinute <= startMin && startMin < endHour * 60 + endMinute
-  })
-  return within?.id || null
+function findBestPeriodId(periods: SchedulePeriod[], startTime: string): string | null {
+  return findSchedulePeriod(periods, startTime)?.id || null
 }
 
 export function TeacherWeekView({
@@ -56,6 +46,7 @@ export function TeacherWeekView({
   const isTablet = useIsMobile(1025) ?? false
   const [selectedTeacherId, setSelectedTeacherId] = useState<string | undefined>()
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
+  const { periods } = useSchedulePeriods()
 
   const { data: teachersData, isLoading: loadingTeachers } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
   const teacherList: Record<string, unknown>[] = Array.isArray(teachersData?.teachers)
@@ -87,7 +78,7 @@ export function TeacherWeekView({
     filteredLessons.forEach((l: Record<string, unknown>) => {
       const dateKey = format(new Date(l.lessonDate as string), 'yyyy-MM-dd')
       const startTime = l.startTime as string
-      const periodId = findBestPeriodId(startTime)
+      const periodId = findBestPeriodId(periods, startTime)
       if (periodId) {
         if (!map[dateKey]) map[dateKey] = {}
         if (!map[dateKey][periodId]) map[dateKey][periodId] = []
@@ -95,7 +86,7 @@ export function TeacherWeekView({
       }
     })
     return map
-  }, [filteredLessons])
+  }, [filteredLessons, periods])
 
   const selectedTeacher = teacherList.find(t => t.id === selectedTeacherId)
   const teacherColor = selectedTeacherId ? getTeacherColor(selectedTeacherId) : '#E8784A'
@@ -174,7 +165,7 @@ export function TeacherWeekView({
             })}
 
             {/* Period rows */}
-            {SCHEDULE_PERIODS.map(period => {
+            {periods.map(period => {
               const displayHeight = period.type === 'CLASS' ? PERIOD_HEIGHTS.CLASS
                 : period.type === 'BIG_BREAK' ? 18
                 : period.type === 'LUNCH' ? 22

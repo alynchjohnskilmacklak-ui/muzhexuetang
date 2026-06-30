@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
-import { CLASS_PERIODS_ONLY, getPeriodId } from '@/lib/schedule-periods'
+import { findSchedulePeriod, normalizeSchedulePeriods } from '@/lib/schedule-periods'
 import { activeEnrollmentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
@@ -12,6 +12,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
   const prisma = await getRequestPrisma()
+  const config = await prisma.systemConfig.findUnique({ where: { id: 'singleton' }, select: { schedulePeriods: true } })
+  const periods = normalizeSchedulePeriods(config?.schedulePeriods)
 
   const { searchParams } = new URL(req.url)
   const dateStr = searchParams.get('date') || new Date().toISOString().slice(0, 10)
@@ -51,17 +53,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   for (const lesson of lessons) {
     const roomId = lesson.group?.room?.id || 'unknown'
-    let periodId = getPeriodId(lesson.startTime)
-    if (!periodId) {
-      const [lessonHour, lessonMinute = 0] = lesson.startTime.split(':').map(Number)
-      const startMin = lessonHour * 60 + lessonMinute
-      const within = CLASS_PERIODS_ONLY.find((period) => {
-        const [periodHour, periodMinute = 0] = period.start.split(':').map(Number)
-        const [endHour, endMinute = 0] = period.end.split(':').map(Number)
-        return periodHour * 60 + periodMinute <= startMin && startMin < endHour * 60 + endMinute
-      })
-      if (within) periodId = within.id
-    }
+    const periodId = findSchedulePeriod(periods, lesson.startTime)?.id || null
     if (!periodId) continue
 
     if (!matrix[roomId]) matrix[roomId] = {}
@@ -80,5 +72,5 @@ export const GET = apiHandler(async (req: NextRequest) => {
     })
   }
 
-  return NextResponse.json({ date: dateStr, matrix })
+  return NextResponse.json({ date: dateStr, matrix, periods })
 })

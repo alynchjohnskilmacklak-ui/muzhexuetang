@@ -25,6 +25,7 @@ export default async function ParentAttendancePage() {
     include: {
       student: { select: { id: true, name: true } },
       lesson: { include: { group: { select: { id: true, name: true, course: { select: { name: true } } } } } },
+      makeupRequest: { select: { status: true, makeupDate: true, note: true } },
     },
     orderBy: { createdAt: 'desc' },
   })

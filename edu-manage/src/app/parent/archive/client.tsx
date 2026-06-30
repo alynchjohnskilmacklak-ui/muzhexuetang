@@ -5,7 +5,7 @@ import { Card, Empty, Select, Tag, Typography, Progress, Spin, Modal, Image, But
 import {
   FileTextOutlined, MessageOutlined, HeartOutlined, TrophyOutlined,
   RiseOutlined, FlagOutlined, BookOutlined, CheckCircleOutlined,
-  DashboardOutlined, DownloadOutlined,
+  DashboardOutlined, DownloadOutlined, RightOutlined,
 } from '@ant-design/icons'
 import { toast } from 'sonner'
 import useSWR from 'swr'
@@ -27,21 +27,16 @@ const TYPE_COLOR: Record<string, string> = {
   paper: '#E8784A', feedback: '#534AB7', post: '#E8784A',
   badge: '#EF9F27', grade: '#1D9E75', goal: '#534AB7',
 }
-const TIMELINE_SOURCE: Record<string, { label: string; color: string }> = {
-  paper: { label: '试卷模块 → 学', color: '#0F6E56' },
-  feedback: { label: '课堂反馈 → 习', color: '#854F0B' },
-  post: { label: '成长反馈 → 档', color: '#3C3489' },
-  badge: { label: '成长反馈 → 案', color: '#854F0B' },
-  grade: { label: '成绩录入 → 档', color: '#993C1D' },
-  goal: { label: '学习目标 → 案', color: '#3C3489' },
+const TIMELINE_LABEL: Record<string, string> = {
+  paper: '试卷', feedback: '课堂反馈', post: '成长反馈', badge: '徽章', grade: '成绩', goal: '学习目标',
 }
 
 const FILTER_CHIPS = [
   { key: '', label: '全部' },
-  { key: 'study', label: '学', types: ['paper'] },
-  { key: 'habit', label: '习', types: ['feedback'] },
-  { key: 'record', label: '档', types: ['post', 'grade'] },
-  { key: 'case', label: '案', types: ['badge', 'goal'] },
+  { key: 'study', label: '学习', types: ['paper'] },
+  { key: 'habit', label: '课堂', types: ['feedback'] },
+  { key: 'record', label: '成长', types: ['post', 'grade'] },
+  { key: 'case', label: '目标', types: ['badge', 'goal'] },
 ]
 
 type InitialData = { children: { id: string; name: string }[]; activeStudentId: string | null; profile: StudentProfile }
@@ -50,16 +45,6 @@ const fetcher = (url: string) => fetch(url).then(async r => { const d = await r.
 function formatTeacherLabel(item?: { teacher?: string; teacherSubject?: string }) {
   if (!item?.teacher) return ''
   return `${item.teacher} 老师${item.teacherSubject ? ` · ${item.teacherSubject}` : ''}`
-}
-
-/** Compute trend arrow from subject trend data */
-function trendArrow(points: { pct: number }[]): string {
-  if (points.length < 2) return ''
-  const first = points[0]?.pct ?? 0, last = points[points.length - 1]?.pct ?? 0
-  const diff = last - first
-  if (diff >= 5) return `↑${diff}`
-  if (diff <= -5) return `↓${Math.abs(diff)}`
-  return ''
 }
 
 function timelineKey(item: { type?: string; refId?: string; id?: string }, index: number) {
@@ -76,12 +61,14 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const reportRef = useRef<HTMLDivElement>(null)
-  const timelineRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const timelineRefs = useRef<Record<string, HTMLElement | null>>({})
   const [studentId, setStudentId] = useState(searchParams.get('studentId') || initial.activeStudentId || '')
   const [months, setMonths] = useState(6)
   const [timeFilter, setTimeFilter] = useState('')
   const [studyOpen, setStudyOpen] = useState(false)
   const [habitOpen, setHabitOpen] = useState(false)
+  const [trendOpen, setTrendOpen] = useState(false)
+  const [showAllTimeline, setShowAllTimeline] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [detailItem, setDetailItem] = useState<any>(null)
@@ -157,12 +144,6 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
 
   const loadingMask = isLoading && <div style={{ textAlign: 'center', padding: 40 }}><Spin size="large" /></div>
 
-  // Trend arrows for recent activity
-  const trendSignals = profile?.record.trendBySubject.map(s => ({
-    subject: s.subject,
-    arrow: trendArrow(s.points as { pct: number }[]),
-  })).filter(s => s.arrow) || []
-
   const reportTrendOption = profile?.record.trendBySubject.length ? {
     tooltip: { trigger: 'axis' }, legend: { bottom: 0, textStyle: { fontSize: 9, color: '#333' } },
     grid: { left: 40, right: 20, top: 20, bottom: 30 },
@@ -170,6 +151,48 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
     yAxis: { type: 'value' as const, min: 0, max: 100, axisLabel: { fontSize: 8, formatter: '{value}%', color: '#333' } },
     series: profile.record.trendBySubject.map((subj, idx) => ({ name: subj.subject, type: 'line' as const, smooth: true, data: subj.points.map(p => [p.date, p.pct]), symbol: 'circle' as const, symbolSize: 3, lineStyle: { width: 2 }, color: ['#1D9E75','#E8784A','#534AB7','#EF9F27'][idx % 4] })),
   } : null
+
+  const moodWeekly = profile?.growth.moodWeekly || []
+  const moodTrendText = moodWeekly.length >= 2
+    ? moodWeekly[moodWeekly.length - 1].avg - moodWeekly[0].avg >= 0.5
+      ? '📈 最近课堂状态在变好'
+      : moodWeekly[moodWeekly.length - 1].avg - moodWeekly[0].avg <= -0.5
+        ? '📉 最近状态有波动，可和老师聊聊'
+        : '➡️ 课堂状态保持平稳'
+    : ''
+  const moodTrendOption = moodWeekly.length >= 2 ? {
+    tooltip: {
+      trigger: 'axis' as const,
+      formatter: (params: Array<{ data: { value: number; count: number }; axisValueLabel: string }>) => {
+        const point = params[0]
+        if (!point) return ''
+        return `${point.axisValueLabel}<br/>课堂状态：${point.data.value}${point.data.count <= 1 ? '<br/>（本周反馈较少，仅供参考）' : ''}`
+      },
+    },
+    grid: { left: 46, right: 16, top: 20, bottom: 30 },
+    xAxis: { type: 'category' as const, data: moodWeekly.map(point => fmtDate(point.weekStart).replace('月', '/').replace('日', '')), axisLabel: { fontSize: 10, color: '#5a4e3a' } },
+    yAxis: { type: 'value' as const, min: 1, max: 4, interval: 1, axisLabel: { fontSize: 10, color: '#5a4e3a', formatter: (value: number) => ({ 1: '关注', 2: '一般', 3: '好', 4: '棒' }[value] || '') } },
+    series: [{
+      type: 'line' as const,
+      smooth: true,
+      data: moodWeekly.map(point => ({
+        value: point.avg,
+        count: point.count,
+        symbol: 'circle',
+        symbolSize: point.count <= 1 ? 8 : 6,
+        itemStyle: point.count <= 1 ? { color: '#ffffff', borderColor: '#E8784A', borderWidth: 2 } : { color: '#E8784A' },
+      })),
+      lineStyle: { color: '#E8784A', width: 2 },
+      areaStyle: { color: 'rgba(232,120,74,.12)' },
+    }],
+  } : null
+  const teacherUpdates = profile?.record.timeline.filter(item => item.type === 'feedback' || item.type === 'post') || []
+  const latestTeacherUpdate = teacherUpdates[0]
+  const highlights = profile?.growth.highlights
+  const hasHighlights = Boolean(highlights && (highlights.badgeTotal > 0 || highlights.praiseCount > 0 || highlights.topTags.length > 0))
+  const hasTrendData = Boolean(moodTrendOption || profile?.growth.badgeCumulative.length || profile?.habits.attendanceRate !== null)
+  const hasStudyData = Boolean(profile && (profile.study.mastery.total > 0 || profile.study.weaknesses.length > 0 || profile.study.radar.length > 0))
+  const hasHabitData = Boolean(profile && (profile.habits.moodTimeline.length > 0 || profile.habits.homeworkDoneRate !== null || profile.habits.inClassAvg !== null))
 
   return (
     <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 4px' }}>
@@ -185,14 +208,13 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
       {!profile && !isLoading && <Card bordered={false} style={{ borderRadius: 14, textAlign: 'center', minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Empty description="该学员暂无档案数据，老师更新学情后将在此展示" image={Empty.PRESENTED_IMAGE_SIMPLE} /></Card>}
 
       {profile && (<>
-        {/* Portrait card */}
-        <Card bordered={false} style={{ borderRadius: 14, marginBottom: 12, border: '1px solid rgba(0,0,0,.06)', padding: '10px 0' }}>
+        {/* Student overview */}
+        <Card bordered={false} className="parent-growth-overview">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
             <div>
-              <Text strong style={{ fontSize: 16 }}>{profile.identity.name}</Text>
-              <div style={{ display: 'flex', gap: 4, marginTop: 2, flexWrap: 'wrap' }}>
+              <Text strong style={{ fontSize: 20 }}>{profile.identity.name}</Text>
+              <div style={{ display: 'flex', gap: 5, marginTop: 5, flexWrap: 'wrap' }}>
                 {profile.identity.grade && <Tag style={{ borderRadius: 9999, fontSize: 11 }}>{profile.identity.grade}</Tag>}
-                {profile.identity.school && <Tag color="purple" style={{ borderRadius: 9999, fontSize: 11 }}>{profile.identity.school}</Tag>}
                 {profile.identity.mainTeacher && <Tag color="orange" style={{ borderRadius: 9999, fontSize: 11 }}>{profile.identity.mainTeacher} 老师</Tag>}
               </div>
             </div>
@@ -201,40 +223,67 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
               <div><Text strong style={{ fontSize: 20, color: '#E8784A' }}>{profile.identity.totalHours}</Text><Text type="secondary" style={{ fontSize: 12 }}>h</Text></div>
             </div>
           </div>
-          {/* D1: Recent activity with trend arrow */}
-          {profile.record.timeline[0] && (
-            <div style={{ marginTop: 8 }}>
-              <Text type="secondary" style={{ fontSize: 12 }}>最近动态：</Text>
-              <Text style={{ fontSize: 12 }}>{profile.record.timeline[0].sub || profile.record.timeline[0].title}</Text>
-              {trendSignals.length > 0 && (
-                <span style={{ marginLeft: 8, fontSize: 11, color: '#1D9E75', fontWeight: 600 }}>
-                  {trendSignals.map((s, i) => <span key={i}>{s.subject} {s.arrow.replace('↑','↑ ').replace('↓','↓ ')}{i < trendSignals.length - 1 ? ' · ' : ''}</span>)}
-                </span>
-              )}
-            </div>
-          )}
         </Card>
 
-        {/* Four-square overview */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(118px, 1fr))', gap: 8, marginBottom: 10 }}>
+        {/* Compact metrics */}
+        <Card bordered={false} className="parent-growth-metrics">
           {[
-            { label: '出勤率', value: profile.overview.attendanceRate !== null ? `${profile.overview.attendanceRate}%` : '—', color: '#1D9E75', icon: <CheckCircleOutlined /> },
-            { label: '本期试卷', value: `${profile.overview.paperCount} 份`, color: '#534AB7', icon: <FileTextOutlined />, emptyNote: '老师批改试卷后将更新' },
-            { label: '获得徽章', value: `${profile.overview.badgeCount} 枚`, color: '#EF9F27', icon: <TrophyOutlined />, emptyNote: '老师评价后可获徽章' },
+            { label: '出勤', value: profile.overview.attendanceRate !== null ? `${profile.overview.attendanceRate}%` : '待记录', color: '#1D9E75', icon: <CheckCircleOutlined /> },
+            { label: '试卷', value: `${profile.overview.paperCount} 份`, color: '#534AB7', icon: <FileTextOutlined /> },
+            { label: '徽章', value: `${profile.overview.badgeCount} 枚`, color: '#EF9F27', icon: <TrophyOutlined /> },
           ].map(item => (
-            <Card key={item.label} bordered={false} style={{ borderRadius: 10, textAlign: 'center', border: '1px solid rgba(0,0,0,.06)', padding: '4px 0' }}>
-              <div style={{ color: item.color, fontSize: 14, marginBottom: 1 }}>{item.icon}</div>
-              <Text type="secondary" style={{ fontSize: 11 }}>{item.label}</Text>
-              <div><Text strong style={{ fontSize: 18, color: item.color }}>{item.value}</Text></div>
-              {'emptyNote' in item && profile.overview.paperCount === 0 && <div style={{ fontSize: 10, color: '#B0B8C1', marginTop: 2 }}>{(item as { emptyNote?: string }).emptyNote}</div>}
-            </Card>
+            <div key={item.label} className="parent-growth-metric">
+              <span style={{ color: item.color }}>{item.icon}</span>
+              <div><Text type="secondary">{item.label}</Text><Text strong style={{ color: item.color }}>{item.value}</Text></div>
+            </div>
           ))}
-        </div>
+        </Card>
 
-        {/* D1: Collapsed study/habit with key values */}
-        <Collapse ghost size="small" activeKey={[...(studyOpen ? ['study'] : []), ...(habitOpen ? ['habit'] : [])]} onChange={k => { setStudyOpen(k.includes('study')); setHabitOpen(k.includes('habit')) }}
+        {/* Latest teacher update: one clear source of truth */}
+        {latestTeacherUpdate && <Card bordered={false} className="parent-growth-latest" onClick={() => handleTimelineClick(latestTeacherUpdate)}>
+          <div className="parent-growth-section-head">
+            <div><MessageOutlined /><Text strong>老师最近说</Text></div>
+            <Text type="secondary">{fmtDate(latestTeacherUpdate.date)}</Text>
+          </div>
+          <Paragraph ellipsis={{ rows: 3 }} className="parent-growth-latest-copy">{latestTeacherUpdate.sub || latestTeacherUpdate.title}</Paragraph>
+          <div className="parent-growth-latest-meta">
+            <Text type="secondary">{formatTeacherLabel(latestTeacherUpdate) || '任课老师'}</Text>
+            {latestTeacherUpdate.refType && <Button type="link" size="small" onClick={(event) => { event.stopPropagation(); handleTimelineClick(latestTeacherUpdate) }}>查看详情 <RightOutlined /></Button>}
+          </div>
+        </Card>}
+
+        {/* Highlights stay compact and only surface meaningful signals */}
+        {hasHighlights && highlights && <Card bordered={false} className="parent-growth-highlights">
+          <div className="parent-growth-section-head">
+            <div><TrophyOutlined /><Text strong>本期亮点</Text></div>
+            <Text type="secondary">表扬 {highlights.praiseCount} 次 · 徽章 {highlights.badgeTotal} 枚</Text>
+          </div>
+          {highlights.topTags.length > 0 && <div className="parent-growth-tags">{highlights.topTags.slice(0, 5).map(item => <Tag key={item.tag}>{item.tag} ×{item.count}</Tag>)}</div>}
+        </Card>}
+
+        {/* Trend details are collapsed by default on mobile to avoid empty-screen fatigue */}
+        <Card bordered={false} className="parent-growth-trends">
+          <button className="parent-growth-trend-trigger" onClick={() => setTrendOpen(value => !value)} aria-expanded={trendOpen}>
+            <span><RiseOutlined />成长趋势</span>
+            <span>{hasTrendData ? (trendOpen ? '收起' : '查看趋势') : '数据积累中'} <RightOutlined className={trendOpen ? 'is-open' : ''} /></span>
+          </button>
+          {trendOpen && <div className="parent-growth-trend-content">
+            <Text strong>课堂状态</Text>
+            {moodTrendOption ? <><ReactECharts style={{ width: '100%', height: 190 }} option={moodTrendOption} opts={{ renderer: 'svg' }} /><Text style={{ display: 'block', textAlign: 'center', fontSize: 12 }}>{moodTrendText}</Text></> : <Text type="secondary">再积累几次课堂反馈后，将显示状态走向</Text>}
+            {profile.growth.badgeCumulative.length > 0 && <><Text strong>徽章累计</Text><ReactECharts style={{ width: '100%', height: 170 }} option={{
+              tooltip: { trigger: 'axis' }, grid: { left: 38, right: 16, top: 18, bottom: 28 },
+              xAxis: { type: 'category', data: profile.growth.badgeCumulative.map(point => fmtDate(point.date).replace('月', '/').replace('日', '')), axisLabel: { fontSize: 10, color: '#5a4e3a' } },
+              yAxis: { type: 'value', minInterval: 1, axisLabel: { fontSize: 10, color: '#5a4e3a' } },
+              series: [{ type: 'line', step: 'end', data: profile.growth.badgeCumulative.map(point => point.total), lineStyle: { color: '#EF9F27', width: 2 }, itemStyle: { color: '#EF9F27' }, areaStyle: { color: 'rgba(239,159,39,.12)' } }],
+            }} opts={{ renderer: 'svg' }} /></>}
+            {profile.habits.attendanceRate !== null && <div><Text strong>出勤率</Text><Progress percent={profile.habits.attendanceRate} strokeColor="#1D9E75" trailColor="rgba(0,0,0,.05)" /></div>}
+          </div>}
+        </Card>
+
+        {/* Optional detail groups only appear when they contain useful data */}
+        {(hasStudyData || hasHabitData) && <Collapse className="parent-growth-details" ghost size="small" activeKey={[...(studyOpen ? ['study'] : []), ...(habitOpen ? ['habit'] : [])]} onChange={k => { setStudyOpen(k.includes('study')); setHabitOpen(k.includes('habit')) }}
           items={[
-            {
+            ...(hasStudyData ? [{
               key: 'study', label: (<span><BookOutlined style={{ color: '#1D9E75', marginRight: 6 }} />学 · 知识掌握{profile.study.mastery.total > 0 ? ` · 掌握${profile.study.mastery.masteredPct}%` : ' · 暂无数据'}{profile.study.weaknesses.length > 0 ? ` · ${profile.study.weaknesses.length}项薄弱` : ''}</span>),
               children: (
                 <div>
@@ -254,8 +303,8 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                     </div>)}
                   {profile.study.radar.length > 0 && <div style={{ maxWidth: 280, margin: '0 auto' }}><ReactECharts style={{ height: 170 }} option={{ radar: { indicator: profile.study.radar.map(d => ({ name: d.dimension, max: d.maxScore })), center: ['50%','50%'], radius: '60%', splitArea: { areaStyle: { color: ['#faf8f5','#fff'] } }, axisName: { fontSize: 9, color: '#5a4e3a' } }, series: [{ type: 'radar', data: [{ value: profile.study.radar.map(d => d.score), name: '能力', areaStyle: { color: 'rgba(29,158,117,.12)' }, lineStyle: { color: '#1D9E75' }, itemStyle: { color: '#1D9E75' } }] }] }} opts={{ renderer: 'svg' }} /></div>}
                 </div>),
-            },
-            {
+            }] : []),
+            ...(hasHabitData ? [{
               key: 'habit', label: (<span><DashboardOutlined style={{ color: '#E8784A', marginRight: 6 }} />习 · 课堂状态{profile.habits.attendanceRate !== null ? ` · 出勤${profile.habits.attendanceRate}%` : ''}{profile.habits.homeworkDoneRate !== null ? ` · 作业${profile.habits.homeworkDoneRate}%` : ''}{profile.habits.inClassAvg !== null ? ` · 表现${profile.habits.inClassAvg}` : ''}{!profile.habits.attendanceRate && !profile.habits.homeworkDoneRate && !profile.habits.inClassAvg ? ' · 暂无数据' : ''}</span>),
               children: (
                 <div>
@@ -264,71 +313,58 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                       {profile.habits.moodTimeline.map((m, i) => <span key={i} title={m.mood ?? undefined} style={{ fontSize: 18, lineHeight: 1 }}>{MOOD_EMOJI[m.mood ?? ''] || '🙂'}</span>)}
                       <Text type="secondary" style={{ fontSize: 11 }}>近期课堂情绪</Text>
                     </div>) : <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>老师发布课堂反馈后将显示情绪记录</Text>}
-                  {profile.record.timeline.filter(t => t.type === 'feedback').slice(0, 1).map(t => <Paragraph key="fb" type="secondary" style={{ fontSize: 12, margin: 0 }}>最近反馈：{t.sub}</Paragraph>)}
                 </div>),
-            },
+            }] : []),
           ]}
-        />
+        />}
 
-        {/* D2: Timeline with left color strip + filter chips */}
-        <div style={{ marginTop: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <Text strong style={{ fontSize: 14 }}>成长时间线</Text>
-            <div style={{ display: 'flex', gap: 4 }}>
+        {/* Parent-friendly growth history */}
+        <section className="parent-growth-history">
+          <div className="parent-growth-history-head">
+            <div><Text strong>成长记录</Text><Text type="secondary">按时间回看孩子的学习变化</Text></div>
+            <div className="parent-growth-filters" role="group" aria-label="成长记录筛选">
               {FILTER_CHIPS.map(c => (
-                <button key={c.key} onClick={() => setTimeFilter(c.key)} style={{
-                  padding: '2px 10px', borderRadius: 9999, border: timeFilter === c.key ? '1px solid #E8784A' : '1px solid rgba(0,0,0,.08)',
-                  background: timeFilter === c.key ? '#FFF3EC' : '#fff', color: timeFilter === c.key ? '#E8784A' : '#7A869A',
-                  fontSize: 11, cursor: 'pointer', fontWeight: timeFilter === c.key ? 600 : 400,
-                }}>{c.label}</button>
+                <button key={c.key} aria-pressed={timeFilter === c.key} onClick={() => { setTimeFilter(c.key); setShowAllTimeline(false) }}>{c.label}</button>
               ))}
             </div>
           </div>
           {(() => {
-            const filtered = profile.record.timeline.filter(item => !timeFilter || FILTER_CHIPS.find(c => c.key === timeFilter)?.types?.includes(item.type))
-            return filtered.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {filtered.map((item, i) => {
+            const filtered = profile.record.timeline
+              .filter(item => item !== latestTeacherUpdate)
+              .filter(item => !timeFilter || FILTER_CHIPS.find(c => c.key === timeFilter)?.types?.includes(item.type))
+            const visible = showAllTimeline ? filtered : filtered.slice(0, isMobile ? 6 : 10)
+            return filtered.length > 0 ? <>
+              <div className="parent-growth-history-list">
+                {visible.map((item, i) => {
                   const key = timelineKey(item, i)
                   const isFocused = (feedbackId && item.refId === feedbackId) || (postId && item.refId === postId) || (focusDate && localDateKey(item.date) === focusDate)
                   return (
-                  <div key={key} ref={(node) => { timelineRefs.current[key] = node }} onClick={() => handleTimelineClick(item)} style={{
-                    display: 'flex', gap: 0, cursor: (item.images?.length || item.refType) ? 'pointer' : 'default',
-                    background: isFocused ? '#FFF3EC' : item.type === 'badge' || item.type === 'goal' ? 'rgba(239,159,39,.04)' : 'transparent',
-                    borderRadius: 8, overflow: 'hidden', outline: isFocused ? '1px solid rgba(232,120,74,.35)' : 'none',
-                  }}>
-                    {/* D2: Left color strip */}
-                    <div style={{ width: 3, flexShrink: 0, background: TYPE_COLOR[item.type], borderRadius: '3px 0 0 3px', margin: '8px 0' }} />
-                    <div style={{ flex: 1, minWidth: 0, padding: '8px 10px 8px 8px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                        <Text strong style={{ fontSize: 13 }}>{item.title}</Text>
-                        <Text type="secondary" style={{ fontSize: 11, flexShrink: 0 }}>{fmtDate(item.date)}</Text>
+                  <article key={key} ref={(node) => { timelineRefs.current[key] = node }} onClick={() => handleTimelineClick(item)} className={`parent-growth-history-item${isFocused ? ' is-focused' : ''}${(item.images?.length || item.refType) ? ' is-clickable' : ''}`}>
+                    <div className="parent-growth-history-icon" style={{ color: TYPE_COLOR[item.type], background: `${TYPE_COLOR[item.type]}12` }}>{TYPE_ICON[item.type]}</div>
+                    <div className="parent-growth-history-body">
+                      <div className="parent-growth-history-title">
+                        <div><Text strong>{item.title}</Text><Tag>{TIMELINE_LABEL[item.type] || '记录'}</Tag></div>
+                        <Text type="secondary">{fmtDate(item.date)}</Text>
                       </div>
-                      {item.sub && <Text type="secondary" style={{ fontSize: 12 }}>{item.sub.length > 60 ? item.sub.slice(0, 60) + '...' : item.sub}</Text>}
-                      <div style={{ marginTop: 2, display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
-                        {item.teacher && <Tag style={{ fontSize: 10, borderRadius: 9999 }}>{formatTeacherLabel(item)}</Tag>}
-                        {TIMELINE_SOURCE[item.type] && (
-                          <span style={{ fontSize: 10, color: TIMELINE_SOURCE[item.type].color, background: `${TIMELINE_SOURCE[item.type].color}14`, padding: '1px 7px', borderRadius: 9999 }}>
-                            {TIMELINE_SOURCE[item.type].label}
-                          </span>
-                        )}
-                      </div>
+                      {item.teacher && <Text type="secondary" className="parent-growth-history-teacher">{formatTeacherLabel(item)}</Text>}
+                      {item.sub && <Paragraph ellipsis={{ rows: 2 }} className="parent-growth-history-copy">{item.sub}</Paragraph>}
                       {(() => { const imgs = item.images as string[] | undefined; return imgs && imgs.length > 0 })() && (
-                        <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                        <div className="parent-growth-history-images">
                           {(item.images as string[]).slice(0, 3).map((url: string, j: number) => (
-                            <img key={j} src={url} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid rgba(0,0,0,.06)' }} />
+                            <img key={j} src={url} alt="课堂记录" />
                           ))}
                           {(item.images as string[]).length > 3 && <span style={{ fontSize: 11, color: '#98A2B3', alignSelf: 'center' }}>+{(item.images as string[]).length - 3}张</span>}
                         </div>
                       )}
-                      {((item.images && item.images.length > 0) || item.refType) && <div style={{ fontSize: 10, color: '#E8784A', marginTop: 4 }}>{item.refType === 'feedback' ? '查看反馈详情 →' : (item.images && item.images.length > 0) ? '查看图片 →' : item.refType ? '查看详情 →' : ''}</div>}
                     </div>
-                  </div>
+                    {(item.images?.length || item.refType) && <RightOutlined className="parent-growth-history-arrow" />}
+                  </article>
                 )})}
               </div>
-            ) : <Text type="secondary" style={{ fontSize: 13 }}>暂无成长记录</Text>
+              {filtered.length > visible.length && <Button type="text" block className="parent-growth-show-more" onClick={() => setShowAllTimeline(true)}>查看全部 {filtered.length} 条记录</Button>}
+            </> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="这个分类暂时还没有记录" />
           })()}
-        </div>
+        </section>
 
         {/* Trend chart */}
         {profile.record.trendBySubject.length > 0 && (
@@ -344,10 +380,10 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
           </Card>
         )}
 
-        {/* Case: goals + summary */}
-        <Card bordered={false} style={{ borderRadius: 14, marginTop: 16, border: '1px solid rgba(0,0,0,.06)', padding: '12px 0' }}>
-          <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 8 }}><FlagOutlined style={{ color: '#EF9F27', marginRight: 6 }} />案 · 学习目标与教师寄语</Text>
-          {profile.profileCase.goals.length > 0 ? (
+        {/* Goals and teacher summary only surface when there is actual content */}
+        {(profile.profileCase.goals.length > 0 || profile.profileCase.teacherSummary) && <Card bordered={false} className="parent-growth-summary">
+          <Text strong className="parent-growth-summary-title"><FlagOutlined />老师寄语与学习目标</Text>
+          {profile.profileCase.goals.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
               {profile.profileCase.goals.map((g, i) => (
                 <div key={i}>
@@ -359,22 +395,19 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                   <Text type="secondary" style={{ fontSize: 10 }}>{g.subject}</Text>
                 </div>
               ))}
-            </div>
-          ) : <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 12 }}>暂无学习目标，老师设置后将在此展示</Text>}
-          <div style={{ padding: '10px 14px', background: '#faf8f5', borderRadius: 12, border: '1px solid rgba(0,0,0,.04)' }}>
+            </div>)}
+          {profile.profileCase.teacherSummary && <div style={{ padding: '10px 14px', background: '#faf8f5', borderRadius: 12, border: '1px solid rgba(0,0,0,.04)' }}>
             <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>教师寄语</Text>
-            {profile.profileCase.teacherSummary ? (
               <div>
                 <Tag color="purple" style={{ borderRadius: 9999, marginBottom: 6, fontSize: 10 }}>{profile.profileCase.teacherSummary.teacherName || '老师'}{profile.profileCase.teacherSummary.teacherSubject ? ` · ${profile.profileCase.teacherSummary.teacherSubject}` : ''} · {fmtDate(profile.profileCase.teacherSummary.periodStart)} 至 {fmtDate(profile.profileCase.teacherSummary.periodEnd)}</Tag>
                 <Paragraph type="secondary" style={{ fontSize: 12, margin: 0, whiteSpace: 'pre-wrap' }}>{profile.profileCase.teacherSummary.summary}</Paragraph>
                 {profile.profileCase.teacherSummary.suggestions && <Paragraph type="secondary" style={{ fontSize: 12, margin: '6px 0 0', whiteSpace: 'pre-wrap' }}>下一步建议：{profile.profileCase.teacherSummary.suggestions}</Paragraph>}
               </div>
-            ) : <Text type="secondary" style={{ fontSize: 12, fontStyle: 'italic' }}>老师正在撰写本期寄语</Text>}
-          </div>
-        </Card>
+          </div>}
+        </Card>}
 
         {/* Report button */}
-        <div style={{ textAlign: 'center', margin: '24px 0 60px' }}>
+        <div className="parent-growth-report-action">
           <Button type="primary" size="large" icon={<FileTextOutlined />} onClick={() => setReportOpen(true)}
             style={{ borderRadius: 10, background: '#E8784A', border: 'none', padding: '10px 28px', fontSize: 14, height: 'auto' }}>
             查看本期学情报告

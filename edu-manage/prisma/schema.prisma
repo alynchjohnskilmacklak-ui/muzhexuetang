@@ -1119,6 +1119,7 @@ model SystemConfig {
   founded   Int?
   website   String?
   logoUrl   String?
+  schedulePeriods Json?
   updatedAt DateTime @updatedAt
 }
 

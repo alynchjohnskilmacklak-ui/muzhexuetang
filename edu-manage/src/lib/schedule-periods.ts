@@ -1,4 +1,14 @@
-export const SCHEDULE_PERIODS = [
+export type PeriodType = 'CLASS' | 'BREAK' | 'BIG_BREAK' | 'LUNCH'
+
+export type SchedulePeriod = {
+  id: string
+  name: string
+  type: PeriodType
+  start: string
+  end: string
+}
+
+export const SCHEDULE_PERIODS: SchedulePeriod[] = [
   { id:'am1',  name:'上午第一', type:'CLASS' as const,     start:'08:00', end:'08:40' },
   { id:'bk1',  name:'课间',     type:'BREAK' as const,     start:'08:40', end:'08:50' },
   { id:'am2',  name:'上午第二', type:'CLASS' as const,     start:'08:50', end:'09:30' },
@@ -16,8 +26,6 @@ export const SCHEDULE_PERIODS = [
   { id:'pm4',  name:'下午第四', type:'CLASS' as const,     start:'16:40', end:'17:20' },
 ]
 
-export type PeriodType = 'CLASS' | 'BREAK' | 'BIG_BREAK' | 'LUNCH'
-
 export const PERIOD_HEIGHTS: Record<PeriodType, number> = {
   CLASS:     80,
   BREAK:     18,
@@ -33,6 +41,35 @@ export const PERIOD_BG: Record<PeriodType, string> = {
 }
 
 export const CLASS_PERIODS_ONLY = SCHEDULE_PERIODS.filter(p => p.type === 'CLASS')
+
+const VALID_TYPES = new Set<PeriodType>(['CLASS', 'BREAK', 'BIG_BREAK', 'LUNCH'])
+const TIME_RE = /^(?:[01]\d|2[0-3]):[0-5]\d$/
+
+export function normalizeSchedulePeriods(value: unknown): SchedulePeriod[] {
+  if (!Array.isArray(value)) return SCHEDULE_PERIODS.map(period => ({ ...period }))
+  const periods = value.flatMap((item, index) => {
+    if (!item || typeof item !== 'object') return []
+    const row = item as Record<string, unknown>
+    const type = row.type as PeriodType
+    const start = typeof row.start === 'string' ? row.start : ''
+    const end = typeof row.end === 'string' ? row.end : ''
+    if (!VALID_TYPES.has(type) || !TIME_RE.test(start) || !TIME_RE.test(end) || start >= end) return []
+    return [{
+      id: typeof row.id === 'string' && row.id.trim() ? row.id.trim() : `period-${index + 1}`,
+      name: typeof row.name === 'string' && row.name.trim() ? row.name.trim() : '未命名时段',
+      type,
+      start,
+      end,
+    }]
+  })
+  return periods.length ? periods.sort((a, b) => a.start.localeCompare(b.start)) : SCHEDULE_PERIODS.map(period => ({ ...period }))
+}
+
+export function findSchedulePeriod(periods: SchedulePeriod[], startTime: string): SchedulePeriod | undefined {
+  const exact = periods.find(period => period.type === 'CLASS' && period.start === startTime)
+  if (exact) return exact
+  return periods.find(period => period.type === 'CLASS' && period.start <= startTime && startTime < period.end)
+}
 
 // One-on-one / small-group hourly periods (60min blocks, 08:00-24:00)
 export const HOURLY_PERIODS = [

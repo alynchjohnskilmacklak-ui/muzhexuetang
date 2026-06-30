@@ -38,8 +38,9 @@ import { zhCN } from 'date-fns/locale'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { MobileSelect } from '@/components/MobileSelect'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { CLASS_PERIODS_ONLY, HOURLY_PERIODS } from '@/lib/schedule-periods'
+import { CLASS_PERIODS_ONLY, HOURLY_PERIODS, SchedulePeriod } from '@/lib/schedule-periods'
 import { useDivision } from '@/contexts/DivisionContext'
+import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
 
 type CourseType = 'GROUP' | 'ONE_ON_ONE' | 'SMALL_GROUP'
 type ScheduleTemplateRow = {
@@ -106,9 +107,9 @@ function generatePreview(startDate: string, recurringDays: string[], totalLesson
   return dates
 }
 
-function buildScheduleTemplate(type: CourseType): ScheduleTemplateRow[] {
+function buildScheduleTemplate(type: CourseType, periods: SchedulePeriod[] = CLASS_PERIODS_ONLY): ScheduleTemplateRow[] {
   if (type !== 'GROUP') return []
-  return CLASS_PERIODS_ONLY.map(p => ({
+  return periods.filter(period => period.type === 'CLASS').map(p => ({
     periodId: p.id,
     periodName: p.name,
     startTime: p.start,
@@ -126,6 +127,8 @@ export default function CoursesPage() {
   const { data: teachers } = useSWR('/api/teachers?status=ACTIVE', fetcher)
   const { data: rooms } = useSWR('/api/rooms', fetcher)
   const { data: dashboard, mutate: mutateDashboard } = useSWR(`/api/dashboard?division=${division}`, fetcher)
+  const { periods } = useSchedulePeriods(division)
+  const classPeriods = useMemo(() => periods.filter(period => period.type === 'CLASS'), [periods])
 
   const [courseTab, setCourseTab] = useState<'GROUP'|'SMALL'>('GROUP')
   const [filterType, setFilterType] = useState('')
@@ -229,7 +232,7 @@ export default function CoursesPage() {
       maxStudents: initialType === 'ONE_ON_ONE' ? 1 : 20,
       teacherAssignments: [{ teacherId: '', subject: '' }],
       scheduleSlots: [] as string[],
-      scheduleTemplate: buildScheduleTemplate(initialType),
+      scheduleTemplate: buildScheduleTemplate(initialType, classPeriods),
     })
     setCreateOpen(true)
   }
@@ -448,6 +451,16 @@ export default function CoursesPage() {
 
     const isHourly = (createData.type as string) !== 'GROUP'
     const selectedSlots = (createData.scheduleSlots as string[]) || []
+
+    if (validSlots.some(row => String(row.startTime) >= String(row.endTime))) {
+      toast.error('结束时间必须晚于开始时间')
+      return
+    }
+    const sortedSlots = [...validSlots].sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)))
+    if (sortedSlots.some((row, index) => index > 0 && String(row.startTime) < String(sortedSlots[index - 1].endTime))) {
+      toast.error('上课时间段不能重叠')
+      return
+    }
 
     if (isHourly && selectedSlots.length === 0 && validSlots.length === 0) {
       toast.error('请至少选择一个上课时间段')
@@ -871,7 +884,7 @@ export default function CoursesPage() {
                   totalLessons: course?.totalLessons || prev.totalLessons || 16,
                   maxStudents: nextType === 'ONE_ON_ONE' ? 1 : (prev.maxStudents === 1 ? 20 : prev.maxStudents),
                   scheduleSlots: [] as string[],
-                  scheduleTemplate: buildScheduleTemplate(nextType),
+                  scheduleTemplate: buildScheduleTemplate(nextType, classPeriods),
                 }))
               }}
               options={courseList.map((course: Record<string, unknown>) => ({
@@ -907,7 +920,7 @@ export default function CoursesPage() {
                           lessonMinutes: isHourly ? 60 : 40,
                           maxStudents: option.value === 'ONE_ON_ONE' ? 1 : (Number(prev.maxStudents) === 1 ? 20 : prev.maxStudents),
                           scheduleSlots: [] as string[],
-                          scheduleTemplate: buildScheduleTemplate(option.value),
+                          scheduleTemplate: buildScheduleTemplate(option.value, classPeriods),
                         }))
                       }}
                       style={{
@@ -1143,7 +1156,8 @@ export default function CoursesPage() {
                     const filled = !!(row.teacherId && row.subject)
                     return (
                       <div key={index} style={{
-                        display: 'flex',
+                        display: 'grid',
+                        gridTemplateColumns: isMobile ? '52px minmax(0, 1fr)' : '58px 190px minmax(0, 1fr)',
                         alignItems: 'center',
                         gap: 8,
                         padding: '8px 10px',
@@ -1151,13 +1165,36 @@ export default function CoursesPage() {
                         background: filled ? '#FCFBF9' : '#fff',
                         border: `1px solid ${filled ? '#E8784A33' : '#EEE7E1'}`,
                       }}>
-                        <span style={{ fontSize: 12, fontWeight: 500, color: '#E8784A', width: 58, flexShrink: 0 }}>{row.periodName as string}</span>
-                        <span style={{ fontSize: 11, color: '#C4BAB0', width: 90, flexShrink: 0 }}>{row.startTime as string}-{row.endTime as string}</span>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: '#E8784A' }}>{row.periodName as string}</span>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, minWidth: 0 }}>
+                          <Input
+                            size="small"
+                            type="time"
+                            aria-label={`${row.periodName as string}开始时间`}
+                            value={row.startTime as string}
+                            onChange={event => {
+                              const template = [...(Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : [])]
+                              template[index] = { ...template[index], startTime: event.target.value }
+                              setCreateData(prev => ({ ...prev, scheduleTemplate: template }))
+                            }}
+                          />
+                          <Input
+                            size="small"
+                            type="time"
+                            aria-label={`${row.periodName as string}结束时间`}
+                            value={row.endTime as string}
+                            onChange={event => {
+                              const template = [...(Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : [])]
+                              template[index] = { ...template[index], endTime: event.target.value }
+                              setCreateData(prev => ({ ...prev, scheduleTemplate: template }))
+                            }}
+                          />
+                        </div>
                         <Select
                           size="small"
                           allowClear
                           placeholder="老师科目（空=不排课）"
-                          style={{ flex: 1 }}
+                          style={{ width: '100%', gridColumn: isMobile ? '1 / -1' : undefined }}
                           value={row.teacherId && row.subject ? `${row.teacherId}::${row.subject}` : undefined}
                           onChange={v => {
                             const template = [...(Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : [])]
@@ -1176,7 +1213,7 @@ export default function CoursesPage() {
                         />
                         {!!(row.teacherId && row.startTime && row.endTime) &&
                           slotConflicts[`${row.teacherId}::${row.startTime}-${row.endTime}`] && (
-                          <span style={{ fontSize: 11, color: '#E24B4A', flexShrink: 0 }}>
+                          <span style={{ fontSize: 11, color: '#E24B4A', gridColumn: '1 / -1' }}>
                             ⚠ {slotConflicts[`${row.teacherId}::${row.startTime}-${row.endTime}`]}
                           </span>
                         )}
