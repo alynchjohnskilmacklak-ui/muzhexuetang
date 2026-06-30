@@ -31,6 +31,33 @@ const NOTIFICATION_META: Record<string, { label: string; icon: React.ReactNode; 
   SYSTEM: { label: '通知', icon: <BellOutlined />, color: '#5a4e3a', bg: '#f5f2ee' },
 }
 
+const MEMBERSHIP_HERO_THEME = {
+  NORMAL: {
+    gradient: 'linear-gradient(145deg, #E8784A 0%, #F59A68 100%)',
+    shadow: '0 10px 30px rgba(232,120,74,0.15)',
+    badgeBg: 'rgba(255,255,255,0.25)',
+    statBg: 'rgba(255,255,255,0.18)',
+    statBorder: 'rgba(255,255,255,0.2)',
+    quoteBg: 'rgba(255,255,255,0.15)',
+  },
+  VIP: {
+    gradient: 'linear-gradient(145deg, #F0875B 0%, #F7A66F 48%, #F8C49A 100%)',
+    shadow: '0 12px 34px rgba(240,135,91,0.24)',
+    badgeBg: 'rgba(255,255,255,0.28)',
+    statBg: 'rgba(255,255,255,0.2)',
+    statBorder: 'rgba(255,255,255,0.26)',
+    quoteBg: 'rgba(255,255,255,0.18)',
+  },
+  SVIP: {
+    gradient: 'linear-gradient(145deg, #123C35 0%, #1F5A4D 58%, #C9A45C 145%)',
+    shadow: '0 14px 38px rgba(18,60,53,0.30)',
+    badgeBg: 'rgba(255,255,255,0.16)',
+    statBg: 'rgba(255,255,255,0.13)',
+    statBorder: 'rgba(201,164,92,0.28)',
+    quoteBg: 'rgba(255,255,255,0.12)',
+  },
+} as const
+
 function notificationMeta(n: any) {
   return NOTIFICATION_META[n.relatedType] || NOTIFICATION_META[n.type] || NOTIFICATION_META.SYSTEM
 }
@@ -95,21 +122,15 @@ export function ParentDashboardClient({
   )
   const membershipLevel = resolveMembership(activeStudent?.membershipLevel)
   const membershipTheme = MEMBERSHIP_THEME[membershipLevel]
+  const heroTheme = MEMBERSHIP_HERO_THEME[membershipLevel]
 
   useEffect(() => {
     if (!activeStudent?.id) return
-    const storageKey = `mz_welcome_${activeStudent.id}`
-    if (sessionStorage.getItem(storageKey)) {
-      setWelcomeMounted(false)
-      setWelcomeVisible(false)
-      return
-    }
-
-    sessionStorage.setItem(storageKey, '1')
     setWelcomeMounted(true)
-    const showTimer = window.setTimeout(() => setWelcomeVisible(true), 20)
-    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 6000)
-    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 6600)
+    setWelcomeVisible(false)
+    const showTimer = window.setTimeout(() => setWelcomeVisible(true), 30)
+    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 3000)
+    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 3600)
     return () => {
       window.clearTimeout(showTimer)
       window.clearTimeout(fadeTimer)
@@ -138,6 +159,7 @@ export function ParentDashboardClient({
   const allTeacherNames = new Set<string>()
   Object.values(studentTeachers).forEach(names => names.forEach(n => allTeacherNames.add(n)))
   const activeTeacherNames = activeStudent?.id ? (studentTeachers[activeStudent.id] || []) : [...allTeacherNames]
+  const teacherDisplay = activeTeacherNames.length > 0 ? activeTeacherNames.join('、') : '待分配'
   const activeStats = activeChildId ? studentStats[activeChildId] : null
   const activeAttendanceRate = activeStats?.attendanceRate ?? attendanceRate
   const activeBadgeCount = activeStats?.badgeCount ?? badgeCount
@@ -215,7 +237,8 @@ export function ParentDashboardClient({
   const todayRooms = [...new Set(todayLessons.map((lesson) => lesson.roomName).filter(Boolean))]
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
-  const heroStudentName = activeStudent?.name || '同学'
+  const heroStudentName = activeStudent?.name?.trim() || '牧哲学堂同学'
+  const welcomeName = activeStudent?.name?.trim() || '牧哲学堂'
 
   const goCalendarDay = (day: number) => {
     const d = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
@@ -260,16 +283,72 @@ export function ParentDashboardClient({
     <div>
       {welcomeMounted && (
         <div style={{
-          marginBottom: 16, padding: '14px 16px', borderRadius: 12,
-          background: membershipTheme.bg, border: `1px solid ${membershipTheme.border}`,
-          color: membershipTheme.text, opacity: welcomeVisible ? 1 : 0,
-          transition: 'opacity .6s ease',
+          position: 'fixed', inset: 0, zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: isMobile ? 18 : 24, pointerEvents: 'none',
+          background: welcomeVisible ? 'rgba(18,60,53,.10)' : 'rgba(18,60,53,0)',
+          backdropFilter: welcomeVisible ? 'blur(6px)' : 'blur(0px)',
+          WebkitBackdropFilter: welcomeVisible ? 'blur(6px)' : 'blur(0px)',
+          transition: 'background .45s ease, backdrop-filter .45s ease',
         }}>
-          <div style={{ color: membershipTheme.accent, fontSize: 14, fontWeight: 700, lineHeight: 1.6 }}>
-            {fillName(MEMBERSHIP_WELCOME[membershipLevel].title, activeStudent?.name || '')}
-          </div>
-          <div style={{ marginTop: 4, fontSize: 12, lineHeight: 1.7 }}>
-            {MEMBERSHIP_WELCOME[membershipLevel].body}
+          <div style={{
+            width: 'min(88vw, 430px)', borderRadius: 26,
+            padding: isMobile ? '24px 22px' : '28px 30px',
+            background: membershipLevel === 'SVIP'
+              ? 'linear-gradient(145deg, #F8F3E7 0%, #FFFDF7 100%)'
+              : membershipTheme.bg,
+            border: `1.5px solid ${membershipTheme.border}`,
+            color: membershipTheme.text,
+            boxShadow: membershipLevel === 'SVIP'
+              ? '0 26px 80px rgba(18,60,53,.30)'
+              : membershipLevel === 'VIP'
+                ? '0 26px 80px rgba(240,135,91,.26)'
+                : '0 24px 70px rgba(62,142,110,.20)',
+            opacity: welcomeVisible ? 1 : 0,
+            transform: welcomeVisible ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)',
+            transition: 'opacity .45s ease, transform .58s cubic-bezier(.2,.9,.2,1)',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute', right: -24, top: -28, width: 90, height: 90,
+              borderRadius: '50%',
+              background: membershipLevel === 'SVIP' ? 'rgba(201,164,92,.18)' : 'rgba(240,135,91,.13)',
+            }} />
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+              <div style={{
+                width: 42, height: 42, borderRadius: 16, flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 20, fontWeight: 900, color: '#fff',
+                background: membershipLevel === 'SVIP'
+                  ? 'linear-gradient(145deg, #123C35 0%, #C9A45C 150%)'
+                  : membershipLevel === 'VIP'
+                    ? 'linear-gradient(145deg, #F0875B 0%, #F8B27F 100%)'
+                    : 'linear-gradient(145deg, #3E8E6E 0%, #7ABF9A 100%)',
+                boxShadow: membershipLevel === 'SVIP'
+                  ? '0 10px 24px rgba(18,60,53,.25)'
+                  : '0 10px 24px rgba(240,135,91,.18)',
+              }}>
+                {membershipLevel === 'SVIP' ? '尊' : membershipLevel === 'VIP' ? 'V' : '牧'}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{
+                  fontSize: isMobile ? 17 : 18, fontWeight: 900, lineHeight: 1.55,
+                  color: membershipTheme.accent, letterSpacing: .2, overflowWrap: 'anywhere',
+                }}>
+                  {fillName(MEMBERSHIP_WELCOME[membershipLevel].title, welcomeName)}
+                </div>
+                <div style={{ marginTop: 10, fontSize: 14, lineHeight: 1.9, color: membershipTheme.text, fontWeight: 500 }}>
+                  {MEMBERSHIP_WELCOME[membershipLevel].body}
+                </div>
+                <div style={{
+                  marginTop: 14, fontSize: 12,
+                  color: membershipLevel === 'SVIP' ? '#8A6A2E' : membershipTheme.accent,
+                  fontWeight: 700,
+                }}>
+                  牧哲学堂 · 把每一个孩子，当成自己的孩子来教
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -319,10 +398,10 @@ export function ParentDashboardClient({
 
       {/* Hero Card */}
       <div style={{
-        background: 'linear-gradient(145deg, #E8784A 0%, #F59A68 100%)',
+        background: heroTheme.gradient,
         borderRadius: 24, padding: isMobile ? '20px 18px' : '28px 32px', marginBottom: 20,
-        position: 'relative', overflow: 'hidden',
-        boxShadow: '0 10px 30px rgba(232,120,74,0.15)'
+        position: 'relative', overflow: 'hidden', maxWidth: '100%',
+        boxShadow: heroTheme.shadow,
       }}>
         {/* Decorative background elements */}
         <div style={{
@@ -354,7 +433,7 @@ export function ParentDashboardClient({
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
                 <div style={{
                   width: 64, height: 64, borderRadius: 20, 
-                  background: 'rgba(255,255,255,0.25)',
+                  background: heroTheme.badgeBg,
                   backdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255,255,255,0.4)', 
                   display: 'flex', alignItems: 'center', justifyContent: 'center', 
@@ -363,20 +442,20 @@ export function ParentDashboardClient({
                 }}>
                   {heroStudentName[0]}
                 </div>
-                <div>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: -0.5 }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: -0.5, overflowWrap: 'anywhere' }}>
                     {heroStudentName}
                   </div>
                   <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4, fontWeight: 500 }}>
                     {activeStudent?.grade ? <span style={{ marginRight: 8 }}>{activeStudent.grade}</span> : ''}
                     <span style={{ opacity: 0.8 }}>负责老师：</span>
-                    {activeTeacherNames.length > 0 ? activeTeacherNames.join('、') : '审核中'}
+                    {teacherDisplay}
                   </div>
                 </div>
               </div>
 
               <div style={{
-                background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)',
+                background: heroTheme.quoteBg, backdropFilter: 'blur(8px)',
                 borderRadius: 14, padding: '12px 18px', display: 'inline-flex',
                 alignItems: 'center', gap: 8, border: '1px solid rgba(255,255,255,0.1)'
               }}>
@@ -405,10 +484,10 @@ export function ParentDashboardClient({
               { val: activeNotifications.filter((n: any) => !n.read).length, label: '待处理通知', icon: <BellOutlined /> },
             ].map(({ val, label, icon, special }) => (
               <div key={label} style={{
-                background: 'rgba(255,255,255,0.18)', 
+                background: heroTheme.statBg,
                 backdropFilter: 'blur(12px)',
                 borderRadius: 18, padding: '16px 14px', 
-                border: '1px solid rgba(255,255,255,0.2)',
+                border: `1px solid ${heroTheme.statBorder}`,
                 display: 'flex', flexDirection: 'column', alignItems: 'center',
                 boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
               }}>
@@ -438,16 +517,26 @@ export function ParentDashboardClient({
         return (
           <div style={{
             marginBottom: 20, padding: isMobile ? '16px' : '18px 20px', borderRadius: 14,
-            background: membershipTheme.bg, border: `1px solid ${membershipTheme.border}`,
+            background: membershipLevel === 'SVIP'
+              ? 'linear-gradient(135deg, #F8F3E7 0%, #FFFDF7 100%)'
+              : '#FFF7F1',
+            border: `1px solid ${membershipLevel === 'SVIP' ? '#C9A45C' : '#F2B58F'}`,
             color: membershipTheme.text,
+            boxShadow: membershipLevel === 'SVIP'
+              ? '0 12px 32px rgba(18,60,53,.12)'
+              : '0 10px 28px rgba(240,135,91,.12)',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7, color: membershipTheme.accent, fontSize: 15, fontWeight: 700 }}>
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', gap: 7,
+              color: membershipLevel === 'SVIP' ? '#123C35' : '#C96D3E',
+              fontSize: 15, fontWeight: 700, lineHeight: 1.6,
+            }}>
               {membershipLevel === 'SVIP' && <span style={{ color: membershipTheme.gold }}>★</span>}
               {service.title}
             </div>
             <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.75 }}>{service.body}</div>
-            <div style={{ marginTop: 8, fontSize: 13 }}>
-              {service.hotlineLabel}：<strong style={{ color: membershipTheme.accent, fontWeight: 700 }}>{service.hotline}</strong>
+            <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.8 }}>
+              {service.hotlineLabel}：<strong style={{ color: membershipTheme.accent, fontWeight: 800, overflowWrap: 'anywhere' }}>{service.hotline}</strong>
             </div>
             <div style={{ marginTop: 8, fontSize: 12, lineHeight: 1.7 }}>{service.footer}</div>
           </div>

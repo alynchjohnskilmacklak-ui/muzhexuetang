@@ -3,7 +3,6 @@ import type { PrismaClient } from '@prisma/client'
 import { getEffectiveMealMenuForDate } from '@/lib/meal-template'
 import {
   parentActiveEnrollmentWhere,
-  parentActiveStudentWhere,
   parentLinkedStudentWhere,
   parentVisibleExamPaperWhere,
   parentVisibleLessonWhere,
@@ -16,7 +15,7 @@ import {
 export async function getParentDashboardData(userId: string, prismaClient?: PrismaClient) {
   const prisma = prismaClient ?? await getRequestPrisma()
   const students = await prisma.student.findMany({
-    where: parentActiveStudentWhere(userId),
+    where: parentLinkedStudentWhere(userId),
     include: {
       mainTeacher: { select: { id: true, name: true } },
       enrollments: {
