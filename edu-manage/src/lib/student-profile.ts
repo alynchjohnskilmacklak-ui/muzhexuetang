@@ -56,6 +56,7 @@ export async function getStudentProfile(
       prisma.classroomFeedback.findMany({
         where: { studentIds: { has: studentId }, status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
         select: { id: true, mood: true, tags: true, knowledgePoints: true, summary: true, overallComment: true,
+          homework: true, badge: true,
           homeworkDone: true, inClassRating: true,
           createdAt: true, teacher: { select: { name: true, subjects: true } } },
         orderBy: { createdAt: 'desc' }, take: 50,
@@ -199,13 +200,27 @@ export async function getStudentProfile(
   const subjOf = (t?: { subjects?: string | null }) =>
     (t?.subjects || '').split(/[，,、\s]+/).filter(Boolean)[0] || ''
 
-  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; teacherSubject?: string; images?: string[]; refType?: 'feedback' | 'paper' | 'post'; refId?: string }
+  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; teacherSubject?: string; images?: string[]; refType?: 'feedback' | 'paper' | 'post'; refId?: string; detail?: { comment?: string; summary?: string; knowledgePoints?: string[]; homework?: string[]; tags?: string[]; badge?: string | null; mood?: string | null } }
   const timeline: TLItem[] = []
   for (const p of papers) {
     const m = p.questions.filter(q => q.mastery === 'MASTERED').length
     timeline.push({ type: 'paper', title: `${p.title} 已批改`, sub: `掌握 ${m}/${p.questions.length} 题`, date: p.paperDate, teacher: p.teacher?.name, teacherSubject: subjOf(p.teacher), refType: 'paper', refId: p.id })
   }
-  for (const f of feedbacks) timeline.push({ type: 'feedback', title: '课堂反馈', sub: f.overallComment || f.summary || (f.tags || []).join(' '), date: f.createdAt, teacher: f.teacher?.name, teacherSubject: subjOf(f.teacher), refType: 'feedback', refId: f.id })
+  for (const f of feedbacks) timeline.push({
+    type: 'feedback', title: '课堂反馈',
+    sub: f.overallComment || f.summary || (f.tags || []).join(' '),
+    date: f.createdAt, teacher: f.teacher?.name, teacherSubject: subjOf(f.teacher),
+    refType: 'feedback', refId: f.id,
+    detail: {
+      comment: f.overallComment || undefined,
+      summary: f.summary || undefined,
+      knowledgePoints: f.knowledgePoints || [],
+      homework: Array.isArray(f.homework) ? (f.homework as any[]).map(h => typeof h === 'string' ? h : h?.content).filter(Boolean) : [],
+      tags: f.tags || [],
+      badge: f.badge || null,
+      mood: f.mood || null,
+    },
+  })
   for (const po of posts) timeline.push({ type: 'post', title: '成长动态', sub: po.content, date: po.createdAt, teacher: po.teacher?.name, teacherSubject: subjOf(po.teacher), images: (po.images as string[] | undefined) || undefined, refType: 'post', refId: po.id })
   for (const b of badges) timeline.push({ type: 'badge', title: `获得徽章「${b.badgeType}」`, sub: b.description || undefined, date: b.earnedAt })
   for (const g of grades) timeline.push({ type: 'grade', title: `${g.assessment.name}`, sub: `${g.score} 分`, date: g.assessment.assessDate })
