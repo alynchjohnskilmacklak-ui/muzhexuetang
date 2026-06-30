@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { Card, Empty, Select, Tag, Typography } from 'antd'
-import { ClockCircleOutlined, EnvironmentOutlined, TeamOutlined } from '@ant-design/icons'
+import { ClockCircleOutlined, DownOutlined, EnvironmentOutlined, RightOutlined, TeamOutlined } from '@ant-design/icons'
 import { findSchedulePeriod, PERIOD_BG, SchedulePeriod } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { fmtDate } from '@/lib/format-date'
@@ -75,6 +75,25 @@ export function ParentScheduleClient({ students, lessons, periods }: { students:
   const mobileLessons = useMemo(() => [...childLessons].sort((a, b) =>
     String(a.lessonDate).localeCompare(String(b.lessonDate)) || String(a.startTime).localeCompare(String(b.startTime))
   ), [childLessons])
+  const mobileLessonGroups = useMemo(() => {
+    const groups: Array<{ key: string; date: Date; lessons: any[] }> = []
+    mobileLessons.forEach((lesson: any) => {
+      const date = new Date(lesson.lessonDate)
+      const key = date.toDateString()
+      const current = groups[groups.length - 1]
+      if (current?.key === key) current.lessons.push(lesson)
+      else groups.push({ key, date, lessons: [lesson] })
+    })
+    return groups
+  }, [mobileLessons])
+  const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>(() => ({}))
+
+  const isDateExpanded = (key: string, index: number) => {
+    if (key in expandedDates) return expandedDates[key]
+    const todayKey = new Date().toDateString()
+    const hasToday = mobileLessonGroups.some(group => group.key === todayKey)
+    return hasToday ? key === todayKey : index === 0
+  }
 
   return (
     <div>
@@ -97,31 +116,43 @@ export function ParentScheduleClient({ students, lessons, periods }: { students:
         </Card>
       ) : isMobile ? (
         <div style={{ display: 'grid', gap: 10 }}>
-          {mobileLessons.map((lesson: any, index) => {
-            const status = getLessonStatus(lesson)
-            const studentNames = lesson.group?.enrollments?.map((e: any) => e.student?.name).filter(Boolean).join('、') || selectedStudent?.name || '-'
+          {mobileLessonGroups.map((group, groupIndex) => {
+            const expanded = isDateExpanded(group.key, groupIndex)
             return (
-            <div key={lesson.id}>
-              {(index === 0 || new Date(mobileLessons[index - 1].lessonDate).toDateString() !== new Date(lesson.lessonDate).toDateString()) && (
-                <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12, fontWeight: 600 }}>
-                  {fmtDate(lesson.lessonDate)}
-                </Text>
-              )}
-            <Card bordered={false} style={{ borderRadius: 10, background: '#fff', border: '1px solid #EEE7E1' }} styles={{ body: { padding: 14 } }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
-                <Text strong style={{ color: '#1F2329' }}>{lesson.group?.course?.name || '-'}</Text>
-                <Tag color={status.color}>{status.text}</Tag>
+              <div key={group.key} style={{ display: 'grid', gap: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => setExpandedDates(current => ({ ...current, [group.key]: !expanded }))}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(232,120,74,.18)',
+                    background: '#fff6f1', color: '#5a4e3a', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                  }}
+                >
+                  <span>{fmtDate(group.date)} · {group.lessons.length}节</span>
+                  {expanded ? <DownOutlined style={{ color: '#E8784A' }} /> : <RightOutlined style={{ color: '#E8784A' }} />}
+                </button>
+                {expanded && group.lessons.map((lesson: any) => {
+                  const status = getLessonStatus(lesson)
+                  const studentNames = lesson.group?.enrollments?.map((e: any) => e.student?.name).filter(Boolean).join('、') || selectedStudent?.name || '-'
+                  return (
+                    <Card key={lesson.id} bordered={false} style={{ borderRadius: 10, background: '#fff', border: '1px solid #EEE7E1' }} styles={{ body: { padding: 14 } }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
+                        <Text strong style={{ color: '#1F2329' }}>{lesson.group?.course?.name || '-'}</Text>
+                        <Tag color={status.color}>{status.text}</Tag>
+                      </div>
+                      <div style={{ display: 'grid', gap: 5, fontSize: 12, color: '#5a4e3a' }}>
+                        <span><ClockCircleOutlined style={{ marginRight: 5 }} />{fmtDate(lesson.lessonDate)} {lesson.startTime}-{lesson.endTime}</span>
+                        <span><TeamOutlined style={{ marginRight: 5 }} />{lesson.teacher?.name || lesson.group?.teacher?.name || '-'}</span>
+                        <span><EnvironmentOutlined style={{ marginRight: 5 }} />{lesson.group?.room?.name || '-'}</span>
+                        <span>学生：{studentNames}</span>
+                        <span>考勤状态：{lesson.attendanceSubmittedAt ? '老师已确认' : '待老师确认'}</span>
+                        <span>课时扣除：{status.deducted}</span>
+                      </div>
+                    </Card>
+                  )
+                })}
               </div>
-              <div style={{ display: 'grid', gap: 5, fontSize: 12, color: '#5a4e3a' }}>
-                <span><ClockCircleOutlined style={{ marginRight: 5 }} />{fmtDate(lesson.lessonDate)} {lesson.startTime}-{lesson.endTime}</span>
-                <span><TeamOutlined style={{ marginRight: 5 }} />{lesson.teacher?.name || lesson.group?.teacher?.name || '-'}</span>
-                <span><EnvironmentOutlined style={{ marginRight: 5 }} />{lesson.group?.room?.name || '-'}</span>
-                <span>学生：{studentNames}</span>
-                <span>考勤状态：{lesson.attendanceSubmittedAt ? '老师已确认' : '待老师确认'}</span>
-                <span>课时扣除：{status.deducted}</span>
-              </div>
-            </Card>
-            </div>
             )
           })}
         </div>

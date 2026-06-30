@@ -12,8 +12,7 @@ export const dynamic = 'force-dynamic'
  */
 export async function GET() {
   const prisma = getPrismaForDivision('JUNIOR')
-  const schools = await prisma.highSchoolInfo.findMany({
-    where: { xinleStatus: { isEmpty: false } },
+  const schoolRows = await prisma.highSchoolInfo.findMany({
     orderBy: [{ tongZhao: 'desc' }],
     select: {
       id: true,
@@ -53,6 +52,24 @@ export async function GET() {
       xinleFenpeiQuota: true,
     },
   })
+  const schools = schoolRows.map((school) => {
+    const accessible = school.xinleAccessibleOverride ?? school.xinleAccessible
+    const xinleStatus = school.xinleStatus.length > 0
+      ? school.xinleStatus
+      : accessible
+        ? [
+            '统招可报',
+            ...(school.category?.includes('分配生') ? ['分配生可报'] : []),
+          ]
+        : ['仅供参考']
+
+    return {
+      ...school,
+      xinleAccessible: accessible,
+      xinleStatus,
+      isProvincialDemo: school.isProvincialDemo || Boolean(school.batch?.includes('省级示范')),
+    }
+  })
   const [allocationRows, rankRows] = await Promise.all([
     prisma.allocationQuota.findMany({ where: { year: 2025 }, select: { juniorSchool: true, seniorSchool: true, quota: true } }),
     prisma.yifenYidang.findMany({ where: { year: 2025 }, select: { score: true, cumulative: true }, orderBy: { score: 'desc' } }),
@@ -65,7 +82,7 @@ export async function GET() {
   const scoreRanks = Object.fromEntries(rankRows.map((row) => [row.score, row.cumulative]))
   return NextResponse.json({ schools, allocationQuotas, scoreRanks }, {
     headers: {
-      'Cache-Control': 'public, max-age=3600, stale-while-revalidate=300',
+      'Cache-Control': 'no-store, max-age=0',
     },
   })
 }

@@ -187,9 +187,6 @@ export default function ParentSchoolsPage() {
           <img src="/images/logo.jpg" alt="牧哲学堂" style={{ width: 28, height: 28, borderRadius: 7, objectFit: 'cover', flexShrink: 0 }} />
           <Title level={5} style={{ margin: 0, color: C.ink, fontSize: isMobile ? 16 : 18 }}>高中学校库 · 新乐可报名一览</Title>
         </div>
-        <Text style={{ display: 'block', marginTop: 7, color: C.muted, fontSize: 12, lineHeight: 1.6 }}>
-          绿色 = 新乐考生可报名，灰色 = 不可报名。数据由牧哲学堂整理，仅供参考。
-        </Text>
       </header>
 
       <div style={{ marginBottom: 12 }}>

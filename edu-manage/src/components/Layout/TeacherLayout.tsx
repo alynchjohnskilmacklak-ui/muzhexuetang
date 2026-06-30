@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -12,7 +12,6 @@ import {
   CoffeeOutlined,
   DashboardOutlined,
   DollarOutlined,
-  EllipsisOutlined,
   ExperimentOutlined,
   FileImageOutlined,
   FolderOutlined,
@@ -42,22 +41,33 @@ interface TeacherData {
   badges: { unsubmitted: number; unpublished: number; unread: number; unreadMessages: number }
 }
 
-type NavItem = MobileNavItem & { badgeKey?: keyof TeacherData['badges'] | null }
+type NavItem = Omit<MobileNavItem, 'children'> & {
+  badgeKey?: keyof TeacherData['badges'] | null
+  children?: NavItem[]
+}
 
 const navItems: NavItem[] = [
-  { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
-  { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '我的课表' },
-  { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
-  { key: '/teacher/feedback', icon: <MessageOutlined />, label: '成长反馈', badgeKey: 'unpublished' },
-  { key: '/teacher/messages', icon: <MessageOutlined />, label: '家长留言', badgeKey: 'unreadMessages' },
-  { key: '/teacher/leave', icon: <CalendarOutlined />, label: '请假审批' },
-  { key: '/teacher/meals', icon: <CoffeeOutlined />, label: '就餐上报' },
-  { key: '/teacher/students', icon: <TeamOutlined />, label: '我的学员' },
-  { key: '/teacher/papers', icon: <FileImageOutlined />, label: '试卷上传' },
-  { key: '/teacher/materials', icon: <FolderOutlined />, label: '学习资料' },
-  { key: '/teacher/salary', icon: <DollarOutlined />, label: '我的薪资' },
-  { key: '/teacher/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
-  { key: '/teacher/ai', icon: <MessageFilled />, label: 'AI 助手' },
+  { key: 'teaching-group', icon: <CalendarOutlined />, label: '教学工作', children: [
+    { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
+    { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '我的课表' },
+    { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
+    { key: '/teacher/feedback', icon: <MessageOutlined />, label: '成长反馈', badgeKey: 'unpublished' },
+  ] },
+  { key: 'service-group', icon: <MessageOutlined />, label: '沟通与服务', children: [
+    { key: '/teacher/messages', icon: <MessageOutlined />, label: '家长留言', badgeKey: 'unreadMessages' },
+    { key: '/teacher/leave', icon: <CalendarOutlined />, label: '请假审批' },
+    { key: '/teacher/meals', icon: <CoffeeOutlined />, label: '就餐上报' },
+  ] },
+  { key: 'student-group', icon: <TeamOutlined />, label: '学员与资源', children: [
+    { key: '/teacher/students', icon: <TeamOutlined />, label: '我的学员' },
+    { key: '/teacher/papers', icon: <FileImageOutlined />, label: '试卷上传' },
+    { key: '/teacher/materials', icon: <FolderOutlined />, label: '学习资料' },
+  ] },
+  { key: 'tools-group', icon: <ExperimentOutlined />, label: '个人与工具', children: [
+    { key: '/teacher/salary', icon: <DollarOutlined />, label: '我的薪资' },
+    { key: '/teacher/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
+    { key: '/teacher/ai', icon: <MessageFilled />, label: 'AI 助手' },
+  ] },
 ]
 
 function withBadges(items: NavItem[], data: TeacherData | null): MobileNavItem[] {
@@ -66,7 +76,12 @@ function withBadges(items: NavItem[], data: TeacherData | null): MobileNavItem[]
     icon: item.icon,
     label: item.label,
     badge: item.badgeKey && data ? data.badges[item.badgeKey] || 0 : undefined,
+    children: item.children ? withBadges(item.children, data) : undefined,
   }))
+}
+
+function flattenNavItems(items: NavItem[]): NavItem[] {
+  return items.flatMap(item => item.children ? flattenNavItems(item.children) : [item])
 }
 
 export function TeacherLayout({ children, initialData }: { children: React.ReactNode; initialData?: TeacherData }) {
@@ -112,18 +127,12 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     }
   }, [dashData, msgUnreadData])
 
-  const selectedKey = navItems.find(item => pathname.startsWith(item.key))?.key || '/teacher/dashboard'
+  const leafItems = useMemo(() => flattenNavItems(navItems), [])
+  const selectedKey = leafItems
+    .filter(item => pathname === item.key || pathname.startsWith(`${item.key}/`))
+    .sort((a, b) => b.key.length - a.key.length)[0]?.key || '/teacher/dashboard'
+  const defaultOpenKeys = navItems.filter(item => item.children?.some(child => child.key === selectedKey)).map(item => item.key)
   const mobileNavItems = withBadges(navItems, data)
-  const teacherBottomTabs: MobileNavItem[] = withBadges([
-    { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
-    { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '课表' },
-    { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤', badgeKey: 'unsubmitted' },
-    { key: '/teacher/feedback', icon: <MessageOutlined />, label: '反馈', badgeKey: 'unpublished' },
-  ], data)
-  teacherBottomTabs.push({ key: '__more', icon: <EllipsisOutlined />, label: '更多' })
-  const bottomKeys = ['/teacher/dashboard', '/teacher/schedule', '/teacher/attendance', '/teacher/feedback']
-  const morePriority = ['/teacher/messages', '/teacher/leave', '/teacher/meals', '/teacher/students', '/teacher/papers', '/teacher/materials', '/teacher/salary', '/teacher/phet', '/teacher/ai']
-  const teacherMoreItems = mobileNavItems.filter(item => !bottomKeys.includes(item.key)).sort((a, b) => morePriority.indexOf(a.key) - morePriority.indexOf(b.key))
   const todoTotal = (data?.badges?.unsubmitted || 0) + (data?.badges?.unpublished || 0)
 
   const handleChangePwd = async (values: { oldPassword: string; newPassword: string }) => {
@@ -146,11 +155,14 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   const menuItems = navItems.map((item) => ({
     key: item.key,
     icon: item.icon,
-    label: item.badgeKey && data ? (
-      <Badge count={data.badges[item.badgeKey] || 0} size="small" offset={[8, 0]}>
-        {item.label}
-      </Badge>
-    ) : item.label,
+    label: item.label,
+    children: item.children?.map(child => ({
+      key: child.key,
+      icon: child.icon,
+      label: child.badgeKey && data ? (
+        <Badge count={data.badges[child.badgeKey] || 0} size="small" offset={[8, 0]}>{child.label}</Badge>
+      ) : child.label,
+    })),
   }))
 
   if (isMobile === null) return null
@@ -158,10 +170,8 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   if (isMobile) {
     return (
       <MobileLayout
-        mode="tabs"
+        mode="drawer"
         navItems={mobileNavItems}
-        bottomTabs={teacherBottomTabs}
-        moreItems={teacherMoreItems}
         title="牧哲学堂 教师"
         drawerHeaderExtra={todoTotal > 0 ? (
           <div style={{ fontSize: 12, color: '#E8784A', background: 'rgba(232,120,74,.08)',
@@ -232,6 +242,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
         <Menu
           mode="inline"
           selectedKeys={[selectedKey]}
+          defaultOpenKeys={defaultOpenKeys}
           items={menuItems}
           onClick={({ key }) => router.push(key)}
           style={{ borderInlineEnd: 'none', background: 'transparent', marginTop: 8, fontSize: 14 }}

@@ -12,10 +12,8 @@ import {
   ClockCircleOutlined,
   CoffeeOutlined,
   CommentOutlined,
-  EllipsisOutlined,
   ExperimentOutlined,
   FileTextOutlined,
-  HeartOutlined,
   HomeOutlined,
   IdcardOutlined,
   LogoutOutlined,
@@ -39,7 +37,11 @@ import { MobileLayout, type MobileNavItem } from './MobileLayout'
 const { Sider, Content, Header } = Layout
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
-function resolveActiveKey(pathname: string, items: { key: string }[], fallback: string) {
+function flattenNavItems(items: MobileNavItem[]): MobileNavItem[] {
+  return items.flatMap(item => item.children ? flattenNavItems(item.children) : [item])
+}
+
+function resolveActiveKey(pathname: string, items: MobileNavItem[], fallback: string) {
   const exact = items.find(item => item.key === pathname)
   if (exact) return exact.key
 
@@ -90,39 +92,41 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   }
 
   const navItems: MobileNavItem[] = [
-    { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
-    { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课次' },
-    { key: '/parent/class-feedback', icon: <BookOutlined />, label: '反馈' },
-    { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长主页', badge: unread.papers + unread.posts },
-    { key: '/parent/volunteer/schools', icon: <BankOutlined />, label: '高中学校库' },
-    { key: '/parent/volunteer', icon: <ReadOutlined />, label: '志愿咨询' },
-    { key: '/parent/volunteer/rank-query', icon: <BarChartOutlined />, label: '一分一档位次' },
-    { key: '/parent/teachers', icon: <TeamOutlined />, label: '教师信息' },
-    { key: '/parent/notifications', icon: <BellOutlined />, label: '通知', badge: unread.notifications },
-    { key: '/parent/messages', icon: <CommentOutlined />, label: '我的留言', badge: unread.messages },
-    { key: '/parent/meals', icon: <CoffeeOutlined />, label: '就餐安排' },
-    { key: '/parent/leave', icon: <CalendarOutlined />, label: '请假' },
-    { key: '/parent/hour-records', icon: <ClockCircleOutlined />, label: '课时明细' },
-    { key: '/parent/materials', icon: <ReadOutlined />, label: '学习资料' },
-    { key: '/parent/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
-    { key: '/parent/ai', icon: <MessageFilled />, label: 'AI 助手' },
-    { key: '/parent/bind', icon: <WechatOutlined />, label: '绑定微信' },
-    { key: '/parent/profile', icon: <IdcardOutlined />, label: '个人中心' },
+    { key: 'growth-group', icon: <HomeOutlined />, label: '学习与成长', children: [
+      { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
+      { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课程表' },
+      { key: '/parent/class-feedback', icon: <BookOutlined />, label: '成长反馈' },
+      { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长主页', badge: unread.papers + unread.posts },
+      { key: '/parent/teachers', icon: <TeamOutlined />, label: '教师信息' },
+    ] },
+    { key: 'volunteer-group', icon: <BankOutlined />, label: '中考志愿', children: [
+      { key: '/parent/volunteer/schools', icon: <BankOutlined />, label: '高中学校库' },
+      { key: '/parent/volunteer', icon: <ReadOutlined />, label: '志愿咨询' },
+      { key: '/parent/volunteer/rank-query', icon: <BarChartOutlined />, label: '一分一档位次' },
+    ] },
+    { key: 'communication-group', icon: <CommentOutlined />, label: '消息沟通', children: [
+      { key: '/parent/notifications', icon: <BellOutlined />, label: '通知', badge: unread.notifications },
+      { key: '/parent/messages', icon: <CommentOutlined />, label: '我的留言', badge: unread.messages },
+    ] },
+    { key: 'service-group', icon: <CoffeeOutlined />, label: '生活服务', children: [
+      { key: '/parent/meals', icon: <CoffeeOutlined />, label: '就餐安排' },
+      { key: '/parent/leave', icon: <CalendarOutlined />, label: '请假' },
+      { key: '/parent/hour-records', icon: <ClockCircleOutlined />, label: '课时明细' },
+    ] },
+    { key: 'resource-group', icon: <ReadOutlined />, label: '学习资源', children: [
+      { key: '/parent/materials', icon: <ReadOutlined />, label: '学习资料' },
+      { key: '/parent/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
+      { key: '/parent/ai', icon: <MessageFilled />, label: 'AI 助手' },
+    ] },
+    { key: 'account-group', icon: <IdcardOutlined />, label: '账户设置', children: [
+      { key: '/parent/bind', icon: <WechatOutlined />, label: '绑定微信' },
+      { key: '/parent/profile', icon: <IdcardOutlined />, label: '个人中心' },
+    ] },
   ]
 
-  const bottomTabs: MobileNavItem[] = [
-    { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
-    { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课次' },
-    { key: '/parent/class-feedback', icon: <BookOutlined />, label: '反馈' },
-    { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长' },
-    { key: '__more', icon: <EllipsisOutlined />, label: '更多', badge: unread.papers + unread.posts + unread.notifications + unread.messages },
-  ]
-
-  const bottomKeys = ['/parent/dashboard', '/parent/schedule', '/parent/class-feedback', '/parent/archive']
-  // More items sorted by importance
-  const morePriority = ['/parent/notifications', '/parent/messages', '/parent/meals', '/parent/leave', '/parent/hour-records', '/parent/materials', '/parent/volunteer', '/parent/volunteer/schools', '/parent/volunteer/rank-query', '/parent/teachers', '/parent/phet', '/parent/ai', '/parent/bind', '/parent/profile']
-  const moreItems = navItems.filter(item => !bottomKeys.includes(item.key)).sort((a, b) => morePriority.indexOf(a.key) - morePriority.indexOf(b.key))
-  const currentKey = resolveActiveKey(pathname, navItems, '/parent/dashboard')
+  const leafItems = flattenNavItems(navItems)
+  const currentKey = resolveActiveKey(pathname, leafItems, '/parent/dashboard')
+  const defaultOpenKeys = navItems.filter(item => item.children?.some(child => child.key === currentKey)).map(item => item.key)
 
   const markAllRead = async () => {
     await fetch('/api/parent/notifications/read-all', { method: 'PATCH' })
@@ -134,11 +138,14 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   const menuItems = navItems.map(item => ({
     key: item.key,
     icon: item.icon,
-    label: (item.badge ?? 0) > 0 ? (
-      <Badge dot size="small" offset={[4, 0]}>
-        <span>{item.label}</span>
-      </Badge>
-    ) : item.label,
+    label: item.label,
+    children: item.children?.map(child => ({
+      key: child.key,
+      icon: child.icon,
+      label: (child.badge ?? 0) > 0 ? (
+        <Badge dot size="small" offset={[4, 0]}><span>{child.label}</span></Badge>
+      ) : child.label,
+    })),
   }))
 
   if (isMobile === null) return null
@@ -146,10 +153,8 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   if (isMobile) {
     return (
       <MobileLayout
-        mode="tabs"
+        mode="drawer"
         navItems={navItems}
-        bottomTabs={bottomTabs}
-        moreItems={moreItems}
         title="牧哲学堂 家长"
         drawerHeaderExtra={totalUnread > 0 ? (
           <button onClick={markAllRead} style={{
@@ -226,6 +231,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
         <Menu
           mode="inline"
           selectedKeys={[currentKey]}
+          defaultOpenKeys={defaultOpenKeys}
           items={menuItems}
           onClick={({ key }) => router.push(key)}
           style={{ borderInlineEnd: 'none', background: 'transparent', marginTop: 8, fontSize: 14 }}

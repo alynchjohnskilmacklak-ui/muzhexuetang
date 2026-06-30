@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Card, Empty, Image, Tag, Typography } from 'antd'
-import { BookOutlined, TeamOutlined } from '@ant-design/icons'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 
 const { Title, Text, Paragraph } = Typography
@@ -96,16 +95,6 @@ function TeacherRow({ teacher }: { teacher: TeacherInfo }) {
             })}
           </div>
         )}
-
-        {/* Stats */}
-        <div style={{ display: 'flex', gap: 24, marginBottom: 8 }}>
-          <span style={{ fontSize: 13, color: '#667085' }}>
-            <TeamOutlined style={{ marginRight: 4 }} />学员 {teacher.studentCount} 人
-          </span>
-          <span style={{ fontSize: 13, color: '#667085' }}>
-            <BookOutlined style={{ marginRight: 4 }} />班级 {teacher.classGroupCount} 个
-          </span>
-        </div>
 
         {/* Bio */}
         {teacher.bio && (

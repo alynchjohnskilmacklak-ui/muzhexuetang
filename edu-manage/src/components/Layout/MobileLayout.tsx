@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Avatar, Badge, Drawer, Dropdown } from 'antd'
-import { CloseOutlined, LogoutOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons'
+import { CloseOutlined, DownOutlined, LogoutOutlined, MenuOutlined, RightOutlined, UserOutlined } from '@ant-design/icons'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -15,6 +15,7 @@ export type MobileNavItem = {
   icon: React.ReactNode
   label: string
   badge?: number
+  children?: MobileNavItem[]
 }
 
 type MobileLayoutMode = 'drawer' | 'tabs'
@@ -61,6 +62,9 @@ export function MobileLayout({
   }
 
   const isActive = (key: string) => pathname === key || pathname.startsWith(`${key}/`)
+  const [expandedGroupKeys, setExpandedGroupKeys] = useState<string[]>(() =>
+    drawerItems.filter(item => item.children?.some(child => isActive(child.key))).map(item => item.key),
+  )
 
   const navigate = (key: string) => {
     if (key === '__more') {
@@ -234,6 +238,51 @@ export function MobileLayout({
         {/* Navigation items */}
         <nav style={{ flex: 1, overflowY: 'auto', padding: '10px 10px', WebkitOverflowScrolling: 'touch' }}>
           {drawerItems.map(item => {
+            if (item.children?.length) {
+              const expanded = expandedGroupKeys.includes(item.key)
+              const active = item.children.some(child => isActive(child.key))
+              return (
+                <div key={item.key} style={{ marginBottom: 4 }}>
+                  <button
+                    type="button"
+                    onClick={() => setExpandedGroupKeys(keys => expanded ? keys.filter(key => key !== item.key) : [...keys, item.key])}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 14px',
+                      borderRadius: 12, cursor: 'pointer', backgroundColor: active ? 'rgba(232,120,74,.06)' : 'transparent',
+                      color: active ? '#E8784A' : '#5a4e3a', fontSize: 15, fontWeight: active ? 600 : 500,
+                      border: 0, textAlign: 'left', minHeight: 50,
+                    }}
+                  >
+                    <span style={{ fontSize: 19, flexShrink: 0, width: 24, textAlign: 'center' }}>{item.icon}</span>
+                    <span style={{ flex: 1 }}>{item.label}</span>
+                    {expanded ? <DownOutlined /> : <RightOutlined />}
+                  </button>
+                  {expanded && item.children.map(child => {
+                    const childActive = isActive(child.key)
+                    return (
+                      <Link
+                        key={child.key}
+                        href={child.key}
+                        prefetch={true}
+                        onClick={() => setOpen(false)}
+                        style={{
+                          width: '100%', display: 'flex', alignItems: 'center', gap: 14,
+                          padding: '12px 14px 12px 30px', borderRadius: 12, marginBottom: 2,
+                          backgroundColor: childActive ? 'rgba(232,120,74,.1)' : 'transparent',
+                          color: childActive ? '#E8784A' : '#5a4e3a', fontSize: 14,
+                          fontWeight: childActive ? 600 : 400, minHeight: 46, textDecoration: 'none',
+                        }}
+                      >
+                        <span style={{ fontSize: 17, flexShrink: 0, width: 24, textAlign: 'center' }}>{child.icon}</span>
+                        {child.badge != null && child.badge > 0 ? (
+                          <Badge count={child.badge} size="small"><span>{child.label}</span></Badge>
+                        ) : <span>{child.label}</span>}
+                      </Link>
+                    )
+                  })}
+                </div>
+              )
+            }
             const active = isActive(item.key)
             return (
               <Link
