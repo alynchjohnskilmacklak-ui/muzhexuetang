@@ -93,7 +93,7 @@ function ParentSchoolCard({ school, onClick, detailed = false }: { school: Schoo
         <div style={{ minWidth: 0 }}>
           <Text strong style={{ display: 'block', color: C.ink, fontSize: 15 }}>{school.name}</Text>
           <Text style={{ display: 'block', marginTop: 3, color: C.subtle, fontSize: 11.5 }}>
-            {[school.batch, school.type].filter(Boolean).join(' · ')}
+            {[school.batch, school.category].filter(Boolean).join(' · ')}
           </Text>
         </div>
         <Tag color={accessible ? 'green' : 'red'} style={{ flexShrink: 0, margin: 0, borderRadius: 999 }}>
@@ -161,9 +161,9 @@ export default function ParentSchoolsPage() {
       || (school.keyFeature || '').includes(search)
     const matchFilter = filter === 'all'
       || (filter === 'accessible' && school.xinleAccessible === true)
-      || (filter === 'provincial' && (school.isProvincialDemo || school.type === '省示范' || school.batch === '第一批 省级示范性高中'))
-      || (filter === 'public' && !school.type.includes('民办'))
-      || (filter === 'private' && school.type.includes('民办'))
+      || (filter === 'provincial' && (school.batch || '').includes('省级示范'))
+      || (filter === 'public' && !(school.category || '').includes('民办'))
+      || (filter === 'private' && (school.category || '').includes('民办'))
     return matchSearch && matchFilter
   }), [schools, search, filter])
 
@@ -184,7 +184,7 @@ export default function ParentSchoolsPage() {
     <div style={{ width: '100%', maxWidth: '100%', color: C.ink, padding: isMobile ? '0 2px' : 0 }}>
       <header style={{ marginBottom: 14, padding: '14px 16px', borderRadius: 14, background: '#fff6f1', border: '1px solid rgba(232,120,74,.18)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src="/picture/牧哲学堂logo.jpg" alt="牧哲学堂" style={{ width: 28, height: 28, borderRadius: 7, objectFit: 'cover', flexShrink: 0 }} />
+          <img src="/images/logo.jpg" alt="牧哲学堂" style={{ width: 28, height: 28, borderRadius: 7, objectFit: 'cover', flexShrink: 0 }} />
           <Title level={5} style={{ margin: 0, color: C.ink, fontSize: isMobile ? 16 : 18 }}>高中学校库 · 新乐可报名一览</Title>
         </div>
         <Text style={{ display: 'block', marginTop: 7, color: C.muted, fontSize: 12, lineHeight: 1.6 }}>
