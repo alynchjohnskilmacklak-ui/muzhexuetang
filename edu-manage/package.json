@@ -30,6 +30,8 @@
     "school:update-all": "tsx scripts/update-school-info-comprehensive.ts",
     "import:master-schools": "tsx scripts/import-master-schools.ts",
     "import:yifenyidang": "tsx scripts/import-yifenyidang.ts",
+    "convert:yifenyidang:2026": "tsx scripts/convert-yifenyidang-csv.ts",
+    "import:yifenyidang:2026": "tsx scripts/import-yifenyidang.ts data/volunteer/yifenyidang_2026.json",
     "import:allocation": "tsx scripts/import-allocation.ts",
     "import:enrollment": "tsx scripts/import-enrollment.ts",
     "check:garbled": "tsx scripts/check-garbled-text.ts",

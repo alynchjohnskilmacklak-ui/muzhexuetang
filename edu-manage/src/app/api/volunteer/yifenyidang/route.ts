@@ -14,16 +14,20 @@ export const GET = apiHandler(async (request: NextRequest) => {
     select: { score: true, count: true, cumulative: true },
   })
 
-  let previousCumulative = 0
   const rows = records.map((record) => {
-    const rankStart = previousCumulative + 1
+    const rankStart = record.cumulative - record.count + 1
     const rankEnd = record.cumulative
-    previousCumulative = record.cumulative
     return [record.score, record.count, record.cumulative, rankStart, rankEnd]
   })
   const total = records.at(-1)?.cumulative ?? 0
 
-  return NextResponse.json({ total, rows }, {
+  return NextResponse.json({
+    year,
+    total,
+    minScore: records.at(-1)?.score ?? null,
+    maxScore: records[0]?.score ?? null,
+    rows,
+  }, {
     headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=300' },
   })
 })
