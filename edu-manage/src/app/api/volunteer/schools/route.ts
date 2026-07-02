@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getPrismaForDivision } from '@/lib/prisma'
+import admissionCutoffs2025 from '../../../../../data/volunteer/admission_cutoffs_2025.json'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,19 +69,41 @@ export async function GET() {
       xinleAccessible: accessible,
       xinleStatus,
       isProvincialDemo: school.isProvincialDemo || Boolean(school.batch?.includes('省级示范')),
+      cutoffVariants2025: admissionCutoffs2025
+        .filter((cutoff) => school.name.includes(cutoff.baseName) || school.fullName.includes(cutoff.baseName) || cutoff.baseName.includes(school.name))
+        .map((cutoff) => ({
+          regionLabel: cutoff.regionLabel,
+          regionType: cutoff.regionType,
+          yiTong: cutoff.yiTong,
+          tongZhao: cutoff.tongZhao,
+          sourceName: cutoff.schoolName,
+        })),
     }
   })
   const [allocationRows, rankRows] = await Promise.all([
     prisma.allocationQuota.findMany({ where: { year: 2025 }, select: { juniorSchool: true, seniorSchool: true, quota: true } }),
-    prisma.yifenYidang.findMany({ where: { year: 2025 }, select: { score: true, cumulative: true }, orderBy: { score: 'desc' } }),
+    prisma.yifenYidang.findMany({ where: { year: { in: [2025, 2026] } }, select: { year: true, score: true, count: true, cumulative: true }, orderBy: [{ year: 'asc' }, { score: 'desc' }] }),
   ])
   const allocationQuotas: Record<string, Record<string, number>> = {}
   for (const row of allocationRows) {
     allocationQuotas[row.juniorSchool] ||= {}
     allocationQuotas[row.juniorSchool][row.seniorSchool] = row.quota
   }
-  const scoreRanks = Object.fromEntries(rankRows.map((row) => [row.score, row.cumulative]))
-  return NextResponse.json({ schools, allocationQuotas, scoreRanks }, {
+  const rows2025 = rankRows.filter((row) => row.year === 2025).map(({ score, count, cumulative }) => ({ score, count, cumulative }))
+  const rows2026 = rankRows.filter((row) => row.year === 2026).map(({ score, count, cumulative }) => ({ score, count, cumulative }))
+  const scoreRanks = Object.fromEntries(rows2025.map((row) => [row.score, row.cumulative]))
+  const rankMaps = {
+    '2025': scoreRanks,
+    '2026': Object.fromEntries(rows2026.map((row) => [row.score, row.cumulative])),
+  }
+  const rankRowsByYear = { '2025': rows2025, '2026': rows2026 }
+  const rankMeta = Object.fromEntries(Object.entries(rankRowsByYear).map(([year, rows]) => [year, {
+    total: rows.at(-1)?.cumulative ?? 0,
+    minScore: rows.at(-1)?.score ?? 0,
+    maxScore: rows[0]?.score ?? 0,
+  }]))
+
+  return NextResponse.json({ schools, allocationQuotas, scoreRanks, rankMaps, rankRows: rankRowsByYear, rankMeta }, {
     headers: {
       'Cache-Control': 'no-store, max-age=0',
     },

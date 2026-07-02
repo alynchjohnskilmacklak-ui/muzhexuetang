@@ -15,7 +15,6 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import {
   CONTROL_LINES_2025,
   getAllocationLine,
-  getMarketPercentile,
   getMarketRank,
   getScoreTag,
   nameMatches,
@@ -29,7 +28,7 @@ const { Title, Text } = Typography
 const XINLE_SCHOOLS = Object.keys(XINLE_ALLOCATION_2025).filter((school) => school !== '超击武校')
 
 const DISCLAIMER_TEXT =
-  '本方案依据 2025 年石家庄中考数据测算给出，结果仅供参考，并非百分之百准确，仅为方便孩子更好地对比择校。所填信息仍需家长仔细核对，本机构不承担任何后果。'
+  '本方案依据2025年普通高中录取线与2026年石家庄17县一分一档进行位次换算，结果仅供模拟参考，非官方录取结果。所填信息仍需家长仔细核对。'
 
 // 真实二维码替换后，standalone 部署需重新构建并同步 public 目录。
 const CONSULT_QR_SRC = '/volunteer/consult-qr.png'
@@ -69,6 +68,7 @@ interface DBSchool {
   xinleStatus: string[]
   isProvincialDemo: boolean
   lineRank?: number | null
+  cutoffVariants2025?: CutoffVariant2025[]
 }
 
 interface ProcessedSchool extends DBSchool {
@@ -76,6 +76,151 @@ interface ProcessedSchool extends DBSchool {
   gap: number
   quota: number
   accessible: boolean
+  lineCompare: LineCompare
+}
+
+type RankRowObject = { score: number; count: number; cumulative: number }
+type RankYear = '2025' | '2026'
+type RankMaps = Record<RankYear, Record<string, number>>
+type RankRows = Record<RankYear, RankRowObject[]>
+type RankMeta = Record<RankYear, { total: number; minScore: number; maxScore: number }>
+type CutoffVariant2025 = {
+  regionLabel: string
+  regionType: string
+  yiTong: number | null
+  tongZhao: number
+  sourceName: string
+}
+type Student2026Metrics = {
+  score: number
+  rank: number | null
+  count: number | null
+  rankStart: number | null
+  rankEnd: number | null
+  total: number | null
+  missing: boolean
+}
+type LineCompare = {
+  lineScore: number
+  lineRank2025: number | null
+  equivalent2026Score: number | null
+  equivalent2026Rank: number | null
+  equivalentDiff: number | null
+  rankGap: number | null
+  rankGapText: string
+  rankCompareLabel: string
+  scoreGap: number
+  sourceLabel: string
+  regionWarning: string | null
+}
+
+function formatNum(value?: number | null) {
+  return typeof value === 'number' ? value.toLocaleString() : '—'
+}
+
+function getRankRowByScore(rows: RankRowObject[] | undefined, score: number | null) {
+  if (score == null || !rows?.length) return null
+  return rows.find((row) => row.score === score) || null
+}
+
+function getRankByScore(rankMaps: Partial<RankMaps>, year: RankYear, score: number | null) {
+  if (score == null) return null
+  const value = rankMaps[year]?.[String(score)]
+  return typeof value === 'number' ? value : null
+}
+
+function findClosestScoreByRank(rows: RankRowObject[] | undefined, targetRank: number | null) {
+  if (!rows?.length || targetRank == null) return null
+  let best = rows[0]
+  for (const row of rows) {
+    if (Math.abs(row.cumulative - targetRank) < Math.abs(best.cumulative - targetRank)) best = row
+  }
+  return {
+    score: best.score,
+    count: best.count,
+    cumulative: best.cumulative,
+    diff: best.cumulative - targetRank,
+    absDiff: Math.abs(best.cumulative - targetRank),
+  }
+}
+
+function getStudent2026Metrics(
+  inputScore: number | null,
+  rows: RankRowObject[] | undefined,
+  meta: RankMeta[RankYear] | undefined,
+  fallbackRank: number | null,
+): Student2026Metrics | null {
+  if (inputScore == null) return null
+  const row = getRankRowByScore(rows, inputScore)
+  if (!row) return { score: inputScore, rank: fallbackRank, count: null, rankStart: null, rankEnd: null, total: meta?.total || null, missing: true }
+  return {
+    score: inputScore,
+    rank: row.cumulative,
+    count: row.count,
+    rankStart: row.cumulative - row.count + 1,
+    rankEnd: row.cumulative,
+    total: meta?.total || rows?.at(-1)?.cumulative || null,
+    missing: false,
+  }
+}
+
+function buildLineCompare({
+  school, inputScore, student2026Rank, rankRows2025, rankRows2026, rankMaps,
+}: {
+  school: DBSchool
+  inputScore: number
+  student2026Rank: number | null
+  rankRows2025: RankRowObject[] | undefined
+  rankRows2026: RankRowObject[] | undefined
+  rankMaps: Partial<RankMaps>
+}): LineCompare {
+  const nameText = `${school.name}${school.fullName}`
+  const namedOtherCounty = nameText.includes('其他县区')
+  const xinleVariant = school.cutoffVariants2025?.find((item) => item.regionType === 'XINLE')
+  const generalVariant = school.cutoffVariants2025?.find((item) => item.regionType === 'GENERAL')
+  const otherCountyVariant = school.cutoffVariants2025?.find((item) => item.regionType === 'OTHER_COUNTY')
+  const otherCountyOnly = namedOtherCounty || (!school.xinleLine && !xinleVariant && Boolean(otherCountyVariant))
+  const lineScore = namedOtherCounty
+    ? otherCountyVariant?.tongZhao ?? school.tongZhao
+    : school.xinleLine ?? xinleVariant?.tongZhao ?? school.tongZhao ?? generalVariant?.tongZhao
+  const lineRank2025 = getRankByScore(rankMaps, '2025', lineScore) ?? getRankRowByScore(rankRows2025, lineScore)?.cumulative ?? null
+  const equivalent2026 = findClosestScoreByRank(rankRows2026, lineRank2025)
+  const rankGap = student2026Rank != null && lineRank2025 != null ? student2026Rank - lineRank2025 : null
+  const rankGapText = rankGap == null
+    ? '位次差暂无'
+    : rankGap < 0
+      ? `领先约${formatNum(Math.abs(rankGap))}名`
+      : rankGap > 0 ? `落后约${formatNum(rankGap)}名` : '位次基本持平'
+  const rankCompareLabel = rankGap == null
+    ? '位次对比暂无'
+    : rankGap <= -3000
+      ? '位次优势明显'
+      : rankGap <= -1000
+        ? '位次有优势'
+        : rankGap <= 1000 ? '位次接近，需谨慎' : '位次落后，建议冲刺或慎报'
+  let sourceLabel = school.xinleLine != null || xinleVariant ? '新乐线' : '统招线'
+  if (otherCountyOnly || nameText.includes('其他县区')) sourceLabel = '其他县区线（仅参考）'
+  else if (sourceLabel === '新乐线' || nameText.includes('新乐')) sourceLabel = '新乐线（新乐）'
+  const hasMultipleRegions = (school.cutoffVariants2025?.length || 0) > 1
+  const regionWarning = otherCountyOnly
+    ? '该线为其他县区线，新乐考生不可直接按此线判断'
+    : hasMultipleRegions
+      ? '该校存在不同招生区域分数线，系统已优先按新乐考生可参考线测算。其他县区线仅作了解，不能直接用于新乐考生判断。'
+      : null
+
+  return {
+    lineScore,
+    lineRank2025,
+    equivalent2026Score: equivalent2026?.score ?? null,
+    equivalent2026Rank: equivalent2026?.cumulative ?? null,
+    equivalentDiff: equivalent2026?.diff ?? null,
+    rankGap,
+    rankGapText,
+    rankCompareLabel,
+    scoreGap: inputScore - lineScore,
+    sourceLabel,
+    regionWarning,
+  }
 }
 
 const TAG_OPTIONS: ('全部' | ScoreTag)[] = ['全部', '分配生机会', '保底', '稳妥', '冲刺', '差距较大', '暂未达线']
@@ -144,6 +289,9 @@ export default function VolunteerSimPage() {
   const [schoolsError, setSchoolsError] = useState(false)
   const [allocationQuotaMap, setAllocationQuotaMap] = useState<Record<string, Record<string, number>>>({})
   const [scoreRankMap, setScoreRankMap] = useState<Record<string, number>>({})
+  const [rankMaps, setRankMaps] = useState<Partial<RankMaps>>({})
+  const [rankRows, setRankRows] = useState<Partial<RankRows>>({})
+  const [rankMeta, setRankMeta] = useState<Partial<RankMeta>>({})
 
   const [filterTag, setFilterTag] = useState<string>('全部')
   const [filterType, setFilterType] = useState<string>('全部')
@@ -220,6 +368,9 @@ export default function VolunteerSimPage() {
         setSchools(Array.isArray(d?.schools) ? d.schools : [])
         setAllocationQuotaMap(d?.allocationQuotas || {})
         setScoreRankMap(d?.scoreRanks || {})
+        setRankMaps(d?.rankMaps || {})
+        setRankRows(d?.rankRows || {})
+        setRankMeta(d?.rankMeta || {})
       })
       .catch((error) => { console.warn('学校数据加载失败', error); setSchoolsError(true) })
       .finally(() => setSchoolsReady(true))
@@ -252,10 +403,12 @@ export default function VolunteerSimPage() {
     return getMarketRank(score).rank
   }, [scoreRankMap])
 
-  const marketRankResult = submitted && inputScore !== null
-    ? { rank: getRankForScore(inputScore), message: undefined as string | undefined }
+  const student2026Metrics = useMemo(() => submitted && inputScore !== null
+    ? getStudent2026Metrics(inputScore, rankRows['2026'], rankMeta['2026'], getRankForScore(inputScore))
+    : null, [submitted, inputScore, rankRows, rankMeta, getRankForScore])
+  const marketRankResult = student2026Metrics
+    ? { rank: student2026Metrics.rank, message: student2026Metrics.missing ? '2026一分一档暂未完整导入，当前为历史数据估算' : undefined }
     : null
-  const percentileResult = submitted && inputScore !== null ? getMarketPercentile(inputScore) : null
 
   const processedSchools = useMemo((): ProcessedSchool[] => {
     if (!submitted || inputScore === null) return []
@@ -263,7 +416,15 @@ export default function VolunteerSimPage() {
       .map(school => {
         const quota = getAllocationQuota(school)
         const allocationLine = getAllocationLine(school)
-        const effectiveLine = school.xinleLine ?? school.tongZhao
+        const lineCompare = buildLineCompare({
+          school,
+          inputScore,
+          student2026Rank: student2026Metrics?.rank ?? null,
+          rankRows2025: rankRows['2025'],
+          rankRows2026: rankRows['2026'],
+          rankMaps,
+        })
+        const effectiveLine = lineCompare.lineScore
         const tag = getScoreTag(
           inputScore,
           effectiveLine,
@@ -273,7 +434,7 @@ export default function VolunteerSimPage() {
         )
         const gap = inputScore - effectiveLine
         const accessible = school.xinleStatus.includes('统招可报')
-        return { ...school, tongZhao: effectiveLine, lineRank: getRankForScore(effectiveLine), allocationLine, tag, gap, quota, accessible }
+        return { ...school, tongZhao: effectiveLine, lineRank: lineCompare.lineRank2025, allocationLine, tag, gap, quota, accessible, lineCompare }
       })
       .sort((a, b) => {
         if (a.accessible !== b.accessible) return a.accessible ? -1 : 1
@@ -282,7 +443,7 @@ export default function VolunteerSimPage() {
         if (pa !== pb) return pa - pb
         return b.tongZhao - a.tongZhao
       })
-  }, [schools, submitted, inputScore, inputRank, getAllocationQuota, getRankForScore])
+  }, [schools, submitted, inputScore, inputRank, getAllocationQuota, student2026Metrics, rankRows, rankMaps])
 
   const filteredSchools = useMemo(() => {
     return processedSchools.filter(s => {
@@ -618,7 +779,7 @@ export default function VolunteerSimPage() {
         items={[{
           key: 'disclaimer',
           label: <span style={{ color: C.warning, fontSize: 13, fontWeight: 500 }}>重要提示：本系统仅供模拟参考，非官方录取结果</span>,
-          children: <span style={{ color: C.inkMuted, fontSize: 13, lineHeight: 1.8 }}>本系统基于2025年石家庄中考一分一档表、全市统招线和“初中×高中”精确分配生名额进行模拟，仅供志愿填报参考。全市排名基于一分一档表测算。梯度标签（冲刺/稳妥/保底）基于2025年分数线静态计算，不代表2026年实际录取结果。分配生资格仅按本校排名与该高中给本校的精确名额比较，不使用报名人数估算；实际录取仍受考生意愿、控制线、同校竞争等因素影响。最终录取以石家庄市教育考试院和学校官方公布为准。</span>,
+          children: <span style={{ color: C.inkMuted, fontSize: 13, lineHeight: 1.8 }}>本系统基于2025年普通高中录取线与2026年石家庄17县一分一档进行位次换算，结果仅供模拟参考，非官方录取结果。梯度标签（冲刺/稳妥/保底）仍按原有规则计算；分配生资格仍按本校排名与对应高中名额比较。</span>,
         }]}
       />
 
@@ -724,46 +885,48 @@ export default function VolunteerSimPage() {
           borderRadius: 12,
           padding: '16px 24px',
           marginBottom: 20,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 12,
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) auto',
+          gap: isMobile ? 14 : 20,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(100px, 1fr))', gap: isMobile ? 12 : 24 }}>
             <div>
-              <Text style={{ color: C.inkSubtle, fontSize: 12 }}>分数</Text>
-              <div style={{ fontSize: 28, fontWeight: 700, color: C.primary, lineHeight: 1.2 }}>{inputScore}</div>
+              <Text style={{ color: C.inkSubtle, fontSize: isMobile ? 11 : 12 }}>分数</Text>
+              <div style={{ fontSize: isMobile ? 26 : 28, fontWeight: 700, color: C.primary, lineHeight: 1.2 }}>{inputScore}</div>
             </div>
-            <div style={{ width: 1, height: 32, background: C.hairline }} />
             <div>
-              <Text style={{ color: C.inkSubtle, fontSize: 12 }}>全市排名</Text>
+              <Text style={{ color: C.inkSubtle, fontSize: isMobile ? 11 : 12 }}>2026位次</Text>
               <div style={{ fontSize: 16, fontWeight: 600, color: C.ink }}>
                 {marketRankResult?.rank != null ? `约第 ${marketRankResult.rank.toLocaleString()} 名` : '—'}
               </div>
-              {marketRankResult?.message && (
-                <Text style={{ fontSize: 10, color: C.inkSubtle, display: 'block' }}>{marketRankResult.message}</Text>
-              )}
+              <Text style={{ fontSize: 10, color: C.inkSubtle, display: 'block' }}>按2026年石家庄17县一分一档测算</Text>
             </div>
-            <div style={{ width: 1, height: 32, background: C.hairline }} />
             <div>
-              <Text style={{ color: C.inkSubtle, fontSize: 12 }}>超越全市</Text>
-              <div style={{ fontSize: 16, fontWeight: 600, color: C.success }}>
-                {percentileResult?.percentile !== '—' ? `${(100 - parseFloat(percentileResult?.percentile || '0')).toFixed(1)}%` : '—'}
-              </div>
-            </div>
-            <div style={{ width: 1, height: 32, background: C.hairline }} />
-            <div>
-              <Text style={{ color: C.inkSubtle, fontSize: 12 }}>新乐控制线</Text>
+              <Text style={{ color: C.inkSubtle, fontSize: isMobile ? 11 : 12 }}>2026同分人数</Text>
               <div style={{ fontSize: 16, fontWeight: 600, color: C.ink }}>
-                {CONTROL_LINES_2025['新乐市']}分
+                {student2026Metrics?.count != null ? `${formatNum(student2026Metrics.count)} 人` : '暂无'}
               </div>
             </div>
-            <Tag color={inputScore !== null && inputScore >= CONTROL_LINES_2025['新乐市'] ? 'success' : 'error'}>
+            <div>
+              <Text style={{ color: C.inkSubtle, fontSize: isMobile ? 11 : 12 }}>2026参考总人数</Text>
+              <div style={{ fontSize: 16, fontWeight: 600, color: C.ink }}>
+                {student2026Metrics?.total != null ? `${formatNum(student2026Metrics.total)} 人` : '暂无'}
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'space-between' : 'flex-end', gap: 8, flexWrap: 'wrap', borderTop: isMobile ? `1px solid ${C.hairline}` : undefined, paddingTop: isMobile ? 12 : 0 }}>
+            <div>
+              <Text style={{ color: C.inkSubtle, fontSize: 11 }}>新乐控制线</Text>
+              <Text strong style={{ color: C.ink, marginLeft: 6 }}>{CONTROL_LINES_2025['新乐市']}分</Text>
+            </div>
+            <Tag color={inputScore !== null && inputScore >= CONTROL_LINES_2025['新乐市'] ? 'success' : 'error'} style={{ margin: 0 }}>
               {inputScore !== null && inputScore >= CONTROL_LINES_2025['新乐市'] ? '已过控制线' : '未过控制线'}
             </Tag>
+            <Button onClick={handleReset} style={{ color: C.inkMuted }}>重新输入</Button>
           </div>
-          <Button onClick={handleReset} style={{ color: C.inkMuted }}>重新输入</Button>
+          {marketRankResult?.message && (
+            <Text style={{ fontSize: 11, color: C.warning, gridColumn: '1 / -1' }}>{marketRankResult.message}</Text>
+          )}
         </div>
       )}
 
@@ -944,22 +1107,29 @@ export default function VolunteerSimPage() {
                 <div style={{ fontSize: 13, marginTop: 4 }}>请调整筛选条件或修改分数后重试</div>
               </div>
             ) : (
-              <TieredSchoolList
-                schools={filteredSchools}
-                isInBasket={isInBasket}
-                allocationSlots={allocationSlots}
-                shifanSlots={shifanSlots}
-                putongSlots={putongSlots}
-                allocationFilled={allocationFilled}
-                shifanFilled={shifanFilled}
-                putongFilled={putongFilled}
-                hasAllocationOption={hasAllocationOption}
-                getSchoolSegment={getSchoolSegment}
-                addToAllocation={addToAllocation}
-                addToShifan={addToShifan}
-                addToPutong={addToPutong}
-                onDetail={setDetailSchool}
-              />
+              <>
+                <div style={{ marginBottom: 12, padding: isMobile ? 10 : '11px 14px', borderRadius: 10, background: C.primaryBg, border: `1px solid ${C.primaryBorder}`, color: C.inkMuted, fontSize: 12, lineHeight: 1.7 }}>
+                  <strong style={{ color: C.ink }}>怎样看位次对比：</strong>2025线位次表示该校去年录取线在2025一分一档中的大致位置；2026等效分表示把去年位次放到今年一分一档中，大约对应多少分。
+                  <div style={{ marginTop: 3 }}>同一所学校可能存在不同招生区域分数线，例如新伏羲中学2025年新乐线660分、其他县区线474分。系统测算新乐考生时优先使用新乐线，不能混用其他县区线。</div>
+                </div>
+                <TieredSchoolList
+                  schools={filteredSchools}
+                  isMobile={isMobile}
+                  isInBasket={isInBasket}
+                  allocationSlots={allocationSlots}
+                  shifanSlots={shifanSlots}
+                  putongSlots={putongSlots}
+                  allocationFilled={allocationFilled}
+                  shifanFilled={shifanFilled}
+                  putongFilled={putongFilled}
+                  hasAllocationOption={hasAllocationOption}
+                  getSchoolSegment={getSchoolSegment}
+                  addToAllocation={addToAllocation}
+                  addToShifan={addToShifan}
+                  addToPutong={addToPutong}
+                  onDetail={setDetailSchool}
+                />
+              </>
             )}
           </div>
         </div>
@@ -1041,17 +1211,33 @@ export default function VolunteerSimPage() {
               <div style={{
                 marginTop: 12,
                 display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr',
+                gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
                 gap: 10,
               }}>
-                {detailSchool.yiTong && (
-                  <ScoreBlock label={detailSchool.type === '民办' ? '市区统招分' : '一统线'} value={`${detailSchool.yiTong}分`} />
-                )}
-                <ScoreBlock label="新乐对照线" value={`${detailSchool.tongZhao}分`} sub={`${detailSchool.lineRank ? `约第${detailSchool.lineRank.toLocaleString()}名 · ` : ''}距线${detailSchool.gap >= 0 ? `高出${detailSchool.gap}` : `差${Math.abs(detailSchool.gap)}`}分`} />
-                {detailSchool.allocationLine && (
-                  <ScoreBlock label="分配生录取线" value={`${detailSchool.allocationLine}分`} />
-                )}
+                <ScoreBlock label="2025录取线" value={`${detailSchool.lineCompare.lineScore}分`} sub={`${detailSchool.lineCompare.sourceLabel} · ${detailSchool.lineCompare.scoreGap >= 0 ? '高' : '差'}${Math.abs(detailSchool.lineCompare.scoreGap)}分`} />
+                <ScoreBlock label="2025线位次" value={detailSchool.lineCompare.lineRank2025 != null ? `约第${formatNum(detailSchool.lineCompare.lineRank2025)}名` : '暂无'} sub="按2025一分一档换算" />
+                <ScoreBlock label="2026等效分" value={detailSchool.lineCompare.equivalent2026Score != null ? `约${detailSchool.lineCompare.equivalent2026Score}分` : '暂无'} sub={detailSchool.lineCompare.equivalent2026Rank != null ? `对应位次约第${formatNum(detailSchool.lineCompare.equivalent2026Rank)}名` : '请先导入2026一分一档'} />
+                <ScoreBlock label="考生2026位次" value={student2026Metrics?.rank != null ? `第${formatNum(student2026Metrics.rank)}名` : '暂无'} sub={detailSchool.lineCompare.rankGapText} />
               </div>
+
+              {detailSchool.lineCompare.regionWarning && (
+                <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 8, background: C.warningBg, border: `1px solid ${C.warningBorder}`, color: C.warning, fontSize: 12, lineHeight: 1.7 }}>
+                  {detailSchool.lineCompare.regionWarning}
+                </div>
+              )}
+
+              {!!detailSchool.cutoffVariants2025?.length && (
+                <div style={{ marginTop: 10, padding: '10px 14px', borderRadius: 8, background: C.surface3, border: `1px solid ${C.hairline}` }}>
+                  <Text strong style={{ display: 'block', color: C.inkMuted, fontSize: 12, marginBottom: 6 }}>2025招生区域分数线</Text>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {detailSchool.cutoffVariants2025.map((variant) => (
+                      <Tag key={`${variant.regionType}-${variant.tongZhao}`} color={variant.regionType === 'XINLE' ? 'orange' : 'default'} style={{ margin: 0 }}>
+                        {variant.regionLabel}：{variant.tongZhao}分
+                      </Tag>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {detailSchool.quota > 0 && (
                 <div style={{
@@ -1237,7 +1423,7 @@ export default function VolunteerSimPage() {
             inputSchool={inputSchool}
             inputRank={inputRank}
             marketRankResult={marketRankResult}
-            percentileResult={percentileResult}
+            student2026Metrics={student2026Metrics}
             allocationSlots={allocationSlots}
             shifanSlots={shifanSlots}
             putongSlots={putongSlots}
@@ -1249,7 +1435,7 @@ export default function VolunteerSimPage() {
         {submitted && (
           <SharePoster
             marketRankResult={marketRankResult}
-            percentileResult={percentileResult}
+            student2026Metrics={student2026Metrics}
             allocationSlots={allocationSlots}
             shifanSlots={shifanSlots}
             putongSlots={putongSlots}
@@ -1260,14 +1446,13 @@ export default function VolunteerSimPage() {
   )
 }
 
-type RankResult = ReturnType<typeof getMarketRank> | null
-type PercentileResult = ReturnType<typeof getMarketPercentile> | null
+type RankResult = { rank: number | null; message?: string } | null
 function ReportDocument({
   inputScore,
   inputSchool,
   inputRank,
   marketRankResult,
-  percentileResult,
+  student2026Metrics,
   allocationSlots,
   shifanSlots,
   putongSlots,
@@ -1277,14 +1462,13 @@ function ReportDocument({
   inputSchool: string
   inputRank: number | null
   marketRankResult: RankResult
-  percentileResult: PercentileResult
+  student2026Metrics: Student2026Metrics | null
   allocationSlots: (DBSchool | null)[]
   shifanSlots: (DBSchool | null)[]
   putongSlots: (DBSchool | null)[]
   processedSchools: ProcessedSchool[]
 }) {
   const rankText = marketRankResult?.rank != null ? marketRankResult.rank.toLocaleString() : '—'
-  const percentileText = percentileResult?.percentile && percentileResult.percentile !== '—' ? `${percentileResult.percentile}%` : '—'
 
   return (
     <div style={{ width: 794, background: '#ffffff', padding: 32, color: C.ink, boxSizing: 'border-box', fontFamily: 'Arial, sans-serif' }}>
@@ -1295,12 +1479,13 @@ function ReportDocument({
 
       <section style={{ marginBottom: 24 }}>
         <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 12 }}>考生测算概览</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           <ReportMetric label="分数" value={inputScore !== null ? `${inputScore}分` : '—'} />
           <ReportMetric label="毕业初中" value={inputSchool || '—'} />
           <ReportMetric label="校内排名" value={inputRank !== null ? `第${inputRank}名` : '—'} />
-          <ReportMetric label="全市位次" value={rankText === '—' ? '—' : `第${rankText}名`} />
-          <ReportMetric label="全市百分位" value={percentileText} />
+          <ReportMetric label="2026位次" value={rankText === '—' ? '—' : `第${rankText}名`} />
+          <ReportMetric label="2026同分人数" value={student2026Metrics?.count != null ? `${formatNum(student2026Metrics.count)}人` : '暂无'} />
+          <ReportMetric label="参考总人数" value={student2026Metrics?.total != null ? `${formatNum(student2026Metrics.total)}人` : '暂无'} />
         </div>
       </section>
 
@@ -1326,23 +1511,20 @@ function ReportMetric({ label, value }: { label: string; value: string }) {
 
 function SharePoster({
   marketRankResult,
-  percentileResult,
+  student2026Metrics,
   allocationSlots,
   shifanSlots,
   putongSlots,
 }: {
   marketRankResult: RankResult
-  percentileResult: PercentileResult
+  student2026Metrics: Student2026Metrics | null
   allocationSlots: (DBSchool | null)[]
   shifanSlots: (DBSchool | null)[]
   putongSlots: (DBSchool | null)[]
 }) {
   const rankText = marketRankResult?.rank != null
-    ? `全市位次 第 ${marketRankResult.rank.toLocaleString()} 名`
+    ? `2026位次 第 ${marketRankResult.rank.toLocaleString()} 名`
     : '已完成志愿模拟测算'
-  const percentileText = percentileResult?.percentile && percentileResult.percentile !== '—'
-    ? `百分位 ${percentileResult.percentile}%`
-    : '百分位 —'
 
   return (
     <div style={{ width: 750, height: 1334, background: 'linear-gradient(160deg,#fff3ec,#ffffff)', color: C.ink, boxSizing: 'border-box', padding: 54, fontFamily: 'Arial, sans-serif', position: 'relative', overflow: 'hidden' }}>
@@ -1355,7 +1537,7 @@ function SharePoster({
           {rankText}
         </div>
         <div style={{ marginTop: 22, fontSize: 28, fontWeight: 700, color: '#E8784A' }}>
-          {percentileText}
+          志愿模拟完成{student2026Metrics?.count != null ? ` · 同分${formatNum(student2026Metrics.count)}人` : ''}
         </div>
       </div>
 
@@ -1616,11 +1798,12 @@ const TIER_SECTION_SUBTLE: Record<string, string> = {
 }
 
 function TieredSchoolList({
-  schools, isInBasket, allocationSlots, shifanSlots, putongSlots,
+  schools, isMobile, isInBasket, allocationSlots, shifanSlots, putongSlots,
   allocationFilled, shifanFilled, putongFilled, hasAllocationOption, getSchoolSegment,
   addToAllocation, addToShifan, addToPutong, onDetail,
 }: {
   schools: ProcessedSchool[]
+  isMobile: boolean
   isInBasket: (id: string) => boolean
   allocationSlots: (DBSchool | null)[]
   shifanSlots: (DBSchool | null)[]
@@ -1745,29 +1928,37 @@ function TieredSchoolList({
                       </div>
                     </div>
 
-                    <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
+                    <div style={{ marginTop: 8, display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'baseline', flexWrap: 'wrap', gap: 8 }}>
                       <div>
                         <Text strong style={{ fontSize: 15, color: C.ink }}>{school.name}</Text>
                         <Text style={{ fontSize: 11, color: C.inkSubtle, marginLeft: 6 }}>{school.fullName}</Text>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
+                      <div style={{ textAlign: isMobile ? 'left' : 'right', minWidth: isMobile ? 0 : 250, padding: isMobile ? '9px 10px' : 0, borderRadius: isMobile ? 8 : 0, background: isMobile ? C.surface1 : 'transparent', border: isMobile ? `1px solid ${C.hairline}` : undefined }}>
                         {school.yiTong && (
                           <Text style={{ fontSize: 11, color: C.inkSubtle, marginRight: 12 }}>
                             {school.type === '民办' ? '市区' : '一统'}{school.yiTong}分
                           </Text>
                         )}
                         <Text style={{ fontSize: 13 }}>
-                          新乐线
+                          2025{school.lineCompare.sourceLabel.replace('（新乐）', '').replace('（仅参考）', '')}
                           <Text strong style={{ color: school.gap >= 0 ? C.success : C.error, fontSize: 15, margin: '0 2px' }}>
-                            {school.tongZhao}
+                            {school.lineCompare.lineScore}
                           </Text>
                           分
                           <Text style={{ fontSize: 11, marginLeft: 3, color: school.gap >= 0 ? C.success : C.error }}>
-                            ({school.gap >= 0 ? `高${school.gap}` : `差${Math.abs(school.gap)}`})
+                            ({school.lineCompare.scoreGap >= 0 ? `高${school.lineCompare.scoreGap}` : `差${Math.abs(school.lineCompare.scoreGap)}`})
                           </Text>
                         </Text>
                         <Text style={{ display: 'block', fontSize: 11, color: C.inkSubtle }}>
-                          {school.lineRank ? `换算位次约第${school.lineRank.toLocaleString()}名` : '换算位次暂无'}
+                          {school.lineCompare.lineRank2025 != null ? `2025线位次 约第${formatNum(school.lineCompare.lineRank2025)}名` : '2025线位次暂无'}
+                        </Text>
+                        <Text style={{ display: 'block', fontSize: 11, color: school.lineCompare.rankGap != null && school.lineCompare.rankGap <= 0 ? C.success : C.warning }}>
+                          {school.lineCompare.equivalent2026Score != null
+                            ? `折算2026约${school.lineCompare.equivalent2026Score}分 · 你${school.lineCompare.rankGapText}`
+                            : '折算2026暂无 · 请先导入2026一分一档'}
+                        </Text>
+                        <Text style={{ display: 'block', fontSize: 10, color: C.inkSubtle }}>
+                          {school.lineCompare.rankCompareLabel}
                         </Text>
                       </div>
                     </div>
