@@ -346,6 +346,10 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       where: { id: feedbackId },
       include: { classLesson: { include: { group: { include: { course: true } } } } },
     })
+    if (feedback && feedback.source === 'admin') {
+      console.warn('[salary] 管理端代发不计薪资', feedbackId)
+      return { success: false, error: '管理端代发反馈不计入薪资' }
+    }
     if (!feedback || !isPayableFeedback(feedback)) {
       console.warn('[salary] triggerFeedbackBonus: feedback not payable', feedbackId, feedback?.status)
       return { success: false, error: '反馈不可发放奖励' }

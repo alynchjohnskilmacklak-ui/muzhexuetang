@@ -27,7 +27,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       where: {
         ...(teacherId ? { teacherId } : {}),
         ...(all ? {} : { createdAt: { gte: dayStart, lt: dayEnd } }),
-        ...(division && division !== 'ALL' ? { classLesson: { division } } : {}),
+        ...(division && division !== 'ALL' ? { OR: [{ classLesson: { division } }, { classLessonId: null }] } : {}),
       },
       include: {
         teacher: { select: { id: true, name: true } },
@@ -77,9 +77,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
       orderBy: { name: 'asc' },
     })
     const feedbackTeacherIds = new Set(feedbacks.map((feedback) => feedback.teacherId))
+    const teacherIdsWithLessonToday = new Set(allLessons.map((lesson) => lesson.teacherId).filter(Boolean))
     const teachersWithoutFeedback = all
       ? []
-      : teachers.filter((teacher) => !feedbackTeacherIds.has(teacher.id))
+      : teachers.filter((teacher) => teacherIdsWithLessonToday.has(teacher.id) && !feedbackTeacherIds.has(teacher.id))
 
     return NextResponse.json({
       date,
@@ -100,6 +101,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
         homework: feedback.homework,
         imageUrls: feedback.imageUrls,
         studentRatings: feedback.studentRatings,
+        parentReply: feedback.parentReply,
+        parentRepliedAt: feedback.parentRepliedAt?.toISOString() ?? null,
+        adminReply: feedback.adminReply,
+        adminRepliedAt: feedback.adminRepliedAt?.toISOString() ?? null,
+        mood: feedback.mood,
+        tags: feedback.tags,
+        badge: feedback.badge,
         createdAt: feedback.createdAt.toISOString(),
       })),
       lessons: allLessons.map((lesson) => ({

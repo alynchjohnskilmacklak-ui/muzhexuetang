@@ -6,6 +6,7 @@ import { triggerFeedbackBonus } from '@/lib/teacher-salary'
 import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestPrisma } from '@/lib/prisma'
+import type { Prisma } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,12 +22,14 @@ function isMissingFeedbackContextColumn(error: unknown) {
   return err?.code === 'P2022' && /feedbackCourseType|feedbackGroupId/.test(text)
 }
 
-async function createClassroomFeedbackCompat(tx: any, data: Record<string, unknown>) {
+async function createClassroomFeedbackCompat(tx: Prisma.TransactionClient, data: Prisma.ClassroomFeedbackUncheckedCreateInput) {
   try {
     return await tx.classroomFeedback.create({ data })
   } catch (error) {
     if (!isMissingFeedbackContextColumn(error)) throw error
-    const { feedbackCourseType: _feedbackCourseType, feedbackGroupId: _feedbackGroupId, ...legacyData } = data
+    const legacyData = { ...data }
+    delete legacyData.feedbackCourseType
+    delete legacyData.feedbackGroupId
     console.warn('[feedback] ClassroomFeedback course context columns missing; creating legacy feedback without course context')
     return tx.classroomFeedback.create({ data: legacyData })
   }
@@ -290,6 +293,12 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
       }
     }
   } else if ((user.role === 'admin' || user.role === 'teacher') && adminReply !== undefined) {
+    const feedback = await prisma.classroomFeedback.findUnique({
+      where: { id },
+      select: { studentIds: true },
+    })
+    if (!feedback) return NextResponse.json({ error: '反馈不存在' }, { status: 404 })
+
     await prisma.classroomFeedback.update({
       where: { id },
       data: {
@@ -297,6 +306,31 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
         adminRepliedAt: adminReply ? new Date() : null,
       },
     })
+
+    if (adminReply) {
+      const students = await prisma.student.findMany({
+        where: { id: { in: feedback.studentIds } },
+        select: { name: true, parentId: true, parentUserId: true },
+      })
+      const notifiedParentIds = new Set<string>()
+      for (const student of students) {
+        const parentUserId = student.parentId || student.parentUserId
+        if (!parentUserId || notifiedParentIds.has(parentUserId)) continue
+        notifiedParentIds.add(parentUserId)
+        await prisma.notification.create({
+          data: {
+            userId: parentUserId,
+            type: 'CLASSROOM_FEEDBACK',
+            title: '老师回复了课堂反馈',
+            content: `${student.name}的课堂反馈有了新回复`,
+            link: `/parent/class-feedback/${id}`,
+            relatedType: 'CLASSROOM_FEEDBACK',
+            relatedId: id,
+            href: `/parent/class-feedback/${id}`,
+          },
+        })
+      }
+    }
   } else {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }

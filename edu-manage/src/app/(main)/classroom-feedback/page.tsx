@@ -24,22 +24,58 @@ type AdminFeedback = {
   summary?: string | null
   homework?: unknown
   imageUrls?: string[]
+  parentReply?: string | null
+  parentRepliedAt?: string | null
+  adminReply?: string | null
+  adminRepliedAt?: string | null
+  mood?: string | null
+  tags?: string[]
+  badge?: string | null
   createdAt: string
 }
 
-function FeedbackItemCard({ item, isMobile: _isMobile }: { item: AdminFeedback; isMobile: boolean }) {
+type AdminLesson = {
+  id: string
+  teacherId: string
+  teacherName: string
+  groupName: string
+  courseName: string
+  subject: string
+  time: string
+  hasFeedback: boolean
+  students: Array<{ id: string; name: string; grade?: string | null }>
+}
+
+function formatFeedbackTime(value?: string | null) {
+  if (!value) return ''
+  return new Date(value).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+function formatHomework(homework: unknown) {
+  if (!Array.isArray(homework)) return []
+  return homework.map((entry) => {
+    if (typeof entry === 'string') return entry
+    if (entry && typeof entry === 'object' && 'content' in entry) return String((entry as { content?: unknown }).content || '')
+    return String(entry || '')
+  }).filter(Boolean)
+}
+
+function FeedbackItemCard({ item, onOpen }: { item: AdminFeedback; onOpen: (item: AdminFeedback) => void }) {
   const students = Array.isArray(item.students) ? item.students : []
   const points = Array.isArray(item.knowledgePoints) ? item.knowledgePoints : []
   const images = Array.isArray(item.imageUrls) ? item.imageUrls : []
-  const homework = Array.isArray(item.homework) ? item.homework : []
+  const homework = formatHomework(item.homework)
+  const performanceTags = Array.isArray(item.tags) ? item.tags : []
   return (
-    <Card bordered={false} style={{ borderRadius: 10, border: '1px solid #EEE7E1', background: '#fff' }} styles={{ body: { padding: '12px 14px' } }}>
+    <Card onClick={() => onOpen(item)} bordered={false} style={{ borderRadius: 10, border: '1px solid #EEE7E1', background: '#fff', cursor: 'pointer' }} styles={{ body: { padding: '12px 14px' } }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, flexWrap: 'wrap', gap: 4 }}>
         <span style={{ fontWeight: 600, fontSize: 14, color: '#1F2329' }}>{item.teacherName}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Tag color={item.status === 'PUBLISHED' ? 'green' : 'orange'} style={{ borderRadius: 9999, fontSize: 10, margin: 0 }}>
             {item.status === 'PUBLISHED' ? '已发布' : '草稿'}
           </Tag>
+          {item.parentReply && <Tag color="green" style={{ borderRadius: 9999, fontSize: 10, margin: 0 }}>家长已回复</Tag>}
+          {item.adminReply && <Tag color="orange" style={{ borderRadius: 9999, fontSize: 10, margin: 0 }}>管理员已回复</Tag>}
           <span style={{ fontSize: 11, color: '#C4BAB0' }}>
             {new Date(item.createdAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </span>
@@ -55,6 +91,13 @@ function FeedbackItemCard({ item, isMobile: _isMobile }: { item: AdminFeedback; 
           {points.map(p => <Tag key={p} style={{ borderRadius: 9999, fontSize: 11, background: '#FFF3EC', color: '#E8784A', border: 'none', margin: '0 3px 2px 0' }}>{p}</Tag>)}
         </div>
       )}
+      {(item.mood || performanceTags.length > 0 || item.badge) && (
+        <div style={{ marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          {item.mood && <Tag style={{ borderRadius: 9999, margin: 0, background: '#F5F2EE', color: '#5A4E3A' }}>课堂情绪：{item.mood}</Tag>}
+          {performanceTags.map((tag) => <Tag key={tag} style={{ borderRadius: 9999, margin: 0 }}>{tag}</Tag>)}
+          {item.badge && <Tag color="gold" style={{ borderRadius: 9999, margin: 0 }}>徽章：{item.badge}</Tag>}
+        </div>
+      )}
       {item.summary && (
         <div style={{ padding: '6px 10px', background: '#FCFBF9', borderRadius: 6, borderLeft: '3px solid #E8784A', fontSize: 13, color: '#1F2329', lineHeight: 1.6 }}>
           {item.summary}
@@ -66,14 +109,30 @@ function FeedbackItemCard({ item, isMobile: _isMobile }: { item: AdminFeedback; 
         </div>
       )}
       {images.length > 0 && (
-        <div style={{ marginTop: 6, display: 'flex', gap: 4 }}>
+        <div onClick={(event) => event.stopPropagation()} style={{ marginTop: 6, display: 'flex', gap: 4 }}>
           {images.slice(0, 4).map((url, i) => (
             <img key={i} src={normalizeUploadUrl(url)} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid #EEE7E1' }} />
           ))}
           {images.length > 4 && <div style={{ width: 48, height: 48, borderRadius: 6, background: '#f5f2ee', display: 'grid', placeItems: 'center', fontSize: 11, color: '#98A2B3' }}>+{images.length - 4}</div>}
         </div>
       )}
+      {item.parentReply && (
+        <div style={{ marginTop: 8, padding: '8px 10px', borderRadius: 8, background: '#EAF7F1', border: '1px solid #B6E2D2', color: '#176C53', fontSize: 12, lineHeight: 1.6 }}>
+          <strong>家长回复：</strong>{item.parentReply}{item.parentRepliedAt ? ` · ${formatFeedbackTime(item.parentRepliedAt)}` : ''}
+        </div>
+      )}
     </Card>
+  )
+}
+
+function DetailSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <div style={{ color: '#9A8E7A', fontSize: 12, marginBottom: 6 }}>{label}</div>
+      <div style={{ padding: '10px 12px', borderRadius: 8, background: '#FAF8F5', border: '1px solid #EEE7E1', color: '#5A4E3A', fontSize: 13 }}>
+        {children}
+      </div>
+    </section>
   )
 }
 
@@ -85,7 +144,7 @@ export default function ClassroomFeedbackAdminPage() {
   const [teacherFilter, setTeacherFilter] = useState('')
   const [q, setQ] = useState('')
   const [viewAll, setViewAll] = useState(false)
-  const [groupByClass, setGroupByClass] = useState(true)
+  const groupByClass = true
 
   // Compose drawer state
   const [composeOpen, setComposeOpen] = useState(false)
@@ -94,6 +153,9 @@ export default function ClassroomFeedbackAdminPage() {
   const [submitting, setSubmitting] = useState(false)
   const [composeTeacherId, setComposeTeacherId] = useState('')
   const [composeLessonId, setComposeLessonId] = useState('')
+  const [detailFeedback, setDetailFeedback] = useState<AdminFeedback | null>(null)
+  const [adminReply, setAdminReply] = useState('')
+  const [replying, setReplying] = useState(false)
 
   const params = new URLSearchParams({ date, limit: '200' })
   params.set('division', division)
@@ -104,7 +166,7 @@ export default function ClassroomFeedbackAdminPage() {
   const teachers = Array.isArray(teachersData?.teachers) ? teachersData.teachers : []
 
   const feedbacks: AdminFeedback[] = Array.isArray(data?.feedbacks) ? data.feedbacks : []
-  const allLessons: any[] = Array.isArray(data?.lessons) ? data.lessons : []
+  const allLessons: AdminLesson[] = useMemo(() => Array.isArray(data?.lessons) ? data.lessons : [], [data])
   const missingLessons = allLessons.filter(l => !l.hasFeedback)
   const noFeedback: Array<{ id: string; name: string }> = Array.isArray(data?.teachersWithoutFeedback) ? data.teachersWithoutFeedback : []
   
@@ -128,7 +190,7 @@ export default function ClassroomFeedbackAdminPage() {
         setComposeTeacherId(lesson.teacherId)
         composeForm.setFieldsValue({
           teacherId: lesson.teacherId,
-          studentIds: lesson.students.map((s: any) => s.id)
+          studentIds: lesson.students.map((student) => student.id)
         })
       }
     } else {
@@ -151,6 +213,35 @@ export default function ClassroomFeedbackAdminPage() {
     } else if (teacherId) {
       handleTeacherChange(teacherId)
       composeForm.setFieldValue('teacherId', teacherId)
+    }
+  }
+
+  const openDetail = (feedback: AdminFeedback) => {
+    setDetailFeedback(feedback)
+    setAdminReply(feedback.adminReply || '')
+  }
+
+  const submitAdminReply = async () => {
+    if (!detailFeedback) return
+    const reply = adminReply.trim()
+    if (!reply) { message.warning('请输入回复内容'); return }
+    setReplying(true)
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: detailFeedback.id, adminReply: reply }),
+      })
+      const payload = await response.json()
+      if (!response.ok) { message.error(payload.error || '回复失败'); return }
+      const repliedAt = new Date().toISOString()
+      setDetailFeedback((current) => current ? { ...current, adminReply: reply, adminRepliedAt: repliedAt } : current)
+      message.success('回复已发送并通知家长')
+      await mutate()
+    } catch {
+      message.error('回复失败，请稍后重试')
+    } finally {
+      setReplying(false)
     }
   }
 
@@ -340,15 +431,89 @@ export default function ClassroomFeedbackAdminPage() {
                   <span style={{ fontSize: 12, color: '#98A2B3' }}>{group.items.length} 条反馈</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 14, borderLeft: '2px solid #F5EDE8' }}>
-                  {group.items.map(item => <FeedbackItemCard key={item.id} item={item} isMobile={isMobile} />)}
+                  {group.items.map(item => <FeedbackItemCard key={item.id} item={item} onOpen={openDetail} />)}
                 </div>
               </div>
             ))
           ) : (
-            filtered.map(item => <FeedbackItemCard key={item.id} item={item} isMobile={isMobile} />)
+            filtered.map(item => <FeedbackItemCard key={item.id} item={item} onOpen={openDetail} />)
           )}
         </div>
       )}
+
+      {/* Read-only feedback detail and admin reply */}
+      <Drawer
+        open={!!detailFeedback}
+        onClose={() => { setDetailFeedback(null); setAdminReply('') }}
+        title="课堂反馈详情"
+        width={isMobile ? '100%' : 520}
+        placement={isMobile ? 'bottom' : 'right'}
+        height={isMobile ? '90vh' : undefined}
+        footer={
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <Button onClick={() => { setDetailFeedback(null); setAdminReply('') }}>关闭</Button>
+            <Button type="primary" icon={<SendOutlined />} loading={replying} onClick={submitAdminReply}
+              style={{ background: '#E8784A', borderColor: '#E8784A' }}>
+              发送回复
+            </Button>
+          </div>
+        }
+        styles={{ body: { paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))' } }}
+      >
+        {detailFeedback && (() => {
+          const students = Array.isArray(detailFeedback.students) ? detailFeedback.students : []
+          const points = Array.isArray(detailFeedback.knowledgePoints) ? detailFeedback.knowledgePoints : []
+          const homework = formatHomework(detailFeedback.homework)
+          const images = Array.isArray(detailFeedback.imageUrls) ? detailFeedback.imageUrls : []
+          const performanceTags = Array.isArray(detailFeedback.tags) ? detailFeedback.tags : []
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ padding: '12px 14px', borderRadius: 10, background: '#FAF8F5', border: '1px solid #EEE7E1' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+                  <strong style={{ color: '#1A1201' }}>{detailFeedback.teacherName}</strong>
+                  <span style={{ color: '#9A8E7A', fontSize: 12 }}>{formatFeedbackTime(detailFeedback.createdAt)}</span>
+                </div>
+                <div style={{ marginTop: 4, color: '#5A4E3A', fontSize: 13 }}>
+                  {detailFeedback.lessonName || '未关联课次'} · {detailFeedback.courseName || detailFeedback.subject || '课程未填写'}
+                </div>
+              </div>
+
+              {students.length > 0 && <DetailSection label="学员"><div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{students.map((student) => <Tag key={student.id} style={{ borderRadius: 9999, margin: 0 }}>{student.name}{student.grade ? ` · ${student.grade}` : ''}</Tag>)}</div></DetailSection>}
+              {points.length > 0 && <DetailSection label="知识点"><div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{points.map((point) => <Tag key={point} style={{ borderRadius: 9999, margin: 0, background: '#FFF3EC', color: '#E8784A', border: 'none' }}>{point}</Tag>)}</div></DetailSection>}
+              {(detailFeedback.mood || performanceTags.length > 0 || detailFeedback.badge) && (
+                <DetailSection label="课堂表现">
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                    {detailFeedback.mood && <Tag style={{ borderRadius: 9999, margin: 0 }}>课堂情绪：{detailFeedback.mood}</Tag>}
+                    {performanceTags.map((tag) => <Tag key={tag} style={{ borderRadius: 9999, margin: 0 }}>{tag}</Tag>)}
+                    {detailFeedback.badge && <Tag color="gold" style={{ borderRadius: 9999, margin: 0 }}>徽章：{detailFeedback.badge}</Tag>}
+                  </div>
+                </DetailSection>
+              )}
+              {detailFeedback.summary && <DetailSection label="课堂小结"><div style={{ color: '#1A1201', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{detailFeedback.summary}</div></DetailSection>}
+              {homework.length > 0 && <DetailSection label="作业"><ol style={{ margin: 0, paddingLeft: 20 }}>{homework.map((item, index) => <li key={`${index}-${item}`}>{item}</li>)}</ol></DetailSection>}
+              {images.length > 0 && <DetailSection label="课堂资料"><AntImage.PreviewGroup><div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{images.map((url, index) => <AntImage key={`${url}-${index}`} src={normalizeUploadUrl(url)} width={72} height={72} style={{ objectFit: 'cover', borderRadius: 8 }} />)}</div></AntImage.PreviewGroup></DetailSection>}
+
+              {detailFeedback.parentReply && (
+                <div style={{ padding: '10px 12px', borderRadius: 8, background: '#EAF7F1', border: '1px solid #B6E2D2', color: '#176C53', lineHeight: 1.7 }}>
+                  <strong>家长回复：</strong>{detailFeedback.parentReply}
+                  {detailFeedback.parentRepliedAt && <div style={{ fontSize: 11, opacity: 0.75 }}>{formatFeedbackTime(detailFeedback.parentRepliedAt)}</div>}
+                </div>
+              )}
+              {detailFeedback.adminReply && (
+                <div style={{ padding: '10px 12px', borderRadius: 8, background: '#FFF3EC', border: '1px solid #FFD9BF', color: '#B85D32', lineHeight: 1.7 }}>
+                  <strong>管理员已回复：</strong>{detailFeedback.adminReply}
+                  {detailFeedback.adminRepliedAt && <div style={{ fontSize: 11, opacity: 0.75 }}>{formatFeedbackTime(detailFeedback.adminRepliedAt)}</div>}
+                </div>
+              )}
+
+              <div style={{ borderTop: '1px solid #EEE7E1', paddingTop: 14 }}>
+                <div style={{ fontWeight: 600, color: '#1A1201', marginBottom: 8 }}>管理员回复家长</div>
+                <Input.TextArea rows={4} value={adminReply} onChange={(event) => setAdminReply(event.target.value)} maxLength={300} showCount placeholder="请输入给家长的回复内容" style={{ borderRadius: 8 }} />
+              </div>
+            </div>
+          )
+        })()}
+      </Drawer>
 
       {/* Compose drawer */}
       <Drawer
