@@ -13,7 +13,8 @@ import ReactECharts from 'echarts-for-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { StudentProfile } from '@/lib/student-profile'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { fmtDate, fmtDateTime } from '@/lib/format-date'
+import { fmtDate } from '@/lib/format-date'
+import { formatFriendlyTime } from '@/lib/date/relative'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -311,7 +312,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
             {detailItem.images?.length > 0 && <Image.PreviewGroup><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>{detailItem.images.map((url: string, i: number) => <Image key={i} src={url} alt="" style={{ borderRadius: 8, objectFit: 'cover', width: '100%', height: 120 }} />)}</div></Image.PreviewGroup>}
             <Paragraph style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detailItem.sub || detailItem.content}</Paragraph>
             {detailItem.teacher && <Tag style={{ borderRadius: 9999, marginTop: 4 }}>{formatTeacherLabel(detailItem)}</Tag>}
-            {detailItem.date && <div style={{ marginTop: 8 }}><Text type="secondary" style={{ fontSize: 11 }}>{fmtDateTime(detailItem.date)}</Text></div>}
+            {detailItem.date && <div style={{ marginTop: 8 }}><Text type="secondary" style={{ fontSize: 11 }}>{formatFriendlyTime(detailItem.date)}</Text></div>}
             <FeedbackDetail detail={detailItem.detail} />
             {detailItem.refType === 'paper' && detailItem.refId && <Button type="link" onClick={() => { setDetailItem(null); router.push(`/parent/archive?paperId=${detailItem.refId}`) }} style={{ padding: 0, marginTop: 8 }}>查看试卷详情</Button>}
             {detailItem.refType === 'post' && detailItem.refId && <Button type="link" onClick={() => { setDetailItem(null); router.push(`/parent/archive?postId=${detailItem.refId}`) }} style={{ padding: 0, marginTop: 8 }}>查看成长动态详情</Button>}

@@ -2186,3 +2186,23 @@ button:focus:not(:focus-visible) {
     grid-template-columns: 58px minmax(0, 1fr);
   }
 }
+/* ---- 家长端统一骨架屏与微动效 ---- */
+.mz-skeleton {
+  background: linear-gradient(90deg, #f2ede8 25%, #faf6f1 50%, #f2ede8 75%);
+  background-size: 400% 100%;
+  animation: dashboard-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.stagger-item { animation: fadeInUp .38s ease-out both; }
+.pressable { transition: transform .15s ease, box-shadow .15s ease; }
+.pressable:active { transform: scale(.98); }
+.status-breathe { animation: pulse 2.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger-item, .status-breathe { animation: none; }
+  .pressable:active { transform: none; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pressable:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(26,18,1,.08); }
+}

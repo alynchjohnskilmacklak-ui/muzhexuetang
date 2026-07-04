@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { Button, Card, Empty, List, Tag, Typography } from 'antd'
+import { Button, List, Tag, Typography } from 'antd'
 import {
   BellOutlined,
   BookOutlined,
@@ -11,9 +11,11 @@ import {
   StarOutlined,
 } from '@ant-design/icons'
 import { toast } from 'sonner'
-import { fmtDateTime } from '@/lib/format-date'
+import { formatFriendlyTime } from '@/lib/date/relative'
 import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { BrandEmpty } from '@/components/Parent/BrandEmpty'
+import { ParentCard } from '@/components/Parent/ParentCard'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -100,22 +102,24 @@ export function ParentNotificationsClient({
       </div>
 
       {notifications.length === 0 ? (
-        <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', minHeight: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Empty description="暂无通知。新的课堂反馈、试卷和系统提醒都会出现在这里。" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-        </Card>
+        <ParentCard style={{ minHeight: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BrandEmpty title="暂无通知" hint="新的课堂反馈、试卷和系统提醒都会出现在这里" icon="🔔" />
+        </ParentCard>
       ) : (
-        <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2' }} styles={{ body: { padding: 0 } }}>
+        <ParentCard style={{ padding: 0 }}>
           <List
             dataSource={notifications}
-            renderItem={(n: any) => {
+            renderItem={(n: any, index: number) => {
               const meta = getNotificationMeta(n)
               return (
                 <List.Item
+                  className="stagger-item pressable"
                   style={{
                     padding: isMobile ? '11px 12px' : '14px 20px',
                     borderBottom: '1px solid #FBF0EA',
                     cursor: 'pointer',
                     background: n.read ? '#fff' : '#FFFBF7',
+                    animationDelay: `${Math.min(index, 8) * 40}ms`,
                   }}
                   onClick={() => handleClick(n)}
                 >
@@ -151,7 +155,7 @@ export function ParentNotificationsClient({
                       )}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginTop: 6, flexWrap: 'wrap' }}>
                         <Text type="secondary" style={{ fontSize: 11 }}>
-                          {fmtDateTime(n.createdAt)}
+                          {formatFriendlyTime(n.createdAt)}
                         </Text>
                         <Text style={{ fontSize: 12, color: '#E8784A', fontWeight: 600 }}>查看详情</Text>
                       </div>
@@ -161,7 +165,7 @@ export function ParentNotificationsClient({
               )
             }}
           />
-        </Card>
+        </ParentCard>
       )}
     </div>
   )

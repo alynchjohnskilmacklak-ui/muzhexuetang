@@ -688,6 +688,7 @@ model ClassroomFeedback {
   studentRatings     Json?
   parentReply        String?
   parentRepliedAt    DateTime?
+  parentReadAt       DateTime?
   adminReply         String?
   adminRepliedAt     DateTime?
   status             String       @default("DRAFT")
@@ -700,6 +701,7 @@ model ClassroomFeedback {
   @@index([classLessonId])
   @@index([feedbackGroupId])
   @@index([status])
+  @@index([status, parentReadAt])
   @@index([source, createdAt])
   @@index([teacherId, source, status])
 }

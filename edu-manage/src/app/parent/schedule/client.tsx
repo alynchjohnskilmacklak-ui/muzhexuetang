@@ -1,11 +1,13 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Card, Empty, Select, Tag, Typography } from 'antd'
+import { Select, Tag, Typography } from 'antd'
 import { ClockCircleOutlined, DownOutlined, EnvironmentOutlined, RightOutlined, TeamOutlined } from '@ant-design/icons'
 import { findSchedulePeriod, PERIOD_BG, SchedulePeriod } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { fmtDate } from '@/lib/format-date'
+import { BrandEmpty } from '@/components/Parent/BrandEmpty'
+import { ParentCard } from '@/components/Parent/ParentCard'
 
 const { Title, Text } = Typography
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
@@ -107,39 +109,45 @@ export function ParentScheduleClient({ students, lessons, periods }: { students:
       </div>
 
       {!students.length ? (
-        <Card bordered={false} style={{ borderRadius: 10, minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
-          <Empty description="暂未绑定学员" />
-        </Card>
+        <ParentCard style={{ minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BrandEmpty title="暂未绑定学员" hint="绑定孩子后即可查看课程安排" icon="🔗" />
+        </ParentCard>
       ) : childLessons.length === 0 ? (
-        <Card bordered={false} style={{ borderRadius: 10, minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
-          <Empty description={`${selectedStudent?.name || ''}本周暂无课程`} />
-        </Card>
+        <ParentCard style={{ minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BrandEmpty title="本周暂无课程" hint="有新排课时会第一时间显示在这里" icon="📅" />
+        </ParentCard>
       ) : isMobile ? (
         <div style={{ display: 'grid', gap: 10 }}>
           {mobileLessonGroups.map((group, groupIndex) => {
             const expanded = isDateExpanded(group.key, groupIndex)
+            const isToday = group.key === today.toDateString()
+            const isPast = group.date < new Date(today.getFullYear(), today.getMonth(), today.getDate())
             return (
-              <div key={group.key} style={{ display: 'grid', gap: 8 }}>
+              <div className="stagger-item" key={group.key} style={{ display: 'grid', gap: 8, opacity: isPast ? .62 : 1, animationDelay: `${Math.min(groupIndex, 8) * 40}ms` }}>
                 <button
                   type="button"
                   onClick={() => setExpandedDates(current => ({ ...current, [group.key]: !expanded }))}
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(232,120,74,.18)',
-                    background: '#fff6f1', color: '#5a4e3a', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                    borderLeft: '4px solid #E8784A', background: '#fff6f1', color: isToday ? '#E8784A' : '#5a4e3a', cursor: 'pointer', fontSize: 13, fontWeight: 600,
                   }}
                 >
-                  <span>{fmtDate(group.date)} · {group.lessons.length}节</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {fmtDate(group.date)} · {group.lessons.length}节
+                    {isToday && <span style={{ background: '#FFF3EC', color: '#E8784A', border: '1px solid #F5C9AE', borderRadius: 999, fontSize: 11, padding: '1px 8px' }}>今天</span>}
+                  </span>
                   {expanded ? <DownOutlined style={{ color: '#E8784A' }} /> : <RightOutlined style={{ color: '#E8784A' }} />}
                 </button>
-                {expanded && group.lessons.map((lesson: any) => {
+                {expanded && group.lessons.map((lesson: any, lessonIndex: number) => {
                   const status = getLessonStatus(lesson)
+                  const statusBorder = { '已结束': '#1D9E75', '上课中': '#E8784A', '待上课': '#6B9FD8', '待老师确认': '#F0A24A' }[status.text] || '#EEE7E1'
                   const studentNames = lesson.group?.enrollments?.map((e: any) => e.student?.name).filter(Boolean).join('、') || selectedStudent?.name || '-'
                   return (
-                    <Card key={lesson.id} bordered={false} style={{ borderRadius: 10, background: '#fff', border: '1px solid #EEE7E1' }} styles={{ body: { padding: 14 } }}>
+                    <ParentCard key={lesson.id} className="stagger-item" style={{ padding: 14, borderLeft: `3px solid ${statusBorder}`, animationDelay: `${Math.min(lessonIndex, 8) * 40}ms` }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
                         <Text strong style={{ color: '#1F2329' }}>{lesson.group?.course?.name || '-'}</Text>
-                        <Tag color={status.color}>{status.text}</Tag>
+                        <Tag className={status.text === '待老师确认' ? 'status-breathe' : undefined} color={status.color}>{status.text}</Tag>
                       </div>
                       <div style={{ display: 'grid', gap: 5, fontSize: 12, color: '#5a4e3a' }}>
                         <span><ClockCircleOutlined style={{ marginRight: 5 }} />{fmtDate(lesson.lessonDate)} {lesson.startTime}-{lesson.endTime}</span>
@@ -149,7 +157,7 @@ export function ParentScheduleClient({ students, lessons, periods }: { students:
                         <span>考勤状态：{lesson.attendanceSubmittedAt ? '老师已确认' : '待老师确认'}</span>
                         <span>课时扣除：{status.deducted}</span>
                       </div>
-                    </Card>
+                    </ParentCard>
                   )
                 })}
               </div>
@@ -157,7 +165,7 @@ export function ParentScheduleClient({ students, lessons, periods }: { students:
           })}
         </div>
       ) : (
-        <Card bordered={false} style={{ borderRadius: 10, overflow: 'auto', background: '#fff' }} bodyStyle={{ padding: 0 }}>
+        <ParentCard style={{ padding: 0, overflow: 'auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: isTablet ? '56px repeat(7, minmax(58px, 1fr))' : '72px repeat(7, minmax(72px, 1fr))', minWidth: isTablet ? 0 : 640 }}>
             <div style={{ padding: 8, background: '#faf8f5', borderBottom: '0.5px solid #EEE7E1' }} />
             {weekDates.map((date, i) => {
@@ -193,7 +201,7 @@ export function ParentScheduleClient({ students, lessons, periods }: { students:
                               <div style={{ fontSize: 11, fontWeight: 500, color, lineHeight: 1.3 }}>{l.group?.course?.name || '-'}</div>
                               <div style={{ fontSize: 10, color, opacity: .8, lineHeight: 1.3 }}><TeamOutlined style={{ fontSize: 9 }} /> {l.teacher?.name || l.group?.teacher?.name || '-'}</div>
                               <div style={{ fontSize: 9, color, opacity: .6, lineHeight: 1.3 }}><EnvironmentOutlined style={{ fontSize: 8 }} /> {l.group?.room?.name || '-'}</div>
-                              <Tag color={status.color} style={{ alignSelf: 'flex-start', marginTop: 3, fontSize: 9, lineHeight: 1.4 }}>{status.text}</Tag>
+                              <Tag className={status.text === '待老师确认' ? 'status-breathe' : undefined} color={status.color} style={{ alignSelf: 'flex-start', marginTop: 3, fontSize: 9, lineHeight: 1.4 }}>{status.text}</Tag>
                             </div>
                           )
                         }) : period.type === 'CLASS' ? (
@@ -208,7 +216,7 @@ export function ParentScheduleClient({ students, lessons, periods }: { students:
               )
             })}
           </div>
-        </Card>
+        </ParentCard>
       )}
     </div>
   )

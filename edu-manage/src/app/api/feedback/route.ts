@@ -238,14 +238,14 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
 
 
   const prisma = await getRequestPrisma()
-  const { id, parentReply, adminReply } = await req.json()
+  const { id, parentReply, adminReply, markRead } = await req.json()
   if (!id) return NextResponse.json({ error: '缺少反馈 ID' }, { status: 400 })
 
-  if (user.role === 'parent' && parentReply !== undefined) {
+  if (user.role === 'parent' && (parentReply !== undefined || markRead === true)) {
     // Verify parent is linked to a student in this feedback
     const feedback = await prisma.classroomFeedback.findUnique({
       where: { id },
-      select: { studentIds: true, id: true },
+      select: { studentIds: true, id: true, parentReadAt: true },
     })
     if (!feedback) return NextResponse.json({ error: '反馈不存在' }, { status: 404 })
     const linkedCount = await prisma.student.count({
@@ -253,13 +253,22 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
     })
     if (linkedCount === 0) return NextResponse.json({ error: '无权操作此反馈' }, { status: 403 })
 
-    await prisma.classroomFeedback.update({
-      where: { id },
-      data: {
-        parentReply: String(parentReply).slice(0, 300) || null,
-        parentRepliedAt: parentReply ? new Date() : null,
-      },
-    })
+    if (parentReply !== undefined) {
+      await prisma.classroomFeedback.update({
+        where: { id },
+        data: {
+          parentReply: String(parentReply).slice(0, 300) || null,
+          parentRepliedAt: parentReply ? new Date() : null,
+        },
+      })
+    }
+
+    if (markRead === true && !feedback.parentReadAt) {
+      await prisma.classroomFeedback.updateMany({
+        where: { id, parentReadAt: null },
+        data: { parentReadAt: new Date() },
+      })
+    }
 
     // Notify teacher of parent reply
     if (parentReply) {

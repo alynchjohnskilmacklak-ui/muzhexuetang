@@ -1,6 +1,7 @@
 ﻿'use client'
 
-import { Button, Card, Descriptions, Empty, Image, Tag, Typography } from 'antd'
+import { useEffect } from 'react'
+import { Button, Card, Descriptions, Image, Tag, Typography } from 'antd'
 import { ArrowLeftOutlined, BookOutlined, ClockCircleOutlined, EnvironmentOutlined, TeamOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { fmtDateTime } from '@/lib/format-date'
@@ -16,6 +17,15 @@ function subjectOfTeacher(subjects?: string | null) {
 export function FeedbackDetailClient({ feedback }: { feedback: any }) {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
+
+  useEffect(() => {
+    if (feedback.parentReadAt || feedback.status !== 'PUBLISHED') return
+    void fetch('/api/feedback', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: feedback.id, markRead: true }),
+    })
+  }, [feedback.id, feedback.parentReadAt, feedback.status])
 
   return (
     <div>

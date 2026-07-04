@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { seniorSchoolNameMatches } from '@/lib/volunteer-school-names'
 import {
   CONTROL_LINES_2025,
   getAllocationLine,
@@ -389,7 +390,7 @@ export default function VolunteerSimPage() {
       if (quotaMap[school.name] != null) return quotaMap[school.name]
       if (quotaMap[school.fullName] != null) return quotaMap[school.fullName]
       for (const [key, quota] of Object.entries(quotaMap)) {
-        if (nameMatches(school.name, school.fullName, key)) return quota
+        if (seniorSchoolNameMatches(school.name, school.fullName, key) || nameMatches(school.name, school.fullName, key)) return quota
       }
     }
     return 0
@@ -779,7 +780,7 @@ export default function VolunteerSimPage() {
         items={[{
           key: 'disclaimer',
           label: <span style={{ color: C.warning, fontSize: 13, fontWeight: 500 }}>重要提示：本系统仅供模拟参考，非官方录取结果</span>,
-          children: <span style={{ color: C.inkMuted, fontSize: 13, lineHeight: 1.8 }}>本系统基于2025年普通高中录取线与2026年石家庄17县一分一档进行位次换算，结果仅供模拟参考，非官方录取结果。梯度标签（冲刺/稳妥/保底）仍按原有规则计算；分配生资格仍按本校排名与对应高中名额比较。</span>,
+          children: <span style={{ color: C.inkMuted, fontSize: 13, lineHeight: 1.8 }}>本系统基于2025年普通高中录取线与2026年石家庄17县一分一档进行位次换算，结果仅供模拟参考，非官方录取结果。分配生名额按2026年官方分配计划；梯度标签（冲刺/稳妥/保底）仍按原有规则计算。</span>,
         }]}
       />
 

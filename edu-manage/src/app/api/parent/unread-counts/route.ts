@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
-import { parentActiveStudentWhere, parentVisibleExamPaperWhere, parentVisiblePerformancePostWhere, visibleNotificationWhere } from '@/lib/business-visibility'
+import { parentActiveStudentWhere, parentLinkedStudentWhere, parentVisibleExamPaperWhere, parentVisiblePerformancePostWhere, visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -14,7 +14,14 @@ export const GET = apiHandler(async () => {
 
 
   const prisma = await getRequestPrisma()
-  const [papers, posts, notifications] = await Promise.all([
+  const activeStudentIds = (
+    await prisma.student.findMany({
+      where: parentLinkedStudentWhere(user.id),
+      select: { id: true },
+    })
+  ).map(student => student.id)
+
+  const [papers, posts, notifications, feedbacks] = await Promise.all([
     prisma.examPaper.count({
       where: {
         ...parentVisibleExamPaperWhere(user.id),
@@ -31,9 +38,16 @@ export const GET = apiHandler(async () => {
     prisma.notification.count({
       where: { userId: user.id, read: false, ...visibleNotificationWhere, user: { students: { some: parentActiveStudentWhere(user.id) } } },
     }),
+    prisma.classroomFeedback.count({
+      where: {
+        status: 'PUBLISHED',
+        parentReadAt: null,
+        studentIds: { hasSome: activeStudentIds },
+      },
+    }),
   ])
 
-  return NextResponse.json({ papers, posts, notifications }, {
+  return NextResponse.json({ papers, posts, notifications, feedbacks }, {
     headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
   })
 })

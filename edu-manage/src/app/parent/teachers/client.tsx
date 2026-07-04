@@ -1,8 +1,10 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { Card, Empty, Image, Tag, Typography } from 'antd'
+import { Image, Tag, Typography } from 'antd'
 import { normalizeUploadUrl } from '@/lib/upload-url'
+import { BrandEmpty } from '@/components/Parent/BrandEmpty'
+import { ParentCard, SectionHeader } from '@/components/Parent/ParentCard'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -30,7 +32,7 @@ interface TeacherInfo {
 const PHOTO_W = 112
 const PHOTO_H = 140
 
-function TeacherRow({ teacher }: { teacher: TeacherInfo }) {
+function TeacherRow({ teacher, index }: { teacher: TeacherInfo; index: number }) {
   const [imgFailed, setImgFailed] = useState(false)
   const subjects = teacher.subjects ? teacher.subjects.split(',').map(s => s.trim()).filter(Boolean) : []
   const firstSubject = subjects[0] || ''
@@ -39,10 +41,10 @@ function TeacherRow({ teacher }: { teacher: TeacherInfo }) {
   const showAvatar = teacher.avatar && !imgFailed
 
   return (
-    <div style={{
+    <div className="stagger-item" style={{
       display: 'flex', gap: 20, padding: '20px 0',
       borderBottom: '1px solid #F3EDE7',
-      alignItems: 'flex-start',
+      alignItems: 'flex-start', animationDelay: `${Math.min(index, 8) * 40}ms`,
     }}>
       {/* Photo area */}
       <div style={{ width: PHOTO_W, height: PHOTO_H, flexShrink: 0, borderRadius: 12, overflow: 'hidden', background: '#f8f8f8', border: '1px solid #F0DDD2' }}>
@@ -130,14 +132,16 @@ export function ParentTeachersClient({ teachers }: { teachers: TeacherInfo[] }) 
         </Text>
       </div>
 
+      <SectionHeader title="教师团队" count={`${teachers.length} 位`} />
+
       {teachers.length === 0 ? (
-        <Card bordered={false} style={{ borderRadius: 12, minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', border: '1px solid #F0DDD2' }}>
-          <Empty description="暂无在岗教师信息" />
-        </Card>
+        <ParentCard style={{ minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BrandEmpty title="暂无在岗教师信息" icon="👩‍🏫" />
+        </ParentCard>
       ) : (
-        <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2' }} styles={{ body: { padding: '0 24px' } }}>
-          {teachers.map(t => <TeacherRow key={t.id} teacher={t} />)}
-        </Card>
+        <ParentCard style={{ padding: '0 24px' }}>
+          {teachers.map((teacher, index) => <TeacherRow key={teacher.id} teacher={teacher} index={index} />)}
+        </ParentCard>
       )}
     </div>
   )

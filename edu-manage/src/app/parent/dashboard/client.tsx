@@ -8,10 +8,10 @@ import { zhCN } from 'date-fns/locale'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { getDailyQuote } from '@/data/daily-quotes'
-import { formatPercent } from '@/lib/format'
 import { TodayStatus } from '@/components/Parent/TodayStatus'
 import { WeeklyReport } from '@/components/Parent/WeeklyReport'
 import { fillName, MEMBERSHIP_SERVICE_CARD, MEMBERSHIP_THEME, MEMBERSHIP_WELCOME, resolveMembership } from '@/constants/membership'
+import { useCountUp } from '@/hooks/useCountUp'
 
 const { Title, Text } = Typography
 
@@ -202,6 +202,10 @@ export function ParentDashboardClient({
   const activeNotifications = students.length <= 1 || !activeChildId
     ? notifications
     : notifications.filter((notification: any) => !notification.studentId || notification.studentId === activeChildId)
+  const animatedLessonCount = useCountUp(todayLessons.length)
+  const animatedAttendanceRate = useCountUp(Number(activeAttendanceRate) || 0)
+  const animatedBadgeCount = useCountUp(activeBadgeCount)
+  const animatedUnreadCount = useCountUp(activeNotifications.filter((notification: any) => !notification.read).length)
   const activeLatestPost = students.length <= 1 || !activeChildId || latestPost?.student?.id === activeChildId
     ? latestPost
     : null
@@ -478,11 +482,11 @@ export function ParentDashboardClient({
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12, marginTop: 24 }}>
             {[
-              { val: todayLessons.length, label: '今日课次', icon: <ClockCircleOutlined /> },
-              { val: formatPercent(activeAttendanceRate), label: '本月出勤率', icon: <IdcardOutlined /> },
-              { val: activeBadgeCount, label: '已获徽章', icon: <StarOutlined />, special: true },
-              { val: activeNotifications.filter((n: any) => !n.read).length, label: '待处理通知', icon: <BellOutlined /> },
-            ].map(({ val, label, icon, special }) => (
+              { val: animatedLessonCount, label: '今日课次', icon: <ClockCircleOutlined /> },
+              { val: animatedAttendanceRate, unit: '%', label: '本月出勤率', icon: <IdcardOutlined /> },
+              { val: animatedBadgeCount, label: '已获徽章', icon: <StarOutlined />, special: true },
+              { val: animatedUnreadCount, label: '待处理通知', icon: <BellOutlined /> },
+            ].map(({ val, unit, label, icon, special }) => (
               <div key={label} style={{
                 background: heroTheme.statBg,
                 backdropFilter: 'blur(12px)',
@@ -493,7 +497,7 @@ export function ParentDashboardClient({
               }}>
                 <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
                   {special && <span style={{ fontSize: 16 }}>🌟</span>}
-                  {val}
+                  {val}{unit}
                 </div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{label}</div>
               </div>

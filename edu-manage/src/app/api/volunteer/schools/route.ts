@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPrismaForDivision } from '@/lib/prisma'
 import admissionCutoffs2025 from '../../../../../data/volunteer/admission_cutoffs_2025.json'
+import { normalizeSeniorSchoolName, seniorSchoolNameMatches } from '@/lib/volunteer-school-names'
 
 export const dynamic = 'force-dynamic'
 
@@ -81,14 +82,29 @@ export async function GET() {
     }
   })
   const [allocationRows, rankRows] = await Promise.all([
-    prisma.allocationQuota.findMany({ where: { year: 2025 }, select: { juniorSchool: true, seniorSchool: true, quota: true } }),
+    prisma.allocationQuota.findMany({ where: { year: 2026 }, select: { juniorSchool: true, seniorSchool: true, quota: true } }),
     prisma.yifenYidang.findMany({ where: { year: { in: [2025, 2026] } }, select: { year: true, score: true, count: true, cumulative: true }, orderBy: [{ year: 'asc' }, { score: 'desc' }] }),
   ])
   const allocationQuotas: Record<string, Record<string, number>> = {}
+  const allocationTotals = new Map<string, number>()
   for (const row of allocationRows) {
+    const seniorSchool = normalizeSeniorSchoolName(row.seniorSchool)
     allocationQuotas[row.juniorSchool] ||= {}
-    allocationQuotas[row.juniorSchool][row.seniorSchool] = row.quota
+    allocationQuotas[row.juniorSchool][seniorSchool] = row.quota
+    allocationTotals.set(seniorSchool, (allocationTotals.get(seniorSchool) || 0) + row.quota)
   }
+  const schoolsWithQuota = schools.map((school) => {
+    let xinleFenpeiQuota = 0
+    for (const [seniorSchool, total] of allocationTotals) {
+      if (seniorSchoolNameMatches(school.name, school.fullName, seniorSchool)) {
+        xinleFenpeiQuota = total
+        break
+      }
+    }
+    const xinleStatus = school.xinleStatus.filter((status) => status !== '分配生可报')
+    if (xinleFenpeiQuota > 0) xinleStatus.push('分配生可报')
+    return { ...school, xinleFenpeiQuota, xinleStatus }
+  })
   const rows2025 = rankRows.filter((row) => row.year === 2025).map(({ score, count, cumulative }) => ({ score, count, cumulative }))
   const rows2026 = rankRows.filter((row) => row.year === 2026).map(({ score, count, cumulative }) => ({ score, count, cumulative }))
   const scoreRanks = Object.fromEntries(rows2025.map((row) => [row.score, row.cumulative]))
@@ -103,7 +119,7 @@ export async function GET() {
     maxScore: rows[0]?.score ?? 0,
   }]))
 
-  return NextResponse.json({ schools, allocationQuotas, scoreRanks, rankMaps, rankRows: rankRowsByYear, rankMeta }, {
+  return NextResponse.json({ schools: schoolsWithQuota, allocationQuotas, scoreRanks, rankMaps, rankRows: rankRowsByYear, rankMeta }, {
     headers: {
       'Cache-Control': 'no-store, max-age=0',
     },

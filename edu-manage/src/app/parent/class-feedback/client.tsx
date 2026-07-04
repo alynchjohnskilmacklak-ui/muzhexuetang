@@ -1,14 +1,17 @@
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { Button, Card, Empty, Tag, Typography, Modal, Input, Descriptions, Image, Space } from 'antd'
+import { Button, Tag, Typography, Modal, Input, Descriptions, Image, Space } from 'antd'
 import { BookOutlined, ClockCircleOutlined, CameraOutlined, MessageOutlined, ArrowRightOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { fmtDate, fmtDateTime } from '@/lib/format-date'
+import { formatFriendlyTime } from '@/lib/date/relative'
 import { toast } from 'sonner'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { BrandEmpty } from '@/components/Parent/BrandEmpty'
+import { ParentCard } from '@/components/Parent/ParentCard'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -19,11 +22,30 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
   const [replyText, setReplyText] = useState('')
   const [replying, setReplying] = useState(false)
   const [localReply, setLocalReply] = useState<string | null>(null)
+  const [locallyReadIds, setLocallyReadIds] = useState<Set<string>>(() => new Set())
+
+  const markAsRead = async (feedback: any) => {
+    if (feedback.parentReadAt || feedback.status !== 'PUBLISHED' || locallyReadIds.has(feedback.id)) return
+    setLocallyReadIds(current => new Set(current).add(feedback.id))
+    await fetch('/api/feedback', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: feedback.id, markRead: true }),
+    })
+  }
 
   // Auto-open detail if highlightedFeedback is present (from notification click)
   useEffect(() => {
     if (highlightedFeedback) {
       setDetailModal(highlightedFeedback)
+      if (!highlightedFeedback.parentReadAt && highlightedFeedback.status === 'PUBLISHED') {
+        setLocallyReadIds(current => new Set(current).add(highlightedFeedback.id))
+        void fetch('/api/feedback', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: highlightedFeedback.id, markRead: true }),
+        })
+      }
     }
   }, [highlightedFeedback])
 
@@ -49,6 +71,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
     setDetailModal(f)
     setReplyText('')
     setLocalReply(f.parentReply || null)
+    void markAsRead(f)
   }
 
   return (
@@ -72,17 +95,16 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
       )}
 
       {feedbacks.length === 0 ? (
-        <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Empty description="暂无课堂反馈，老师发布课堂反馈后，会在这里第一时间展示。" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-        </Card>
+        <ParentCard style={{ minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BrandEmpty title="暂无课堂反馈" hint="老师发布课堂反馈后，会在这里第一时间展示" icon="💬" actionText="去看课程表" onAction={() => router.push('/parent/schedule')} />
+        </ParentCard>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 80 }}>
-          {feedbacks.map((f: any) => (
-            <Card
+          {feedbacks.map((f: any, index: number) => (
+            <ParentCard
               key={f.id}
-              bordered={false}
-              hoverable
-              style={{ borderRadius: 12, background: '#fff', border: `1px solid ${detailModal?.id === f.id ? '#E8784A' : '#F0DDD2'}` }}
+              className="stagger-item pressable"
+              style={{ border: `1px solid ${detailModal?.id === f.id ? '#E8784A' : '#EEE7E1'}`, animationDelay: `${Math.min(index, 8) * 40}ms` }}
               onClick={() => openDetail(f)}
             >
               {/* Header */}
@@ -101,14 +123,14 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
                   ) : null
                 })()}
                 {/* Unread dot for recent feedbacks */}
-                {f.createdAt > new Date(Date.now() - 3 * 86400000) && (
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#E8784A', display: 'inline-block' }} />
+                {!f.parentReadAt && f.status === 'PUBLISHED' && !locallyReadIds.has(f.id) && (
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#E24B4A', display: 'inline-block' }} />
                 )}
                 {f.parentReply && (
                   <Tag color="green" style={{ borderRadius: 9999, fontSize: 10 }}>已回复</Tag>
                 )}
                 <Text type="secondary" style={{ fontSize: 11, marginLeft: 'auto' }}>
-                  {fmtDateTime(f.createdAt)}
+                  {formatFriendlyTime(f.createdAt)}
                 </Text>
               </div>
 
@@ -151,7 +173,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
               <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text style={{ fontSize: 11, color: '#E8784A' }}>查看详情 →</Text>
               </div>
-            </Card>
+            </ParentCard>
           ))}
         </div>
       )}
@@ -178,7 +200,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
             <Descriptions column={isMobile ? 1 : 2} size="small" style={{ marginBottom: 16 }}>
               <Descriptions.Item label="老师">{detailModal.teacher?.name || '-'}</Descriptions.Item>
               <Descriptions.Item label="发布时间">
-                {fmtDateTime(detailModal.createdAt)}
+                {formatFriendlyTime(detailModal.createdAt)}
               </Descriptions.Item>
               {detailModal.classLesson?.group?.course && (
                 <>

@@ -33,6 +33,7 @@
     "convert:yifenyidang:2026": "tsx scripts/convert-yifenyidang-csv.ts",
     "import:yifenyidang:2026": "tsx scripts/import-yifenyidang.ts data/volunteer/yifenyidang_2026.json",
     "import:allocation": "tsx scripts/import-allocation.ts",
+    "import:allocation:2026": "tsx scripts/import-allocation.ts data/volunteer/allocation_2026.json",
     "import:enrollment": "tsx scripts/import-enrollment.ts",
     "check:garbled": "tsx scripts/check-garbled-text.ts",
     "test": "vitest run"

@@ -77,9 +77,10 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     papers: Number(unreadData?.papers || 0),
     posts: Number(unreadData?.posts || 0),
     notifications: Number(unreadData?.notifications || 0),
+    feedbacks: Number(unreadData?.feedbacks || 0),
     messages: Number(msgUnreadData?.count || 0),
   }
-  const totalUnread = unread.papers + unread.posts + unread.notifications + unread.messages
+  const totalUnread = unread.papers + unread.posts + unread.notifications + unread.feedbacks + unread.messages
 
   const userMenu = {
     items: [
@@ -96,7 +97,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
     { key: 'growth-group', icon: <HomeOutlined />, label: '学习与成长', children: [
       { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课程表' },
-      { key: '/parent/class-feedback', icon: <BookOutlined />, label: '成长反馈' },
+      { key: '/parent/class-feedback', icon: <BookOutlined />, label: '成长反馈', badge: unread.feedbacks },
       { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长主页', badge: unread.papers + unread.posts },
       { key: '/parent/teachers', icon: <TeamOutlined />, label: '教师信息' },
     ] },
@@ -268,7 +269,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
           </Dropdown>
         </Header>
 
-        <Content style={{ padding: 24, maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+        <Content style={{ padding: 24, maxWidth: pathname.startsWith('/parent/volunteer') ? 1140 : 800, margin: '0 auto', width: '100%' }}>
           {children}
         </Content>
       </Layout>
