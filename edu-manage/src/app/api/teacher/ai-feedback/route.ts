@@ -73,27 +73,34 @@ function cleanRawText(raw: string) {
 }
 
 function detectIntent(note: string): Intent {
-  if (/教师寄语|本期寄语|阶段小结|学情小结|阶段报告|学期总结|生成寄语|写个寄语|写一段评语|帮我生成教师评语|帮我补齐评语/.test(note)) return 'stage'
-  if (/下一步建议|写建议|生成建议|接下来|后续建议|给个建议/.test(note)) return 'suggestion'
+  if (/教师寄语|本期寄语|阶段小结|学情小结|阶段报告|学期总结|生成寄语|写个寄语|写一段评语|帮我生成教师评语|帮我补齐评语|总结.{0,4}(这段时间|这学期|近期)|期末(评语|总结|寄语)|阶段性(评价|总结)|月度小结/.test(note)) return 'stage'
+  if (/下一步建议|写建议|生成建议|接下来|后续建议|给个建议|怎么(提高|改进|办)|努力方向|提升方向|回家(练|复习)什么/.test(note)) return 'suggestion'
   return 'classroom'
 }
 
 function inferMoodFromNote(note: string): Mood {
-  if (/走神|不认真|没完成|没有完成|需要加强|拖拉|粗心|不仔细|不稳定/.test(note)) return 'OKAY'
-  if (/非常好|很好|主动|进步明显|特别积极|状态很好/.test(note)) return 'GREAT'
-  if (/积极|认真|不错|进步|稳定|听讲/.test(note)) return 'GOOD'
+  if (/走神|不认真|没完成|没有完成|需要加强|拖拉|粗心|不仔细|不稳定|开小差|打瞌睡|犯困|坐不住|不在状态|有点飘|溜号|讲小话|说话|玩|敷衍|应付|磨蹭|状态一般|不太行/.test(note)) return 'OKAY'
+  if (/非常好|很好|主动|进步明显|特别积极|状态很好|表现突出|全对|抢答|状态在线|超出预期|明显变好|比上次强|突飞猛进/.test(note)) return 'GREAT'
+  if (/积极|认真|不错|进步|稳定|听讲|还可以|还行|有起色|跟得上|完成得不错|配合/.test(note)) return 'GOOD'
   return 'GOOD'
 }
 
-function inferTagsFromNote(note: string): string[] {
+function inferTagsFromNote(note: string, tagOptions: string[] = []): string[] {
   const tags: string[] = []
-  const add = (tag: string) => { if (!tags.includes(tag)) tags.push(tag) }
-  if (/认真|听讲|专注/.test(note)) add('认真听讲')
-  if (/积极|主动|回答/.test(note)) add('积极回答')
-  if (/进步|提升/.test(note)) add('有进步')
-  if (/作业.*(不好|没完成|没有完成|需要|拖拉)|没完成.*作业/.test(note)) add('作业需加强')
-  if (/计算|准确率/.test(note)) add('计算能力')
-  if (/审题|不仔细|粗心/.test(note)) add('审题需加强')
+  const add = (tag: string) => {
+    const synonym = tag === '专注度需提升'
+      ? tagOptions.find((option) => /(专注|注意力).*(提升|加强|改进)|(提升|加强|改进).*(专注|注意力)/.test(option))
+      : undefined
+    const resolvedTag = synonym || tag
+    if (!tags.includes(resolvedTag)) tags.push(resolvedTag)
+  }
+  if (/认真|听讲|专注|投入|状态在线/.test(note)) add('认真听讲')
+  if (/积极|主动|回答|抢答|发言|举手/.test(note)) add('积极回答')
+  if (/进步|提升|变好|起色|比上次强/.test(note)) add('有进步')
+  if (/作业.*(不好|没完成|没有完成|没写完|没写|未完成|需要|拖拉|敷衍|应付|忘|漏)|没完成.*作业/.test(note)) add('作业需加强')
+  if (/计算|准确率|口算|运算/.test(note)) add('计算能力')
+  if (/审题|不仔细|粗心|看错|漏看|马虎/.test(note)) add('审题需加强')
+  if (/开小差|走神|溜号|坐不住|讲小话/.test(note)) add('专注度需提升')
   return tags.slice(0, 4)
 }
 
@@ -244,17 +251,35 @@ function resolveStudentsFromContext(params: {
   }
 
   if (!matchedIds.length) {
+    const noteTokens = note.split(/[、，,和跟与及\s]+/).filter(Boolean)
+    const candidatesByShortName = new Map<string, RosterEntry[]>()
     for (const student of roster) {
       const name = student.name || ''
-      if (name.length >= 2 && note.includes(name.slice(1)) && !matchedIds.includes(student.id)) {
+      if (name.length < 2) continue
+      const shortNames = new Set([name.slice(1), name.slice(-2)].filter((shortName) => shortName.length >= 2))
+      for (const shortName of shortNames) {
+        if (!noteTokens.some((token) => token.includes(shortName))) continue
+        const candidates = candidatesByShortName.get(shortName) || []
+        candidates.push(student)
+        candidatesByShortName.set(shortName, candidates)
+      }
+    }
+
+    for (const [shortName, candidates] of candidatesByShortName) {
+      const uniqueCandidates = [...new Map(candidates.map((student) => [student.id, student])).values()]
+      if (uniqueCandidates.length !== 1) {
+        if (!unknownNames.includes(shortName)) unknownNames.push(shortName)
+        continue
+      }
+      const student = uniqueCandidates[0]
+      if (!matchedIds.includes(student.id)) {
         matchedIds.push(student.id)
         matchedNames.push(student.name)
-        break
       }
     }
   }
 
-  return { matchedIds, matchedNames, unknownNames, needsManual: matchedIds.length === 0 }
+  return { matchedIds, matchedNames, unknownNames, needsManual: matchedIds.length === 0 || unknownNames.length > 0 }
 }
 
 function buildFallbackResponse(opts: {
@@ -262,9 +287,10 @@ function buildFallbackResponse(opts: {
   intent: Intent
   resolved: ReturnType<typeof resolveStudentsFromContext>
   kpOptions: string[]
+  tagOptions?: string[]
   raw?: string
 }) {
-  const { note, intent, resolved, kpOptions, raw } = opts
+  const { note, intent, resolved, kpOptions, tagOptions = [], raw } = opts
   const rawComment = raw ? cleanRawText(raw) : ''
   const comment = rawComment || buildFallbackComment(note, resolved.matchedNames)
   const suggestion = buildFallbackSuggestion(note)
@@ -273,11 +299,11 @@ function buildFallbackResponse(opts: {
     studentIds: resolved.matchedIds,
     studentNames: resolved.matchedNames,
     unknownNames: resolved.unknownNames,
-    needsManualStudentSelection: resolved.matchedIds.length === 0,
+    needsManualStudentSelection: resolved.needsManual,
     mood: inferMoodFromNote(note),
     overallComment: intent === 'suggestion' ? '' : comment.slice(0, 400),
     perStudentComments: buildPerStudentComments(note, resolved, [], rawComment),
-    tags: inferTagsFromNote(note),
+    tags: inferTagsFromNote(note, tagOptions),
     knowledgePoints: inferKnowledgePointsFromNote(note, kpOptions),
     homework: inferHomeworkFromNote(note),
     summary: '',
@@ -360,9 +386,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
       const maxTokens = Math.min(500 + n * 220, 1500)
       const raw = await callDeepSeek({ system: sys, user, maxTokens, temperature: 0.4, jsonMode: true })
       const parsed = parseAIJson(raw)
-      if (!parsed) return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, raw }))
+      if (!parsed) return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, tagOptions, raw }))
 
       const validMoods = moods.map((m) => m.value)
+      const matchTag = (tag: string) => tagOptions.find((option) => option === tag || option.includes(tag) || tag.includes(option))
+      const matchKnowledgePoint = (knowledgePoint: string) => kpOptions.find((option) => option === knowledgePoint || option.includes(knowledgePoint) || knowledgePoint.includes(option))
       const parsedMood = typeof parsed.mood === 'string' ? parsed.mood : inferMoodFromNote(note)
       const parsedOverallComment = typeof parsed.overallComment === 'string' ? parsed.overallComment.trim() : ''
       const result = {
@@ -370,12 +398,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
         studentIds: resolved.matchedIds,
         studentNames: resolved.matchedNames,
         unknownNames: resolved.unknownNames,
-        needsManualStudentSelection: resolved.matchedIds.length === 0,
+        needsManualStudentSelection: resolved.needsManual,
         mood: validMoods.includes(parsedMood) ? parsedMood : inferMoodFromNote(note),
         overallComment: parsedOverallComment,
         perStudentComments: buildPerStudentComments(note, resolved, parsed.perStudentComments, parsedOverallComment),
-        tags: stringArray(parsed.tags).filter((t) => tagOptions.includes(t)).slice(0, 4),
-        knowledgePoints: stringArray(parsed.knowledgePoints).filter((kp) => kpOptions.includes(kp)),
+        tags: stringArray(parsed.tags).map(matchTag).filter((tag): tag is string => !!tag).slice(0, 4),
+        knowledgePoints: stringArray(parsed.knowledgePoints).map(matchKnowledgePoint).filter((knowledgePoint): knowledgePoint is string => !!knowledgePoint).slice(0, 4),
         homework: stringArray(parsed.homework),
         summary: typeof parsed.summary === 'string' ? parsed.summary.trim() : '',
         suggestion: typeof parsed.suggestion === 'string' ? parsed.suggestion.trim() : '',
@@ -387,10 +415,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
         result.overallComment || result.perStudentComments.length || result.suggestion || result.summary || result.stageSummaryText || result.stageSuggestions ||
         result.tags.length || result.knowledgePoints.length || result.homework.length
       )
-      return NextResponse.json(hasContent ? result : buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, raw }))
+      return NextResponse.json(hasContent ? result : buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, tagOptions, raw }))
     } catch (error) {
       console.error('[ai-feedback smart]', error)
-      return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions }))
+      return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, tagOptions }))
     }
   }
 
