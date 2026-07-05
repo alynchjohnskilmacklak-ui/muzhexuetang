@@ -59,3 +59,10 @@ export const TIER_WELCOME: Record<TeacherTier, { title: string; body: string }> 
 export function fillName(template: string, name: string): string {
   return template.replace(/\{name\}/g, name || '')
 }
+
+/** 弹窗里展示的核心福利点（每档3条，完整清单在福利页） */
+export const TIER_QUICK_PERKS: Record<TeacherTier, string[]> = {
+  NEW: ['工作日饮品畅饮', '子女/亲属 1对1 辅导 2 小时/学期', '入职导师一对一带教'],
+  EXPERIENCED: ['工资可申请提前预支', '教务问题优先响应', '子女/亲属 1对1 辅导 4 小时/学期'],
+  SENIOR: ['预支工资绿色通道 · 优先审批', '专属通道 · 第一时间响应', '子女/亲属 1对1 辅导 6 小时/学期 · 可指定教师'],
+}

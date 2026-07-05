@@ -18,7 +18,7 @@ import {
 } from '@ant-design/icons'
 import { formatHours, formatPercent } from '@/lib/format'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { fillName, resolveTier, TIER_THEME, TIER_WELCOME } from '@/constants/teacher-tier'
+import { fillName, resolveTier, TIER_QUICK_PERKS, TIER_THEME, TIER_WELCOME } from '@/constants/teacher-tier'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
@@ -173,8 +173,8 @@ export default function TeacherDashboardPage() {
     window.sessionStorage.setItem(storageKey, '1')
     setWelcomeMounted(true)
     const showTimer = window.setTimeout(() => setWelcomeVisible(true), 30)
-    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 6000)
-    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 6600)
+    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 8000)
+    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 8600)
     return () => {
       window.clearTimeout(showTimer)
       window.clearTimeout(fadeTimer)
@@ -201,12 +201,72 @@ export default function TeacherDashboardPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {welcomeMounted && (
         <div style={{
-          background: tierTheme.bg, border: `1px solid ${tierTheme.border}`, borderRadius: 12,
-          padding: isMobile ? '12px 14px' : '14px 18px', color: tierTheme.accent,
-          opacity: welcomeVisible ? 1 : 0, transition: 'opacity .6s ease',
+          position: 'fixed', inset: 0, zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: isMobile ? 18 : 24, pointerEvents: 'none',
+          background: welcomeVisible ? 'rgba(18,51,38,.10)' : 'rgba(18,51,38,0)',
+          backdropFilter: welcomeVisible ? 'blur(6px)' : 'blur(0px)',
+          WebkitBackdropFilter: welcomeVisible ? 'blur(6px)' : 'blur(0px)',
+          transition: 'background .45s ease, backdrop-filter .45s ease',
         }}>
-          <div style={{ fontSize: 15, fontWeight: 700 }}>{fillName(tierWelcome.title, teacher.name)}</div>
-          <div style={{ fontSize: 13, lineHeight: 1.7, marginTop: 3 }}>{tierWelcome.body}</div>
+          <div style={{
+            width: 'min(88vw, 430px)', borderRadius: 26,
+            padding: isMobile ? '24px 22px' : '28px 30px',
+            background: tier === 'SENIOR' ? 'linear-gradient(145deg,#F8F3E7,#FFFDF7)' : tierTheme.bg,
+            border: `1.5px solid ${tier === 'SENIOR' ? '#C9A45C' : tierTheme.border}`,
+            color: tierTheme.accent,
+            boxShadow: tier === 'SENIOR'
+              ? '0 26px 80px rgba(18,60,53,.30)'
+              : tier === 'EXPERIENCED'
+                ? '0 26px 80px rgba(232,120,74,.26)'
+                : '0 24px 70px rgba(62,142,110,.20)',
+            opacity: welcomeVisible ? 1 : 0,
+            transform: welcomeVisible ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)',
+            transition: 'opacity .45s ease, transform .58s cubic-bezier(.2,.9,.2,1)',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute', right: -24, top: -28, width: 90, height: 90,
+              borderRadius: '50%',
+              background: tier === 'SENIOR' ? 'rgba(201,164,92,.18)' : `${tierTheme.accent}18`,
+            }} />
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+              <div style={{
+                width: 42, height: 42, borderRadius: 16, flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 20, fontWeight: 900, color: '#fff',
+                background: tier === 'SENIOR'
+                  ? 'linear-gradient(145deg, #123C35 0%, #C9A45C 150%)'
+                  : tier === 'EXPERIENCED'
+                    ? 'linear-gradient(145deg, #E8784A 0%, #F8B27F 100%)'
+                    : 'linear-gradient(145deg, #3E8E6E 0%, #7ABF9A 100%)',
+                boxShadow: tier === 'SENIOR'
+                  ? '0 10px 24px rgba(18,60,53,.25)'
+                  : `0 10px 24px ${tierTheme.accent}2E`,
+              }}>
+                {tier === 'SENIOR' ? '师' : tier === 'EXPERIENCED' ? '优' : '新'}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: isMobile ? 17 : 18, fontWeight: 900, lineHeight: 1.55, color: tierTheme.accent, letterSpacing: .2, overflowWrap: 'anywhere' }}>
+                  {fillName(tierWelcome.title, teacher.name)}
+                </div>
+                <div style={{ marginTop: 10, fontSize: 14, lineHeight: 1.9, color: '#5A4E3A', fontWeight: 500 }}>
+                  {tierWelcome.body}
+                </div>
+                <div style={{ marginTop: 12 }}>
+                  {TIER_QUICK_PERKS[tier].map((perk) => (
+                    <div key={perk} style={{ display: 'flex', gap: 7, fontSize: 13, lineHeight: 1.9, color: '#5A4E3A' }}>
+                      <span style={{ color: tier === 'SENIOR' ? '#C9A45C' : tierTheme.accent, fontWeight: 900 }}>✦</span>
+                      <span>{perk}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 14, fontSize: 12, color: tier === 'SENIOR' ? '#8A6A2E' : tierTheme.accent, fontWeight: 700 }}>
+                  完整福利见 侧栏「我的福利」
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
       <section style={{ background: '#123326', borderRadius: 12, padding: isMobile ? 16 : '26px 30px', color: '#fff', maxWidth: '100%', overflow: 'hidden' }}>

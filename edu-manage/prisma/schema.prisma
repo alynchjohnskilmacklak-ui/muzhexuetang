@@ -1125,6 +1125,7 @@ model SystemConfig {
   logoUrl            String?
   schedulePeriods    Json?
   membershipBenefits String?  @db.Text
+  teacherBenefits    String?  @db.Text
   updatedAt          DateTime @updatedAt
 }
 

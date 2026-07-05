@@ -15,6 +15,7 @@ import {
   ExperimentOutlined,
   FileImageOutlined,
   FolderOutlined,
+  GiftOutlined,
   LockOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
@@ -64,6 +65,7 @@ const navItems: NavItem[] = [
     { key: '/teacher/materials', icon: <FolderOutlined />, label: '学习资料' },
   ] },
   { key: 'tools-group', icon: <ExperimentOutlined />, label: '个人与工具', children: [
+    { key: '/teacher/benefits', icon: <GiftOutlined />, label: '我的福利' },
     { key: '/teacher/salary', icon: <DollarOutlined />, label: '我的薪资' },
     { key: '/teacher/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
     { key: '/teacher/ai', icon: <MessageFilled />, label: 'AI 助手' },
