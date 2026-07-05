@@ -54,6 +54,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
           data: parentIds.map((parentId) => ({
             userId: parentId,
             type: 'CLASS_START',
+            href: '/parent/schedule',
             title: `${group.name} 已开班`,
             content: `课程：${group.course.name}；首次上课：${firstLesson.lessonDate.toLocaleDateString('zh-CN')} ${firstLesson.startTime}-${firstLesson.endTime}；授课团队：${teacherNames}${group.room?.name ? `；教室：${group.room.name}` : ''}。`,
           })),

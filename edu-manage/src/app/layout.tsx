@@ -6,6 +6,15 @@ import './globals.css'
 export const metadata: Metadata = {
   title: '牧哲学堂 - 教育管理系统',
   description: '教育培训机构综合管理系统',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    title: '牧哲学堂',
+    statusBarStyle: 'default',
+  },
+  icons: {
+    apple: '/icons/apple-touch-icon.png',
+  },
 }
 
 export const viewport: Viewport = {

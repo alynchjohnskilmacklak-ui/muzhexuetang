@@ -43,6 +43,7 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [commentText, setCommentText] = useState('')
   const [commentingId, setCommentingId] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   const stats = useMemo(() => {
     const allQ = papers.flatMap((p) => p.questions)
@@ -80,18 +81,24 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
   }
 
   const submitComment = async (paperId: string) => {
+    if (submitting) return
     if (!commentText.trim()) return toast.error('请输入留言')
-    const res = await fetch(`/api/exam-papers/${paperId}/comment`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: commentText }),
-    })
-    if (res.ok) {
-      toast.success('留言已发送')
-      setCommentText('')
-      setCommentingId(null)
-    } else {
-      toast.error('留言失败')
+    setSubmitting(true)
+    try {
+      const res = await fetch(`/api/exam-papers/${paperId}/comment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: commentText }),
+      })
+      if (res.ok) {
+        toast.success('留言已发送')
+        setCommentText('')
+        setCommentingId(null)
+      } else {
+        toast.error('留言失败')
+      }
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -378,7 +385,7 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
                           <Input value={commentText} onChange={e => setCommentText(e.target.value)}
                             placeholder="写下你的留言..." maxLength={200}
                             onPressEnter={() => { if (commentText.trim()) submitComment(paper.id) }} />
-                          <Button type="primary" style={{ background: '#E8784A', borderColor: '#E8784A' }}
+                          <Button type="primary" loading={submitting} disabled={submitting} style={{ background: '#E8784A', borderColor: '#E8784A' }}
                             onClick={() => { if (commentText.trim()) submitComment(paper.id) }}>
                             发送
                           </Button>

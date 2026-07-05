@@ -59,7 +59,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const isMobile = useIsMobile()
   const [collapsed, setCollapsed] = useState(false)
-  const { data: unreadData, mutate: mutateUnread } = useSWR('/api/parent/unread-counts', fetcher, { refreshInterval: 300_000 })
+  const { data: unreadData, mutate: mutateUnread } = useSWR('/api/parent/unread-counts', fetcher, { refreshInterval: 120_000 })
   useKickListener()
   useSessionPing()
 

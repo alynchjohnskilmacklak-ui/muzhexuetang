@@ -1,7 +1,8 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { Image, Tag, Typography } from 'antd'
+import NextImage from 'next/image'
+import { Image as AntImage, Tag, Typography } from 'antd'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ParentCard, SectionHeader } from '@/components/Parent/ParentCard'
@@ -36,6 +37,7 @@ const PHOTO_H = 140
 
 function TeacherRow({ teacher, index }: { teacher: TeacherInfo; index: number }) {
   const [imgFailed, setImgFailed] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const subjects = teacher.subjects ? teacher.subjects.split(',').map(s => s.trim()).filter(Boolean) : []
   const firstSubject = subjects[0] || ''
   const style = SUBJECT_STYLES[firstSubject] || DEFAULT_STYLE
@@ -51,17 +53,25 @@ function TeacherRow({ teacher, index }: { teacher: TeacherInfo; index: number })
       alignItems: 'flex-start', animationDelay: `${Math.min(index, 8) * 40}ms`,
     }}>
       {/* Photo area */}
-      <div style={{ width: PHOTO_W, height: PHOTO_H, flexShrink: 0, borderRadius: 12, overflow: 'hidden', background: '#f8f8f8', border: '1px solid #F0DDD2' }}>
+      <div style={{ position: 'relative', width: PHOTO_W, height: PHOTO_H, flexShrink: 0, borderRadius: 12, overflow: 'hidden', background: '#f8f8f8', border: '1px solid #F0DDD2' }}>
         {showAvatar ? (
-          <Image
-            src={normalizeUploadUrl(teacher.avatar)}
-            alt={teacher.name}
-            width={PHOTO_W}
-            height={PHOTO_H}
-            style={{ objectFit: 'cover', objectPosition: 'center top' }}
-            preview={{ mask: '预览' }}
-            onError={() => setImgFailed(true)}
-          />
+          <>
+            <NextImage
+              fill
+              src={normalizeUploadUrl(teacher.avatar)}
+              alt={teacher.name}
+              sizes="(max-width: 768px) 40vw, 200px"
+              style={{ objectFit: 'cover', objectPosition: 'center top', cursor: 'zoom-in' }}
+              onClick={() => setPreviewOpen(true)}
+              onError={() => setImgFailed(true)}
+            />
+            <AntImage
+              src={normalizeUploadUrl(teacher.avatar)}
+              alt={teacher.name}
+              style={{ display: 'none' }}
+              preview={{ visible: previewOpen, onVisibleChange: setPreviewOpen }}
+            />
+          </>
         ) : (
           <div style={{
             width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',

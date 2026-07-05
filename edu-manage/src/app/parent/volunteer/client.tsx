@@ -36,6 +36,7 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
   const [quotaQ, setQuotaQ] = useState('')
   const [expandedSchool, setExpandedSchool] = useState<string | null>(null)
   const [question, setQuestion] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const { data: consultData, mutate: mutateConsults } = useSWR('/api/volunteer/consultation', fetcher)
   const consultations = Array.isArray(consultData?.consultations) ? consultData.consultations : []
 
@@ -83,16 +84,22 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
   }, [quotas, quotaQ])
 
   const submitQuestion = async () => {
+    if (submitting) return
     if (!question.trim()) return toast.error('请输入问题')
-    const res = await fetch('/api/volunteer/consultation', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question }),
-    })
-    if (!res.ok) return toast.error('提交失败')
-    toast.success('问题已提交，老师会尽快回复')
-    setQuestion('')
-    mutateConsults()
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/volunteer/consultation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+      })
+      if (!res.ok) return toast.error('提交失败')
+      toast.success('问题已提交，老师会尽快回复')
+      setQuestion('')
+      mutateConsults()
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (!currentGuide) return <Empty description="志愿填报指南暂未发布" />
@@ -224,7 +231,7 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
         <Space direction="vertical" style={{ width: '100%' }} size={12}>
           {consultations.map((item: Record<string, unknown>) => <div key={item.id as string} style={{ padding: 12, borderRadius: 8, background: '#FCFBF9' }}><div style={{ color: '#1F2329' }}>问：{item.question as string}</div>{item.reply ? <div style={{ color: '#5a4e3a', marginTop: 8 }}>答：{item.reply as string}</div> : <Tag color="orange" style={{ marginTop: 8 }}>等待回复</Tag>}</div>)}
           <Input.TextArea value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={500} showCount autoSize={{ minRows: 3, maxRows: 6 }} placeholder="把您的志愿填报问题写在这里..." />
-          <Button type="primary" onClick={submitQuestion}>提交我的问题</Button>
+          <Button type="primary" loading={submitting} disabled={submitting} onClick={submitQuestion}>提交我的问题</Button>
         </Space>
       </Card>
     </div>

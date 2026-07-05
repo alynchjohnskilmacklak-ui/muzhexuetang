@@ -59,6 +59,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
         senderId: userId,
         relatedType: 'LEAVE_REQUEST',
         relatedId: updated.id,
+        href: '/parent/leave',
         pushStatus: 'none',
       },
     })

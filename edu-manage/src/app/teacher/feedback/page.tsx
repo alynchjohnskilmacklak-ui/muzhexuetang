@@ -13,6 +13,17 @@ import { fmtDate } from '@/lib/format-date'
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
+const confirmModal = (content: string) => new Promise<boolean>((resolve) => {
+  Modal.confirm({
+    title: '请确认',
+    content,
+    okText: '继续',
+    cancelText: '取消',
+    onOk: () => resolve(true),
+    onCancel: () => resolve(false),
+  })
+})
+
 const AI_KEYWORD_GROUPS = [
   { label: '表现类', words: ['认真听讲', '积极回答', '进步明显', '课堂活跃', '状态一般', '注意力不集中'] },
   { label: '问题/方向类', words: ['作业未完成', '作业质量不高', '审题粗心', '计算不熟练', '需要加强复习', '建议家长督促作业'] },
@@ -246,8 +257,12 @@ function FeedbackPageInner() {
     if (!overallComment.trim() && !individualComments.length && !summary.trim() && !kps.length && !homework.length && !imageUrls.length && !stageSummaryText.trim() && !stageSuggestions.trim()) {
       toast.warning('请至少填写评语、建议、知识点、作业、本期寄语或上传资料'); return
     }
-    if (status === 'PUBLISHED' && aiSuggestion && !aiSuggestionUsed && !window.confirm('AI 已生成建议但尚未采用，是否继续发布？')) return
-    if (status === 'PUBLISHED' && bonusPreview?.selectedCount && bonusPreview.eligibleCount === 0 && !window.confirm('本次反馈将发布给家长，但今日同场景已奖励过，不重复计奖。')) return
+    if (status === 'PUBLISHED' && aiSuggestion && !aiSuggestionUsed) {
+      if (!(await confirmModal('AI 已生成建议但尚未采用，是否继续发布？'))) return
+    }
+    if (status === 'PUBLISHED' && bonusPreview?.selectedCount && bonusPreview.eligibleCount === 0) {
+      if (!(await confirmModal('本次反馈将发布给家长，但今日同场景已奖励过，不重复计奖。'))) return
+    }
     setSaving(true)
     try {
       let fbData: any = {}
@@ -459,9 +474,11 @@ function FeedbackPageInner() {
     overallComment.trim() || Object.values(perStudentComments).some((comment) => comment.trim()) || summary.trim() || tags.length || kps.length || homework.length || stageSummaryText.trim() || stageSuggestions.trim()
   )
 
-  const adoptAiSuggestion = (mode: 'all' | 'empty' | 'append') => {
+  const adoptAiSuggestion = async (mode: 'all' | 'empty' | 'append') => {
     if (!aiSuggestion) return
-    if (mode === 'all' && hasTeacherWrittenContent() && !window.confirm('当前已有手写内容，是否覆盖？')) return
+    if (mode === 'all' && hasTeacherWrittenContent()) {
+      if (!(await confirmModal('当前已有手写内容，是否覆盖？'))) return
+    }
 
     const useIf = (current: string, next?: string) => {
       if (mode === 'append') return appendText(current, next)

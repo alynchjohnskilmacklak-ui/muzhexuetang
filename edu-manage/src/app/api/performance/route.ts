@@ -177,6 +177,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         data: {
           userId: parentUserId,
           type: 'PERFORMANCE_UPDATE',
+          href: `/parent/archive?feedbackId=${post.id}`,
           title: `${student.name}有新的课堂表现`,
           content: content.slice(0, 60),
           link: '/parent/performance',

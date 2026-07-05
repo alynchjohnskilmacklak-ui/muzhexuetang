@@ -71,6 +71,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
       data: {
         userId: teacherUser.id,
         type: 'PARENT_COMMENT',
+        href: '/teacher/students',
         title: '家长回复了您的动态',
         content: `${post.student.name}: ${content.slice(0, 50)}`,
         link: `/performance/${id}`,

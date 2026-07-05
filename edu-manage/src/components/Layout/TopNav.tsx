@@ -1,35 +1,13 @@
 'use client'
 
-import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Layout, Input, Badge, Avatar, Dropdown, Space } from 'antd'
-import { BellOutlined, SearchOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons'
+import { Layout, Badge, Avatar, Dropdown, Space } from 'antd'
+import { BellOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons'
 import { signOut, useSession } from 'next-auth/react'
 import useSWR from 'swr'
+import { GlobalSearch } from '@/components/GlobalSearch'
 
 const { Header } = Layout
-
-const SEARCH_TARGETS: { prefix: string; keywords: string[]; href: string }[] = [
-  { prefix: '学生', keywords: ['学生', '学员', 'student'], href: '/students' },
-  { prefix: '课程', keywords: ['课程', '课', 'course'], href: '/courses' },
-  { prefix: '教师', keywords: ['教师', '老师', 'teacher'], href: '/teachers' },
-  { prefix: '排课', keywords: ['排课', '课表', 'schedule'], href: '/schedule' },
-  { prefix: '考勤', keywords: ['考勤', 'attendance'], href: '/attendance' },
-  { prefix: '收费', keywords: ['收费', '缴费', '费用', '学费'], href: '/fees' },
-  { prefix: '志愿', keywords: ['志愿', '中考', '高中', '学校'], href: '/volunteer-sim' },
-  { prefix: '通知', keywords: ['通知', '消息', 'notification'], href: '/notifications' },
-  { prefix: '档案', keywords: ['档案', '成绩', '学习'], href: '/student-archive' },
-  { prefix: '设置', keywords: ['设置', '配置', '系统'], href: '/settings' },
-]
-
-function resolveSearchRoute(query: string): string | null {
-  const trimmed = query.trim()
-  if (!trimmed) return null
-  for (const target of SEARCH_TARGETS) {
-    if (target.keywords.some((kw) => trimmed.includes(kw))) return target.href
-  }
-  return null
-}
 
 export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
   const { data: session } = useSession()
@@ -44,25 +22,12 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
         ? '初中部管理系统'
         : '管理系统'
 
-  const [searchValue, setSearchValue] = useState('')
-
   const { data: unreadData } = useSWR(
     '/api/messages/unread-count',
     (url: string) => fetch(url).then((r) => r.ok ? r.json() : { count: 0 }),
     { refreshInterval: 60_000 },
   )
   const unreadCount: number = unreadData?.count ?? 0
-
-  const handleSearch = useCallback(
-    (value: string) => {
-      const route = resolveSearchRoute(value)
-      if (route) {
-        router.push(route)
-        setSearchValue('')
-      }
-    },
-    [router],
-  )
 
   const userMenu = {
     items: [
@@ -101,16 +66,7 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
         background: '#ffffff',
       }}
     >
-      <Input.Search
-        placeholder="快速跳转：输入学生/课程/考勤等关键词"
-        prefix={<SearchOutlined style={{ color: '#9a8e7a' }} />}
-        value={searchValue}
-        onChange={(e) => setSearchValue(e.target.value)}
-        onSearch={handleSearch}
-        style={{ width: 320, borderRadius: 10 }}
-        size="middle"
-        allowClear
-      />
+      <GlobalSearch />
       <Space size={20}>
         <Badge count={unreadCount} size="small" offset={[-2, 2]}>
           <BellOutlined

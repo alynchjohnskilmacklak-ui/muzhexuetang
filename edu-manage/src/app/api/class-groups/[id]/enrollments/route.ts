@@ -126,6 +126,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         data: {
           userId: parentId,
           type: 'CLASS_ENROLLMENT',
+          href: '/parent/schedule',
           title: `${created.student.name} 已加入 ${group.name}`,
           content: `课程：${group.course.name}；教师：${group.teacher.name}；首次课：${firstLesson ? `${firstLesson.lessonDate.toISOString().slice(0, 10)} ${firstLesson.startTime}` : '待通知'}；教室：${group.room?.name || '待分配'}。`,
         },

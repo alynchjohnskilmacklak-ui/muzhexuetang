@@ -35,6 +35,7 @@ export default function OfficialVolunteerFormPage() {
   const [schools, setSchools] = useState<School[]>([])
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [segments, setSegments] = useState(EMPTY_SEGMENTS)
   const [firstARadio, setFirstARadio] = useState<RadioValue>('clear')
   const [firstASchool, setFirstASchool] = useState('')
@@ -99,19 +100,25 @@ export default function OfficialVolunteerFormPage() {
   }
 
   function saveSimulation() {
-    const byId = new Map(schools.map((school) => [school.schoolId, school]))
-    sessionStorage.setItem('volunteer_form_data', JSON.stringify({
-      allocation: segments.allocation.map((id) => byId.get(id) || null),
-      shifan: segments.shifan.map((id) => byId.get(id) || null),
-      putong: segments.putong.map((id) => byId.get(id) || null),
-      officialExtras: {
-        firstA: { mode: firstARadio, schoolId: firstASchool },
-        firstB: { schoolId: firstBSchool, major: firstBMajor },
-        secondA: { mode: secondARadio, schoolId: secondASchool },
-        secondB: { schoolId: secondBSchool, major: secondBMajor },
-      },
-    }))
-    toast.info('此为模拟填报，非官方，实际填报请登录石家庄市教育考试院官方平台', { duration: 6000 })
+    if (saving) return
+    setSaving(true)
+    try {
+      const byId = new Map(schools.map((school) => [school.schoolId, school]))
+      sessionStorage.setItem('volunteer_form_data', JSON.stringify({
+        allocation: segments.allocation.map((id) => byId.get(id) || null),
+        shifan: segments.shifan.map((id) => byId.get(id) || null),
+        putong: segments.putong.map((id) => byId.get(id) || null),
+        officialExtras: {
+          firstA: { mode: firstARadio, schoolId: firstASchool },
+          firstB: { schoolId: firstBSchool, major: firstBMajor },
+          secondA: { mode: secondARadio, schoolId: secondASchool },
+          secondB: { schoolId: secondBSchool, major: secondBMajor },
+        },
+      }))
+      toast.info('此为模拟填报，非官方，实际填报请登录石家庄市教育考试院官方平台', { duration: 6000 })
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function exportPdf() {
@@ -246,7 +253,7 @@ export default function OfficialVolunteerFormPage() {
         </div>
 
         <div className="actions">
-          <button type="button" className="btn btn-save" onClick={saveSimulation}>保存志愿</button>
+          <button type="button" className="btn btn-save" onClick={saveSimulation} disabled={saving}>{saving ? '正在保存...' : '保存志愿'}</button>
           <button type="button" className="btn btn-back" onClick={exportPdf} disabled={exporting}>{exporting ? '正在导出...' : '导出PDF'}</button>
           <button type="button" className="btn btn-back" onClick={() => router.push('/volunteer-sim')}>返回</button>
         </div>

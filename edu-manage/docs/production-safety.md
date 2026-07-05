@@ -71,6 +71,14 @@ Nginx must not serve `/uploads/` directly. Requests should go through Next middl
 
 Long-term target: move uploads to Aliyun OSS with private bucket and signed URLs.
 
+## Daily operations report
+
+Run the administrator WxPusher report at 21:00 every day. Ensure `CRON_SECRET` is available to cron:
+
+```bash
+0 21 * * * curl -s "https://muzhexuetang.xyz/api/cron/daily-ops-report?token=$CRON_SECRET"
+```
+
 ## Schedule migration risk
 
 The app still has two schedule systems: legacy `Schedule` and new `ClassGroup/ClassLesson`. New statistics must explicitly decide whether they need both sources. Long-term target is to migrate remaining legacy schedules and make `ClassLesson` the only lesson source.
