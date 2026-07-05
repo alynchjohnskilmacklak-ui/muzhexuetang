@@ -1,11 +1,11 @@
 ﻿'use client'
 
 import { useMemo, useState } from 'react'
-import { Button, Card, Empty, Radio, Tag, Typography, Collapse } from 'antd'
-import { DownOutlined, RightOutlined } from '@ant-design/icons'
-import dayjs from 'dayjs'
+import { Button, Card, Radio, Tag, Typography } from 'antd'
+import { CoffeeOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { fmtDateTime, fmtFull } from '@/lib/format-date'
+import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 
 const { Title, Text } = Typography
 
@@ -87,7 +87,7 @@ export function TeacherMealsClient({
     finally { setSubmitting(false) }
   }
 
-  if (!menu) return <Empty description="今日菜单尚未设置，暂不能上报" />
+  if (!menu) return <BrandEmpty title="今日菜单尚未设置" hint="菜单设置后即可上报就餐信息" icon={<CoffeeOutlined />} />
 
   return (
     <div>
@@ -113,10 +113,10 @@ export function TeacherMealsClient({
           </>
         ) : (
           <>
-            {mealGroups.map(group => {
+            {mealGroups.map((group, groupIndex) => {
               const gs = groupStats(group.students)
               return (
-                <Card key={group.id} size="small" style={{ marginBottom: 12, borderRadius: 10, border: '1px solid #EEE7E1' }}
+                <Card key={group.id} className="stagger-item" size="small" style={{ marginBottom: 12, borderRadius: 10, border: '1px solid #EEE7E1', animationDelay: `${Math.min(groupIndex, 8) * 40}ms` }}
                   title={
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span>
@@ -137,8 +137,8 @@ export function TeacherMealsClient({
                       {menu.allowDouble && <Button size="small" onClick={() => setGroupAll(group.students, 'double')}>全双份</Button>}
                     </div>
                   }>
-                  {group.students.map(s => (
-                    <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '6px 0', borderBottom: '1px solid rgba(0,0,0,.04)' }}>
+                  {group.students.map((s, studentIndex) => (
+                    <div className="stagger-item" key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '6px 0', borderBottom: '1px solid rgba(0,0,0,.04)', animationDelay: `${Math.min(studentIndex, 8) * 40}ms` }}>
                       <div style={{ minWidth: 80 }}>
                         <Text style={{ fontSize: 13 }}>{s.name}</Text>
                         <Text type="secondary" style={{ display: 'block', fontSize: 10 }}>{[s.grade, s.school].filter(Boolean).join(' · ') || '-'}</Text>

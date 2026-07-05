@@ -108,6 +108,7 @@ model Teacher {
   email          String?
   avatar         String?
   employmentType String    @default("FULL_TIME")
+  tierLevel      String    @default("NEW")
   status         String    @default("ACTIVE")
   division       String    @default("JUNIOR")
   joinedAt       DateTime  @default(now())

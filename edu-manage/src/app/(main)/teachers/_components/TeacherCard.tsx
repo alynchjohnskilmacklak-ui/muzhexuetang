@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import { SUBJECT_COLORS } from '@/constants/subjects'
 import { normalizeUploadUrl } from '@/lib/upload-url'
+import { resolveTier, TIER_THEME } from '@/constants/teacher-tier'
 
 const { Text } = Typography
 const AVATAR_COLORS = ['#E8784A', '#27a644', '#b37feb', '#f5a623', '#828fff', '#e03e2d']
@@ -15,6 +16,7 @@ type Teacher = {
   id: string; name: string; gender?: string | null; phone: string; email?: string | null
   avatar?: string | null
   employmentType: string; status: string; education?: string | null; university?: string | null
+  tierLevel?: string | null
   major?: string | null; subjects: string; bio?: string | null; monthlyHours: number
   rating: number; joinedAt: string; contractEnd?: string | null
   _count?: { students: number; schedules: number }
@@ -31,6 +33,8 @@ export function TeacherCard({ teacher, onEdit, onDelete }: {
   const typeBadge = teacher.employmentType === 'FULL_TIME'
     ? { label: '全职', color: '#E8784A' }
     : { label: '兼职', color: '#f5a623' }
+  const tier = resolveTier(teacher.tierLevel)
+  const tierTheme = TIER_THEME[tier]
 
   return (
     <Card bordered style={{ borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
@@ -43,6 +47,10 @@ export function TeacherCard({ teacher, onEdit, onDelete }: {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Text strong style={{ fontSize: 16, color: '#1F2329' }}>{teacher.name}</Text>
+            <span style={{ background: tierTheme.bg, color: tierTheme.accent, border: `1px solid ${tierTheme.border}`, borderRadius: 999, fontSize: 10, padding: '1px 7px', whiteSpace: 'nowrap' }}>
+              {tier === 'SENIOR' && <span style={{ color: tierTheme.gold, marginRight: 3 }}>★</span>}
+              {tierTheme.label}
+            </span>
             <Tag style={{ borderRadius: 9999, border: 'none', fontWeight: 600, fontSize: 11, background: typeBadge.color + '22', color: typeBadge.color }}>{typeBadge.label}</Tag>
           </div>
           <Text style={{ fontSize: 13, color: '#5a4e3a', display: 'block', marginTop: 2 }}>

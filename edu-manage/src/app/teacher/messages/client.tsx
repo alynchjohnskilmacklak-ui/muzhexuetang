@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import {
-  Avatar, Badge, Button, Drawer, Empty, Input,
+  Avatar, Badge, Button, Drawer, Input,
   Select, Tag, Typography,
 } from 'antd'
 import {
@@ -14,6 +14,8 @@ import { usePausableSWR } from '@/lib/use-pausable-swr'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { SUBJECT_COLORS } from '@/constants/subjects'
 import { fmtDateTime } from '@/lib/format-date'
+import { BrandEmpty } from '@/components/Parent/BrandEmpty'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const { Text, Title } = Typography
 const { TextArea } = Input
@@ -67,16 +69,17 @@ function ChatBubble({ reply }: { reply: Reply }) {
   )
 }
 
-function MessageCard({ msg, onClick, active }: { msg: Message; onClick: () => void; active: boolean }) {
+function MessageCard({ msg, onClick, active, index }: { msg: Message; onClick: () => void; active: boolean; index: number }) {
   const unread = unreadCount(msg)
   const lastReply = msg.replies[msg.replies.length - 1]
   const subjectColor = msg.subject ? SUBJECT_COLORS[msg.subject] : null
   return (
-    <div onClick={onClick} style={{
+    <div className="pressable stagger-item" onClick={onClick} style={{
       background: active ? '#F0F9F5' : '#fff',
       border: active ? '1.5px solid #1D9E75' : '1px solid rgba(0,0,0,.07)',
       borderRadius: 12, padding: '14px 16px',
       cursor: 'pointer', transition: 'all .18s ease', marginBottom: 8,
+      animationDelay: `${Math.min(index, 8) * 40}ms`,
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
         <Text strong style={{ flex: 1, fontSize: 14, lineHeight: 1.4 }}>{msg.title}</Text>
@@ -122,7 +125,7 @@ export function TeacherMessagesClient() {
   const [closing, setClosing] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  const { data, mutate } = usePausableSWR('/api/messages', fetcher, {
+  const { data, mutate, isLoading } = usePausableSWR('/api/messages', fetcher, {
     refreshInterval: 15_000,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
@@ -199,10 +202,10 @@ export function TeacherMessagesClient() {
       )}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', background: '#faf8f5' }}>
         {!active ? (
-          <Empty description="选择留言开始回复" style={{ marginTop: 80 }} />
+          <BrandEmpty title="选择留言开始回复" icon={<MessageOutlined />} />
         ) : (
           <>
-            {active.replies.map(r => <ChatBubble key={r.id} reply={r} />)}
+            {active.replies.map((reply, index) => <div className="stagger-item" key={reply.id} style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}><ChatBubble reply={reply} /></div>)}
             <div ref={bottomRef} />
           </>
         )}
@@ -246,6 +249,8 @@ export function TeacherMessagesClient() {
     </Select>
   )
 
+  if (isLoading) return <CardSkeleton rows={3} />
+
   if (isMobile) {
     return (
       <div style={{ padding: '0 0 80px' }}>
@@ -257,12 +262,9 @@ export function TeacherMessagesClient() {
           {filterBar}
         </div>
         {messages.length === 0 ? (
-          <div style={{ background: '#fff', borderRadius: 16, padding: '48px 24px', textAlign: 'center', border: '1px solid rgba(0,0,0,.06)' }}>
-            <MessageOutlined style={{ fontSize: 40, color: '#1D9E75', opacity: .4, marginBottom: 12 }} />
-            <div style={{ fontSize: 15, color: '#5a4e3a' }}>暂无留言</div>
-          </div>
-        ) : messages.map(msg => (
-          <MessageCard key={msg.id} msg={msg} onClick={() => handleSelect(msg.id)} active={false} />
+          <BrandEmpty title="暂无留言" icon={<MessageOutlined />} />
+        ) : messages.map((msg, index) => (
+          <MessageCard key={msg.id} msg={msg} index={index} onClick={() => handleSelect(msg.id)} active={false} />
         ))}
         <Drawer
           open={!!activeId} onClose={() => setActiveId(null)}
@@ -310,9 +312,9 @@ export function TeacherMessagesClient() {
           </div>
           <div style={{ overflowY: 'auto', flex: 1, padding: '12px 12px' }}>
             {messages.length === 0 ? (
-              <Empty description="暂无留言" style={{ marginTop: 60 }} image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            ) : messages.map(msg => (
-              <MessageCard key={msg.id} msg={msg} onClick={() => handleSelect(msg.id)} active={msg.id === activeId} />
+              <BrandEmpty title="暂无留言" icon={<MessageOutlined />} />
+            ) : messages.map((msg, index) => (
+              <MessageCard key={msg.id} msg={msg} index={index} onClick={() => handleSelect(msg.id)} active={msg.id === activeId} />
             ))}
           </div>
         </div>

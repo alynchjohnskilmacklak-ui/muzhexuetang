@@ -8,6 +8,7 @@ import dayjs from 'dayjs'
 import { ALL_SUBJECTS } from '@/constants/subjects'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { TIER_OPTIONS } from '@/constants/teacher-tier'
 
 const EDU_OPTIONS = ['本科', '硕士', '博士在读', '博士', '其他'].map(value => ({ label: value, value }))
 
@@ -172,6 +173,7 @@ export function TeacherForm({
             <Col span={12}><Form.Item name="phone" label="手机" rules={[{ required: true, message: '请输入手机号' }, { pattern: /^1[3-9]\d{9}$/, message: '请输入正确手机号' }]}><Input placeholder="必填" /></Form.Item></Col>
             <Col span={12}><Form.Item name="email" label="邮箱"><Input placeholder="选填" /></Form.Item></Col>
             <Col span={12}><Form.Item name="employmentType" label="任职类型" initialValue="FULL_TIME"><Select options={[{ label: '全职', value: 'FULL_TIME' }, { label: '兼职', value: 'PART_TIME' }]} /></Form.Item></Col>
+            <Col span={12}><Form.Item name="tierLevel" label="教师等级" initialValue="NEW"><Select options={TIER_OPTIONS} /></Form.Item></Col>
             <Col span={12}><Form.Item name="joinedAt" label="入职日期"><DatePicker style={{ width: '100%' }} placeholder="选择日期" /></Form.Item></Col>
             <Col span={12}><Form.Item name="contractEnd" label="合同到期日"><DatePicker style={{ width: '100%' }} placeholder="选择日期" /></Form.Item></Col>
           </Row>

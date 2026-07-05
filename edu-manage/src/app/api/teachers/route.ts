@@ -125,6 +125,7 @@ export async function POST(req: NextRequest) {
       phone,
       email: body.email || null,
       employmentType: body.employmentType || 'FULL_TIME',
+      tierLevel: body.tierLevel || 'NEW',
       joinedAt: body.joinedAt ? new Date(body.joinedAt) : new Date(),
       contractEnd: body.contractEnd ? new Date(body.contractEnd) : null,
       education: body.education || null,

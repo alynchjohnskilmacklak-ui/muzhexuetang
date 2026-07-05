@@ -3,10 +3,12 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
-import { Avatar, Button, Card, Empty, Input, Segmented, Select, Skeleton, Tag, Typography } from 'antd'
+import { Avatar, Button, Card, Input, Segmented, Select, Tag, Typography } from 'antd'
 import { FileTextOutlined, ProfileOutlined, SearchOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatHourPair, formatHours, formatPercent } from '@/lib/format'
+import { BrandEmpty } from '@/components/Parent/BrandEmpty'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const { Title, Text } = Typography
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
@@ -84,7 +86,7 @@ export default function TeacherStudentsPage() {
     return { oneOnOne, smallGroup, group }
   }, [filtered])
 
-  const renderStudentCard = (student: TeacherStudent) => {
+  const renderStudentCard = (student: TeacherStudent, index: number) => {
     const remain = Number(student.remainHours || 0)
     const total = Number(student.totalHours || 0)
     const used = Math.max(0, total - remain)
@@ -102,12 +104,14 @@ export default function TeacherStudentsPage() {
     return (
       <Card
         key={student.id}
+        className="pressable stagger-item"
         bordered={false}
         style={{
           width: '100%',
           borderRadius: 10,
           borderLeft: remain <= 2 ? '3px solid #E24B4A' : '3px solid transparent',
           cursor: 'pointer',
+          animationDelay: `${Math.min(index, 8) * 40}ms`,
         }}
         styles={{ body: { padding: isMobile ? 12 : 14 } }}
         onClick={() => router.push(`/teacher/student/${student.id}`)}
@@ -201,13 +205,7 @@ export default function TeacherStudentsPage() {
   }
 
   if (isLoading) {
-    return (
-      <div style={{ padding: 16 }}>
-        <Skeleton active avatar paragraph={{ rows: 2 }} style={{ marginBottom: 12 }} />
-        <Skeleton active avatar paragraph={{ rows: 2 }} style={{ marginBottom: 12 }} />
-        <Skeleton active avatar paragraph={{ rows: 2 }} />
-      </div>
-    )
+    return <CardSkeleton rows={3} />
   }
 
   return (
@@ -284,7 +282,7 @@ export default function TeacherStudentsPage() {
       </Card>
 
       {!filtered.length ? (
-        <Empty description="暂无匹配学员" />
+        <BrandEmpty title="暂无匹配学员" icon={<ProfileOutlined />} />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {[

@@ -1,12 +1,14 @@
 ﻿'use client'
 
 import useSWR from 'swr'
-import { Button, Card, Empty, Input, Modal, Segmented, Skeleton, Space, Tag, Typography } from 'antd'
+import { Button, Card, Input, Modal, Segmented, Space, Tag, Typography } from 'antd'
 import { CalendarOutlined, CheckOutlined, CloseOutlined, ReloadOutlined, UserOutlined } from '@ant-design/icons'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { fmtDate, fmtDateTime } from '@/lib/format-date'
+import { BrandEmpty } from '@/components/Parent/BrandEmpty'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -122,22 +124,21 @@ export default function TeacherLeavePage() {
         </div>
 
         {isLoading ? (
-          <div style={{ display: 'grid', gap: 10 }}>
-            {[0, 1, 2].map((item) => <Skeleton key={item} active paragraph={{ rows: 3 }} />)}
-          </div>
+          <CardSkeleton rows={3} />
         ) : records.length === 0 ? (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无请假申请，有新申请会出现在这里。" />
+          <BrandEmpty title="暂无请假申请" hint="有新申请会出现在这里" icon={<CalendarOutlined />} />
         ) : (
           <div className="scroll-area" style={{ display: 'grid', gap: 10 }}>
-            {records.map((record) => {
+            {records.map((record, index) => {
               const meta = statusMeta(record.status)
               const canReview = record.status === 'pending'
               return (
-                <div key={record.id} style={{
+                <div className="stagger-item" key={record.id} style={{
                   padding: isMobile ? 12 : 14,
                   borderRadius: 12,
                   background: canReview ? '#FFFBF7' : '#FFFFFF',
                   border: '1px solid #F0DDD2',
+                  animationDelay: `${Math.min(index, 8) * 40}ms`,
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start', flexWrap: 'wrap' }}>
                     <div style={{ minWidth: 0 }}>

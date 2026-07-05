@@ -113,6 +113,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         phone: body.phone,
         email: body.email,
         employmentType: body.employmentType,
+        tierLevel: body.tierLevel ?? undefined,
         status: body.status,
         joinedAt: body.joinedAt ? new Date(body.joinedAt) : undefined,
         contractEnd: body.contractEnd ? new Date(body.contractEnd) : undefined,

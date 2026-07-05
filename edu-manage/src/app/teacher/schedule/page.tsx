@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Card, Empty, Spin, Tag, Typography } from 'antd'
-import { BellOutlined, ClockCircleOutlined, CoffeeOutlined, EnvironmentOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
+import { Card, Tag, Typography } from 'antd'
+import { BellOutlined, CalendarOutlined, CoffeeOutlined, EnvironmentOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
 import { findSchedulePeriod, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
+import { BrandEmpty } from '@/components/Parent/BrandEmpty'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const { Title, Text } = Typography
 const fetcher = (url: string) => fetch(url).then(r => r.json())
@@ -56,7 +58,6 @@ export default function TeacherSchedulePage() {
     `/api/teacher/schedule?startDate=${startDate}&endDate=${endDate}&type=INTENSIVE`, fetcher
   )
 
-  const currentTeacherId = groupData?.currentTeacherId || intensiveData?.currentTeacherId || ''
   const groupLessons: any[] = Array.isArray(groupData?.lessons) ? groupData.lessons : []
   const intensiveLessons: any[] = Array.isArray(intensiveData?.lessons) ? intensiveData.lessons : []
   const allLessons = [...groupLessons, ...intensiveLessons]
@@ -156,13 +157,13 @@ export default function TeacherSchedulePage() {
         <Card bordered={false} style={{ borderRadius: 10 }}><Text type="secondary" style={{ fontSize: isMobile ? 11 : undefined }}>在带学员</Text><div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: '#E8784A' }}>{stats.students}</div></Card>
       </div>
 
-      {isLoading ? <Spin size="large" style={{ display: 'block', margin: '60px auto' }} /> : (
+      {isLoading ? <CardSkeleton rows={3} /> : (
         isMobile ? (
           <Card bordered={false} title="本周课程列表" style={{ borderRadius: 10 }}>
-            {visibleLessons.length === 0 ? <Empty description="本周暂无课程" /> : (
+            {visibleLessons.length === 0 ? <BrandEmpty title="本周暂无课程" icon={<CalendarOutlined />} /> : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {mobileLessonsByDay.map((day) => (
-                  <div key={day.label}>
+                {mobileLessonsByDay.map((day, dayIndex) => (
+                  <div className="stagger-item" key={day.label} style={{ animationDelay: `${Math.min(dayIndex, 8) * 40}ms` }}>
                     <div style={{ fontWeight: 700, color: '#1F2329', marginBottom: 8 }}>
                       {day.label} {day.date.getMonth() + 1}月{day.date.getDate()}日
                     </div>
@@ -214,7 +215,7 @@ export default function TeacherSchedulePage() {
           </Card>
         ) :
         scheduleType === 'group' ? (
-          groupLessons.length === 0 ? <Empty description="本周暂无精品班课" /> : (
+          groupLessons.length === 0 ? <BrandEmpty title="本周暂无精品班课" icon={<CalendarOutlined />} /> : (
             <Card bordered={false} style={{ borderRadius: 10, overflow: 'auto' }} styles={{ body: { padding: 0 } }}>
               <div style={{ display: 'grid', gridTemplateColumns: isTablet ? '56px repeat(7, minmax(58px, 1fr))' : '72px repeat(7, minmax(72px, 1fr))', minWidth: isTablet ? 0 : 640 }}>
                 <div style={{ padding: 8, background: 'var(--color-background-secondary, #faf8f5)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)' }} />
@@ -263,7 +264,7 @@ export default function TeacherSchedulePage() {
             </Card>
           )
         ) : (
-          intensiveLessons.length === 0 ? <Empty description="本周暂无突击全能班课程" /> : (
+          intensiveLessons.length === 0 ? <BrandEmpty title="本周暂无突击全能班课程" icon={<CalendarOutlined />} /> : (
             <Card bordered={false} style={{ borderRadius: 10, overflow: 'auto' }} styles={{ body: { padding: 0 } }}>
               <div style={{ display: 'grid', gridTemplateColumns: isTablet ? '56px repeat(7, minmax(58px, 1fr))' : '72px repeat(7, minmax(72px, 1fr))', minWidth: isTablet ? 0 : 640 }}>
                 <div style={{ padding: 8, background: 'var(--color-background-secondary, #faf8f5)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)' }} />
@@ -276,7 +277,7 @@ export default function TeacherSchedulePage() {
                     </div>
                   )
                 })}
-                {INTENSIVE_SLOTS.map((slot, si) => {
+                {INTENSIVE_SLOTS.map((slot) => {
                   const isNoon = slot.start === '12:00'
                   const h = isNoon ? 22 : 68
                   return (

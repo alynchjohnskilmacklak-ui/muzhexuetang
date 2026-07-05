@@ -5,6 +5,7 @@ import { Image, Tag, Typography } from 'antd'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ParentCard, SectionHeader } from '@/components/Parent/ParentCard'
+import { resolveTier, TIER_THEME } from '@/constants/teacher-tier'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -25,6 +26,7 @@ interface TeacherInfo {
   education: string | null; university: string | null; major: string | null
   graduationYear: number | null; currentUnit: string | null; subjects: string | null
   bio: string | null; employmentType: string; rating: number; ratingCount: number
+  tierLevel?: string | null
   studentCount: number; classGroupCount: number
   studyMaterials?: Array<{ id: string; title: string; grade: string; subject: string; fileType: string; createdAt: string }>
 }
@@ -39,6 +41,8 @@ function TeacherRow({ teacher, index }: { teacher: TeacherInfo; index: number })
   const style = SUBJECT_STYLES[firstSubject] || DEFAULT_STYLE
   const titleParts = [teacher.education, teacher.university, teacher.major].filter(Boolean)
   const showAvatar = teacher.avatar && !imgFailed
+  const tier = resolveTier(teacher.tierLevel)
+  const tierTheme = TIER_THEME[tier]
 
   return (
     <div className="stagger-item" style={{
@@ -75,6 +79,10 @@ function TeacherRow({ teacher, index }: { teacher: TeacherInfo; index: number })
           <Tag color={teacher.employmentType === 'FULL_TIME' ? 'blue' : 'orange'} style={{ borderRadius: 9999, fontSize: 11 }}>
             {teacher.employmentType === 'FULL_TIME' ? '全职' : '兼职'}
           </Tag>
+          <span style={{ background: tierTheme.bg, color: tierTheme.accent, border: `1px solid ${tierTheme.border}`, borderRadius: 999, fontSize: 10, padding: '1px 7px', whiteSpace: 'nowrap' }}>
+            {tier === 'SENIOR' && <span style={{ color: tierTheme.gold, marginRight: 3 }}>★</span>}
+            {tierTheme.label}
+          </span>
           {teacher.currentUnit && (
             <Text type="secondary" style={{ fontSize: 12 }}>{teacher.currentUnit}</Text>
           )}

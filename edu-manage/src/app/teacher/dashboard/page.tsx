@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Col, Empty, List, Progress, Row, Space, Tag, Typography } from 'antd'
+import { Button, Card, Col, List, Progress, Row, Space, Tag, Typography } from 'antd'
 import { useRouter } from 'next/navigation'
 import {
   AlertOutlined,
@@ -18,6 +18,9 @@ import {
 } from '@ant-design/icons'
 import { formatHours, formatPercent } from '@/lib/format'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { fillName, resolveTier, TIER_THEME, TIER_WELCOME } from '@/constants/teacher-tier'
+import { BrandEmpty } from '@/components/Parent/BrandEmpty'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const { Text } = Typography
 
@@ -67,7 +70,7 @@ interface CompletionItem {
 }
 
 interface DashboardData {
-  teacher: { id: string; name: string; avatar?: string | null; subjects?: string | null }
+  teacher: { id: string; name: string; avatar?: string | null; subjects?: string | null; tierLevel?: string | null }
   heroStats: {
     todayLessons: number
     pendingAttendance: number
@@ -92,23 +95,23 @@ interface DashboardData {
 }
 
 const toneColor: Record<Tone, string> = {
-  blue: '#2F6FED',
-  orange: '#E87545',
-  red: '#D4537E',
-  green: '#1D9E75',
-  purple: '#6F55D9',
-  brown: '#BA7517',
-  dark: '#123326',
+  blue: '#123C35',
+  orange: '#E8784A',
+  red: '#D64545',
+  green: '#123C35',
+  purple: '#8A8F99',
+  brown: '#E8784A',
+  dark: '#123C35',
 }
 
 const tagColor: Record<Tone, string> = {
-  blue: 'blue',
-  orange: 'orange',
-  red: 'red',
-  green: 'green',
-  purple: 'purple',
-  brown: 'gold',
-  dark: 'default',
+  blue: '#123C35',
+  orange: '#E8784A',
+  red: '#D64545',
+  green: '#123C35',
+  purple: '#8A8F99',
+  brown: '#E8784A',
+  dark: '#123C35',
 }
 
 const quickIcons = [<CheckCircleOutlined key="attendance" />, <CalendarOutlined key="leave" />, <UploadOutlined key="paper" />, <FileDoneOutlined key="classroom" />, <MessageOutlined key="performance" />, <TeamOutlined key="students" />, <RobotOutlined key="ai" />]
@@ -153,6 +156,8 @@ export default function TeacherDashboardPage() {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const { data, isLoading } = useSWR<DashboardData>('/api/teacher/dashboard', fetcher, { refreshInterval: 180_000 })
+  const [welcomeMounted, setWelcomeMounted] = useState(false)
+  const [welcomeVisible, setWelcomeVisible] = useState(false)
 
   useEffect(() => {
     fetch('/api/teacher/dashboard', { method: 'POST' }).catch((error) =>
@@ -160,25 +165,61 @@ export default function TeacherDashboardPage() {
     )
   }, [])
 
-  if (isLoading) return <div style={{ textAlign: 'center', padding: 80 }}>加载中...</div>
-  if (!data?.teacher) return <div style={{ textAlign: 'center', padding: 80 }}>未找到教师信息</div>
+  useEffect(() => {
+    const teacher = data?.teacher
+    if (!teacher?.id) return
+    const storageKey = `mz_teacher_welcome_${teacher.id}`
+    if (window.sessionStorage.getItem(storageKey)) return
+    window.sessionStorage.setItem(storageKey, '1')
+    setWelcomeMounted(true)
+    const showTimer = window.setTimeout(() => setWelcomeVisible(true), 30)
+    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 6000)
+    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 6600)
+    return () => {
+      window.clearTimeout(showTimer)
+      window.clearTimeout(fadeTimer)
+      window.clearTimeout(unmountTimer)
+    }
+  }, [data?.teacher])
+
+  if (isLoading) return <CardSkeleton rows={3} />
+  if (!data?.teacher) return <BrandEmpty title="未找到教师信息" icon={<UserOutlined />} />
 
   const { teacher, heroStats, todayLessons, todos, studentWarnings, feedbackTasks, weekCompletion, monthlyStats, pendingTasks, quickActions } = data
+  const tier = resolveTier(teacher.tierLevel)
+  const tierTheme = TIER_THEME[tier]
+  const tierWelcome = TIER_WELCOME[tier]
   const heroItems = [
-    { label: '今日课次', value: heroStats.todayLessons, color: '#2F6FED', suffix: '节' },
-    { label: '待考勤', value: heroStats.pendingAttendance, color: '#E87545', suffix: '节' },
-    { label: '待发反馈', value: heroStats.pendingFeedback, color: '#6F55D9', suffix: '条' },
-    { label: '待批请假', value: heroStats.pendingLeave, color: '#BA7517', suffix: '条' },
-    { label: '待推送试卷', value: heroStats.pendingPapers, color: '#1D9E75', suffix: '份' },
+    { label: '今日课次', value: heroStats.todayLessons, color: '#123C35', suffix: '节' },
+    { label: '待考勤', value: heroStats.pendingAttendance, color: '#E8784A', suffix: '节' },
+    { label: '待发反馈', value: heroStats.pendingFeedback, color: '#E8784A', suffix: '条' },
+    { label: '待批请假', value: heroStats.pendingLeave, color: '#E8784A', suffix: '条' },
+    { label: '待推送试卷', value: heroStats.pendingPapers, color: '#E8784A', suffix: '份' },
   ]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {welcomeMounted && (
+        <div style={{
+          background: tierTheme.bg, border: `1px solid ${tierTheme.border}`, borderRadius: 12,
+          padding: isMobile ? '12px 14px' : '14px 18px', color: tierTheme.accent,
+          opacity: welcomeVisible ? 1 : 0, transition: 'opacity .6s ease',
+        }}>
+          <div style={{ fontSize: 15, fontWeight: 700 }}>{fillName(tierWelcome.title, teacher.name)}</div>
+          <div style={{ fontSize: 13, lineHeight: 1.7, marginTop: 3 }}>{tierWelcome.body}</div>
+        </div>
+      )}
       <section style={{ background: '#123326', borderRadius: 12, padding: isMobile ? 16 : '26px 30px', color: '#fff', maxWidth: '100%', overflow: 'hidden' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', gap: 20, flexWrap: 'wrap' }}>
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ fontSize: 12, opacity: 0.72 }}>{dateText()}</div>
-            <h1 style={{ margin: '8px 0 8px', fontSize: isMobile ? 20 : 24, lineHeight: 1.3, letterSpacing: 0 }}>{teacher.name}老师，{getGreeting()}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: '8px 0' }}>
+              <h1 style={{ margin: 0, fontSize: isMobile ? 20 : 24, lineHeight: 1.3, letterSpacing: 0 }}>{teacher.name}老师，{getGreeting()}</h1>
+              <span style={{ background: 'rgba(255,255,255,.14)', color: '#fff', border: '1px solid rgba(255,255,255,.35)', borderRadius: 999, fontSize: 10, padding: '2px 8px', whiteSpace: 'nowrap' }}>
+                {tier === 'SENIOR' && <span style={{ color: '#C9A45C', marginRight: 3 }}>★</span>}
+                {tierTheme.label}
+              </span>
+            </div>
             <div style={{ fontSize: 14, opacity: 0.86, lineHeight: 1.8 }}>
               今日共有 {heroStats.todayLessons} 节课，{heroStats.pendingAttendance} 节待考勤，{heroStats.totalTodos} 条待处理事项
             </div>
@@ -186,11 +227,11 @@ export default function TeacherDashboardPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(96px, 1fr))', gap: 10, flex: '1 1 460px', width: '100%', minWidth: 0 }}>
             {heroItems.map((item) => (
-              <div key={item.label} style={{ background: 'rgba(255,255,255,.1)', border: '1px solid rgba(255,255,255,.14)', borderRadius: 10, padding: 14 }}>
+              <div key={item.label} style={{ background: 'rgba(255,255,255,.94)', border: '1px solid rgba(255,255,255,.35)', borderRadius: 10, padding: 14 }}>
                 <div style={{ color: item.color, fontSize: 26, fontWeight: 800, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
                   {item.value}<span style={{ fontSize: 12, fontWeight: 500, marginLeft: 2 }}>{item.suffix}</span>
                 </div>
-                <div style={{ fontSize: 12, opacity: 0.74, marginTop: 4 }}>{item.label}</div>
+                <div style={{ fontSize: 12, color: '#5A4E3A', marginTop: 4 }}>{item.label}</div>
               </div>
             ))}
           </div>
@@ -203,10 +244,11 @@ export default function TeacherDashboardPage() {
             {todos.length ? (
               <List
                 dataSource={todos}
-                renderItem={(item) => (
+                renderItem={(item, index) => (
                   <List.Item
+                    className="stagger-item"
                     actions={isMobile ? undefined : [<Button key="action" size="small" type="link" onClick={() => router.push(item.href)}>{item.actionLabel}</Button>]}
-                    style={{ padding: '12px 0' }}
+                    style={{ padding: '12px 0', animationDelay: `${Math.min(index, 8) * 40}ms` }}
                   >
                     <List.Item.Meta
                       avatar={<div style={{ width: 4, height: 42, borderRadius: 4, background: toneColor[item.tone] }} />}
@@ -218,7 +260,7 @@ export default function TeacherDashboardPage() {
                 )}
               />
             ) : (
-              <Empty description="今日暂无待办，可以整理课堂反馈、上传试卷或查看学生学习情况。" />
+              <BrandEmpty title="今日暂无待办" hint="可以整理课堂反馈、上传试卷或查看学生学习情况" icon={<CheckCircleOutlined />} />
             )}
           </Card>
 
@@ -226,8 +268,8 @@ export default function TeacherDashboardPage() {
             {todayLessons.length ? (
               <List
                 dataSource={todayLessons}
-                renderItem={(lesson) => (
-                  <List.Item style={{ padding: '14px 0' }}>
+                renderItem={(lesson, index) => (
+                  <List.Item className="stagger-item" style={{ padding: '14px 0', animationDelay: `${Math.min(index, 8) * 40}ms` }}>
                     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '92px 1fr auto', width: '100%', gap: isMobile ? 8 : 14, alignItems: 'center', minWidth: 0 }}>
                       <div style={{ color: toneColor[lesson.statusTone], fontWeight: 700, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{lesson.time}</div>
                       <div>
@@ -261,7 +303,7 @@ export default function TeacherDashboardPage() {
               />
             ) : (
               <div>
-                <Empty description="今日暂无课程，可以整理课堂反馈、上传试卷或查看学生学习情况。" />
+                <BrandEmpty title="今日暂无课程" hint="可以整理课堂反馈、上传试卷或查看学生学习情况" icon={<CalendarOutlined />} />
                 <Space wrap style={{ marginTop: 12 }}>
                   <Button onClick={() => router.push('/teacher/students')}>查看我的学生</Button>
                   <Button onClick={() => router.push('/teacher/papers')}>上传试卷</Button>
@@ -274,8 +316,8 @@ export default function TeacherDashboardPage() {
           <Card bordered={false} title="重点学生预警" style={{ borderRadius: 12 }}>
             {studentWarnings.length ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
-                {studentWarnings.map((item) => (
-                  <div key={item.id} style={{ border: '1px solid #F0E7DE', borderLeft: `4px solid ${toneColor[item.tone]}`, borderRadius: 10, padding: 12, background: '#FFFDFC' }}>
+                {studentWarnings.map((item, index) => (
+                  <div className="stagger-item" key={item.id} style={{ border: '1px solid #F0E7DE', borderLeft: `4px solid ${toneColor[item.tone]}`, borderRadius: 10, padding: 12, background: '#FFFDFC', animationDelay: `${Math.min(index, 8) * 40}ms` }}>
                     <Space style={{ width: '100%', justifyContent: 'space-between' }}>
                       <Text strong>{item.name}</Text>
                       <Tag color={tagColor[item.tone]}>{item.type}</Tag>
@@ -287,7 +329,7 @@ export default function TeacherDashboardPage() {
                 ))}
               </div>
             ) : (
-              <Empty description="暂无重点预警学生" />
+              <BrandEmpty title="暂无重点预警学生" icon={<TeamOutlined />} />
             )}
           </Card>
         </Col>
@@ -297,8 +339,8 @@ export default function TeacherDashboardPage() {
             {feedbackTasks.length ? (
               <List
                 dataSource={feedbackTasks}
-                renderItem={(item) => (
-                  <List.Item actions={isMobile ? undefined : [<Button key="action" size="small" type="link" onClick={() => router.push(item.href)}>{item.actionLabel}</Button>]}>
+                renderItem={(item, index) => (
+                  <List.Item className="stagger-item" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }} actions={isMobile ? undefined : [<Button key="action" size="small" type="link" onClick={() => router.push(item.href)}>{item.actionLabel}</Button>]}>
                     <List.Item.Meta
                       title={<Space wrap><Tag color={tagColor[item.tone]}>{item.status || item.type}</Tag><Text strong>{item.title}</Text></Space>}
                       description={item.description}
@@ -308,24 +350,24 @@ export default function TeacherDashboardPage() {
                 )}
               />
             ) : (
-              <Empty description="反馈和试卷暂无待处理事项" />
+              <BrandEmpty title="反馈和试卷暂无待处理事项" icon={<FileDoneOutlined />} />
             )}
           </Card>
 
           <Card bordered={false} title="本周教学完成度" style={{ borderRadius: 12, marginBottom: 16 }}>
-            <CompletionRow label="考勤提交率" item={weekCompletion.attendance} color="#E87545" />
-            <CompletionRow label="课堂反馈率" item={weekCompletion.classroomFeedback} color="#6F55D9" />
-            <CompletionRow label="试卷推送率" item={weekCompletion.paperPush} color="#1D9E75" />
-            <CompletionRow label="表现反馈率" item={weekCompletion.performance} color="#2F6FED" />
+            <CompletionRow label="考勤提交率" item={weekCompletion.attendance} color="#123C35" />
+            <CompletionRow label="课堂反馈率" item={weekCompletion.classroomFeedback} color="#123C35" />
+            <CompletionRow label="试卷推送率" item={weekCompletion.paperPush} color="#123C35" />
+            <CompletionRow label="表现反馈率" item={weekCompletion.performance} color="#123C35" />
           </Card>
 
           <Card bordered={false} title="教学概览" style={{ borderRadius: 12, marginBottom: 16 }}>
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : '1fr 1fr', gap: 10 }}>
               {[
-                { label: '在带学员', value: `${monthlyStats.totalStudents}人`, icon: <TeamOutlined />, color: '#E87545' },
-                { label: '本月课时', value: `${formatHours(monthlyStats.monthlyHours)}h`, icon: <ClockCircleOutlined />, color: '#1D9E75' },
-                { label: '未读留言', value: `${pendingTasks.unreadParentComments}条`, icon: <MessageOutlined />, color: '#D4537E' },
-                { label: '待处理', value: `${heroStats.totalTodos}项`, icon: <AlertOutlined />, color: '#6F55D9' },
+                { label: '在带学员', value: `${monthlyStats.totalStudents}人`, icon: <TeamOutlined />, color: '#123C35' },
+                { label: '本月课时', value: `${formatHours(monthlyStats.monthlyHours)}h`, icon: <ClockCircleOutlined />, color: '#123C35' },
+                { label: '未读留言', value: `${pendingTasks.unreadParentComments}条`, icon: <MessageOutlined />, color: '#E8784A' },
+                { label: '待处理', value: `${heroStats.totalTodos}项`, icon: <AlertOutlined />, color: '#E8784A' },
               ].map((item) => (
                 <div key={item.label} style={{ background: '#FAF8F5', borderRadius: 10, padding: 12 }}>
                   <div style={{ color: item.color, fontSize: 18 }}>{item.icon}</div>
@@ -343,6 +385,7 @@ export default function TeacherDashboardPage() {
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : '1fr 1fr', gap: 10 }}>
               {quickActions.map((item, index) => (
                 <button
+                  className="pressable stagger-item"
                   key={item.label}
                   onClick={() => router.push(item.href)}
                   style={{
@@ -353,6 +396,7 @@ export default function TeacherDashboardPage() {
                     textAlign: 'left',
                     cursor: 'pointer',
                     minHeight: 96,
+                    animationDelay: `${Math.min(index, 8) * 40}ms`,
                   }}
                   onMouseEnter={(event) => {
                     event.currentTarget.style.borderColor = toneColor[item.tone]

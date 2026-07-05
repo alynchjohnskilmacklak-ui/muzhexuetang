@@ -25,6 +25,7 @@ export default async function ParentTeachersPage() {
       subjects: true,
       bio: true,
       employmentType: true,
+      tierLevel: true,
       rating: true,
       ratingCount: true,
       studyMaterials: {
@@ -48,5 +49,8 @@ export default async function ParentTeachersPage() {
     orderBy: [{ employmentType: 'asc' }, { createdAt: 'desc' }],
   })
 
-  return <ParentTeachersClient teachers={JSON.parse(JSON.stringify(teachers))} />
+  const tierOrder: Record<string, number> = { SENIOR: 0, EXPERIENCED: 1, NEW: 2 }
+  const sortedTeachers = [...teachers].sort((a, b) => (tierOrder[a.tierLevel] ?? 2) - (tierOrder[b.tierLevel] ?? 2))
+
+  return <ParentTeachersClient teachers={JSON.parse(JSON.stringify(sortedTeachers))} />
 }
