@@ -91,9 +91,21 @@ function FeedbackPageInner() {
   // AI generation
   const [aiNote, setAiNote] = useState('')
   const [aiGenerating, setAiGenerating] = useState(false)
+  const [aiWaitingMessageIndex, setAiWaitingMessageIndex] = useState(0)
   const [aiPrefilled, setAiPrefilled] = useState<Set<string>>(new Set())
   const [aiSuggestion, setAiSuggestion] = useState<AiFeedbackResult | null>(null)
   const [aiSuggestionUsed, setAiSuggestionUsed] = useState(false)
+
+  useEffect(() => {
+    if (!aiGenerating) {
+      setAiWaitingMessageIndex(0)
+      return
+    }
+    const timer = window.setInterval(() => {
+      setAiWaitingMessageIndex((index) => (index + 1) % 4)
+    }, 1800)
+    return () => window.clearInterval(timer)
+  }, [aiGenerating])
 
   // Stage summary (only when 1 student selected)
   const [stageExpanded, setStageExpanded] = useState(false)
@@ -484,6 +496,17 @@ function FeedbackPageInner() {
   const aiPrefillMark = (key: string) => aiPrefilled.has(key)
     ? <Tag color="processing" style={{ fontSize: 10, marginLeft: 6, borderRadius: 4 }}>AI 预填</Tag>
     : null
+  const aiWaitingMessages = [
+    '正在理解你的描述…',
+    `正在为 ${selectedStudentIds.length} 名学生分别撰写评语…`,
+    '正在匹配表现标签和知识点…',
+    '快好了，正在整理格式…',
+  ]
+  const aiWaitingHint = aiGenerating ? (
+    <div style={{ color: '#B26B45', fontSize: 12, lineHeight: 1.6, margin: '0 0 8px' }}>
+      {aiWaitingMessages[aiWaitingMessageIndex]}
+    </div>
+  ) : null
 
   const formSection = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -815,6 +838,7 @@ function FeedbackPageInner() {
                 allowClear
                 disabled={aiGenerating}
               />
+              {aiWaitingHint}
               <Button
                 type="primary"
                 size="small"
@@ -1022,6 +1046,7 @@ function FeedbackPageInner() {
                 allowClear
                 disabled={aiGenerating}
               />
+              {aiWaitingHint}
               <Button
                 type="primary"
                 block

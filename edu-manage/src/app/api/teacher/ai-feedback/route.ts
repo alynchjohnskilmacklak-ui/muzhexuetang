@@ -321,6 +321,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const detectedIntent = detectIntent(note)
     const currentForm = body.currentForm || {}
     const stageMaterial = typeof body.stageMaterial === 'string' ? body.stageMaterial : ''
+    const promptRoster = resolved.matchedIds.length
+      ? resolved.matchedIds.map((id, index) => ({ id, name: resolved.matchedNames[index] || '孩子' }))
+      : roster.slice(0, 60)
 
     const confirmedStudentText = resolved.matchedIds.length
       ? `【已确认学生】${resolved.matchedIds.map((id, index) => `${resolved.matchedNames[index] || '孩子'}(${id})`).join('、')}。这些就是本次反馈对象，老师输入可以不包含学生姓名，必须直接围绕他们生成反馈。`
@@ -333,7 +336,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       '不要机械重复老师原话，要补充成自然、具体、温暖的老师表达。',
       '写作要求：面向家长；使用“学生姓名+同学”；不要使用“该生”“该同学”；不编造分数、排名、考试成绩；不编造老师没说过的具体事件；语气自然。',
       '为【已确认学生】中的每一个学生分别生成一段独立评语，输出到 perStudentComments 数组，每项包含 studentId、studentName、comment。',
-      '每段 comment 只能出现该学生本人的姓名，绝不能出现其他同学姓名。内容自然连贯，不加小标题、不列点：先写基于老师输入的今日课堂表现，再给一句可执行的努力方向，最后用「」引用一句适合初中生的学习、坚持或成长类名言。不同学生尽量使用不同名言。',
+      '每段 comment 只能出现该学生本人的姓名，绝不能出现其他同学姓名。内容自然连贯，不加小标题、不列点：先写基于老师输入的今日课堂表现，再给一句可执行的努力方向。结尾不要加名言或引用，系统会自动补充。',
       '必须尽量完成：mood、overallComment、suggestion、2-4个tags；能判断知识点才填knowledgePoints；提到作业才填homework。',
       '只输出 JSON，不要 Markdown，不要解释。',
     ].join('\n')
@@ -341,7 +344,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const user = [
       `【老师输入】${note}`,
       confirmedStudentText,
-      roster.length ? `【班级学生】${roster.map((s) => `${s.name}(${s.id})`).join('、')}` : '【班级学生】无',
+      promptRoster.length ? `【班级学生】${promptRoster.map((s) => `${s.name}(${s.id})`).join('、')}` : '【班级学生】无',
       moods.length ? `【可选状态】${moods.map((m) => `${m.value}=${m.label}`).join(' / ')}` : '',
       tagOptions.length ? `【可选标签】${tagOptions.join('、')}` : '',
       kpOptions.length ? `【可选知识点】${kpOptions.join('、')}` : '',
@@ -353,7 +356,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
     ].filter(Boolean).join('\n')
 
     try {
-      const raw = await callDeepSeek({ system: sys, user, maxTokens: 1800, jsonMode: true })
+      const n = Math.max(resolved.matchedIds.length, 1)
+      const maxTokens = Math.min(500 + n * 220, 1500)
+      const raw = await callDeepSeek({ system: sys, user, maxTokens, temperature: 0.4, jsonMode: true })
       const parsed = parseAIJson(raw)
       if (!parsed) return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, raw }))
 
