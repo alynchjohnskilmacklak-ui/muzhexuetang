@@ -356,15 +356,18 @@ export const POST = apiHandler(async (req: NextRequest) => {
       : '【已确认学生】无。若能从班级名单和老师描述中唯一识别学生，请匹配；不能唯一识别时仍然生成反馈内容，并标记需要老师手动选择学生。'
 
     const sys = [
-      '你是课外辅导老师的课堂反馈写作助手。你不是关键词提取器，而是要把老师的一句话扩写成完整、自然、家长可读的课堂反馈。',
-      '如果【已确认学生】不为空，老师输入可以不包含学生姓名。此时必须直接围绕已确认学生生成反馈，不得因为描述里没有姓名而拒绝。',
-      '老师输入常常很短，例如“上课认真听讲，但是作业完成不好”。你的任务是扩写成家长能看懂的完整反馈。',
-      '不要机械重复老师原话，要补充成自然、具体、温暖的老师表达。',
-      '写作要求：面向家长；使用“学生姓名+同学”；不要使用“该生”“该同学”；不编造分数、排名、考试成绩；不编造老师没说过的具体事件；语气自然。',
-      '为【已确认学生】中的每一个学生分别生成一段独立评语，输出到 perStudentComments 数组，每项包含 studentId、studentName、comment。',
-      '每段 comment 只能出现该学生本人的姓名，绝不能出现其他同学姓名。内容自然连贯，不加小标题、不列点：先写基于老师输入的今日课堂表现，再给一句可执行的努力方向。结尾不要加名言或引用，系统会自动补充。',
-      '必须尽量完成：mood、overallComment、suggestion、2-4个tags；能判断知识点才填knowledgePoints；提到作业才填homework。',
-      '只输出 JSON，不要 Markdown，不要解释。',
+      '你是牧哲学堂（课外辅导机构）的资深班主任，正在替任课老师给家长写当天的课堂反馈。你的任务是把老师随手记的一句话，扩写成家长愿意读、读得懂、读完知道怎么配合的反馈。',
+      '',
+      '口吻要求：',
+      '- 像老师放学后当面跟家长说话：具体、平实、有温度，不打官腔。',
+      '- 先说今天课堂上看到的具体表现（基于老师输入，不编造），再客观点出需要注意的地方（委婉但不回避，家长有知情权），最后给一条家长在家能配合做的具体事。',
+      "- 严禁：'该生''该同学''表现良好''总体不错'这类套话；严禁堆砌空洞夸奖；严禁编造分数、名次、考试和老师没提到的事件。",
+      "- 称呼用'姓名+同学'。每段评语 120~180 字，一段连贯的话，不列点、不加小标题，结尾不要加名言（系统自动补充）。",
+      '- 如果老师输入里既有表扬又有问题，两者都要写进去，问题放在表扬之后、建议之前。',
+      '- 如果【已确认学生】不为空，直接围绕这些学生写，老师输入没提名字也不要拒绝。',
+      '- 为每个已确认学生单独写一段（perStudentComments），只出现该学生本人姓名；多个学生共用同一段描述时，允许内容相近但措辞要有变化。',
+      '- mood、tags、knowledgePoints 只能从提供的可选项里选；提到作业才填 homework。',
+      '只输出 JSON，不要 Markdown，不要任何解释。',
     ].join('\n')
 
     const user = [
@@ -378,7 +381,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       `【当前表单】状态=${currentForm.mood || '未选'}；已有评语=${currentForm.overallComment || '空'}；已有建议=${currentForm.suggestion || currentForm.summary || '空'}；已有寄语=${currentForm.stageSummaryText || '空'}`,
       stageMaterial ? `【阶段素材】${stageMaterial.slice(0, 800)}` : '',
       '【返回 JSON】',
-      '{"intent":"classroom|stage|suggestion|mixed","mood":"GREAT|GOOD|OKAY|NEEDS_ATTENTION","overallComment":"兼容旧流程的完整家长反馈","perStudentComments":[{"studentId":"已确认学生id","studentName":"已确认学生姓名","comment":"该生专属三部分评语"}],"tags":["从可选标签中选"],"knowledgePoints":["从可选知识点中选"],"homework":["作业内容"],"summary":"","suggestion":"下一步建议","stageSummaryText":"阶段寄语","stageSuggestions":"阶段建议"}',
+      '{"intent":"classroom|stage|suggestion|mixed","mood":"GREAT|GOOD|OKAY|NEEDS_ATTENTION","overallComment":"兼容旧流程的完整家长反馈","perStudentComments":[{"studentId":"已确认学生id","studentName":"已确认学生姓名","comment":"学生专属三部分评语"}],"tags":["从可选标签中选"],"knowledgePoints":["从可选知识点中选"],"homework":["作业内容"],"summary":"","suggestion":"下一步建议","stageSummaryText":"阶段寄语","stageSuggestions":"阶段建议"}',
     ].filter(Boolean).join('\n')
 
     try {
@@ -447,8 +450,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (p.habits.inClassAvg !== null) facts.push(`课堂表现均分：${p.habits.inClassAvg}/5`)
 
   const sysPrompt = kind === 'stage'
-    ? '你是老师，给家长写阶段小结（约100字）。温暖具体，基于数据给方向。只输出正文。'
-    : '你是老师，给家长写课堂反馈（约100字）。温暖具体，基于事实。只输出正文。'
+    ? "你是老师，给家长写阶段小结。像老师当面跟家长说话，先具体表现、再注意点、最后一条家长可配合的建议，120~180字，不用'该生'，不编造数据之外的内容。只输出正文。"
+    : "你是老师，给家长写课堂反馈。像老师当面跟家长说话，先具体表现、再注意点、最后一条家长可配合的建议，120~180字，不用'该生'，不编造数据之外的内容。只输出正文。"
   const userPrompt = ['【真实数据，严禁编造】', facts.join('\n'), keywords ? `【关键词】${keywords}` : '', '要求：称呼名字+同学，不用“该生”，肯定进步、说明现状、给下一步建议。'].filter(Boolean).join('\n')
 
   try {

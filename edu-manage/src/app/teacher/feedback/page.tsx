@@ -13,6 +13,11 @@ import { fmtDate } from '@/lib/format-date'
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
+const AI_KEYWORD_GROUPS = [
+  { label: '表现类', words: ['认真听讲', '积极回答', '进步明显', '课堂活跃', '状态一般', '注意力不集中'] },
+  { label: '问题/方向类', words: ['作业未完成', '作业质量不高', '审题粗心', '计算不熟练', '需要加强复习', '建议家长督促作业'] },
+]
+
 type FeedbackCourseBucket = 'GROUP' | 'ONE_ON_ONE'
 type AiFeedbackResult = {
   studentIds?: string[]
@@ -92,6 +97,7 @@ function FeedbackPageInner() {
   const [aiNote, setAiNote] = useState('')
   const [aiGenerating, setAiGenerating] = useState(false)
   const [aiWaitingMessageIndex, setAiWaitingMessageIndex] = useState(0)
+  const [selectedAiKeywords, setSelectedAiKeywords] = useState<string[]>([])
   const [aiPrefilled, setAiPrefilled] = useState<Set<string>>(new Set())
   const [aiSuggestion, setAiSuggestion] = useState<AiFeedbackResult | null>(null)
   const [aiSuggestionUsed, setAiSuggestionUsed] = useState(false)
@@ -507,6 +513,37 @@ function FeedbackPageInner() {
       {aiWaitingMessages[aiWaitingMessageIndex]}
     </div>
   ) : null
+  const appendAiKeyword = (keyword: string) => {
+    if (selectedAiKeywords.includes(keyword)) return
+    setSelectedAiKeywords((current) => [...current, keyword])
+    setAiNote((current) => current.trim() ? `${current.trim()}，${keyword}` : keyword)
+  }
+  const aiKeywordChips = (
+    <div style={{ display: 'grid', gap: 6, margin: '0 0 8px' }}>
+      {AI_KEYWORD_GROUPS.map((group) => (
+        <div key={group.label} style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 5 }}>
+          <span style={{ color: '#8d806f', fontSize: 11, marginRight: 2 }}>{group.label}</span>
+          {group.words.map((word) => {
+            const selected = selectedAiKeywords.includes(word)
+            return (
+              <button
+                key={word}
+                type="button"
+                onClick={() => appendAiKeyword(word)}
+                style={{
+                  borderRadius: 999, padding: '2px 8px', fontSize: 11, lineHeight: 1.6, cursor: selected ? 'default' : 'pointer',
+                  background: selected ? '#FFF3EC' : '#FAFBFC', color: selected ? '#E8784A' : '#5a4e3a',
+                  border: `1px solid ${selected ? 'rgba(232,120,74,.35)' : '#E2E4E8'}`,
+                }}
+              >
+                {word}
+              </button>
+            )
+          })}
+        </div>
+      ))}
+    </div>
+  )
 
   const formSection = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -838,6 +875,7 @@ function FeedbackPageInner() {
                 allowClear
                 disabled={aiGenerating}
               />
+              {aiKeywordChips}
               {aiWaitingHint}
               <Button
                 type="primary"
@@ -1046,6 +1084,7 @@ function FeedbackPageInner() {
                 allowClear
                 disabled={aiGenerating}
               />
+              {aiKeywordChips}
               {aiWaitingHint}
               <Button
                 type="primary"
