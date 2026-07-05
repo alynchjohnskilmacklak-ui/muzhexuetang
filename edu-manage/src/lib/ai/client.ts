@@ -113,7 +113,7 @@ export async function callDeepSeek(params: {
           { role: 'system', content: params.system },
           { role: 'user', content: params.user },
         ],
-        temperature: isKimiCompatible ? 1 : (params.temperature ?? 0.7),
+        temperature: params.temperature ?? (isKimiCompatible ? 1 : 0.7),
         max_tokens: params.maxTokens ?? 500,
         ...(isKimiCompatible ? { top_p: 0.95 } : {}),
         ...(params.jsonMode && !isKimiCompatible ? { response_format: { type: 'json_object' } } : {}),
