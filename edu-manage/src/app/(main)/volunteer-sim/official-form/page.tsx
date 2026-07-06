@@ -14,7 +14,7 @@ type School = {
 
 type SegmentKey = 'allocation' | 'shifan' | 'putong'
 type StoredSchool = { schoolId?: string } | null
-type StoredForm = { allocation?: StoredSchool[]; shifan?: StoredSchool[]; putong?: StoredSchool[] }
+type StoredForm = { allocation?: StoredSchool[]; shifan?: StoredSchool[]; putong?: StoredSchool[]; tagBySchoolId?: Record<string, string> }
 type RadioValue = 'clear' | 'major' | 'special'
 
 const EMPTY_SEGMENTS = {
@@ -36,6 +36,7 @@ export default function OfficialVolunteerFormPage() {
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [tagBySchoolId, setTagBySchoolId] = useState<Record<string, string>>({})
   const [segments, setSegments] = useState(EMPTY_SEGMENTS)
   const [firstARadio, setFirstARadio] = useState<RadioValue>('clear')
   const [firstASchool, setFirstASchool] = useState('')
@@ -58,6 +59,7 @@ export default function OfficialVolunteerFormPage() {
     const allocationSet = new Set(allocation.filter(Boolean))
     const shifan = readIds(stored.shifan, 6).map((id) => allocationSet.has(id) ? '' : id)
     setSegments({ allocation, shifan, putong: readIds(stored.putong, 6) })
+    setTagBySchoolId(stored.tagBySchoolId || {})
 
     fetch('/api/volunteer/schools')
       .then(async (response) => {
@@ -103,11 +105,17 @@ export default function OfficialVolunteerFormPage() {
     if (saving) return
     setSaving(true)
     try {
+      const selectedIds = [...segments.allocation, ...segments.shifan, ...segments.putong].filter(Boolean)
+      const selectedTags = selectedIds.map((id) => tagBySchoolId[id]).filter(Boolean)
+      if (selectedTags.includes('冲刺') && !selectedTags.some((tag) => tag === '稳妥' || tag === '保底')) {
+        toast.warning('当前方案没有保底学校，滑档风险高，建议至少加入 1 所稳妥/保底', { duration: 6000 })
+      }
       const byId = new Map(schools.map((school) => [school.schoolId, school]))
       sessionStorage.setItem('volunteer_form_data', JSON.stringify({
         allocation: segments.allocation.map((id) => byId.get(id) || null),
         shifan: segments.shifan.map((id) => byId.get(id) || null),
         putong: segments.putong.map((id) => byId.get(id) || null),
+        tagBySchoolId,
         officialExtras: {
           firstA: { mode: firstARadio, schoolId: firstASchool },
           firstB: { schoolId: firstBSchool, major: firstBMajor },
@@ -368,6 +376,16 @@ export default function OfficialVolunteerFormPage() {
           .vol-row { grid-template-columns: 1fr; }
           .page { padding: 18px 14px 30px; }
           .page-title { font-size: 24px; }
+          .actions {
+            position: sticky;
+            bottom: 0;
+            z-index: 20;
+            margin: 24px -14px 0;
+            padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+            background: #fff;
+            border-top: 1px solid #EEE7E1;
+          }
+          .actions .btn { margin: 4px; }
         }
       `}</style>
     </>

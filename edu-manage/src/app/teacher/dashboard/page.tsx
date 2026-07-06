@@ -21,6 +21,7 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { fillName, resolveTier, TIER_QUICK_PERKS, TIER_THEME, TIER_WELCOME } from '@/constants/teacher-tier'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { PullToRefresh } from '@/components/PullToRefresh'
 
 const { Text } = Typography
 
@@ -155,7 +156,7 @@ function CompletionRow({ label, item, color }: { label: string; item: Completion
 export default function TeacherDashboardPage() {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
-  const { data, isLoading } = useSWR<DashboardData>('/api/teacher/dashboard', fetcher, { refreshInterval: 180_000 })
+  const { data, isLoading, mutate } = useSWR<DashboardData>('/api/teacher/dashboard', fetcher, { refreshInterval: 180_000 })
   const [welcomeMounted, setWelcomeMounted] = useState(false)
   const [welcomeVisible, setWelcomeVisible] = useState(false)
 
@@ -198,6 +199,7 @@ export default function TeacherDashboardPage() {
   ]
 
   return (
+    <PullToRefresh onRefresh={async () => { await mutate() }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {welcomeMounted && (
         <div style={{
@@ -477,5 +479,6 @@ export default function TeacherDashboardPage() {
         </Col>
       </Row>
     </div>
+    </PullToRefresh>
   )
 }

@@ -17,6 +17,7 @@ import {
 } from './chartBuilders'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const { RangePicker } = DatePicker
 const ReactECharts = dynamic(() => import('echarts-for-react'), {
@@ -113,7 +114,7 @@ export default function ReportsPage() {
   if (isLoading) {
     return (
       <PageLayout title="数据报表" subtitle="学员分析、教学质量与财务统计">
-        <div style={{ display: 'flex', justifyContent: 'center', padding: 120 }}><Spin size="large" /></div>
+        <CardSkeleton rows={3} />
       </PageLayout>
     )
   }

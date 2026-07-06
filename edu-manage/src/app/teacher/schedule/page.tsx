@@ -9,6 +9,7 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { PullToRefresh } from '@/components/PullToRefresh'
 
 const { Title, Text } = Typography
 const fetcher = (url: string) => fetch(url).then(r => r.json())
@@ -51,10 +52,10 @@ export default function TeacherSchedulePage() {
   const endDate = end.toISOString().slice(0,10)
 
   // Fetch both types for stats
-  const { data: groupData, isLoading: loadingGroup } = useSWR(
+  const { data: groupData, isLoading: loadingGroup, mutate: mutateGroup } = useSWR(
     `/api/teacher/schedule?startDate=${startDate}&endDate=${endDate}&type=GROUP`, fetcher
   )
-  const { data: intensiveData, isLoading: loadingIntensive } = useSWR(
+  const { data: intensiveData, isLoading: loadingIntensive, mutate: mutateIntensive } = useSWR(
     `/api/teacher/schedule?startDate=${startDate}&endDate=${endDate}&type=INTENSIVE`, fetcher
   )
 
@@ -122,6 +123,7 @@ export default function TeacherSchedulePage() {
   }, [visibleLessons, weekDates])
 
   return (
+    <PullToRefresh onRefresh={async () => { await Promise.all([mutateGroup(), mutateIntensive()]) }}>
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'flex-end', marginBottom: 16, flexWrap: 'wrap', gap: 8, flexDirection: isMobile ? 'column' : 'row' }}>
         <div>
@@ -321,6 +323,7 @@ export default function TeacherSchedulePage() {
         )
       )}
     </div>
+    </PullToRefresh>
   )
 }
 

@@ -12,6 +12,7 @@ import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ParentCard } from '@/components/Parent/ParentCard'
+import { PullToRefresh } from '@/components/PullToRefresh'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -75,6 +76,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
   }
 
   return (
+    <PullToRefresh onRefresh={async () => { router.refresh(); await new Promise((resolve) => setTimeout(resolve, 500)) }}>
     <div>
       <ChildSwitcher />
       <div style={{ marginBottom: 20 }}>
@@ -338,5 +340,6 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
         )}
       </Modal>
     </div>
+    </PullToRefresh>
   )
 }

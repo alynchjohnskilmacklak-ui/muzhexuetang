@@ -112,6 +112,7 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
           {quickActions.map((action) => (
             <button
+              className="pressable"
               key={action.label}
               onClick={() => router.push(action.href)}
               style={{
@@ -155,6 +156,7 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
               const color = colorMap[item.tone] || '#E8784A'
               return (
                 <button
+                  className="pressable"
                   key={item.label}
                   onClick={() => router.push(item.href)}
                   style={{

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPrismaForDivision } from '@/lib/prisma'
 import admissionCutoffs2025 from '../../../../../data/volunteer/admission_cutoffs_2025.json'
-import { normalizeSeniorSchoolName, seniorSchoolNameMatches } from '@/lib/volunteer-school-names'
+import { normalizeSchoolNameWithoutScope, normalizeSeniorSchoolName, seniorSchoolNameMatches } from '@/lib/volunteer-school-names'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,7 +54,7 @@ export async function GET() {
       xinleFenpeiQuota: true,
     },
   })
-  const schools = schoolRows.map((school) => {
+  const normalizedSchools = schoolRows.map((school) => {
     const accessible = school.xinleAccessibleOverride ?? school.xinleAccessible
     const xinleStatus = school.xinleStatus.length > 0
       ? school.xinleStatus
@@ -81,6 +81,22 @@ export async function GET() {
         })),
     }
   })
+  const dedupedSchoolMap = new Map<string, (typeof normalizedSchools)[number]>()
+  for (const school of normalizedSchools) {
+    const key = normalizeSchoolNameWithoutScope(school.name)
+    const existing = dedupedSchoolMap.get(key)
+    if (!existing) {
+      dedupedSchoolMap.set(key, school)
+      continue
+    }
+    const keepCurrent = existing.xinleLine == null && school.xinleLine != null
+    const kept = keepCurrent ? school : existing
+    const removed = keepCurrent ? existing : school
+    dedupedSchoolMap.set(key, kept)
+    console.warn(`[volunteer:schools] 学校名称去重：保留“${kept.name}”，过滤“${removed.name}”`)
+  }
+  const schools = [...dedupedSchoolMap.values()]
+
   const [allocationRows, rankRows] = await Promise.all([
     prisma.allocationQuota.findMany({ where: { year: 2026 }, select: { juniorSchool: true, seniorSchool: true, quota: true } }),
     prisma.yifenYidang.findMany({ where: { year: { in: [2025, 2026] } }, select: { year: true, score: true, count: true, cumulative: true }, orderBy: [{ year: 'asc' }, { score: 'desc' }] }),

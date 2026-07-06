@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Input, Modal, Skeleton, Tag, Typography } from 'antd'
+import { Drawer, Input, Modal, Skeleton, Tag, Typography } from 'antd'
 import { BankOutlined, EnvironmentOutlined, HomeOutlined, SearchOutlined, WalletOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -218,6 +218,25 @@ export default function ParentSchoolsPage() {
         共 {schools.length} 所 · 可报名 {accessibleCount} 所 · 数据以官方招生计划为准
       </footer>}
 
+      {isMobile ? (
+        <Drawer
+          title={detailSchool && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {detailSchool.name}
+              <Tag color={detailSchool.xinleAccessible ? 'green' : 'red'} style={{ borderRadius: 999, margin: 0 }}>
+                {detailSchool.xinleAccessible ? '可报名' : '不可报'}
+              </Tag>
+            </span>
+          )}
+          open={!!detailSchool}
+          onClose={() => setDetailSchool(null)}
+          placement="bottom"
+          height="auto"
+          styles={{ body: { maxHeight: '78dvh', overflowY: 'auto', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' } }}
+        >
+          {detailSchool && <ParentSchoolCard school={detailSchool} detailed bare />}
+        </Drawer>
+      ) : (
       <Modal title={detailSchool && (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {detailSchool.name}
@@ -228,6 +247,7 @@ export default function ParentSchoolsPage() {
       )} open={!!detailSchool} onCancel={() => setDetailSchool(null)} footer={null} width={isMobile ? 'calc(100vw - 24px)' : 600} style={{ top: isMobile ? 12 : 30 }}>
         {detailSchool && <ParentSchoolCard school={detailSchool} detailed bare />}
       </Modal>
+      )}
     </div>
   )
 }

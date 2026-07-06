@@ -393,7 +393,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
           {mode === 'parent' && (
             <>
               <Form.Item name="phone" label="手机号" rules={[{ required: true, message: '请输入手机号' }]}>
-                <Input />
+                <Input type="tel" inputMode="numeric" />
               </Form.Item>
               <Form.Item name="studentIds" label="绑定学员">
                 <Select

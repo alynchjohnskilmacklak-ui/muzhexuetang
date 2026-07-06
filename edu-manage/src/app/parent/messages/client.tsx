@@ -12,6 +12,7 @@ import {
 import { toast } from 'sonner'
 import { usePausableSWR } from '@/lib/use-pausable-swr'
 import { fmtDateTime } from '@/lib/format-date'
+import { PullToRefresh } from '@/components/PullToRefresh'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { SUBJECT_COLORS } from '@/constants/subjects'
 
@@ -513,6 +514,7 @@ export function ParentMessagesClient({
   }
 
   return (
+    <PullToRefresh onRefresh={async () => { await mutate() }}>
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div>
@@ -590,5 +592,6 @@ export function ParentMessagesClient({
 
       {composeModal}
     </div>
+    </PullToRefresh>
   )
 }

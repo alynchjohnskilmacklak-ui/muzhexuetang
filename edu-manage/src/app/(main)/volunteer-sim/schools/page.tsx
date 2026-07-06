@@ -444,7 +444,7 @@ export default function SchoolsManagePage() {
               <Input placeholder="如：市区内，骑车可达" />
             </Form.Item>
             <Form.Item name="phone" label="招生电话">
-              <Input placeholder="0311-XXXXXXXX" />
+              <Input type="tel" inputMode="numeric" placeholder="0311-XXXXXXXX" />
             </Form.Item>
             <Form.Item name="website" label="官网">
               <Input placeholder="https://..." />

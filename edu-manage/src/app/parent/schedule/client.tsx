@@ -8,6 +8,8 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { fmtDate } from '@/lib/format-date'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ParentCard } from '@/components/Parent/ParentCard'
+import { PullToRefresh } from '@/components/PullToRefresh'
+import { useRouter } from 'next/navigation'
 
 const { Title, Text } = Typography
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
@@ -40,6 +42,7 @@ function getLessonStatus(lesson: any): { text: string; color: string; deducted: 
 }
 
 export function ParentScheduleClient({ students, lessons, periods }: { students: any[]; lessons: any[]; periods: SchedulePeriod[] }) {
+  const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const isTablet = useIsMobile(1025) ?? false
   const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || '')
@@ -98,6 +101,7 @@ export function ParentScheduleClient({ students, lessons, periods }: { students:
   }
 
   return (
+    <PullToRefresh onRefresh={async () => { router.refresh(); await new Promise((resolve) => setTimeout(resolve, 500)) }}>
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <div>
@@ -219,5 +223,6 @@ export function ParentScheduleClient({ students, lessons, periods }: { students:
         </ParentCard>
       )}
     </div>
+    </PullToRefresh>
   )
 }

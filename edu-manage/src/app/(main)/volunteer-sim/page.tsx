@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  Button, Collapse, Divider, Form, InputNumber, Modal, Select,
-  Spin, Switch, Tag, Typography,
+  Button, Checkbox, Collapse, Divider, Form, InputNumber, Modal, Select,
+  Spin, Switch, Tag, Tooltip, Typography,
 } from 'antd'
 import {
   ArrowLeftOutlined, TrophyOutlined,
@@ -113,6 +113,16 @@ type LineCompare = {
   scoreGap: number
   sourceLabel: string
   regionWarning: string | null
+}
+
+type VolunteerDataHealth = {
+  yifenYidang: Array<{ year: number; count: number }>
+  allocationQuota: Array<{ year: number; count: number; juniorSchoolCount: number }>
+  highSchools: {
+    total: number
+    suspectedDuplicateCount: number
+    suspectedDuplicates: Array<{ normalizedName: string; schools: Array<{ id: string; name: string; tongZhao: number }> }>
+  }
 }
 
 function formatNum(value?: number | null) {
@@ -293,6 +303,7 @@ export default function VolunteerSimPage() {
   const [rankMaps, setRankMaps] = useState<Partial<RankMaps>>({})
   const [rankRows, setRankRows] = useState<Partial<RankRows>>({})
   const [rankMeta, setRankMeta] = useState<Partial<RankMeta>>({})
+  const [dataHealth, setDataHealth] = useState<VolunteerDataHealth | null>(null)
 
   const [filterTag, setFilterTag] = useState<string>('全部')
   const [filterType, setFilterType] = useState<string>('全部')
@@ -305,6 +316,7 @@ export default function VolunteerSimPage() {
   const [putongSlots, setPutongSlots] = useState<(DBSchool | null)[]>(Array(6).fill(null))
 
   const [detailSchool, setDetailSchool] = useState<ProcessedSchool | null>(null)
+  const [compareSchoolIds, setCompareSchoolIds] = useState<string[]>([])
   const [exportingPdf, setExportingPdf] = useState(false)
   const [exportingPoster, setExportingPoster] = useState(false)
 
@@ -459,6 +471,22 @@ export default function VolunteerSimPage() {
     })
   }, [processedSchools, onlyAccessible, availabilityFilter, filterTag, filterType, filterLocation])
 
+  const compareSchools = useMemo(
+    () => compareSchoolIds.map((id) => processedSchools.find((school) => school.schoolId === id)).filter((school): school is ProcessedSchool => Boolean(school)),
+    [compareSchoolIds, processedSchools],
+  )
+
+  const toggleCompareSchool = useCallback((schoolId: string) => {
+    setCompareSchoolIds((current) => {
+      if (current.includes(schoolId)) return current.filter((id) => id !== schoolId)
+      if (current.length >= 3) {
+        toast.warning('最多同时对比 3 所学校')
+        return current
+      }
+      return [...current, schoolId]
+    })
+  }, [])
+
   // Tag counts reflect current visibility scope
   const tagCounts = useMemo(() => {
     const base = onlyAccessible ? processedSchools.filter(s => s.accessible) : processedSchools
@@ -518,6 +546,7 @@ export default function VolunteerSimPage() {
     setFilterLocation('全部')
     setAvailabilityFilter('全部')
     setOnlyAccessible(false)
+    setCompareSchoolIds([])
   }
 
   const addToAllocation = useCallback((school: DBSchool) => {
@@ -532,6 +561,13 @@ export default function VolunteerSimPage() {
       next[emptyIndex] = school
       return next
     })
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/admin/volunteer-data-health')
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => setDataHealth(data))
+      .catch((error) => console.warn('志愿数据健康状态加载失败', error))
   }, [])
 
   const removeAllocation = useCallback((index: number) => {
@@ -708,6 +744,7 @@ export default function VolunteerSimPage() {
       allocation: allocationSlots,
       shifan: shifanSlots,
       putong: putongSlots,
+      tagBySchoolId: Object.fromEntries(processedSchools.map((school) => [school.schoolId, school.tag])),
     }))
     router.push('/volunteer-sim/official-form')
   }
@@ -730,6 +767,46 @@ export default function VolunteerSimPage() {
           </Text>
         </div>
       </div>
+
+      {dataHealth && (() => {
+        const rank2026 = dataHealth.yifenYidang.find((item) => item.year === 2026)
+        const allocation2026 = dataHealth.allocationQuota.find((item) => item.year === 2026)
+        const duplicateCount = dataHealth.highSchools.suspectedDuplicateCount
+        return (
+          <Collapse
+            ghost
+            style={{ marginBottom: 16, background: C.surface1, border: `1px solid ${C.hairline}`, borderRadius: 12 }}
+            items={[{
+              key: 'health',
+              label: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <Text strong style={{ color: C.ink }}>数据状态</Text>
+                  <Tag color={rank2026?.count === 480 ? 'success' : 'warning'} style={{ margin: 0 }}>
+                    2026一分一档 {rank2026?.count ?? 0} {rank2026?.count === 480 ? '✓' : '⚠️'}
+                  </Tag>
+                  <Tag color={allocation2026?.count ? 'success' : 'warning'} style={{ margin: 0 }}>
+                    2026分配生 {allocation2026?.count ?? 0}{allocation2026?.count ? ` · 覆盖初中${allocation2026.juniorSchoolCount}所 ✓` : ' ⚠️ 未导入'}
+                  </Tag>
+                  <Tag color={duplicateCount === 0 ? 'success' : 'warning'} style={{ margin: 0 }}>
+                    学校库 {dataHealth.highSchools.total} {duplicateCount === 0 ? '✓' : `⚠️ 疑似重复${duplicateCount}`}
+                  </Tag>
+                </div>
+              ),
+              children: (
+                <div style={{ color: C.inkMuted, fontSize: 12, lineHeight: 1.8 }}>
+                  <div>一分一档：{dataHealth.yifenYidang.map((item) => `${item.year}年 ${item.count}档`).join(' / ') || '暂无数据'}</div>
+                  <div>分配生：{dataHealth.allocationQuota.map((item) => `${item.year}年 ${item.count}条，覆盖${item.juniorSchoolCount}所初中`).join(' / ') || '暂无数据'}</div>
+                  {dataHealth.highSchools.suspectedDuplicates.map((group) => (
+                    <div key={group.normalizedName} style={{ color: C.warning }}>
+                      疑似重复：{group.schools.map((school) => `${school.name}（${school.tongZhao}分）`).join(' / ')}
+                    </div>
+                  ))}
+                </div>
+              ),
+            }]}
+          />
+        )
+      })()}
 
       {/* First-visit onboarding guide */}
       {showOnboarding && (
@@ -814,6 +891,7 @@ export default function VolunteerSimPage() {
                   ]}
                 >
                   <InputNumber
+                    inputMode="numeric"
                     placeholder="678"
                     min={0}
                     max={800}
@@ -860,7 +938,7 @@ export default function VolunteerSimPage() {
                   ]}
                   style={{ marginBottom: 0 }}
                 >
-                  <InputNumber style={{ width: '100%' }} placeholder="例：5" min={1} size="large" />
+                  <InputNumber inputMode="numeric" style={{ width: '100%' }} placeholder="例：5" min={1} size="large" />
                 </Form.Item>
               </div>
 
@@ -1064,6 +1142,32 @@ export default function VolunteerSimPage() {
               })}
             </div>
 
+            {compareSchools.length > 0 && (
+              <div style={{ background: C.surface1, border: `1px solid ${C.hairline}`, borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 10 }}>
+                  <div>
+                    <Text strong style={{ color: C.ink }}>学校对比（{compareSchools.length}/3）</Text>
+                    {compareSchools.length < 2 && <Text style={{ marginLeft: 8, color: C.warning, fontSize: 12 }}>再勾选 1 所即可并排比较</Text>}
+                  </div>
+                  <Button size="small" type="text" onClick={() => setCompareSchoolIds([])}>清空</Button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : `repeat(${compareSchools.length}, minmax(0, 1fr))`, gap: 8 }}>
+                  {compareSchools.map((school) => (
+                    <div key={`compare-${school.schoolId}`} style={{ background: C.surface3, border: `1px solid ${C.hairline}`, borderRadius: 10, padding: '10px 12px' }}>
+                      <Text strong style={{ color: C.ink }}>{school.name}</Text>
+                      <div style={{ marginTop: 8, display: 'grid', gap: 5, color: C.inkMuted, fontSize: 12 }}>
+                        <span>2025录取线：{school.lineCompare.lineScore}分</span>
+                        <span>2026等效分：{school.lineCompare.equivalent2026Score != null ? `${school.lineCompare.equivalent2026Score}分` : '暂无'}</span>
+                        <span>距新乐：{school.distanceFromXinle || '暂未收录'}</span>
+                        <span>学费：{school.tuitionFee || '暂未收录'}</span>
+                        <span>住宿：{school.boardingAvail ? (school.boardingFee || '可住宿') : '走读'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Category tabs */}
             <div style={{
               display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap',
@@ -1129,6 +1233,8 @@ export default function VolunteerSimPage() {
                   addToShifan={addToShifan}
                   addToPutong={addToPutong}
                   onDetail={setDetailSchool}
+                  compareSchoolIds={compareSchoolIds}
+                  onToggleCompare={toggleCompareSchool}
                 />
               </>
             )}
@@ -1801,7 +1907,7 @@ const TIER_SECTION_SUBTLE: Record<string, string> = {
 function TieredSchoolList({
   schools, isMobile, isInBasket, allocationSlots, shifanSlots, putongSlots,
   allocationFilled, shifanFilled, putongFilled, hasAllocationOption, getSchoolSegment,
-  addToAllocation, addToShifan, addToPutong, onDetail,
+  addToAllocation, addToShifan, addToPutong, onDetail, compareSchoolIds, onToggleCompare,
 }: {
   schools: ProcessedSchool[]
   isMobile: boolean
@@ -1818,6 +1924,8 @@ function TieredSchoolList({
   addToShifan: (s: DBSchool) => void
   addToPutong: (s: DBSchool) => void
   onDetail: (s: ProcessedSchool) => void
+  compareSchoolIds: string[]
+  onToggleCompare: (schoolId: string) => void
 }) {
   const grouped = useMemo(() => {
     const map = new Map<string, ProcessedSchool[]>()
@@ -1904,6 +2012,9 @@ function TieredSchoolList({
                         )}
                       </div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
+                        <Checkbox checked={compareSchoolIds.includes(school.schoolId)} onChange={() => onToggleCompare(school.schoolId)}>
+                          对比
+                        </Checkbox>
                         {allocationEligible && (
                           <Button size="small" disabled={allocationFilled >= 3 || inBasket}
                             style={{ fontSize: 11, borderColor: C.primary, color: C.primary }}
@@ -1941,7 +2052,7 @@ function TieredSchoolList({
                           </Text>
                         )}
                         <Text style={{ fontSize: 13 }}>
-                          2025{school.lineCompare.sourceLabel.replace('（新乐）', '').replace('（仅参考）', '')}
+                          2025<Tooltip title={school.sourceNote || '暂无补充说明'}>{school.lineCompare.sourceLabel.replace('（新乐）', '').replace('（仅参考）', '')}</Tooltip>
                           <Text strong style={{ color: school.gap >= 0 ? C.success : C.error, fontSize: 15, margin: '0 2px' }}>
                             {school.lineCompare.lineScore}
                           </Text>

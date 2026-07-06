@@ -15,6 +15,17 @@ export function normalizeSeniorSchoolName(name: string) {
   return SENIOR_SCHOOL_NAME_ALIASES[trimmed] ?? trimmed
 }
 
+export function normalizeSchoolNameWithoutScope(name: string) {
+  return name
+    .replace(/（[^）]*）|\([^)]*\)|【[^】]*】|\[[^\]]*\]/g, '')
+    .replace(/\s+/g, '')
+    .trim()
+}
+
+export function hasSchoolNameScope(name: string) {
+  return /（[^）]*）|\([^)]*\)|【[^】]*】|\[[^\]]*\]/.test(name)
+}
+
 export function seniorSchoolNameMatches(dbName: string, dbFullName: string, allocationName: string) {
   const normalizedAllocation = normalizeSeniorSchoolName(allocationName)
   return normalizeSeniorSchoolName(dbName) === normalizedAllocation

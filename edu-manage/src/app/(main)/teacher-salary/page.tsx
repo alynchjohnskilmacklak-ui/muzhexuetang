@@ -118,7 +118,7 @@ function SalaryAdjustmentModal({ teacherId, teacherName, open, onClose, onSaved 
             { validator: (_, value) => typeof value === 'number' && Number.isFinite(value) && value !== 0 ? Promise.resolve() : Promise.reject(new Error('金额必须是非0有效数字')) },
           ]}
         >
-          <InputNumber precision={2} step={10} placeholder="例如：100 或 -50" style={{ width: '100%' }} />
+          <InputNumber inputMode="decimal" precision={2} step={10} placeholder="例如：100 或 -50" style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item label="调整原因" name="description" rules={[{ required: true, whitespace: true, message: '请填写调整原因' }]}>
           <Input.TextArea rows={3} maxLength={200} showCount placeholder="例如：6月优势工资补差" />

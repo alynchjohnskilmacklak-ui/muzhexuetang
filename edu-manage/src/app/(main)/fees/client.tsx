@@ -397,12 +397,12 @@ export function FeesClient() {
           <Row gutter={12}>
             <Col span={12}>
               <Form.Item name="amount" label="费用" rules={[{ required: true, message: '请输入金额' }]}>
-                <InputNumber min={0} prefix="¥" style={{ width: '100%' }} />
+                <InputNumber inputMode="decimal" min={0} prefix="¥" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item name="hours" label="课时数">
-                <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
+                <InputNumber inputMode="decimal" min={0} style={{ width: '100%' }} placeholder="0" />
               </Form.Item>
             </Col>
           </Row>

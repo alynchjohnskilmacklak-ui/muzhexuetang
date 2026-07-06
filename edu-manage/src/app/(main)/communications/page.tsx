@@ -7,6 +7,7 @@ import { Avatar, Button, Card, Col, Empty, Input, List, Popconfirm, Row, Select,
 import { CheckOutlined, DeleteOutlined, MessageOutlined, ReloadOutlined, SendOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const { Text, Paragraph } = Typography
 
@@ -87,6 +88,7 @@ export default function CommunicationsPage() {
         ].map((card) => (
           <Col xs={12} sm={6} key={card.label}>
             <Card
+              className="pressable"
               bordered={false}
               style={{ borderRadius: 10, border: `1px solid ${card.urgent ? '#F9A8D4' : '#EEE7E1'}`, background: card.bg, cursor: 'pointer' }}
               bodyStyle={{ padding: 14 }}
@@ -139,7 +141,7 @@ export default function CommunicationsPage() {
 
       <Card bordered={false} style={{ borderRadius: 8, border: '1px solid #EEE7E1' }}>
         {isLoading ? (
-          <div style={{ padding: 80, textAlign: 'center' }}><Spin size="large" /></div>
+          <CardSkeleton rows={3} />
         ) : items.length === 0 ? (
           <Empty description="暂无沟通记录" />
         ) : (

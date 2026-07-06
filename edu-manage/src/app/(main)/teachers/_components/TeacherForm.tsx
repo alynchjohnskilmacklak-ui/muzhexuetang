@@ -170,7 +170,7 @@ export function TeacherForm({
             </Col>
             <Col span={12}><Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入姓名' }]}><Input placeholder="教师姓名" /></Form.Item></Col>
             <Col span={12}><Form.Item name="gender" label="性别"><Select options={[{ label: '男', value: '男' }, { label: '女', value: '女' }]} placeholder="选填" allowClear /></Form.Item></Col>
-            <Col span={12}><Form.Item name="phone" label="手机" rules={[{ required: true, message: '请输入手机号' }, { pattern: /^1[3-9]\d{9}$/, message: '请输入正确手机号' }]}><Input placeholder="必填" /></Form.Item></Col>
+            <Col span={12}><Form.Item name="phone" label="手机" rules={[{ required: true, message: '请输入手机号' }, { pattern: /^1[3-9]\d{9}$/, message: '请输入正确手机号' }]}><Input type="tel" inputMode="numeric" placeholder="必填" /></Form.Item></Col>
             <Col span={12}><Form.Item name="email" label="邮箱"><Input placeholder="选填" /></Form.Item></Col>
             <Col span={12}><Form.Item name="employmentType" label="任职类型" initialValue="FULL_TIME"><Select options={[{ label: '全职', value: 'FULL_TIME' }, { label: '兼职', value: 'PART_TIME' }]} /></Form.Item></Col>
             <Col span={12}><Form.Item name="tierLevel" label="教师等级" initialValue="NEW"><Select options={TIER_OPTIONS} /></Form.Item></Col>

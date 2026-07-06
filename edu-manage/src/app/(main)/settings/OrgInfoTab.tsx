@@ -51,7 +51,7 @@ export function OrgInfoTab() {
             <Input />
           </Form.Item>
           <Form.Item label="联系电话" name="phone">
-            <Input />
+            <Input type="tel" inputMode="numeric" />
           </Form.Item>
           <Form.Item label="机构地址" name="address">
             <Input />

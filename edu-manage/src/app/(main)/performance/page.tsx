@@ -12,6 +12,7 @@ import { MOOD_META } from '@/lib/mood-meta'
 import { BadgeWall } from './_components/BadgeWall'
 import { FeedItem } from './_components/FeedItem'
 import { PostComposer } from './_components/PostComposer'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const fetcher = (url: string) => fetch(url).then((res) => {
   if (!res.ok) throw new Error('加载失败')
@@ -148,7 +149,7 @@ export default function PerformancePage() {
           </Card>
 
           {isLoading ? (
-            <div style={{ textAlign: 'center', padding: 80 }}><Spin size="large" /></div>
+            <CardSkeleton rows={3} />
           ) : posts.length === 0 ? (
             <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
               <Empty description="暂无表现动态" />
@@ -192,7 +193,7 @@ function TodayFeedbackView({ date, onDateChange }: { date: string; onDateChange:
         </div>
       )}
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: 40 }}><Spin /></div>
+        <CardSkeleton rows={3} />
       ) : feedbacks.length === 0 ? (
         <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
           <Empty description={`${date} 暂无课堂反馈`} />

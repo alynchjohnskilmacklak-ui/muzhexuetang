@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, List, Tag, Typography } from 'antd'
 import {
   BellOutlined,
@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ParentCard } from '@/components/Parent/ParentCard'
+import { PullToRefresh } from '@/components/PullToRefresh'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -45,6 +46,8 @@ export function ParentNotificationsClient({
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const [notifications, setNotifications] = useState(initialNotifications)
+
+  useEffect(() => setNotifications(initialNotifications), [initialNotifications])
 
   const markAsRead = async (id: string) => {
     try {
@@ -85,6 +88,7 @@ export function ParentNotificationsClient({
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
+    <PullToRefresh onRefresh={async () => { router.refresh(); await new Promise((resolve) => setTimeout(resolve, 500)) }}>
     <div className="parent-notifications-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: isMobile ? 14 : 20 }}>
         <div>
@@ -168,5 +172,6 @@ export function ParentNotificationsClient({
         </ParentCard>
       )}
     </div>
+    </PullToRefresh>
   )
 }

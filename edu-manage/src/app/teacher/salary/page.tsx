@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
-import { Card, Col, Row, Segmented, Space, Statistic, Table, Tag, Typography } from 'antd'
+import { Card, Col, Empty, Row, Segmented, Space, Statistic, Table, Tag, Typography } from 'antd'
 import { DollarOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const { Text, Title } = Typography
 
@@ -109,16 +110,37 @@ export default function TeacherSalaryPage() {
         </Row>
 
         <Card title="薪资明细" bordered={false} style={{ borderRadius: 8 }} extra={<Text type="secondary" style={{ fontSize: 12 }}>考勤和课堂反馈自动结算</Text>}>
-          <Table
-            dataSource={transactions}
-            columns={columns}
-            rowKey="id"
-            loading={isLoading}
-            pagination={{ pageSize: 20, hideOnSinglePage: true }}
-            size="small"
-            locale={{ emptyText: '暂无薪资记录' }}
-            scroll={{ x: isMobile ? 560 : undefined }}
-          />
+          {isMobile ? (
+            isLoading ? <CardSkeleton rows={3} /> : (
+              <div style={{ display: 'grid', gap: 10 }}>
+                {transactions.map((transaction) => (
+                  <div key={transaction.id} style={{ padding: 12, borderRadius: 10, border: '1px solid rgba(0,0,0,.06)', background: '#faf8f5' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                      <Tag color={TYPE_META[transaction.type]?.color ?? 'default'} style={{ margin: 0, borderRadius: 999 }}>
+                        {TYPE_META[transaction.type]?.label ?? transaction.type}
+                      </Tag>
+                      <Text strong style={{ color: '#1D9E75' }}>+¥{transaction.amount.toFixed(2)}</Text>
+                    </div>
+                    <Text style={{ display: 'block', marginTop: 8, color: '#1a1201' }}>{transaction.description || '-'}</Text>
+                    <Text type="secondary" style={{ display: 'block', marginTop: 5, fontSize: 12 }}>
+                      {new Date(transaction.createdAt).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                  </div>
+                ))}
+                {!transactions.length && <Empty description="暂无薪资记录" />}
+              </div>
+            )
+          ) : (
+            <Table
+              dataSource={transactions}
+              columns={columns}
+              rowKey="id"
+              loading={isLoading}
+              pagination={{ pageSize: 20, hideOnSinglePage: true }}
+              size="small"
+              locale={{ emptyText: '暂无薪资记录' }}
+            />
+          )}
         </Card>
 
         <Card title="薪资规则说明" bordered={false} style={{ borderRadius: 8 }}>

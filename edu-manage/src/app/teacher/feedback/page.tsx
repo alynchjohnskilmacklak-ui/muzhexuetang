@@ -10,6 +10,7 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { MOODS, QUICK_TAGS, QUICK_KPS, BADGES } from '@/components/FeedbackCard'
 import { fmtDate } from '@/lib/format-date'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
@@ -826,7 +827,13 @@ function FeedbackPageInner() {
       {/* Submit */}
       <div style={{
         display: 'flex', gap: 10, flexWrap: isMobile ? 'wrap' : 'nowrap',
-        padding: isMobile ? '12px 0 calc(96px + env(safe-area-inset-bottom))' : '0 0 24px',
+        position: isMobile ? 'sticky' : undefined,
+        bottom: isMobile ? 0 : undefined,
+        zIndex: isMobile ? 20 : undefined,
+        margin: isMobile ? '0 -16px' : undefined,
+        padding: isMobile ? '12px 16px calc(12px + env(safe-area-inset-bottom))' : '0 0 24px',
+        background: isMobile ? '#fff' : undefined,
+        borderTop: isMobile ? '1px solid #EEE7E1' : undefined,
       }}>
         <Button block onClick={() => setPreviewOpen(true)} style={{ flex: isMobile ? '1 0 100%' : 1 }}>预览家长端</Button>
         <Button block onClick={() => submit('DRAFT')} loading={saving} disabled={saving} style={{ flex: 1 }}>保存草稿</Button>
@@ -1142,7 +1149,7 @@ export default function TeacherFeedbackPage() {
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#1F2329' }}>课堂反馈</h2>
         <div style={{ fontSize: 13, color: '#98A2B3', marginTop: 4 }}>发布后家长实时收到通知，并计入反馈奖励</div>
       </div>
-      <Suspense fallback={<div style={{ textAlign: 'center', padding: 60 }}><Spin /></div>}>
+      <Suspense fallback={<CardSkeleton rows={3} />}>
         <FeedbackPageInner />
       </Suspense>
     </div>

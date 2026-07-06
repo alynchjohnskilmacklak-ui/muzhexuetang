@@ -9,6 +9,7 @@ import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
@@ -161,7 +162,7 @@ export default function CourseGroupDetailPage() {
   }
 
   if (isLoading) {
-    return <PageLayout title="班级管理"><div style={{ padding: 80, textAlign: 'center' }}><Spin size="large" /></div></PageLayout>
+    return <PageLayout title="班级管理"><CardSkeleton rows={3} /></PageLayout>
   }
 
   if (!group) {

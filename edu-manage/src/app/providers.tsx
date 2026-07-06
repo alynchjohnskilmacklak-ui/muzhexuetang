@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { NextAuthProvider } from './NextAuthProvider'
 import { AntdRegistry } from '@ant-design/nextjs-registry'
 import { ConfigProvider, App as AntdApp } from 'antd'
@@ -23,6 +24,15 @@ const swrConfig = {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [toastPos, setToastPos] = useState<'top-center' | 'bottom-center'>('top-center')
+
+  useEffect(() => {
+    const check = () => setToastPos(window.innerWidth < 768 ? 'bottom-center' : 'top-center')
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   return (
     <SWRConfig value={swrConfig}>
       <AntdRegistry>
@@ -40,7 +50,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             {children}
           </AntdApp>
         </NextAuthProvider>
-        <Toaster position="top-center" richColors style={{ zIndex: 10000 }} />
+        <Toaster position={toastPos} richColors style={{ zIndex: 10000 }} />
       </ConfigProvider>
     </AntdRegistry>
     </SWRConfig>

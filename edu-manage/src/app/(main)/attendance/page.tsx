@@ -8,6 +8,7 @@ import { PageLayout } from '@/components/Layout/PageLayout'
 import { format } from 'date-fns'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const { Text } = Typography
 
@@ -223,7 +224,7 @@ export default function AttendancePage() {
       </Card>
 
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: 80 }}><Spin size="large" /></div>
+        <CardSkeleton rows={3} />
       ) : allSchedules.length === 0 ? (
         <Card bordered={false} style={{ borderRadius: 8, minHeight: 300, display: 'grid', placeItems: 'center', background: '#ffffff', border: '1px solid #EEE7E1' }}>
           <Empty description="该日期暂无课程" />
@@ -466,6 +467,9 @@ export default function AttendancePage() {
 
                 {/* 汇总 + 提交 */}
                 <div style={{
+                  position: 'sticky',
+                  bottom: 0,
+                  zIndex: 10,
                   padding: '16px',
                   background: '#ffffff',
                   borderTop: '1px solid #EEE7E1',

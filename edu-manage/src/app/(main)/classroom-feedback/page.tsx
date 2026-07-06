@@ -10,6 +10,7 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { toast } from 'sonner'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useDivision } from '@/contexts/DivisionContext'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const fetcher = (url: string) => fetch(url).then((res) => { if (!res.ok) throw new Error('加载失败'); return res.json() })
 
@@ -68,7 +69,7 @@ function FeedbackItemCard({ item, onOpen }: { item: AdminFeedback; onOpen: (item
   const homework = formatHomework(item.homework)
   const performanceTags = Array.isArray(item.tags) ? item.tags : []
   return (
-    <Card onClick={() => onOpen(item)} bordered={false} style={{ borderRadius: 10, border: '1px solid #EEE7E1', background: '#fff', cursor: 'pointer' }} styles={{ body: { padding: '12px 14px' } }}>
+    <Card className="pressable" onClick={() => onOpen(item)} bordered={false} style={{ borderRadius: 10, border: '1px solid #EEE7E1', background: '#fff', cursor: 'pointer' }} styles={{ body: { padding: '12px 14px' } }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, flexWrap: 'wrap', gap: 4 }}>
         <span style={{ fontWeight: 600, fontSize: 14, color: '#1F2329' }}>{item.teacherName}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -411,7 +412,7 @@ export default function ClassroomFeedbackAdminPage() {
       )}
 
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: 60 }}><Spin size="large" /></div>
+        <CardSkeleton rows={3} />
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 0', background: '#fff', borderRadius: 12, border: '1px solid #EEE7E1' }}>
           <img src="/images/empty-box.png" alt="" style={{ width: 120, opacity: 0.5, marginBottom: 16 }} />

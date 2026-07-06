@@ -20,6 +20,7 @@ import {
   Spin,
   Tag,
 } from 'antd'
+import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { toast } from 'sonner'
 import {
   BookOutlined,
@@ -728,7 +729,7 @@ export default function CoursesPage() {
       </Space>
 
       {isLoading ? (
-        <div style={{ textAlign: 'center', padding: 80 }}><Spin size="large" /></div>
+        <CardSkeleton rows={3} />
       ) : filteredGroups.length === 0 ? (
         <Card bordered={false} style={{ borderRadius: 8, minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Empty description="暂无班级数据">

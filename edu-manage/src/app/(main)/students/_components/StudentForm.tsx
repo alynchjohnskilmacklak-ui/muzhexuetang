@@ -200,7 +200,7 @@ export function StudentForm({
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="phone" label="学员电话">
-                <Input placeholder="选填" />
+                <Input type="tel" inputMode="numeric" placeholder="选填" />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -215,7 +215,7 @@ export function StudentForm({
             </Col>
             <Col span={12}>
               <Form.Item name="parentPhone" label="家长手机">
-                <Input placeholder="选填" />
+                <Input type="tel" inputMode="numeric" placeholder="选填" />
               </Form.Item>
             </Col>
           </Row>
