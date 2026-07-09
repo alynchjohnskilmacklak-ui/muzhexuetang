@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getRequestPrisma } from '@/lib/prisma'
 import { requireTeacherPage } from '@/lib/teacher-portal'
-import { formatHours } from '@/lib/format'
 import { fmtDate } from '@/lib/format-date'
+import { formatDeducted, formatRemaining } from '@/lib/lesson-units'
 
 export default async function TeacherStudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const teacher = await requireTeacherPage()
@@ -68,6 +68,15 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
   const remainHours = student.enrollments.reduce((sum, enrollment) => sum + Number(enrollment.remainHours || 0), 0)
   const totalHours = student.enrollments.reduce((sum, enrollment) => sum + Number(enrollment.totalHours || 0), 0)
   const courseNames = [...new Set(student.enrollments.map((enrollment) => enrollment.group.course.name))]
+  const firstEnrollment = student.enrollments[0]
+  const firstCourseType = firstEnrollment?.group.course.type || null
+  const firstLessonMinutes = Number(firstEnrollment?.group.lessonMinutes || 40)
+  const remainText = firstEnrollment
+    ? `${formatRemaining(Number(firstEnrollment.remainHours || 0), firstCourseType, firstLessonMinutes).text}${student.enrollments.length > 1 ? ` +${student.enrollments.length - 1}门` : ''}`
+    : formatRemaining(remainHours, null, 40).text
+  const totalText = firstEnrollment
+    ? `${formatRemaining(Number(firstEnrollment.totalHours || 0), firstCourseType, firstLessonMinutes).text}${student.enrollments.length > 1 ? ` +${student.enrollments.length - 1}门` : ''}`
+    : formatRemaining(totalHours, null, 40).text
 
   return (
     <div style={{ padding: '0 0 32px' }}>
@@ -90,8 +99,8 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
 
       <div style={{ background: '#fff', border: '1px solid #EEE7E1', borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 14 }}>
-          <MetricCell label="剩余课时" value={formatHours(remainHours)} color={remainHours <= 2 ? '#D4537E' : remainHours <= 10 ? '#f5a623' : '#1F2329'} />
-          <MetricCell label="总课时" value={formatHours(totalHours)} />
+          <MetricCell label="课程余额" value={remainText} color={remainHours <= 2 ? '#D4537E' : remainHours <= 10 ? '#f5a623' : '#1F2329'} />
+          <MetricCell label="课程总量" value={totalText} />
           <MetricCell
             label="状态"
             value={
@@ -191,6 +200,7 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
                       </div>
                       <div style={{ fontSize: 11, color: '#8d806f', marginTop: 2 }}>
                         {fmtDate(attendance.lesson!.lessonDate)} {attendance.lesson!.startTime}
+                        {Number(attendance.hoursDeducted || 0) > 0 ? ` · 扣${formatDeducted(Number(attendance.hoursDeducted || 0), attendance.lesson!.group.course.type, Number(attendance.lesson!.group.lessonMinutes || 40))}` : ''}
                       </div>
                     </div>
                     <span style={{ fontSize: 12, padding: '2px 10px', borderRadius: 9999, background: status.bg, color: status.color, fontWeight: 600, whiteSpace: 'nowrap' }}>

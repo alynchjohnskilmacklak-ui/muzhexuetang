@@ -8,12 +8,17 @@ import {
 } from '@ant-design/icons'
 import { fmtDate, fmtDateTime } from '@/lib/format-date'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
+import { formatRemaining } from '@/lib/lesson-units'
 
 const { Title, Text } = Typography
 
 interface ArchiveData {
   studentBasic: any; courses: any; attendance: any
   feedbacks: any[]; profile: any; files: any[]; timeline: any[]
+}
+
+function enrollmentRemainingText(enrollment: any) {
+  return formatRemaining(Number(enrollment.remainHours || 0), enrollment.courseType || enrollment.group?.course?.type || null, Number(enrollment.lessonMinutes || enrollment.group?.lessonMinutes || 40)).text
 }
 
 export function ParentArchiveClient({ studentId, studentName }: { studentId: string; studentName: string }) {
@@ -61,7 +66,10 @@ export function ParentArchiveClient({ studentId, studentName }: { studentId: str
               {s.mainTeacher && <span> · 主老师：{s.mainTeacher}</span>}
             </div>
             <div style={{ marginTop: 4 }}>
-              <Tag color="orange">剩余 {s.remainHours} 课时</Tag>
+              {data.courses.classGroups.slice(0, 2).map((group: any) => (
+                <Tag key={group.id} color="orange">剩余 {enrollmentRemainingText(group)}</Tag>
+              ))}
+              {data.courses.classGroups.length > 2 && <Tag>+{data.courses.classGroups.length - 2} 门课程</Tag>}
               {p?.overview?.attendanceRate != null && (
                 <Tag color={p.overview.attendanceRate >= 80 ? 'green' : 'orange'}>
                   出勤率 {p.overview.attendanceRate}%
@@ -97,7 +105,15 @@ function OverviewTab({ data }: { data: ArchiveData }) {
         <Title level={5}>基本信息</Title>
         <Descriptions size="small" column={2}>
           <Descriptions.Item label="主老师">{s.mainTeacher || '-'}</Descriptions.Item>
-          <Descriptions.Item label="剩余课时">{s.remainHours} / {s.totalHours}</Descriptions.Item>
+          <Descriptions.Item label="课程余额">
+            {data.courses.classGroups.length ? (
+              <div style={{ display: 'grid', gap: 4 }}>
+                {data.courses.classGroups.map((group: any) => (
+                  <span key={group.id}>{group.courseName}：剩余 {enrollmentRemainingText(group)} / 共 {formatRemaining(Number(group.totalHours || 0), group.courseType || null, Number(group.lessonMinutes || 40)).text}</span>
+                ))}
+              </div>
+            ) : `${s.remainHours} / ${s.totalHours}`}
+          </Descriptions.Item>
           <Descriptions.Item label="出勤率">{a.summary.rate != null ? `${a.summary.rate}%` : '-'}</Descriptions.Item>
           <Descriptions.Item label="状态">{s.status === 'ACTIVE' ? '在读' : s.status}</Descriptions.Item>
         </Descriptions>
@@ -110,6 +126,7 @@ function OverviewTab({ data }: { data: ArchiveData }) {
             <Card key={g.id} size="small" bordered={false} style={{ background: '#FFFBF7', borderRadius: 8, marginBottom: 8 }}>
               <Text strong>{g.courseName}</Text>
               <div style={{ fontSize: 12, color: '#7A869A' }}>教师：{g.teacherNames.join('、')}</div>
+              <div style={{ fontSize: 12, color: '#7A869A' }}>剩余：{enrollmentRemainingText(g)}</div>
             </Card>
           ))
         )}

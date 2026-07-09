@@ -6,8 +6,8 @@ import { ClockCircleOutlined } from '@ant-design/icons'
 import { useSearchParams } from 'next/navigation'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { formatHours } from '@/lib/format'
 import { fmtDate, fmtDateTime } from '@/lib/format-date'
+import { formatDeducted } from '@/lib/lesson-units'
 
 const { Title, Text } = Typography
 
@@ -35,6 +35,36 @@ function MakeupStatusLine({ record }: { record: any }) {
   return null
 }
 
+function attendanceCourseUnit(record: any) {
+  const group = record.lesson?.group
+  return {
+    courseType: group?.course?.type || null,
+    lessonMinutes: Number(group?.lessonMinutes || 40),
+  }
+}
+
+function deductedText(record: any) {
+  const unit = attendanceCourseUnit(record)
+  return formatDeducted(Number(record.hoursDeducted || 0), unit.courseType, unit.lessonMinutes)
+}
+
+function summarizeDeducted(records: any[]) {
+  const totals = new Map<string, { hours: number; courseType: string | null; lessonMinutes: number }>()
+  records
+    .filter((record: any) => record.status === 'PRESENT' || record.status === 'ABSENT')
+    .forEach((record: any) => {
+      const unit = attendanceCourseUnit(record)
+      const key = `${unit.courseType || 'GROUP'}:${unit.lessonMinutes}`
+      const current = totals.get(key) || { hours: 0, ...unit }
+      current.hours += Number(record.hoursDeducted || 0)
+      totals.set(key, current)
+    })
+  const parts = [...totals.values()]
+    .filter((item) => item.hours > 0)
+    .map((item) => formatDeducted(item.hours, item.courseType, item.lessonMinutes))
+  return parts.length ? parts.join(' + ') : '0 节'
+}
+
 export function ParentAttendanceClient({ records, students }: { records: any[]; students: any[] }) {
   const isMobile = useIsMobile() ?? false
   const searchParams = useSearchParams()
@@ -58,8 +88,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
     absent: filteredRecords.filter((r: any) => r.status === 'ABSENT').length,
     arrangedCount: filteredRecords.filter((r: any) => r.makeupRequest?.status === 'ARRANGED').length,
     pendingCount: filteredRecords.filter((r: any) => r.makeupRequest?.status === 'PENDING').length,
-    totalHours: filteredRecords.filter((r: any) => r.status === 'PRESENT' || r.status === 'ABSENT')
-      .reduce((s: number, r: any) => s + (r.hoursDeducted || 0), 0),
+    deductedText: summarizeDeducted(filteredRecords),
     total: filteredRecords.length,
   }), [filteredRecords])
 
@@ -80,7 +109,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
         <div>
           <Title level={4} style={{ margin: 0 }}>考勤记录</Title>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            {today.getMonth() + 1}月 · 共 {stats.total} 条记录 · 扣 {formatHours(stats.totalHours)} 课时
+            {today.getMonth() + 1}月 · 共 {stats.total} 条记录 · 扣 {stats.deductedText}
           </Text>
         </div>
         <Select value={selectedStudentId || undefined} style={{ width: 160 }} onChange={v => setSelectedStudentId(v)}
@@ -93,7 +122,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
           { label: '出勤', value: stats.present, bg: '#E1F5EE', color: '#1D9E75' },
           { label: '请假', value: stats.leave, bg: '#FAEEDA', color: '#BA7517' },
           { label: '旷课', value: stats.absent, bg: '#FCEBEB', color: '#E24B4A' },
-          { label: '扣课时', value: `${formatHours(stats.totalHours)}h`, bg: '#EEEDFE', color: '#534AB7' },
+          { label: '扣课', value: stats.deductedText, bg: '#EEEDFE', color: '#534AB7' },
         ].map(item => (
           <Card key={item.label} bordered={false} style={{ borderRadius: 10, background: item.bg, border: 'none' }} bodyStyle={{ padding: '12px 14px' }}>
             <Text type="secondary" style={{ fontSize: 10 }}>{item.label}</Text>
@@ -154,7 +183,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
                   <div style={{ marginTop: 8, display: 'grid', gap: 4, fontSize: 13, color: '#5a4e3a' }}>
                     <span>{record.lesson?.group?.course?.name || record.lesson?.group?.name || '-'}</span>
                     <span>{fmtDate(record.createdAt)}</span>
-                    <span>扣课时：{formatHours(record.hoursDeducted)}</span>
+                    <span>扣课：{deductedText(record)}</span>
                     <div style={{ marginTop: 4, paddingLeft: 8 }}><MakeupStatusLine record={record} /></div>
                   </div>
                 </div>
@@ -177,8 +206,8 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
                 const m = STATUS_MAP[s] || { label: s, color: 'default', bg: 'transparent' }
                 return <div style={{ display: 'grid', gap: 5 }}><Tag color={m.color} style={{ width: 'fit-content', margin: 0 }}>{m.label}</Tag><MakeupStatusLine record={record} /></div>
               }},
-            { title: '扣课时', dataIndex: 'hoursDeducted', key: 'hours', width: 70,
-              render: (v: number) => v > 0 ? <Text style={{ color: '#E24B4A' }}>-{formatHours(v)}</Text> : <Text type="secondary">0</Text> },
+            { title: '扣课', key: 'hours', width: 90,
+              render: (_: unknown, record: any) => Number(record.hoursDeducted || 0) > 0 ? <Text style={{ color: '#E24B4A' }}>-{deductedText(record)}</Text> : <Text type="secondary">0</Text> },
           ]}
         />}
       </Card>

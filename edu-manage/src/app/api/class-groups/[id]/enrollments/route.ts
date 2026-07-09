@@ -3,7 +3,8 @@ import type { Prisma } from '@prisma/client'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { activeEnrollmentWhere, visibleClassGroupWhere, visibleStudentWhere } from '@/lib/business-visibility'
-import { minutesToHours, roundHours } from '@/lib/hours'
+import { roundHours } from '@/lib/hours'
+import { hoursPerLesson } from '@/lib/lesson-units'
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
@@ -61,7 +62,8 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
       course: true,
       teacher: { select: { name: true } },
       room: { select: { name: true } },
-      classLessons: { orderBy: { lessonDate: 'asc' }, take: 1 },
+      classLessons: { orderBy: { lessonDate: 'asc' }, select: { id: true, lessonDate: true, startTime: true }, take: 1 },
+      _count: { select: { classLessons: true } },
     },
   })
   if (!group) return NextResponse.json({ error: '班级不存在' }, { status: 404 })
@@ -90,16 +92,8 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   if (totalHours > 0) {
     hours = roundHours(totalHours)
   } else {
-    const existingEnrollments = await prisma.enrollment.findMany({
-      where: { groupId: id, status: 'ACTIVE', studentId: { not: studentId } },
-      select: { remainHours: true },
-    })
-    if (existingEnrollments.length > 0) {
-      const avgRemain = existingEnrollments.reduce((sum, e) => sum + Number(e.remainHours || 0), 0) / existingEnrollments.length
-      hours = roundHours(Math.max(0, avgRemain))
-    } else {
-      hours = minutesToHours(group.totalLessons * group.lessonMinutes)
-    }
+    const lessonCount = Number(group._count?.classLessons || group.totalLessons || 0)
+    hours = roundHours(lessonCount * hoursPerLesson(group.lessonMinutes))
   }
   const enrollment = await prisma.$transaction(async (tx) => {
     const created = existing

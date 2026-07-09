@@ -5,8 +5,8 @@ import { DeleteOutlined, EditOutlined, EyeOutlined, ProfileOutlined } from '@ant
 import { useRouter } from 'next/navigation'
 
 import { StatusBadge } from './StatusBadge'
-import { formatHours } from '@/lib/format'
 import { MEMBERSHIP_THEME, resolveMembership } from '@/constants/membership'
+import { formatRemaining } from '@/lib/lesson-units'
 
 const { Text } = Typography
 
@@ -32,6 +32,30 @@ function CourseTypeBadge({ type }: { type?: string | null }) {
   )
 }
 
+type StudentEnrollment = {
+  id: string
+  remainHours?: number | null
+  totalHours?: number | null
+  group?: {
+    name?: string | null
+    lessonMinutes?: number | null
+    course?: { name?: string | null; type?: string | null } | null
+  } | null
+}
+
+function remainingLines(student: { remainHours: number; courseType?: string | null; enrollments?: StudentEnrollment[] }) {
+  const enrollments = Array.isArray(student.enrollments) ? student.enrollments : []
+  if (!enrollments.length) {
+    return [formatRemaining(Number(student.remainHours || 0), student.courseType || null, 40).text]
+  }
+  return enrollments.slice(0, 2).map((enrollment) => {
+    const group = enrollment.group
+    const label = group?.name || group?.course?.name || '课程'
+    const remaining = formatRemaining(Number(enrollment.remainHours || 0), group?.course?.type || null, Number(group?.lessonMinutes || 40)).text
+    return `${label} ${remaining}`
+  }).concat(enrollments.length > 2 ? [`+${enrollments.length - 2} 门课程`] : [])
+}
+
 type StudentCardProps = {
   student: {
     id: string
@@ -46,6 +70,7 @@ type StudentCardProps = {
     source?: string | null
     membershipLevel?: string
     courseType?: string | null
+    enrollments?: StudentEnrollment[]
     mainTeacher?: { id: string; name: string } | null
     schedules?: Array<{ schedule: { course?: { id: string; name: string } | null } }>
   }
@@ -55,6 +80,7 @@ type StudentCardProps = {
 
 export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
   const router = useRouter()
+  const firstRemaining = remainingLines(student)[0]
   const isLowHours = student.remainHours <= 3 && student.status === 'ACTIVE'
   const bgColor = getAvatarColor(student.name)
   const membershipLevel = resolveMembership(student.membershipLevel)
@@ -118,8 +144,8 @@ export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
       </Space>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #EEE7E1', paddingTop: 9 }}>
-        <span style={{ color: '#98A2B3', fontSize: 11 }}>
-          余 <strong style={{ color: isLowHours ? '#e03e2d' : '#1F2329', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{formatHours(student.remainHours)}</strong> 课时
+        <span style={{ color: '#98A2B3', fontSize: 11, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          余 <strong style={{ color: isLowHours ? '#e03e2d' : '#1F2329', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{firstRemaining}</strong>
         </span>
         <Space className="student-actions" size={2} style={{ opacity: 0, transition: 'opacity 0.2s' }}>
           <Tooltip title="查看">

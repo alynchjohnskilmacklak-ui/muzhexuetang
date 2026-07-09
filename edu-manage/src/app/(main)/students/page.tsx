@@ -48,6 +48,16 @@ type Student = {
   totalHours: number
   source?: string | null
   courseType?: string | null
+  enrollments?: Array<{
+    id: string
+    remainHours?: number | null
+    totalHours?: number | null
+    group?: {
+      name?: string | null
+      lessonMinutes?: number | null
+      course?: { name?: string | null; type?: string | null } | null
+    } | null
+  }>
   mainTeacher?: { id: string; name: string } | null
   schedules?: Array<{ schedule: { course?: { id: string; name: string } | null } }>
 }

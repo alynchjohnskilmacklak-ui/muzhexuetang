@@ -1,18 +1,49 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
 import { Button, Card, Col, Descriptions, Empty, Form, Input, Modal, Progress, Radio, Row, Select, Spin, Statistic, Table, Tag, message } from 'antd'
 import { ArrowLeftOutlined, DisconnectOutlined, HeartOutlined, LinkOutlined, MessageOutlined, UserAddOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
-import { formatHours } from '@/lib/format'
 import { ImageUploader } from '@/app/(main)/performance/_components/ImageUploader'
+import { formatDeducted, formatRemaining } from '@/lib/lesson-units'
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
   if (!res.ok) throw new Error('加载失败')
   return res.json()
+}
+
+type EnrollmentLine = {
+  id: string
+  remainHours?: number | null
+  totalHours?: number | null
+  group?: {
+    name?: string | null
+    lessonMinutes?: number | null
+    course?: { name?: string | null; type?: string | null } | null
+  } | null
+}
+
+function enrollmentBalanceLines(enrollments: EnrollmentLine[] | undefined, fallbackRemain: number, fallbackTotal: number) {
+  if (!Array.isArray(enrollments) || !enrollments.length) {
+    return [`剩余 ${formatRemaining(fallbackRemain, null, 40).text} / 共 ${formatRemaining(fallbackTotal, null, 40).text}`]
+  }
+  return enrollments.map((enrollment) => {
+    const group = enrollment.group
+    const label = group?.name || group?.course?.name || '课程'
+    const courseType = group?.course?.type || null
+    const lessonMinutes = Number(group?.lessonMinutes || 40)
+    const remain = formatRemaining(Number(enrollment.remainHours || 0), courseType, lessonMinutes).text
+    const total = formatRemaining(Number(enrollment.totalHours || 0), courseType, lessonMinutes).text
+    return `${label}：剩余 ${remain} / 共 ${total}`
+  })
+}
+
+function attendanceDeductedText(record: any) {
+  const group = record.lesson?.group || record.enrollment?.group
+  return formatDeducted(Number(record.hoursDeducted || 0), group?.course?.type || null, Number(group?.lessonMinutes || 40))
 }
 
 export default function StudentDetailPage() {
@@ -40,6 +71,7 @@ export default function StudentDetailPage() {
   const remainHours = Number(student.remainHours || 0)
   const totalHours = Number(student.totalHours || 0)
   const usedHours = Math.max(0, totalHours - remainHours)
+  const balanceLines = enrollmentBalanceLines(student.enrollments, remainHours, totalHours)
 
   const unlinkParent = async () => {
     Modal.confirm({
@@ -148,8 +180,8 @@ export default function StudentDetailPage() {
       </div>}
     >
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col xs={12} lg={6}><Metric title="剩余课时" value={formatHours(remainHours)} /></Col>
-        <Col xs={12} lg={6}><Metric title="总课时" value={formatHours(totalHours)} /></Col>
+        <Col xs={12} lg={6}><Metric title="课程余额" value={balanceLines.slice(0, 2)} /></Col>
+        <Col xs={12} lg={6}><Metric title="在读课程" value={balanceLines.length} /></Col>
         <Col xs={12} lg={6}><Metric title="考勤记录" value={student.attendances?.length || 0} /></Col>
         <Col xs={12} lg={6}><Metric title="缴费记录" value={student.fees?.length || 0} /></Col>
       </Row>
@@ -203,7 +235,7 @@ export default function StudentDetailPage() {
               dataSource={student.attendances || []}
               columns={[
                 { title: '状态', dataIndex: 'status', render: (value: string) => <Tag>{value}</Tag> },
-                { title: '扣课时', dataIndex: 'hoursDeducted', render: (value: number) => formatHours(value) },
+                { title: '扣课时', key: 'hoursDeducted', render: (_: unknown, record: any) => attendanceDeductedText(record) },
                 { title: '日期', dataIndex: 'createdAt', render: (value: string) => new Date(value).toLocaleDateString('zh-CN') },
               ]}
             />
@@ -322,10 +354,22 @@ export default function StudentDetailPage() {
   )
 }
 
-function Metric({ title, value }: { title: string; value: number | string }) {
+function Metric({ title, value }: { title: string; value: ReactNode | ReactNode[] }) {
+  const isSimple = typeof value === 'number' || typeof value === 'string'
   return (
     <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
-      <Statistic title={<span style={{ color: '#98A2B3' }}>{title}</span>} value={value} valueStyle={{ color: '#1F2329' }} />
+      {isSimple ? (
+        <Statistic title={<span style={{ color: '#98A2B3' }}>{title}</span>} value={value as string | number} valueStyle={{ color: '#1F2329' }} />
+      ) : (
+        <div>
+          <div style={{ color: '#98A2B3', fontSize: 14, marginBottom: 8 }}>{title}</div>
+          <div style={{ display: 'grid', gap: 4 }}>
+            {(Array.isArray(value) ? value : [value]).map((item, index) => (
+              <div key={index} style={{ color: '#1F2329', fontSize: 13, lineHeight: 1.5 }}>{item}</div>
+            ))}
+          </div>
+        </div>
+      )}
     </Card>
   )
 }

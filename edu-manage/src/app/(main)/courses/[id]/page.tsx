@@ -10,6 +10,7 @@ import { zhCN } from 'date-fns/locale'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { formatRemaining } from '@/lib/lesson-units'
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
@@ -250,7 +251,9 @@ export default function CourseGroupDetailPage() {
                     <div key={enrollment.id as string} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #EEE7E1' }}>
                       <div>
                         <div style={{ color: '#1F2329' }}>{student?.name as string}</div>
-                        <div style={{ color: '#98A2B3', fontSize: 12 }}>{student?.grade as string || '-'} / 剩余 {Number(enrollment.remainHours ?? 0).toFixed(1)} 课时</div>
+                        <div style={{ color: '#98A2B3', fontSize: 12 }}>
+                          {student?.grade as string || '-'} / 剩余 {formatRemaining(Number(enrollment.remainHours ?? 0), group.course?.type || null, Number(group.lessonMinutes || 40)).text}
+                        </div>
                       </div>
                       <Popconfirm title="确定把该学员移出班级？" onConfirm={() => handleRemoveStudent(enrollment.id as string)}>
                         <Button size="small" danger type="text">移出</Button>

@@ -5,8 +5,8 @@ import useSWR from 'swr'
 import { Button, Card, Empty, List, Space, Tag, Typography } from 'antd'
 import { CheckCircleOutlined, ClockCircleOutlined, EnvironmentOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
-import { formatHours } from '@/lib/format'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { formatRemaining } from '@/lib/lesson-units'
 
 const { Title, Text } = Typography
 const fetcher = (url: string) => fetch(url).then(res => res.json())
@@ -24,6 +24,7 @@ type TeacherLesson = {
   groupName?: string
   courseName?: string
   courseType?: string
+  lessonMinutes?: number
   time?: string
   startTime?: string
   lessonDate?: string
@@ -37,6 +38,8 @@ type AttendanceStudent = {
   status?: AttStatus
   name?: string
   remainHours?: number
+  courseType?: string | null
+  lessonMinutes?: number
 }
 
 const STUDENT_COLORS = ['#E8784A','#1D9E75','#534AB7','#D4537E','#BA7517','#185FA5','#27500A','#72243E']
@@ -76,6 +79,11 @@ export default function TeacherAttendancePage() {
   }, [attMap])
 
   const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId) || lessons[0]
+  const remainingText = (student: AttendanceStudent) => formatRemaining(
+    Number(student.remainHours || 0),
+    student.courseType || selectedLesson?.courseType || null,
+    Number(student.lessonMinutes || selectedLesson?.lessonMinutes || 40),
+  )
 
   useEffect(() => { if (!selectedLessonId && lessons[0]?.id) setSelectedLessonId(lessons[0].id) }, [lessons, selectedLessonId])
 
@@ -319,6 +327,8 @@ export default function TeacherAttendancePage() {
                 {students.map((s) => {
                   const status: AttStatus = attMap.get(s.studentId) || 'none'
                   const cfg = STATUS_CONFIG[status]
+                  const remaining = remainingText(s)
+                  const isLowRemaining = remaining.value <= 5
                   return (
                     <div key={s.studentId} onClick={() => cycleAttendance(s.studentId)} style={{
                       borderRadius: 9, padding: isMobile ? '10px 6px' : '10px 8px', textAlign: 'center', cursor: 'pointer', userSelect: 'none',
@@ -330,8 +340,8 @@ export default function TeacherAttendancePage() {
                         {(s.name || '?')[0]}
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
-                      <div style={{ fontSize: 10, color: (s.remainHours || 0) <= 5 ? '#E24B4A' : 'var(--color-text-tertiary, #98A2B3)' }}>
-                        余{formatHours(s.remainHours)}课时{(s.remainHours || 0) <= 5 ? ' ⚠️' : ''}
+                      <div style={{ fontSize: 10, color: isLowRemaining ? '#E24B4A' : 'var(--color-text-tertiary, #98A2B3)' }}>
+                        余{remaining.text}{isLowRemaining ? ' ⚠️' : ''}
                       </div>
                       <span style={{ fontSize: 10, fontWeight: 500, marginTop: 4, padding: '2px 6px', borderRadius: 6,
                         display: 'inline-block', background: cfg.badge, color: status === 'none' ? cfg.text : '#fff' }}>

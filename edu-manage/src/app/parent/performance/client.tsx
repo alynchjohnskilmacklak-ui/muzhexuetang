@@ -8,7 +8,7 @@ import { HeartFilled, HeartOutlined, MessageOutlined, StarOutlined, UserOutlined
 import { toast } from 'sonner'
 import { MOOD_META, PERFORMANCE_BADGES, RATING_LABELS } from '@/lib/mood-meta'
 import { normalizeUploadUrl } from '@/lib/upload-url'
-import { formatHours } from '@/lib/format'
+import { formatRemaining } from '@/lib/lesson-units'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -32,6 +32,11 @@ type Student = {
   name: string
   grade?: string | null
   remainHours: number
+  enrollments?: Array<{
+    id: string
+    remainHours: number
+    group?: { name?: string | null; lessonMinutes?: number | null; course?: { name?: string | null; type?: string | null } | null } | null
+  }>
   mainTeacher?: { name: string } | null
   achievementBadges?: Array<{ badgeType: string; earnedAt: string; description?: string | null; teacher?: { name: string } }>
 } | null
@@ -45,6 +50,17 @@ function averageRating(posts: ParentPost[]) {
   const values = posts.flatMap((post) => post.ratings ? Object.values(post.ratings).map(Number) : [])
   if (!values.length) return 0
   return Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 10) / 10
+}
+
+function remainingLines(student: NonNullable<Student>) {
+  const enrollments = student.enrollments || []
+  if (!enrollments.length) return [formatRemaining(Number(student.remainHours || 0), null, 40).text]
+  return enrollments.map((enrollment) => {
+    const group = enrollment.group
+    const label = group?.course?.name || group?.name || '课程'
+    const remaining = formatRemaining(Number(enrollment.remainHours || 0), group?.course?.type || null, Number(group?.lessonMinutes || 40))
+    return `${label} ${remaining.text}`
+  })
 }
 
 function MoodCalendar({ posts }: { posts: ParentPost[] }) {
@@ -211,10 +227,21 @@ export default function PerformanceClient({ student, initialPosts }: { student: 
           </div>
         </Space>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, 1fr)', gap: 12, marginTop: 18 }}>
-          {[['动态', posts.length], ['平均评分', avg || '-'], ['已获徽章', student.achievementBadges?.length || 0], ['剩余课时', formatHours(student.remainHours)]].map(([label, value]) => (
+          {[
+            { label: '动态', value: posts.length },
+            { label: '平均评分', value: avg || '-' },
+            { label: '已获徽章', value: student.achievementBadges?.length || 0 },
+            { label: '剩余', value: remainingLines(student) },
+          ].map(({ label, value }) => (
             <div key={label} style={{ background: '#FCFBF9', borderRadius: 8, padding: 12 }}>
               <div style={{ color: '#98A2B3', fontSize: 12 }}>{label}</div>
-              <div style={{ color: '#1F2329', fontSize: 22, fontWeight: 700 }}>{value}</div>
+              {Array.isArray(value) ? (
+                <div style={{ color: '#1F2329', fontSize: value.length > 1 ? 13 : 22, fontWeight: 700, marginTop: 4, display: 'grid', gap: 3 }}>
+                  {value.map((line) => <span key={line}>{line}</span>)}
+                </div>
+              ) : (
+                <div style={{ color: '#1F2329', fontSize: 22, fontWeight: 700 }}>{value}</div>
+              )}
             </div>
           ))}
         </div>

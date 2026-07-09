@@ -22,6 +22,10 @@ export default async function ParentPerformancePage({ searchParams }: { searchPa
     where: studentWhere,
     include: {
       mainTeacher: { select: { id: true, name: true } },
+      enrollments: {
+        where: { status: 'ACTIVE', group: { status: { not: 'ARCHIVED' }, course: { isActive: true } } },
+        include: { group: { include: { course: { select: { name: true, type: true } } } } },
+      },
       achievementBadges: { include: { teacher: { select: { name: true } } }, orderBy: { earnedAt: 'desc' } },
     },
   })

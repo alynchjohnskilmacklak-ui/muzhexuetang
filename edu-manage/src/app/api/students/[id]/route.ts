@@ -28,7 +28,22 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
         include: { group: { include: { course: true, teacherAssignments: { include: { teacher: { select: { id: true, name: true } } } } } } },
         orderBy: { enrolledAt: 'desc' },
       },
-      attendances: { orderBy: { createdAt: 'desc' }, take: 50 },
+      attendances: {
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+        include: {
+          lesson: {
+            include: {
+              group: { include: { course: true } },
+            },
+          },
+          enrollment: {
+            include: {
+              group: { include: { course: true } },
+            },
+          },
+        },
+      },
       fees: { orderBy: { createdAt: 'desc' } },
     },
   })

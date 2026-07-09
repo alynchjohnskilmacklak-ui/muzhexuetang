@@ -40,6 +40,7 @@ export interface ArchiveCourses {
     id: string; name: string; courseName: string; courseSubject: string
     courseType: string; teacherNames: string[]; status: string
     startDate: Date | null; recurringDays: string[]
+    lessonMinutes: number; remainHours: number; totalHours: number
   }>
   recentLessons: Array<{
     id: string; groupId: string; lessonDate: Date; startTime: string; endTime: string
@@ -56,7 +57,7 @@ export interface ArchiveAttendance {
   records: Array<{
     id: string; lessonId: string | null; lessonDate: Date
     startTime: string; endTime: string; status: string
-    courseName: string; hoursDeducted: number
+    courseName: string; courseType: string | null; lessonMinutes: number; hoursDeducted: number
   }>
   summary: { total: number; present: number; leave: number; absent: number; makeup: number; rate: number | null }
   leaveRecords: Array<{ id: string; leaveDate: string; reason: string; status: string }>
@@ -221,6 +222,9 @@ async function fetchCourses(prisma: PrismaClient, studentId: string): Promise<Ar
       .filter(Boolean).map(t => t!.name).filter((v, i, a) => a.indexOf(v) === i),
     status: e.group.status, startDate: e.group.startDate,
     recurringDays: (e.group.recurringDays as string[]) || [],
+    lessonMinutes: e.group.lessonMinutes,
+    remainHours: e.remainHours,
+    totalHours: e.totalHours,
   }))
 
   const groupIds = enrollments.map(e => e.groupId)
@@ -262,7 +266,7 @@ async function fetchAttendance(prisma: PrismaClient, studentId: string): Promise
   const records = await prisma.attendance.findMany({
     where: { studentId },
     include: {
-      lesson: { select: { lessonDate: true, startTime: true, endTime: true, group: { select: { course: { select: { name: true } } } } } },
+      lesson: { select: { lessonDate: true, startTime: true, endTime: true, group: { select: { lessonMinutes: true, course: { select: { name: true, type: true } } } } } },
     },
     orderBy: { createdAt: 'desc' }, take: 100,
   })
@@ -284,7 +288,10 @@ async function fetchAttendance(prisma: PrismaClient, studentId: string): Promise
     records: records.map(r => ({
       id: r.id, lessonId: r.lessonId, lessonDate: r.lesson?.lessonDate || new Date(0),
       startTime: r.lesson?.startTime || '', endTime: r.lesson?.endTime || '',
-      status: r.status, courseName: r.lesson?.group?.course?.name || '-', hoursDeducted: r.hoursDeducted || 0,
+      status: r.status, courseName: r.lesson?.group?.course?.name || '-',
+      courseType: r.lesson?.group?.course?.type || null,
+      lessonMinutes: r.lesson?.group?.lessonMinutes || 40,
+      hoursDeducted: r.hoursDeducted || 0,
     })),
     summary: { total, present, leave: statusCount.LEAVE, absent: statusCount.ABSENT, makeup: statusCount.MAKEUP, rate: total ? Math.round((present / total) * 100) : null },
     leaveRecords: leaves.map(l => ({ id: l.id, leaveDate: l.leaveDate?.toISOString?.()?.slice(0, 10) || '', reason: l.reason || '', status: l.status })),

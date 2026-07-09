@@ -6,9 +6,10 @@ import useSWR from 'swr'
 import { Avatar, Button, Card, Input, Segmented, Select, Tag, Typography } from 'antd'
 import { FileTextOutlined, ProfileOutlined, SearchOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { formatHourPair, formatHours, formatPercent } from '@/lib/format'
+import { formatPercent } from '@/lib/format'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { formatRemaining } from '@/lib/lesson-units'
 
 const { Title, Text } = Typography
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
@@ -26,11 +27,35 @@ type TeacherStudent = {
   primaryCourseType?: 'ONE_ON_ONE' | 'SMALL_GROUP' | 'GROUP' | string | null
   enrollments?: Array<{
     id: string
+    remainHours?: number | string | null
+    totalHours?: number | string | null
     group?: {
-      course?: { name?: string | null } | null
+      lessonMinutes?: number | null
+      course?: { name?: string | null; type?: string | null } | null
       teacherAssignments?: Array<{ subject?: string | null }>
     } | null
   }>
+}
+
+function enrollmentBalance(student: TeacherStudent) {
+  const enrollments = Array.isArray(student.enrollments) ? student.enrollments : []
+  if (!enrollments.length) {
+    return {
+      remainText: formatRemaining(Number(student.remainHours || 0), student.primaryCourseType || null, 40).text,
+      totalText: formatRemaining(Number(student.totalHours || 0), student.primaryCourseType || null, 40).text,
+      remainValue: Number(student.remainHours || 0),
+    }
+  }
+  const first = enrollments[0]
+  const courseType = first.group?.course?.type || student.primaryCourseType || null
+  const lessonMinutes = Number(first.group?.lessonMinutes || 40)
+  const remain = formatRemaining(Number(first.remainHours || 0), courseType, lessonMinutes)
+  const total = formatRemaining(Number(first.totalHours || 0), courseType, lessonMinutes)
+  return {
+    remainText: `${remain.text}${enrollments.length > 1 ? ` +${enrollments.length - 1}门` : ''}`,
+    totalText: total.text,
+    remainValue: remain.value,
+  }
 }
 
 function avatarColor(name: string) {
@@ -89,11 +114,11 @@ export default function TeacherStudentsPage() {
   const renderStudentCard = (student: TeacherStudent, index: number) => {
     const remain = Number(student.remainHours || 0)
     const total = Number(student.totalHours || 0)
-    const used = Math.max(0, total - remain)
+    const balance = enrollmentBalance(student)
     const status = getStatusChip(student)
     const initial = (student.name || '?')[0]
     const gradeGender = [student.grade, student.gender].filter(Boolean).join(' · ')
-    const remainColor = remain <= 2 ? '#E24B4A' : remain <= 15 ? '#f5a623' : '#1F2329'
+    const remainColor = balance.remainValue <= 2 ? '#E24B4A' : balance.remainValue <= 15 ? '#f5a623' : '#1F2329'
     const subjects = [
       ...new Set(
         (student.enrollments || [])
@@ -167,10 +192,10 @@ export default function TeacherStudentsPage() {
           </span>
           <span>
             剩余{' '}
-            <b style={{ color: remainColor }}>{formatHours(remain)}</b>
+            <b style={{ color: remainColor }}>{balance.remainText}</b>
           </span>
           <span>
-            已用 <b>{total ? formatHourPair(used, total) : '0/0'}</b>
+            总量 <b>{total ? balance.totalText : '0'}</b>
           </span>
         </div>
 
