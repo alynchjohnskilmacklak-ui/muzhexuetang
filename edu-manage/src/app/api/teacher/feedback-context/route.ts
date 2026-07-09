@@ -43,6 +43,8 @@ export const GET = apiHandler(async (_req: NextRequest) => {
 
   // Recent lessons
   const now = new Date()
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const tomorrowStart = new Date(todayStart.getTime() + 86400000)
   const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000)
   const recentLessons = await prisma.classLesson.findMany({
     where: {
@@ -75,6 +77,16 @@ export const GET = apiHandler(async (_req: NextRequest) => {
     select: { studentIds: true, createdAt: true },
     orderBy: { createdAt: 'desc' },
   })
+
+  const todayFeedbacks = await prisma.classroomFeedback.findMany({
+    where: {
+      teacherId: teacher.id,
+      status: 'PUBLISHED',
+      createdAt: { gte: todayStart, lt: tomorrowStart },
+    },
+    select: { studentIds: true },
+  })
+  const feedbackedTodayIds = [...new Set(todayFeedbacks.flatMap((feedback) => feedback.studentIds))]
 
   // Build student feedback map
   const studentFeedbackMap = new Map<string, Date>()
@@ -138,7 +150,6 @@ export const GET = apiHandler(async (_req: NextRequest) => {
   }))
 
   const todayKey = localDateKey(now)
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const lessonsOut = [...recentLessons]
     .sort((a, b) => {
       const aDate = new Date(a.lessonDate)
@@ -162,5 +173,5 @@ export const GET = apiHandler(async (_req: NextRequest) => {
     studentIds: l.group?.enrollments?.map(e => e.studentId) || [],
   }))
 
-  return NextResponse.json({ groups: groupsOut, lessons: lessonsOut })
+  return NextResponse.json({ groups: groupsOut, lessons: lessonsOut, feedbackedTodayIds })
 })

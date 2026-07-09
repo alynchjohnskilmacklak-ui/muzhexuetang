@@ -10,9 +10,11 @@ const aiRateBucket = new Map<string, { count: number; resetAt: number }>()
 
 type Mood = 'GREAT' | 'GOOD' | 'OKAY' | 'NEEDS_ATTENTION'
 type Intent = 'stage' | 'suggestion' | 'classroom'
+type StudentPerfLevel = 'GREAT' | 'OKAY' | 'WEAK'
 type AIJson = Record<string, unknown>
 interface RosterEntry { id: string; name: string }
 interface SelectedStudent { id: string; name?: string | null }
+interface StudentPerfInput { id: string; name?: string | null; level: StudentPerfLevel }
 interface PerStudentComment { studentId: string; studentName: string; comment: string }
 
 const JUNIOR_QUOTES = [
@@ -328,8 +330,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
     options?: { moods?: Array<{ value: string; label: string }>; tags?: string[]; knowledgePoints?: string[] }
     selected?: { mood?: string; tags?: string[]; knowledgePoints?: string[] }
     selectedStudentIds?: string[]
+    studentPerf?: Array<{ id?: string; name?: string | null; level?: string }>
     stageMaterial?: string
-    lessonId?: string; groupId?: string; courseType?: string
+    groupId?: string; courseType?: string
     currentForm?: { mood?: string; overallComment?: string; tags?: string[]; knowledgePoints?: string[]; homework?: string[]; summary?: string; suggestion?: string; stageSummaryText?: string; stageSuggestions?: string }
   }
 
@@ -339,6 +342,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const roster = Array.isArray(body.roster) ? body.roster.filter((s) => typeof s?.id === 'string') : []
     const selectedStudentIds = Array.isArray(body.selectedStudentIds) ? body.selectedStudentIds.filter((id): id is string => typeof id === 'string') : []
     const selectedStudents = Array.isArray(body.selectedStudents) ? body.selectedStudents.filter((s) => typeof s?.id === 'string') : []
+    const studentPerf: StudentPerfInput[] = Array.isArray(body.studentPerf)
+      ? body.studentPerf
+        .filter((item): item is { id: string; name?: string | null; level: StudentPerfLevel } =>
+          typeof item?.id === 'string' && (item.level === 'GREAT' || item.level === 'OKAY' || item.level === 'WEAK'),
+        )
+        .map((item) => ({ id: item.id, name: item.name || null, level: item.level }))
+      : []
     const resolved = resolveStudentsFromContext({ note, roster, selectedStudentIds, selectedStudents })
     const options = body.options || {}
     const moods = Array.isArray(options.moods) ? options.moods : []
@@ -350,6 +360,18 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const promptRoster = resolved.matchedIds.length
       ? resolved.matchedIds.map((id, index) => ({ id, name: resolved.matchedNames[index] || '孩子' }))
       : roster.slice(0, 60)
+    const perfById = new Map(studentPerf.map((item) => [item.id, item]))
+    const perfLabel: Record<StudentPerfLevel, string> = { GREAT: '积极突出', OKAY: '表现一般', WEAK: '待努力' }
+    const perfGroups = (['GREAT', 'OKAY', 'WEAK'] as StudentPerfLevel[])
+      .map((level) => {
+        const names = resolved.matchedIds
+          .map((id, index) => ({ id, name: resolved.matchedNames[index] || perfById.get(id)?.name || '孩子', level: perfById.get(id)?.level || 'OKAY' }))
+          .filter((item) => item.level === level)
+          .map((item) => item.name)
+        return names.length ? `【${perfLabel[level]}】${names.join('、')}` : ''
+      })
+      .filter(Boolean)
+      .join('　')
 
     const confirmedStudentText = resolved.matchedIds.length
       ? `【已确认学生】${resolved.matchedIds.map((id, index) => `${resolved.matchedNames[index] || '孩子'}(${id})`).join('、')}。这些就是本次反馈对象，老师输入可以不包含学生姓名，必须直接围绕他们生成反馈。`
@@ -366,6 +388,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
       '- 如果老师输入里既有表扬又有问题，两者都要写进去，问题放在表扬之后、建议之前。',
       '- 如果【已确认学生】不为空，直接围绕这些学生写，老师输入没提名字也不要拒绝。',
       '- 为每个已确认学生单独写一段（perStudentComments），只出现该学生本人姓名；多个学生共用同一段描述时，允许内容相近但措辞要有变化。',
+      '- 你会收到每个学生的表现档位（积极突出 / 表现一般 / 待努力）。必须为每个学生单独写一段评语，基调随档位不同：',
+      '  - 积极突出：具体表扬其课堂表现（如积极回答、思路清晰），并给予更高期待；',
+      '  - 表现一般：客观描述当堂状态，并给出一个明确的小改进点；',
+      '  - 待努力：委婉但不回避地点出问题，并给家长一条可在家配合的具体建议。',
+      '- 严禁给不同学生写雷同或模板化内容，每段的切入点、措辞、举例都要不同。称呼用“姓名+同学”。不编造分数、名次等老师未提供的信息。',
       '- mood、tags、knowledgePoints 只能从提供的可选项里选；提到作业才填 homework。',
       '只输出 JSON，不要 Markdown，不要任何解释。',
     ].join('\n')
@@ -373,6 +400,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const user = [
       `【老师输入】${note}`,
       confirmedStudentText,
+      perfGroups ? `【表现档位】${perfGroups}` : '',
       promptRoster.length ? `【班级学生】${promptRoster.map((s) => `${s.name}(${s.id})`).join('、')}` : '【班级学生】无',
       moods.length ? `【可选状态】${moods.map((m) => `${m.value}=${m.label}`).join(' / ')}` : '',
       tagOptions.length ? `【可选标签】${tagOptions.join('、')}` : '',
@@ -387,7 +415,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     try {
       const n = Math.max(resolved.matchedIds.length, 1)
       const maxTokens = Math.min(500 + n * 220, 1500)
-      const raw = await callDeepSeek({ system: sys, user, maxTokens, temperature: 0.4, jsonMode: true })
+      const raw = await callDeepSeek({ system: sys, user, maxTokens, temperature: 0.5, jsonMode: true })
       const parsed = parseAIJson(raw)
       if (!parsed) return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, tagOptions, raw }))
 

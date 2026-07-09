@@ -33,6 +33,41 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('resize', check)
   }, [])
 
+  useEffect(() => {
+    const isMobile = () => window.innerWidth < 768
+    const hasVisibleOverlay = () => {
+      const overlays = document.querySelectorAll<HTMLElement>(
+        '.ant-modal-wrap, .ant-drawer, .ant-select-dropdown, .ant-picker-dropdown, .ant-dropdown',
+      )
+      return Array.from(overlays).some((element) => {
+        const style = window.getComputedStyle(element)
+        const rect = element.getBoundingClientRect()
+        return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0
+      })
+    }
+    const releaseStaleScrollLock = () => {
+      if (!isMobile() || hasVisibleOverlay()) return
+      document.body.classList.remove('ant-scrolling-effect')
+      for (const element of [document.documentElement, document.body]) {
+        if (element.style.overflow === 'hidden') element.style.overflow = ''
+        if (element.style.overflowY === 'hidden') element.style.overflowY = ''
+        if (element.style.touchAction === 'none') element.style.touchAction = ''
+      }
+    }
+
+    releaseStaleScrollLock()
+    window.addEventListener('pageshow', releaseStaleScrollLock)
+    window.addEventListener('focus', releaseStaleScrollLock)
+    window.addEventListener('touchend', releaseStaleScrollLock, { passive: true })
+    const timer = window.setInterval(releaseStaleScrollLock, 1200)
+    return () => {
+      window.removeEventListener('pageshow', releaseStaleScrollLock)
+      window.removeEventListener('focus', releaseStaleScrollLock)
+      window.removeEventListener('touchend', releaseStaleScrollLock)
+      window.clearInterval(timer)
+    }
+  }, [])
+
   return (
     <SWRConfig value={swrConfig}>
       <AntdRegistry>

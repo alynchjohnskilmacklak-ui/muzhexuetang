@@ -1729,6 +1729,24 @@ button:focus:not(:focus-visible) {
 .ant-modal .ant-modal-footer { margin: 0; padding: 14px 22px; border-top: 1px solid rgba(0,0,0,.06); }
 .ant-modal .ant-modal-close { top: 15px; inset-inline-end: 16px; }
 
+/* Mobile scroll safety: avoid stale overlay/dropdown locks trapping one-finger scroll. */
+@media (max-width: 768px) {
+  html,
+  body,
+  #admin-root,
+  #mobile-root,
+  .mobile-page-content {
+    touch-action: pan-y !important;
+  }
+
+  html,
+  body {
+    overflow-y: auto;
+    overscroll-behavior-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 .membership-markdown {
   color: #5a4e3a;
   font-size: 14px;
@@ -2239,5 +2257,32 @@ button:focus:not(:focus-visible) {
     max-height: 90dvh;
     overflow-y: auto;
     padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
+
+/* ---- Mobile scroll final guard: keep this block at the very end of globals.css ---- */
+@media (max-width: 768px) {
+  html,
+  body,
+  #admin-root,
+  #mobile-root,
+  .mobile-page-content {
+    overflow-y: auto !important;
+    touch-action: pan-y !important;
+    overscroll-behavior-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ant-select-dropdown,
+  .ant-picker-dropdown,
+  .ant-dropdown,
+  .ant-modal,
+  .ant-modal-wrap,
+  .ant-modal-content,
+  .ant-modal-body,
+  .ant-drawer,
+  .ant-drawer-content,
+  .ant-drawer-body {
+    touch-action: pan-y !important;
   }
 }
