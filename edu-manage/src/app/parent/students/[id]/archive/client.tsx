@@ -7,6 +7,7 @@ import {
   LineChartOutlined, FileTextOutlined, ClockCircleOutlined,
 } from '@ant-design/icons'
 import { fmtDate, fmtDateTime } from '@/lib/format-date'
+import { useSignedUrls } from '@/hooks/useSignedUrls'
 
 const { Title, Text } = Typography
 
@@ -141,14 +142,7 @@ function FeedbacksTab({ feedbacks }: { feedbacks: any[] }) {
       {f.knowledgePoints?.length > 0 && <Text type="secondary" style={{ fontSize: 12 }}>知识点：{f.knowledgePoints.join('、')}</Text>}
       {f.summary && <div style={{ marginTop: 8, fontSize: 13, color: '#4A5568' }}>{f.summary}</div>}
       {f.overallComment && <div style={{ marginTop: 4, fontSize: 13, fontStyle: 'italic', color: '#718096' }}>{f.overallComment}</div>}
-      {f.imageUrls?.length > 0 && (
-        <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {f.imageUrls.map((url: string, i: number) => (
-            <Image key={i} src={url} width={80} height={80} style={{ borderRadius: 8, objectFit: 'cover' }}
-              fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRleHQgeD0iNDAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZmlsbD0iIzk5OSIgZm9udC1zaXplPSIxMCI+5Zu+54mH5Yqg6L295aSx6LSlPC90ZXh0Pjwvc3ZnPg==" />
-          ))}
-        </div>
-      )}
+      {f.imageUrls?.length > 0 && <FeedbackImages imageUrls={f.imageUrls} />}
       {f.parentReply && (
         <div style={{ marginTop: 10, padding: '8px 12px', borderRadius: 8, background: '#FFF3E8', fontSize: 12 }}>
           <Text type="secondary">我的回复：</Text>{f.parentReply}
@@ -161,6 +155,18 @@ function FeedbacksTab({ feedbacks }: { feedbacks: any[] }) {
       )}
     </Card>
   ))
+}
+
+function FeedbackImages({ imageUrls }: { imageUrls: string[] }) {
+  const { urls } = useSignedUrls(imageUrls)
+  return (
+    <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      {imageUrls.map((url: string, i: number) => (
+        <Image key={`${url}-${i}`} src={urls[i]} width={80} height={80} style={{ borderRadius: 8, objectFit: 'cover' }}
+          fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjZjVmMmVlIi8+PHRleHQgeD0iNDAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZmlsbD0iIzlhOGU3YSIgZm9udC1zaXplPSIxMCI+5Zu+54mH5Yqg6L295aSx6LSlPC90ZXh0Pjwvc3ZnPg==" />
+      ))}
+    </div>
+  )
 }
 
 function TimelineTab({ timeline, profile }: { timeline: any[]; profile: any }) {

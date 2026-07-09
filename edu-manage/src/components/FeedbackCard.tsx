@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Image as AntImage, Input, Space, Tag } from 'antd'
 import { Button } from 'antd'
-import { normalizeUploadUrl } from '@/lib/upload-url'
+import { useSignedUrls } from '@/hooks/useSignedUrls'
 
 export const MOODS = [
   { value: 'GREAT', label: '非常棒', emoji: '🌟', color: '#1D9E75' },
@@ -24,6 +24,7 @@ export function FeedbackCard({ item, compact = false, onReply }: { item: any; co
   const kps: string[] = Array.isArray(item.knowledgePoints) ? item.knowledgePoints : []
   const tags: string[] = Array.isArray(item.tags) ? item.tags : []
   const images: string[] = Array.isArray(item.imageUrls) ? item.imageUrls : []
+  const { urls: signedImageUrls } = useSignedUrls(images)
   const hw: any[] = Array.isArray(item.homework) ? item.homework : []
 
   return (
@@ -93,7 +94,7 @@ export function FeedbackCard({ item, compact = false, onReply }: { item: any; co
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
             <AntImage.PreviewGroup>
               {images.map((url, i) => (
-                <AntImage key={i} src={normalizeUploadUrl(url)} width={60} height={60} style={{ objectFit: 'cover', borderRadius: 6, border: '1px solid #EEE7E1' }} />
+                <AntImage key={i} src={signedImageUrls[i]} width={60} height={60} style={{ objectFit: 'cover', borderRadius: 6, border: '1px solid #EEE7E1' }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='%23f5f2ee'/%3E%3Ctext x='30' y='30' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='10'%3E加载失败%3C/text%3E%3C/svg%3E" />
               ))}
             </AntImage.PreviewGroup>
           </div>

@@ -13,6 +13,7 @@ import ReactECharts from 'echarts-for-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { StudentProfile } from '@/lib/student-profile'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { fmtDate } from '@/lib/format-date'
 import { formatFriendlyTime } from '@/lib/date/relative'
 
@@ -68,6 +69,19 @@ function FeedbackDetail({ detail }: { detail?: any }) {
   )
 }
 
+function TimelineImageStrip({ images }: { images: string[] }) {
+  const visibleImages = images.slice(0, 3)
+  const { urls } = useSignedUrls(visibleImages)
+  return (
+    <div className="parent-growth-history-images">
+      {visibleImages.map((url: string, imageIndex: number) => (
+        <img key={`${url}-${imageIndex}`} src={urls[imageIndex]} alt="课堂记录" />
+      ))}
+      {images.length > 3 && <span>+{images.length - 3}张</span>}
+    </div>
+  )
+}
+
 export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   const isMobile = useIsMobile() ?? false
   const router = useRouter()
@@ -82,6 +96,8 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   const [reportOpen, setReportOpen] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [detailItem, setDetailItem] = useState<any>(null)
+  const detailImages = Array.isArray(detailItem?.images) ? detailItem.images : []
+  const { urls: signedDetailImages } = useSignedUrls(detailImages)
 
   const query = studentId ? `/api/parent/profile?studentId=${studentId}&months=${months}` : null
   const { data, isLoading } = useSWR(query, fetcher, {
@@ -258,7 +274,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                         <div className="parent-growth-history-title"><div><Text strong>{item.title}</Text><Tag>{TIMELINE_LABEL[item.type] || '记录'}</Tag></div><Text type="secondary">{fmtDate(item.date)}</Text></div>
                         {item.teacher && <Text type="secondary" className="parent-growth-history-teacher">{formatTeacherLabel(item)}</Text>}
                         {item.sub && <Paragraph ellipsis={{ rows: 2 }} className="parent-growth-history-copy">{item.sub}</Paragraph>}
-                        {!!item.images?.length && <div className="parent-growth-history-images">{item.images.slice(0, 3).map((url: string, imageIndex: number) => <img key={imageIndex} src={url} alt="课堂记录" />)}{item.images.length > 3 && <span>+{item.images.length - 3}张</span>}</div>}
+                        {!!item.images?.length && <TimelineImageStrip images={item.images} />}
                       </div>
                       {(item.images?.length || item.refType) && <RightOutlined className="parent-growth-history-arrow" />}
                     </article>
@@ -309,7 +325,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
       <Modal open={!!detailItem} onCancel={() => setDetailItem(null)} footer={null} width="min(560px, 92vw)" title={detailItem?.title || '详情'}>
         {detailItem && (
           <div>
-            {detailItem.images?.length > 0 && <Image.PreviewGroup><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>{detailItem.images.map((url: string, i: number) => <Image key={i} src={url} alt="" style={{ borderRadius: 8, objectFit: 'cover', width: '100%', height: 120 }} />)}</div></Image.PreviewGroup>}
+            {detailImages.length > 0 && <Image.PreviewGroup><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>{detailImages.map((url: string, i: number) => <Image key={i} src={signedDetailImages[i]} alt="" style={{ borderRadius: 8, objectFit: 'cover', width: '100%', height: 120 }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='120'%3E%3Crect width='140' height='120' fill='%23f5f2ee'/%3E%3Ctext x='70' y='60' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='12'%3E图片加载失败%3C/text%3E%3C/svg%3E" />)}</div></Image.PreviewGroup>}
             <Paragraph style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detailItem.sub || detailItem.content}</Paragraph>
             {detailItem.teacher && <Tag style={{ borderRadius: 9999, marginTop: 4 }}>{formatTeacherLabel(detailItem)}</Tag>}
             {detailItem.date && <div style={{ marginTop: 8 }}><Text type="secondary" style={{ fontSize: 11 }}>{formatFriendlyTime(detailItem.date)}</Text></div>}

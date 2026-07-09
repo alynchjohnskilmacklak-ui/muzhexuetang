@@ -6,7 +6,7 @@ import { ArrowLeftOutlined, BookOutlined, ClockCircleOutlined, EnvironmentOutlin
 import { useRouter } from 'next/navigation'
 import { fmtDateTime } from '@/lib/format-date'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { normalizeUploadUrl } from '@/lib/upload-url'
+import { useSignedUrls } from '@/hooks/useSignedUrls'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -17,6 +17,8 @@ function subjectOfTeacher(subjects?: string | null) {
 export function FeedbackDetailClient({ feedback }: { feedback: any }) {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
+  const imageUrls = Array.isArray(feedback.imageUrls) ? feedback.imageUrls : []
+  const { urls: signedImageUrls } = useSignedUrls(imageUrls)
 
   useEffect(() => {
     if (feedback.parentReadAt || feedback.status !== 'PUBLISHED') return
@@ -110,15 +112,15 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
         </div>
 
         {/* Images */}
-        {feedback.imageUrls?.length > 0 && (
+        {imageUrls.length > 0 && (
           <div>
             <Text strong style={{ display: 'block', marginBottom: 12 }}>课堂资料</Text>
             <Image.PreviewGroup>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-                {feedback.imageUrls.map((url: string, i: number) => (
+                {imageUrls.map((url: string, i: number) => (
                   <Image
                     key={i}
-                    src={normalizeUploadUrl(url)}
+                    src={signedImageUrls[i]}
                     alt={`资料 ${i + 1}`}
                     width="100%"
                     height={isMobile ? 120 : 140}

@@ -8,9 +8,9 @@ import { Image as AntImage } from 'antd'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { toast } from 'sonner'
-import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useDivision } from '@/contexts/DivisionContext'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { useSignedUrls } from '@/hooks/useSignedUrls'
 
 const fetcher = (url: string) => fetch(url).then((res) => { if (!res.ok) throw new Error('加载失败'); return res.json() })
 
@@ -66,6 +66,7 @@ function FeedbackItemCard({ item, onOpen }: { item: AdminFeedback; onOpen: (item
   const students = Array.isArray(item.students) ? item.students : []
   const points = Array.isArray(item.knowledgePoints) ? item.knowledgePoints : []
   const images = Array.isArray(item.imageUrls) ? item.imageUrls : []
+  const { urls: signedImages } = useSignedUrls(images)
   const homework = formatHomework(item.homework)
   const performanceTags = Array.isArray(item.tags) ? item.tags : []
   return (
@@ -113,7 +114,7 @@ function FeedbackItemCard({ item, onOpen }: { item: AdminFeedback; onOpen: (item
       {images.length > 0 && (
         <div onClick={(event) => event.stopPropagation()} style={{ marginTop: 6, display: 'flex', gap: 4 }}>
           {images.slice(0, 4).map((url, i) => (
-            <img key={i} src={normalizeUploadUrl(url)} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid #EEE7E1' }} />
+            <img key={i} src={signedImages[i]} alt="" onError={(event) => { event.currentTarget.alt = '图片加载失败' }} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid #EEE7E1' }} />
           ))}
           {images.length > 4 && <div style={{ width: 48, height: 48, borderRadius: 6, background: '#f5f2ee', display: 'grid', placeItems: 'center', fontSize: 11, color: '#98A2B3' }}>+{images.length - 4}</div>}
         </div>
@@ -158,6 +159,9 @@ export default function ClassroomFeedbackAdminPage() {
   const [detailFeedback, setDetailFeedback] = useState<AdminFeedback | null>(null)
   const [adminReply, setAdminReply] = useState('')
   const [replying, setReplying] = useState(false)
+  const detailImages = Array.isArray(detailFeedback?.imageUrls) ? detailFeedback.imageUrls : []
+  const { urls: signedDetailImages } = useSignedUrls(detailImages)
+  const { urls: signedComposeImages } = useSignedUrls(composeImages)
 
   const params = new URLSearchParams({ date, limit: '200' })
   params.set('division', division)
@@ -466,7 +470,7 @@ export default function ClassroomFeedbackAdminPage() {
           const students = Array.isArray(detailFeedback.students) ? detailFeedback.students : []
           const points = Array.isArray(detailFeedback.knowledgePoints) ? detailFeedback.knowledgePoints : []
           const homework = formatHomework(detailFeedback.homework)
-          const images = Array.isArray(detailFeedback.imageUrls) ? detailFeedback.imageUrls : []
+          const images = detailImages
           const performanceTags = Array.isArray(detailFeedback.tags) ? detailFeedback.tags : []
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -493,7 +497,7 @@ export default function ClassroomFeedbackAdminPage() {
               )}
               {detailFeedback.summary && <DetailSection label="课堂小结"><div style={{ color: '#1A1201', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{detailFeedback.summary}</div></DetailSection>}
               {homework.length > 0 && <DetailSection label="作业"><ol style={{ margin: 0, paddingLeft: 20 }}>{homework.map((item, index) => <li key={`${index}-${item}`}>{item}</li>)}</ol></DetailSection>}
-              {images.length > 0 && <DetailSection label="课堂资料"><AntImage.PreviewGroup><div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{images.map((url, index) => <AntImage key={`${url}-${index}`} src={normalizeUploadUrl(url)} width={72} height={72} style={{ objectFit: 'cover', borderRadius: 8 }} />)}</div></AntImage.PreviewGroup></DetailSection>}
+              {images.length > 0 && <DetailSection label="课堂资料"><AntImage.PreviewGroup><div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{images.map((url, index) => <AntImage key={`${url}-${index}`} src={signedDetailImages[index]} width={72} height={72} style={{ objectFit: 'cover', borderRadius: 8 }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Crect width='72' height='72' fill='%23f5f2ee'/%3E%3Ctext x='36' y='36' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='10'%3E加载失败%3C/text%3E%3C/svg%3E" />)}</div></AntImage.PreviewGroup></DetailSection>}
 
               {detailFeedback.parentReply && (
                 <div style={{ padding: '10px 12px', borderRadius: 8, background: '#EAF7F1', border: '1px solid #B6E2D2', color: '#176C53', lineHeight: 1.7 }}>
@@ -608,7 +612,7 @@ export default function ClassroomFeedbackAdminPage() {
                 <AntImage.PreviewGroup>
                   {composeImages.map((url, i) => (
                     <div key={i} style={{ position: 'relative' }}>
-                      <AntImage src={normalizeUploadUrl(url)} width={60} height={60} style={{ objectFit: 'cover', borderRadius: 6 }} />
+                      <AntImage src={signedComposeImages[i]} width={60} height={60} style={{ objectFit: 'cover', borderRadius: 6 }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='%23f5f2ee'/%3E%3Ctext x='30' y='30' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='10'%3E加载失败%3C/text%3E%3C/svg%3E" />
                       <button onClick={() => setComposeImages(prev => prev.filter((_, j) => j !== i))}
                         style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#E24B4A', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11, display: 'grid', placeItems: 'center' }}>×</button>
                     </div>
@@ -625,7 +629,7 @@ export default function ClassroomFeedbackAdminPage() {
               onChange={info => {
                 if (info.file.status === 'uploading') return
                 if (info.file.status === 'done') {
-                  const url = (info.file.response as { url?: string })?.url
+                  const url = (info.file.response as { file?: { storageKey?: string }, url?: string })?.file?.storageKey || (info.file.response as { url?: string })?.url
                   const error = (info.file.response as { error?: string })?.error
                   if (url) { setComposeImages(prev => [...prev, url]); toast.success('图片上传成功') }
                   else if (error) toast.error(`图片上传失败：${error}`)

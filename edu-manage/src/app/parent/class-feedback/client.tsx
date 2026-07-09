@@ -8,11 +8,11 @@ import { fmtDate, fmtDateTime } from '@/lib/format-date'
 import { formatFriendlyTime } from '@/lib/date/relative'
 import { toast } from 'sonner'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
-import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ParentCard } from '@/components/Parent/ParentCard'
 import { PullToRefresh } from '@/components/PullToRefresh'
+import { useSignedUrls } from '@/hooks/useSignedUrls'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -24,6 +24,8 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
   const [replying, setReplying] = useState(false)
   const [localReply, setLocalReply] = useState<string | null>(null)
   const [locallyReadIds, setLocallyReadIds] = useState<Set<string>>(() => new Set())
+  const detailImageUrls = Array.isArray(detailModal?.imageUrls) ? detailModal.imageUrls : []
+  const { urls: signedDetailImageUrls } = useSignedUrls(detailImageUrls)
 
   const markAsRead = async (feedback: any) => {
     if (feedback.parentReadAt || feedback.status !== 'PUBLISHED' || locallyReadIds.has(feedback.id)) return
@@ -275,10 +277,10 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
                 <Text strong style={{ display: 'block', marginBottom: 8 }}>🖼 课堂照片</Text>
                 <Image.PreviewGroup>
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 8 }}>
-                    {detailModal.imageUrls.map((url: string, i: number) => (
+                    {detailImageUrls.map((url: string, i: number) => (
                       <Image
                         key={i}
-                        src={normalizeUploadUrl(url)}
+                        src={signedDetailImageUrls[i]}
                         alt={`课堂照片 ${i + 1}`}
                         width="100%"
                         height={isMobile ? 100 : 120}

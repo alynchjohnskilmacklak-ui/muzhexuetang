@@ -7,7 +7,7 @@ import { Button, Image as AntImage, Input, Modal, Spin, Upload, Tag, Card, Selec
 import { CheckCircleOutlined, DeleteOutlined, PlusOutlined, SendOutlined, SearchOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { normalizeUploadUrl } from '@/lib/upload-url'
+import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { MOODS, QUICK_TAGS, QUICK_KPS, BADGES } from '@/components/FeedbackCard'
 import { fmtDate } from '@/lib/format-date'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
@@ -95,6 +95,7 @@ function FeedbackPageInner() {
   const [homework, setHomework] = useState<string[]>([])
   const [hwInput, setHwInput] = useState('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
+  const { urls: signedImageUrls } = useSignedUrls(imageUrls)
   const [badgeOpen, setBadgeOpen] = useState(false)
   const [uploadExpanded, setUploadExpanded] = useState(false)
   const [studentsExpanded, setStudentsExpanded] = useState(false)
@@ -722,7 +723,7 @@ function FeedbackPageInner() {
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
                 <AntImage.PreviewGroup>{imageUrls.map((url, i) => (
                   <div key={i} style={{ position: 'relative' }}>
-                    <AntImage src={normalizeUploadUrl(url)} width={64} height={64} style={{ objectFit: 'cover', borderRadius: 8 }} />
+                    <AntImage src={signedImageUrls[i]} width={64} height={64} style={{ objectFit: 'cover', borderRadius: 8 }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23f5f2ee'/%3E%3Ctext x='32' y='32' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='10'%3E加载失败%3C/text%3E%3C/svg%3E" />
                     <button onClick={() => setImageUrls(prev => prev.filter((_, j) => j !== i))}
                       style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#E24B4A', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11 }}>×</button>
                   </div>
@@ -751,7 +752,7 @@ function FeedbackPageInner() {
               onChange={info => {
                 if (info.file.status === 'uploading') return
                 if (info.file.status === 'done') {
-                  const url = (info.file.response as any)?.url
+                  const url = (info.file.response as any)?.file?.storageKey || (info.file.response as any)?.url
                   const error = (info.file.response as any)?.error
                   if (url) setImageUrls(prev => [...prev, url])
                   else toast.error(error || '上传失败', { duration: 5000 })
