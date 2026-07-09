@@ -119,13 +119,13 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   let created = 0
   for (let i = 0; i < allData.length; i += BATCH_SIZE) {
     const batch = allData.slice(i, i + BATCH_SIZE)
-    await prisma.classLesson.createMany({ data: batch, skipDuplicates: true })
-    created += batch.length
+    const result = await prisma.classLesson.createMany({ data: batch, skipDuplicates: true })
+    created += result.count
   }
 
   await prisma.classGroup.update({
     where: { id },
-    data: { totalLessons: dates.length, lessonStartTime: startTime, lessonMinutes: mins,
+    data: { totalLessons: created, lessonStartTime: startTime, lessonMinutes: mins,
       recurringDays: days, startDate: start },
   })
 

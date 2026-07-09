@@ -155,10 +155,10 @@ function FeedbackPageInner() {
       grouped[key].push(l)
     }
     return [
-      ...(grouped.today.length ? [{ label: `今日 (${grouped.today.length})`, options: grouped.today.map((l: any) => ({
+      ...(grouped.today.length ? [{ label: `今天 (${grouped.today.length})`, options: grouped.today.map((l: any) => ({
         label: `${l.groupName} · ${l.startTime} (${l.studentIds.length}人)`, value: l.id,
       })) }] : []),
-      ...(grouped.recent.length ? [{ label: `近7天 (${grouped.recent.length})`, options: grouped.recent.map((l: any) => ({
+      ...(grouped.recent.length ? [{ label: `近期课次 (${grouped.recent.length})`, options: grouped.recent.map((l: any) => ({
         label: `${l.groupName} · ${fmtDate(l.lessonDate)} ${l.startTime}`, value: l.id,
       })) }] : []),
     ]

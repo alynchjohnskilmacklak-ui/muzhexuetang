@@ -314,7 +314,7 @@ export default function TeacherAttendancePage() {
                 display: 'grid', 
                 gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, 1fr)', 
                 gap: 12, 
-                paddingBottom: isMobile ? 140 : 0 
+                paddingBottom: isMobile ? 96 : 0 
               }}>
                 {students.map((s) => {
                   const status: AttStatus = attMap.get(s.studentId) || 'none'
@@ -349,20 +349,20 @@ export default function TeacherAttendancePage() {
                 </Text>
               </div>
 
-              {/* Fixed bottom bar on mobile - positioned above the layout tab bar */}
+              {/* Fixed bottom action bar on mobile */}
               {isMobile && (
                 <div style={{ 
                   position: 'fixed', 
-                  bottom: 'calc(74px + env(safe-area-inset-bottom, 0px))', 
-                  left: 12, 
-                  right: 12, 
+                  bottom: 0, 
+                  left: 0, 
+                  right: 0, 
                   zIndex: 400,
-                  background: 'rgba(255, 255, 255, 0.95)', 
+                  background: 'rgba(255, 255, 255, 0.98)', 
                   backdropFilter: 'blur(10px)',
-                  borderRadius: 16,
-                  border: '1px solid #F0EBE5',
-                  boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
-                  padding: '12px 16px', 
+                  borderRadius: '16px 16px 0 0',
+                  borderTop: '1px solid #F0EBE5',
+                  boxShadow: '0 -2px 12px rgba(0,0,0,.06)',
+                  padding: '12px 16px calc(12px + env(safe-area-inset-bottom, 0px))', 
                   display: 'grid', 
                   gridTemplateColumns: '1fr 1fr', 
                   gap: 12 
@@ -400,7 +400,7 @@ export default function TeacherAttendancePage() {
           )}
         </Card>
       </div>
-      <div style={{ height: isMobile ? 12 : 0 }} />
+      <div style={{ height: isMobile ? 96 : 0 }} />
     </div>
   )
 }

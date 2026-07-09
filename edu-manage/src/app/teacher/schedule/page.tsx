@@ -1,9 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { Card, Tag, Typography } from 'antd'
-import { BellOutlined, CalendarOutlined, CoffeeOutlined, EnvironmentOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
+import { BellOutlined, CalendarOutlined, CoffeeOutlined, DownOutlined, EnvironmentOutlined, RightOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
 import { findSchedulePeriod, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
@@ -13,6 +13,10 @@ import { PullToRefresh } from '@/components/PullToRefresh'
 
 const { Title, Text } = Typography
 const fetcher = (url: string) => fetch(url).then(r => r.json())
+
+function dateKey(date: Date) {
+  return date.toDateString()
+}
 
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
 const INTENSIVE_SLOTS = [
@@ -46,6 +50,7 @@ export default function TeacherSchedulePage() {
   const isTablet = useIsMobile(1025) ?? false
   const [scheduleType, setScheduleType] = useState<'group'|'intensive'>('group')
   const [weekOffset, setWeekOffset] = useState(0)
+  const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({})
   const { periods } = useSchedulePeriods()
   const { start, end } = getWeekRange(weekOffset)
   const startDate = start.toISOString().slice(0,10)
@@ -111,16 +116,29 @@ export default function TeacherSchedulePage() {
   const weekDates = useMemo(() => {
     const d = new Date(start)
     return WEEKDAYS.map((_, i) => { const nd = new Date(d); nd.setDate(d.getDate() + i); return nd })
-  }, [start])
+  }, [startDate])
   const visibleLessons = scheduleType === 'group' ? groupLessons : intensiveLessons
   const mobileLessonsByDay = useMemo(() => {
-    return weekDates.map((date, index) => {
+    const today = new Date().toDateString()
+    const days = weekDates.map((date, index) => {
       const lessons = visibleLessons
         .filter((lesson: any) => new Date(lesson.lessonDate).toDateString() === date.toDateString())
         .sort((a: any, b: any) => String(a.startTime || '').localeCompare(String(b.startTime || '')))
-      return { date, label: WEEKDAYS[index], lessons }
+      return { key: dateKey(date), date, label: WEEKDAYS[index], lessons, isToday: date.toDateString() === today }
+    })
+    return [...days].sort((a, b) => {
+      if (a.isToday !== b.isToday) return a.isToday ? -1 : 1
+      return a.date.getTime() - b.date.getTime()
     })
   }, [visibleLessons, weekDates])
+
+  useEffect(() => {
+    if (!isMobile) return
+    const todayGroup = mobileLessonsByDay.find((day) => day.isToday)
+    const fallbackGroup = mobileLessonsByDay.find((day) => day.lessons.length > 0) || mobileLessonsByDay[0]
+    const openKey = todayGroup?.key || fallbackGroup?.key
+    setExpandedDays(openKey ? { [openKey]: true } : {})
+  }, [endDate, isMobile, scheduleType, startDate])
 
   return (
     <PullToRefresh onRefresh={async () => { await Promise.all([mutateGroup(), mutateIntensive()]) }}>
@@ -163,14 +181,37 @@ export default function TeacherSchedulePage() {
         isMobile ? (
           <Card bordered={false} title="本周课程列表" style={{ borderRadius: 10 }}>
             {visibleLessons.length === 0 ? <BrandEmpty title="本周暂无课程" icon={<CalendarOutlined />} /> : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {mobileLessonsByDay.map((day, dayIndex) => (
-                  <div className="stagger-item" key={day.label} style={{ animationDelay: `${Math.min(dayIndex, 8) * 40}ms` }}>
-                    <div style={{ fontWeight: 700, color: '#1F2329', marginBottom: 8 }}>
+                  <div className="stagger-item" key={day.key} style={{ animationDelay: `${Math.min(dayIndex, 8) * 40}ms`, border: '1px solid #EEE7E1', borderRadius: 12, background: day.isToday ? '#FFF8F4' : '#fff', overflow: 'hidden' }}>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedDays((prev) => ({ ...prev, [day.key]: !prev[day.key] }))}
+                      style={{
+                        width: '100%',
+                        border: 'none',
+                        background: 'transparent',
+                        padding: '12px 14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 10,
+                        textAlign: 'left',
+                      }}
+                    >
+                      <span style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        <span style={{ fontWeight: 800, color: day.isToday ? '#E8784A' : '#1F2329' }}>
+                          {day.isToday ? '今天 · ' : ''}{day.label} {day.date.getMonth() + 1}月{day.date.getDate()}日
+                        </span>
+                        <span style={{ color: '#8D806F', fontSize: 12 }}>{day.lessons.length} 节课</span>
+                      </span>
+                      {expandedDays[day.key] ? <DownOutlined style={{ color: '#E8784A' }} /> : <RightOutlined style={{ color: '#E8784A' }} />}
+                    </button>
+                    <div style={{ display: 'none' }}>
                       {day.label} {day.date.getMonth() + 1}月{day.date.getDate()}日
                     </div>
-                    {day.lessons.length ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {expandedDays[day.key] && (day.lessons.length ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 12px 12px' }}>
                         {day.lessons.map((lesson: any) => {
                           const courseType = lesson.group?.course?.type
                           const intensiveCfg = INTENSIVE_CONFIG[courseType || 'ONE_ON_ONE'] || INTENSIVE_CONFIG.ONE_ON_ONE
@@ -209,7 +250,7 @@ export default function TeacherSchedulePage() {
                       </div>
                     ) : (
                       <div style={{ color: '#98A2B3', fontSize: 12, padding: '4px 0 8px' }}>暂无课程</div>
-                    )}
+                    ))}
                   </div>
                 ))}
               </div>

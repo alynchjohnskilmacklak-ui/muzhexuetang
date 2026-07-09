@@ -1,17 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-export function useCountUp(target: number, duration = 800) {
+export function useCountUp(target: number, duration = 900) {
   const [value, setValue] = useState(0)
-  const played = useRef(false)
 
   useEffect(() => {
-    if (played.current) {
-      setValue(target)
-      return
-    }
-    played.current = true
     const start = performance.now()
     let raf = 0
     const tick = (now: number) => {

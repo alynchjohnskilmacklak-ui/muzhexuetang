@@ -5,6 +5,13 @@ import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
 
+function localDateKey(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export const GET = apiHandler(async (_req: NextRequest) => {
   const { teacher, prisma } = await requireCurrentTeacher()
 
@@ -130,7 +137,21 @@ export const GET = apiHandler(async (_req: NextRequest) => {
     }),
   }))
 
-  const lessonsOut = recentLessons.map(l => ({
+  const todayKey = localDateKey(now)
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const lessonsOut = [...recentLessons]
+    .sort((a, b) => {
+      const aDate = new Date(a.lessonDate)
+      const bDate = new Date(b.lessonDate)
+      const aIsToday = localDateKey(aDate) === todayKey
+      const bIsToday = localDateKey(bDate) === todayKey
+      if (aIsToday !== bIsToday) return aIsToday ? -1 : 1
+      const aDistance = Math.abs(new Date(aDate.getFullYear(), aDate.getMonth(), aDate.getDate()).getTime() - todayStart.getTime())
+      const bDistance = Math.abs(new Date(bDate.getFullYear(), bDate.getMonth(), bDate.getDate()).getTime() - todayStart.getTime())
+      if (aDistance !== bDistance) return aDistance - bDistance
+      return String(a.startTime || '').localeCompare(String(b.startTime || ''))
+    })
+    .map(l => ({
     id: l.id,
     groupId: l.groupId,
     groupName: l.group?.course?.name || '-',

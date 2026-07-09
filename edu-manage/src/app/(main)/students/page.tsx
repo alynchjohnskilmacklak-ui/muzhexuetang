@@ -53,15 +53,21 @@ type Student = {
 }
 
 type GroupedStudents = Record<string, Student[]>
+type StudentSortBy = 'createdAt' | 'nameAsc' | 'nameDesc' | 'remainHoursAsc' | 'remainHoursDesc'
 
 function readQuery() {
-  if (typeof window === 'undefined') return { grade: 'all', courseType: 'all', q: '', status: '' }
+  if (typeof window === 'undefined') return { grade: 'all', courseType: 'all', q: '', status: '', sortBy: 'createdAt' as StudentSortBy }
   const params = new URLSearchParams(window.location.search)
+  const requestedSort = params.get('sortBy')
+  const sortBy: StudentSortBy = requestedSort === 'nameAsc' || requestedSort === 'nameDesc' || requestedSort === 'remainHoursAsc' || requestedSort === 'remainHoursDesc'
+    ? requestedSort
+    : 'createdAt'
   return {
     grade: params.get('grade') || 'all',
     courseType: params.get('courseType') || 'all',
     q: params.get('q') || '',
     status: params.get('status') || '',
+    sortBy,
   }
 }
 
@@ -76,6 +82,7 @@ export default function StudentsPage() {
   const [filterType, setFilterType] = useState('all')
   const [filterStatus, setFilterStatus] = useState<string | undefined>()
   const [lowHourOnly, setLowHourOnly] = useState(false)
+  const [sortBy, setSortBy] = useState<StudentSortBy>('createdAt')
   const [formOpen, setFormOpen] = useState(false)
   const [editData, setEditData] = useState<Record<string, unknown> | null>(null)
   const [importOpen, setImportOpen] = useState(false)
@@ -87,13 +94,14 @@ export default function StudentsPage() {
     setFilterType(query.courseType)
     setSearch(query.q)
     setFilterStatus(query.status || undefined)
+    setSortBy(query.sortBy)
   }, [])
 
   const allStudents = useMemo(() => Object.values(grouped).flat(), [grouped])
   const activeCount = allStudents.filter((student) => student.status === 'ACTIVE').length
   const lowHourCount = allStudents.filter((student) => student.status === 'ACTIVE' && student.remainHours <= 3).length
 
-  const updateUrl = useCallback((next: { grade?: string; courseType?: string; q?: string; status?: string; lowHour?: boolean }) => {
+  const updateUrl = useCallback((next: { grade?: string; courseType?: string; q?: string; status?: string; lowHour?: boolean; sortBy?: StudentSortBy }) => {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
     const merged = {
@@ -112,8 +120,11 @@ export default function StudentsPage() {
     else params.delete('status')
     if (next.lowHour) params.set('lowHours', '1')
     else if (next.lowHour === false) params.delete('lowHours')
+    const nextSortBy = next.sortBy ?? sortBy
+    if (nextSortBy !== 'createdAt') params.set('sortBy', nextSortBy)
+    else params.delete('sortBy')
     window.history.replaceState(null, '', `${window.location.pathname}${params.toString() ? `?${params}` : ''}`)
-  }, [filterGrade, filterStatus, filterType, search])
+  }, [filterGrade, filterStatus, filterType, search, sortBy])
 
   const fetchStudents = useCallback(async () => {
     setLoading(true)
@@ -126,6 +137,7 @@ export default function StudentsPage() {
     if (filterStatus) params.set('status', filterStatus)
     if (search) params.set('q', search)
     if (lowHourOnly) params.set('lowHours', '1')
+    params.set('sortBy', sortBy)
     try {
       const [studentRes, countRes] = await Promise.all([
         fetch(`/api/students?${params}`),
@@ -140,7 +152,7 @@ export default function StudentsPage() {
     } finally {
       setLoading(false)
     }
-  }, [division, filterGrade, filterStatus, filterType, lowHourOnly, search])
+  }, [division, filterGrade, filterStatus, filterType, lowHourOnly, search, sortBy])
 
   useEffect(() => { fetchStudents() }, [fetchStudents])
 
@@ -162,6 +174,11 @@ export default function StudentsPage() {
   const handleStatusChange = (value?: string) => {
     setFilterStatus(value)
     updateUrl({ status: value || '' })
+  }
+
+  const handleSortChange = (value: StudentSortBy) => {
+    setSortBy(value)
+    updateUrl({ sortBy: value })
   }
 
   const handleEdit = (student: Record<string, unknown>) => { setEditData(student); setFormOpen(true) }
@@ -280,9 +297,16 @@ export default function StudentsPage() {
                 options={GRADE_SELECT_OPTIONS.map((grade) => ({ label: grade, value: grade }))}
               />
               <Select
-                defaultValue="createdAt"
-                style={{ width: isMobile ? '100%' : 120 }}
-                options={[{ label: '最近添加', value: 'createdAt' }, { label: '课时升序', value: 'remainHours' }]}
+                value={sortBy}
+                onChange={handleSortChange}
+                style={{ width: isMobile ? '100%' : 152 }}
+                options={[
+                  { label: '最近添加', value: 'createdAt' },
+                  { label: '姓名 A-Z', value: 'nameAsc' },
+                  { label: '姓名 Z-A', value: 'nameDesc' },
+                  { label: '剩余课时升序', value: 'remainHoursAsc' },
+                  { label: '剩余课时降序', value: 'remainHoursDesc' },
+                ]}
               />
             </Space>
             <Space>

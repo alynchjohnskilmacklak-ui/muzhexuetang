@@ -851,7 +851,7 @@ img { -webkit-touch-callout: none; pointer-events: auto; }
 .ant-select-dropdown,
 .ant-picker-dropdown,
 .ant-dropdown {
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 .rc-virtual-list-holder {
@@ -1206,11 +1206,6 @@ img { -webkit-touch-callout: none; pointer-events: auto; }
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
-  }
-
-  body:has(.ant-select-open) {
-    overflow: hidden;
-    touch-action: none;
   }
 
 .rc-virtual-list-holder {

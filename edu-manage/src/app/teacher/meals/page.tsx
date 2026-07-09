@@ -10,6 +10,7 @@ export default async function TeacherMealsPage() {
   const teacher = await requireTeacherPage()
   const prisma = await getRequestPrisma()
   const today = startOfLocalDay(new Date())!
+  const tomorrow = new Date(today.getTime() + 86400000)
 
   // Active groups for this teacher
   const groups = await prisma.classGroup.findMany({
@@ -22,6 +23,15 @@ export default async function TeacherMealsPage() {
     },
     include: {
       course: { select: { id: true, name: true, type: true } },
+      classLessons: {
+        where: {
+          lessonDate: { gte: today, lt: tomorrow },
+          status: { notIn: ['CANCELLED', 'POSTPONED'] },
+        },
+        orderBy: { startTime: 'asc' },
+        take: 1,
+        select: { id: true, teacherId: true, startTime: true },
+      },
       enrollments: {
         where: { status: 'ACTIVE' },
         include: { student: { select: { id: true, name: true, grade: true, school: true } } },
@@ -31,7 +41,12 @@ export default async function TeacherMealsPage() {
 
   // Students already assigned to groups
   const groupedStudentIds = new Set<string>()
-  const mealGroups = groups.map(g => {
+  const visibleGroups = groups.filter((group) => {
+    if (group.course?.type !== 'GROUP') return true
+    const firstLesson = group.classLessons[0]
+    return Boolean(firstLesson && firstLesson.teacherId === teacher.id)
+  })
+  const mealGroups = visibleGroups.map(g => {
     const students = g.enrollments.map(e => {
       groupedStudentIds.add(e.student.id)
       return { id: e.student.id, name: e.student.name, grade: e.student.grade, school: e.student.school }
@@ -59,6 +74,7 @@ export default async function TeacherMealsPage() {
               { teacherId: teacher.id },
               { teacherAssignments: { some: { teacherId: teacher.id } } },
             ],
+            course: { type: { in: ['ONE_ON_ONE', 'SMALL_GROUP'] } },
           },
         },
       },

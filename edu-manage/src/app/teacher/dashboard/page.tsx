@@ -18,12 +18,30 @@ import {
 } from '@ant-design/icons'
 import { formatHours, formatPercent } from '@/lib/format'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useCountUp } from '@/hooks/useCountUp'
 import { fillName, resolveTier, TIER_QUICK_PERKS, TIER_THEME, TIER_WELCOME } from '@/constants/teacher-tier'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { PullToRefresh } from '@/components/PullToRefresh'
 
 const { Text } = Typography
+
+function localDateKey(date = new Date()) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function markWelcomeShown(key: string) {
+  try {
+    if (window.localStorage.getItem(key)) return true
+    window.localStorage.setItem(key, '1')
+    return false
+  } catch {
+    return false
+  }
+}
 
 type Tone = 'blue' | 'orange' | 'red' | 'green' | 'purple' | 'brown' | 'dark'
 
@@ -169,19 +187,24 @@ export default function TeacherDashboardPage() {
   useEffect(() => {
     const teacher = data?.teacher
     if (!teacher?.id) return
-    const storageKey = `mz_teacher_welcome_${teacher.id}`
-    if (window.sessionStorage.getItem(storageKey)) return
-    window.sessionStorage.setItem(storageKey, '1')
+    const storageKey = `mz_welcome_${teacher.id}_${localDateKey()}`
+    if (markWelcomeShown(storageKey)) return
     setWelcomeMounted(true)
     const showTimer = window.setTimeout(() => setWelcomeVisible(true), 30)
-    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 8000)
-    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 8600)
+    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 3500)
+    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 4100)
     return () => {
       window.clearTimeout(showTimer)
       window.clearTimeout(fadeTimer)
       window.clearTimeout(unmountTimer)
     }
   }, [data?.teacher])
+
+  const animatedTodayLessons = useCountUp(Number(data?.heroStats?.todayLessons) || 0)
+  const animatedPendingAttendance = useCountUp(Number(data?.heroStats?.pendingAttendance) || 0)
+  const animatedPendingFeedback = useCountUp(Number(data?.heroStats?.pendingFeedback) || 0)
+  const animatedPendingLeave = useCountUp(Number(data?.heroStats?.pendingLeave) || 0)
+  const animatedPendingPapers = useCountUp(Number(data?.heroStats?.pendingPapers) || 0)
 
   if (isLoading) return <CardSkeleton rows={3} />
   if (!data?.teacher) return <BrandEmpty title="未找到教师信息" icon={<UserOutlined />} />
@@ -191,11 +214,11 @@ export default function TeacherDashboardPage() {
   const tierTheme = TIER_THEME[tier]
   const tierWelcome = TIER_WELCOME[tier]
   const heroItems = [
-    { label: '今日课次', value: heroStats.todayLessons, color: '#123C35', suffix: '节' },
-    { label: '待考勤', value: heroStats.pendingAttendance, color: '#E8784A', suffix: '节' },
-    { label: '待发反馈', value: heroStats.pendingFeedback, color: '#E8784A', suffix: '条' },
-    { label: '待批请假', value: heroStats.pendingLeave, color: '#E8784A', suffix: '条' },
-    { label: '待推送试卷', value: heroStats.pendingPapers, color: '#E8784A', suffix: '份' },
+    { label: '今日课次', value: animatedTodayLessons, color: '#123C35', suffix: '节' },
+    { label: '待考勤', value: animatedPendingAttendance, color: '#E8784A', suffix: '节' },
+    { label: '待发反馈', value: animatedPendingFeedback, color: '#E8784A', suffix: '条' },
+    { label: '待批请假', value: animatedPendingLeave, color: '#E8784A', suffix: '条' },
+    { label: '待推送试卷', value: animatedPendingPapers, color: '#E8784A', suffix: '份' },
   ]
 
   return (

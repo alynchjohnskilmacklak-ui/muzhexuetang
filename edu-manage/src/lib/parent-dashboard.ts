@@ -183,6 +183,7 @@ export async function getParentDashboardData(userId: string, prismaClient?: Pris
   const todayMeal = await getEffectiveMealMenuForDate(today, prisma)
 
   return {
+    parentUserId: userId,
     students,
     studentTeachers,
     todaySchedules: [],

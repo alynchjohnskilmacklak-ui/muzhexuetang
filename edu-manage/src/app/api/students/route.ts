@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
-import { generateParentCredentials, generateParentCredentialsHashed } from '@/lib/pinyin'
+import { chineseToPinyin, generateParentCredentials, generateParentCredentialsHashed } from '@/lib/pinyin'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 
@@ -12,6 +12,26 @@ const normalizeCourseTypeFilter = (courseType: string) => {
   if (courseType === 'ONE_ON_TWO' || courseType === 'ONE_ON_THREE') return 'SMALL_GROUP'
   if (courseType === 'GROUP' || courseType === 'ONE_ON_ONE' || courseType === 'SMALL_GROUP') return courseType
   return null
+}
+
+const STUDENT_SORTS = ['createdAt', 'nameAsc', 'nameDesc', 'remainHoursAsc', 'remainHoursDesc'] as const
+type StudentSortBy = (typeof STUDENT_SORTS)[number]
+
+function compareStudents(a: { id: string; name: string; createdAt: Date; remainHours: number }, b: { id: string; name: string; createdAt: Date; remainHours: number }, sortBy: StudentSortBy) {
+  if (sortBy === 'nameAsc' || sortBy === 'nameDesc') {
+    const direction = sortBy === 'nameAsc' ? 1 : -1
+    const byPinyin = chineseToPinyin(a.name).localeCompare(chineseToPinyin(b.name), 'en')
+    if (byPinyin) return byPinyin * direction
+    const byName = a.name.localeCompare(b.name, 'zh-CN')
+    if (byName) return byName * direction
+  }
+  if (sortBy === 'remainHoursAsc' || sortBy === 'remainHoursDesc') {
+    const direction = sortBy === 'remainHoursAsc' ? 1 : -1
+    const byHours = (a.remainHours - b.remainHours) * direction
+    if (byHours) return byHours
+  }
+  const byCreatedAt = b.createdAt.getTime() - a.createdAt.getTime()
+  return byCreatedAt || a.id.localeCompare(b.id)
 }
 
 export const GET = apiHandler(async (req: NextRequest) => {
@@ -29,6 +49,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const groupByGrade = searchParams.get('groupByGrade') === 'true'
   const lowHours = searchParams.get('lowHours') === '1'
   const q = searchParams.get('q') || ''
+  const requestedSort = searchParams.get('sortBy')
+  const sortBy: StudentSortBy = STUDENT_SORTS.includes(requestedSort as StudentSortBy) ? requestedSort as StudentSortBy : 'createdAt'
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '100')
   const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
@@ -102,8 +124,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
           orderBy: { enrolledAt: 'desc' },
         },
       },
-      skip,
-      take: limit,
       orderBy: { createdAt: 'desc' },
     }),
     prisma.student.count({ where }),
@@ -125,20 +145,21 @@ export const GET = apiHandler(async (req: NextRequest) => {
       courseType: activeEnrollments[0]?.group.course.type || null,
     }
   })
+  const sorted = [...normalized].sort((a, b) => compareStudents(a, b, sortBy))
 
   if (groupByGrade) {
-    const grouped: Record<string, typeof normalized> = {}
+    const grouped: Record<string, typeof sorted> = {}
     const gradeOrder = ['高三', '高二', '高一', '初三', '初二', '初一']
     for (const g of gradeOrder) {
-      const gStudents = normalized.filter((student) => student.grade === g)
+      const gStudents = sorted.filter((student) => student.grade === g)
       if (gStudents.length) grouped[g] = gStudents
     }
-    const otherStudents = normalized.filter((student) => !student.grade || !gradeOrder.includes(student.grade))
+    const otherStudents = sorted.filter((student) => !student.grade || !gradeOrder.includes(student.grade))
     if (otherStudents.length) grouped['未设年级'] = otherStudents
     return NextResponse.json(grouped)
   }
 
-  return NextResponse.json({ students: normalized, total, page, limit })
+  return NextResponse.json({ students: sorted.slice(skip, skip + limit), total, page, limit })
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {

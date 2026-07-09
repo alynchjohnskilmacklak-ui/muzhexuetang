@@ -98,33 +98,57 @@ const FEATURES = [
   },
 ]
 
-export function SplashScreen({ onDone }: { onDone: () => void }) {
+export type SplashVariant = 'compact' | 'full'
+
+export function SplashScreen({
+  onDone,
+  variant = 'compact',
+  duration = 1500,
+}: {
+  onDone: () => void
+  variant?: SplashVariant
+  duration?: number
+}) {
   const [phase, setPhase] = useState<'logo' | 'features'>('logo')
   const [shownFeatures, setShownFeatures] = useState<number[]>([])
   const [exiting, setExiting] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(false)
+  const showFeatures = variant === 'full' && phase === 'features'
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase('features'), 1600)
-    const t2 = setTimeout(() => {
-      setExiting(true)
-      setTimeout(onDone, 600)
-    }, 4000)
-    return () => {
-      clearTimeout(t1)
-      clearTimeout(t2)
+    const totalDuration = Math.max(300, duration)
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setReducedMotion(reduceMotion)
+    if (reduceMotion) {
+      const doneTimer = window.setTimeout(onDone, Math.min(totalDuration, 150))
+      return () => window.clearTimeout(doneTimer)
     }
-  }, [onDone])
+
+    const featureTimer = variant === 'full'
+      ? window.setTimeout(() => setPhase('features'), Math.min(1600, Math.max(300, totalDuration * .4)))
+      : null
+    const exitDuration = variant === 'full' ? 600 : 250
+    const exitTimer = window.setTimeout(() => setExiting(true), Math.max(0, totalDuration - exitDuration))
+    const doneTimer = window.setTimeout(onDone, totalDuration)
+    return () => {
+      if (featureTimer) window.clearTimeout(featureTimer)
+      window.clearTimeout(exitTimer)
+      window.clearTimeout(doneTimer)
+    }
+  }, [duration, onDone, variant])
 
   useEffect(() => {
-    if (phase !== 'features') return
+    if (!showFeatures) return
+    const timers: number[] = []
     FEATURES.slice(0, 4).forEach((_, i) => {
-      setTimeout(() => setShownFeatures((prev) => [...prev, i]), i * 110 + 60)
+      timers.push(window.setTimeout(() => setShownFeatures((prev) => [...prev, i]), i * 110 + 60))
     })
-    setTimeout(() => setShownFeatures((prev) => [...prev, 4]), 4 * 110 + 60 + 180)
-  }, [phase])
+    timers.push(window.setTimeout(() => setShownFeatures((prev) => [...prev, 4]), 4 * 110 + 60 + 180))
+    return () => timers.forEach((timer) => window.clearTimeout(timer))
+  }, [showFeatures])
 
   return (
-    <div style={{
+    <div className="splash-screen-root" style={{
       position: 'fixed',
       inset: 0,
       zIndex: 9999,
@@ -132,11 +156,11 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: phase === 'features' ? 'flex-start' : 'center',
+      justifyContent: showFeatures ? 'flex-start' : 'center',
       opacity: exiting ? 0 : 1,
-      transition: 'opacity 0.6s ease',
-      overflow: phase === 'features' ? 'auto' : 'hidden',
-      padding: phase === 'features' ? '32px 0 28px' : '20px 0',
+      transition: reducedMotion ? 'none' : `opacity ${variant === 'full' ? 600 : 250}ms ease`,
+      overflow: showFeatures ? 'auto' : 'hidden',
+      padding: showFeatures ? '32px 0 28px' : '20px 0',
     }}>
       <div style={{
         position: 'absolute',
@@ -156,7 +180,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
         width: '100%',
         transformOrigin: 'left center',
         background: 'linear-gradient(90deg,#E87545,#0d9e82)',
-        animation: 'splashProg 4s linear forwards',
+        animation: reducedMotion ? 'none' : `splashProg ${Math.max(300, duration)}ms linear forwards`,
         willChange: 'transform',
       }} />
 
@@ -168,8 +192,8 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
         transition: 'transform 0.75s cubic-bezier(0.4,0,0.2,1), margin 0.75s ease',
         transform: 'scale(1)',
         marginBottom: 12,
-        animation: 'splashLogoIn 0.85s cubic-bezier(0.34,1.56,0.64,1) 0.2s both',
-      }} className={phase === 'features' ? 'splash-logo-block splash-logo-block-features' : 'splash-logo-block'}>
+        animation: reducedMotion ? 'none' : 'splashLogoIn 0.65s cubic-bezier(0.34,1.56,0.64,1) 0.08s both',
+      }} className={showFeatures ? 'splash-logo-block splash-logo-block-features' : 'splash-logo-block'}>
         <div className="splash-logo-mark" style={{ position: 'relative', width: 'clamp(136px, 18vw, 168px)', height: 'clamp(136px, 18vw, 168px)', filter: 'drop-shadow(0 0 16px rgba(232,117,69,0.25))' }}>
           <div style={{
             position: 'absolute',
@@ -180,7 +204,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
             height: 280,
             borderRadius: '50%',
             border: '1px solid rgba(232,117,69,0.22)',
-            animation: 'splashRing 2s ease 0.9s infinite',
+            animation: reducedMotion ? 'none' : 'splashRing 2s ease 0.45s infinite',
             pointerEvents: 'none',
             willChange: 'transform, opacity',
           }} />
@@ -193,7 +217,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
             height: 280,
             borderRadius: '50%',
             border: '1px solid rgba(13,158,130,0.16)',
-            animation: 'splashRing 2s ease 1.5s infinite',
+            animation: reducedMotion ? 'none' : 'splashRing 2s ease 0.8s infinite',
             pointerEvents: 'none',
             willChange: 'transform, opacity',
           }} />
@@ -214,7 +238,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
           background: 'linear-gradient(135deg,#6f2c12 20%,#E87545 55%,#F09A5B 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          animation: 'splashFadeUp 0.55s ease 0.9s both',
+          animation: reducedMotion ? 'none' : `splashFadeUp 0.45s ease ${variant === 'compact' ? 0.25 : 0.9}s both`,
           transition: 'opacity 0.3s, max-height 0.3s',
         }} className="splash-brand-title">
           牧哲学堂
@@ -223,14 +247,14 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
           width: 80,
           height: 1,
           background: 'linear-gradient(90deg,transparent,#E87545 40%,#0d9e82 60%,transparent)',
-          animation: 'splashLineIn 0.5s ease 1.3s both',
+          animation: reducedMotion ? 'none' : `splashLineIn 0.4s ease ${variant === 'compact' ? 0.4 : 1.3}s both`,
           transition: 'opacity 0.3s, max-height 0.3s',
         }} />
         <div style={{
           fontSize: 14,
           color: 'rgba(111,44,18,0.58)',
           letterSpacing: 8,
-          animation: 'splashFadeUp 0.45s ease 1.15s both',
+          animation: reducedMotion ? 'none' : `splashFadeUp 0.4s ease ${variant === 'compact' ? 0.48 : 1.15}s both`,
           transition: 'opacity 0.3s, max-height 0.3s',
         }} className="splash-brand-en">
           M O R E J O Y
@@ -239,14 +263,14 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
           fontSize: 14,
           color: 'rgba(111,44,18,0.42)',
           letterSpacing: 2,
-          animation: 'splashFadeUp 0.45s ease 1.6s both',
+          animation: reducedMotion ? 'none' : `splashFadeUp 0.4s ease ${variant === 'compact' ? 0.62 : 1.6}s both`,
           transition: 'opacity 0.3s, max-height 0.3s',
         }} className="splash-brand-slogan">
           在思想的原野上，放牧星辰
         </div>
       </div>
 
-      {phase === 'features' && (
+      {showFeatures && (
         <div style={{
           width: '100%',
           maxWidth: 500,
@@ -406,6 +430,13 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
         @keyframes splashProg {
           from { transform: scaleX(0); }
           to   { transform: scaleX(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .splash-screen-root,
+          .splash-screen-root * {
+            animation: none !important;
+            transition: none !important;
+          }
         }
       `}</style>
     </div>

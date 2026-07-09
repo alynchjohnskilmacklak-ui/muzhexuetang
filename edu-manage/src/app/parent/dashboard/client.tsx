@@ -15,6 +15,20 @@ import { useCountUp } from '@/hooks/useCountUp'
 
 const { Title, Text } = Typography
 
+function todayKey() {
+  return format(new Date(), 'yyyy-MM-dd')
+}
+
+function hasShownToday(key: string) {
+  try {
+    if (window.localStorage.getItem(key)) return true
+    window.localStorage.setItem(key, '1')
+    return false
+  } catch {
+    return false
+  }
+}
+
 const MOOD_COLORS: Record<string, { bg: string; color: string; label: string }> = {
   GREAT: { bg: '#E1F5EE', color: '#1D9E75', label: '棒' },
   GOOD: { bg: '#EEEDFE', color: '#534AB7', label: '好' },
@@ -77,11 +91,13 @@ function getLessonStatus(l: { startTime: string; endTime: string; attendanceSubm
 }
 
 export function ParentDashboardClient({
+  parentUserId,
   students, studentTeachers, todaySchedules, todayClassLessons,
   notifications, latestPost, latestClassroomFeedback,
   monthMoods, monthClassroomFeedbacks, attendanceRate, badgeCount,
   studentStats = {}, todayAttendances = [], todayFeedbackCount = 0, todayPaperCount = 0, todayMeal = null,
 }: {
+  parentUserId?: string
   students: any[]
   studentTeachers: Record<string, string[]>
   todaySchedules: any[]
@@ -126,6 +142,9 @@ export function ParentDashboardClient({
 
   useEffect(() => {
     if (!activeStudent?.id) return
+    const welcomeOwnerId = parentUserId || activeStudent.id
+    const storageKey = `mz_welcome_${welcomeOwnerId}_${todayKey()}`
+    if (hasShownToday(storageKey)) return
     setWelcomeMounted(true)
     setWelcomeVisible(false)
     const showTimer = window.setTimeout(() => setWelcomeVisible(true), 30)
@@ -136,7 +155,7 @@ export function ParentDashboardClient({
       window.clearTimeout(fadeTimer)
       window.clearTimeout(unmountTimer)
     }
-  }, [activeStudent?.id])
+  }, [activeStudent?.id, parentUserId])
 
   const selectChild = (childId: string) => {
     window.location.href = `/parent/dashboard?childId=${childId}`

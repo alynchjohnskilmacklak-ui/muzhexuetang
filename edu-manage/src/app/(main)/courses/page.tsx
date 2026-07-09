@@ -108,6 +108,11 @@ function generatePreview(startDate: string, recurringDays: string[], totalLesson
   return dates
 }
 
+function countScheduledLessons(template: unknown) {
+  return (Array.isArray(template) ? template as Record<string, unknown>[] : [])
+    .filter(row => row.teacherId && row.subject && row.startTime && row.endTime).length
+}
+
 function buildScheduleTemplate(type: CourseType, periods: SchedulePeriod[] = CLASS_PERIODS_ONLY): ScheduleTemplateRow[] {
   if (type !== 'GROUP') return []
   return periods.filter(period => period.type === 'CLASS').map(p => ({
@@ -751,7 +756,8 @@ export default function CoursesPage() {
             const color = SUBJECT_COLOR[(course?.subject as string) || '数学'] || '#e8784a'
             const statusInfo = GROUP_STATUS_MAP[group.status as string] || { color: 'default', label: String(group.status || '-') }
             const completed = Number(group.completedLessons || 0)
-            const total = Number(group.totalLessons || 0)
+            const realLessonCount = Number((group._count as Record<string, number> | undefined)?.classLessons ?? 0)
+            const total = realLessonCount || Number(group.totalLessons || 0)
             const progress = total > 0 ? Math.round((completed / total) * 100) : 0
 
             return (
@@ -1044,8 +1050,11 @@ export default function CoursesPage() {
                 <Input type="date" value={(createData.startDate as string) || todayString()} onChange={(event) => setCreateData((prev) => ({ ...prev, startDate: event.target.value }))} style={{ width: '100%' }} />
               </Col>
               <Col xs={12} sm={8}><InputNumber min={1} max={100} addonBefore="限额" addonAfter="人" style={{ width: '100%' }} value={Number(createData.maxStudents || 20)} onChange={(value) => setCreateData((prev) => ({ ...prev, maxStudents: value || 20 }))} /></Col>
-              <Col xs={12} sm={8}><InputNumber min={1} max={120} addonBefore="课次" style={{ width: '100%' }} value={Number(createData.totalLessons || 16)} onChange={(value) => setCreateData((prev) => ({ ...prev, totalLessons: value || 16 }))} /></Col>
+              <Col xs={12} sm={8}><InputNumber min={1} max={120} addonBefore="上课天数" style={{ width: '100%' }} value={Number(createData.totalLessons || 16)} onChange={(value) => setCreateData((prev) => ({ ...prev, totalLessons: value || 16 }))} /></Col>
             </Row>
+            <div style={{ color: '#98A2B3', fontSize: 12 }}>
+              共 {previewDates.length} 天 × 每天 {countScheduledLessons(createData.scheduleTemplate)} 节 = {previewDates.length * countScheduledLessons(createData.scheduleTemplate)} 节课
+            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, paddingTop: 12, borderTop: '1px solid #EEE7E1' }}>
               <Button onClick={() => setCreateStep(0)}>上一步</Button>
               <Button type="primary" onClick={handleNextStep}>下一步</Button>
@@ -1058,8 +1067,7 @@ export default function CoursesPage() {
           const selectedSlots = (createData.scheduleSlots as string[]) || []
           const validAssignments = ((createData.teacherAssignments as Record<string, unknown>[]) || [])
             .filter(assignment => assignment.teacherId && assignment.subject)
-          const scheduledCount = (Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : [])
-            .filter(row => row.teacherId && row.subject && row.startTime && row.endTime).length
+          const scheduledCount = countScheduledLessons(createData.scheduleTemplate)
 
           return (
           <Space direction="vertical" size={16} style={{ width: '100%' }}>
@@ -1227,9 +1235,10 @@ export default function CoursesPage() {
 
             <Row gutter={[12, 10]}>
               <Col xs={12} sm={8}><InputNumber min={isHourly ? 60 : 30} max={isHourly ? 120 : 240} step={isHourly ? 60 : 5} addonBefore="课时" addonAfter="分钟" style={{ width: '100%' }} value={Number(createData.lessonMinutes || (isHourly ? 60 : 40))} disabled={isHourly} onChange={(value) => setCreateData((prev) => ({ ...prev, lessonMinutes: value || (isHourly ? 60 : 40) }))} /></Col>
-              <Col xs={12} sm={8}><InputNumber min={1} max={120} addonBefore="总天次" style={{ width: '100%' }} value={Number(createData.totalLessons || 16)} onChange={(value) => setCreateData((prev) => ({ ...prev, totalLessons: value || 16 }))} /></Col>
+              <Col xs={12} sm={8}><InputNumber min={1} max={120} addonBefore="上课天数" style={{ width: '100%' }} value={Number(createData.totalLessons || 16)} onChange={(value) => setCreateData((prev) => ({ ...prev, totalLessons: value || 16 }))} /></Col>
             </Row>
             <div style={{ background: '#FCFBF9', border: '1px solid #EEE7E1', borderRadius: 8, padding: 14, minHeight: 104 }}>
+              <div style={{ color: '#98A2B3', fontSize: 12, marginBottom: 6 }}>共 {previewDates.length} 天 × 每天 {scheduledCount} 节 = {previewDates.length * scheduledCount} 节课</div>
               <div style={{ color: '#1F2329', fontWeight: 700, marginBottom: 8 }}>课次预览（共{previewDates.length}天，每天{scheduledCount}节，合计{previewDates.length * scheduledCount}节）</div>
               {previewDates.length ? previewDates.slice(0, 6).map((date, index) => (
                 <div key={date.toISOString()} style={{ color: '#98A2B3', fontSize: 12, lineHeight: '22px' }}>
