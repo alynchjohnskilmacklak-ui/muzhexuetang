@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   Col,
+  DatePicker,
   Drawer,
   Dropdown,
   Empty,
@@ -36,6 +37,7 @@ import {
 } from '@ant-design/icons'
 import { addDays, format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
+import dayjs from 'dayjs'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { MobileSelect } from '@/components/MobileSelect'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -158,6 +160,9 @@ export default function CoursesPage() {
   const [regeneratingGroupId, setRegeneratingGroupId] = useState('')
   const [deletingGroupId, setDeletingGroupId] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<{id:string;name:string}|null>(null)
+  const [addDayOpen, setAddDayOpen] = useState(false)
+  const [addDayDate, setAddDayDate] = useState('')
+  const [addingDay, setAddingDay] = useState(false)
   const isMobile = useIsMobile() ?? false
 
   const groupList = useMemo(() => Array.isArray(groups) ? groups : [], [groups])
@@ -630,6 +635,34 @@ export default function CoursesPage() {
     setDeleteTarget({ id: groupId, name: groupName })
   }
 
+  const handleAddDay = async () => {
+    if (!addDayDate) {
+      toast.error('请选择日期')
+      return
+    }
+    setAddingDay(true)
+    try {
+      const res = await fetch('/api/class-lessons/add-day', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: addDayDate }),
+      })
+      const payload = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(payload.error || '新增上课日失败')
+      let msg = `已为 ${payload.affectedGroups} 个班新增 ${payload.createdLessons} 节课`
+      if (payload.skipped > 0) msg += `，其中 ${payload.skipped} 个班当天已有课，已跳过`
+      if (payload.skippedNoTemplate > 0) msg += `，${payload.skippedNoTemplate} 个班无样板可复制`
+      toast.success(msg)
+      setAddDayOpen(false)
+      mutateGroups()
+      mutateDashboard()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '新增上课日失败')
+    } finally {
+      setAddingDay(false)
+    }
+  }
+
   const handleRegenerateLessons = async (groupId: string) => {
     setRegeneratingGroupId(groupId)
     try {
@@ -656,6 +689,7 @@ export default function CoursesPage() {
       subtitle="课程设置、班级创建、课表生成和课次调整"
       actions={
         <Space>
+          <Button icon={<CalendarOutlined />} onClick={() => { setAddDayDate(dayjs().format('YYYY-MM-DD')); setAddDayOpen(true) }}>新增上课日</Button>
           <Button icon={<CopyOutlined />} onClick={() => setCopyOpen(true)}>批量复制</Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate} style={{ background: '#e8784a' }}>
             新建班级
@@ -1329,6 +1363,29 @@ export default function CoursesPage() {
         }}
       >
         确定删除「{deleteTarget?.name}」吗？系统会先备份班级及相关课次、报名、考勤、测评数据，然后从业务数据库中清除。
+      </Modal>
+
+      <Modal
+        title="新增一个上课日"
+        open={addDayOpen}
+        onCancel={() => setAddDayOpen(false)}
+        onOk={handleAddDay}
+        confirmLoading={addingDay}
+        okText="确认新增"
+        cancelText="取消"
+        okButtonProps={{ style: { background: '#e8784a', borderColor: '#e8784a' } }}
+      >
+        <Space direction="vertical" style={{ width: '100%' }} size={14}>
+          <DatePicker
+            placeholder="选择上课日期"
+            value={addDayDate ? dayjs(addDayDate) : null}
+            onChange={(_, dateString) => setAddDayDate(Array.isArray(dateString) ? dateString[0] || '' : dateString)}
+            style={{ width: '100%' }}
+          />
+          <div style={{ fontSize: 12, color: '#8d806f', padding: '10px 12px', borderRadius: 8, background: '#FFF8F4', border: '1px solid #F0EBE5', lineHeight: 1.7 }}>
+            将为当前全部在读班级，按各自平时的课表，在这一天排上一整天相同的课（和周一~周五一样），考勤、课堂反馈、家长端都会同步显示。已在该日有课的班级会自动跳过。
+          </div>
+        </Space>
       </Modal>
     </PageLayout>
   )

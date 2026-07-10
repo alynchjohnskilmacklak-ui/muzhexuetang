@@ -67,7 +67,7 @@ function avatarColor(name: string) {
 
 function getStatusChip(student: TeacherStudent) {
   const remain = Number(student.remainHours || 0)
-  const days = Number(student.daysSinceLastFeedback || 999)
+  const days = student.daysSinceLastFeedback == null ? 999 : Number(student.daysSinceLastFeedback)
   if (remain <= 2) return { text: '课时不足', color: '#E24B4A' }
   if (days > 7) return { text: '未反馈', color: '#D4537E' }
   return { text: '已反馈', color: '#1D9E75' }
@@ -98,7 +98,7 @@ export default function TeacherStudentsPage() {
     const matchSearch = !q.trim() || searchText.includes(q.trim())
     const matchFilter = filter === '全部'
       || (filter === '课时不足' && Number(student.remainHours || 0) <= 2)
-      || (filter === '未反馈' && Number(student.daysSinceLastFeedback || 999) > 7)
+      || (filter === '未反馈' && (student.daysSinceLastFeedback == null ? 999 : Number(student.daysSinceLastFeedback)) > 7)
       || student.grade === filter
     const matchGrade = !gradeFilter || student.grade === gradeFilter
     return matchSearch && matchFilter && matchGrade

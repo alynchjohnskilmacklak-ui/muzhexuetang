@@ -51,6 +51,8 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     unreadPaperComments,
     unreadPostComments,
     pendingLeaveRequests,
+    todayPublishedFeedbacks,
+    weekPublishedFeedbacks,
   ] = await Promise.all([
     prisma.classLesson.findMany({
       where: { ...lessonWhere, lessonDate: { gte: today, lt: todayEnd } },
@@ -141,10 +143,47 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       orderBy: { createdAt: 'desc' },
       take: 4,
     }),
+    prisma.classroomFeedback.findMany({
+      where: { teacherId, status: 'PUBLISHED', createdAt: { gte: today, lt: todayEnd } },
+      select: { classLessonId: true, feedbackGroupId: true, studentIds: true },
+    }),
+    prisma.classroomFeedback.findMany({
+      where: { teacherId, status: 'PUBLISHED', createdAt: { gte: weekStart, lt: weekEnd } },
+      select: {
+        classLessonId: true,
+        feedbackGroupId: true,
+        createdAt: true,
+        classLesson: { select: { groupId: true } },
+      },
+    }),
   ])
+
+  const coveredByLesson = new Map<string, Set<string>>()
+  const coveredByGroup = new Map<string, Set<string>>()
+  for (const feedback of todayPublishedFeedbacks) {
+    if (feedback.classLessonId) {
+      const set = coveredByLesson.get(feedback.classLessonId) || new Set<string>()
+      feedback.studentIds.forEach((studentId) => set.add(studentId))
+      coveredByLesson.set(feedback.classLessonId, set)
+    }
+    if (feedback.feedbackGroupId) {
+      const set = coveredByGroup.get(feedback.feedbackGroupId) || new Set<string>()
+      feedback.studentIds.forEach((studentId) => set.add(studentId))
+      coveredByGroup.set(feedback.feedbackGroupId, set)
+    }
+  }
+
+  const coveredStudentIdsFor = (lesson: typeof todayLessons[number]) => {
+    const covered = new Set<string>()
+    coveredByGroup.get(lesson.groupId)?.forEach((studentId) => covered.add(studentId))
+    coveredByLesson.get(lesson.id)?.forEach((studentId) => covered.add(studentId))
+    return covered
+  }
 
   const decoratedTodayLessons = todayLessons.map((lesson) => {
     const status = lessonStatusLabel(lesson, now)
+    const expectedStudentIds = lesson.group.enrollments.map((enrollment) => enrollment.student.id)
+    const covered = coveredStudentIdsFor(lesson)
     return {
       id: lesson.id,
       time: `${lesson.startTime}-${lesson.endTime}`,
@@ -160,14 +199,22 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       statusTone: status.tone,
       attendanceSubmittedAt: lesson.attendanceSubmittedAt,
       lessonId: lesson.id,
-      hasFeedback: lesson.classroomFeedbacks.length > 0,
+      hasFeedback: expectedStudentIds.length > 0
+        ? expectedStudentIds.every((studentId) => covered.has(studentId))
+        : lesson.classroomFeedbacks.length > 0,
       feedbackId: lesson.classroomFeedbacks[0]?.id || null,
     }
   })
 
   const endedTodayLessons = todayLessons.filter((lesson) => atTime(lesson.lessonDate, lesson.endTime) < now)
   const pendingAttendanceLessons = endedTodayLessons.filter((lesson) => !lesson.attendanceSubmittedAt)
-  const pendingFeedbackLessons = todayLessons.filter((lesson) => lesson.attendanceSubmittedAt && lesson.classroomFeedbacks.length === 0)
+  const pendingFeedbackLessons = todayLessons.filter((lesson) => {
+    if (!lesson.attendanceSubmittedAt) return false
+    const expectedStudentIds = lesson.group.enrollments.map((enrollment) => enrollment.student.id)
+    if (expectedStudentIds.length === 0) return false
+    const covered = coveredStudentIdsFor(lesson)
+    return expectedStudentIds.some((studentId) => !covered.has(studentId))
+  })
   const unreadParentComments = unreadPaperComments + unreadPostComments
 
   const todos = [
@@ -340,8 +387,20 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
 
   const endedWeekLessons = weekLessons.filter((lesson) => atTime(lesson.lessonDate, lesson.endTime) < now)
   const attendanceDone = endedWeekLessons.filter((lesson) => lesson.attendanceSubmittedAt || lesson.attendances.length > 0).length
-  const completedWeekLessons = weekLessons.filter((lesson) => lesson.status === 'COMPLETED' || lesson.attendanceSubmittedAt)
-  const classroomDone = completedWeekLessons.filter((lesson) => lesson.classroomFeedbacks.length > 0).length
+  const feedbackExpectedGroupIds = new Set(
+    weekLessons
+      .filter((lesson) => lesson.status === 'COMPLETED' || lesson.attendanceSubmittedAt)
+      .map((lesson) => lesson.groupId),
+  )
+  const feedbackDoneGroupIds = new Set<string>()
+  weekPublishedFeedbacks.forEach((feedback) => {
+    if (feedback.feedbackGroupId) {
+      feedbackDoneGroupIds.add(feedback.feedbackGroupId)
+      return
+    }
+    if (feedback.classLesson?.groupId) feedbackDoneGroupIds.add(feedback.classLesson.groupId)
+  })
+  const classroomDone = [...feedbackExpectedGroupIds].filter((groupId) => feedbackDoneGroupIds.has(groupId)).length
   const paperDone = weekPapers.filter((paper) => paper.status === 'PUBLISHED').length
   const weekPerformanceStudentIds = new Set(
     students
@@ -368,9 +427,8 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     feedbackTasks,
     weekCompletion: {
       attendance: { done: attendanceDone, total: endedWeekLessons.length, percent: percent(attendanceDone, endedWeekLessons.length) },
-      classroomFeedback: { done: classroomDone, total: completedWeekLessons.length, percent: percent(classroomDone, completedWeekLessons.length) },
+      classroomFeedback: { done: classroomDone, total: feedbackExpectedGroupIds.size, percent: percent(classroomDone, feedbackExpectedGroupIds.size) },
       paperPush: { done: paperDone, total: weekPapers.length, percent: percent(paperDone, weekPapers.length) },
-      performance: { done: weekPerformanceStudentIds.size, total: students.length, percent: percent(weekPerformanceStudentIds.size, students.length) },
     },
     quickActions: [
       { label: '提交今日考勤', desc: '完成课后考勤与课时结算', href: '/teacher/attendance', tone: 'orange' },

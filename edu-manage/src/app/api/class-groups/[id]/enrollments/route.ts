@@ -27,6 +27,14 @@ async function syncStudentHours(tx: Prisma.TransactionClient, studentId: string)
   })
 }
 
+function trimmedMeanHours(hours: number[]) {
+  const sorted = [...hours].sort((a, b) => a - b)
+  const trimCount = Math.max(0, Math.floor(sorted.length * 0.2))
+  const trimmed = sorted.slice(trimCount, sorted.length - trimCount)
+  if (!trimmed.length) return 0
+  return roundHours(trimmed.reduce((sum, value) => sum + value, 0) / trimmed.length)
+}
+
 export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
@@ -92,8 +100,18 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   if (totalHours > 0) {
     hours = roundHours(totalHours)
   } else {
-    const lessonCount = Number(group._count?.classLessons || group.totalLessons || 0)
-    hours = roundHours(lessonCount * hoursPerLesson(group.lessonMinutes))
+    const peerEnrollments = await prisma.enrollment.findMany({
+      where: { groupId: id, status: 'ACTIVE', studentId: { not: studentId } },
+      select: { remainHours: true },
+      orderBy: { enrolledAt: 'asc' },
+    })
+    if (peerEnrollments.length) {
+      hours = trimmedMeanHours(peerEnrollments.map((enrollment) => Number(enrollment.remainHours || 0)))
+    } else {
+      const totalLessonCount = Number(group.totalLessons || group._count?.classLessons || 0)
+      const remainingLessonCount = Math.max(0, totalLessonCount - Number(group.completedLessons || 0))
+      hours = roundHours(remainingLessonCount * hoursPerLesson(group.lessonMinutes))
+    }
   }
   const enrollment = await prisma.$transaction(async (tx) => {
     const created = existing

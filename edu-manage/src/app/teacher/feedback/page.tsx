@@ -210,6 +210,10 @@ function FeedbackPageInner() {
 
   const toggleStudent = (id: string) => {
     const selected = selectedStudentIds.includes(id)
+    if (!selected && selectedStudentIds.length >= 5) {
+      toast.warning('单次最多选择5名学员')
+      return
+    }
     if (!selected && feedbackedTodaySet.has(id)) {
       toast('该同学今日已反馈，重复发布不计入奖励', { duration: 3000 })
     }
@@ -223,11 +227,14 @@ function FeedbackPageInner() {
     }
   }
   const selectAll = () => {
-    const availableIds = filteredStudents.filter((s: any) => !feedbackedTodaySet.has(s.id)).map((s: any) => s.id)
-    if (availableIds.length < filteredStudents.length) {
-      toast('已跳过今日已反馈学生，如需补充请手动单独选择', { duration: 3000 })
+    const selectedIds = filteredStudents.slice(0, 5).map((s: any) => s.id)
+    if (filteredStudents.length > 5) {
+      toast('单次最多选择5名学员，已自动选择前5名', { duration: 3000 })
     }
-    setSelectedStudentIds(availableIds)
+    if (selectedIds.some((id: string) => feedbackedTodaySet.has(id))) {
+      toast('部分学生今日已反馈，重复发布不计入奖励', { duration: 3000 })
+    }
+    setSelectedStudentIds(selectedIds)
   }
   const clearAll = () => { setSelectedStudentIds([]); setStudentPerf({}) }
   const cycleStudentPerf = (id: string, event?: { stopPropagation: () => void }) => {
@@ -979,7 +986,7 @@ function FeedbackPageInner() {
                 <div style={{ marginTop: 8 }}>
                   <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
                     <Input size="small" prefix={<SearchOutlined />} value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="搜索" style={{ flex: 1, borderRadius: 8 }} />
-                    <Button size="small" onClick={selectAll} style={{ fontSize: 11 }}>全选（不含已反馈）</Button>
+                    <Button size="small" onClick={selectAll} style={{ fontSize: 11 }}>全选（最多5人）</Button>
                     <Button size="small" onClick={clearAll} style={{ fontSize: 11 }}>清空</Button>
                   </div>
                   {filteredStudents.length === 0 ? (
@@ -1082,7 +1089,7 @@ function FeedbackPageInner() {
                   <div style={{ marginTop: 12 }}>
                     <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
                       <Input prefix={<SearchOutlined />} value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="搜索学生" style={{ flex: 1, borderRadius: 10 }} />
-                      <Button onClick={selectAll}>全选（不含已反馈）</Button>
+                      <Button onClick={selectAll}>全选（最多5人）</Button>
                       <Button onClick={clearAll}>清空</Button>
                     </div>
                     {filteredStudents.length === 0 ? (

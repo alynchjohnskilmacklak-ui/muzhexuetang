@@ -270,6 +270,14 @@ export const POST = apiHandler(async (request: NextRequest) => {
         },
       })
 
+      const completedCount = await tx.classLesson.count({
+        where: { groupId: group.id, status: 'COMPLETED' },
+      })
+      await tx.classGroup.update({
+        where: { id: group.id },
+        data: { completedLessons: completedCount },
+      })
+
       await tx.activityLog.create({
         data: {
           userId: user.id,

@@ -266,6 +266,7 @@ model ClassLesson {
   note                  String?
   hoursDeductedAt       DateTime?
   attendanceSubmittedAt DateTime?
+  isManual              Boolean      @default(false)
   createdAt             DateTime     @default(now())
 
   attendances        Attendance[]

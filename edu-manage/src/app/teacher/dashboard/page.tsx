@@ -106,7 +106,6 @@ interface DashboardData {
     attendance: CompletionItem
     classroomFeedback: CompletionItem
     paperPush: CompletionItem
-    performance: CompletionItem
   }
   monthlyStats: { totalStudents: number; monthlyHours: number }
   pendingTasks: { unreadParentComments: number; pendingLeave: number }
@@ -443,7 +442,6 @@ export default function TeacherDashboardPage() {
             <CompletionRow label="考勤提交率" item={weekCompletion.attendance} color="#123C35" />
             <CompletionRow label="课堂反馈率" item={weekCompletion.classroomFeedback} color="#123C35" />
             <CompletionRow label="试卷推送率" item={weekCompletion.paperPush} color="#123C35" />
-            <CompletionRow label="表现反馈率" item={weekCompletion.performance} color="#123C35" />
           </Card>
 
           <Card bordered={false} title="教学概览" style={{ borderRadius: 12, marginBottom: 16 }}>

@@ -1,0 +1,1 @@
+ALTER TABLE "ClassLesson" ADD COLUMN "isManual" BOOLEAN NOT NULL DEFAULT false;

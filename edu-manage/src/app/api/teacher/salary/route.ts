@@ -23,16 +23,27 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
     const totalLesson = transactions.filter((item) => item.type === 'LESSON_PAY').reduce((sum, item) => sum + item.amount, 0)
     const totalFeedback = transactions.filter((item) => item.type === 'FEEDBACK_BONUS').reduce((sum, item) => sum + item.amount, 0)
-    const total = totalLesson + totalFeedback
+    const totalAdjustment = transactions
+      .filter((item) => item.type !== 'LESSON_PAY' && item.type !== 'FEEDBACK_BONUS')
+      .reduce((sum, item) => sum + item.amount, 0)
+    const total = transactions.reduce((sum, item) => sum + item.amount, 0)
+    const typeLabel = (type: string) => {
+      if (type === 'LESSON_PAY') return '课时费'
+      if (type === 'FEEDBACK_BONUS') return '反馈奖励'
+      if (type === 'manual_adjust') return '薪资调整'
+      return '其他调整'
+    }
 
     return NextResponse.json({
       period,
       total: Number(total.toFixed(2)),
       totalLesson: Number(totalLesson.toFixed(2)),
       totalFeedback: Number(totalFeedback.toFixed(2)),
+      totalAdjustment: Number(totalAdjustment.toFixed(2)),
       transactions: transactions.map((item) => ({
         id: item.id,
         type: item.type,
+        typeLabel: typeLabel(item.type),
         amount: item.amount,
         description: item.description,
         lessonDate: item.lessonDate?.toISOString() ?? null,

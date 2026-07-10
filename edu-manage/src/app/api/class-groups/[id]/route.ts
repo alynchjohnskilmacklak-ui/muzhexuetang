@@ -81,6 +81,12 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const primaryTeacherId = typeof teacherId === 'string' && teacherId ? teacherId : normalizedAssignments[0]?.teacherId
 
   const group = await prisma.$transaction(async (tx) => {
+    const previous = await tx.classGroup.findUnique({
+      where: { id },
+      select: { id: true, name: true, teacherId: true, teacher: { select: { id: true, name: true } } },
+    })
+    if (!previous) throw new Error('CLASS_GROUP_NOT_FOUND')
+
     const updated = await tx.classGroup.update({
       where: { id },
       data: {
@@ -95,6 +101,49 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
     })
 
     // 班级归档：级联清理学员报名、课时、未来课次
+    if (primaryTeacherId && primaryTeacherId !== previous.teacherId) {
+      const nextTeacher = await tx.teacher.findUnique({
+        where: { id: primaryTeacherId },
+        select: { id: true, name: true },
+      })
+      const affectedLessons = await tx.classLesson.updateMany({
+        where: { groupId: id, status: { notIn: ['COMPLETED', 'CANCELLED'] } },
+        data: { teacherId: primaryTeacherId },
+      })
+      const activeEnrollments = await tx.enrollment.findMany({
+        where: { groupId: id, status: 'ACTIVE' },
+        select: { id: true, studentId: true, student: { select: { mainTeacherId: true } } },
+      })
+      for (const enrollment of activeEnrollments) {
+        if (enrollment.student.mainTeacherId !== previous.teacherId) continue
+        const oldTeacherGroupCount = await tx.enrollment.count({
+          where: {
+            studentId: enrollment.studentId,
+            groupId: { not: id },
+            status: 'ACTIVE',
+            group: {
+              status: { not: 'ARCHIVED' },
+              course: { isActive: true },
+              OR: [
+                { teacherId: previous.teacherId },
+                { teacherAssignments: { some: { teacherId: previous.teacherId } } },
+              ],
+            },
+          },
+        })
+        if (oldTeacherGroupCount === 0) {
+          await tx.student.update({ where: { id: enrollment.studentId }, data: { mainTeacherId: primaryTeacherId } })
+        }
+      }
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: '更换老师',
+          detail: `${updated.name}：${previous.teacher?.name || '未分配'} -> ${nextTeacher?.name || primaryTeacherId}，影响 ${affectedLessons.count} 节未完成课次`,
+        },
+      })
+    }
+
     if (status === 'ARCHIVED') {
       const activeEnrollments = await tx.enrollment.findMany({
         where: { groupId: id, status: 'ACTIVE' },

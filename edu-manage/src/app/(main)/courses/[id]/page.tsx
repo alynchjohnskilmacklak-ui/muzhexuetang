@@ -3,8 +3,8 @@
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
-import { Alert, Button, Card, Col, Dropdown, Empty, Input, InputNumber, message, Modal, Popconfirm, Progress, Row, Select, Space, Spin, Statistic, Table, Tag } from 'antd'
-import { ArrowLeftOutlined, CalendarOutlined, DeleteOutlined, MoreOutlined, PlusOutlined, ReloadOutlined, TeamOutlined } from '@ant-design/icons'
+import { Alert, Button, Card, Col, Dropdown, Empty, Input, InputNumber, message, Modal, Popconfirm, Progress, Row, Select, Space, Statistic, Table, Tag } from 'antd'
+import { ArrowLeftOutlined, CalendarOutlined, DeleteOutlined, MoreOutlined, PlusOutlined, ReloadOutlined, TeamOutlined, UserSwitchOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { PageLayout } from '@/components/Layout/PageLayout'
@@ -30,9 +30,22 @@ export default function CourseGroupDetailPage() {
   const [submitting, setSubmitting] = useState(false)
   const [starting, setStarting] = useState(false)
   const [syncingHours, setSyncingHours] = useState(false)
+  const [replaceOpen, setReplaceOpen] = useState(false)
+  const [replaceKey, setReplaceKey] = useState<string>('')
+  const [replaceOldTeacherId, setReplaceOldTeacherId] = useState<string>('')
+  const [replaceOldSubject, setReplaceOldSubject] = useState<string>('')
+  const [replaceOldTeacherName, setReplaceOldTeacherName] = useState<string>('')
+  const [replaceNewTeacherId, setReplaceNewTeacherId] = useState<string>()
+  const [replacing, setReplacing] = useState(false)
+
+  const [addTeacherOpen, setAddTeacherOpen] = useState(false)
+  const [addTeacherId, setAddTeacherId] = useState<string>()
+  const [addTeacherSubject, setAddTeacherSubject] = useState('')
+  const [addingTeacher, setAddingTeacher] = useState(false)
 
   const { data: group, mutate, isLoading } = useSWR(params.id ? `/api/class-groups/${params.id}` : null, fetcher)
   const { data: studentsData } = useSWR(enrollOpen ? `/api/students?limit=200&q=${encodeURIComponent(studentSearch)}` : null, fetcher)
+  const { data: teachers } = useSWR('/api/teachers?status=ACTIVE', fetcher)
 
   const lessons = useMemo(() => Array.isArray(group?.classLessons) ? group.classLessons : [], [group])
   const enrollments = useMemo(() => Array.isArray(group?.enrollments) ? group.enrollments : [], [group])
@@ -49,6 +62,43 @@ export default function CourseGroupDetailPage() {
   const todayStr = format(new Date(), 'yyyy-MM-dd')
   const todayLessons = lessons.filter((lesson: Record<string, unknown>) => String(lesson.lessonDate || '').slice(0, 10) === todayStr)
   const visibleLessons = todayLessons.length > 0 ? todayLessons : lessons.slice(0, 5)
+  const teacherList = Array.isArray(teachers?.teachers) ? teachers.teachers : Array.isArray(teachers) ? teachers : []
+  const teacherAssignments = useMemo(() => Array.isArray(group?.teacherAssignments) ? group.teacherAssignments : [], [group])
+
+  // 合并 teacherAssignments + classLessons 去重作为数据源
+  const mergedTeacherRecords = useMemo(() => {
+    const map = new Map<string, { teacherId: string; subject: string; teacherName: string }>()
+    for (const item of teacherAssignments) {
+      const tId = item.teacherId as string
+      const sub = (item.subject as string) || ''
+      const tName = (item.teacher as Record<string, unknown> | undefined)?.name as string || tId
+      const key = `${tId}::${sub}`
+      if (!map.has(key)) map.set(key, { teacherId: tId, subject: sub, teacherName: tName })
+    }
+    for (const lesson of lessons) {
+      const tId = lesson.teacherId as string
+      const sub = (lesson.subject as string) || ''
+      const tName = (lesson.teacher as Record<string, unknown> | undefined)?.name as string || tId
+      if (!tId) continue
+      const key = `${tId}::${sub}`
+      if (!map.has(key)) map.set(key, { teacherId: tId, subject: sub, teacherName: tName })
+    }
+    return Array.from(map.values())
+  }, [teacherAssignments, lessons])
+
+  const replaceAffectedLessons = replaceOldTeacherId
+    ? lessons.filter((lesson: Record<string, unknown>) => (
+      lesson.status !== 'COMPLETED'
+      && lesson.status !== 'CANCELLED'
+      && lesson.teacherId === replaceOldTeacherId
+      && (replaceOldSubject ? lesson.subject === replaceOldSubject : true)
+    )).length
+    : 0
+
+  const replaceTeacherOptions = teacherList
+    .filter((teacher: Record<string, unknown>) => teacher.id && teacher.id !== replaceOldTeacherId)
+    .map((teacher: Record<string, unknown>) => ({ label: String(teacher.name || '未命名老师'), value: teacher.id as string }))
+  const replaceNewTeacherName = teacherList.find((teacher: Record<string, unknown>) => teacher.id === replaceNewTeacherId)?.name || '新老师'
   const teacherTeam = Array.isArray(group?.teacherAssignments) && group.teacherAssignments.length
     ? group.teacherAssignments.map((item: Record<string, unknown>) => (item.teacher as Record<string, unknown>)?.name).filter(Boolean).join('、')
     : group?.teacher?.name
@@ -162,6 +212,83 @@ export default function CourseGroupDetailPage() {
     }
   }
 
+  const openReplaceTeacher = () => {
+    setReplaceKey('')
+    setReplaceOldTeacherId('')
+    setReplaceOldSubject('')
+    setReplaceOldTeacherName('')
+    setReplaceNewTeacherId(undefined)
+    setReplaceOpen(true)
+  }
+
+  const handleSelectReplaceEntry = (entry: { teacherId: string; subject: string; teacherName: string }) => {
+    const key = `${entry.teacherId}::${entry.subject}`
+    setReplaceKey(key)
+    setReplaceOldTeacherId(entry.teacherId)
+    setReplaceOldSubject(entry.subject)
+    setReplaceOldTeacherName(entry.teacherName)
+    setReplaceNewTeacherId(undefined)
+  }
+
+  const handleReplaceTeacher = async () => {
+    if (!replaceOldTeacherId || !replaceNewTeacherId) {
+      message.warning('请选择新的任课老师')
+      return
+    }
+    setReplacing(true)
+    try {
+      const res = await fetch(`/api/class-groups/${params.id}/replace-teacher`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          oldTeacherId: replaceOldTeacherId,
+          newTeacherId: replaceNewTeacherId,
+          subject: replaceOldSubject || null,
+        }),
+      })
+      const payload = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(payload.error || '更换老师失败')
+      message.success(`已更换，影响 ${payload.affectedLessons || 0} 节课次`)
+      setReplaceOpen(false)
+      setReplaceKey('')
+      setReplaceOldTeacherId('')
+      setReplaceOldSubject('')
+      setReplaceOldTeacherName('')
+      setReplaceNewTeacherId(undefined)
+      mutate()
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '更换老师失败')
+    } finally {
+      setReplacing(false)
+    }
+  }
+
+  const handleAddTeacher = async () => {
+    if (!addTeacherId || !addTeacherSubject.trim()) {
+      message.warning('请选择老师和科目')
+      return
+    }
+    setAddingTeacher(true)
+    try {
+      const res = await fetch(`/api/class-groups/${params.id}/add-teacher`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teacherId: addTeacherId, subject: addTeacherSubject.trim() }),
+      })
+      const payload = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(payload.error || '添加任课老师失败')
+      message.success(`已添加 ${addTeacherSubject} 任课老师`)
+      setAddTeacherOpen(false)
+      setAddTeacherId(undefined)
+      setAddTeacherSubject('')
+      mutate()
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '添加任课老师失败')
+    } finally {
+      setAddingTeacher(false)
+    }
+  }
+
   if (isLoading) {
     return <PageLayout title="班级管理"><CardSkeleton rows={3} /></PageLayout>
   }
@@ -179,6 +306,7 @@ export default function CourseGroupDetailPage() {
           trigger={['click']}
           menu={{
             items: [
+              { key: 'change-teacher', icon: <UserSwitchOutlined />, label: '更换老师', onClick: openReplaceTeacher },
               { key: 'regenerate', icon: <ReloadOutlined />, label: '重新生成课表', onClick: handleRegenerateLessons },
               { key: 'back', icon: <ArrowLeftOutlined />, label: '返回课程管理', onClick: () => router.push('/courses') },
               {
@@ -206,6 +334,7 @@ export default function CourseGroupDetailPage() {
         <Space wrap>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a' }}>添加学员</Button>
           {group.status === 'WAITING' && <Button type="primary" loading={starting} onClick={handleStartGroup} style={{ background: '#27a644' }}>开班并通知家长</Button>}
+          <Button icon={<UserSwitchOutlined />} onClick={openReplaceTeacher}>更换老师</Button>
           <Button icon={<ReloadOutlined />} onClick={handleRegenerateLessons}>重新生成课表</Button>
           <Popconfirm title="确定删除这个班级？" description="删除后班级会归档，不再出现在课程和排课列表。" onConfirm={handleDeleteGroup}>
             <Button danger icon={<DeleteOutlined />}>删除班级</Button>
@@ -281,7 +410,16 @@ export default function CourseGroupDetailPage() {
                 { title: '日期', dataIndex: 'lessonDate', render: (value: string) => format(new Date(value), 'yyyy-MM-dd EEEE', { locale: zhCN }) },
                 { title: '时间', render: (_, row: Record<string, unknown>) => `${row.startTime}-${row.endTime}` },
                 { title: '科目/老师', render: (_, row: Record<string, unknown>) => `${row.subject || group.course?.subject || '-'} / ${(row.teacher as Record<string, unknown> | undefined)?.name || teacherTeam || '-'}` },
-                { title: '状态', dataIndex: 'status', render: (value: string) => <Tag>{value}</Tag> },
+                {
+                  title: '状态',
+                  dataIndex: 'status',
+                  render: (value: string, row: Record<string, unknown>) => (
+                    <Space size={4}>
+                      <Tag>{value}</Tag>
+                      {row.isManual === true && <Tag color="orange">临时</Tag>}
+                    </Space>
+                  ),
+                },
               ]}
             />
           </Card>
@@ -350,6 +488,127 @@ export default function CourseGroupDetailPage() {
             onChange={(value) => setTotalHours(value)}
             style={{ width: '100%' }}
           />
+        </Space>
+      </Modal>
+      <Modal
+        title="更换任课老师"
+        open={replaceOpen}
+        onCancel={() => setReplaceOpen(false)}
+        footer={null}
+        width={480}
+      >
+        <Space direction="vertical" style={{ width: '100%' }} size={14}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1201', marginBottom: 8 }}>选择要替换的任课记录</div>
+            <Space direction="vertical" style={{ width: '100%' }} size={8}>
+              {mergedTeacherRecords.map((entry) => {
+                const key = `${entry.teacherId}::${entry.subject}`
+                const selected = replaceKey === key
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => handleSelectReplaceEntry(entry)}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      border: selected ? '1px solid #E8784A' : '1px solid #EEE7E1',
+                      background: selected ? '#FFF3EC' : '#fff',
+                      borderRadius: 10,
+                      padding: '10px 12px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                      <span style={{ color: '#1a1201', fontWeight: 700 }}>{entry.subject || '主讲'}</span>
+                      <span style={{ color: selected ? '#E8784A' : '#5a4e3a' }}>{entry.teacherName || '未分配老师'}</span>
+                    </div>
+                  </button>
+                )
+              })}
+              {!mergedTeacherRecords.length && <Alert type="warning" showIcon message="该班级暂无任课老师记录，请先添加授课团队。" />}
+            </Space>
+          </div>
+          {replaceOldTeacherId && (
+            <>
+              <Select
+                placeholder="更换为"
+                value={replaceNewTeacherId}
+                onChange={setReplaceNewTeacherId}
+                options={replaceTeacherOptions}
+                style={{ width: '100%' }}
+                optionFilterProp="label"
+                showSearch
+                listHeight={240}
+                virtual={false}
+                getPopupContainer={(trigger) => trigger.parentElement || document.body}
+              />
+              <div style={{ fontSize: 12, color: '#8d806f', padding: '10px 12px', borderRadius: 8, background: '#FFF8F4', border: '1px solid #F0EBE5', lineHeight: 1.7 }}>
+                将把【{replaceOldSubject || '主讲'}】的【{replaceOldTeacherName || replaceOldTeacherId}】更换为【{replaceNewTeacherName}】，
+                影响 {replaceAffectedLessons} 节尚未完成的课次，已完成课次不受影响。
+              </div>
+              <Button
+                type="primary"
+                block
+                loading={replacing}
+                disabled={!replaceNewTeacherId}
+                onClick={handleReplaceTeacher}
+                style={{ background: '#e8784a', borderColor: '#e8784a' }}
+              >
+                确认更换
+              </Button>
+            </>
+          )}
+          <div style={{ borderTop: '1px solid #EEE7E1', paddingTop: 12 }}>
+            <Button
+              type="dashed"
+              block
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setAddTeacherId(undefined)
+                setAddTeacherSubject('')
+                setAddTeacherOpen(true)
+              }}
+            >
+              添加任课老师
+            </Button>
+          </div>
+        </Space>
+      </Modal>
+
+      <Modal
+        title="添加任课老师"
+        open={addTeacherOpen}
+        onCancel={() => setAddTeacherOpen(false)}
+        onOk={handleAddTeacher}
+        confirmLoading={addingTeacher}
+        okText="确认添加"
+        cancelText="取消"
+        okButtonProps={{ style: { background: '#e8784a', borderColor: '#e8784a' } }}
+      >
+        <Space direction="vertical" style={{ width: '100%' }} size={14}>
+          <Select
+            placeholder="选择老师"
+            value={addTeacherId}
+            onChange={setAddTeacherId}
+            options={teacherList.map((t: Record<string, unknown>) => ({ label: String(t.name || ''), value: t.id as string }))}
+            style={{ width: '100%' }}
+            optionFilterProp="label"
+            showSearch
+            listHeight={240}
+            virtual={false}
+            getPopupContainer={(trigger) => trigger.parentElement || document.body}
+          />
+          <Select
+            placeholder="选择科目"
+            value={addTeacherSubject || undefined}
+            onChange={setAddTeacherSubject}
+            style={{ width: '100%' }}
+            options={['语文', '数学', '英语', '物理', '化学', '生物', '地理', '历史', '政治'].map((s) => ({ label: s, value: s }))}
+          />
+          <div style={{ fontSize: 12, color: '#8d806f', padding: '10px 12px', borderRadius: 8, background: '#FFF8F4', border: '1px solid #F0EBE5', lineHeight: 1.7 }}>
+            仅补入对应表，不自动排课。排课请用&ldquo;新增上课日&rdquo;或重新生成课表。
+          </div>
         </Space>
       </Modal>
     </PageLayout>

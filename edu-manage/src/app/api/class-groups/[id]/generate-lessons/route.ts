@@ -58,13 +58,13 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
 
   // Clean up attendances before deleting lessons (FK constraint)
   const oldLessons = await prisma.classLesson.findMany({
-    where: { groupId: id, status: { not: 'COMPLETED' } },
+    where: { groupId: id, status: { not: 'COMPLETED' }, isManual: false },
     select: { id: true },
   })
   const oldIds = oldLessons.map(l => l.id)
   await prisma.attendance.deleteMany({ where: { lessonId: { in: oldIds } } })
   await prisma.classLesson.deleteMany({
-    where: { groupId: id, status: { not: 'COMPLETED' } },
+    where: { groupId: id, status: { not: 'COMPLETED' }, isManual: false },
   })
 
   const dates: Date[] = []
@@ -123,9 +123,13 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     created += result.count
   }
 
+  const manualLessonCount = await prisma.classLesson.count({
+    where: { groupId: id, isManual: true, status: { not: 'CANCELLED' } },
+  })
+
   await prisma.classGroup.update({
     where: { id },
-    data: { totalLessons: created, lessonStartTime: startTime, lessonMinutes: mins,
+    data: { totalLessons: created + manualLessonCount, lessonStartTime: startTime, lessonMinutes: mins,
       recurringDays: days, startDate: start },
   })
 

@@ -156,6 +156,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '请选择学员或填写反馈内容' }, { status: 400 })
   }
 
+  if (isTeacher && !classLessonId && resolvedStudentIds.length > 5) {
+    return NextResponse.json({ error: '单次反馈最多选择5名学员' }, { status: 400 })
+  }
+
   // Get student-parent mapping for notifications
   const studentsData = resolvedStudentIds.length
     ? await prisma.student.findMany({ where: { id: { in: resolvedStudentIds } }, select: { id: true, name: true, parentId: true, parentUserId: true } })

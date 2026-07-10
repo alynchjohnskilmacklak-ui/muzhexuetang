@@ -18,13 +18,15 @@ const PERIOD_OPTIONS = [
 ]
 
 const TYPE_META: Record<string, { color: string; label: string }> = {
-  LESSON_PAY: { color: '#1D9E75', label: '课时薪资' },
+  LESSON_PAY: { color: '#1D9E75', label: '课时费' },
   FEEDBACK_BONUS: { color: '#E8784A', label: '反馈奖励' },
+  manual_adjust: { color: '#7A6F5F', label: '薪资调整' },
 }
 
 interface SalaryTransaction {
   id: string
   type: string
+  typeLabel?: string
   amount: number
   description?: string | null
   lessonDate?: string | null
@@ -35,6 +37,7 @@ interface SalaryPayload {
   total: number
   totalLesson: number
   totalFeedback: number
+  totalAdjustment: number
   transactions: SalaryTransaction[]
 }
 
@@ -43,6 +46,12 @@ export default function TeacherSalaryPage() {
   const [period, setPeriod] = useState('month')
   const { data, isLoading } = useSWR<SalaryPayload>(`/api/teacher/salary?period=${period}`, fetcher)
   const transactions = data?.transactions ?? []
+
+  const renderAmount = (value: number) => (
+    <Text strong style={{ color: value >= 0 ? '#1D9E75' : '#C0392B' }}>
+      {value >= 0 ? '+' : ''}¥{value.toFixed(2)}
+    </Text>
+  )
 
   const columns = [
     {
@@ -57,7 +66,11 @@ export default function TeacherSalaryPage() {
       dataIndex: 'type',
       key: 'type',
       width: 110,
-      render: (value: string) => <Tag color={TYPE_META[value]?.color ?? 'default'} style={{ borderRadius: 999 }}>{TYPE_META[value]?.label ?? value}</Tag>,
+      render: (value: string, record: SalaryTransaction) => (
+        <Tag color={TYPE_META[value]?.color ?? 'default'} style={{ borderRadius: 999 }}>
+          {TYPE_META[value]?.label ?? record.typeLabel ?? '其他调整'}
+        </Tag>
+      ),
     },
     {
       title: '说明',
@@ -72,7 +85,7 @@ export default function TeacherSalaryPage() {
       key: 'amount',
       width: 100,
       align: 'right' as const,
-      render: (value: number) => <Text strong style={{ color: '#1D9E75' }}>+¥{value.toFixed(2)}</Text>,
+      render: renderAmount,
     },
   ]
 
@@ -84,7 +97,7 @@ export default function TeacherSalaryPage() {
         <Segmented options={PERIOD_OPTIONS} value={period} onChange={(value) => setPeriod(value as string)} />
 
         <Row gutter={[12, 12]}>
-          <Col xs={24} sm={8}>
+          <Col xs={24} sm={6}>
             <Card bordered={false} style={{ borderRadius: 8, background: 'linear-gradient(135deg,#1D9E75,#27B885)' }}>
               <Statistic
                 title={<span style={{ color: 'rgba(255,255,255,.82)', fontSize: 13 }}>合计薪资</span>}
@@ -97,14 +110,19 @@ export default function TeacherSalaryPage() {
               />
             </Card>
           </Col>
-          <Col xs={12} sm={8}>
+          <Col xs={12} sm={6}>
             <Card bordered={false} style={{ borderRadius: 8 }}>
               <Statistic title="课时薪资" value={data?.totalLesson ?? 0} precision={2} suffix="元" valueStyle={{ color: '#1D9E75' }} loading={isLoading} />
             </Card>
           </Col>
-          <Col xs={12} sm={8}>
+          <Col xs={12} sm={6}>
             <Card bordered={false} style={{ borderRadius: 8 }}>
               <Statistic title="反馈奖励" value={data?.totalFeedback ?? 0} precision={2} suffix="元" valueStyle={{ color: '#E8784A' }} loading={isLoading} />
+            </Card>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Card bordered={false} style={{ borderRadius: 8 }}>
+              <Statistic title="其他调整" value={data?.totalAdjustment ?? 0} precision={2} suffix="元" valueStyle={{ color: '#7A6F5F' }} loading={isLoading} />
             </Card>
           </Col>
         </Row>
@@ -117,9 +135,9 @@ export default function TeacherSalaryPage() {
                   <div key={transaction.id} style={{ padding: 12, borderRadius: 10, border: '1px solid rgba(0,0,0,.06)', background: '#faf8f5' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                       <Tag color={TYPE_META[transaction.type]?.color ?? 'default'} style={{ margin: 0, borderRadius: 999 }}>
-                        {TYPE_META[transaction.type]?.label ?? transaction.type}
+                        {TYPE_META[transaction.type]?.label ?? transaction.typeLabel ?? '其他调整'}
                       </Tag>
-                      <Text strong style={{ color: '#1D9E75' }}>+¥{transaction.amount.toFixed(2)}</Text>
+                      {renderAmount(transaction.amount)}
                     </div>
                     <Text style={{ display: 'block', marginTop: 8, color: '#1a1201' }}>{transaction.description || '-'}</Text>
                     <Text type="secondary" style={{ display: 'block', marginTop: 5, fontSize: 12 }}>
@@ -145,8 +163,8 @@ export default function TeacherSalaryPage() {
 
         <Card title="薪资规则说明" bordered={false} style={{ borderRadius: 8 }}>
           <Space direction="vertical" size={6}>
-            <Text type="secondary" style={{ fontSize: 12 }}>课时薪资：完成考勤提交后自动发放，每节课仅计一次。</Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>反馈奖励：发布课堂反馈后按学员人数发放，同一课次反馈奖励只计一次。</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>课时费：完成考勤提交后自动发放，每节课仅计一次。</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>反馈奖励：发布课堂反馈后按学员人数发放，同一学生当天同课程类型只奖励一次。</Text>
             <Text type="secondary" style={{ fontSize: 12 }}>默认初中班课 22 元/小时，高中班课 26 元/小时；一对一按年级独立定价。</Text>
             <Text type="secondary" style={{ fontSize: 12 }}>默认班课反馈奖励 0.5 元/人，一对一反馈奖励 1 元/人。</Text>
           </Space>
