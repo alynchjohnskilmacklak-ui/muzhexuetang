@@ -29,6 +29,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const { user, teacher, prisma } = await requireCurrentTeacher()
     const body = await req.json()
     const classLessonId = typeof body.classLessonId === 'string' && body.classLessonId ? body.classLessonId : null
+    let feedbackGroupId = typeof body.feedbackGroupId === 'string' && body.feedbackGroupId
+      ? body.feedbackGroupId
+      : typeof body.groupId === 'string' && body.groupId
+        ? body.groupId
+        : null
+    let feedbackCourseType = body.feedbackCourseType === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
     const targetType = body.targetType === 'STUDENT' ? 'STUDENT' : 'CLASS'
     const status = body.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT'
     const knowledgePoints = asStringArray(body.knowledgePoints, 10)
@@ -56,6 +62,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         include: {
           group: {
             include: {
+              course: { select: { type: true } },
               enrollments: {
                 where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
                 include: { student: { select: { id: true, name: true, parentId: true, parentUserId: true } } },
@@ -66,6 +73,29 @@ export const POST = apiHandler(async (req: NextRequest) => {
       })
       if (!lesson) return NextResponse.json({ error: '课次不存在或无权限' }, { status: 403 })
       lessonStudents = lesson.group.enrollments.map((enrollment) => enrollment.student)
+      feedbackGroupId = lesson.groupId
+      feedbackCourseType = lesson.group.course?.type === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
+    } else if (feedbackGroupId) {
+      const group = await prisma.classGroup.findFirst({
+        where: {
+          id: feedbackGroupId,
+          status: { not: 'ARCHIVED' },
+          OR: [
+            { teacherId: teacher.id },
+            { teacherAssignments: { some: { teacherId: teacher.id } } },
+          ],
+        },
+        include: {
+          course: { select: { type: true } },
+          enrollments: {
+            where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
+            include: { student: { select: { id: true, name: true, parentId: true, parentUserId: true } } },
+          },
+        },
+      })
+      if (!group) return NextResponse.json({ error: '班级不存在或无权限' }, { status: 403 })
+      lessonStudents = group.enrollments.map((enrollment) => enrollment.student)
+      feedbackCourseType = group.course.type === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
     }
 
     const targetIds = targetType === 'CLASS'
@@ -77,6 +107,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const students = lessonStudents.length
       ? lessonStudents.filter((student) => targetIds.includes(student.id))
       : []
+    if (lessonStudents.length && students.length !== new Set(targetIds).size) {
+      return NextResponse.json({ error: '包含不属于当前班级或课次的学员' }, { status: 403 })
+    }
     if (!lessonStudents.length) {
       for (const studentId of targetIds) {
         const student = await assertTeacherOwnsStudent(teacher.id, studentId)
@@ -90,6 +123,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
         data: {
           teacherId: teacher.id,
           classLessonId,
+          feedbackGroupId,
+          feedbackCourseType,
           targetType,
           source: 'teacher',
           studentIds: students.map((student) => student.id),
@@ -149,7 +184,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           detail: `${students.length}名学员 · ${knowledgePoints.join('/') || '课堂反馈'}`,
           entityType: 'ClassroomFeedback',
           entityId: created.id,
-          metadata: { status, targetType, studentCount: students.length, imageCount: imageUrls.length },
+          metadata: { status, targetType, studentCount: students.length, imageCount: imageUrls.length, feedbackGroupId, feedbackCourseType },
         },
       })
 

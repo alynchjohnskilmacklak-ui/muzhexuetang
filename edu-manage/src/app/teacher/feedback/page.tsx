@@ -37,11 +37,11 @@ const MASTERY_OPTIONS = [
 ]
 
 type FeedbackCourseBucket = 'GROUP' | 'ONE_ON_ONE'
-type StudentPerfLevel = 'GREAT' | 'OKAY' | 'WEAK'
+type StudentPerfLevel = 'GREAT' | 'OKAY' | 'NEEDS_IMPROVEMENT'
 const STUDENT_PERF_META: Record<StudentPerfLevel, { label: string; short: string; color: string; bg: string; border: string }> = {
-  GREAT: { label: '积极突出', short: '积极', color: '#1D9E75', bg: '#EAF7F1', border: '#BFE7D4' },
-  OKAY: { label: '表现一般', short: '一般', color: '#7A6F5F', bg: '#F5F2EE', border: '#E5DDD4' },
-  WEAK: { label: '待努力', short: '待努力', color: '#C77F00', bg: '#FFF4DE', border: '#F3D6A6' },
+  GREAT: { label: '积极', short: '积极', color: '#1D9E75', bg: '#EAF7F1', border: '#BFE7D4' },
+  OKAY: { label: '一般', short: '一般', color: '#7A6F5F', bg: '#F5F2EE', border: '#E5DDD4' },
+  NEEDS_IMPROVEMENT: { label: '需提升', short: '需提升', color: '#C77F00', bg: '#FFF4DE', border: '#F3D6A6' },
 }
 type AiFeedbackResult = {
   studentIds?: string[]
@@ -245,7 +245,7 @@ function FeedbackPageInner() {
   const clearAll = () => { setSelectedStudentIds([]); setStudentPerf({}) }
   const cycleStudentPerf = (id: string, event?: { stopPropagation: () => void }) => {
     event?.stopPropagation()
-    const levels: StudentPerfLevel[] = ['GREAT', 'OKAY', 'WEAK']
+    const levels: StudentPerfLevel[] = ['GREAT', 'OKAY', 'NEEDS_IMPROVEMENT']
     setStudentPerf(prev => {
       const current = prev[id] || 'GREAT'
       const next = levels[(levels.indexOf(current) + 1) % levels.length]
@@ -310,6 +310,9 @@ function FeedbackPageInner() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               classLessonId: null,
+              groupId: groupId || null,
+              feedbackGroupId: groupId || null,
+              feedbackCourseType: feedbackCourseBucket,
               targetType: 'STUDENT',
               studentIds: [item.studentId],
               mood, tags, knowledgePoints: kps, badge, summary, overallComment: item.comment,

@@ -32,6 +32,7 @@ type Message = {
   updatedAt: string; createdAt: string
 }
 type Student = { id: string; name: string; grade: string | null }
+type TeacherRecommendation = { id: string; name: string; subject: string | null; source: 'lesson' | 'group' }
 
 function unreadCount(msg: Message) {
   return msg.replies.filter(r => !r.isReadByParent && r.role !== 'parent').length
@@ -144,10 +145,11 @@ function MessageCard({
 }
 
 export function ParentMessagesClient({
-  students, initialMessages,
+  students, initialMessages, teacherRecommendations,
 }: {
   students: Student[]
   initialMessages: Message[]
+  teacherRecommendations: Record<string, TeacherRecommendation[]>
 }) {
   const isMobile = useIsMobile() ?? false
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -155,6 +157,8 @@ export function ParentMessagesClient({
   const [replyText, setReplyText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [composeForm] = Form.useForm()
+  const composeStudentId = Form.useWatch('studentId', composeForm)
+  const recommendedTeachers = composeStudentId ? teacherRecommendations[composeStudentId] || [] : []
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const [activeChildId, setActiveChildId] = useState<string>(() => {
@@ -182,6 +186,15 @@ export function ParentMessagesClient({
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
     }
   }, [active?.replies.length])
+
+  useEffect(() => {
+    if (!showCompose || !composeStudentId) return
+    const recommendation = teacherRecommendations[composeStudentId]?.[0]
+    composeForm.setFieldsValue({
+      teacherId: recommendation?.id,
+      subject: recommendation?.subject || composeForm.getFieldValue('subject') || undefined,
+    })
+  }, [composeForm, composeStudentId, showCompose, teacherRecommendations])
 
   const handleSelect = async (id: string) => {
     setActiveId(id)
@@ -215,6 +228,7 @@ export function ParentMessagesClient({
           title: values.title,
           content: values.content,
           studentId: values.studentId || null,
+          teacherId: values.teacherId || null,
           subject: values.subject || null,
         }),
       })
@@ -356,6 +370,19 @@ export function ParentMessagesClient({
               </Select.Option>
             ))}
           </Select>
+        </Form.Item>
+        <Form.Item name="teacherId" label="联系老师" rules={[{ required: true, message: '请选择任课老师' }]}
+          extra={recommendedTeachers[0] ? `已优先推荐${recommendedTeachers[0].source === 'lesson' ? '最近课次' : '当前班级'}任课老师，可手动调整` : '请选择孩子当前的任课老师'}>
+          <Select
+            placeholder="选择任课老师"
+            options={recommendedTeachers.map((teacher) => ({
+              value: teacher.id,
+              label: `${teacher.name}老师${teacher.subject ? ` · ${teacher.subject}` : ''}`,
+            }))}
+            getPopupContainer={(trigger) => trigger.parentElement || document.body}
+            listHeight={200}
+            virtual={false}
+          />
         </Form.Item>
         <Form.Item name="subject" label="学科">
           <Select

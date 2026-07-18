@@ -1259,19 +1259,21 @@ model TeacherSalaryTransaction {
 }
 
 // Per-student first-feedback reward ledger. A teacher can earn once for each
-// student in each concrete course (or subject fallback when no course exists).
+// student and division-aware subject; course fields remain audit context.
 model FeedbackRewardRecord {
   id              String   @id @default(cuid())
   feedbackId      String
   studentId       String
   teacherId       String
+  subjectKey      String
+  subjectLabel    String
   courseKey       String
   courseLabel     String?
   amount          Float
   isFirstFeedback Boolean  @default(true)
   createdAt       DateTime @default(now())
 
-  @@unique([teacherId, studentId, courseKey])
+  @@unique([teacherId, studentId, subjectKey])
   @@index([feedbackId])
   @@index([teacherId, createdAt])
   @@index([studentId, createdAt])

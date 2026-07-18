@@ -5,6 +5,7 @@ import { normalizeUploadUrl } from '@/lib/upload-url'
 
 const LOADING_IMAGE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23f5f2ee'/%3E%3Ctext x='48' y='48' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='12'%3E加载中%3C/text%3E%3C/svg%3E"
+const SIGN_BATCH_SIZE = 50
 
 export function useSignedUrls(keys: string[] | undefined) {
   const stableKeys = useMemo(
@@ -25,17 +26,23 @@ export function useSignedUrls(keys: string[] | undefined) {
     }
 
     setLoading(true)
-    fetch('/api/uploads/sign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ keys: keysForRequest }),
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.json()
+    const uniqueKeys = [...new Set(keysForRequest)]
+    const batches = Array.from(
+      { length: Math.ceil(uniqueKeys.length / SIGN_BATCH_SIZE) },
+      (_, index) => uniqueKeys.slice(index * SIGN_BATCH_SIZE, (index + 1) * SIGN_BATCH_SIZE),
+    )
+    Promise.all(batches.map(async (keys) => {
+      const res = await fetch('/api/uploads/sign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keys }),
       })
-      .then((data) => {
-        if (!cancelled) setUrlMap(data?.urls || {})
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      return data?.urls || {}
+    }))
+      .then((maps) => {
+        if (!cancelled) setUrlMap(Object.assign({}, ...maps))
       })
       .catch(() => {
         if (!cancelled) setUrlMap({})

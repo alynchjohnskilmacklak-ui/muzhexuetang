@@ -10,7 +10,7 @@ const aiRateBucket = new Map<string, { count: number; resetAt: number }>()
 
 type Mood = 'GREAT' | 'GOOD' | 'OKAY' | 'NEEDS_ATTENTION'
 type Intent = 'stage' | 'suggestion' | 'classroom'
-type StudentPerfLevel = 'GREAT' | 'OKAY' | 'WEAK'
+type StudentPerfLevel = 'GREAT' | 'OKAY' | 'NEEDS_IMPROVEMENT'
 type AIJson = Record<string, unknown>
 interface RosterEntry { id: string; name: string }
 interface SelectedStudent { id: string; name?: string | null }
@@ -72,6 +72,27 @@ function cleanRawText(raw: string) {
     .replace(/^\s*[{\[]/, '')
     .replace(/[}\]]\s*$/, '')
     .trim()
+}
+
+function ensureStructuredFeedback(value: string, context: {
+  performanceTags: string[]
+  masteryLevel: string
+  teacherRemark: string
+}) {
+  const text = value.trim()
+  const labels = ['课堂表现', '知识掌握', '存在问题', '后续建议']
+  if (labels.every((label) => text.includes(`${label}：`) || text.includes(`${label}:`))) {
+    return text
+      .replace(/(?:^|\s*)(课堂表现|知识掌握|存在问题|后续建议)\s*[:：]\s*/g, (_match, label: string) => `${label}：\n`)
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+  }
+  return [
+    `课堂表现：\n${text || context.performanceTags.join('、') || '课堂表现按老师记录如实反馈。'}`,
+    `知识掌握：\n${context.masteryLevel || '知识掌握情况需结合当堂练习继续观察。'}`,
+    `存在问题：\n${context.teacherRemark || '本次未记录明显问题。'}`,
+    '后续建议：\n建议结合本节内容及时复习，并按要求完成课后练习。',
+  ].join('\n\n')
 }
 
 function detectIntent(note: string): Intent {
@@ -145,7 +166,12 @@ function buildFallbackComment(note: string, studentNames: string[]): string {
       : /计算|准确率/.test(note)
         ? '计算步骤和检查习惯仍有提升空间'
         : '暂未发现明显知识障碍，下一步重点是让课堂状态保持稳定'
-  return `${subject}。课堂表现：${performance}。知识掌握：${mastery}。存在问题：${problem}。后续建议：${buildFallbackSuggestion(note)}`
+  return [
+    `课堂表现：\n${subject}，${performance}。`,
+    `知识掌握：\n${mastery}。`,
+    `存在问题：\n${problem}。`,
+    `后续建议：\n${buildFallbackSuggestion(note)}`,
+  ].join('\n\n')
 }
 
 function appendUniqueQuote(comment: string, index: number, usedQuotes: Set<string>): string {
@@ -353,10 +379,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const selectedStudents = Array.isArray(body.selectedStudents) ? body.selectedStudents.filter((s) => typeof s?.id === 'string') : []
     const studentPerf: StudentPerfInput[] = Array.isArray(body.studentPerf)
       ? body.studentPerf
-        .filter((item): item is { id: string; name?: string | null; level: StudentPerfLevel } =>
-          typeof item?.id === 'string' && (item.level === 'GREAT' || item.level === 'OKAY' || item.level === 'WEAK'),
+        .filter((item): item is { id: string; name?: string | null; level: StudentPerfLevel | 'WEAK' } =>
+          typeof item?.id === 'string' && (item.level === 'GREAT' || item.level === 'OKAY' || item.level === 'NEEDS_IMPROVEMENT' || item.level === 'WEAK'),
         )
-        .map((item) => ({ id: item.id, name: item.name || null, level: item.level }))
+        .map((item) => ({ id: item.id, name: item.name || null, level: item.level === 'WEAK' ? 'NEEDS_IMPROVEMENT' : item.level }))
       : []
     const resolved = resolveStudentsFromContext({ note, roster, selectedStudentIds, selectedStudents })
     const options = body.options || {}
@@ -370,8 +396,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
       ? resolved.matchedIds.map((id, index) => ({ id, name: resolved.matchedNames[index] || '孩子' }))
       : roster.slice(0, 60)
     const perfById = new Map(studentPerf.map((item) => [item.id, item]))
-    const perfLabel: Record<StudentPerfLevel, string> = { GREAT: '积极突出', OKAY: '表现一般', WEAK: '待努力' }
-    const perfGroups = (['GREAT', 'OKAY', 'WEAK'] as StudentPerfLevel[])
+    const perfLabel: Record<StudentPerfLevel, string> = { GREAT: '积极', OKAY: '一般', NEEDS_IMPROVEMENT: '需提升' }
+    const perfGroups = (['GREAT', 'OKAY', 'NEEDS_IMPROVEMENT'] as StudentPerfLevel[])
       .map((level) => {
         const names = resolved.matchedIds
           .map((id, index) => ({ id, name: resolved.matchedNames[index] || perfById.get(id)?.name || '孩子', level: perfById.get(id)?.level || 'GREAT' }))
@@ -396,12 +422,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
       "- 称呼用'姓名+同学'。每段评语 120~220 字，必须依次包含“课堂表现、知识掌握、存在问题、后续建议”四部分；可使用这四个短标签，但不要写空洞套话，结尾不要加名言（系统自动补充）。",
       '- 如果老师输入里既有表扬又有问题，两者都要写进去，问题放在表扬之后、建议之前。',
       '- 如果【已确认学生】不为空，直接围绕这些学生写，老师输入没提名字也不要拒绝。',
-      '- 为每个已确认学生单独写一段（perStudentComments），只出现该学生本人姓名；多个学生共用同一段描述时，允许内容相近但措辞要有变化。',
-      '- 你会收到每个学生的表现档位（积极突出 / 表现一般 / 待努力）。必须为每个学生单独写一段评语，基调随档位不同：',
-      '  - 积极突出：具体表扬其课堂表现（如积极回答、思路清晰），并给予更高期待；',
-      '  - 表现一般：客观描述当堂状态，并给出一个明确的小改进点；',
-      '  - 待努力：委婉但不回避地点出问题，并给家长一条可在家配合的具体建议。',
+      '- overallComment 和每个 perStudentComments.comment 都必须严格按以下四段输出，每个标题单独一行且顺序固定：课堂表现：、知识掌握：、存在问题：、后续建议：。禁止输出一段式评语。',
+      '- 为每个已确认学生单独写反馈，只出现该学生本人姓名；即使表现档位相同，不同学生也必须根据各自输入调整切入点、问题和建议，不能复制同一模板。',
+      '- 你会收到每个学生的表现档位（积极 / 一般 / 需提升）。必须为每个学生单独写四段反馈，基调随档位不同：',
+      '  - 积极：具体表扬其课堂表现，并给予更高期待；',
+      '  - 一般：客观描述当堂状态，并给出一个明确的小改进点；',
+      '  - 需提升：委婉但不回避地点出问题，并给家长一条可在家配合的具体建议。',
       '- 严禁给不同学生写雷同或模板化内容，每段的切入点、措辞、举例都要不同。称呼用“姓名+同学”。不编造分数、名次等老师未提供的信息。',
+      '- 必须结合【学科】调整观察重点：数学关注运算准确性、步骤规范和解题思路；英语关注词汇、语法、阅读与表达；物理关注模型理解、公式应用、实验现象和推理过程；其他学科围绕该学科真实学习任务展开。不得把其他学科的术语套入当前反馈。',
       '- mood、tags、knowledgePoints 只能从提供的可选项里选；提到作业才填 homework。',
       '只输出 JSON，不要 Markdown，不要任何解释。',
     ].join('\n')
@@ -438,7 +466,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
       const matchTag = (tag: string) => tagOptions.find((option) => option === tag || option.includes(tag) || tag.includes(option))
       const matchKnowledgePoint = (knowledgePoint: string) => kpOptions.find((option) => option === knowledgePoint || option.includes(knowledgePoint) || knowledgePoint.includes(option))
       const parsedMood = typeof parsed.mood === 'string' ? parsed.mood : inferMoodFromNote(note)
-      const parsedOverallComment = typeof parsed.overallComment === 'string' ? parsed.overallComment.trim() : ''
+      const structureContext = { performanceTags, masteryLevel, teacherRemark }
+      const parsedOverallComment = typeof parsed.overallComment === 'string'
+        ? ensureStructuredFeedback(parsed.overallComment, structureContext)
+        : ''
+      const perStudentComments = buildPerStudentComments(note, resolved, parsed.perStudentComments, parsedOverallComment)
+        .map((item) => ({ ...item, comment: ensureStructuredFeedback(item.comment, structureContext) }))
       const result = {
         intent: typeof parsed.intent === 'string' ? parsed.intent : detectedIntent,
         studentIds: resolved.matchedIds,
@@ -447,7 +480,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         needsManualStudentSelection: resolved.needsManual,
         mood: validMoods.includes(parsedMood) ? parsedMood : inferMoodFromNote(note),
         overallComment: parsedOverallComment,
-        perStudentComments: buildPerStudentComments(note, resolved, parsed.perStudentComments, parsedOverallComment),
+        perStudentComments,
         tags: stringArray(parsed.tags).map(matchTag).filter((tag): tag is string => !!tag).slice(0, 4),
         knowledgePoints: stringArray(parsed.knowledgePoints).map(matchKnowledgePoint).filter((knowledgePoint): knowledgePoint is string => !!knowledgePoint).slice(0, 4),
         homework: stringArray(parsed.homework),

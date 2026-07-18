@@ -48,7 +48,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   }
   if (status) {
     if (where.OR) {
-      where = { AND: [{ OR: where.OR }, { status }] }
+      const { OR, ...baseWhere } = where
+      where = { ...baseWhere, AND: [{ OR }, { status }] }
     } else {
       where.status = status
     }
@@ -101,42 +102,67 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (owned === 0) return NextResponse.json({ error: '无权为该学员创建留言' }, { status: 403 })
   }
 
-  // 根据当前课程关系自动匹配教师；前端传入的教师仅在无法匹配课程时作为兼容提示。
+  // 默认优先最近课次教师，其次当前班级教师；家长可在这些任课教师中手动调整。
   if (studentId) {
-    const enrollments = await prisma.enrollment.findMany({
-      where: {
-        studentId,
-        status: 'ACTIVE',
-        group: { status: { not: 'ARCHIVED' } },
-      },
-      select: {
-        group: {
-          select: {
-            teacherId: true,
-            course: { select: { subject: true } },
-            teacherAssignments: { select: { teacherId: true, subject: true } },
+    const [recentLesson, enrollments] = await Promise.all([
+      prisma.classLesson.findFirst({
+        where: {
+          status: { not: 'CANCELLED' },
+          group: { enrollments: { some: { studentId, status: 'ACTIVE' } } },
+        },
+        orderBy: [{ lessonDate: 'desc' }, { startTime: 'desc' }],
+        select: {
+          teacherId: true,
+          subject: true,
+          group: {
+            select: {
+              teacherId: true,
+              course: { select: { subject: true } },
+              teacherAssignments: { select: { teacherId: true, subject: true } },
+            },
           },
         },
-      },
-      orderBy: { enrolledAt: 'desc' },
-    })
+      }),
+      prisma.enrollment.findMany({
+        where: {
+          studentId,
+          status: 'ACTIVE',
+          group: { status: { not: 'ARCHIVED' } },
+        },
+        select: {
+          group: {
+            select: {
+              teacherId: true,
+              course: { select: { subject: true } },
+              teacherAssignments: { select: { teacherId: true, subject: true } },
+            },
+          },
+        },
+        orderBy: { enrolledAt: 'desc' },
+      }),
+    ])
     const normalizedSubject = subject?.toLowerCase() || ''
-    const candidates = enrollments.flatMap(({ group }) => [
+    const recentCandidates = recentLesson ? [
+      { teacherId: recentLesson.teacherId || recentLesson.group.teacherId, subject: recentLesson.subject || recentLesson.group.course.subject, priority: 0 },
+      ...recentLesson.group.teacherAssignments.map((assignment) => ({
+        teacherId: assignment.teacherId,
+        subject: assignment.subject || recentLesson.group.course.subject,
+        priority: 1,
+      })),
+    ] : []
+    const groupCandidates = enrollments.flatMap(({ group }) => [
       ...group.teacherAssignments.map((assignment) => ({
         teacherId: assignment.teacherId,
         subject: assignment.subject || group.course.subject,
-        priority: assignment.subject && normalizedSubject && assignment.subject.toLowerCase().includes(normalizedSubject) ? 0 : 1,
+        priority: assignment.subject && normalizedSubject && assignment.subject.toLowerCase().includes(normalizedSubject) ? 2 : 3,
       })),
-      { teacherId: group.teacherId, subject: group.course.subject, priority: normalizedSubject && group.course.subject.toLowerCase().includes(normalizedSubject) ? 0 : 2 },
-    ]).sort((a, b) => a.priority - b.priority)
-    teacherId = candidates[0]?.teacherId || null
-
-    if (!teacherId && requestedTeacherId) {
-      const assigned = await prisma.enrollment.count({
-        where: { studentId, status: 'ACTIVE', group: { OR: [{ teacherId: requestedTeacherId }, { teacherAssignments: { some: { teacherId: requestedTeacherId } } }] } },
-      })
-      if (assigned > 0) teacherId = requestedTeacherId
-    }
+      { teacherId: group.teacherId, subject: group.course.subject, priority: normalizedSubject && group.course.subject.toLowerCase().includes(normalizedSubject) ? 2 : 4 },
+    ])
+    const candidates = [...recentCandidates, ...groupCandidates]
+      .filter((candidate): candidate is { teacherId: string; subject: string; priority: number } => Boolean(candidate.teacherId))
+      .sort((a, b) => a.priority - b.priority)
+    const requestedCandidate = requestedTeacherId ? candidates.find((candidate) => candidate.teacherId === requestedTeacherId) : null
+    teacherId = requestedCandidate?.teacherId || candidates[0]?.teacherId || null
     if (!teacherId) return NextResponse.json({ error: '暂未找到该学员的任课教师，请联系管理员检查课程关系' }, { status: 400 })
   }
 

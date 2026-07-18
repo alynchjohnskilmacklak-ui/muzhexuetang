@@ -133,7 +133,7 @@ function FeedbackImageViewer({ images, initialIndex, onClose }: { images: AdminF
   )
 }
 
-function FeedbackItemCard({ item, onOpen }: { item: AdminFeedback; onOpen: (item: AdminFeedback) => void }) {
+function FeedbackItemCard({ item, onOpen, signedThumbnailMap }: { item: AdminFeedback; onOpen: (item: AdminFeedback) => void; signedThumbnailMap: Map<string, string> }) {
   const students = Array.isArray(item.students) ? item.students : []
   const points = Array.isArray(item.knowledgePoints) ? item.knowledgePoints : []
   const originalImages = Array.isArray(item.imageUrls) ? item.imageUrls : []
@@ -141,7 +141,6 @@ function FeedbackItemCard({ item, onOpen }: { item: AdminFeedback; onOpen: (item
     ? item.images
     : originalImages.map((url) => ({ assetId: null, originalUrl: url, previewUrl: url, thumbnailUrl: url }))
   const thumbnails = images.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl)
-  const { urls: signedImages } = useSignedUrls(thumbnails)
   const homework = formatHomework(item.homework)
   const performanceTags = Array.isArray(item.tags) ? item.tags : []
   return (
@@ -188,8 +187,8 @@ function FeedbackItemCard({ item, onOpen }: { item: AdminFeedback; onOpen: (item
       )}
       {images.length > 0 && (
         <div onClick={(event) => event.stopPropagation()} style={{ marginTop: 6, display: 'flex', gap: 4 }}>
-          {images.slice(0, 4).map((url, i) => (
-            <FeedbackImage key={`${url}-${i}`} src={signedImages[i]} size={48} />
+          {images.slice(0, 4).map((image, i) => (
+            <FeedbackImage key={`${image.originalUrl}-${i}`} src={signedThumbnailMap.get(thumbnails[i]) || thumbnails[i]} size={48} />
           ))}
           {images.length > 4 && <div style={{ width: 48, height: 48, borderRadius: 6, background: '#f5f2ee', display: 'grid', placeItems: 'center', fontSize: 11, color: '#98A2B3' }}>+{images.length - 4}</div>}
         </div>
@@ -250,7 +249,19 @@ export default function ClassroomFeedbackAdminPage() {
   const { data: teachersData } = useSWR('/api/teachers?limit=200', fetcher)
   const teachers = Array.isArray(teachersData?.teachers) ? teachersData.teachers : []
 
-  const feedbacks: AdminFeedback[] = Array.isArray(data?.feedbacks) ? data.feedbacks : []
+  const feedbacks: AdminFeedback[] = useMemo(() => Array.isArray(data?.feedbacks) ? data.feedbacks : [], [data])
+  const listThumbnailKeys = useMemo(() => feedbacks.flatMap((feedback) => {
+    const originals = Array.isArray(feedback.imageUrls) ? feedback.imageUrls : []
+    const images = Array.isArray(feedback.images) && feedback.images.length === originals.length
+      ? feedback.images
+      : originals.map((url) => ({ assetId: null, originalUrl: url, previewUrl: url, thumbnailUrl: url }))
+    return images.slice(0, 4).map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl)
+  }), [feedbacks])
+  const { urls: signedListThumbnails } = useSignedUrls(listThumbnailKeys)
+  const signedThumbnailMap = useMemo(
+    () => new Map(listThumbnailKeys.map((key, index) => [key, signedListThumbnails[index]])),
+    [listThumbnailKeys, signedListThumbnails],
+  )
   const allLessons: AdminLesson[] = useMemo(() => Array.isArray(data?.lessons) ? data.lessons : [], [data])
   const missingLessons = allLessons.filter(l => !l.hasFeedback)
   const noFeedback: Array<{ id: string; name: string }> = Array.isArray(data?.teachersWithoutFeedback) ? data.teachersWithoutFeedback : []
@@ -516,12 +527,12 @@ export default function ClassroomFeedbackAdminPage() {
                   <span style={{ fontSize: 12, color: '#98A2B3' }}>{group.items.length} 条反馈</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 14, borderLeft: '2px solid #F5EDE8' }}>
-                  {group.items.map(item => <FeedbackItemCard key={item.id} item={item} onOpen={openDetail} />)}
+                  {group.items.map(item => <FeedbackItemCard key={item.id} item={item} onOpen={openDetail} signedThumbnailMap={signedThumbnailMap} />)}
                 </div>
               </div>
             ))
           ) : (
-            filtered.map(item => <FeedbackItemCard key={item.id} item={item} onOpen={openDetail} />)
+            filtered.map(item => <FeedbackItemCard key={item.id} item={item} onOpen={openDetail} signedThumbnailMap={signedThumbnailMap} />)
           )}
         </div>
       )}

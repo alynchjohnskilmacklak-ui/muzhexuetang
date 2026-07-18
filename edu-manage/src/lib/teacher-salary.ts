@@ -191,6 +191,8 @@ export type FeedbackBonusPreview = {
   courseBucket: FeedbackCourseBucket
   courseKey: string
   courseLabel: string
+  subjectKey: string
+  subjectLabel: string
   rewardLedgerAvailable: boolean
   label: string
   rate: number
@@ -211,6 +213,7 @@ export type FeedbackBonusResult = {
   error?: string
   courseBucket?: FeedbackCourseBucket
   courseKey?: string
+  subjectKey?: string
   rate?: number
   eligibleCount?: number
   duplicateCount?: number
@@ -238,6 +241,8 @@ type FeedbackRewardContext = {
   courseBucket: FeedbackCourseBucket
   courseKey: string
   courseLabel: string
+  subjectKey: string
+  subjectLabel: string
 }
 
 type FeedbackRewardModel = {
@@ -250,14 +255,46 @@ function feedbackRewardModel(prisma: PrismaClient | Prisma.TransactionClient): F
   return (prisma as unknown as { feedbackRewardRecord?: FeedbackRewardModel }).feedbackRewardRecord ?? null
 }
 
-export function rewardContextFromCourse(course: { id?: string | null; name?: string | null; subject?: string | null; type?: string | null } | null | undefined, fallbackType?: string | null): FeedbackRewardContext {
+const SUBJECT_KEY_ALIASES: Array<[string, string[]]> = [
+  ['MATH', ['数学', 'math', 'mathematics']],
+  ['PHYSICS', ['物理', 'physics']],
+  ['ENGLISH', ['英语', '英文', 'english']],
+  ['CHINESE', ['语文', 'chinese']],
+  ['CHEMISTRY', ['化学', 'chemistry']],
+  ['BIOLOGY', ['生物', 'biology']],
+  ['GEOGRAPHY', ['地理', 'geography']],
+  ['HISTORY', ['历史', 'history']],
+  ['POLITICS', ['政治', '道法', '道德与法治', 'politics']],
+  ['SCIENCE', ['科学', 'science']],
+]
+
+export function normalizeFeedbackSubjectKey(division: string | null | undefined, subject: string | null | undefined) {
+  const divisionKey = String(division || '').toUpperCase() === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+  const subjectLabel = String(subject || '').trim()
+  const normalizedSubject = subjectLabel.toLowerCase().replace(/\s+/g, '')
+  const alias = SUBJECT_KEY_ALIASES.find(([, aliases]) => aliases.some((item) => item.toLowerCase() === normalizedSubject))?.[0]
+  const subjectToken = alias || subjectLabel
+    .toUpperCase()
+    .replace(/[\s/\\-]+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'UNCLASSIFIED'
+  return `${divisionKey}_${subjectToken}`
+}
+
+export function rewardContextFromCourse(
+  course: { id?: string | null; name?: string | null; subject?: string | null; type?: string | null; division?: string | null } | null | undefined,
+  fallbackType?: string | null,
+  override?: { subject?: string | null; division?: string | null },
+): FeedbackRewardContext {
   const courseBucket = toFeedbackCourseBucket(course?.type || fallbackType)
-  const subject = course?.subject?.trim()
-  const courseKey = course?.id ? `course:${course.id}` : subject ? `subject:${subject.toLowerCase()}` : `type:${courseBucket}`
+  const subjectLabel = override?.subject?.trim() || course?.subject?.trim() || '未分类'
+  const subjectKey = normalizeFeedbackSubjectKey(override?.division || course?.division, subjectLabel)
+  const courseKey = course?.id ? `course:${course.id}` : subjectLabel !== '未分类' ? `subject:${subjectLabel.toLowerCase()}` : `type:${courseBucket}`
   return {
     courseBucket,
     courseKey,
-    courseLabel: course?.name?.trim() || subject || feedbackBucketLabel(courseBucket),
+    courseLabel: course?.name?.trim() || subjectLabel || feedbackBucketLabel(courseBucket),
+    subjectKey,
+    subjectLabel,
   }
 }
 
@@ -265,24 +302,49 @@ async function resolveFeedbackRewardContext(opts: {
   lessonId?: string | null
   groupId?: string | null
   feedbackCourseType?: string | null
+  teacherId: string
   prismaClient: PrismaClient | Prisma.TransactionClient
 }): Promise<FeedbackRewardContext> {
   const prisma = opts.prismaClient
   if (opts.lessonId) {
     const lesson = await prisma.classLesson.findUnique({
       where: { id: opts.lessonId },
-      select: { group: { select: { course: { select: { id: true, name: true, subject: true, type: true } } } } },
+      select: {
+        subject: true,
+        division: true,
+        group: {
+          select: {
+            division: true,
+            course: { select: { id: true, name: true, subject: true, type: true, division: true } },
+            teacherAssignments: { where: { teacherId: opts.teacherId }, select: { subject: true }, take: 1 },
+          },
+        },
+      },
     })
-    if (lesson?.group?.course) return rewardContextFromCourse(lesson.group.course, opts.feedbackCourseType)
+    if (lesson?.group?.course) {
+      const subject = lesson.subject?.trim() || lesson.group.course.subject?.trim() || lesson.group.teacherAssignments[0]?.subject?.trim()
+      return rewardContextFromCourse(lesson.group.course, opts.feedbackCourseType, {
+        subject,
+        division: lesson.division || lesson.group.division || lesson.group.course.division,
+      })
+    }
   }
   if (opts.groupId) {
     const group = await prisma.classGroup.findUnique({
       where: { id: opts.groupId },
-      select: { course: { select: { id: true, name: true, subject: true, type: true } } },
+      select: {
+        division: true,
+        course: { select: { id: true, name: true, subject: true, type: true, division: true } },
+        teacherAssignments: { where: { teacherId: opts.teacherId }, select: { subject: true }, take: 1 },
+      },
     })
-    if (group?.course) return rewardContextFromCourse(group.course, opts.feedbackCourseType)
+    if (group?.course) {
+      const subject = group.course.subject?.trim() || group.teacherAssignments[0]?.subject?.trim()
+      return rewardContextFromCourse(group.course, opts.feedbackCourseType, { subject, division: group.division || group.course.division })
+    }
   }
-  return rewardContextFromCourse(null, opts.feedbackCourseType)
+  const teacher = await prisma.teacher.findUnique({ where: { id: opts.teacherId }, select: { division: true } })
+  return rewardContextFromCourse(null, opts.feedbackCourseType, { division: teacher?.division })
 }
 
 export async function resolveFeedbackCourseBucketFromContext(opts: {
@@ -335,24 +397,25 @@ export async function getFeedbackBonusPreview(opts: {
   const prisma = opts.prismaClient ?? await getRequestPrisma()
   const selectedIds = [...new Set(opts.studentIds.filter(Boolean))]
   const rewardContext = await resolveFeedbackRewardContext({
+    teacherId: opts.teacherId,
     lessonId: opts.lessonId,
     groupId: opts.groupId,
     feedbackCourseType: opts.feedbackCourseType,
     prismaClient: prisma,
   })
-  const { courseBucket, courseKey, courseLabel } = rewardContext
+  const { courseBucket, courseKey, courseLabel, subjectKey, subjectLabel } = rewardContext
   const cfg = await getTeacherSalaryConfig(opts.teacherId, prisma)
   const rate = courseBucket === 'ONE_ON_ONE' ? cfg.feedbackRateOneOne : cfg.feedbackRateGroup
 
-  const rewardedKeys = new Set<string>()
+  const rewardedStudentIds = new Set<string>()
   let rewardModel = feedbackRewardModel(prisma)
   if (rewardModel) {
     try {
       const records = await rewardModel.findMany({
-        where: { teacherId: opts.teacherId, courseKey, studentId: { in: selectedIds } },
+        where: { teacherId: opts.teacherId, subjectKey, studentId: { in: selectedIds } },
         select: { studentId: true },
       })
-      records.forEach((record) => rewardedKeys.add(`${record.studentId}:${courseKey}`))
+      records.forEach((record) => rewardedStudentIds.add(record.studentId))
     } catch (error) {
       const code = typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : ''
       if (code !== 'P2021' && code !== 'P2022') throw error
@@ -361,28 +424,33 @@ export async function getFeedbackBonusPreview(opts: {
   }
   if (!rewardModel) {
     // Safe compatibility before the reviewed migration is deployed.
-    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
-    const todayEnd = new Date(todayStart.getTime() + 86400000)
-    const todayBonuses = await prisma.teacherSalaryTransaction.findMany({
-      where: { teacherId: opts.teacherId, type: 'FEEDBACK_BONUS', createdAt: { gte: todayStart, lt: todayEnd } },
+    const previousBonuses = await prisma.teacherSalaryTransaction.findMany({
+      where: { teacherId: opts.teacherId, type: 'FEEDBACK_BONUS' },
       select: { feedbackId: true },
     })
-    const feedbackIds = todayBonuses.map((item) => item.feedbackId).filter((id): id is string => Boolean(id && id !== opts.excludeFeedbackId))
+    const feedbackIds = previousBonuses.map((item) => item.feedbackId).filter((id): id is string => Boolean(id && id !== opts.excludeFeedbackId))
     if (feedbackIds.length) {
       const feedbacks = await prisma.classroomFeedback.findMany({
         where: { id: { in: feedbackIds } },
-        select: { studentIds: true, feedbackCourseType: true, classLesson: { select: { group: { select: { course: { select: { type: true } } } } } } },
+        select: { id: true, studentIds: true, classLessonId: true, feedbackGroupId: true, feedbackCourseType: true },
       })
       for (const fb of feedbacks) {
-        const bucket = resolveFeedbackCourseBucket(fb)
-        fb.studentIds.forEach((id: string) => rewardedKeys.add(`${id}:${bucket}`))
+        const historicalContext = await resolveFeedbackRewardContext({
+          teacherId: opts.teacherId,
+          lessonId: fb.classLessonId,
+          groupId: fb.feedbackGroupId,
+          feedbackCourseType: fb.feedbackCourseType,
+          prismaClient: prisma,
+        })
+        if (historicalContext.subjectKey === subjectKey) {
+          fb.studentIds.forEach((id: string) => rewardedStudentIds.add(id))
+        }
       }
     }
   }
 
-  const lookupKey = rewardModel ? courseKey : courseBucket
-  const eligibleStudentIds = selectedIds.filter((id) => !rewardedKeys.has(`${id}:${lookupKey}`))
-  const duplicateStudentIds = selectedIds.filter((id) => rewardedKeys.has(`${id}:${lookupKey}`))
+  const eligibleStudentIds = selectedIds.filter((id) => !rewardedStudentIds.has(id))
+  const duplicateStudentIds = selectedIds.filter((id) => rewardedStudentIds.has(id))
   const selectedStudents = selectedIds.length
     ? await prisma.student.findMany({ where: { id: { in: selectedIds } }, select: { id: true, name: true } })
     : []
@@ -392,13 +460,15 @@ export async function getFeedbackBonusPreview(opts: {
   const label = `${courseLabel} · ${feedbackBucketLabel(courseBucket)}`
   const total = Number((eligibleStudentIds.length * rate).toFixed(4))
   const message = duplicateStudentIds.length
-    ? `当前课程：${label} · ${formatMoney(rate)}元/人；首次奖励：${eligibleStudentNames.join('、') || '无'}；仅记录反馈：${duplicateStudentNames.join('、')}`
-    : `当前课程：${label} · ${formatMoney(rate)}元/人；${eligibleStudentNames.join('、') || '所选学生'}可获得首次反馈奖励，预计${formatMoney(total)}元`
+    ? `${label} · ${formatMoney(rate)}元/人；首次奖励：${eligibleStudentNames.join('、') || '无'}；仅记录反馈：${duplicateStudentNames.join('、')}`
+    : `${label} · ${formatMoney(rate)}元/人；${eligibleStudentNames.join('、') || '所选学生'}可获得该教师首次反馈奖励，预计${formatMoney(total)}元`
 
   return {
     courseBucket,
     courseKey,
     courseLabel,
+    subjectKey,
+    subjectLabel,
     rewardLedgerAvailable: Boolean(rewardModel),
     label,
     rate,
@@ -457,6 +527,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       teacherId,
       lessonId: feedback.classLessonId,
       currentBucket: preview.courseBucket,
+      subjectKey: preview.subjectKey,
       rate: preview.rate,
       allStudentIds: feedback.studentIds,
       eligibleIds: preview.eligibleStudentIds,
@@ -464,15 +535,16 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
     })
 
     if (preview.eligibleCount === 0) {
-      console.warn(`[salary] triggerFeedbackBonus: all ${feedback.studentIds.length} students already rewarded for ${preview.courseKey}`, feedbackId)
+      console.warn(`[salary] triggerFeedbackBonus: all ${feedback.studentIds.length} students already rewarded for ${preview.subjectKey}`, feedbackId)
       return {
         success: true,
         courseBucket: preview.courseBucket,
+        subjectKey: preview.subjectKey,
         rate: preview.rate,
         eligibleCount: 0,
         duplicateCount: preview.duplicateCount,
         amount: 0,
-        message: '本次反馈已记录，该课程首次反馈奖励已发放过，本次不重复计奖',
+        message: '本次反馈已记录，该学科首次反馈奖励已发放过，本次不重复计奖',
       }
     }
 
@@ -491,6 +563,8 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
             feedbackId,
             studentId,
             teacherId,
+            subjectKey: preview.subjectKey,
+            subjectLabel: preview.subjectLabel,
             courseKey: preview.courseKey,
             courseLabel: preview.courseLabel,
             amount: preview.rate,
@@ -523,7 +597,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
           entityType: 'TeacherSalaryTransaction',
           entityId: feedbackId,
           detail: `反馈奖励 ¥${finalAmount}：${preview.courseLabel} ${awardedCount}人 × ¥${formatMoney(preview.rate)}`,
-          metadata: { feedbackId, amount: finalAmount, eligibleCount: awardedCount, duplicateCount: feedback.studentIds.length - awardedCount, rate: preview.rate, courseBucket: preview.courseBucket, courseKey: preview.courseKey },
+          metadata: { feedbackId, amount: finalAmount, eligibleCount: awardedCount, duplicateCount: feedback.studentIds.length - awardedCount, rate: preview.rate, courseBucket: preview.courseBucket, courseKey: preview.courseKey, subjectKey: preview.subjectKey, subjectLabel: preview.subjectLabel },
         },
       })
       return { success: true, awardedCount, amount: finalAmount }
@@ -533,6 +607,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       success: true,
       courseBucket: preview.courseBucket,
       courseKey: preview.courseKey,
+      subjectKey: preview.subjectKey,
       rate: preview.rate,
       eligibleCount: result.awardedCount ?? 0,
       duplicateCount: feedback.studentIds.length - (result.awardedCount ?? 0),
@@ -541,7 +616,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       duplicateStudentNames: preview.duplicateStudentNames,
       message: (result.awardedCount ?? 0) > 0
         ? `首次奖励：${preview.eligibleStudentNames.slice(0, result.awardedCount ?? 0).join('、')}，共${formatMoney(result.amount ?? 0)}元${preview.duplicateStudentNames.length ? `；仅记录反馈：${preview.duplicateStudentNames.join('、')}` : ''}`
-        : `本次反馈已记录；${preview.duplicateStudentNames.join('、') || '所选学生'}在该课程已获得首次奖励，本次不重复计奖`,
+        : `本次反馈已记录；${preview.duplicateStudentNames.join('、') || '所选学生'}已获得${preview.subjectLabel}首次反馈奖励，本次不重复计奖`,
     }
   } catch (err) {
     if (isUniqueConstraintError(err)) {
