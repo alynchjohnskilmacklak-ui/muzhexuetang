@@ -25,6 +25,11 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     if (message.teacherId && message.teacherId !== user.teacherId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
+    if (!message.studentId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const taught = await prisma.enrollment.count({
+      where: { studentId: message.studentId, status: 'ACTIVE', group: { OR: [{ teacherId: user.teacherId }, { teacherAssignments: { some: { teacherId: user.teacherId } } }] } },
+    })
+    if (taught === 0) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     if (!message.teacherId) {
       await prisma.parentMessage.update({
         where: { id },
@@ -54,7 +59,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
 
   await prisma.parentMessage.update({
     where: { id },
-    data: { updatedAt: new Date() },
+    data: { updatedAt: new Date(), status: isParent ? 'OPEN' : 'REPLIED' },
   })
 
   return NextResponse.json(reply, { status: 201 })

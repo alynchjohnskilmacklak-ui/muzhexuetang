@@ -26,6 +26,12 @@ function getSubjectColor(subject: string): string {
   return '#E8784A'
 }
 
+function getLessonSubject(lesson: any): string {
+  const teacherId = lesson.teacher?.id || lesson.group?.teacher?.id
+  const assignedSubject = lesson.group?.teacherAssignments?.find((assignment: any) => assignment.teacherId === teacherId)?.subject
+  return assignedSubject || lesson.subject || lesson.group?.course?.subject || ''
+}
+
 function lessonDateTime(lesson: any, time: string) {
   const dateText = new Date(lesson.lessonDate).toISOString().slice(0, 10)
   return new Date(`${dateText}T${time}:00`)
@@ -155,7 +161,7 @@ export function ParentScheduleClient({ students, lessons, periods }: { students:
                       </div>
                       <div style={{ display: 'grid', gap: 5, fontSize: 12, color: '#5a4e3a' }}>
                         <span><ClockCircleOutlined style={{ marginRight: 5 }} />{fmtDate(lesson.lessonDate)} {lesson.startTime}-{lesson.endTime}</span>
-                        <span><TeamOutlined style={{ marginRight: 5 }} />{lesson.teacher?.name || lesson.group?.teacher?.name || '-'}</span>
+                        <span><TeamOutlined style={{ marginRight: 5 }} />{lesson.teacher?.name || lesson.group?.teacher?.name || '-'}老师 · {getLessonSubject(lesson) || '学科待定'}</span>
                         <span><EnvironmentOutlined style={{ marginRight: 5 }} />{lesson.group?.room?.name || '-'}</span>
                         <span>学生：{studentNames}</span>
                         <span>考勤状态：{lesson.attendanceSubmittedAt ? '老师已确认' : '待老师确认'}</span>
@@ -197,13 +203,13 @@ export function ParentScheduleClient({ students, lessons, periods }: { students:
                     return (
                       <div key={dayIdx} style={{ minHeight: h, borderRight: '0.5px solid #EEE7E1', borderBottom: '0.5px solid #EEE7E1', padding: 3, background: PERIOD_BG[period.type] }}>
                         {hasItem ? items.map((l: any) => {
-                          const subject = l.group?.course?.subject || ''
+                          const subject = getLessonSubject(l)
                           const color = getSubjectColor(subject)
                           const status = getLessonStatus(l)
                           return (
                             <div key={l.id} style={{ borderLeft: `3px solid ${color}`, background: `${color}10`, borderRadius: 5, padding: '5px 7px', height: '100%', minHeight: 54, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                               <div style={{ fontSize: 11, fontWeight: 500, color, lineHeight: 1.3 }}>{l.group?.course?.name || '-'}</div>
-                              <div style={{ fontSize: 10, color, opacity: .8, lineHeight: 1.3 }}><TeamOutlined style={{ fontSize: 9 }} /> {l.teacher?.name || l.group?.teacher?.name || '-'}</div>
+                              <div style={{ fontSize: 10, color, opacity: .8, lineHeight: 1.3 }}><TeamOutlined style={{ fontSize: 9 }} /> {l.teacher?.name || l.group?.teacher?.name || '-'}老师 · {subject || '学科待定'}</div>
                               <div style={{ fontSize: 9, color, opacity: .6, lineHeight: 1.3 }}><EnvironmentOutlined style={{ fontSize: 8 }} /> {l.group?.room?.name || '-'}</div>
                               <Tag className={status.text === '待老师确认' ? 'status-breathe' : undefined} color={status.color} style={{ alignSelf: 'flex-start', marginTop: 3, fontSize: 9, lineHeight: 1.4 }}>{status.text}</Tag>
                             </div>

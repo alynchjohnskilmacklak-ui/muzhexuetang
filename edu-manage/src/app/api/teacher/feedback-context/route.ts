@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getRequestPrisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
 import { requireCurrentTeacher, teacherLessonWhere, teacherStudentWhere } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -12,7 +11,7 @@ function localDateKey(date: Date) {
   return `${year}-${month}-${day}`
 }
 
-export const GET = apiHandler(async (_req: NextRequest) => {
+export const GET = apiHandler(async () => {
   const { teacher, prisma } = await requireCurrentTeacher()
 
   // Active groups for this teacher
@@ -25,7 +24,7 @@ export const GET = apiHandler(async (_req: NextRequest) => {
       ],
     },
     include: {
-      course: { select: { id: true, name: true, subject: true, type: true } },
+      course: { select: { id: true, name: true, subject: true, grade: true, type: true } },
       enrollments: {
         where: { status: 'ACTIVE' },
         include: {
@@ -67,12 +66,12 @@ export const GET = apiHandler(async (_req: NextRequest) => {
     take: 100,
   })
 
-  // Per-student feedback status (last 14 days)
+  // Per-student feedback history. Repeated feedback is allowed and the total is shown in the selector.
   const fourteenDaysAgo = new Date(now.getTime() - 14 * 86400000)
-  const recentFeedbacks = await prisma.classroomFeedback.findMany({
+  const feedbackHistory = await prisma.classroomFeedback.findMany({
     where: {
       teacherId: teacher.id,
-      createdAt: { gte: fourteenDaysAgo },
+      status: 'PUBLISHED',
     },
     select: { studentIds: true, createdAt: true },
     orderBy: { createdAt: 'desc' },
@@ -90,8 +89,10 @@ export const GET = apiHandler(async (_req: NextRequest) => {
 
   // Build student feedback map
   const studentFeedbackMap = new Map<string, Date>()
-  for (const fb of recentFeedbacks) {
+  const studentFeedbackCountMap = new Map<string, number>()
+  for (const fb of feedbackHistory) {
     for (const sid of fb.studentIds) {
+      studentFeedbackCountMap.set(sid, (studentFeedbackCountMap.get(sid) || 0) + 1)
       if (!studentFeedbackMap.has(sid) || fb.createdAt > studentFeedbackMap.get(sid)!) {
         studentFeedbackMap.set(sid, fb.createdAt)
       }
@@ -123,7 +124,8 @@ export const GET = apiHandler(async (_req: NextRequest) => {
     name: g.name,
     courseName: g.course?.name || '-',
     courseType: g.course?.type || 'GROUP',
-    grade: g.course?.subject || null,
+    subject: g.course?.subject || null,
+    grade: g.course?.grade || null,
     studentCount: g.enrollments.length,
     recentLesson: g.classLessons[0] ? {
       date: g.classLessons[0].lessonDate,
@@ -145,6 +147,7 @@ export const GET = apiHandler(async (_req: NextRequest) => {
         attendanceRate: attRate,
         daysSinceLastFeedback,
         lastFeedbackAt: lastFb,
+        feedbackCount: studentFeedbackCountMap.get(e.student.id) || 0,
       }
     }),
   }))

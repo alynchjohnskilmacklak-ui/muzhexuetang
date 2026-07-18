@@ -120,7 +120,11 @@ export function SplashScreen({
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     setReducedMotion(reduceMotion)
     if (reduceMotion) {
-      const doneTimer = window.setTimeout(onDone, Math.min(totalDuration, 150))
+      if (variant === 'full') {
+        setPhase('features')
+        setShownFeatures(FEATURES.map((_, index) => index))
+      }
+      const doneTimer = window.setTimeout(onDone, Math.min(totalDuration, 2000))
       return () => window.clearTimeout(doneTimer)
     }
 
@@ -144,6 +148,8 @@ export function SplashScreen({
       timers.push(window.setTimeout(() => setShownFeatures((prev) => [...prev, i]), i * 110 + 60))
     })
     timers.push(window.setTimeout(() => setShownFeatures((prev) => [...prev, 4]), 4 * 110 + 60 + 180))
+    // 定时动画异常时仍保证所有功能标签最终可见。
+    timers.push(window.setTimeout(() => setShownFeatures(FEATURES.map((_, index) => index)), 1200))
     return () => timers.forEach((timer) => window.clearTimeout(timer))
   }, [showFeatures])
 
@@ -297,8 +303,8 @@ export function SplashScreen({
                   border: '1px solid rgba(232,117,69,0.12)',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
                   willChange: 'transform, opacity',
-                  opacity: shownFeatures.includes(i) ? 1 : 0,
-                  transform: shownFeatures.includes(i)
+                  opacity: reducedMotion || shownFeatures.includes(i) ? 1 : 0,
+                  transform: reducedMotion || shownFeatures.includes(i)
                     ? 'translateY(0) scale(1)'
                     : 'translateY(16px) scale(0.96)',
                   transition: 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.34,1.2,0.64,1)',
@@ -363,8 +369,8 @@ export function SplashScreen({
             border: '1px solid rgba(232,117,69,0.18)',
             boxShadow: '0 2px 12px rgba(232,117,69,0.07)',
             willChange: 'transform, opacity',
-            opacity: shownFeatures.includes(4) ? 1 : 0,
-            transform: shownFeatures.includes(4)
+            opacity: reducedMotion || shownFeatures.includes(4) ? 1 : 0,
+            transform: reducedMotion || shownFeatures.includes(4)
               ? 'translateY(0) scale(1)'
               : 'translateY(16px) scale(0.96)',
             transition: 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.34,1.2,0.64,1)',

@@ -45,6 +45,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (!summary && !overallComment && !knowledgePoints.length && !homework.length && !imageUrls.length) {
       return NextResponse.json({ error: '请至少填写课堂内容、作业或上传资料' }, { status: 400 })
     }
+    if (status === 'PUBLISHED' && imageUrls.length === 0) {
+      return NextResponse.json({ error: '请上传课堂资料照片后提交反馈' }, { status: 400 })
+    }
 
     let lessonStudents: Array<{ id: string; name: string; parentId: string | null; parentUserId: string | null }> = []
     if (classLessonId) {
@@ -69,6 +72,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       ? lessonStudents.map((student) => student.id)
       : studentIds
     if (!targetIds.length) return NextResponse.json({ error: '请选择学员或关联一个有学员的课次' }, { status: 400 })
+    if (targetIds.length > 3) return NextResponse.json({ error: '一次最多反馈3名学生' }, { status: 400 })
 
     const students = lessonStudents.length
       ? lessonStudents.filter((student) => targetIds.includes(student.id))

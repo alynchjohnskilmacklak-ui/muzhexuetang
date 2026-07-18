@@ -6,6 +6,7 @@ import {
   DEFAULT_ONE_ON_ONE_RATES,
   isPayableFeedback,
   normalizeGrade,
+  rewardContextFromCourse,
 } from './teacher-salary'
 
 describe('teacher salary calculations', () => {
@@ -42,6 +43,19 @@ describe('teacher salary calculations', () => {
     expect(isPayableFeedback({ status: 'PUBLISHED', summary: '课堂完成', knowledgePoints: [], studentIds: ['s1'] })).toBe(true)
     expect(isPayableFeedback({ status: 'DRAFT', summary: '课堂完成', knowledgePoints: [], studentIds: ['s1'] })).toBe(false)
     expect(isPayableFeedback({ status: 'PUBLISHED', summary: '', knowledgePoints: [], studentIds: ['s1'] })).toBe(false)
+  })
+
+  it('scopes first-feedback rewards by concrete course with subject fallback', () => {
+    expect(rewardContextFromCourse({ id: 'math-1', name: '初二数学', subject: '数学', type: 'GROUP' })).toEqual({
+      courseBucket: 'GROUP',
+      courseKey: 'course:math-1',
+      courseLabel: '初二数学',
+    })
+    expect(rewardContextFromCourse({ subject: '物理', type: 'ONE_ON_ONE' })).toEqual({
+      courseBucket: 'ONE_ON_ONE',
+      courseKey: 'subject:物理',
+      courseLabel: '物理',
+    })
   })
 
   it('minute 0 returns 0 pay', () => {

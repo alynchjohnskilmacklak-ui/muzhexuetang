@@ -114,6 +114,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const badge = typeof body.badge === 'string' ? body.badge.trim().slice(0, 30) : ''
   const studentRatings = body.studentRatings && typeof body.studentRatings === 'object' ? body.studentRatings : {}
 
+  if (status === 'PUBLISHED' && imageUrls.length === 0) {
+    return NextResponse.json({ error: '请上传课堂资料照片后提交反馈' }, { status: 400 })
+  }
+
   // Determine teacherId
   let teacherId: string
   let teacherName: string
@@ -156,8 +160,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '请选择学员或填写反馈内容' }, { status: 400 })
   }
 
-  if (isTeacher && !classLessonId && resolvedStudentIds.length > 5) {
-    return NextResponse.json({ error: '单次反馈最多选择5名学员' }, { status: 400 })
+  if (isTeacher && resolvedStudentIds.length > 3) {
+    return NextResponse.json({ error: '一次最多反馈3名学生' }, { status: 400 })
   }
 
   // Get student-parent mapping for notifications

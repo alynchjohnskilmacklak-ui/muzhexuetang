@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/get-user'
 import { getRequestPrisma } from '@/lib/prisma'
-import { uploadBuffer, safeFilename } from '@/lib/storage'
+import { uploadBuffer } from '@/lib/storage'
 import { apiHandler } from '@/lib/api-handler'
+import sharp from 'sharp'
 
 export const dynamic = 'force-dynamic'
 
@@ -83,36 +84,91 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   try {
     const result = await uploadBuffer(buffer, { originalName: file.name, mimeType: file.type, prefix: ownerType })
+    let preview: Awaited<ReturnType<typeof uploadBuffer>> | null = null
+    let thumbnail: Awaited<ReturnType<typeof uploadBuffer>> | null = null
+    let width: number | null = null
+    let height: number | null = null
+    const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif|avif)$/i.test(file.name)
+    if (isImage) {
+      try {
+        const metadata = await sharp(buffer, { animated: false, failOn: 'none' }).metadata()
+        width = metadata.width ?? null
+        height = metadata.height ?? null
+        const previewBuffer = await sharp(buffer, { animated: false, failOn: 'none' })
+          .rotate()
+          .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 82 })
+          .toBuffer()
+        preview = await uploadBuffer(previewBuffer, {
+          originalName: `${file.name.replace(/\.[^.]+$/, '')}-preview.webp`,
+          mimeType: 'image/webp',
+          prefix: `${ownerType}-preview`,
+        })
+        const thumbnailBuffer = await sharp(buffer, { animated: false, failOn: 'none' })
+          .rotate()
+          .resize({ width: 400, height: 400, fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 70 })
+          .toBuffer()
+        thumbnail = await uploadBuffer(thumbnailBuffer, {
+          originalName: `${file.name.replace(/\.[^.]+$/, '')}-thumbnail.webp`,
+          mimeType: 'image/webp',
+          prefix: `${ownerType}-thumbnail`,
+        })
+      } catch (thumbnailError) {
+        // HEIC support depends on the server libvips build. Keep the original usable.
+        console.warn('[upload:thumbnail]', file.name, thumbnailError instanceof Error ? thumbnailError.message : thumbnailError)
+      }
+    }
 
     // Create FileAsset record if table exists
     const prisma = await getRequestPrisma()
     try {
-      await (prisma as unknown as { fileAsset: { create: Function } }).fileAsset.create({
-        data: {
-          filename: result.storageKey,
-          originalName: file.name,
-          mimeType: file.type || 'application/octet-stream',
-          size: file.size,
-          storageDriver: result.storageDriver,
-          storageKey: result.storageKey,
-          url: result.url,
-          ownerType,
-          studentId,
-          lessonId,
-          feedbackId,
-          postId,
-          visibility,
-          uploadedById: user.id,
-          uploadedByRole: user.role,
-          tenant: user.division || null,
-        },
-      })
+      const fileAsset = (prisma as unknown as { fileAsset: { create(args: { data: Record<string, unknown> }): Promise<unknown> } }).fileAsset
+      const legacyData = {
+        filename: result.storageKey,
+        originalName: file.name,
+        mimeType: file.type || 'application/octet-stream',
+        size: file.size,
+        storageDriver: result.storageDriver,
+        storageKey: result.storageKey,
+        url: result.url,
+        ownerType,
+        studentId,
+        lessonId,
+        feedbackId,
+        postId,
+        visibility,
+        uploadedById: user.id,
+        uploadedByRole: user.role,
+        tenant: user.division || null,
+      }
+      try {
+        await fileAsset.create({ data: { ...legacyData, previewUrl: preview?.url ?? null, thumbnailUrl: thumbnail?.url ?? null, width, height, fileSize: file.size } })
+      } catch (metadataError) {
+        const message = metadataError instanceof Error ? metadataError.message : ''
+        if (!/previewUrl|thumbnailUrl|fileSize|Unknown argument/i.test(message)) throw metadataError
+        await fileAsset.create({ data: legacyData })
+      }
     } catch { /* FileAsset table may not exist yet */ }
 
     return NextResponse.json({
       url: result.url,
+      previewUrl: preview?.url ?? null,
+      thumbnailUrl: thumbnail?.url ?? null,
       legacyUrl: result.url.replace('/api/uploads/', '/uploads/'),
-      file: { storageKey: result.storageKey, filename: file.name, mimeType: file.type, size: file.size, visibility },
+      file: {
+        storageKey: result.storageKey,
+        filename: file.name,
+        mimeType: file.type,
+        size: file.size,
+        width,
+        height,
+        previewUrl: preview?.url ?? null,
+        previewStorageKey: preview?.storageKey ?? null,
+        thumbnailUrl: thumbnail?.url ?? null,
+        thumbnailStorageKey: thumbnail?.storageKey ?? null,
+        visibility,
+      },
     })
   } catch (uploadErr) {
     const code = (uploadErr as NodeJS.ErrnoException)?.code

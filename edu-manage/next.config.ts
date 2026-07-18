@@ -39,6 +39,10 @@ const nextConfig: NextConfig = {
     deviceSizes: [375, 750, 828, 1080, 1200],
     imageSizes: [64, 128, 180, 256, 384],
     minimumCacheTTL: 86400,
+    remotePatterns: [
+      { protocol: 'https', hostname: '**.aliyuncs.com' },
+      { protocol: 'https', hostname: '**.aliyuncs.com.cn' },
+    ],
   },
   async headers() {
     return [

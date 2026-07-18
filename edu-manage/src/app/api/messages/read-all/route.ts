@@ -21,11 +21,23 @@ export const PATCH = apiHandler(async () => {
       data: { isReadByParent: true },
     })
   } else if (user.role === 'teacher' && user.teacherId) {
+    const taughtGroups = await prisma.classGroup.findMany({
+      where: { OR: [{ teacherId: user.teacherId }, { teacherAssignments: { some: { teacherId: user.teacherId } } }] },
+      select: { id: true },
+    })
+    const enrollments = await prisma.enrollment.findMany({
+      where: { groupId: { in: taughtGroups.map((group) => group.id) }, status: 'ACTIVE' },
+      select: { studentId: true },
+    })
+    const taughtStudentIds = [...new Set(enrollments.map((enrollment) => enrollment.studentId))]
     await prisma.parentMessageReply.updateMany({
       where: {
         isReadByTeacher: false,
         role: 'parent',
-        message: { teacherId: user.teacherId },
+        message: {
+          studentId: { in: taughtStudentIds.length ? taughtStudentIds : ['__none__'] },
+          OR: [{ teacherId: user.teacherId }, { teacherId: null }],
+        },
       },
       data: { isReadByTeacher: true },
     })

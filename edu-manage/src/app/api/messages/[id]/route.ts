@@ -22,12 +22,18 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
   })
   if (!message) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  // 授权检查：家长只能读自己的留言，教师只能读分配给自己的留言
+  // 授权检查：教师只能读取分配给自己或自己在教学关系内的历史未分配留言。
   if (user.role === 'parent' && message.parentId !== user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
-  if (user.role === 'teacher' && message.teacherId !== user.teacherId) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (user.role === 'teacher') {
+    if (!user.teacherId || !message.studentId || (message.teacherId && message.teacherId !== user.teacherId)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    const taught = await prisma.enrollment.count({
+      where: { studentId: message.studentId, status: 'ACTIVE', group: { OR: [{ teacherId: user.teacherId }, { teacherAssignments: { some: { teacherId: user.teacherId } } }] } },
+    })
+    if (taught === 0) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   if (user.role === 'parent' && message.parentId === user.id) {
@@ -35,11 +41,14 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
       where: { messageId: id, isReadByParent: false },
       data: { isReadByParent: true },
     })
-  } else if ((user.role === 'teacher' && message.teacherId === user.teacherId) || user.role === 'admin') {
+  } else if (user.role === 'teacher' || user.role === 'admin') {
     await prisma.parentMessageReply.updateMany({
       where: { messageId: id, isReadByTeacher: false },
       data: { isReadByTeacher: true },
     })
+    if (user.role === 'teacher' && message.status === 'OPEN') {
+      await prisma.parentMessage.update({ where: { id }, data: { status: 'READ' } })
+    }
   }
 
   return NextResponse.json(message)
@@ -54,12 +63,19 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
 
   const existing = await prisma.parentMessage.findUnique({ where: { id } })
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  if (user.role === 'teacher' && existing.teacherId !== user.teacherId) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (user.role === 'teacher') {
+    if (!user.teacherId || !existing.studentId || (existing.teacherId && existing.teacherId !== user.teacherId)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    const taught = await prisma.enrollment.count({
+      where: { studentId: existing.studentId, status: 'ACTIVE', group: { OR: [{ teacherId: user.teacherId }, { teacherAssignments: { some: { teacherId: user.teacherId } } }] } },
+    })
+    if (taught === 0) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const body = await req.json()
-  const status = body.status === 'CLOSED' ? 'CLOSED' : 'OPEN'
+  const allowedStatuses = ['OPEN', 'READ', 'REPLIED', 'CLOSED']
+  const status = allowedStatuses.includes(body.status) ? body.status : 'OPEN'
 
   const message = await prisma.parentMessage.update({
     where: { id },

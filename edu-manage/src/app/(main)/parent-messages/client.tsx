@@ -115,14 +115,14 @@ export function AdminMessagesClient() {
 
   const stats = useMemo(() => ({
     total: allMessages.length,
-    open: allMessages.filter(m => m.status === 'OPEN').length,
+    open: allMessages.filter(m => m.status !== 'CLOSED').length,
     unread: allMessages.reduce((s, m) => s + unreadCount(m), 0),
   }), [allMessages])
 
   const messages = useMemo(() => {
     const kw = search.trim()
     return allMessages
-      .filter(m => filter === 'ALL' || m.status === filter)
+      .filter(m => filter === 'ALL' || (filter === 'OPEN' ? m.status !== 'CLOSED' : m.status === 'CLOSED'))
       .filter(m => !teacherFilter || m.teacher?.id === teacherFilter)
       .filter(m => !kw || `${m.title} ${m.parent.name} ${m.teacher?.name || ''} ${m.student?.name || ''} ${m.subject || ''}`.includes(kw) || m.replies.some(r => r.content.includes(kw)))
       .sort((a, b) => {
@@ -218,7 +218,7 @@ export function AdminMessagesClient() {
           <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(0,0,0,.07)', background: '#fff', flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Text strong style={{ fontSize: 15, flex: 1 }}>{active.title}</Text>
-              {active.status === 'OPEN' && <Button size="small" onClick={handleClose} loading={closing} style={{ borderRadius: 8, fontSize: 12 }}>关闭会话</Button>}
+              {active.status !== 'CLOSED' && <Button size="small" onClick={handleClose} loading={closing} style={{ borderRadius: 8, fontSize: 12 }}>关闭会话</Button>}
             </div>
             <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
               <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#FFF6F1', color: PARENT, border: 'none' }}><UserOutlined /> {active.parent.name}</Tag>
@@ -230,7 +230,7 @@ export function AdminMessagesClient() {
             {active.replies.map(r => <ChatBubble key={r.id} reply={r} />)}
             <div ref={bottomRef} />
           </div>
-          {active.status === 'OPEN' ? (
+          {active.status !== 'CLOSED' ? (
             <div style={{ padding: '12px 18px', background: '#fff', borderTop: '1px solid rgba(0,0,0,.07)', flexShrink: 0, display: 'flex', gap: 8, alignItems: 'flex-end' }}>
               <TextArea value={replyText} onChange={e => setReplyText(e.target.value)} placeholder="以管理员身份回复（Enter 发送，Shift+Enter 换行）"
                 autoSize={{ minRows: 1, maxRows: 4 }}

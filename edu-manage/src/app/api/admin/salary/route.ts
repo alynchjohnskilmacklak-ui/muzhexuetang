@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     const page = Math.max(1, Number(req.nextUrl.searchParams.get('page') || 1))
     const limit = Math.min(200, Math.max(1, Number(req.nextUrl.searchParams.get('limit') || 50)))
 
-    const [transactions, total, teachers, aggregates] = await Promise.all([
+    const [transactions, total, teachers, aggregates, feedbackAggregates] = await Promise.all([
       prisma.teacherSalaryTransaction.findMany({
         where,
         orderBy: { createdAt: 'desc' },
@@ -46,13 +46,24 @@ export async function GET(req: NextRequest) {
         by: ['teacherId', 'type'],
         where,
         _sum: { amount: true },
+        _count: { _all: true },
+      }),
+      prisma.classroomFeedback.groupBy({
+        by: ['teacherId'],
+        where: {
+          ...(teacherId ? { teacherId } : {}),
+          teacher: { division },
+          status: 'PUBLISHED',
+          createdAt: { gte: since },
+        },
+        _count: { _all: true },
       }),
     ])
 
-    const summaryMap = new Map<string, { teacherId: string; name: string; avatar: string | null; lesson: number; feedback: number; total: number }>()
+    const summaryMap = new Map<string, { teacherId: string; name: string; avatar: string | null; lesson: number; feedback: number; feedbackCount: number; rewardCount: number; total: number }>()
     for (const teacher of teachers) {
       if (!teacherId || teacher.id === teacherId) {
-        summaryMap.set(teacher.id, { teacherId: teacher.id, name: teacher.name, avatar: teacher.avatar, lesson: 0, feedback: 0, total: 0 })
+        summaryMap.set(teacher.id, { teacherId: teacher.id, name: teacher.name, avatar: teacher.avatar, lesson: 0, feedback: 0, feedbackCount: 0, rewardCount: 0, total: 0 })
       }
     }
     for (const item of aggregates) {
@@ -60,8 +71,32 @@ export async function GET(req: NextRequest) {
       if (!row) continue
       const amount = item._sum.amount ?? 0
       if (item.type === 'LESSON_PAY') row.lesson += amount
-      if (item.type === 'FEEDBACK_BONUS') row.feedback += amount
+      if (item.type === 'FEEDBACK_BONUS') {
+        row.feedback += amount
+        row.rewardCount = item._count._all
+      }
       row.total += amount
+    }
+    for (const item of feedbackAggregates) {
+      const row = summaryMap.get(item.teacherId)
+      if (row) row.feedbackCount = item._count._all
+    }
+
+    const rewardClient = (prisma as unknown as { feedbackRewardRecord?: { groupBy(args: unknown): Promise<Array<{ teacherId: string; _count: { _all: number } }>> } }).feedbackRewardRecord
+    if (rewardClient) {
+      try {
+        const rewardAggregates = await rewardClient.groupBy({
+          by: ['teacherId'],
+          where: { ...(teacherId ? { teacherId } : {}), amount: { gt: 0 }, createdAt: { gte: since } },
+          _count: { _all: true },
+        })
+        for (const item of rewardAggregates) {
+          const row = summaryMap.get(item.teacherId)
+          if (row) row.rewardCount = item._count._all
+        }
+      } catch {
+        // Migration not deployed yet: transaction count remains the compatibility value.
+      }
     }
 
     const summary = [...summaryMap.values()].map((row) => ({

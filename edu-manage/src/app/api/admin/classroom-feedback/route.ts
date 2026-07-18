@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { isPayableFeedback, triggerFeedbackBonus } from '@/lib/teacher-salary'
 import { divisionWhere } from '@/lib/division'
+import { resolveFeedbackImageVariants, variantsForFeedback } from '@/lib/file-asset-variants'
 
 import { apiHandler } from '@/lib/api-handler'
 
@@ -63,6 +64,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     })
 
     const allStudentIds = [...new Set(feedbacks.flatMap((feedback) => feedback.studentIds))]
+    const allImageKeys = [...new Set(feedbacks.flatMap((feedback) => feedback.imageUrls).filter(Boolean))]
+    const imageVariantMap = await resolveFeedbackImageVariants(prisma, allImageKeys)
     const students = allStudentIds.length
       ? await prisma.student.findMany({
           where: { id: { in: allStudentIds } },
@@ -100,6 +103,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
         summary: feedback.summary,
         homework: feedback.homework,
         imageUrls: feedback.imageUrls,
+        images: variantsForFeedback(feedback.imageUrls, imageVariantMap),
         studentRatings: feedback.studentRatings,
         parentReply: feedback.parentReply,
         parentRepliedAt: feedback.parentRepliedAt?.toISOString() ?? null,

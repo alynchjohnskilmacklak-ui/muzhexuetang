@@ -13,6 +13,7 @@ import { OneOnOneModal } from './OneOnOneModal'
 import { ScheduleDetailPanel } from './_components/ScheduleDetailPanel'
 import { ScheduleFormModal } from './_components/ScheduleFormModal'
 import { SchedulePeriodSettingsModal } from './_components/SchedulePeriodSettingsModal'
+import { CopyFridayToSaturdayModal } from './_components/CopyFridayToSaturdayModal'
 import { SchedulePeriod } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
@@ -52,6 +53,7 @@ function SchedulePageInner() {
   const [savingLesson, setSavingLesson] = useState(false)
   const [scheduleFormOpen, setScheduleFormOpen] = useState(false)
   const [periodSettingsOpen, setPeriodSettingsOpen] = useState(false)
+  const [copyFridayOpen, setCopyFridayOpen] = useState(false)
   const { periods, mutate: mutatePeriods } = useSchedulePeriods(division)
 
   const handleRoomCellClick = (_room: Record<string, unknown>, _period: SchedulePeriod) => {
@@ -149,6 +151,12 @@ function SchedulePageInner() {
           }}>
             + 新建排课
           </button>
+          <button onClick={() => setCopyFridayOpen(true)} style={{
+            padding: '7px 14px', borderRadius: 6, background: '#fff', color: '#1D9E75',
+            border: '1px solid #1D9E75', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+          }}>
+            周六照常上课
+          </button>
           <button onClick={() => setPeriodSettingsOpen(true)} style={{
             padding: '7px 14px', borderRadius: 6, background: '#fff', color: '#5a4e3a',
             border: '1px solid #EEE7E1', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
@@ -196,6 +204,14 @@ function SchedulePageInner() {
         onSaved={() => {
           mutatePeriods()
           mutateSWR(key => typeof key === 'string' && key.startsWith('/api/schedules/'))
+        }}
+      />
+
+      <CopyFridayToSaturdayModal
+        open={copyFridayOpen}
+        onClose={() => setCopyFridayOpen(false)}
+        onSuccess={() => {
+          mutateSWR(key => typeof key === 'string' && (key.startsWith('/api/schedules/') || key.startsWith('/api/class-lessons/')))
         }}
       />
     </PageLayout>

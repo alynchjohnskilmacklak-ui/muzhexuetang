@@ -399,7 +399,7 @@ export default function LoginPage() {
 
   return (
     <>
-      {showSplash && <SplashScreen onDone={handleSplashDone} />}
+      {showSplash && <SplashScreen onDone={handleSplashDone} variant="full" duration={4200} />}
       <MobileBrandBar />
       <div style={{ display: 'flex', minHeight: '100vh', background: '#faf8f5' }}>
         {!isMobile && <BrandLeft mounted={mounted} />}

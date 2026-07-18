@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import {
   Button,
@@ -22,7 +22,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
-import { DeleteOutlined, DollarOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
+import { DeleteOutlined, DollarOutlined, DownloadOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 const { Text, Title } = Typography
@@ -52,6 +52,8 @@ interface SalarySummary {
   name: string
   lesson: number
   feedback: number
+  feedbackCount: number
+  rewardCount: number
   total: number
 }
 
@@ -132,6 +134,9 @@ interface SalaryPayload {
   teachers: TeacherOption[]
   summary: SalarySummary[]
   transactions: SalaryTransaction[]
+  total: number
+  page: number
+  limit: number
 }
 
 interface FeedbackRecord {
@@ -248,13 +253,52 @@ export default function TeacherSalaryAdminPage() {
   const [adjustmentModal, setAdjustmentModal] = useState({ open: false, teacherId: '', teacherName: '' })
   const [pendingDelete, setPendingDelete] = useState<SalaryTransaction | null>(null)
   const [deleting, setDeleting] = useState(false)
-  const query = filterTeacher ? `period=${period}&teacherId=${filterTeacher}` : `period=${period}`
-  const { data, isLoading, mutate } = useSWR<SalaryPayload>(`/api/admin/salary?${query}`, fetcher)
+  const [transactionPage, setTransactionPage] = useState(1)
+  const [exportingTeacherId, setExportingTeacherId] = useState('')
+  const transactionPageSize = 50
+  const query = new URLSearchParams({ period, page: String(transactionPage), limit: String(transactionPageSize) })
+  if (filterTeacher) query.set('teacherId', filterTeacher)
+  const { data, isLoading, mutate } = useSWR<SalaryPayload>(`/api/admin/salary?${query.toString()}`, fetcher)
+
+  useEffect(() => {
+    setTransactionPage(1)
+  }, [period, filterTeacher])
 
   const teachers = data?.teachers ?? []
   const summary = data?.summary ?? []
   const transactions = data?.transactions ?? []
   const totalAll = summary.reduce((sum, item) => sum + item.total, 0)
+
+  const exportTeacherSalary = async (teacherId: string, teacherName: string) => {
+    if (exportingTeacherId) return
+    setExportingTeacherId(teacherId)
+    message.loading({ content: `正在导出${teacherName}老师的薪资流水...`, key: 'salary-export' })
+    try {
+      const params = new URLSearchParams({ teacherId, period })
+      const response = await fetch(`/api/admin/salary/export?${params.toString()}`)
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}))
+        throw new Error(payload.error || '导出失败')
+      }
+      const blob = await response.blob()
+      const disposition = response.headers.get('Content-Disposition') || ''
+      const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1]
+      const filename = encodedName ? decodeURIComponent(encodedName) : `${teacherName}老师薪资流水.xlsx`
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      message.success({ content: '薪资流水已导出，包含汇总、科目汇总和明细', key: 'salary-export' })
+    } catch (error) {
+      message.error({ content: error instanceof Error ? error.message : '导出失败', key: 'salary-export' })
+    } finally {
+      setExportingTeacherId('')
+    }
+  }
 
   const deleteManualAdjustment = async () => {
     if (!pendingDelete) return
@@ -277,16 +321,19 @@ export default function TeacherSalaryAdminPage() {
     { title: '教师', dataIndex: 'name', key: 'name', render: (name: string) => <Text strong>{name}</Text> },
     { title: '课时薪资', dataIndex: 'lesson', key: 'lesson', width: 110, align: 'right' as const, render: (value: number) => <Text style={{ color: '#1D9E75' }}>¥{value.toFixed(2)}</Text> },
     { title: '反馈奖励', dataIndex: 'feedback', key: 'feedback', width: 110, align: 'right' as const, render: (value: number) => <Text style={{ color: '#E8784A' }}>¥{value.toFixed(2)}</Text> },
+    { title: '反馈次数', dataIndex: 'feedbackCount', key: 'feedbackCount', width: 90, align: 'right' as const },
+    { title: '奖励次数', dataIndex: 'rewardCount', key: 'rewardCount', width: 90, align: 'right' as const },
     { title: '合计', dataIndex: 'total', key: 'total', width: 110, align: 'right' as const, render: (value: number) => <Text strong>¥{value.toFixed(2)}</Text> },
     {
       title: '操作',
       key: 'action',
-      width: 220,
+      width: 300,
       render: (_: unknown, row: SalarySummary) => (
         <Space size={6}>
           <Button size="small" icon={<EditOutlined />} onClick={() => setConfigDrawer({ open: true, teacherId: row.teacherId, teacherName: row.name })}>配置</Button>
           <Button size="small" icon={<EyeOutlined />} onClick={() => setFeedbackDrawer({ open: true, teacherId: row.teacherId, teacherName: row.name })}>反馈</Button>
           <Button size="small" icon={<DollarOutlined />} onClick={() => setAdjustmentModal({ open: true, teacherId: row.teacherId, teacherName: row.name })}>调整</Button>
+          <Button size="small" icon={<DownloadOutlined />} loading={exportingTeacherId === row.teacherId} disabled={Boolean(exportingTeacherId) && exportingTeacherId !== row.teacherId} onClick={() => exportTeacherSalary(row.teacherId, row.name)}>导出</Button>
         </Space>
       ),
     },
@@ -346,7 +393,7 @@ export default function TeacherSalaryAdminPage() {
             {
               key: 'detail',
               label: '全部流水',
-              children: <Table dataSource={transactions} columns={detailColumns} rowKey="id" loading={isLoading} pagination={{ pageSize: 30, hideOnSinglePage: true }} size="small" scroll={{ x: isMobile ? 680 : undefined }} locale={{ emptyText: '暂无数据' }} />,
+              children: <Table dataSource={transactions} columns={detailColumns} rowKey="id" loading={isLoading} pagination={{ current: transactionPage, pageSize: transactionPageSize, total: data?.total ?? 0, showSizeChanger: false, hideOnSinglePage: true, showTotal: (total) => `共 ${total} 条流水`, onChange: setTransactionPage }} size="small" scroll={{ x: isMobile ? 680 : undefined }} locale={{ emptyText: '暂无数据' }} />,
             },
           ]}
         />

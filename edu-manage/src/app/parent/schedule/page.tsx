@@ -33,7 +33,7 @@ export default async function ParentSchedulePage() {
       lessonDate: { gte: monday, lte: sunday },
     },
     include: {
-      group: { include: { course: true, teacher: { select: { id: true, name: true } }, room: true, enrollments: { where: parentActiveEnrollmentWhere(userId), include: { student: true } } } },
+      group: { include: { course: true, teacher: { select: { id: true, name: true } }, teacherAssignments: { select: { teacherId: true, subject: true } }, room: true, enrollments: { where: parentActiveEnrollmentWhere(userId), include: { student: true } } } },
       teacher: { select: { id: true, name: true } },
     },
     orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],

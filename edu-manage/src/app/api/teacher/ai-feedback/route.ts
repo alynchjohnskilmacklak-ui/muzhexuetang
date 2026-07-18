@@ -127,25 +127,25 @@ function buildFallbackSuggestion(note: string): string {
 function buildFallbackComment(note: string, studentNames: string[]): string {
   const names = studentNames.length ? studentNames : ['孩子']
   const subject = names.length === 1 ? `${names[0]}同学` : `${names.join('、')}几位同学`
-  if (/帮我补齐|写得自然|补齐评语|生成反馈/.test(note)) {
-    return `${subject}本节课整体学习状态比较稳定，能够跟着课堂节奏完成主要学习任务。后续建议继续把课堂上的理解落实到课后练习中，遇到不确定的地方及时标记并订正，这样进步会更扎实。`
-  }
-  if (/作业.*(不好|没完成|没有完成|需要|拖拉)|没完成.*作业/.test(note)) {
-    return `${subject}今天课堂上能够跟着老师的节奏听讲，说明课堂注意力和理解状态是在线的。不过从作业完成情况来看，课后落实还需要继续加强。建议接下来先保证作业按时、独立完成，再逐步提高正确率。`
-  }
-  if (/审题|粗心|不仔细/.test(note)) {
-    return `${subject}今天在课堂学习中能看出有思考和参与，基础计算也在逐步稳定。需要提醒的是，做题时审题还要再细一些，先看清条件和问题，再下笔计算，会更容易减少不必要的失误。`
-  }
-  if (/计算|准确率/.test(note)) {
-    return `${subject}今天在计算相关内容上有进步，课堂上能跟着老师的思路完成练习。接下来建议继续保持练习量，同时做完后主动检查关键步骤，让准确率更加稳定。`
-  }
-  if (/走神|专注|不认真/.test(note)) {
-    return `${subject}今天课堂中偶尔会出现注意力不够集中的情况，但在老师提醒后能够回到学习节奏。接下来希望先把课堂专注度稳定住，跟紧每一步讲解，课后巩固效果也会更好。`
-  }
-  if (/积极|主动|认真|不错|进步|听讲/.test(note)) {
-    return `${subject}今天课堂状态不错，能够认真听讲并积极参与互动，说明对本节课内容有在主动思考。接下来继续保持这种课堂投入度，课后再及时复盘巩固，学习效果会更稳定。`
-  }
-  return `${subject}本节课整体表现比较平稳，能够完成课堂中的主要学习任务。接下来建议继续跟紧课堂节奏，课后及时复盘和订正，把当天学到的内容真正沉淀下来。`
+  const cleanNote = note.replace(/帮我补齐|写得自然|补齐评语|生成反馈/g, '').trim().slice(0, 100)
+  const performance = /走神|专注|不认真|需要提醒/.test(note)
+    ? '课堂中有时需要老师提醒，但提醒后能够重新跟上学习节奏'
+    : /积极|主动|回答|认真|听讲|练习|思考/.test(note)
+      ? `能够主动参与课堂，${cleanNote || '听讲和练习状态较为投入'}`
+      : `能够跟随课堂节奏完成主要学习任务${cleanNote ? `，老师记录到：${cleanNote}` : ''}`
+  const mastery = /不会|困难|需要加强|薄弱|不熟练/.test(note)
+    ? '相关知识目前处在巩固阶段，需要通过针对性练习继续加深理解'
+    : /掌握|理解|学会|不错|正确/.test(note)
+      ? '对本节核心内容已有较好的理解，能够尝试运用到课堂练习中'
+      : '能够理解当堂主要内容，后续还需要通过练习检验掌握是否稳定'
+  const problem = /作业/.test(note)
+    ? '当前需要重点关注作业完成质量和课后落实情况'
+    : /审题|粗心|不仔细/.test(note)
+      ? '做题时还需要放慢审题速度，减少因遗漏条件造成的失误'
+      : /计算|准确率/.test(note)
+        ? '计算步骤和检查习惯仍有提升空间'
+        : '暂未发现明显知识障碍，下一步重点是让课堂状态保持稳定'
+  return `${subject}。课堂表现：${performance}。知识掌握：${mastery}。存在问题：${problem}。后续建议：${buildFallbackSuggestion(note)}`
 }
 
 function appendUniqueQuote(comment: string, index: number, usedQuotes: Set<string>): string {
@@ -331,12 +331,21 @@ export const POST = apiHandler(async (req: NextRequest) => {
     selected?: { mood?: string; tags?: string[]; knowledgePoints?: string[] }
     selectedStudentIds?: string[]
     studentPerf?: Array<{ id?: string; name?: string | null; level?: string }>
+    performanceTags?: string[]
+    masteryLevel?: string
+    teacherRemark?: string
+    grade?: string
+    subject?: string
+    course?: string
     stageMaterial?: string
     groupId?: string; courseType?: string
     currentForm?: { mood?: string; overallComment?: string; tags?: string[]; knowledgePoints?: string[]; homework?: string[]; summary?: string; suggestion?: string; stageSummaryText?: string; stageSuggestions?: string }
   }
 
-  const note = (typeof body.note === 'string' && body.note.trim()) || ''
+  const performanceTags = stringArray(body.performanceTags).slice(0, 5)
+  const masteryLevel = typeof body.masteryLevel === 'string' ? body.masteryLevel.trim().slice(0, 30) : ''
+  const teacherRemark = typeof body.teacherRemark === 'string' ? body.teacherRemark.trim().slice(0, 300) : ''
+  const note = (typeof body.note === 'string' && body.note.trim()) || teacherRemark || performanceTags.join('、')
 
   if (note) {
     const roster = Array.isArray(body.roster) ? body.roster.filter((s) => typeof s?.id === 'string') : []
@@ -365,7 +374,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const perfGroups = (['GREAT', 'OKAY', 'WEAK'] as StudentPerfLevel[])
       .map((level) => {
         const names = resolved.matchedIds
-          .map((id, index) => ({ id, name: resolved.matchedNames[index] || perfById.get(id)?.name || '孩子', level: perfById.get(id)?.level || 'OKAY' }))
+          .map((id, index) => ({ id, name: resolved.matchedNames[index] || perfById.get(id)?.name || '孩子', level: perfById.get(id)?.level || 'GREAT' }))
           .filter((item) => item.level === level)
           .map((item) => item.name)
         return names.length ? `【${perfLabel[level]}】${names.join('、')}` : ''
@@ -384,7 +393,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       '- 像老师放学后当面跟家长说话：具体、平实、有温度，不打官腔。',
       '- 先说今天课堂上看到的具体表现（基于老师输入，不编造），再客观点出需要注意的地方（委婉但不回避，家长有知情权），最后给一条家长在家能配合做的具体事。',
       "- 严禁：'该生''该同学''表现良好''总体不错'这类套话；严禁堆砌空洞夸奖；严禁编造分数、名次、考试和老师没提到的事件。",
-      "- 称呼用'姓名+同学'。每段评语 120~180 字，一段连贯的话，不列点、不加小标题，结尾不要加名言（系统自动补充）。",
+      "- 称呼用'姓名+同学'。每段评语 120~220 字，必须依次包含“课堂表现、知识掌握、存在问题、后续建议”四部分；可使用这四个短标签，但不要写空洞套话，结尾不要加名言（系统自动补充）。",
       '- 如果老师输入里既有表扬又有问题，两者都要写进去，问题放在表扬之后、建议之前。',
       '- 如果【已确认学生】不为空，直接围绕这些学生写，老师输入没提名字也不要拒绝。',
       '- 为每个已确认学生单独写一段（perStudentComments），只出现该学生本人姓名；多个学生共用同一段描述时，允许内容相近但措辞要有变化。',
@@ -399,6 +408,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
     const user = [
       `【老师输入】${note}`,
+      body.grade ? `【年级】${String(body.grade).slice(0, 80)}` : '',
+      body.subject ? `【学科】${String(body.subject).slice(0, 80)}` : '',
+      body.course ? `【课程】${String(body.course).slice(0, 120)}` : '',
+      performanceTags.length ? `【课堂表现】${performanceTags.join('、')}` : '',
+      masteryLevel ? `【知识掌握】${masteryLevel}` : '',
+      teacherRemark ? `【教师补充】${teacherRemark}` : '',
       confirmedStudentText,
       perfGroups ? `【表现档位】${perfGroups}` : '',
       promptRoster.length ? `【班级学生】${promptRoster.map((s) => `${s.name}(${s.id})`).join('、')}` : '【班级学生】无',
@@ -409,7 +424,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       `【当前表单】状态=${currentForm.mood || '未选'}；已有评语=${currentForm.overallComment || '空'}；已有建议=${currentForm.suggestion || currentForm.summary || '空'}；已有寄语=${currentForm.stageSummaryText || '空'}`,
       stageMaterial ? `【阶段素材】${stageMaterial.slice(0, 800)}` : '',
       '【返回 JSON】',
-      '{"intent":"classroom|stage|suggestion|mixed","mood":"GREAT|GOOD|OKAY|NEEDS_ATTENTION","overallComment":"兼容旧流程的完整家长反馈","perStudentComments":[{"studentId":"已确认学生id","studentName":"已确认学生姓名","comment":"学生专属三部分评语"}],"tags":["从可选标签中选"],"knowledgePoints":["从可选知识点中选"],"homework":["作业内容"],"summary":"","suggestion":"下一步建议","stageSummaryText":"阶段寄语","stageSuggestions":"阶段建议"}',
+      '{"intent":"classroom|stage|suggestion|mixed","mood":"GREAT|GOOD|OKAY|NEEDS_ATTENTION","overallComment":"包含课堂表现、知识掌握、存在问题、后续建议四部分的完整反馈","perStudentComments":[{"studentId":"已确认学生id","studentName":"已确认学生姓名","comment":"该学生专属的四部分反馈"}],"tags":["从可选标签中选"],"knowledgePoints":["从可选知识点中选"],"homework":["作业内容"],"summary":"","suggestion":"下一步建议","stageSummaryText":"阶段寄语","stageSuggestions":"阶段建议"}',
     ].filter(Boolean).join('\n')
 
     try {

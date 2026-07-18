@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Col, Drawer, Empty, Form, Input, Row, Select, Spin, Tag, Upload } from 'antd'
-import { PlusOutlined, ReloadOutlined, SearchOutlined, SendOutlined, WarningOutlined } from '@ant-design/icons'
+import { Button, Card, Carousel, Col, Drawer, Empty, Form, Input, Modal, Row, Select, Spin, Tag, Upload } from 'antd'
+import { DownloadOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, SendOutlined, WarningOutlined } from '@ant-design/icons'
 import { Image as AntImage } from 'antd'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { useDivision } from '@/contexts/DivisionContext'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
+import Image from 'next/image'
 
 const fetcher = (url: string) => fetch(url).then((res) => { if (!res.ok) throw new Error('加载失败'); return res.json() })
 
@@ -26,6 +27,7 @@ type AdminFeedback = {
   summary?: string | null
   homework?: unknown
   imageUrls?: string[]
+  images?: AdminFeedbackImage[]
   parentReply?: string | null
   parentRepliedAt?: string | null
   adminReply?: string | null
@@ -34,6 +36,13 @@ type AdminFeedback = {
   tags?: string[]
   badge?: string | null
   createdAt: string
+}
+
+type AdminFeedbackImage = {
+  assetId: string | null
+  originalUrl: string
+  previewUrl: string
+  thumbnailUrl: string
 }
 
 type AdminLesson = {
@@ -62,11 +71,77 @@ function formatHomework(homework: unknown) {
   }).filter(Boolean)
 }
 
+function FeedbackImage({ src, size, onClick }: { src: string; size: number; onClick?: () => void }) {
+  const [loaded, setLoaded] = useState(false)
+  const [failed, setFailed] = useState(false)
+  return (
+    <button
+      type="button"
+      aria-label={onClick ? '预览课堂资料图片' : '课堂资料缩略图'}
+      onClick={onClick}
+      style={{ position: 'relative', width: size, height: size, flex: `0 0 ${size}px`, padding: 0, overflow: 'hidden', borderRadius: 6, border: '1px solid #EEE7E1', background: '#F5F2EE', cursor: onClick ? 'zoom-in' : 'default' }}
+    >
+      {!loaded && !failed && <Spin size="small" style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center' }} />}
+      {failed ? <span style={{ fontSize: 10, color: '#9A8E7A' }}>加载失败</span> : (
+        <Image src={src} alt="课堂资料" fill sizes={`${size}px`} loading="lazy" unoptimized style={{ objectFit: 'cover', opacity: loaded ? 1 : 0, transition: 'opacity .2s ease' }} onLoad={() => setLoaded(true)} onError={() => setFailed(true)} />
+      )}
+    </button>
+  )
+}
+
+function FeedbackImageViewer({ images, initialIndex, onClose }: { images: AdminFeedbackImage[]; initialIndex: number; onClose: () => void }) {
+  const [current, setCurrent] = useState(initialIndex)
+  const { urls: signedPreviews } = useSignedUrls(images.map((image) => image.previewUrl || image.thumbnailUrl || image.originalUrl))
+  const { urls: signedOriginals } = useSignedUrls(images.map((image) => image.originalUrl))
+  const activeImage = images[current]
+  const downloadHref = activeImage?.assetId
+    ? `/api/admin/classroom-feedback/image-download?assetId=${encodeURIComponent(activeImage.assetId)}`
+    : signedOriginals[current]
+
+  return (
+    <Modal
+      open
+      onCancel={onClose}
+      footer={null}
+      width="min(960px, 100vw)"
+      centered
+      styles={{ body: { padding: 0, maxWidth: '100%', overflow: 'hidden' } }}
+      title={<span style={{ color: '#1A1201' }}>课堂资料 <span style={{ color: '#9A8E7A', fontWeight: 400 }}>{current + 1} / {images.length}</span></span>}
+    >
+      <Carousel key={initialIndex} initialSlide={initialIndex} afterChange={setCurrent} arrows dots={false} swipeToSlide>
+        {images.map((image, index) => (
+          <div key={`${image.originalUrl}-${index}`}>
+            <div style={{ position: 'relative', width: '100%', height: 'min(70vh, 720px)', minHeight: 280, background: '#1A1201' }}>
+              <Image
+                src={signedPreviews[index]}
+                alt={`课堂资料 ${index + 1}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 960px"
+                unoptimized
+                style={{ objectFit: 'contain' }}
+              />
+            </div>
+          </div>
+        ))}
+      </Carousel>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '12px max(12px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom, 0px))', background: '#FAF8F5' }}>
+        <Button type="primary" icon={<DownloadOutlined />} href={downloadHref} target="_blank" rel="noopener noreferrer" style={{ background: '#E8784A', borderColor: '#E8784A' }}>
+          下载原图
+        </Button>
+      </div>
+    </Modal>
+  )
+}
+
 function FeedbackItemCard({ item, onOpen }: { item: AdminFeedback; onOpen: (item: AdminFeedback) => void }) {
   const students = Array.isArray(item.students) ? item.students : []
   const points = Array.isArray(item.knowledgePoints) ? item.knowledgePoints : []
-  const images = Array.isArray(item.imageUrls) ? item.imageUrls : []
-  const { urls: signedImages } = useSignedUrls(images)
+  const originalImages = Array.isArray(item.imageUrls) ? item.imageUrls : []
+  const images = Array.isArray(item.images) && item.images.length === originalImages.length
+    ? item.images
+    : originalImages.map((url) => ({ assetId: null, originalUrl: url, previewUrl: url, thumbnailUrl: url }))
+  const thumbnails = images.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl)
+  const { urls: signedImages } = useSignedUrls(thumbnails)
   const homework = formatHomework(item.homework)
   const performanceTags = Array.isArray(item.tags) ? item.tags : []
   return (
@@ -114,7 +189,7 @@ function FeedbackItemCard({ item, onOpen }: { item: AdminFeedback; onOpen: (item
       {images.length > 0 && (
         <div onClick={(event) => event.stopPropagation()} style={{ marginTop: 6, display: 'flex', gap: 4 }}>
           {images.slice(0, 4).map((url, i) => (
-            <img key={i} src={signedImages[i]} alt="" onError={(event) => { event.currentTarget.alt = '图片加载失败' }} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, border: '1px solid #EEE7E1' }} />
+            <FeedbackImage key={`${url}-${i}`} src={signedImages[i]} size={48} />
           ))}
           {images.length > 4 && <div style={{ width: 48, height: 48, borderRadius: 6, background: '#f5f2ee', display: 'grid', placeItems: 'center', fontSize: 11, color: '#98A2B3' }}>+{images.length - 4}</div>}
         </div>
@@ -159,8 +234,12 @@ export default function ClassroomFeedbackAdminPage() {
   const [detailFeedback, setDetailFeedback] = useState<AdminFeedback | null>(null)
   const [adminReply, setAdminReply] = useState('')
   const [replying, setReplying] = useState(false)
-  const detailImages = Array.isArray(detailFeedback?.imageUrls) ? detailFeedback.imageUrls : []
-  const { urls: signedDetailImages } = useSignedUrls(detailImages)
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null)
+  const detailOriginalImages = Array.isArray(detailFeedback?.imageUrls) ? detailFeedback.imageUrls : []
+  const detailImages: AdminFeedbackImage[] = Array.isArray(detailFeedback?.images) && detailFeedback.images.length === detailOriginalImages.length
+    ? detailFeedback.images
+    : detailOriginalImages.map((url) => ({ assetId: null, originalUrl: url, previewUrl: url, thumbnailUrl: url }))
+  const { urls: signedDetailImages } = useSignedUrls(detailImages.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
   const { urls: signedComposeImages } = useSignedUrls(composeImages)
 
   const params = new URLSearchParams({ date, limit: '200' })
@@ -497,7 +576,7 @@ export default function ClassroomFeedbackAdminPage() {
               )}
               {detailFeedback.summary && <DetailSection label="课堂小结"><div style={{ color: '#1A1201', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{detailFeedback.summary}</div></DetailSection>}
               {homework.length > 0 && <DetailSection label="作业"><ol style={{ margin: 0, paddingLeft: 20 }}>{homework.map((item, index) => <li key={`${index}-${item}`}>{item}</li>)}</ol></DetailSection>}
-              {images.length > 0 && <DetailSection label="课堂资料"><AntImage.PreviewGroup><div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{images.map((url, index) => <AntImage key={`${url}-${index}`} src={signedDetailImages[index]} width={72} height={72} style={{ objectFit: 'cover', borderRadius: 8 }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Crect width='72' height='72' fill='%23f5f2ee'/%3E%3Ctext x='36' y='36' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='10'%3E加载失败%3C/text%3E%3C/svg%3E" />)}</div></AntImage.PreviewGroup></DetailSection>}
+              {images.length > 0 && <DetailSection label="课堂资料（点击预览）"><div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', maxWidth: '100%' }}>{images.map((image, index) => <FeedbackImage key={`${image.originalUrl}-${index}`} src={signedDetailImages[index]} size={72} onClick={() => setViewerIndex(index)} />)}</div></DetailSection>}
 
               {detailFeedback.parentReply && (
                 <div style={{ padding: '10px 12px', borderRadius: 8, background: '#EAF7F1', border: '1px solid #B6E2D2', color: '#176C53', lineHeight: 1.7 }}>
@@ -520,6 +599,10 @@ export default function ClassroomFeedbackAdminPage() {
           )
         })()}
       </Drawer>
+
+      {viewerIndex !== null && detailImages.length > 0 && (
+        <FeedbackImageViewer images={detailImages} initialIndex={viewerIndex} onClose={() => setViewerIndex(null)} />
+      )}
 
       {/* Compose drawer */}
       <Drawer

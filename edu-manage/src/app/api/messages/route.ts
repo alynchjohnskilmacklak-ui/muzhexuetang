@@ -27,20 +27,20 @@ export const GET = apiHandler(async (req: NextRequest) => {
     const enrollments = await prisma.enrollment.findMany({
       where: {
         status: 'ACTIVE',
-        group: { teacherAssignments: { some: { teacherId: user.teacherId } } },
+        group: {
+          OR: [
+            { teacherId: user.teacherId },
+            { teacherAssignments: { some: { teacherId: user.teacherId } } },
+          ],
+        },
       },
       select: { studentId: true },
     })
     const taughtStudentIds = Array.from(new Set(enrollments.map((e) => e.studentId)))
 
     where = {
-      OR: [
-        { teacherId: user.teacherId },
-        {
-          teacherId: null,
-          studentId: { in: taughtStudentIds.length > 0 ? taughtStudentIds : ['__none__'] },
-        },
-      ],
+      studentId: { in: taughtStudentIds.length > 0 ? taughtStudentIds : ['__none__'] },
+      OR: [{ teacherId: user.teacherId }, { teacherId: null }],
     }
   }
   if (user.role === 'admin') {
@@ -82,7 +82,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const body = await req.json()
   const title = typeof body.title === 'string' ? body.title.trim() : ''
   const content = typeof body.content === 'string' ? body.content.trim() : ''
-  const teacherId = typeof body.teacherId === 'string' ? body.teacherId : null
+  const requestedTeacherId = typeof body.teacherId === 'string' ? body.teacherId : null
+  let teacherId: string | null = null
   const studentId = typeof body.studentId === 'string' ? body.studentId : null
   const subject = typeof body.subject === 'string' ? body.subject.trim() : null
 
@@ -90,6 +91,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (title.length > 100) return NextResponse.json({ error: '标题不能超过100字' }, { status: 400 })
   if (!content) return NextResponse.json({ error: '请填写问题内容' }, { status: 400 })
   if (content.length > 2000) return NextResponse.json({ error: '内容不能超过2000字' }, { status: 400 })
+  if (!studentId) return NextResponse.json({ error: '请选择关联学员，系统将自动匹配任课教师' }, { status: 400 })
 
   // 验证 studentId 属于当前家长
   if (studentId) {
@@ -99,16 +101,43 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (owned === 0) return NextResponse.json({ error: '无权为该学员创建留言' }, { status: 403 })
   }
 
-  // 验证 teacherId 是该学员的任课教师
-  if (studentId && teacherId) {
-    const assigned = await prisma.enrollment.count({
+  // 根据当前课程关系自动匹配教师；前端传入的教师仅在无法匹配课程时作为兼容提示。
+  if (studentId) {
+    const enrollments = await prisma.enrollment.findMany({
       where: {
         studentId,
         status: 'ACTIVE',
-        group: { teacherAssignments: { some: { teacherId } } },
+        group: { status: { not: 'ARCHIVED' } },
       },
+      select: {
+        group: {
+          select: {
+            teacherId: true,
+            course: { select: { subject: true } },
+            teacherAssignments: { select: { teacherId: true, subject: true } },
+          },
+        },
+      },
+      orderBy: { enrolledAt: 'desc' },
     })
-    if (assigned === 0) return NextResponse.json({ error: '该老师不是此学员的任课教师' }, { status: 400 })
+    const normalizedSubject = subject?.toLowerCase() || ''
+    const candidates = enrollments.flatMap(({ group }) => [
+      ...group.teacherAssignments.map((assignment) => ({
+        teacherId: assignment.teacherId,
+        subject: assignment.subject || group.course.subject,
+        priority: assignment.subject && normalizedSubject && assignment.subject.toLowerCase().includes(normalizedSubject) ? 0 : 1,
+      })),
+      { teacherId: group.teacherId, subject: group.course.subject, priority: normalizedSubject && group.course.subject.toLowerCase().includes(normalizedSubject) ? 0 : 2 },
+    ]).sort((a, b) => a.priority - b.priority)
+    teacherId = candidates[0]?.teacherId || null
+
+    if (!teacherId && requestedTeacherId) {
+      const assigned = await prisma.enrollment.count({
+        where: { studentId, status: 'ACTIVE', group: { OR: [{ teacherId: requestedTeacherId }, { teacherAssignments: { some: { teacherId: requestedTeacherId } } }] } },
+      })
+      if (assigned > 0) teacherId = requestedTeacherId
+    }
+    if (!teacherId) return NextResponse.json({ error: '暂未找到该学员的任课教师，请联系管理员检查课程关系' }, { status: 400 })
   }
 
   const message = await prisma.parentMessage.create({

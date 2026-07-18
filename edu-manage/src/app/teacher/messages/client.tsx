@@ -131,7 +131,7 @@ export function TeacherMessagesClient() {
     revalidateOnReconnect: true,
   })
   const allMessages: Message[] = data?.messages || []
-  const messages = allMessages.filter(m => filter === 'ALL' || m.status === filter)
+  const messages = allMessages.filter(m => filter === 'ALL' || (filter === 'OPEN' ? m.status !== 'CLOSED' : m.status === 'CLOSED'))
   const active = allMessages.find(m => m.id === activeId) || null
 
   useEffect(() => {
@@ -181,7 +181,7 @@ export function TeacherMessagesClient() {
         <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(0,0,0,.07)', background: '#fff', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <Text strong style={{ fontSize: 15, flex: 1 }}>{active.title}</Text>
-            {active.status === 'OPEN' && (
+            {active.status !== 'CLOSED' && (
               <Button size="small" onClick={handleClose} loading={closing}
                 style={{ borderRadius: 8, fontSize: 12 }}>
                 关闭留言
@@ -210,7 +210,7 @@ export function TeacherMessagesClient() {
           </>
         )}
       </div>
-      {active && active.status === 'OPEN' && (
+      {active && active.status !== 'CLOSED' && (
         <div style={{
           padding: '12px 16px', background: '#fff',
           borderTop: '1px solid rgba(0,0,0,.07)', flexShrink: 0,

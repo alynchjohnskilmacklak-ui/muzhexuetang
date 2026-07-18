@@ -13,7 +13,7 @@
  *   ALIYUN_OSS_PRIVATE_BUCKET     — true 表示私有 bucket，需签名 URL
  */
 
-import { writeFile, mkdir, unlink } from 'fs/promises'
+import { writeFile, mkdir, unlink, readFile } from 'fs/promises'
 import { join, extname } from 'path'
 import { createReadStream } from 'fs'
 import crypto from 'crypto'
@@ -38,6 +38,7 @@ export interface PostSignature {
 export interface StorageDriver {
   put(key: string, file: File, bucket?: string): Promise<UploadResult>
   putBuffer(key: string, buffer: Buffer, mimeType: string): Promise<UploadResult>
+  readBuffer(key: string): Promise<Buffer>
   delete(key: string): Promise<void>
   getUrl(key: string): string
 }
@@ -154,6 +155,10 @@ class LocalStorageDriver implements StorageDriver {
     try { await unlink(filePath) } catch { /* 文件可能已删除 */ }
   }
 
+  async readBuffer(key: string): Promise<Buffer> {
+    return readFile(join(UPLOAD_ROOT, key))
+  }
+
   getUrl(key: string): string {
     return `/api/uploads/${key}`
   }
@@ -209,6 +214,16 @@ class AliyunOssDriver implements StorageDriver {
   async delete(key: string): Promise<void> {
     const client = await this.getClient() as { delete(key: string): Promise<void> }
     try { await client.delete(key) } catch { /* 忽略 */ }
+  }
+
+  async readBuffer(key: string): Promise<Buffer> {
+    const client = await this.getClient() as { get(key: string): Promise<{ content: Buffer | Uint8Array }> }
+    try {
+      const result = await client.get(key)
+      return Buffer.from(result.content)
+    } catch (err) {
+      throw classifyOssError(err)
+    }
   }
 
   getUrl(key: string): string {
@@ -337,6 +352,13 @@ export async function uploadFile(file: File, options?: { prefix?: string; bucket
 export async function deleteFile(key: string): Promise<void> {
   const driver = getDriver()
   return driver.delete(key)
+}
+
+/** Read an existing object for controlled server-side processing. */
+export async function readStoredBuffer(key: string, storageDriver?: string): Promise<Buffer> {
+  const driver = storageDriver ? drivers[storageDriver] : getDriver()
+  if (!driver) throw new Error(`Unsupported storage driver: ${storageDriver}`)
+  return driver.readBuffer(key)
 }
 
 /** 获取文件访问 URL */

@@ -21,11 +21,11 @@ export const GET = apiHandler(async () => {
       },
     })
   } else if (user.role === 'teacher' && user.teacherId) {
-    const taughtGroups = await prisma.classGroupTeacher.findMany({
-      where: { teacherId: user.teacherId },
-      select: { groupId: true },
+    const taughtGroups = await prisma.classGroup.findMany({
+      where: { OR: [{ teacherId: user.teacherId }, { teacherAssignments: { some: { teacherId: user.teacherId } } }] },
+      select: { id: true },
     })
-    const groupIds = taughtGroups.map((g) => g.groupId)
+    const groupIds = taughtGroups.map((group) => group.id)
     const enrollments = await prisma.enrollment.findMany({
       where: { groupId: { in: groupIds }, status: 'ACTIVE' },
       select: { studentId: true },
@@ -36,10 +36,8 @@ export const GET = apiHandler(async () => {
         isReadByTeacher: false,
         role: 'parent',
         message: {
-          OR: [
-            { teacherId: user.teacherId },
-            { teacherId: null, studentId: { in: taughtStudentIds.length > 0 ? taughtStudentIds : ['__none__'] } },
-          ],
+          studentId: { in: taughtStudentIds.length > 0 ? taughtStudentIds : ['__none__'] },
+          OR: [{ teacherId: user.teacherId }, { teacherId: null }],
         },
       },
     })

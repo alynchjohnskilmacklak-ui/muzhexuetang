@@ -31,7 +31,6 @@ type Message = {
   replies: Reply[]
   updatedAt: string; createdAt: string
 }
-type Teacher = { id: string; name: string; subjects: string[]; studentIds: string[] }
 type Student = { id: string; name: string; grade: string | null }
 
 function unreadCount(msg: Message) {
@@ -145,10 +144,9 @@ function MessageCard({
 }
 
 export function ParentMessagesClient({
-  students, teachers, initialMessages,
+  students, initialMessages,
 }: {
   students: Student[]
-  teachers: Teacher[]
   initialMessages: Message[]
 }) {
   const isMobile = useIsMobile() ?? false
@@ -216,7 +214,6 @@ export function ParentMessagesClient({
         body: JSON.stringify({
           title: values.title,
           content: values.content,
-          teacherId: values.teacherId || null,
           studentId: values.studentId || null,
           subject: values.subject || null,
         }),
@@ -285,7 +282,7 @@ export function ParentMessagesClient({
         )}
       </div>
 
-      {active && active.status === 'OPEN' && (
+      {active && active.status !== 'CLOSED' && (
         <div style={{
           padding: '12px 16px',
           background: '#fff',
@@ -333,14 +330,6 @@ export function ParentMessagesClient({
     </div>
   )
 
-  const selectedStudentId = Form.useWatch('studentId', composeForm)
-  const teacherOptions = teachers
-    .filter(t => !selectedStudentId || t.studentIds.includes(selectedStudentId))
-    .map(t => ({
-      value: t.id,
-      label: t.subjects.length > 0 ? `${t.name}（${t.subjects.join('·')}）` : t.name,
-    }))
-
   const composeModal = (
     <Modal
       open={showCompose}
@@ -353,10 +342,9 @@ export function ParentMessagesClient({
       getContainer={() => document.body}
     >
       <Form form={composeForm} layout="vertical" onFinish={handleCompose} style={{ marginTop: 16 }}>
-        <Form.Item name="studentId" label="孩子">
+        <Form.Item name="studentId" label="孩子" rules={[{ required: true, message: '请选择孩子' }]}>
           <Select
-            placeholder="选择孩子（可选）"
-            allowClear
+            placeholder="选择孩子，系统会自动匹配任课教师"
             style={{ borderRadius: 8 }}
             getPopupContainer={(trigger) => trigger.parentElement || document.body}
             listHeight={200}
@@ -382,17 +370,6 @@ export function ParentMessagesClient({
               <Select.Option key={s} value={s}>{s}</Select.Option>
             ))}
           </Select>
-        </Form.Item>
-        <Form.Item name="teacherId" label="指定老师">
-          <Select
-            placeholder="选择老师（可选）"
-            allowClear
-            style={{ borderRadius: 8 }}
-            options={teacherOptions}
-            getPopupContainer={(trigger) => trigger.parentElement || document.body}
-            listHeight={200}
-            virtual={false}
-          />
         </Form.Item>
         <Form.Item name="title" label="标题" rules={[{ required: true, message: '请填写标题' }]}>
           <Input placeholder="例如：关于数学作业的问题" maxLength={100} style={{ borderRadius: 8 }} />
