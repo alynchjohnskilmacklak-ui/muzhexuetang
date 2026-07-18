@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Card, Divider, Empty, Input, InputNumber, List, Modal, Select, Space, Tag, Tabs, Typography, Upload } from 'antd'
+import { Button, Card, Divider, Empty, Image as AntImage, Input, InputNumber, List, Modal, Select, Space, Tag, Tabs, Typography, Upload } from 'antd'
 import {
   BookOutlined, LineChartOutlined, PlusOutlined,
   RocketOutlined, SaveOutlined, ArrowLeftOutlined, SendOutlined,
@@ -9,6 +9,7 @@ import {
 } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useSignedUrls } from '@/hooks/useSignedUrls'
 
 const { Title, Text, Paragraph } = Typography
 const { TextArea } = Input
@@ -69,6 +70,9 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
   const [homeworkDone, setHomeworkDone] = useState<boolean | null>(null)
   const [inClassRating, setInClassRating] = useState<number | null>(null)
   const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [imageDisplayUrls, setImageDisplayUrls] = useState<Record<string, { thumbnailUrl: string; previewUrl: string }>>({})
+  const { urls: signedImageThumbnails } = useSignedUrls(imageUrls.map(url => imageDisplayUrls[url]?.thumbnailUrl || imageDisplayUrls[url]?.previewUrl || url))
+  const { urls: signedImagePreviews } = useSignedUrls(imageUrls.map(url => imageDisplayUrls[url]?.previewUrl || imageDisplayUrls[url]?.thumbnailUrl || url))
   const [feedbackSaving, setFeedbackSaving] = useState(false)
 
   useEffect(() => {
@@ -188,7 +192,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
       })
       toast.success('成长反馈已发布，家长会立即收到通知')
       setFeedbackText(''); setFeedbackMood('GOOD'); setFeedbackTags('')
-      setHomeworkDone(null); setInClassRating(null); setImageUrls([])
+      setHomeworkDone(null); setInClassRating(null); setImageUrls([]); setImageDisplayUrls({})
     } catch (e: any) { toast.error(e.message) }
     finally { setFeedbackSaving(false) }
   }
@@ -316,13 +320,45 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
             </div>
 
             <div style={{ marginTop: 12 }}>
-              <Upload.Dragger name="file" action="/api/upload" accept="image/*" multiple maxCount={9} showUploadList={false}
+              <Upload.Dragger name="file" accept="image/*" multiple maxCount={9} showUploadList={false}
                 data={{ uploadType: 'teacher-feedback' }}
                 beforeUpload={file => { if (file.size > 5*1024*1024) { toast.warning('图片不超过5MB'); return Upload.LIST_IGNORE }; return true }}
-                onChange={info => { if (info.file.status === 'done') { const url = (info.file.response as any)?.url; if (url) setImageUrls(p => [...p, url]) } }}>
+                customRequest={async ({ file, onSuccess, onError }) => {
+                  const formData = new FormData()
+                  formData.append('file', file as File)
+                  formData.append('uploadType', 'teacher-feedback')
+                  formData.append('studentId', studentId)
+                  try {
+                    const response = await fetch('/api/upload', { method: 'POST', body: formData })
+                    const data = await response.json()
+                    if (!response.ok) throw new Error(data.error || '上传失败')
+                    if (data.assetPersisted === false) throw new Error('图片资产记录失败，请重新上传后再提交反馈')
+                    onSuccess?.(data)
+                  } catch (error) {
+                    onError?.(error instanceof Error ? error : new Error('上传失败'))
+                  }
+                }}
+                onChange={info => {
+                  if (info.file.status === 'done') {
+                    const response = info.file.response as any
+                    const url = response?.file?.storageKey || response?.url
+                    if (url) {
+                      setImageUrls(previous => [...previous, url])
+                      setImageDisplayUrls(previous => ({
+                        ...previous,
+                        [url]: {
+                          thumbnailUrl: response.thumbnailUrl || response.previewUrl || url,
+                          previewUrl: response.previewUrl || response.thumbnailUrl || url,
+                        },
+                      }))
+                    }
+                  } else if (info.file.status === 'error') {
+                    toast.error((info.file.error as Error | undefined)?.message || '上传失败，请重试')
+                  }
+                }}>
                 <div style={{ fontSize: 13, color: '#98A2B3' }}>拖拽上传课堂照片（≤5MB）</div>
               </Upload.Dragger>
-              {imageUrls.length > 0 && <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>{imageUrls.map((url, i) => <img key={i} src={url} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 6 }} />)}</div>}
+              {imageUrls.length > 0 && <AntImage.PreviewGroup><div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>{imageUrls.map((url, i) => <AntImage key={url} src={signedImageThumbnails[i]} preview={{ src: signedImagePreviews[i] }} width={64} height={64} alt="" style={{ objectFit: 'cover', borderRadius: 6 }} />)}</div></AntImage.PreviewGroup>}
             </div>
 
             <Button type="primary" icon={<SendOutlined />} loading={feedbackSaving} onClick={submitFeedback}

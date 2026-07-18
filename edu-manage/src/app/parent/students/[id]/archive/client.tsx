@@ -9,6 +9,7 @@ import {
 import { fmtDate, fmtDateTime } from '@/lib/format-date'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { formatRemaining } from '@/lib/lesson-units'
+import type { FeedbackImageVariant } from '@/lib/file-asset-variants'
 
 const { Title, Text } = Typography
 
@@ -159,7 +160,7 @@ function FeedbacksTab({ feedbacks }: { feedbacks: any[] }) {
       {f.knowledgePoints?.length > 0 && <Text type="secondary" style={{ fontSize: 12 }}>知识点：{f.knowledgePoints.join('、')}</Text>}
       {f.summary && <div style={{ marginTop: 8, fontSize: 13, color: '#4A5568' }}>{f.summary}</div>}
       {f.overallComment && <div style={{ marginTop: 4, fontSize: 13, fontStyle: 'italic', color: '#718096' }}>{f.overallComment}</div>}
-      {f.imageUrls?.length > 0 && <FeedbackImages imageUrls={f.imageUrls} />}
+      {f.images?.length > 0 && <FeedbackImages images={f.images} />}
       {f.parentReply && (
         <div style={{ marginTop: 10, padding: '8px 12px', borderRadius: 8, background: '#FFF3E8', fontSize: 12 }}>
           <Text type="secondary">我的回复：</Text>{f.parentReply}
@@ -174,15 +175,21 @@ function FeedbacksTab({ feedbacks }: { feedbacks: any[] }) {
   ))
 }
 
-function FeedbackImages({ imageUrls }: { imageUrls: string[] }) {
-  const { urls } = useSignedUrls(imageUrls)
+function FeedbackImages({ images }: { images: Array<string | FeedbackImageVariant> }) {
+  const normalized = images.map(image => typeof image === 'string'
+    ? { originalUrl: image, previewUrl: image, thumbnailUrl: image }
+    : image)
+  const thumbnailKeys = normalized.map(image => image.thumbnailUrl || image.previewUrl || image.originalUrl)
+  const previewKeys = normalized.map(image => image.previewUrl || image.thumbnailUrl || image.originalUrl)
+  const { urls: thumbnails } = useSignedUrls(thumbnailKeys)
+  const { urls: previews } = useSignedUrls(previewKeys)
   return (
-    <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-      {imageUrls.map((url: string, i: number) => (
-        <Image key={`${url}-${i}`} src={urls[i]} width={80} height={80} style={{ borderRadius: 8, objectFit: 'cover' }}
+    <Image.PreviewGroup><div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      {normalized.map((image, i) => (
+        <Image key={`${image.originalUrl}-${i}`} src={thumbnails[i]} preview={{ src: previews[i] }} width={80} height={80} style={{ borderRadius: 8, objectFit: 'cover' }}
           fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjZjVmMmVlIi8+PHRleHQgeD0iNDAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZmlsbD0iIzlhOGU3YSIgZm9udC1zaXplPSIxMCI+5Zu+54mH5Yqg6L295aSx6LSlPC90ZXh0Pjwvc3ZnPg==" />
       ))}
-    </div>
+    </div></Image.PreviewGroup>
   )
 }
 
@@ -204,6 +211,7 @@ function TimelineTab({ timeline, profile }: { timeline: any[]; profile: any }) {
           <Text strong style={{ fontSize: 13 }}>{item.title}</Text>
           {item.sub && <div style={{ fontSize: 12, color: '#7A869A' }}>{item.sub}</div>}
           {item.content && <div style={{ fontSize: 12, color: '#4A5568', marginTop: 2 }}>{item.content}</div>}
+          {item.images?.length > 0 && <FeedbackImages images={item.images} />}
           <div style={{ fontSize: 11, color: '#B0B8C1', marginTop: 4 }}>
             {fmtDateTime(item.date)}
             {item.teacher ? ` · ${item.teacher}` : ''}

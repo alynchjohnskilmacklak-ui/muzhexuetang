@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
 import { visiblePerformancePostWhere, visibleTeacherWhere } from '@/lib/business-visibility'
+import { resolveFeedbackImageVariants, variantsForFeedback, type FeedbackImageVariant } from '@/lib/file-asset-variants'
 
 export interface ProfileRange { from: Date; to: Date }
 
@@ -57,6 +58,7 @@ export async function getStudentProfile(
         where: { studentIds: { has: studentId }, status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
         select: { id: true, mood: true, tags: true, knowledgePoints: true, summary: true, overallComment: true,
           homework: true, badge: true,
+          imageUrls: true,
           homeworkDone: true, inClassRating: true,
           createdAt: true, teacher: { select: { name: true, subjects: true } } },
         orderBy: { createdAt: 'desc' }, take: 50,
@@ -85,6 +87,7 @@ export async function getStudentProfile(
     ])
 
   if (!student) return null
+  const feedbackImageVariants = await resolveFeedbackImageVariants(prisma, feedbacks.flatMap(feedback => feedback.imageUrls))
 
   // ── 学：知识掌握 ──
   const masteryCount: Record<string, number> = { MASTERED: 0, NEEDS_REVIEW: 0, NEEDS_PRACTICE: 0 }
@@ -200,7 +203,7 @@ export async function getStudentProfile(
   const subjOf = (t?: { subjects?: string | null }) =>
     (t?.subjects || '').split(/[，,、\s]+/).filter(Boolean)[0] || ''
 
-  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; teacherSubject?: string; images?: string[]; refType?: 'feedback' | 'paper' | 'post'; refId?: string; detail?: { comment?: string; summary?: string; knowledgePoints?: string[]; homework?: string[]; tags?: string[]; badge?: string | null; mood?: string | null } }
+  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; teacherSubject?: string; images?: Array<string | FeedbackImageVariant>; refType?: 'feedback' | 'paper' | 'post'; refId?: string; detail?: { comment?: string; summary?: string; knowledgePoints?: string[]; homework?: string[]; tags?: string[]; badge?: string | null; mood?: string | null } }
   const timeline: TLItem[] = []
   for (const p of papers) {
     const m = p.questions.filter(q => q.mastery === 'MASTERED').length
@@ -210,6 +213,7 @@ export async function getStudentProfile(
     type: 'feedback', title: '课堂反馈',
     sub: f.overallComment || f.summary || (f.tags || []).join(' '),
     date: f.createdAt, teacher: f.teacher?.name, teacherSubject: subjOf(f.teacher),
+    images: variantsForFeedback(f.imageUrls, feedbackImageVariants),
     refType: 'feedback', refId: f.id,
     detail: {
       comment: f.overallComment || undefined,

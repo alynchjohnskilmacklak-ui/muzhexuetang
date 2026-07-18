@@ -16,6 +16,7 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { fmtDate } from '@/lib/format-date'
 import { formatFriendlyTime } from '@/lib/date/relative'
+import type { FeedbackImageVariant } from '@/lib/file-asset-variants'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -69,13 +70,21 @@ function FeedbackDetail({ detail }: { detail?: any }) {
   )
 }
 
-function TimelineImageStrip({ images }: { images: string[] }) {
-  const visibleImages = images.slice(0, 3)
-  const { urls } = useSignedUrls(visibleImages)
+type TimelineImage = string | FeedbackImageVariant
+
+function normalizeTimelineImage(image: TimelineImage) {
+  return typeof image === 'string'
+    ? { originalUrl: image, previewUrl: image, thumbnailUrl: image }
+    : image
+}
+
+function TimelineImageStrip({ images }: { images: TimelineImage[] }) {
+  const visibleImages = images.slice(0, 3).map(normalizeTimelineImage)
+  const { urls } = useSignedUrls(visibleImages.map(image => image.thumbnailUrl || image.previewUrl || image.originalUrl))
   return (
     <div className="parent-growth-history-images">
-      {visibleImages.map((url: string, imageIndex: number) => (
-        <img key={`${url}-${imageIndex}`} src={urls[imageIndex]} alt="课堂记录" />
+      {visibleImages.map((image, imageIndex: number) => (
+        <img key={`${image.originalUrl}-${imageIndex}`} src={urls[imageIndex]} alt="课堂记录" />
       ))}
       {images.length > 3 && <span>+{images.length - 3}张</span>}
     </div>
@@ -96,8 +105,11 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   const [reportOpen, setReportOpen] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [detailItem, setDetailItem] = useState<any>(null)
-  const detailImages = Array.isArray(detailItem?.images) ? detailItem.images : []
-  const { urls: signedDetailImages } = useSignedUrls(detailImages)
+  const detailImages: ReturnType<typeof normalizeTimelineImage>[] = Array.isArray(detailItem?.images)
+    ? detailItem.images.map(normalizeTimelineImage)
+    : []
+  const { urls: signedDetailThumbnails } = useSignedUrls(detailImages.map(image => image.thumbnailUrl || image.previewUrl || image.originalUrl))
+  const { urls: signedDetailPreviews } = useSignedUrls(detailImages.map(image => image.previewUrl || image.thumbnailUrl || image.originalUrl))
 
   const query = studentId ? `/api/parent/profile?studentId=${studentId}&months=${months}` : null
   const { data, isLoading } = useSWR(query, fetcher, {
@@ -325,7 +337,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
       <Modal open={!!detailItem} onCancel={() => setDetailItem(null)} footer={null} width="min(560px, 92vw)" title={detailItem?.title || '详情'}>
         {detailItem && (
           <div>
-            {detailImages.length > 0 && <Image.PreviewGroup><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>{detailImages.map((url: string, i: number) => <Image key={i} src={signedDetailImages[i]} alt="" style={{ borderRadius: 8, objectFit: 'cover', width: '100%', height: 120 }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='120'%3E%3Crect width='140' height='120' fill='%23f5f2ee'/%3E%3Ctext x='70' y='60' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='12'%3E图片加载失败%3C/text%3E%3C/svg%3E" />)}</div></Image.PreviewGroup>}
+            {detailImages.length > 0 && <Image.PreviewGroup><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>{detailImages.map((image, i: number) => <Image key={`${image.originalUrl}-${i}`} src={signedDetailThumbnails[i]} preview={{ src: signedDetailPreviews[i] }} alt="" style={{ borderRadius: 8, objectFit: 'cover', width: '100%', height: 120 }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='120'%3E%3Crect width='140' height='120' fill='%23f5f2ee'/%3E%3Ctext x='70' y='60' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='12'%3E图片加载失败%3C/text%3E%3C/svg%3E" />)}</div></Image.PreviewGroup>}
             <Paragraph style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detailItem.sub || detailItem.content}</Paragraph>
             {detailItem.teacher && <Tag style={{ borderRadius: 9999, marginTop: 4 }}>{formatTeacherLabel(detailItem)}</Tag>}
             {detailItem.date && <div style={{ marginTop: 8 }}><Text type="secondary" style={{ fontSize: 11 }}>{formatFriendlyTime(detailItem.date)}</Text></div>}

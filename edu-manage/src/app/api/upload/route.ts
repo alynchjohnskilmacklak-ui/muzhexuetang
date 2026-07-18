@@ -110,11 +110,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
       }
     }
 
-    // Create FileAsset record if table exists
+    // The original file has already been persisted at this point. FileAsset is the
+    // durable link that lets every client resolve preview/thumbnail variants after
+    // a refresh, so a failure here must be observable instead of silently ignored.
     const prisma = await getRequestPrisma()
+    let assetPersisted = false
     try {
       const fileAsset = (prisma as unknown as { fileAsset: { create(args: { data: Record<string, unknown> }): Promise<unknown> } }).fileAsset
-      const legacyData = {
+      await fileAsset.create({ data: {
         filename: result.storageKey,
         originalName: file.name,
         mimeType: file.type || 'application/octet-stream',
@@ -131,20 +134,28 @@ export const POST = apiHandler(async (req: NextRequest) => {
         uploadedById: user.id,
         uploadedByRole: user.role,
         tenant: user.division || null,
-      }
-      try {
-        await fileAsset.create({ data: { ...legacyData, previewUrl: preview?.url ?? null, thumbnailUrl: thumbnail?.url ?? null, width, height, fileSize: file.size } })
-      } catch (metadataError) {
-        const message = metadataError instanceof Error ? metadataError.message : ''
-        if (!/previewUrl|thumbnailUrl|fileSize|Unknown argument/i.test(message)) throw metadataError
-        await fileAsset.create({ data: legacyData })
-      }
-    } catch { /* FileAsset table may not exist yet */ }
+        previewUrl: preview?.url ?? null,
+        thumbnailUrl: thumbnail?.url ?? null,
+        width,
+        height,
+        fileSize: file.size,
+      } })
+      assetPersisted = true
+    } catch (assetError) {
+      console.error('[upload:file-asset-persist]', {
+        storageKey: result.storageKey,
+        originalName: file.name,
+        ownerType,
+        uploadedById: user.id,
+        message: assetError instanceof Error ? assetError.message : String(assetError),
+      })
+    }
 
     return NextResponse.json({
       url: result.url,
       previewUrl: preview?.url ?? null,
       thumbnailUrl: thumbnail?.url ?? null,
+      assetPersisted,
       legacyUrl: result.url.replace('/api/uploads/', '/uploads/'),
       file: {
         storageKey: result.storageKey,

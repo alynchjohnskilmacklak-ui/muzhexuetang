@@ -94,6 +94,7 @@ function FeedbackPageInner() {
   // State
   const [groupId, setGroupId] = useState('')
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
+  const [todayFeedbackByStudent, setTodayFeedbackByStudent] = useState<Record<string, boolean>>({})
   const [studentPerf, setStudentPerf] = useState<Record<string, StudentPerfLevel>>({})
   const [performanceTags, setPerformanceTags] = useState<string[]>([])
   const [masteryLevel, setMasteryLevel] = useState('GOOD')
@@ -150,8 +151,6 @@ function FeedbackPageInner() {
   // Data
   const { data: ctx } = useSWR('/api/teacher/feedback-context', fetcher)
   const groups: any[] = ctx?.groups || []
-  const feedbackedTodayIds: string[] = Array.isArray(ctx?.feedbackedTodayIds) ? ctx.feedbackedTodayIds : []
-  const feedbackedTodaySet = useMemo(() => new Set(feedbackedTodayIds), [feedbackedTodayIds])
 
 
   // Selected group
@@ -227,9 +226,6 @@ function FeedbackPageInner() {
       toast.warning('一次最多反馈3名学生')
       return
     }
-    if (!selected && feedbackedTodaySet.has(id)) {
-      toast('该同学今日已反馈，重复发布不计入奖励', { duration: 3000 })
-    }
     setSelectedStudentIds(prev => selected ? prev.filter(s => s !== id) : [...prev, id])
     if (selected) {
       setStudentPerf(prev => {
@@ -243,9 +239,6 @@ function FeedbackPageInner() {
     const selectedIds = filteredStudents.slice(0, MAX_STUDENTS_PER_FEEDBACK).map((s: any) => s.id)
     if (filteredStudents.length > MAX_STUDENTS_PER_FEEDBACK) {
       toast('一次最多反馈3名学生，已自动选择前3名', { duration: 3000 })
-    }
-    if (selectedIds.some((id: string) => feedbackedTodaySet.has(id))) {
-      toast('部分学生今日已反馈，重复发布不计入奖励', { duration: 3000 })
     }
     setSelectedStudentIds(selectedIds)
   }
@@ -261,6 +254,13 @@ function FeedbackPageInner() {
   }
   const toggleTag = (tag: string) => setTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])
   const toggleKp = (kp: string) => setKps(prev => prev.includes(kp) ? prev.filter(k => k !== kp) : [...prev, kp])
+  const markTodayFeedback = (studentIds: string[]) => {
+    setTodayFeedbackByStudent((current) => {
+      const next = { ...current }
+      for (const studentId of studentIds) next[studentId] = true
+      return next
+    })
+  }
 
   const submit = async (status: 'DRAFT' | 'PUBLISHED') => {
     if (saving || (status === 'PUBLISHED' && Date.now() - lastSubmitAt < 3000)) return
@@ -324,6 +324,7 @@ function FeedbackPageInner() {
             toast.error(`${studentName}的反馈发布失败：${data.error || '请检查网络后重试'}`, { duration: 5000 })
             return
           }
+          if (status === 'PUBLISHED') markTodayFeedback([item.studentId])
         }
       } else {
         const fbRes = await fetch('/api/feedback', {
@@ -342,6 +343,7 @@ function FeedbackPageInner() {
         })
         fbData = await fbRes.json()
         if (!fbRes.ok) { toast.error(`反馈发布失败：${fbData.error || '请检查网络后重试'}`, { duration: 5000 }); return }
+        if (status === 'PUBLISHED') markTodayFeedback(targetStudents)
       }
 
       let stagePublished = false
@@ -584,19 +586,6 @@ function FeedbackPageInner() {
     if (selectedAiKeywords.includes(keyword)) return
     setSelectedAiKeywords((current) => [...current, keyword])
     setAiNote((current) => current.trim() ? `${current.trim()}，${keyword}` : keyword)
-  }
-  const renderFeedbackedPill = (studentId: string) => {
-    const student = groupStudents.find((item: any) => item.id === studentId)
-    const count = Number(student?.feedbackCount || 0)
-    return count > 0 ? (
-      <span style={{ fontSize: 10, borderRadius: 999, padding: '0 6px', background: '#F0EBE5', color: '#7A6F5F', lineHeight: '17px', display: 'inline-flex', alignItems: 'center' }}>
-        已反馈{count}次，可继续反馈
-      </span>
-    ) : (
-      <span style={{ fontSize: 10, borderRadius: 999, padding: '0 6px', background: '#EAF7F1', color: '#1D9E75', lineHeight: '17px', display: 'inline-flex', alignItems: 'center' }}>
-        首次反馈奖励
-      </span>
-    )
   }
   const renderStudentPerfButton = (studentId: string) => {
     if (!selectedStudentIds.includes(studentId)) return null
@@ -864,6 +853,9 @@ function FeedbackPageInner() {
                   const res = await fetch('/api/upload', { method: 'POST', body: formData })
                   const data = await res.json()
                   if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+                  if (data.assetPersisted === false) {
+                    throw new Error('图片资产记录失败，请重新上传后再提交反馈')
+                  }
                   onSuccess?.(data)
                 } catch (err) {
                   onError?.(err instanceof Error ? err : new Error('上传失败'))
@@ -1068,7 +1060,7 @@ function FeedbackPageInner() {
                     const s = groupStudents.find((gs: any) => gs.id === id)
                     return s ? (
                       <Tag key={id} closable color="orange" style={{ borderRadius: 9999, fontSize: 11, margin: 0, display: 'inline-flex', alignItems: 'center', gap: 5 }}
-                        onClose={(e: any) => { e.preventDefault(); toggleStudent(id) }}>{s.name}{renderFeedbackedPill(id)}{renderStudentPerfButton(id)}</Tag>
+                        onClose={(e: any) => { e.preventDefault(); toggleStudent(id) }}>{s.name}{renderStudentPerfButton(id)}</Tag>
                     ) : null
                   })}
                 </div>
@@ -1095,17 +1087,20 @@ function FeedbackPageInner() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                       {filteredStudents.map((s: any) => {
                         const selected = selectedStudentIds.includes(s.id)
-                        const feedbacked = feedbackedTodaySet.has(s.id)
+                        const feedbacked = Boolean(s.todayFeedback || todayFeedbackByStudent[s.id])
                         return (
                           <div key={s.id} onClick={() => toggleStudent(s.id)} style={{
-                            padding: 8, borderRadius: 8, cursor: 'pointer', border: selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
-                            background: selected ? '#FFF3EC' : feedbacked ? '#F7F5F2' : '#fff', transition: 'all .15s',
+                            padding: 8, borderRadius: 8, cursor: 'pointer',
+                            border: feedbacked ? '1px solid #D9D4CE' : selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
+                            background: feedbacked ? '#F3F1EE' : selected ? '#FFF3EC' : '#fff',
+                            opacity: feedbacked ? 0.62 : 1,
+                            transition: 'all .15s',
                           }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                               <div style={{ width: 26, height: 26, borderRadius: 8, background: '#F5F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#E8784A', flexShrink: 0 }}>{s.name[0]}</div>
                               <div style={{ minWidth: 0, flex: 1 }}>
                                 <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
-                                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 3 }}>{renderFeedbackedPill(s.id)}{renderStudentPerfButton(s.id)}</div>
+                                {selected && <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 3 }}>{renderStudentPerfButton(s.id)}</div>}
                               </div>
                             </div>
                           </div>
@@ -1171,7 +1166,7 @@ function FeedbackPageInner() {
                       const s = groupStudents.find((gs: any) => gs.id === id)
                       return s ? (
                         <Tag key={id} closable color="orange" style={{ borderRadius: 9999, fontSize: 12, margin: 0, padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: 5 }}
-                          onClose={(e: any) => { e.preventDefault(); toggleStudent(id) }}>{s.name}{renderFeedbackedPill(id)}{renderStudentPerfButton(id)}</Tag>
+                          onClose={(e: any) => { e.preventDefault(); toggleStudent(id) }}>{s.name}{renderStudentPerfButton(id)}</Tag>
                       ) : null
                     })}
                   </div>
@@ -1198,16 +1193,19 @@ function FeedbackPageInner() {
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                         {filteredStudents.map((s: any) => {
                           const selected = selectedStudentIds.includes(s.id)
-                          const feedbacked = feedbackedTodaySet.has(s.id)
+                          const feedbacked = Boolean(s.todayFeedback || todayFeedbackByStudent[s.id])
                           return (
                             <div key={s.id} onClick={() => toggleStudent(s.id)} style={{
-                              minHeight: 44, padding: '8px 10px', borderRadius: 10, cursor: 'pointer', border: selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
-                              background: selected ? '#FFF3EC' : feedbacked ? '#F7F5F2' : '#fff', display: 'flex', alignItems: 'center', gap: 8,
+                              minHeight: 44, padding: '8px 10px', borderRadius: 10, cursor: 'pointer',
+                              border: feedbacked ? '1px solid #D9D4CE' : selected ? '2px solid #E8784A' : '1px solid #EEE7E1',
+                              background: feedbacked ? '#F3F1EE' : selected ? '#FFF3EC' : '#fff',
+                              opacity: feedbacked ? 0.62 : 1,
+                              display: 'flex', alignItems: 'center', gap: 8,
                             }}>
                               <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F5F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#E8784A', flexShrink: 0 }}>{s.name[0]}</div>
                               <span style={{ flex: 1, minWidth: 0 }}>
                                 <span style={{ display: 'block', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
-                                <span style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 3 }}>{renderFeedbackedPill(s.id)}{renderStudentPerfButton(s.id)}</span>
+                                {selected && <span style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 3 }}>{renderStudentPerfButton(s.id)}</span>}
                               </span>
                             </div>
                           )

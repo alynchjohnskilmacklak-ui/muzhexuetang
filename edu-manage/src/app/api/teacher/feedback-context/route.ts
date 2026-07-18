@@ -66,7 +66,7 @@ export const GET = apiHandler(async () => {
     take: 100,
   })
 
-  // Per-student feedback history. Repeated feedback is allowed and the total is shown in the selector.
+  // Per-student feedback history. Repeated feedback remains allowed.
   const fourteenDaysAgo = new Date(now.getTime() - 14 * 86400000)
   const feedbackHistory = await prisma.classroomFeedback.findMany({
     where: {
@@ -86,13 +86,12 @@ export const GET = apiHandler(async () => {
     select: { studentIds: true },
   })
   const feedbackedTodayIds = [...new Set(todayFeedbacks.flatMap((feedback) => feedback.studentIds))]
+  const feedbackedTodaySet = new Set(feedbackedTodayIds)
 
   // Build student feedback map
   const studentFeedbackMap = new Map<string, Date>()
-  const studentFeedbackCountMap = new Map<string, number>()
   for (const fb of feedbackHistory) {
     for (const sid of fb.studentIds) {
-      studentFeedbackCountMap.set(sid, (studentFeedbackCountMap.get(sid) || 0) + 1)
       if (!studentFeedbackMap.has(sid) || fb.createdAt > studentFeedbackMap.get(sid)!) {
         studentFeedbackMap.set(sid, fb.createdAt)
       }
@@ -147,7 +146,7 @@ export const GET = apiHandler(async () => {
         attendanceRate: attRate,
         daysSinceLastFeedback,
         lastFeedbackAt: lastFb,
-        feedbackCount: studentFeedbackCountMap.get(e.student.id) || 0,
+        todayFeedback: feedbackedTodaySet.has(e.student.id),
       }
     }),
   }))

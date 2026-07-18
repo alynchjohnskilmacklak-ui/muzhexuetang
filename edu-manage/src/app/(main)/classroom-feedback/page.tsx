@@ -712,8 +712,13 @@ export default function ClassroomFeedbackAdminPage() {
               onChange={info => {
                 if (info.file.status === 'uploading') return
                 if (info.file.status === 'done') {
-                  const url = (info.file.response as { file?: { storageKey?: string }, url?: string })?.file?.storageKey || (info.file.response as { url?: string })?.url
-                  const error = (info.file.response as { error?: string })?.error
+                  const response = info.file.response as { assetPersisted?: boolean; file?: { storageKey?: string }, url?: string; error?: string }
+                  if (response?.assetPersisted === false) {
+                    toast.error('图片资产记录失败，请重新上传后再发布反馈')
+                    return
+                  }
+                  const url = response?.file?.storageKey || response?.url
+                  const error = response?.error
                   if (url) { setComposeImages(prev => [...prev, url]); toast.success('图片上传成功') }
                   else if (error) toast.error(`图片上传失败：${error}`)
                   else toast.error('上传成功但未返回图片地址')

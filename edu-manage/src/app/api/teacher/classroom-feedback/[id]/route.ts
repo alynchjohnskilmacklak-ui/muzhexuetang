@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
+import { resolveFeedbackImages } from '@/lib/file-asset-variants'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,6 +35,7 @@ export const GET = apiHandler(async (
         select: { id: true, name: true, grade: true },
       })
     : []
+  const images = await resolveFeedbackImages(prisma, feedback.imageUrls)
 
   return NextResponse.json({
     id: feedback.id,
@@ -48,6 +50,7 @@ export const GET = apiHandler(async (
     summary: feedback.summary,
     homework: feedback.homework,
     imageUrls: feedback.imageUrls,
+    images,
     imageTypes: feedback.imageTypes,
     studentRatings: feedback.studentRatings,
     students,

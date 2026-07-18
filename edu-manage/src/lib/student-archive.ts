@@ -10,6 +10,7 @@
 
 import type { PrismaClient } from '@prisma/client'
 import { getStudentProfile, type ProfileRange, type StudentProfile } from '@/lib/student-profile'
+import { resolveFeedbackImageVariants, variantsForFeedback, type FeedbackImageVariant } from '@/lib/file-asset-variants'
 
 // ---- types ----
 
@@ -76,6 +77,7 @@ export interface ArchiveFeedback {
   tags: string[]
   studentRatings: unknown
   imageUrls: string[]
+  images: FeedbackImageVariant[]
   parentReply: string | null
   parentRepliedAt: Date | null
   adminReply: string | null
@@ -92,7 +94,7 @@ export interface ArchiveTimelineItem {
   teacher: string | null
   studentId: string | null
   sourceId: string | null
-  images: string[]
+  images: Array<string | FeedbackImageVariant>
   href: string | null
 }
 
@@ -308,6 +310,7 @@ async function fetchFeedbacks(prisma: PrismaClient, studentId: string, viewer: A
     include: { teacher: { select: { id: true, name: true } } },
     orderBy: { createdAt: 'desc' }, take: 50,
   })
+  const imageVariants = await resolveFeedbackImageVariants(prisma, feedbacks.flatMap(feedback => feedback.imageUrls))
 
   return feedbacks.map(f => ({
     id: f.id, lessonId: f.classLessonId, classGroupId: null,
@@ -316,6 +319,7 @@ async function fetchFeedbacks(prisma: PrismaClient, studentId: string, viewer: A
     summary: f.summary, homework: f.homework, overallComment: f.overallComment,
     mood: f.mood, tags: f.tags, studentRatings: f.studentRatings,
     imageUrls: f.imageUrls, parentReply: f.parentReply, parentRepliedAt: f.parentRepliedAt,
+    images: variantsForFeedback(f.imageUrls, imageVariants),
     adminReply: f.adminReply, createdAt: f.createdAt, status: f.status,
   }))
 }
@@ -359,11 +363,12 @@ async function fetchTimeline(prisma: PrismaClient, studentId: string, from: Date
       orderBy: { createdAt: 'desc' }, take: 20,
     }),
   ])
+  const feedbackImageVariants = await resolveFeedbackImageVariants(prisma, feedbacks.flatMap(feedback => feedback.imageUrls))
 
   for (const f of feedbacks) items.push({
     id: f.id, type: 'feedback', title: '课堂反馈', content: f.summary || null,
     date: f.createdAt, teacher: f.teacher?.name || null, studentId,
-    sourceId: f.id, images: f.imageUrls || [],
+    sourceId: f.id, images: variantsForFeedback(f.imageUrls || [], feedbackImageVariants),
     href: `/parent/archive?studentId=${studentId}&feedbackId=${f.id}`,
   })
   for (const p of posts) items.push({
