@@ -1271,9 +1271,10 @@ model FeedbackRewardRecord {
   courseLabel     String?
   amount          Float
   isFirstFeedback Boolean  @default(true)
+  isActive       Boolean  @default(true)
+  invalidReason  String?
   createdAt       DateTime @default(now())
 
-  @@unique([teacherId, studentId, subjectKey])
   @@index([feedbackId])
   @@index([teacherId, createdAt])
   @@index([studentId, createdAt])

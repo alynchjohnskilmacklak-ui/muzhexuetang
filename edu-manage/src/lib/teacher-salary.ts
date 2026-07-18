@@ -412,7 +412,7 @@ export async function getFeedbackBonusPreview(opts: {
   if (rewardModel) {
     try {
       const records = await rewardModel.findMany({
-        where: { teacherId: opts.teacherId, subjectKey, studentId: { in: selectedIds } },
+        where: { teacherId: opts.teacherId, subjectKey, isActive: true, studentId: { in: selectedIds } },
         select: { studentId: true },
       })
       records.forEach((record) => rewardedStudentIds.add(record.studentId))
@@ -569,6 +569,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
             courseLabel: preview.courseLabel,
             amount: preview.rate,
             isFirstFeedback: true,
+            isActive: true,
           })),
           skipDuplicates: true,
         })

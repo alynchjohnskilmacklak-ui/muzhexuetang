@@ -1,6 +1,7 @@
--- Create the reward ledger for fresh databases. Existing installations may
--- already have this table from the reviewed manual rollout plan.
-CREATE TABLE IF NOT EXISTS "FeedbackRewardRecord" (
+-- Step 1: archive every pre-migration reward row before changing the source.
+-- The JSON projection safely preserves subject fields when they already exist,
+-- while remaining compatible with older tables that do not have them yet.
+CREATE TABLE IF NOT EXISTS "FeedbackRewardRecordArchive" (
     "id" TEXT NOT NULL,
     "feedbackId" TEXT NOT NULL,
     "studentId" TEXT NOT NULL,
@@ -10,41 +11,112 @@ CREATE TABLE IF NOT EXISTS "FeedbackRewardRecord" (
     "courseKey" TEXT NOT NULL,
     "courseLabel" TEXT,
     "amount" DOUBLE PRECISION NOT NULL,
+    "isFirstFeedback" BOOLEAN NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL,
+    "isActive" BOOLEAN,
+    "invalidReason" TEXT,
+    "archivedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "archiveReason" TEXT NOT NULL,
+
+    CONSTRAINT "FeedbackRewardRecordArchive_pkey" PRIMARY KEY ("id")
+);
+
+DO $$
+BEGIN
+    IF to_regclass('"FeedbackRewardRecord"') IS NOT NULL THEN
+        INSERT INTO "FeedbackRewardRecordArchive" (
+            "id", "feedbackId", "studentId", "teacherId",
+            "subjectKey", "subjectLabel", "courseKey", "courseLabel",
+            "amount", "isFirstFeedback", "createdAt", "isActive",
+            "invalidReason", "archiveReason"
+        )
+        SELECT
+            r."id",
+            r."feedbackId",
+            r."studentId",
+            r."teacherId",
+            NULLIF(to_jsonb(r) ->> 'subjectKey', ''),
+            NULLIF(to_jsonb(r) ->> 'subjectLabel', ''),
+            r."courseKey",
+            r."courseLabel",
+            r."amount",
+            r."isFirstFeedback",
+            r."createdAt",
+            COALESCE((to_jsonb(r) ->> 'isActive')::BOOLEAN, true),
+            NULLIF(to_jsonb(r) ->> 'invalidReason', ''),
+            'pre_subject_key_migration_full_snapshot'
+        FROM "FeedbackRewardRecord" r
+        ON CONFLICT ("id") DO NOTHING;
+    END IF;
+END $$;
+
+-- Retained for compatibility with the preflight safety gate introduced before
+-- this migration was rewritten. It is not used to remove or hide any record.
+CREATE TABLE IF NOT EXISTS "FeedbackRewardRecordAuditBackup" (
+    "sourceRecordId" TEXT NOT NULL,
+    "feedbackId" TEXT NOT NULL,
+    "studentId" TEXT NOT NULL,
+    "teacherId" TEXT NOT NULL,
+    "subjectKey" TEXT,
+    "subjectLabel" TEXT,
+    "courseKey" TEXT NOT NULL,
+    "courseLabel" TEXT,
+    "amount" DOUBLE PRECISION NOT NULL,
+    "isFirstFeedback" BOOLEAN NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL,
+    "archivedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "archiveReason" TEXT NOT NULL,
+
+    CONSTRAINT "FeedbackRewardRecordAuditBackup_pkey" PRIMARY KEY ("sourceRecordId")
+);
+
+-- Fresh databases may not have the ledger because its first rollout was a
+-- reviewed manual migration plan. Create the active table without data loss.
+CREATE TABLE IF NOT EXISTS "FeedbackRewardRecord" (
+    "id" TEXT NOT NULL,
+    "feedbackId" TEXT NOT NULL,
+    "studentId" TEXT NOT NULL,
+    "teacherId" TEXT NOT NULL,
+    "courseKey" TEXT NOT NULL,
+    "courseLabel" TEXT,
+    "amount" DOUBLE PRECISION NOT NULL,
     "isFirstFeedback" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "FeedbackRewardRecord_pkey" PRIMARY KEY ("id")
 );
 
+-- Step 2: add nullable columns first. NOT NULL is enforced only after every
+-- historical row receives a deterministic value.
 ALTER TABLE "FeedbackRewardRecord" ADD COLUMN IF NOT EXISTS "subjectKey" TEXT;
 ALTER TABLE "FeedbackRewardRecord" ADD COLUMN IF NOT EXISTS "subjectLabel" TEXT;
+ALTER TABLE "FeedbackRewardRecord" ADD COLUMN IF NOT EXISTS "isActive" BOOLEAN DEFAULT true;
+ALTER TABLE "FeedbackRewardRecord" ADD COLUMN IF NOT EXISTS "invalidReason" TEXT;
 
--- Resolve a stable, division-aware subject identity for historical rows.
--- Priority matches application code: ClassLesson.subject, Course.subject,
--- teacher assignment subject, then the retained course label.
+-- Step 3: backfill from authoritative relations only.
+-- Subject priority: ClassLesson.subject, Course.subject,
+-- ClassGroupTeacher.subject, then UNKNOWN. courseLabel is never consulted.
 WITH reward_context AS (
     SELECT
         r."id",
         CASE
-            WHEN UPPER(COALESCE(l."division", g."division", c."division", t."division", 'JUNIOR')) = 'SENIOR'
+            WHEN UPPER(COALESCE(l."division", g."division", c."division", t."division", '')) = 'SENIOR'
                 THEN 'SENIOR'
-            ELSE 'JUNIOR'
+            WHEN UPPER(COALESCE(l."division", g."division", c."division", t."division", '')) = 'JUNIOR'
+                THEN 'JUNIOR'
+            ELSE 'UNKNOWN'
         END AS division_key,
         COALESCE(
             NULLIF(BTRIM(l."subject"), ''),
             NULLIF(BTRIM(c."subject"), ''),
             NULLIF(BTRIM(assignment."subject"), ''),
-            NULLIF(BTRIM(r."courseLabel"), ''),
-            '未分类'
+            'UNKNOWN'
         ) AS subject_label
     FROM "FeedbackRewardRecord" r
     LEFT JOIN "ClassroomFeedback" f ON f."id" = r."feedbackId"
     LEFT JOIN "ClassLesson" l ON l."id" = f."classLessonId"
     LEFT JOIN "ClassGroup" g ON g."id" = COALESCE(l."groupId", f."feedbackGroupId")
-    LEFT JOIN "Course" c ON c."id" = COALESCE(
-        g."courseId",
-        CASE WHEN r."courseKey" LIKE 'course:%' THEN SUBSTRING(r."courseKey" FROM 8) END
-    )
+    LEFT JOIN "Course" c ON c."id" = g."courseId"
     LEFT JOIN "Teacher" t ON t."id" = r."teacherId"
     LEFT JOIN LATERAL (
         SELECT cgt."subject"
@@ -83,7 +155,7 @@ WITH reward_context AS (
             WHEN 'politics' THEN 'POLITICS'
             WHEN '科学' THEN 'SCIENCE'
             WHEN 'science' THEN 'SCIENCE'
-            WHEN '未分类' THEN 'UNCLASSIFIED'
+            WHEN 'unknown' THEN 'UNKNOWN'
             ELSE UPPER(REGEXP_REPLACE(BTRIM(subject_label), '[[:space:]/_-]+', '_', 'g'))
         END AS subject_token
     FROM reward_context
@@ -91,33 +163,32 @@ WITH reward_context AS (
 UPDATE "FeedbackRewardRecord" r
 SET
     "subjectLabel" = normalized.subject_label,
-    "subjectKey" = normalized.division_key || '_' || normalized.subject_token
+    "subjectKey" = CASE
+        WHEN normalized.subject_token = 'UNKNOWN' THEN 'UNKNOWN'
+        ELSE normalized.division_key || '_' || normalized.subject_token
+    END,
+    "isActive" = COALESCE(r."isActive", true)
 FROM normalized
 WHERE normalized."id" = r."id";
 
 ALTER TABLE "FeedbackRewardRecord" ALTER COLUMN "subjectKey" SET NOT NULL;
 ALTER TABLE "FeedbackRewardRecord" ALTER COLUMN "subjectLabel" SET NOT NULL;
+ALTER TABLE "FeedbackRewardRecord" ALTER COLUMN "isActive" SET DEFAULT true;
+ALTER TABLE "FeedbackRewardRecord" ALTER COLUMN "isActive" SET NOT NULL;
 
--- Duplicate active ledger rows must leave the unique set, but no historical
--- reward is physically lost. Copy every duplicate row to an audit table first.
-CREATE TABLE IF NOT EXISTS "FeedbackRewardRecordAuditBackup" (
-    "sourceRecordId" TEXT NOT NULL,
-    "feedbackId" TEXT NOT NULL,
-    "studentId" TEXT NOT NULL,
-    "teacherId" TEXT NOT NULL,
-    "subjectKey" TEXT NOT NULL,
-    "subjectLabel" TEXT NOT NULL,
-    "courseKey" TEXT NOT NULL,
-    "courseLabel" TEXT,
-    "amount" DOUBLE PRECISION NOT NULL,
-    "isFirstFeedback" BOOLEAN NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL,
-    "archivedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "archiveReason" TEXT NOT NULL,
+-- Step 4: audit unresolved rows without failing or guessing their subject.
+DO $$
+DECLARE
+    unknown_count BIGINT;
+BEGIN
+    SELECT COUNT(*) INTO unknown_count
+    FROM "FeedbackRewardRecord"
+    WHERE "subjectKey" = 'UNKNOWN';
 
-    CONSTRAINT "FeedbackRewardRecordAuditBackup_pkey" PRIMARY KEY ("sourceRecordId")
-);
+    RAISE NOTICE 'FeedbackRewardRecord UNKNOWN subjectKey count: %', unknown_count;
+END $$;
 
+-- Preserve the post-backfill form of every duplicate as a second audit layer.
 WITH ranked AS (
     SELECT
         r.*,
@@ -141,7 +212,6 @@ FROM ranked
 WHERE row_number > 1
 ON CONFLICT ("sourceRecordId") DO NOTHING;
 
--- Abort rather than remove an active duplicate if its audit copy is missing.
 DO $$
 BEGIN
     IF EXISTS (
@@ -164,8 +234,8 @@ BEGIN
     END IF;
 END $$;
 
--- Move audited duplicates out of the active ledger. Their complete original
--- values remain in FeedbackRewardRecordAuditBackup and can be restored.
+-- Step 5: keep every duplicate in the original table and mark only the later
+-- rows inactive. No reward record is deleted or overwritten beyond audit state.
 WITH ranked AS (
     SELECT
         r."id",
@@ -175,17 +245,25 @@ WITH ranked AS (
         ) AS row_number
     FROM "FeedbackRewardRecord" r
 )
-DELETE FROM "FeedbackRewardRecord" r
-USING ranked, "FeedbackRewardRecordAuditBackup" backup
+UPDATE "FeedbackRewardRecord" r
+SET
+    "isActive" = false,
+    "invalidReason" = 'duplicate_subject_reward_migration'
+FROM ranked
 WHERE r."id" = ranked."id"
-  AND backup."sourceRecordId" = ranked."id"
   AND ranked.row_number > 1;
 
+-- Step 6: remove obsolete uniqueness definitions. These are indexes only;
+-- neither the reward table nor any reward row is dropped.
 DROP INDEX IF EXISTS "FeedbackRewardRecord_teacherId_studentId_key";
 DROP INDEX IF EXISTS "FeedbackRewardRecord_teacherId_studentId_courseKey_key";
+DROP INDEX IF EXISTS "FeedbackRewardRecord_teacherId_studentId_subjectKey_key";
 
-CREATE UNIQUE INDEX IF NOT EXISTS "FeedbackRewardRecord_teacherId_studentId_subjectKey_key"
-    ON "FeedbackRewardRecord"("teacherId", "studentId", "subjectKey");
+-- Step 7: concurrency safety applies only to active reward rows. Historical
+-- inactive duplicates remain queryable in FeedbackRewardRecord and the archive.
+CREATE UNIQUE INDEX "FeedbackRewardRecord_teacherId_studentId_subjectKey_key"
+    ON "FeedbackRewardRecord"("teacherId", "studentId", "subjectKey")
+    WHERE "isActive" = true;
 CREATE INDEX IF NOT EXISTS "FeedbackRewardRecord_feedbackId_idx"
     ON "FeedbackRewardRecord"("feedbackId");
 CREATE INDEX IF NOT EXISTS "FeedbackRewardRecord_teacherId_createdAt_idx"

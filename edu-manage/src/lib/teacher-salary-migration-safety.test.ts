@@ -5,6 +5,7 @@ const migration = readFileSync(
   new URL('../../prisma/migrations/20260718223000_feedback_reward_teacher_student_unique/migration.sql', import.meta.url),
   'utf8',
 )
+const schema = readFileSync(new URL('../../prisma/schema.prisma', import.meta.url), 'utf8')
 
 describe('feedback reward production migration safety', () => {
   it('adds nullable subject fields before enforcing NOT NULL', () => {
@@ -20,17 +21,20 @@ describe('feedback reward production migration safety', () => {
   })
 
   it('creates a complete archive before mutating historical reward rows', () => {
-    const archivePosition = migration.indexOf('CREATE TABLE IF NOT EXISTS "FeedbackRewardRecordAuditBackup"')
+    const archivePosition = migration.indexOf('CREATE TABLE IF NOT EXISTS "FeedbackRewardRecordArchive"')
+    const archiveEnd = migration.indexOf('DO $$', archivePosition)
+    const archiveDefinition = migration.slice(archivePosition, archiveEnd)
     const firstHistoricalUpdate = migration.indexOf('UPDATE "FeedbackRewardRecord"')
     const requiredArchiveFields = [
-      '"sourceRecordId"', '"feedbackId"', '"studentId"', '"teacherId"',
+      '"id"', '"feedbackId"', '"studentId"', '"teacherId"',
       '"subjectKey"', '"subjectLabel"', '"courseKey"', '"courseLabel"',
-      '"amount"', '"isFirstFeedback"', '"createdAt"',
+      '"amount"', '"isFirstFeedback"', '"createdAt"', '"isActive"',
+      '"invalidReason"', '"archivedAt"', '"archiveReason"',
     ]
 
     expect(archivePosition).toBeGreaterThan(-1)
     expect(archivePosition).toBeLessThan(firstHistoricalUpdate)
-    for (const field of requiredArchiveFields) expect(migration).toContain(field)
+    for (const field of requiredArchiveFields) expect(archiveDefinition).toContain(field)
   })
 
   it('uses UNKNOWN without guessing from labels and reports the unresolved count', () => {
@@ -48,5 +52,13 @@ describe('feedback reward production migration safety', () => {
     expect(migration).toContain('PARTITION BY r."teacherId", r."studentId", r."subjectKey"')
     expect(migration).toContain('DROP INDEX IF EXISTS "FeedbackRewardRecord_teacherId_studentId_key"')
     expect(migration).toContain('ON "FeedbackRewardRecord"("teacherId", "studentId", "subjectKey")')
+    expect(migration).toContain('WHERE "isActive" = true')
+  })
+
+  it('keeps Prisma fields aligned without declaring an unsupported full unique constraint', () => {
+    const model = schema.match(/model FeedbackRewardRecord \{[\s\S]*?\n\}/)?.[0] || ''
+    expect(model).toContain('isActive')
+    expect(model).toContain('invalidReason')
+    expect(model).not.toContain('@@unique([teacherId, studentId, subjectKey])')
   })
 })

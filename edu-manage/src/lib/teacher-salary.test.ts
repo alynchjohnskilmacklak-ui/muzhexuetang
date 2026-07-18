@@ -186,6 +186,13 @@ describe('teacher salary calculations', () => {
     expect(second.duplicateCount).toBe(1)
     expect(ledger).toEqual(new Set(['t1:s1:JUNIOR_MATH']))
     expect(salaryCreates).toHaveLength(1)
+    expect(prisma.feedbackRewardRecord.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ isActive: true }),
+    }))
+    expect(prisma.feedbackRewardRecord.createMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.arrayContaining([expect.objectContaining({ isActive: true })]),
+      skipDuplicates: true,
+    }))
   })
 
   it('rewards math and physics independently for the same teacher and student', async () => {
