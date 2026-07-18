@@ -18,7 +18,11 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const imageUrls = Array.isArray(feedback.imageUrls) ? feedback.imageUrls : []
-  const { urls: signedImageUrls } = useSignedUrls(imageUrls)
+  const images = Array.isArray(feedback.images) && feedback.images.length === imageUrls.length
+    ? feedback.images
+    : imageUrls.map((url: string) => ({ originalUrl: url, previewUrl: url, thumbnailUrl: url }))
+  const { urls: signedThumbnails } = useSignedUrls(images.map((image: any) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
+  const { urls: signedPreviews } = useSignedUrls(images.map((image: any) => image.previewUrl || image.thumbnailUrl || image.originalUrl))
 
   useEffect(() => {
     if (feedback.parentReadAt || feedback.status !== 'PUBLISHED') return
@@ -117,10 +121,11 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
             <Text strong style={{ display: 'block', marginBottom: 12 }}>课堂资料</Text>
             <Image.PreviewGroup>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-                {imageUrls.map((url: string, i: number) => (
+                {images.map((image: any, i: number) => (
                   <Image
                     key={i}
-                    src={signedImageUrls[i]}
+                    src={signedThumbnails[i]}
+                    preview={{ src: signedPreviews[i] }}
                     alt={`资料 ${i + 1}`}
                     width="100%"
                     height={isMobile ? 120 : 140}

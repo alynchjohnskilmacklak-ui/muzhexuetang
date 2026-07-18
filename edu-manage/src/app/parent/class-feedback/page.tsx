@@ -3,6 +3,7 @@ import { getPrismaForDivision } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ClassFeedbackClient } from './client'
 import { parentLinkedStudentWhere, visibleClassroomFeedbackWhere, visibleTeacherWhere } from '@/lib/business-visibility'
+import { resolveFeedbackImageVariants, variantsForFeedback } from '@/lib/file-asset-variants'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,8 +60,16 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
     take: 50,
   })
 
+  const allImageUrls = [...feedbacks, ...(highlightedFeedback ? [highlightedFeedback] : [])]
+    .flatMap((feedback) => feedback.imageUrls)
+  const imageVariantMap = await resolveFeedbackImageVariants(prisma, allImageUrls)
+  const withImages = <T extends { imageUrls: string[] }>(feedback: T) => ({
+    ...feedback,
+    images: variantsForFeedback(feedback.imageUrls, imageVariantMap),
+  })
+
   return <ClassFeedbackClient
-    feedbacks={JSON.parse(JSON.stringify(feedbacks))}
-    highlightedFeedback={highlightedFeedback ? JSON.parse(JSON.stringify(highlightedFeedback)) : null}
+    feedbacks={JSON.parse(JSON.stringify(feedbacks.map(withImages)))}
+    highlightedFeedback={highlightedFeedback ? JSON.parse(JSON.stringify(withImages(highlightedFeedback))) : null}
   />
 }

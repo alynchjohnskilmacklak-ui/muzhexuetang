@@ -3,6 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
 import { FeedbackDetailClient } from './client'
 import { parentLinkedStudentWhere, visibleClassroomFeedbackWhere, visibleTeacherWhere } from '@/lib/business-visibility'
+import { resolveFeedbackImageVariants, variantsForFeedback } from '@/lib/file-asset-variants'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,5 +40,11 @@ export default async function FeedbackDetailPage({ params }: { params: Promise<{
 
   if (!feedback) notFound()
 
-  return <FeedbackDetailClient feedback={JSON.parse(JSON.stringify(feedback))} />
+  const imageVariantMap = await resolveFeedbackImageVariants(prisma, feedback.imageUrls)
+  const feedbackWithImages = {
+    ...feedback,
+    images: variantsForFeedback(feedback.imageUrls, imageVariantMap),
+  }
+
+  return <FeedbackDetailClient feedback={JSON.parse(JSON.stringify(feedbackWithImages))} />
 }

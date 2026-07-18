@@ -92,7 +92,7 @@ function FeedbackImage({ src, size, onClick }: { src: string; size: number; onCl
 function FeedbackImageViewer({ images, initialIndex, onClose }: { images: AdminFeedbackImage[]; initialIndex: number; onClose: () => void }) {
   const [current, setCurrent] = useState(initialIndex)
   const { urls: signedPreviews } = useSignedUrls(images.map((image) => image.previewUrl || image.thumbnailUrl || image.originalUrl))
-  const { urls: signedOriginals } = useSignedUrls(images.map((image) => image.originalUrl))
+  const { urls: signedOriginals, loading: originalsLoading } = useSignedUrls(images.map((image) => image.originalUrl))
   const activeImage = images[current]
   const downloadHref = activeImage?.assetId
     ? `/api/admin/classroom-feedback/image-download?assetId=${encodeURIComponent(activeImage.assetId)}`
@@ -125,7 +125,7 @@ function FeedbackImageViewer({ images, initialIndex, onClose }: { images: AdminF
         ))}
       </Carousel>
       <div style={{ display: 'flex', justifyContent: 'center', padding: '12px max(12px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom, 0px))', background: '#FAF8F5' }}>
-        <Button type="primary" icon={<DownloadOutlined />} href={downloadHref} target="_blank" rel="noopener noreferrer" style={{ background: '#E8784A', borderColor: '#E8784A' }}>
+        <Button type="primary" icon={<DownloadOutlined />} href={downloadHref} disabled={!activeImage?.assetId && originalsLoading} target="_blank" rel="noopener noreferrer" style={{ background: '#E8784A', borderColor: '#E8784A' }}>
           下载原图
         </Button>
       </div>
@@ -529,7 +529,7 @@ export default function ClassroomFeedbackAdminPage() {
       {/* Read-only feedback detail and admin reply */}
       <Drawer
         open={!!detailFeedback}
-        onClose={() => { setDetailFeedback(null); setAdminReply('') }}
+        onClose={() => { setDetailFeedback(null); setAdminReply(''); setViewerIndex(null) }}
         title="课堂反馈详情"
         width={isMobile ? '100%' : 520}
         placement={isMobile ? 'bottom' : 'right'}

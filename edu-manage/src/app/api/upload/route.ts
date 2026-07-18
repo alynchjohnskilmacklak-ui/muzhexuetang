@@ -3,7 +3,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { getRequestPrisma } from '@/lib/prisma'
 import { uploadBuffer } from '@/lib/storage'
 import { apiHandler } from '@/lib/api-handler'
-import sharp from 'sharp'
+import { generateImageVariants } from '@/lib/image-variants'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,25 +91,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif|avif)$/i.test(file.name)
     if (isImage) {
       try {
-        const metadata = await sharp(buffer, { animated: false, failOn: 'none' }).metadata()
-        width = metadata.width ?? null
-        height = metadata.height ?? null
-        const previewBuffer = await sharp(buffer, { animated: false, failOn: 'none' })
-          .rotate()
-          .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
-          .webp({ quality: 82 })
-          .toBuffer()
-        preview = await uploadBuffer(previewBuffer, {
+        const generated = await generateImageVariants(buffer)
+        width = generated.width
+        height = generated.height
+        preview = await uploadBuffer(generated.previewBuffer, {
           originalName: `${file.name.replace(/\.[^.]+$/, '')}-preview.webp`,
           mimeType: 'image/webp',
           prefix: `${ownerType}-preview`,
         })
-        const thumbnailBuffer = await sharp(buffer, { animated: false, failOn: 'none' })
-          .rotate()
-          .resize({ width: 400, height: 400, fit: 'inside', withoutEnlargement: true })
-          .webp({ quality: 70 })
-          .toBuffer()
-        thumbnail = await uploadBuffer(thumbnailBuffer, {
+        thumbnail = await uploadBuffer(generated.thumbnailBuffer, {
           originalName: `${file.name.replace(/\.[^.]+$/, '')}-thumbnail.webp`,
           mimeType: 'image/webp',
           prefix: `${ownerType}-thumbnail`,

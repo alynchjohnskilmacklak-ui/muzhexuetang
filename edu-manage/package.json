@@ -36,6 +36,7 @@
     "import:allocation:2026": "tsx scripts/import-allocation.ts data/volunteer/allocation_2026.json",
     "import:enrollment": "tsx scripts/import-enrollment.ts",
     "check:garbled": "tsx scripts/check-garbled-text.ts",
+    "images:generate-previews": "tsx scripts/generate-image-preview.ts",
     "test": "vitest run"
   },
   "dependencies": {

@@ -109,7 +109,9 @@ function FeedbackPageInner() {
   const [homework, setHomework] = useState<string[]>([])
   const [hwInput, setHwInput] = useState('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
-  const { urls: signedImageUrls } = useSignedUrls(imageUrls)
+  const [imageDisplayUrls, setImageDisplayUrls] = useState<Record<string, { thumbnailUrl: string; previewUrl: string }>>({})
+  const { urls: signedImageUrls } = useSignedUrls(imageUrls.map((url) => imageDisplayUrls[url]?.thumbnailUrl || imageDisplayUrls[url]?.previewUrl || url))
+  const { urls: signedImagePreviews } = useSignedUrls(imageUrls.map((url) => imageDisplayUrls[url]?.previewUrl || imageDisplayUrls[url]?.thumbnailUrl || url))
   const [badgeOpen, setBadgeOpen] = useState(false)
   const [uploadExpanded, setUploadExpanded] = useState(false)
   const [studentsExpanded, setStudentsExpanded] = useState(false)
@@ -382,7 +384,7 @@ function FeedbackPageInner() {
         setSelectedStudentIds([]); setGroupId('')
         setMood('GOOD'); setTags([]); setKps([]); setBadge('')
         setPerformanceTags([]); setMasteryLevel('GOOD'); setTeacherRemark('')
-        setSummary(''); setOverallComment(''); setPerStudentComments({}); setStudentPerf({}); setHomework([]); setImageUrls([])
+        setSummary(''); setOverallComment(''); setPerStudentComments({}); setStudentPerf({}); setHomework([]); setImageUrls([]); setImageDisplayUrls({})
         setStageSummaryText(''); setStageSuggestions('')
         setAiSuggestion(null); setAiSuggestionUsed(false); setAiPrefilled(new Set())
         setStageData(null); setStageExpanded(false)
@@ -834,8 +836,15 @@ function FeedbackPageInner() {
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
                 <AntImage.PreviewGroup>{imageUrls.map((url, i) => (
                   <div key={i} style={{ position: 'relative' }}>
-                    <AntImage src={signedImageUrls[i]} width={64} height={64} style={{ objectFit: 'cover', borderRadius: 8 }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23f5f2ee'/%3E%3Ctext x='32' y='32' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='10'%3E加载失败%3C/text%3E%3C/svg%3E" />
-                    <button onClick={() => setImageUrls(prev => prev.filter((_, j) => j !== i))}
+                    <AntImage src={signedImageUrls[i]} preview={{ src: signedImagePreviews[i] }} width={64} height={64} style={{ objectFit: 'cover', borderRadius: 8 }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23f5f2ee'/%3E%3Ctext x='32' y='32' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='10'%3E加载失败%3C/text%3E%3C/svg%3E" />
+                    <button onClick={() => {
+                      setImageUrls(prev => prev.filter((_, j) => j !== i))
+                      setImageDisplayUrls(prev => {
+                        const next = { ...prev }
+                        delete next[url]
+                        return next
+                      })
+                    }}
                       style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#E24B4A', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11 }}>×</button>
                   </div>
                 ))}</AntImage.PreviewGroup>
@@ -864,8 +873,21 @@ function FeedbackPageInner() {
                 if (info.file.status === 'uploading') return
                 if (info.file.status === 'done') {
                   const url = (info.file.response as any)?.file?.storageKey || (info.file.response as any)?.url
+                  const previewUrl = (info.file.response as any)?.previewUrl
+                  const thumbnailUrl = (info.file.response as any)?.thumbnailUrl
                   const error = (info.file.response as any)?.error
-                  if (url) setImageUrls(prev => [...prev, url])
+                  if (url) {
+                    setImageUrls(prev => [...prev, url])
+                    if (previewUrl || thumbnailUrl) {
+                      setImageDisplayUrls(prev => ({
+                        ...prev,
+                        [url]: {
+                          thumbnailUrl: thumbnailUrl || previewUrl,
+                          previewUrl: previewUrl || thumbnailUrl,
+                        },
+                      }))
+                    }
+                  }
                   else toast.error(error || '上传失败', { duration: 5000 })
                 } else if (info.file.status === 'error') {
                   const err = (info.file as any)?.error

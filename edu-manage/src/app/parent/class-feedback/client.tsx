@@ -25,7 +25,11 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
   const [localReply, setLocalReply] = useState<string | null>(null)
   const [locallyReadIds, setLocallyReadIds] = useState<Set<string>>(() => new Set())
   const detailImageUrls = Array.isArray(detailModal?.imageUrls) ? detailModal.imageUrls : []
-  const { urls: signedDetailImageUrls } = useSignedUrls(detailImageUrls)
+  const detailImages = Array.isArray(detailModal?.images) && detailModal.images.length === detailImageUrls.length
+    ? detailModal.images
+    : detailImageUrls.map((url: string) => ({ originalUrl: url, previewUrl: url, thumbnailUrl: url }))
+  const { urls: signedDetailThumbnails } = useSignedUrls(detailImages.map((image: any) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
+  const { urls: signedDetailPreviews } = useSignedUrls(detailImages.map((image: any) => image.previewUrl || image.thumbnailUrl || image.originalUrl))
 
   const markAsRead = async (feedback: any) => {
     if (feedback.parentReadAt || feedback.status !== 'PUBLISHED' || locallyReadIds.has(feedback.id)) return
@@ -277,10 +281,11 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
                 <Text strong style={{ display: 'block', marginBottom: 8 }}>🖼 课堂照片</Text>
                 <Image.PreviewGroup>
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 8 }}>
-                    {detailImageUrls.map((url: string, i: number) => (
+                    {detailImages.map((image: any, i: number) => (
                       <Image
                         key={i}
-                        src={signedDetailImageUrls[i]}
+                        src={signedDetailThumbnails[i]}
+                        preview={{ src: signedDetailPreviews[i] }}
                         alt={`课堂照片 ${i + 1}`}
                         width="100%"
                         height={isMobile ? 100 : 120}
