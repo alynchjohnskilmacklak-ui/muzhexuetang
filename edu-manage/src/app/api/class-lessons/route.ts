@@ -20,6 +20,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const roomId = searchParams.get('roomId')
   const groupId = searchParams.get('groupId')
   const courseType = searchParams.get('courseType')
+  const intensiveMode = searchParams.get('intensiveMode')
   const division = getRequestDivision(user, searchParams.get('division'))
 
   const where: Record<string, unknown> = { status: { not: 'CANCELLED' }, division }
@@ -77,6 +78,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   if (roomId) groupWhere.roomId = roomId
   if (courseType) groupWhere.course = { ...(groupWhere.course as object), type: courseType }
+  if (intensiveMode === 'INTENSIVE') groupWhere.intensiveMode = 'INTENSIVE'
   where.group = { ...(where.group as object), ...groupWhere }
 
   const lessons = await prisma.classLesson.findMany({
@@ -92,6 +94,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
         },
       },
       teacher: { select: { id: true, name: true, subjects: true } },
+      lessonStudents: { include: { student: { select: { id: true, name: true } } }, orderBy: { createdAt: 'asc' } },
     },
     orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
   })

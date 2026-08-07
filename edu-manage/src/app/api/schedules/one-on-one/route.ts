@@ -41,7 +41,6 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const conflicts = await checkScheduleConflict({
       teacherId,
       studentId,
-      roomId: roomId || undefined,
       date,
       startTime,
       endTime,
@@ -88,6 +87,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
           teacherId,
           courseId: course.id,
           status: { not: 'ARCHIVED' },
+          intensiveMode: 'INTENSIVE',
+          teachingType: 'ONE_ON_ONE',
           enrollments: { some: { studentId, status: 'ACTIVE' } },
         },
       })
@@ -97,7 +98,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             name: `一对一·${teacher.name}·${student.name}·${subject}`,
             courseId: course.id,
             teacherId,
-            roomId: roomId || null,
+            roomId: null,
             maxStudents: 1,
             startDate: new Date(`${date}T00:00:00`),
             totalLessons: 1,
@@ -105,6 +106,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
             lessonMinutes,
             recurringDays: [],
             status: 'ACTIVE',
+            intensiveMode: 'INTENSIVE',
+            teachingType: 'ONE_ON_ONE',
           },
         })
         // Enroll student
@@ -112,8 +115,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
           data: {
             groupId: group.id,
             studentId,
-            totalHours: 1,
-            remainHours: 1,
+            totalHours: 0,
+            remainHours: 0,
             status: 'ACTIVE',
           },
         })
@@ -130,6 +133,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
           endTime,
           status: 'SCHEDULED',
           note: note || null,
+          isManual: true,
+          plannedMinutes: lessonMinutes,
+          intensiveReviewStatus: 'DRAFT',
         },
         include: {
           group: {
@@ -142,6 +148,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
           },
           teacher: { select: { id: true, name: true } },
         },
+      })
+
+      await tx.classLessonStudent.create({
+        data: { lessonId: lesson.id, studentId },
       })
 
       return lesson

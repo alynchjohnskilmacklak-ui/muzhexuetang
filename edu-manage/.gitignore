@@ -60,3 +60,13 @@ edu-manage-deploy.tar
 
 # local business data exports
 exports/
+
+# local cache
+cachenpm/
+
+# temp
+tmp/
+
+# code review artifacts
+design-qa.md
+outputs/

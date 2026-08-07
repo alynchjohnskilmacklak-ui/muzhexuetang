@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
-import { chineseToPinyin, generateParentCredentials, generateParentCredentialsHashed } from '@/lib/pinyin'
+import { chineseToPinyin, generateParentCredentialsHashed } from '@/lib/pinyin'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { calculateApprovedIntensiveHours, calculateTaughtHours } from '@/lib/student-taught-hours'
 
 export const dynamic = 'force-dynamic'
 
@@ -97,7 +98,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
       where: {
         status: 'ACTIVE',
         student: { status: 'ACTIVE', division },
-        group: { status: { not: 'ARCHIVED' }, course: { isActive: true } },
+        group: {
+          intensiveMode: { not: 'INTENSIVE' },
+          status: { not: 'ARCHIVED' },
+          course: { isActive: true },
+        },
       },
       _sum: { remainHours: true },
       having: { remainHours: { _sum: { lte: 3 } } },
@@ -128,6 +133,33 @@ export const GET = apiHandler(async (req: NextRequest) => {
     }),
     prisma.student.count({ where }),
   ])
+  const approvedIntensiveAttendances = students.length
+    ? await prisma.attendance.findMany({
+        where: {
+          studentId: { in: students.map((student) => student.id) },
+          lesson: {
+            intensiveReviewStatus: 'APPROVED',
+            group: {
+              intensiveMode: 'INTENSIVE',
+              status: { not: 'ARCHIVED' },
+              course: { isActive: true },
+            },
+          },
+        },
+        select: {
+          studentId: true,
+          status: true,
+          actualMinutes: true,
+          lesson: { select: { actualMinutes: true } },
+        },
+      })
+    : []
+  const approvedIntensiveByStudent = new Map<string, typeof approvedIntensiveAttendances>()
+  for (const attendance of approvedIntensiveAttendances) {
+    const current = approvedIntensiveByStudent.get(attendance.studentId) || []
+    current.push(attendance)
+    approvedIntensiveByStudent.set(attendance.studentId, current)
+  }
 
   const normalized = students.map((student) => {
     const activeEnrollments = student.enrollments.filter((enrollment) => (
@@ -137,11 +169,16 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ))
     const remainHours = activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.remainHours || 0), 0)
     const totalHours = activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.totalHours || 0), 0)
+    const taughtHours = calculateTaughtHours(
+      activeEnrollments,
+      calculateApprovedIntensiveHours(approvedIntensiveByStudent.get(student.id) || []),
+    )
     return {
       ...student,
       enrollments: activeEnrollments,
       remainHours,
       totalHours,
+      taughtHours,
       courseType: activeEnrollments[0]?.group.course.type || null,
     }
   })
@@ -177,73 +214,83 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const name = typeof body.name === 'string' ? body.name.trim() : ''
     if (!name) return NextResponse.json({ error: '姓名不能为空' }, { status: 400 })
 
-    // Auto-create parent account from student name (hashed password)
-    let parentUserId: string | null = null
-    let parentPlainPassword: string | null = null
-    try {
-      const creds = await generateParentCredentialsHashed(name)
-      parentPlainPassword = creds.plainPassword
-      const parentUser = await prisma.user.upsert({
-        where: { email: creds.email },
-        update: { status: 'active', division },
-        create: {
-          email: creds.email,
-          password: creds.password,
-          name: body.parentName || `${name}家长`,
-          role: 'parent',
-          status: 'active',
+    const userId = (session.user as { id?: string }).id
+    if (!userId) return NextResponse.json({ error: '登录状态异常，请重新登录' }, { status: 401 })
+
+    const creds = await generateParentCredentialsHashed(name)
+    const creation = await prisma.$transaction(async (tx) => {
+      const existingParent = await tx.user.findUnique({ where: { email: creds.email } })
+      const parentUser = existingParent
+        ? await tx.user.update({
+            where: { id: existingParent.id },
+            data: { status: 'active', division },
+          })
+        : await tx.user.create({
+            data: {
+              email: creds.email,
+              password: creds.password,
+              name: body.parentName || `${name}家长`,
+              role: 'parent',
+              status: 'active',
+              division,
+            },
+          })
+
+      const student = await tx.student.create({
+        data: {
+          name,
+          gender: body.gender || null,
+          birthYear: body.birthYear ? parseInt(body.birthYear) : null,
+          grade: body.grade || null,
+          school: body.school || null,
+          phone: body.phone || null,
+          email: body.email || null,
+          parentName: body.parentName || null,
+          parentPhone: body.parentPhone || null,
+          parentUserId: parentUser.id,
+          parentId: parentUser.id,
+          source: body.source || null,
+          notes: body.notes || null,
+          mainTeacherId: body.mainTeacherId || null,
           division,
+          remainHours: body.remainHours ? parseFloat(body.remainHours) : 0,
+          tags: JSON.stringify(body.tags || []),
+          status: 'TRIAL',
+          membershipLevel: body.membershipLevel || 'NORMAL',
         },
       })
-      parentUserId = parentUser.id
-    } catch (error) {
-      console.error('[students:create] parent account creation failed', error)
-    }
 
-    const student = await prisma.student.create({
-      data: {
-        name,
-        gender: body.gender || null,
-        birthYear: body.birthYear ? parseInt(body.birthYear) : null,
-        grade: body.grade || null,
-        school: body.school || null,
-        phone: body.phone || null,
-        email: body.email || null,
-        parentName: body.parentName || null,
-        parentPhone: body.parentPhone || null,
-        parentUserId: parentUserId,
-        parentId: parentUserId,
-        source: body.source || null,
-        notes: body.notes || null,
-        mainTeacherId: body.mainTeacherId || null,
-        division,
-        remainHours: body.remainHours ? parseFloat(body.remainHours) : 0,
-        tags: JSON.stringify(body.tags || []),
-        status: 'TRIAL',
-        membershipLevel: body.membershipLevel || 'NORMAL',
-      },
-    })
-
-    const userId = (session.user as { id?: string }).id
-    if (userId) {
-      await prisma.activityLog.create({
+      await tx.activityLog.create({
         data: {
           userId,
           action: '添加学员',
-          detail: `${student.name}${parentUserId ? `，家长账号：${generateParentCredentials(name).email}` : ''}`,
+          detail: `${student.name}，家长账号：${creds.email}`,
+          entityType: 'Student',
+          entityId: student.id,
         },
       })
-    } else {
-      console.error('[students:create] session user id missing; skipped activity log')
-    }
+      if (!existingParent) {
+        await tx.activityLog.create({
+          data: {
+            userId,
+            action: 'PASSWORD_INITIALIZED',
+            detail: `添加学员时创建家长账号：${parentUser.name}（${parentUser.email}）`,
+            entityType: 'User',
+            entityId: parentUser.id,
+            metadata: { source: body.source === '批量导入' ? 'BULK_IMPORT' : 'STUDENT_CREATION' },
+          },
+        })
+      }
+      return { student, parentUser, parentCreated: !existingParent }
+    })
 
     revalidatePath('/dashboard')
     revalidatePath('/students')
 
     return NextResponse.json({
-      ...student,
-      parentEmail: parentUserId ? generateParentCredentials(name).email : null,
-      parentPlainPassword: parentPlainPassword || null,
+      ...creation.student,
+      parentEmail: creation.parentUser.email,
+      parentPlainPassword: creation.parentCreated ? creds.plainPassword : null,
     }, { status: 201 })
   } catch (error) {
     console.error('[students:create] failed', error)

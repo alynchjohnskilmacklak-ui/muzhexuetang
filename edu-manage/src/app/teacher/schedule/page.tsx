@@ -30,7 +30,20 @@ const INTENSIVE_SLOTS = [
 ]
 const INTENSIVE_CONFIG: Record<string, { label:string; color:string; bg:string }> = {
   ONE_ON_ONE:   { label:'一对一', color:'#534AB7', bg:'rgba(83,74,183,.1)' },
-  SMALL_GROUP:  { label:'一对三', color:'#D4537E', bg:'rgba(212,83,126,.1)' },
+  ONE_ON_TWO:   { label:'一对二', color:'#D4537E', bg:'rgba(212,83,126,.1)' },
+  ONE_ON_THREE: { label:'一对三', color:'#185FA5', bg:'rgba(24,95,165,.1)' },
+}
+
+function getIntensiveWorkflowStatus(lesson: any) {
+  if (lesson.intensiveReviewStatus === 'APPROVED') return { label: '已审核', color: 'green' }
+  if (lesson.intensiveReviewStatus === 'PENDING') return { label: '待管理员审核', color: 'orange' }
+  if (lesson.intensiveReviewStatus === 'REJECTED') return { label: '需修改考勤', color: 'red' }
+  if (lesson.attendanceSubmittedAt) return { label: '考勤已提交', color: 'orange' }
+  const end = new Date(`${String(lesson.lessonDate).slice(0, 10)}T${lesson.endTime || '23:59'}:00`)
+  if (!Number.isNaN(end.getTime()) && end.getTime() < Date.now()) {
+    return { label: '待提交考勤', color: 'gold' }
+  }
+  return { label: '已约课', color: 'blue' }
 }
 
 function getWeekRange(offset = 0) {
@@ -213,19 +226,25 @@ export default function TeacherSchedulePage() {
                     {expandedDays[day.key] && (day.lessons.length ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 12px 12px' }}>
                         {day.lessons.map((lesson: any) => {
-                          const courseType = lesson.group?.course?.type
-                          const intensiveCfg = INTENSIVE_CONFIG[courseType || 'ONE_ON_ONE'] || INTENSIVE_CONFIG.ONE_ON_ONE
+                          const teachingType = lesson.group?.teachingType || 'ONE_ON_ONE'
+                          const intensiveCfg = INTENSIVE_CONFIG[teachingType] || INTENSIVE_CONFIG.ONE_ON_ONE
                           const accent = scheduleType === 'group' ? '#E8784A' : intensiveCfg.color
                           const lessonSubject = lesson.subject || lesson.group?.course?.subject
+                          const workflowStatus = scheduleType === 'intensive'
+                            ? getIntensiveWorkflowStatus(lesson)
+                            : {
+                                label: lesson.status === 'COMPLETED' ? '已完成' : '待上课',
+                                color: lesson.status === 'COMPLETED' ? 'green' : 'orange',
+                              }
                           return (
                             <div key={lesson.id} style={{ border: '1px solid #EEE7E1', borderTop: `3px solid ${accent}`, borderRadius: 10, padding: '10px 12px', background: '#fff', minWidth: 0 }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                                 <span style={{ color: accent, fontWeight: 700, fontSize: 13 }}>
                                   {lesson.startTime || '-'}{lesson.endTime ? `–${lesson.endTime}` : ''}
                                 </span>
-                                <Tag color={lesson.status === 'COMPLETED' ? 'green' : 'orange'}
+                                <Tag color={workflowStatus.color}
                                   style={{ marginInlineEnd: 0, fontSize: 11 }}>
-                                  {lesson.status === 'COMPLETED' ? '已完成' : '待上课'}
+                                  {workflowStatus.label}
                                 </Tag>
                               </div>
                               <div style={{ fontWeight: 700, color: '#1F2329', fontSize: 14, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -239,9 +258,9 @@ export default function TeacherSchedulePage() {
                               )}
                               <div style={{ display: 'flex', gap: 12, color: '#8D806F', fontSize: 12, marginTop: 4 }}>
                                 <span><EnvironmentOutlined /> {lesson.group?.room?.name || '-'}</span>
-                                <span><TeamOutlined /> {lesson.group?.enrollments?.length || 0}人</span>
+                                <span><TeamOutlined /> {lesson.lessonStudents?.length || lesson.group?.enrollments?.length || 0}人</span>
                                 {scheduleType === 'intensive' && (
-                                  <span><UserOutlined /> {lesson.group?.enrollments?.[0]?.student?.name || '-'}</span>
+                                  <span><UserOutlined /> {(lesson.lessonStudents?.map((item: any) => item.student?.name).filter(Boolean).join('、')) || '-'}</span>
                                 )}
                               </div>
                             </div>
@@ -336,15 +355,24 @@ export default function TeacherSchedulePage() {
                         return (
                           <div key={dayIdx} style={{ minHeight: h, overflow: 'hidden', borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', padding: 3 }}>
                             {items.length ? items.map((l: any) => {
-                              const ct = l.group?.course?.type || 'ONE_ON_ONE'
+                              const ct = l.group?.teachingType || 'ONE_ON_ONE'
                               const cfg = INTENSIVE_CONFIG[ct] || INTENSIVE_CONFIG.ONE_ON_ONE
-                              const studentName = l.group?.enrollments?.[0]?.student?.name || ''
+                              const studentName = l.lessonStudents?.map((item: any) => item.student?.name).filter(Boolean).join('、') || ''
+                              const workflowStatus = getIntensiveWorkflowStatus(l)
+                              const feedbackStudentIds = new Set((l.classroomFeedbacks || []).flatMap((item: any) => item.studentIds || []))
+                              const pendingFeedback = l.status === 'COMPLETED'
+                                ? (l.lessonStudents || []).filter((item: any) => !feedbackStudentIds.has(item.studentId)).length
+                                : 0
                               return (
                                 <div key={l.id} style={{ background: cfg.bg, borderRadius: 5, padding: '5px 7px', minHeight: 56, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                   <div style={{ fontSize: 9, fontWeight: 500, color: cfg.color, background: `${cfg.color}18`, padding: '0 4px', borderRadius: 3, alignSelf: 'flex-start', marginBottom: 3 }}>{cfg.label}</div>
                                   <div style={{ fontSize: 11, fontWeight: 600, color: cfg.color, lineHeight: 1.3 }}>{l.teacher?.name || l.teacherId || '-'}</div>
                                   <div style={{ fontSize: 11, color: cfg.color, lineHeight: 1.3 }}><UserOutlined style={{ fontSize: 10 }} /> {studentName}</div>
                                   <div style={{ fontSize: 10, color: cfg.color, opacity: .8, lineHeight: 1.3 }}>{l.subject || l.group?.course?.subject || '-'}</div>
+                                  <div style={{ fontSize: 9, color: cfg.color, fontWeight: 700, lineHeight: 1.3 }}>{workflowStatus.label}</div>
+                                  <div style={{ fontSize: 9, color: cfg.color, opacity: .75, lineHeight: 1.3 }}>
+                                    本节 {((Number(l.actualMinutes || l.plannedMinutes || 0)) / 60).toFixed(2)} 小时 · 待反馈 {pendingFeedback} 人
+                                  </div>
                                 </div>
                               )
                             }) : (

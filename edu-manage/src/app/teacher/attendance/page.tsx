@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Empty, List, Space, Tag, Typography } from 'antd'
+import { Button, Card, Empty, InputNumber, List, Space, Tag, Typography } from 'antd'
 import { CheckCircleOutlined, ClockCircleOutlined, EnvironmentOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -25,11 +25,12 @@ type TeacherLesson = {
   courseName?: string
   courseType?: string
   lessonMinutes?: number
+  lessonDate?: string
   time?: string
   startTime?: string
-  lessonDate?: string
   room?: string
   attendanceCount?: number
+  attendanceSubmittedAt?: string | null
   status?: string
 }
 type AttendanceStudent = {
@@ -40,6 +41,28 @@ type AttendanceStudent = {
   remainHours?: number
   courseType?: string | null
   lessonMinutes?: number
+}
+type AttendanceLessonDetail = {
+  id?: string
+  groupName?: string
+  courseName?: string
+  courseType?: string
+  lessonMinutes?: number
+  lessonDate?: string
+  startTime?: string
+  endTime?: string
+  intensiveMode?: string
+  teachingType?: string | null
+  plannedMinutes?: number | null
+  actualMinutes?: number | null
+  settlementStatus?: 'UNSETTLED' | 'SETTLED' | 'ADJUSTED'
+  intensiveReviewStatus?: 'NOT_REQUIRED' | 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED'
+  latestReview?: {
+    id: string
+    status: string
+    actualMinutes: number
+    reviewNote?: string | null
+  } | null
 }
 
 const STUDENT_COLORS = ['#E8784A','#1D9E75','#534AB7','#D4537E','#BA7517','#185FA5','#27500A','#72243E']
@@ -65,9 +88,22 @@ export default function TeacherAttendancePage() {
   const { data: dashboard, mutate: mutateDashboard } = useSWR('/api/teacher/dashboard', fetcher)
   const lessons = useMemo(() => (dashboard?.todayLessons || []) as TeacherLesson[], [dashboard?.todayLessons])
   const [selectedLessonId, setSelectedLessonId] = useState('')
+  const [queryReady, setQueryReady] = useState(false)
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [detailError, setDetailError] = useState('')
   const [students, setStudents] = useState<AttendanceStudent[]>([])
   const [attMap, setAttMap] = useState<Map<string, AttStatus>>(new Map())
   const [submitting, setSubmitting] = useState(false)
+  const submittingRef = useRef(false)
+  const [lessonDetail, setLessonDetail] = useState<AttendanceLessonDetail | null>(null)
+  const [actualMinutes, setActualMinutes] = useState<number | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+  const intensiveSettlementLocked = lessonDetail?.intensiveMode === 'INTENSIVE'
+    && (
+      lessonDetail.settlementStatus !== 'UNSETTLED'
+      || lessonDetail.intensiveReviewStatus === 'PENDING'
+      || lessonDetail.intensiveReviewStatus === 'APPROVED'
+    )
   const summary = useMemo(() => {
     const vals = [...attMap.values()]
     return {
@@ -78,27 +114,73 @@ export default function TeacherAttendancePage() {
     }
   }, [attMap])
 
-  const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId) || lessons[0]
+  const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId)
+    || (selectedLessonId
+      ? {
+          id: selectedLessonId,
+          groupName: lessonDetail?.groupName,
+          courseName: lessonDetail?.courseName,
+          courseType: lessonDetail?.courseType,
+          lessonMinutes: lessonDetail?.lessonMinutes,
+          lessonDate: lessonDetail?.lessonDate,
+          startTime: lessonDetail?.startTime,
+          time: `${lessonDetail?.startTime || ''}-${lessonDetail?.endTime || ''}`,
+        }
+      : lessons[0])
+  const submitLabel = lessonDetail?.intensiveMode === 'INTENSIVE'
+    ? lessonDetail.intensiveReviewStatus === 'PENDING'
+      ? '等待管理员审核'
+      : lessonDetail.intensiveReviewStatus === 'APPROVED'
+        ? '审核已通过'
+        : lessonDetail.intensiveReviewStatus === 'REJECTED'
+          ? '重新提交审核'
+          : '提交授课审核'
+    : submitted
+      ? '已提交 ✓'
+      : '提交考勤'
   const remainingText = (student: AttendanceStudent) => formatRemaining(
     Number(student.remainHours || 0),
     student.courseType || selectedLesson?.courseType || null,
     Number(student.lessonMinutes || selectedLesson?.lessonMinutes || 40),
   )
 
-  useEffect(() => { if (!selectedLessonId && lessons[0]?.id) setSelectedLessonId(lessons[0].id) }, [lessons, selectedLessonId])
+  useEffect(() => {
+    const lessonId = new URLSearchParams(window.location.search).get('lessonId')
+    if (lessonId) setSelectedLessonId(lessonId)
+    setQueryReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (queryReady && !selectedLessonId && lessons[0]?.id) setSelectedLessonId(lessons[0].id)
+  }, [lessons, queryReady, selectedLessonId])
 
   useEffect(() => {
     if (!selectedLesson?.id) return
+    setDetailLoading(true)
+    setDetailError('')
     fetch(`/api/teacher/attendance?lessonId=${selectedLesson.id}`)
-      .then(res => res.json())
+      .then(async (res) => {
+        const payload = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(payload.error || `课次加载失败：${res.status}`)
+        return payload
+      })
       .then(payload => {
         const list = (payload.students || []) as AttendanceStudent[]
+        const detail = (payload.lesson || null) as AttendanceLessonDetail | null
+        setLessonDetail(detail)
+        setActualMinutes(detail?.actualMinutes || detail?.latestReview?.actualMinutes || detail?.plannedMinutes || null)
+        setSubmitted(detail?.intensiveReviewStatus === 'PENDING' || detail?.intensiveReviewStatus === 'APPROVED')
         setStudents(list)
         const m = new Map<string, AttStatus>()
         list.forEach((student) => m.set(student.studentId, (student.status as AttStatus) || 'none'))
         setAttMap(m)
       })
-      .catch((error) => toast.error(`学员列表加载失败：${error instanceof Error ? error.message : '请检查网络连接'}`))
+      .catch((error) => {
+        const errorText = error instanceof Error ? error.message : '请检查网络连接'
+        setDetailError(errorText)
+        toast.error(`学员列表加载失败：${errorText}`)
+      })
+      .finally(() => setDetailLoading(false))
   }, [selectedLesson?.id])
 
   const cycleAttendance = (studentId: string) => {
@@ -118,13 +200,24 @@ export default function TeacherAttendancePage() {
     setAttMap(m)
   }
 
-  const [submitted, setSubmitted] = useState(false)
-  const submittingRef = { current: false }
-
   const submitAttendance = async () => {
     if (submitting || submittingRef.current) return
     submittingRef.current = true
     if (!selectedLesson?.id) { submittingRef.current = false; return }
+    if (intensiveSettlementLocked) {
+      submittingRef.current = false
+      toast.warning(
+        lessonDetail?.intensiveReviewStatus === 'PENDING'
+          ? '该授课记录正在等待管理员审核'
+          : '该个性化课次已经审核结算，如需调整请联系管理员',
+      )
+      return
+    }
+    if (lessonDetail?.intensiveMode === 'INTENSIVE' && !actualMinutes) {
+      submittingRef.current = false
+      toast.warning('请填写实际授课分钟')
+      return
+    }
     const startTime = (selectedLesson.startTime as string) || String(selectedLesson.time || '').slice(0, 5)
     const lessonDate = (selectedLesson.lessonDate as string) || new Date().toISOString()
     if (startTime && lessonDate) {
@@ -141,6 +234,7 @@ export default function TeacherAttendancePage() {
     const records = students.map(s => ({
       studentId: s.studentId, enrollmentId: s.enrollmentId,
       status: attMap.get(s.studentId) || 'PRESENT',
+      actualMinutes: lessonDetail?.intensiveMode === 'INTENSIVE' ? actualMinutes : undefined,
       note: '',
     }))
     setSubmitting(true)
@@ -158,17 +252,21 @@ export default function TeacherAttendancePage() {
       .then(r => r.json())
       .then(payload => {
         const list = (payload.students || []) as AttendanceStudent[]
+        const detail = (payload.lesson || null) as AttendanceLessonDetail | null
+        setLessonDetail(detail)
+        setActualMinutes(detail?.actualMinutes || detail?.latestReview?.actualMinutes || detail?.plannedMinutes || null)
         setStudents(list)
         const m = new Map<string, AttStatus>()
         list.forEach((student) => m.set(student.studentId, (student.status as AttStatus) || 'none'))
         setAttMap(m)
       })
       .catch((error) => toast.warning(`考勤已提交，但最新考勤列表刷新失败，请手动刷新页面。原因：${error instanceof Error ? error.message : '未知错误'}`))
-    setTimeout(() => setSubmitted(false), 2000)
-    if (payload.alreadyDeducted) {
-      toast.success(`考勤已更新，本次课次已结算课时`)
+    if (payload.pendingReview) {
+      toast.success(payload.message || '授课记录已提交，等待管理员审核', { duration: 2000 })
+    } else if (payload.alreadyDeducted) {
+      toast.success(`考勤已更新，本次课次已结算课时`, { duration: 2000 })
     } else {
-      toast.success(`考勤已提交，本次课次状态已更新`)
+      toast.success(`考勤已提交，本次课次状态已更新`, { duration: 2000 })
     }
   }
 
@@ -235,7 +333,9 @@ export default function TeacherAttendancePage() {
             locale={{ emptyText: '今日暂无课次' }}
             renderItem={(lesson: TeacherLesson) => {
               const selected = selectedLesson?.id === lesson.id
-              const done = Number(lesson.attendanceCount || 0) > 0 || lesson.status === 'COMPLETED'
+              const done = Boolean(lesson.attendanceSubmittedAt)
+                || Number(lesson.attendanceCount || 0) > 0
+                || lesson.status === 'COMPLETED'
               return (
                 <List.Item onClick={() => setSelectedLessonId(lesson.id)} style={{
                   cursor: 'pointer', border: selected ? '1px solid #E8784A' : '1px solid #f0e7de',
@@ -275,15 +375,48 @@ export default function TeacherAttendancePage() {
           extra={!isMobile && selectedLesson ? (
             <Space>
               <Tag color="blue" style={{ borderRadius: 9999 }}>{students.length}人</Tag>
-              <Button icon={<CheckCircleOutlined />} onClick={handleAllPresent} style={{ borderColor: '#1D9E75', color: '#1D9E75' }}>一键全勤</Button>
+              <Button disabled={intensiveSettlementLocked} icon={<CheckCircleOutlined />} onClick={handleAllPresent} style={{ borderColor: '#1D9E75', color: '#1D9E75' }}>一键全勤</Button>
               {attendanceTimeHint(selectedLesson)}
-              <Button type="primary" loading={submitting} onClick={submitAttendance} style={{ background: '#E8784A' }}>{submitted ? '已提交 ✓' : '提交考勤'}</Button>
+              <Button type="primary" disabled={intensiveSettlementLocked} loading={submitting} onClick={submitAttendance} style={{ background: '#E8784A' }}>{submitLabel}</Button>
             </Space>
           ) : null}>
-          {!selectedLesson ? <Empty description="请从左侧选择课次" /> : (
+          {!selectedLesson ? <Empty description="请从左侧选择课次" /> : detailLoading ? (
+            <div style={{ padding: 32, textAlign: 'center', color: 'var(--color-ink-muted)' }}>
+              正在加载目标课次…
+            </div>
+          ) : detailError ? (
+            <Empty
+              description={(
+                <Space direction="vertical" size={8}>
+                  <span>目标课次无法打开：{detailError}</span>
+                  <Button onClick={() => window.location.reload()}>重新加载</Button>
+                </Space>
+              )}
+            />
+          ) : (
             <>
               {isMobile && attendanceTimeHint(selectedLesson)}
               {/* Progress bar */}
+              {lessonDetail?.intensiveMode === 'INTENSIVE' && (
+                <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 10, background: 'var(--color-background-secondary, #faf8f5)' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
+                    <Text strong style={{ fontSize: 12 }}>实际授课分钟</Text>
+                    <InputNumber min={15} max={600} value={actualMinutes} disabled={intensiveSettlementLocked} onChange={(value) => setActualMinutes(value)} addonAfter="分钟" />
+                    {lessonDetail.intensiveReviewStatus === 'PENDING' && <Tag color="orange">等待管理员审核</Tag>}
+                    {lessonDetail.intensiveReviewStatus === 'APPROVED' && <Tag color="green">审核已通过</Tag>}
+                    {lessonDetail.intensiveReviewStatus === 'REJECTED' && <Tag color="red">已驳回，可修改重提</Tag>}
+                    <Text type="secondary" style={{ fontSize: 11 }}>计划 {lessonDetail.plannedMinutes || '-'} 分钟</Text>
+                  </div>
+                  {lessonDetail.intensiveReviewStatus === 'REJECTED' && lessonDetail.latestReview?.reviewNote && (
+                    <Text style={{ display: 'block', marginTop: 8, color: 'var(--color-error)', fontSize: 12 }}>
+                      驳回原因：{lessonDetail.latestReview.reviewNote}
+                    </Text>
+                  )}
+                  <Text style={{ display: 'block', marginTop: 8, color: 'var(--color-ink-muted)', fontSize: 12 }}>
+                    提交后不会立即计薪；管理员核对上课时间并审核通过后，才累计授课时长和生成工资。
+                  </Text>
+                </div>
+              )}
               <div style={{ 
                 background: 'linear-gradient(135deg, #FFFBF9 0%, #FDFCFB 100%)', 
                 borderRadius: 16, 
@@ -330,8 +463,8 @@ export default function TeacherAttendancePage() {
                   const remaining = remainingText(s)
                   const isLowRemaining = remaining.value <= 5
                   return (
-                    <div key={s.studentId} onClick={() => cycleAttendance(s.studentId)} style={{
-                      borderRadius: 9, padding: isMobile ? '10px 6px' : '10px 8px', textAlign: 'center', cursor: 'pointer', userSelect: 'none',
+                    <div key={s.studentId} onClick={() => { if (!intensiveSettlementLocked) cycleAttendance(s.studentId) }} style={{
+                      borderRadius: 9, padding: isMobile ? '10px 6px' : '10px 8px', textAlign: 'center', cursor: intensiveSettlementLocked ? 'not-allowed' : 'pointer', userSelect: 'none',
                       border: `1.5px solid ${cfg.border}`, background: cfg.bg, transition: 'all .2s',
                     }}>
                       <div style={{ width: 36, height: 36, borderRadius: 10, margin: '0 auto 6px',
@@ -340,9 +473,15 @@ export default function TeacherAttendancePage() {
                         {(s.name || '?')[0]}
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
-                      <div style={{ fontSize: 10, color: isLowRemaining ? '#E24B4A' : 'var(--color-text-tertiary, #98A2B3)' }}>
-                        余{remaining.text}{isLowRemaining ? ' ⚠️' : ''}
-                      </div>
+                      {lessonDetail?.intensiveMode === 'INTENSIVE' ? (
+                        <div style={{ fontSize: 10, color: 'var(--color-text-tertiary, #98A2B3)' }}>
+                          审核后按实际分钟计入
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 10, color: isLowRemaining ? '#E24B4A' : 'var(--color-text-tertiary, #98A2B3)' }}>
+                          余{remaining.text}{isLowRemaining ? ' ⚠️' : ''}
+                        </div>
+                      )}
                       <span style={{ fontSize: 10, fontWeight: 500, marginTop: 4, padding: '2px 6px', borderRadius: 6,
                         display: 'inline-block', background: cfg.badge, color: status === 'none' ? cfg.text : '#fff' }}>
                         {cfg.label}
@@ -378,6 +517,7 @@ export default function TeacherAttendancePage() {
                   gap: 12 
                 }}>
                   <Button 
+                    disabled={intensiveSettlementLocked}
                     icon={<CheckCircleOutlined />} 
                     onClick={handleAllPresent} 
                     style={{ 
@@ -392,6 +532,7 @@ export default function TeacherAttendancePage() {
                   </Button>
                   <Button 
                     type="primary" 
+                    disabled={intensiveSettlementLocked}
                     loading={submitting} 
                     onClick={submitAttendance}
                     style={{ 
@@ -402,7 +543,7 @@ export default function TeacherAttendancePage() {
                       fontWeight: 600,
                       boxShadow: '0 4px 12px rgba(232,120,74,0.2)'
                     }}>
-                    {submitted ? '已提交 ✓' : '提交考勤'}
+                    {submitLabel}
                   </Button>
                 </div>
               )}

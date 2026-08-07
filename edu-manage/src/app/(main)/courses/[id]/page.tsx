@@ -42,8 +42,18 @@ export default function CourseGroupDetailPage() {
   const [addTeacherId, setAddTeacherId] = useState<string>()
   const [addTeacherSubject, setAddTeacherSubject] = useState('')
   const [addingTeacher, setAddingTeacher] = useState(false)
+  const [reviewOpenId, setReviewOpenId] = useState('')
+  const [reviewNote, setReviewNote] = useState('')
+  const [reviewing, setReviewing] = useState(false)
 
   const { data: group, mutate, isLoading } = useSWR(params.id ? `/api/class-groups/${params.id}` : null, fetcher)
+  const { data: reviewData, mutate: mutateReviews } = useSWR(
+    group?.intensiveMode === 'INTENSIVE'
+      ? `/api/admin/intensive-reviews?division=${group.division}&status=PENDING`
+      : null,
+    fetcher,
+    { refreshInterval: 15_000, revalidateOnFocus: true },
+  )
   const { data: studentsData } = useSWR(enrollOpen ? `/api/students?limit=200&q=${encodeURIComponent(studentSearch)}` : null, fetcher)
   const { data: teachers } = useSWR('/api/teachers?status=ACTIVE', fetcher)
 
@@ -59,9 +69,34 @@ export default function CourseGroupDetailPage() {
   })
   const completed = Number(group?.completedLessons || lessons.filter((lesson: Record<string, unknown>) => lesson.status === 'COMPLETED').length)
   const total = Number(group?.totalLessons || lessons.length)
+  const isIntensive = group?.intensiveMode === 'INTENSIVE'
+  const intensiveScheduled = lessons.filter((lesson: Record<string, unknown>) => (
+    lesson.status === 'SCHEDULED' || lesson.status === 'IN_PROGRESS'
+  )).length
+  const intensiveApproved = lessons.filter((lesson: Record<string, unknown>) => (
+    lesson.intensiveReviewStatus === 'APPROVED'
+  )).length
+  const intensivePendingReview = lessons.filter((lesson: Record<string, unknown>) => (
+    lesson.intensiveReviewStatus === 'PENDING'
+  )).length
+  const pendingReviews = useMemo(
+    () => Array.isArray(reviewData?.reviews)
+      ? reviewData.reviews.filter((review: Record<string, unknown>) => (
+        lessons.some((lesson: Record<string, unknown>) => lesson.id === review.lessonId)
+      ))
+      : [],
+    [lessons, reviewData?.reviews],
+  )
+  const selectedReview = pendingReviews.find((review: Record<string, unknown>) => review.id === reviewOpenId)
   const todayStr = format(new Date(), 'yyyy-MM-dd')
   const todayLessons = lessons.filter((lesson: Record<string, unknown>) => String(lesson.lessonDate || '').slice(0, 10) === todayStr)
-  const visibleLessons = todayLessons.length > 0 ? todayLessons : lessons.slice(0, 5)
+  const visibleLessons = isIntensive
+    ? [...lessons].sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+      const pendingOrder = Number(b.intensiveReviewStatus === 'PENDING') - Number(a.intensiveReviewStatus === 'PENDING')
+      if (pendingOrder !== 0) return pendingOrder
+      return new Date(String(b.lessonDate)).getTime() - new Date(String(a.lessonDate)).getTime()
+    })
+    : todayLessons.length > 0 ? todayLessons : lessons.slice(0, 5)
   const teacherList = Array.isArray(teachers?.teachers) ? teachers.teachers : Array.isArray(teachers) ? teachers : []
   const teacherAssignments = useMemo(() => Array.isArray(group?.teacherAssignments) ? group.teacherAssignments : [], [group])
 
@@ -199,7 +234,6 @@ export default function CourseGroupDetailPage() {
   }
 
   const syncInsertedStudentHours = async () => {
-    if (!confirm('将把课时明显偏高（比班级平均值高30%以上）的学员课时自动对齐到班级平均值。确认操作？')) return
     setSyncingHours(true)
     try {
       const res = await fetch(`/api/class-groups/${params.id}/sync-hours`, { method: 'POST' })
@@ -207,6 +241,8 @@ export default function CourseGroupDetailPage() {
       if (!res.ok) { message.error(data.error || '同步失败'); return }
       message.success(data.message || `已同步 ${data.updated} 位学员课时`)
       mutate()
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '校准插班生课时失败')
     } finally {
       setSyncingHours(false)
     }
@@ -289,6 +325,54 @@ export default function CourseGroupDetailPage() {
     }
   }
 
+  const openLessonReview = (lessonId?: string) => {
+    const review = pendingReviews.find((item: Record<string, unknown>) => (
+      lessonId ? item.lessonId === lessonId : true
+    ))
+    if (!review) {
+      message.info('审核记录正在刷新，请稍后再试')
+      void mutateReviews()
+      return
+    }
+    setReviewNote('')
+    setReviewOpenId(String(review.id))
+  }
+
+  const handleIntensiveReview = async (action: 'APPROVE' | 'REJECT') => {
+    if (!selectedReview) return
+    if (action === 'REJECT' && reviewNote.trim().length < 2) {
+      message.warning('驳回时请填写原因，方便教师修改')
+      return
+    }
+    setReviewing(true)
+    try {
+      const response = await fetch(
+        `/api/admin/intensive-reviews/${selectedReview.id}?division=${group.division}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, reviewNote: reviewNote.trim() }),
+        },
+      )
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(payload.error || '审核失败')
+      if (action === 'APPROVE') {
+        message.success(
+          `审核通过：计入${(Number(selectedReview.actualMinutes || 0) / 60).toFixed(2)}小时，工资￥${Number(payload.salaryAmount || 0).toFixed(2)}`,
+        )
+      } else {
+        message.success('已驳回，教师可修改后重新提交')
+      }
+      setReviewOpenId('')
+      setReviewNote('')
+      await Promise.all([mutate(), mutateReviews()])
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '审核失败')
+    } finally {
+      setReviewing(false)
+    }
+  }
+
   if (isLoading) {
     return <PageLayout title="班级管理"><CardSkeleton rows={3} /></PageLayout>
   }
@@ -300,7 +384,7 @@ export default function CourseGroupDetailPage() {
   return (
     <PageLayout
       title={group.name}
-      subtitle={`${group.course?.name || ''} / 授课团队：${teacherTeam || '未分配'} / ${group.room?.name || '未分配教室'}`}
+      subtitle={`${group.course?.name || ''} / 授课团队：${teacherTeam || '未分配'} / ${isIntensive ? '上课地点灵活安排' : group.room?.name || '未分配教室'}`}
       actions={isMobile ? (
         <Dropdown
           trigger={['click']}
@@ -335,7 +419,7 @@ export default function CourseGroupDetailPage() {
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a' }}>添加学员</Button>
           {group.status === 'WAITING' && <Button type="primary" loading={starting} onClick={handleStartGroup} style={{ background: '#27a644' }}>开班并通知家长</Button>}
           <Button icon={<UserSwitchOutlined />} onClick={openReplaceTeacher}>更换老师</Button>
-          <Button icon={<ReloadOutlined />} onClick={handleRegenerateLessons}>重新生成课表</Button>
+          {group.status === 'WAITING' && <Button icon={<ReloadOutlined />} onClick={handleRegenerateLessons}>重新生成课表</Button>}
           <Popconfirm title="确定删除这个班级？" description="删除后班级会归档，不再出现在课程和排课列表。" onConfirm={handleDeleteGroup}>
             <Button danger icon={<DeleteOutlined />}>删除班级</Button>
           </Popconfirm>
@@ -352,23 +436,62 @@ export default function CourseGroupDetailPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={12} lg={6}><Metric title="在读人数" value={enrollments.length} /></Col>
-        <Col xs={12} lg={6}><Metric title="总课次" value={total} /></Col>
-        <Col xs={12} lg={6}><Metric title="已上课次" value={completed} /></Col>
-        <Col xs={12} lg={6}><Metric title="剩余课次" value={Math.max(0, total - completed)} /></Col>
+        {isIntensive ? (
+          <>
+            <Col xs={12} lg={6}><Metric title="已安排课次" value={intensiveScheduled} /></Col>
+            <Col xs={12} lg={6}><Metric title="已审核课次" value={intensiveApproved} /></Col>
+            <Col xs={12} lg={6}>
+              <Metric
+                title="待审核课次"
+                value={intensivePendingReview}
+                actionLabel={intensivePendingReview > 0 ? '立即审核' : undefined}
+                onAction={() => openLessonReview()}
+              />
+            </Col>
+          </>
+        ) : (
+          <>
+            <Col xs={12} lg={6}><Metric title="总课次" value={total} /></Col>
+            <Col xs={12} lg={6}><Metric title="已上课次" value={completed} /></Col>
+            <Col xs={12} lg={6}><Metric title="剩余课次" value={Math.max(0, total - completed)} /></Col>
+          </>
+        )}
       </Row>
 
       <Card bordered={false} style={{ borderRadius: 8, marginBottom: 16, background: '#ffffff', border: '1px solid #EEE7E1' }}>
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <div style={{ color: '#98A2B3' }}>课程进度</div>
-          <Progress percent={total ? Math.round((completed / total) * 100) : 0} strokeColor="#E8784A" />
-        </Space>
+        {isIntensive ? (
+          <Alert
+            type="info"
+            showIcon
+            message="个性化课程按实际授课累计"
+            description="不设置固定总课次。教师约课并完成考勤后，由管理员审核实际授课时间，再计入学生课时和教师工资。"
+          />
+        ) : (
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <div style={{ color: '#98A2B3' }}>课程进度</div>
+            <Progress percent={total ? Math.round((completed / total) * 100) : 0} strokeColor="#E8784A" />
+          </Space>
+        )}
       </Card>
 
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={10}>
           <Card
             title={<span style={{ color: '#1F2329' }}><TeamOutlined /> 学员名单</span>}
-            extra={<Space size={8}><Button size="small" loading={syncingHours} onClick={syncInsertedStudentHours}>同步插班生课时</Button><Button size="small" icon={<PlusOutlined />} onClick={() => setEnrollOpen(true)}>添加</Button></Space>}
+            extra={(
+              <Space size={8}>
+                <Popconfirm
+                  title="按剩余有效课次校准插班生？"
+                  description="仅处理开班后加入的学生，并保留已经消耗的课时记录。"
+                  onConfirm={syncInsertedStudentHours}
+                  okText="确认校准"
+                  cancelText="取消"
+                >
+                  <Button size="small" loading={syncingHours}>校准插班生课时</Button>
+                </Popconfirm>
+                <Button size="small" icon={<PlusOutlined />} onClick={() => setEnrollOpen(true)}>添加</Button>
+              </Space>
+            )}
             bordered={false}
             style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}
           >
@@ -396,8 +519,14 @@ export default function CourseGroupDetailPage() {
         </Col>
         <Col xs={24} lg={14}>
           <Card
-            title={<span style={{ color: '#1F2329' }}><CalendarOutlined /> {todayLessons.length > 0 ? '今日课次' : '近期课次'}</span>}
-            extra={<Tag color={todayLessons.length > 0 ? 'orange' : 'blue'}>{todayLessons.length > 0 ? `${todayLessons.length} 节` : '前 5 节'}</Tag>}
+            title={(
+              <span style={{ color: '#1F2329' }}>
+                <CalendarOutlined /> {isIntensive ? '个性化课次' : todayLessons.length > 0 ? '今日课次' : '近期课次'}
+              </span>
+            )}
+            extra={isIntensive
+              ? <Tag color={intensivePendingReview > 0 ? 'orange' : 'green'}>{intensivePendingReview} 节待审核</Tag>
+              : <Tag color={todayLessons.length > 0 ? 'orange' : 'blue'}>{todayLessons.length > 0 ? `${todayLessons.length} 节` : '前 5 节'}</Tag>}
             bordered={false}
             style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}
           >
@@ -405,6 +534,7 @@ export default function CourseGroupDetailPage() {
               rowKey="id"
               size="small"
               pagination={{ pageSize: 10 }}
+              scroll={{ x: isIntensive ? 720 : 620 }}
               dataSource={visibleLessons}
               columns={[
                 { title: '日期', dataIndex: 'lessonDate', render: (value: string) => format(new Date(value), 'yyyy-MM-dd EEEE', { locale: zhCN }) },
@@ -417,14 +547,123 @@ export default function CourseGroupDetailPage() {
                     <Space size={4}>
                       <Tag>{value}</Tag>
                       {row.isManual === true && <Tag color="orange">临时</Tag>}
+                      {isIntensive && row.intensiveReviewStatus === 'PENDING' && <Tag color="orange">待审核</Tag>}
+                      {isIntensive && row.intensiveReviewStatus === 'APPROVED' && <Tag color="green">已审核</Tag>}
+                      {isIntensive && row.intensiveReviewStatus === 'REJECTED' && <Tag color="red">已驳回</Tag>}
                     </Space>
                   ),
                 },
+                ...(isIntensive ? [{
+                  title: '操作',
+                  width: 90,
+                  render: (_: unknown, row: Record<string, unknown>) => (
+                    row.intensiveReviewStatus === 'PENDING' ? (
+                      <Button
+                        type="primary"
+                        size="small"
+                        onClick={() => openLessonReview(String(row.id))}
+                      >
+                        审核
+                      </Button>
+                    ) : (
+                      <span style={{ color: '#98A2B3', fontSize: 12 }}>无需处理</span>
+                    )
+                  ),
+                }] : []),
               ]}
             />
           </Card>
         </Col>
       </Row>
+
+      <Modal
+        title="审核个性化课程"
+        open={Boolean(selectedReview)}
+        onCancel={() => {
+          if (reviewing) return
+          setReviewOpenId('')
+          setReviewNote('')
+        }}
+        footer={null}
+        width={isMobile ? 'calc(100vw - 24px)' : 620}
+        centered
+        destroyOnHidden
+      >
+        {selectedReview && (
+          <Space direction="vertical" size={14} style={{ width: '100%' }}>
+            <Alert
+              type="info"
+              showIcon
+              message={`${selectedReview.groupName} · ${selectedReview.subject}`}
+              description={`${selectedReview.teacherName}申报 ${selectedReview.actualMinutes} 分钟（${(Number(selectedReview.actualMinutes) / 60).toFixed(2)}小时）`}
+            />
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+              gap: 10,
+              padding: 12,
+              borderRadius: 10,
+              background: 'var(--color-surface-3)',
+            }}>
+              <div>
+                <div style={{ color: 'var(--color-ink-subtle)', fontSize: 12 }}>上课日期</div>
+                <div style={{ marginTop: 3, fontWeight: 600 }}>
+                  {format(new Date(String(selectedReview.lessonDate)), 'yyyy-MM-dd EEEE', { locale: zhCN })}
+                </div>
+              </div>
+              <div>
+                <div style={{ color: 'var(--color-ink-subtle)', fontSize: 12 }}>上课时间</div>
+                <div style={{ marginTop: 3, fontWeight: 600 }}>{selectedReview.startTime}-{selectedReview.endTime}</div>
+              </div>
+            </div>
+            <div>
+              <div style={{ marginBottom: 7, fontWeight: 600 }}>学生考勤</div>
+              <Space wrap size={[6, 6]}>
+                {(Array.isArray(selectedReview.students) ? selectedReview.students : []).map((student: Record<string, unknown>) => (
+                  <Tag key={String(student.id)} color={student.status === 'PRESENT' ? 'green' : student.status === 'LEAVE' ? 'gold' : 'red'}>
+                    {String(student.name)} · {student.status === 'PRESENT' ? '出勤' : student.status === 'LEAVE' ? '请假' : student.status === 'MAKEUP' ? '补课' : '缺勤'}
+                  </Tag>
+                ))}
+              </Space>
+            </div>
+            {selectedReview.teacherNote && (
+              <Alert message={`教师说明：${selectedReview.teacherNote}`} type="warning" />
+            )}
+            <Input.TextArea
+              rows={3}
+              maxLength={500}
+              showCount
+              value={reviewNote}
+              onChange={(event) => setReviewNote(event.target.value)}
+              placeholder="审核备注（驳回时必填）"
+            />
+            <Row gutter={10}>
+              <Col span={12}>
+                <Button
+                  block
+                  danger
+                  disabled={reviewing}
+                  onClick={() => handleIntensiveReview('REJECT')}
+                  style={{ minHeight: 42 }}
+                >
+                  驳回修改
+                </Button>
+              </Col>
+              <Col span={12}>
+                <Button
+                  block
+                  type="primary"
+                  loading={reviewing}
+                  onClick={() => handleIntensiveReview('APPROVE')}
+                  style={{ minHeight: 42 }}
+                >
+                  核对无误并通过
+                </Button>
+              </Col>
+            </Row>
+          </Space>
+        )}
+      </Modal>
 
       <Modal
         title="添加学员到班级"
@@ -478,12 +717,12 @@ export default function CourseGroupDetailPage() {
             }))}
           />
           <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 8, padding: '6px 10px', background: '#F5F2EE', borderRadius: 6 }}>
-            插班生将自动获得班级现有学员的平均剩余课时；如需自定义，请在下方输入。
+            插班生将按当前尚未完成的有效课次自动计算剩余课时，不追溯加入前已完成的课程；如购买课时不同，可在下方自定义。
           </div>
           <InputNumber
             min={0}
             precision={1}
-            placeholder={`购买课时，留空则按班级现有学员平均课时自动计算`}
+            placeholder="购买课时，留空则按剩余有效课次自动计算"
             value={totalHours}
             onChange={(value) => setTotalHours(value)}
             style={{ width: '100%' }}
@@ -615,9 +854,23 @@ export default function CourseGroupDetailPage() {
   )
 }
 
-function Metric({ title, value }: { title: string; value: number }) {
+function Metric({
+  title,
+  value,
+  actionLabel,
+  onAction,
+}: {
+  title: string
+  value: number
+  actionLabel?: string
+  onAction?: () => void
+}) {
   return (
-    <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
+    <Card
+      bordered={false}
+      style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}
+      extra={actionLabel ? <Button type="link" size="small" onClick={onAction}>{actionLabel}</Button> : null}
+    >
       <Statistic title={<span style={{ color: '#98A2B3' }}>{title}</span>} value={value} valueStyle={{ color: '#1F2329' }} />
     </Card>
   )

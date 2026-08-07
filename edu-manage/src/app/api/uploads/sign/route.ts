@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
 import { generateOssSignedUrl, isOssEnabled } from '@/lib/storage'
+import { requireAuthenticatedUser } from '@/lib/auth/guards'
+import { resolveTeacherForUser } from '@/lib/performance'
+import { canAccessFeedbackImage } from '@/lib/classroom-feedback/access'
+import { extractUploadStorageKey } from '@/lib/upload-url'
+import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
+
+const SIGNED_URL_TTL_SECONDS = 3600
+const SIGNED_URL_CACHE_MS = 50 * 60 * 1000
+const signedUrlCache = new Map<string, { url: string; expiresAt: number }>()
 
 function normalizeLocalUploadPath(value: string) {
   if (value.startsWith('/api/uploads/')) return value
@@ -10,43 +18,57 @@ function normalizeLocalUploadPath(value: string) {
   return value
 }
 
-function extractStorageKey(value: string) {
-  const raw = value.trim()
-  if (!raw) return ''
-  if (raw.startsWith('/api/uploads/')) return decodeURIComponent(raw.slice('/api/uploads/'.length))
-  if (raw.startsWith('/uploads/')) return decodeURIComponent(raw.slice('/uploads/'.length))
-  try {
-    const url = new URL(raw)
-    return decodeURIComponent(url.pathname.replace(/^\/+/, ''))
-  } catch {
-    return raw.replace(/^\/+/, '')
-  }
-}
-
-export async function POST(req: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.id) return NextResponse.json({ error: '未登录' }, { status: 401 })
+export const POST = apiHandler(async (req: NextRequest) => {
+  const user = await requireAuthenticatedUser()
 
   const body = await req.json().catch(() => ({}))
-  const keys = Array.isArray(body.keys)
+  const keys: string[] = Array.isArray(body.keys)
     ? body.keys.filter((item: unknown): item is string => typeof item === 'string' && item.trim().length > 0).slice(0, 50)
     : []
 
   if (!keys.length) return NextResponse.json({ urls: {} })
 
+  const prisma = user.prisma
+  let teacherId = user.teacherId
+  if (String(user.role).toLowerCase() === 'teacher' && !teacherId) {
+    teacherId = (await resolveTeacherForUser(user, prisma))?.id || null
+  }
+  const keyPairs = keys.map((original) => ({ original, key: extractUploadStorageKey(original) })).filter((item) => item.key)
+  const access = await canAccessFeedbackImage(
+    prisma,
+    { id: user.id, role: user.role, teacherId },
+    keyPairs.map((item) => item.original),
+  )
   const urls: Record<string, string> = {}
-  for (const original of keys) {
-    const key = extractStorageKey(original)
-    if (!key) continue
+  const denied: string[] = []
+  await Promise.all(keyPairs.map(async ({ original, key }) => {
+    if (!access.get(original)?.allowed) {
+      denied.push(original)
+      console.warn('[uploads/sign] denied feedback image', { key, userId: user.id, role: user.role })
+      return
+    }
     try {
-      urls[original] = isOssEnabled()
-        ? await generateOssSignedUrl(key, { expireSeconds: 3600 })
-        : normalizeLocalUploadPath(original)
+      if (!isOssEnabled()) {
+        urls[original] = normalizeLocalUploadPath(original)
+        return
+      }
+
+      const cached = signedUrlCache.get(key)
+      if (cached && cached.expiresAt > Date.now()) {
+        urls[original] = cached.url
+        return
+      }
+
+      const signedUrl = await generateOssSignedUrl(key, { expireSeconds: SIGNED_URL_TTL_SECONDS })
+      signedUrlCache.set(key, { url: signedUrl, expiresAt: Date.now() + SIGNED_URL_CACHE_MS })
+      urls[original] = signedUrl
     } catch (error) {
       console.warn('[uploads/sign] failed to sign url', { key, error })
-      urls[original] = normalizeLocalUploadPath(original)
+      // Private OSS objects cannot use their unsigned public URL. The authenticated
+      // upload route provides a slower but reliable fallback instead of a 403 image.
+      urls[original] = `/api/uploads/${encodeURIComponent(key)}`
     }
-  }
+  }))
 
-  return NextResponse.json({ urls })
-}
+  return NextResponse.json({ urls, denied })
+})

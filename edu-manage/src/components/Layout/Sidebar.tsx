@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -142,13 +142,22 @@ export function Sidebar({
   const searchParams = useSearchParams()
   const router = useRouter()
   const { data: session } = useSession()
-  const { data: alerts } = useSWR('/api/teacher-logs/alerts', fetcher, { refreshInterval: 300_000 })
+  const [backgroundReady, setBackgroundReady] = useState(false)
+  const { data: alerts } = useSWR(backgroundReady ? '/api/teacher-logs/alerts' : null, fetcher, {
+    refreshInterval: 300_000,
+    dedupingInterval: 30_000,
+  })
   const alertCount = Array.isArray(alerts) ? alerts.filter((a: any) => !a.isResolved).length : 0
   const isSenior = (session?.user as { division?: string } | undefined)?.division === 'SENIOR'
 
   useEffect(() => {
     localStorage.setItem('admin_sider_collapsed', String(collapsed))
   }, [collapsed])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setBackgroundReady(true), 1500)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   const menuKeys = useMemo(() => flattenMenuKeys(menuItems), [])
   const baseKey = resolveActiveKey(pathname, menuKeys, '/dashboard')

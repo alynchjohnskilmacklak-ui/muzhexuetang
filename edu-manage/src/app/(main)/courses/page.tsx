@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import {
+  Alert,
   Button,
   Card,
   Col,
@@ -233,13 +234,15 @@ export default function CoursesPage() {
     const isHourly = initialType !== 'GROUP'
     setCreateData({
       type: initialType,
+      intensiveMode: courseTab === 'SMALL' ? 'INTENSIVE' : 'NORMAL',
+      teachingType: courseTab === 'SMALL' ? 'ONE_ON_ONE' : undefined,
       subjects: [] as string[],
       lessonMinutes: isHourly ? 60 : 40,
       totalLessons: 16,
       startDate: todayString(),
       lessonStartTime: '08:00',
       division: division,
-      recurringDays: ['MON', 'WED', 'FRI'],
+      recurringDays: courseTab === 'SMALL' ? [] : ['MON', 'WED', 'FRI'],
       maxStudents: initialType === 'ONE_ON_ONE' ? 1 : 20,
       teacherAssignments: [{ teacherId: '', subject: '' }],
       scheduleSlots: [] as string[],
@@ -352,12 +355,13 @@ export default function CoursesPage() {
   }
 
   const doCreate = async () => {
+    const isIntensiveCreate = createData.intensiveMode === 'INTENSIVE'
     const recurringDays = (createData.recurringDays as string[]) || []
-    if (!recurringDays.length) {
+    if (!isIntensiveCreate && !recurringDays.length) {
       toast.error('请选择至少一个上课日')
       return
     }
-    if (!previewDates.length) {
+    if (!isIntensiveCreate && !previewDates.length) {
       toast.error('无法生成课次，请检查开班日期、上课日和总课次数')
       return
     }
@@ -413,6 +417,8 @@ export default function CoursesPage() {
         lessonMinutes: createData.lessonMinutes || 90,
         totalLessons: Number(createData.totalLessons) || 16,
         division: createData.division || division,
+        intensiveMode: isIntensiveCreate ? 'INTENSIVE' : 'NORMAL',
+        teachingType: isIntensiveCreate ? createData.teachingType : undefined,
       }
 
       const groupRes = await fetch('/api/class-groups', {
@@ -422,6 +428,16 @@ export default function CoursesPage() {
       })
       const group = await groupRes.json().catch(() => ({}))
       if (!groupRes.ok) throw new Error(group.error || '班级创建失败')
+
+      if (isIntensiveCreate) {
+        toast.success(`「${createData.name}」已创建，教师现在可以自主安排每次上课时间`)
+        mutateGroups()
+        mutateDashboard()
+        setCreateOpen(false)
+        setCreateStep(0)
+        setCreateData({})
+        return
+      }
 
       const scheduleTemplate = resolveCreateScheduleTemplate(scheduleTemplateOverride)
 
@@ -454,6 +470,11 @@ export default function CoursesPage() {
   }
 
   const handleCreate = async () => {
+    if (createData.intensiveMode === 'INTENSIVE') {
+      await doCreate()
+      return
+    }
+
     // 前置检查：scheduleTemplate 有效条目数
     const validSlots = (Array.isArray(createData.scheduleTemplate)
       ? createData.scheduleTemplate as Record<string, unknown>[]
@@ -645,13 +666,15 @@ export default function CoursesPage() {
       const res = await fetch('/api/class-lessons/add-day', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: addDayDate }),
+        body: JSON.stringify({ date: addDayDate, keepPlannedTotal: true }),
       })
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(payload.error || '新增上课日失败')
-      let msg = `已为 ${payload.affectedGroups} 个班新增 ${payload.createdLessons} 节课`
+      let msg = `已完成计划内调课：${payload.affectedGroups} 个班补入 ${payload.createdLessons} 节，替换未来 ${payload.replacedLessons} 节，总课次不增加`
       if (payload.skipped > 0) msg += `，其中 ${payload.skipped} 个班当天已有课，已跳过`
       if (payload.skippedNoTemplate > 0) msg += `，${payload.skippedNoTemplate} 个班无样板可复制`
+      if (payload.skippedNoReplacement > 0) msg += `，${payload.skippedNoReplacement} 个班找不到可安全替换的未来教学日`
+      if (payload.alreadyBalanced > 0) msg += `，${payload.alreadyBalanced} 个班计划课次已经平衡`
       toast.success(msg)
       setAddDayOpen(false)
       mutateGroups()
@@ -688,13 +711,13 @@ export default function CoursesPage() {
       title="课程管理"
       subtitle="课程设置、班级创建、课表生成和课次调整"
       actions={
-        <Space>
-          <Button icon={<CalendarOutlined />} onClick={() => { setAddDayDate(dayjs().format('YYYY-MM-DD')); setAddDayOpen(true) }}>新增上课日</Button>
-          <Button icon={<CopyOutlined />} onClick={() => setCopyOpen(true)}>批量复制</Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate} style={{ background: '#e8784a' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, auto)', gap: 8, width: isMobile ? '100%' : 'auto' }}>
+          <Button block={isMobile} icon={<CalendarOutlined />} onClick={() => { setAddDayDate(dayjs().format('YYYY-MM-DD')); setAddDayOpen(true) }}>调整上课日</Button>
+          <Button block={isMobile} icon={<CopyOutlined />} onClick={() => setCopyOpen(true)}>批量复制</Button>
+          <Button block={isMobile} type="primary" icon={<PlusOutlined />} onClick={openCreate} style={{ background: '#e8784a', gridColumn: isMobile ? '1 / -1' : undefined }}>
             新建班级
           </Button>
-        </Space>
+        </div>
       }
     >
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
@@ -714,26 +737,26 @@ export default function CoursesPage() {
       </Row>
 
       {/* Type tabs */}
-      <div style={{ display: 'flex', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8, overflow: 'hidden', width: 'fit-content', marginBottom: 12 }}>
+      <div style={{ display: 'flex', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8, overflow: 'hidden', width: isMobile ? '100%' : 'fit-content', marginBottom: 12 }}>
         <button onClick={() => setCourseTab('GROUP')} style={{
           padding: '7px 18px', background: courseTab === 'GROUP' ? '#E8784A' : 'transparent',
           color: courseTab === 'GROUP' ? '#fff' : 'var(--color-text-secondary, #666)',
           border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: courseTab === 'GROUP' ? 500 : 400,
-          display: 'flex', alignItems: 'center', gap: 5,
-        }}>👥 精品班课</button>
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, flex: isMobile ? 1 : undefined, minWidth: 0,
+        }}><TeamOutlined /> 精品班课</button>
         <button onClick={() => setCourseTab('SMALL')} style={{
           padding: '7px 18px', background: courseTab === 'SMALL' ? '#534AB7' : 'transparent',
           color: courseTab === 'SMALL' ? '#fff' : 'var(--color-text-secondary, #666)',
           border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: courseTab === 'SMALL' ? 500 : 400,
-          display: 'flex', alignItems: 'center', gap: 5,
-        }}>👤 突击全能班（1对1/2/3）</button>
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, flex: isMobile ? 1 : undefined, minWidth: 0,
+        }}><BookOutlined /> {isMobile ? '个性化课程' : '突击全能班（1对1/2/3）'}</button>
       </div>
 
-      <Space style={{ marginBottom: 16 }} wrap>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : '128px 128px 128px auto', gap: 8, marginBottom: 16, width: '100%' }}>
         <Select
           placeholder="课程类型"
           allowClear
-          style={{ width: 128 }}
+          style={{ width: '100%', minWidth: 0 }}
           value={filterType || undefined}
           onChange={(value) => setFilterType(value || '')}
           options={courseTab === 'GROUP'
@@ -747,7 +770,7 @@ export default function CoursesPage() {
         <Select
           placeholder="年级"
           allowClear
-          style={{ width: 128 }}
+          style={{ width: '100%', minWidth: 0 }}
           value={filterGrade || undefined}
           onChange={(value) => setFilterGrade(value || '')}
           options={grades.map((grade) => ({ label: grade, value: grade }))}
@@ -755,7 +778,7 @@ export default function CoursesPage() {
         <Select
           placeholder="状态"
           allowClear
-          style={{ width: 128 }}
+          style={{ width: '100%', minWidth: 0 }}
           value={filterStatus || undefined}
           onChange={(value) => setFilterStatus(value || '')}
           options={[
@@ -764,8 +787,8 @@ export default function CoursesPage() {
             { label: '已结束', value: 'COMPLETED' },
           ]}
         />
-        <Button icon={<ReloadOutlined />} onClick={() => mutateGroups()}>刷新</Button>
-      </Space>
+        <Button block={isMobile} icon={<ReloadOutlined />} onClick={() => mutateGroups()}>刷新</Button>
+      </div>
 
       {isLoading ? (
         <CardSkeleton rows={3} />
@@ -789,6 +812,12 @@ export default function CoursesPage() {
             const count = group._count as Record<string, number> | undefined
             const color = SUBJECT_COLOR[(course?.subject as string) || '数学'] || '#e8784a'
             const statusInfo = GROUP_STATUS_MAP[group.status as string] || { color: 'default', label: String(group.status || '-') }
+            const isIntensive = group.intensiveMode === 'INTENSIVE'
+            const teachingTypeLabel = group.teachingType === 'ONE_ON_TWO'
+              ? '一对二'
+              : group.teachingType === 'ONE_ON_THREE'
+                ? '一对三'
+                : '一对一'
             const completed = Number(group.completedLessons || 0)
             const realLessonCount = Number((group._count as Record<string, number> | undefined)?.classLessons ?? 0)
             const total = realLessonCount || Number(group.totalLessons || 0)
@@ -815,22 +844,30 @@ export default function CoursesPage() {
 
                   <Space size={14} wrap style={{ marginBottom: 12 }}>
                     <span style={{ color: '#98A2B3', fontSize: 12 }}><TeamOutlined /> {teacherTeam || teacher?.name as string || '-'}</span>
-                    <span style={{ color: '#98A2B3', fontSize: 12 }}><BookOutlined /> {course?.type === 'ONE_ON_ONE' ? '1对1' : course?.type === 'SMALL_GROUP' ? '小组课' : '班课'}</span>
+                    <span style={{ color: '#98A2B3', fontSize: 12 }}><BookOutlined /> {isIntensive ? teachingTypeLabel : course?.type === 'ONE_ON_ONE' ? '1对1' : course?.type === 'SMALL_GROUP' ? '小组课' : '班课'}</span>
                     <span style={{ color: '#98A2B3', fontSize: 12 }}><ClockCircleOutlined /> {group.lessonStartTime as string}</span>
-                    <span style={{ color: '#98A2B3', fontSize: 12 }}><EnvironmentOutlined /> {room?.name as string || '未分配'}</span>
+                    <span style={{ color: '#98A2B3', fontSize: 12 }}><EnvironmentOutlined /> {isIntensive ? '地点灵活安排' : room?.name as string || '未分配'}</span>
                   </Space>
 
                   <Row gutter={12} style={{ marginBottom: 12 }}>
                     <Col span={8}><SmallMetric label="在读/限额" value={`${count?.enrollments ?? 0}/${group.maxStudents || 0}`} /></Col>
-                    <Col span={8}><SmallMetric label="剩余课次" value={String(Math.max(0, total - completed))} /></Col>
-                    <Col span={8}><SmallMetric label="总课次" value={String(total)} /></Col>
+                    <Col span={8}><SmallMetric label={isIntensive ? '已安排课次' : '剩余课次'} value={String(isIntensive ? realLessonCount : Math.max(0, total - completed))} /></Col>
+                    <Col span={8}><SmallMetric label={isIntensive ? '已完成课次' : '总课次'} value={String(isIntensive ? completed : total)} /></Col>
                   </Row>
 
-                  <Progress percent={progress} size="small" strokeColor={color} format={() => `已上 ${completed}/${total}`} />
+                  {isIntensive ? (
+                    <div style={{ padding: '8px 10px', borderRadius: 10, background: 'var(--color-primary-bg)', color: 'var(--color-ink-muted)', fontSize: 12 }}>
+                      教师约课后立即计入“已安排课次”；完成考勤后进入管理员审核。
+                    </div>
+                  ) : (
+                    <Progress percent={progress} size="small" strokeColor={color} format={() => `已上 ${completed}/${total}`} />
+                  )}
 
-                  <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
                     <Button size="small" icon={<CalendarOutlined />} onClick={(e) => { e.stopPropagation(); setDrawerGroupId(group.id as string); setDrawerOpen(true) }}>课表</Button>
-                    <Button size="small" icon={<ReloadOutlined />} loading={regeneratingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleRegenerateLessons(group.id as string) }}>重新生成</Button>
+                    {group.status === 'WAITING' && (
+                      <Button size="small" icon={<ReloadOutlined />} loading={regeneratingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleRegenerateLessons(group.id as string) }}>重新生成</Button>
+                    )}
                     <Button size="small" icon={<TeamOutlined />} onClick={(e) => { e.stopPropagation(); router.push(`/courses/${group.id}`) }}>管理</Button>
                     <Button size="small" danger loading={deletingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group.id as string, group.name as string) }}>删除</Button>
                   </div>
@@ -867,7 +904,11 @@ export default function CoursesPage() {
         destroyOnClose
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 20 }}>
-          {(['课程信息', '班级设置', '排课配置'] as const).map((label, index) => {
+          {([
+            '课程信息',
+            '班级设置',
+            createData.intensiveMode === 'INTENSIVE' ? '教师自主约课' : '排课配置',
+          ] as const).map((label, index) => {
             const done = createStep > index
             const active = createStep === index
             return (
@@ -913,7 +954,9 @@ export default function CoursesPage() {
               value={(createData.courseId as string) || undefined}
               onChange={(value) => {
                 const course = courseList.find((item: Record<string, unknown>) => item.id === value)
-                const nextType = (course?.type || createData.type || 'GROUP') as CourseType
+                const nextType = courseTab === 'SMALL'
+                  ? 'ONE_ON_ONE'
+                  : (course?.type || createData.type || 'GROUP') as CourseType
                 const isHourly = nextType !== 'GROUP'
                 setCreateData((prev) => ({
                   ...prev,
@@ -921,9 +964,13 @@ export default function CoursesPage() {
                   courseName: course?.name || prev.courseName,
                   grade: course?.grade || prev.grade,
                   type: nextType,
+                  intensiveMode: courseTab === 'SMALL' ? 'INTENSIVE' : 'NORMAL',
+                  teachingType: courseTab === 'SMALL' ? (prev.teachingType || 'ONE_ON_ONE') : undefined,
                   lessonMinutes: course?.lessonMinutes || (isHourly ? 60 : 40),
                   totalLessons: course?.totalLessons || prev.totalLessons || 16,
-                  maxStudents: nextType === 'ONE_ON_ONE' ? 1 : (prev.maxStudents === 1 ? 20 : prev.maxStudents),
+                  maxStudents: courseTab === 'SMALL'
+                    ? prev.teachingType === 'ONE_ON_THREE' ? 3 : prev.teachingType === 'ONE_ON_TWO' ? 2 : 1
+                    : nextType === 'ONE_ON_ONE' ? 1 : (prev.maxStudents === 1 ? 20 : prev.maxStudents),
                   scheduleSlots: [] as string[],
                   scheduleTemplate: buildScheduleTemplate(nextType, classPeriods),
                 }))
@@ -944,11 +991,10 @@ export default function CoursesPage() {
             <div>
               <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 6 }}>课程类型</div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {([
-                  { value: 'GROUP', label: '班课', sub: '每节40分', icon: '班' },
-                  { value: 'ONE_ON_ONE', label: '1对1', sub: '每节60分', icon: '1' },
-                  { value: 'SMALL_GROUP', label: '小组课', sub: '每节60分', icon: '组' },
-                ] as { value: CourseType; label: string; sub: string; icon: string }[]).map((option) => {
+                {((courseTab === 'SMALL'
+                  ? [{ value: 'ONE_ON_ONE', label: '突击全能班', sub: '教师自主约课', icon: '专' }]
+                  : [{ value: 'GROUP', label: '班课', sub: '按固定课表上课', icon: '班' }]
+                ) as { value: CourseType; label: string; sub: string; icon: string }[]).map((option) => {
                   const active = ((createData.type as CourseType) || 'GROUP') === option.value
                   return (
                     <div
@@ -958,6 +1004,7 @@ export default function CoursesPage() {
                         setCreateData((prev) => ({
                           ...prev,
                           type: option.value,
+                          intensiveMode: courseTab === 'SMALL' ? 'INTENSIVE' : 'NORMAL',
                           lessonMinutes: isHourly ? 60 : 40,
                           maxStudents: option.value === 'ONE_ON_ONE' ? 1 : (Number(prev.maxStudents) === 1 ? 20 : prev.maxStudents),
                           scheduleSlots: [] as string[],
@@ -996,6 +1043,61 @@ export default function CoursesPage() {
                 })}
               </div>
             </div>
+            {courseTab === 'SMALL' && (
+              <div>
+                <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 6 }}>教学模式</div>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                  gap: 8,
+                }}>
+                  {([
+                    { value: 'ONE_ON_ONE', label: '一对一', count: 1 },
+                    { value: 'ONE_ON_TWO', label: '一对二', count: 2 },
+                    { value: 'ONE_ON_THREE', label: '一对三', count: 3 },
+                  ] as const).map((option) => {
+                    const active = (createData.teachingType || 'ONE_ON_ONE') === option.value
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setCreateData((prev) => ({
+                          ...prev,
+                          type: 'ONE_ON_ONE',
+                          intensiveMode: 'INTENSIVE',
+                          teachingType: option.value,
+                          maxStudents: option.count,
+                          recurringDays: [],
+                          scheduleSlots: [],
+                          scheduleTemplate: [],
+                        }))}
+                        style={{
+                          minWidth: 0,
+                          minHeight: 64,
+                          padding: '10px 6px',
+                          borderRadius: 10,
+                          border: `1.5px solid ${active ? '#E8784A' : '#EEE7E1'}`,
+                          background: active ? '#fff3ec' : '#fff',
+                          color: active ? '#E8784A' : '#1F2329',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <span style={{ display: 'block', fontSize: 14, fontWeight: 700 }}>{option.label}</span>
+                        <span style={{ display: 'block', marginTop: 3, fontSize: 11, color: '#98A2B3' }}>
+                          固定 {option.count} 名学生
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+                <Alert
+                  type="info"
+                  showIcon
+                  message="这里只建立课程与师生关系，不生成固定课表；教师会在教师端逐次选择上课日期和时间。"
+                  style={{ marginTop: 10, borderRadius: 10 }}
+                />
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16, paddingTop: 12, borderTop: '1px solid #EEE7E1' }}>
               <Button type="primary" onClick={handleNextStep}>下一步</Button>
             </div>
@@ -1079,16 +1181,39 @@ export default function CoursesPage() {
             </div>
             <Select allowClear placeholder="教室" style={{ width: '100%' }} value={(createData.roomId as string) || undefined} onChange={(value) => setCreateData((prev) => ({ ...prev, roomId: value }))} options={roomList.map((room: Record<string, unknown>) => ({ label: `${room.name} / ${room.capacity || 0}人`, value: room.id as string }))} />
             <Row gutter={[12, 10]}>
-              <Col xs={24} sm={8}>
+              <Col xs={24} sm={createData.intensiveMode === 'INTENSIVE' ? 12 : 8}>
                 <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 4 }}>开班日期</div>
                 <Input type="date" value={(createData.startDate as string) || todayString()} onChange={(event) => setCreateData((prev) => ({ ...prev, startDate: event.target.value }))} style={{ width: '100%' }} />
               </Col>
-              <Col xs={12} sm={8}><InputNumber min={1} max={100} addonBefore="限额" addonAfter="人" style={{ width: '100%' }} value={Number(createData.maxStudents || 20)} onChange={(value) => setCreateData((prev) => ({ ...prev, maxStudents: value || 20 }))} /></Col>
-              <Col xs={12} sm={8}><InputNumber min={1} max={120} addonBefore="上课天数" style={{ width: '100%' }} value={Number(createData.totalLessons || 16)} onChange={(value) => setCreateData((prev) => ({ ...prev, totalLessons: value || 16 }))} /></Col>
+              <Col xs={12} sm={createData.intensiveMode === 'INTENSIVE' ? 12 : 8}>
+                <InputNumber
+                  min={1}
+                  max={100}
+                  addonBefore={createData.intensiveMode === 'INTENSIVE' ? '固定人数' : '限额'}
+                  addonAfter="人"
+                  style={{ width: '100%' }}
+                  value={Number(createData.maxStudents || 20)}
+                  disabled={createData.intensiveMode === 'INTENSIVE'}
+                  onChange={(value) => setCreateData((prev) => ({ ...prev, maxStudents: value || 20 }))}
+                />
+              </Col>
+              {createData.intensiveMode !== 'INTENSIVE' && (
+                <Col xs={12} sm={8}><InputNumber min={1} max={120} addonBefore="上课天数" style={{ width: '100%' }} value={Number(createData.totalLessons || 16)} onChange={(value) => setCreateData((prev) => ({ ...prev, totalLessons: value || 16 }))} /></Col>
+              )}
             </Row>
-            <div style={{ color: '#98A2B3', fontSize: 12 }}>
-              共 {previewDates.length} 天 × 每天 {countScheduledLessons(createData.scheduleTemplate)} 节 = {previewDates.length * countScheduledLessons(createData.scheduleTemplate)} 节课
-            </div>
+            {createData.intensiveMode === 'INTENSIVE' ? (
+              <Alert
+                type="success"
+                showIcon
+                message="班级创建后不会自动生成课次"
+                description="教师将在“个性化课程”中逐次安排时间并完成考勤；管理员仍可查看和介入。"
+                style={{ borderRadius: 10 }}
+              />
+            ) : (
+              <div style={{ color: '#98A2B3', fontSize: 12 }}>
+                共 {previewDates.length} 天 × 每天 {countScheduledLessons(createData.scheduleTemplate)} 节 = {previewDates.length * countScheduledLessons(createData.scheduleTemplate)} 节课
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, paddingTop: 12, borderTop: '1px solid #EEE7E1' }}>
               <Button onClick={() => setCreateStep(0)}>上一步</Button>
               <Button type="primary" onClick={handleNextStep}>下一步</Button>
@@ -1102,6 +1227,60 @@ export default function CoursesPage() {
           const validAssignments = ((createData.teacherAssignments as Record<string, unknown>[]) || [])
             .filter(assignment => assignment.teacherId && assignment.subject)
           const scheduledCount = countScheduledLessons(createData.scheduleTemplate)
+
+          if (createData.intensiveMode === 'INTENSIVE') {
+            const teachingTypeLabel = createData.teachingType === 'ONE_ON_TWO'
+              ? '一对二'
+              : createData.teachingType === 'ONE_ON_THREE'
+                ? '一对三'
+                : '一对一'
+            return (
+              <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                <Alert
+                  type="info"
+                  showIcon
+                  message="课程档案准备完成"
+                  description="确认后只建立突击全能班、授课教师和班型，不预生成任何课次。"
+                  style={{ borderRadius: 10 }}
+                />
+                <Card styles={{ body: { padding: isMobile ? 14 : 18 } }} style={{ borderRadius: 14 }}>
+                  <div style={{ display: 'grid', gap: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                      <span style={{ color: '#98A2B3' }}>班级</span>
+                      <strong style={{ textAlign: 'right' }}>{String(createData.name || '-')}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                      <span style={{ color: '#98A2B3' }}>教学模式</span>
+                      <Tag color="orange" style={{ margin: 0, borderRadius: 999 }}>{teachingTypeLabel}</Tag>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                      <span style={{ color: '#98A2B3' }}>授课教师</span>
+                      <strong style={{ textAlign: 'right' }}>
+                        {validAssignments.map((assignment) => (
+                          teacherList.find((teacher: Record<string, unknown>) => teacher.id === assignment.teacherId)?.name
+                          || '未命名教师'
+                        )).join('、')}
+                      </strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                      <span style={{ color: '#98A2B3' }}>后续排课</span>
+                      <strong style={{ color: '#1D9E75', textAlign: 'right' }}>教师逐次自主安排</strong>
+                    </div>
+                  </div>
+                </Card>
+                <div style={{ fontSize: 13, lineHeight: 1.8, color: '#6B7280' }}>
+                  学生加入班级后，教师可自行选择每次上课的日期、开始时间和结束时间；开课后提交考勤，
+                  系统按实际授课分钟扣减学生课时并生成一份教师工资。
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 8, paddingTop: 12, borderTop: '1px solid #EEE7E1' }}>
+                  <Button onClick={() => setCreateStep(1)}>上一步</Button>
+                  <Button type="primary" loading={createLoading} onClick={handleCreate} style={{ background: '#E8784A' }}>
+                    {createLoading ? '正在创建...' : '确认创建课程'}
+                  </Button>
+                </div>
+              </Space>
+            )
+          }
 
           return (
           <Space direction="vertical" size={16} style={{ width: '100%' }}>
@@ -1366,12 +1545,12 @@ export default function CoursesPage() {
       </Modal>
 
       <Modal
-        title="新增一个上课日"
+        title="计划内调整上课日"
         open={addDayOpen}
         onCancel={() => setAddDayOpen(false)}
         onOk={handleAddDay}
         confirmLoading={addingDay}
-        okText="确认新增"
+        okText="确认调课"
         cancelText="取消"
         okButtonProps={{ style: { background: '#e8784a', borderColor: '#e8784a' } }}
       >
@@ -1383,7 +1562,10 @@ export default function CoursesPage() {
             style={{ width: '100%' }}
           />
           <div style={{ fontSize: 12, color: '#8d806f', padding: '10px 12px', borderRadius: 8, background: '#FFF8F4', border: '1px solid #F0EBE5', lineHeight: 1.7 }}>
-            将为当前全部在读班级，按各自平时的课表，在这一天排上一整天相同的课（和周一~周五一样），考勤、课堂反馈、家长端都会同步显示。已在该日有课的班级会自动跳过。
+            新日期会按各班平时课表补入，同时自动取消一个尚未开始、节次数相同的最晚教学日，总上课天数和总课次保持不变。已完成课次不会删除；被替换的未来课次会保留为“已取消”，方便审计。
+          </div>
+          <div style={{ fontSize: 12, color: '#5a4e3a', lineHeight: 1.7 }}>
+            如果此前已经用“新增上课日”加入过该日期，可再次选择同一天执行一次，系统会校准多出的未来课次，不会重复创建。
           </div>
         </Space>
       </Modal>

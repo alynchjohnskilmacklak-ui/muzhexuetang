@@ -38,6 +38,7 @@ const ONE_ON_ONE_GRADES = ['初一', '初二', '初三', '高一', '高二', '�
 
 const TYPE_META: Record<string, { color: string; label: string }> = {
   LESSON_PAY: { color: '#1D9E75', label: '课时薪资' },
+  LESSON_PAY_ADJUSTMENT: { color: '#C77F00', label: '课时薪资结算调整' },
   FEEDBACK_BONUS: { color: '#E8784A', label: '反馈奖励' },
   manual_adjust: { color: '#534AB7', label: '手动调整' },
 }
@@ -52,6 +53,9 @@ interface SalarySummary {
   name: string
   lesson: number
   feedback: number
+  adjustment: number
+  smallClass: number
+  intensive: number
   feedbackCount: number
   rewardCount: number
   total: number
@@ -62,6 +66,7 @@ interface SalaryTransaction {
   teacherId: string
   teacherName: string
   type: string
+  salaryBucket: 'SMALL_CLASS' | 'INTENSIVE'
   amount: number
   description?: string | null
   createdAt: string
@@ -84,7 +89,12 @@ function SalaryAdjustmentModal({ teacherId, teacherName, open, onClose, onSaved 
       const response = await fetch('/api/admin/salary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ teacherId, amount: values.amount, description: values.description.trim() }),
+        body: JSON.stringify({
+          teacherId,
+          amount: values.amount,
+          description: values.description.trim(),
+          salaryBucket: values.salaryBucket,
+        }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || '调整失败')
@@ -110,7 +120,20 @@ function SalaryAdjustmentModal({ teacherId, teacherName, open, onClose, onSaved 
       cancelText="取消"
       destroyOnHidden
     >
-      <Form form={form} layout="vertical" preserve={false}>
+      <Form form={form} layout="vertical" preserve={false} initialValues={{ salaryBucket: 'SMALL_CLASS' }}>
+        <Form.Item
+          label="工资归属"
+          name="salaryBucket"
+          rules={[{ required: true, message: '请选择工资归属' }]}
+        >
+          <Segmented
+            block
+            options={[
+              { label: '小班课薪资', value: 'SMALL_CLASS' },
+              { label: '一对一/二/三薪资', value: 'INTENSIVE' },
+            ]}
+          />
+        </Form.Item>
         <Form.Item
           label="调整金额（元）"
           name="amount"
@@ -248,6 +271,7 @@ export default function TeacherSalaryAdminPage() {
   const isMobile = useIsMobile() ?? false
   const [period, setPeriod] = useState('month')
   const [filterTeacher, setFilterTeacher] = useState('')
+  const [salaryBucket, setSalaryBucket] = useState<'ALL' | 'SMALL_CLASS' | 'INTENSIVE'>('ALL')
   const [configDrawer, setConfigDrawer] = useState({ open: false, teacherId: '', teacherName: '' })
   const [feedbackDrawer, setFeedbackDrawer] = useState({ open: false, teacherId: '', teacherName: '' })
   const [adjustmentModal, setAdjustmentModal] = useState({ open: false, teacherId: '', teacherName: '' })
@@ -258,16 +282,19 @@ export default function TeacherSalaryAdminPage() {
   const transactionPageSize = 50
   const query = new URLSearchParams({ period, page: String(transactionPage), limit: String(transactionPageSize) })
   if (filterTeacher) query.set('teacherId', filterTeacher)
+  if (salaryBucket !== 'ALL') query.set('bucket', salaryBucket)
   const { data, isLoading, mutate } = useSWR<SalaryPayload>(`/api/admin/salary?${query.toString()}`, fetcher)
 
   useEffect(() => {
     setTransactionPage(1)
-  }, [period, filterTeacher])
+  }, [period, filterTeacher, salaryBucket])
 
   const teachers = data?.teachers ?? []
   const summary = data?.summary ?? []
   const transactions = data?.transactions ?? []
   const totalAll = summary.reduce((sum, item) => sum + item.total, 0)
+  const totalSmallClass = summary.reduce((sum, item) => sum + item.smallClass, 0)
+  const totalIntensive = summary.reduce((sum, item) => sum + item.intensive, 0)
 
   const exportTeacherSalary = async (teacherId: string, teacherName: string) => {
     if (exportingTeacherId) return
@@ -292,7 +319,7 @@ export default function TeacherSalaryAdminPage() {
       link.click()
       link.remove()
       URL.revokeObjectURL(url)
-      message.success({ content: '薪资流水已导出，包含汇总、科目汇总和明细', key: 'salary-export' })
+      message.success({ content: '薪资核对表已导出，五类工资已分别汇总并附完整明细', key: 'salary-export' })
     } catch (error) {
       message.error({ content: error instanceof Error ? error.message : '导出失败', key: 'salary-export' })
     } finally {
@@ -319,8 +346,11 @@ export default function TeacherSalaryAdminPage() {
 
   const summaryColumns = [
     { title: '教师', dataIndex: 'name', key: 'name', render: (name: string) => <Text strong>{name}</Text> },
-    { title: '课时薪资', dataIndex: 'lesson', key: 'lesson', width: 110, align: 'right' as const, render: (value: number) => <Text style={{ color: '#1D9E75' }}>¥{value.toFixed(2)}</Text> },
-    { title: '反馈奖励', dataIndex: 'feedback', key: 'feedback', width: 110, align: 'right' as const, render: (value: number) => <Text style={{ color: '#E8784A' }}>¥{value.toFixed(2)}</Text> },
+    { title: '小班课薪资', dataIndex: 'smallClass', key: 'smallClass', width: 120, align: 'right' as const, render: (value: number) => <Text style={{ color: '#1D9E75' }}>¥{value.toFixed(2)}</Text> },
+    { title: '个性化课程薪资', dataIndex: 'intensive', key: 'intensive', width: 145, align: 'right' as const, render: (value: number) => <Text style={{ color: '#534AB7' }}>¥{value.toFixed(2)}</Text> },
+    { title: '课时工资', dataIndex: 'lesson', key: 'lesson', width: 110, align: 'right' as const, render: (value: number) => `¥${value.toFixed(2)}` },
+    { title: '反馈奖励', dataIndex: 'feedback', key: 'feedback', width: 110, align: 'right' as const, render: (value: number) => `¥${value.toFixed(2)}` },
+    { title: '管理调整', dataIndex: 'adjustment', key: 'adjustment', width: 110, align: 'right' as const, render: (value: number) => `¥${value.toFixed(2)}` },
     { title: '反馈次数', dataIndex: 'feedbackCount', key: 'feedbackCount', width: 90, align: 'right' as const },
     { title: '奖励次数', dataIndex: 'rewardCount', key: 'rewardCount', width: 90, align: 'right' as const },
     { title: '合计', dataIndex: 'total', key: 'total', width: 110, align: 'right' as const, render: (value: number) => <Text strong>¥{value.toFixed(2)}</Text> },
@@ -342,6 +372,17 @@ export default function TeacherSalaryAdminPage() {
   const detailColumns = [
     { title: '时间', dataIndex: 'createdAt', key: 'createdAt', width: 140, render: (value: string) => new Date(value).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) },
     { title: '教师', dataIndex: 'teacherName', key: 'teacherName', width: 100 },
+    {
+      title: '薪资归属',
+      dataIndex: 'salaryBucket',
+      key: 'salaryBucket',
+      width: 125,
+      render: (value: SalaryTransaction['salaryBucket']) => (
+        <Tag color={value === 'INTENSIVE' ? 'purple' : 'green'} style={{ borderRadius: 999 }}>
+          {value === 'INTENSIVE' ? '一对一/二/三' : '小班课'}
+        </Tag>
+      ),
+    },
     { title: '类型', dataIndex: 'type', key: 'type', width: 110, render: (value: string) => <Tag color={TYPE_META[value]?.color ?? 'default'} style={{ borderRadius: 999 }}>{TYPE_META[value]?.label ?? value}</Tag> },
     { title: '说明', dataIndex: 'description', key: 'description', ellipsis: true, render: (value?: string | null) => value || '-' },
     {
@@ -370,18 +411,35 @@ export default function TeacherSalaryAdminPage() {
             options={teachers.map((teacher) => ({ label: teacher.name, value: teacher.id }))}
             style={{ width: 160 }}
           />
+          <Segmented
+            value={salaryBucket}
+            onChange={(value) => setSalaryBucket(value as typeof salaryBucket)}
+            options={[
+              { label: '全部流水', value: 'ALL' },
+              { label: '小班课', value: 'SMALL_CLASS' },
+              { label: '一对一/二/三', value: 'INTENSIVE' },
+            ]}
+          />
         </Space>
 
-        <Card bordered={false} style={{ borderRadius: 8, background: 'linear-gradient(135deg,#E8784A,#f0976a)' }}>
-          <Statistic
-            title={<span style={{ color: 'rgba(255,255,255,.82)', fontSize: 13 }}>总薪资支出（{PERIOD_OPTIONS.find((item) => item.value === period)?.label}）</span>}
-            value={totalAll}
-            precision={2}
-            prefix="¥"
-            valueStyle={{ color: '#fff', fontWeight: 700, fontSize: isMobile ? 22 : 28 }}
-            loading={isLoading}
-          />
-        </Card>
+        <Row gutter={[12, 12]}>
+          <Col xs={24} md={8}>
+            <Card bordered={false} style={{ height: '100%', borderRadius: 14, background: 'linear-gradient(135deg,#E8784A,#f0976a)' }}>
+              <Statistic title={<span style={{ color: 'rgba(255,255,255,.82)' }}>教师工资总和</span>} value={totalAll} precision={2} prefix="¥" valueStyle={{ color: '#fff', fontWeight: 800 }} loading={isLoading} />
+              <Text style={{ color: 'rgba(255,255,255,.82)', fontSize: 12 }}>小班课＋个性化课程</Text>
+            </Card>
+          </Col>
+          <Col xs={12} md={8}>
+            <Card bordered={false} style={{ height: '100%', borderRadius: 14 }}>
+              <Statistic title="小班课薪资" value={totalSmallClass} precision={2} prefix="¥" valueStyle={{ color: '#1D9E75' }} loading={isLoading} />
+            </Card>
+          </Col>
+          <Col xs={12} md={8}>
+            <Card bordered={false} style={{ height: '100%', borderRadius: 14 }}>
+              <Statistic title="一对一/二/三薪资" value={totalIntensive} precision={2} prefix="¥" valueStyle={{ color: '#534AB7' }} loading={isLoading} />
+            </Card>
+          </Col>
+        </Row>
 
         <Tabs
           items={[
@@ -392,7 +450,7 @@ export default function TeacherSalaryAdminPage() {
             },
             {
               key: 'detail',
-              label: '全部流水',
+              label: salaryBucket === 'INTENSIVE' ? '一对一/二/三流水' : salaryBucket === 'SMALL_CLASS' ? '小班课流水' : '全部流水',
               children: <Table dataSource={transactions} columns={detailColumns} rowKey="id" loading={isLoading} pagination={{ current: transactionPage, pageSize: transactionPageSize, total: data?.total ?? 0, showSizeChanger: false, hideOnSinglePage: true, showTotal: (total) => `共 ${total} 条流水`, onChange: setTransactionPage }} size="small" scroll={{ x: isMobile ? 680 : undefined }} locale={{ emptyText: '暂无数据' }} />,
             },
           ]}

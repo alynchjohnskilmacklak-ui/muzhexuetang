@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/get-user'
 import * as XLSX from 'xlsx'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { requireAdminUser } from '@/lib/auth/guards'
+import { createActivityLog } from '@/lib/data-admin/entities-server'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (request: NextRequest) => {
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
-  if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const user = await requireAdminUser()
   const prisma = await getRequestPrisma()
 
   const year = parseInt(request.nextUrl.searchParams.get('year') || String(new Date().getFullYear()))
@@ -38,10 +37,16 @@ export const GET = apiHandler(async (request: NextRequest) => {
   XLSX.utils.book_append_sheet(wb, ws, '财务报表')
 
   const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
+  await createActivityLog(user.id, 'EXPORT_FINANCE', 'FinanceReport', String(year), {
+    division,
+    rowCount: rows.length,
+  })
   return new NextResponse(buf, {
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Disposition': `attachment; filename="财务报表-${year}.xlsx"`,
+      'Cache-Control': 'no-store, private',
+      'X-Content-Type-Options': 'nosniff',
     },
   })
 })

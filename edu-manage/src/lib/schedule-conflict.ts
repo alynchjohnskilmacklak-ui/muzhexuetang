@@ -1,5 +1,6 @@
 import { getRequestPrisma } from '@/lib/prisma'
 import type { PrismaClient } from '@prisma/client'
+import { getLocalDayRange, localDateKey } from '@/lib/date/local-day'
 
 export function hasTimeOverlap(
   newStart: string,
@@ -33,11 +34,10 @@ export async function checkScheduleConflict(input: ConflictCheckInput, prismaCli
   const prisma = prismaClient ?? await getRequestPrisma()
   const { teacherId, studentId, roomId, date, startTime, endTime, excludeLessonId } = input
 
-  const dayStart = new Date(`${date}T00:00:00+08:00`)
-  const dayEnd = new Date(`${date}T23:59:59+08:00`)
+  const { start: dayStart, end: dayEnd } = getLocalDayRange(date)
 
   const whereBase: Record<string, unknown> = {
-    lessonDate: { gte: dayStart, lte: dayEnd },
+    lessonDate: { gte: dayStart, lt: dayEnd },
     status: { not: 'CANCELLED' },
   }
   if (excludeLessonId) {
@@ -60,6 +60,7 @@ export async function checkScheduleConflict(input: ConflictCheckInput, prismaCli
 
   for (const lesson of teacherLessons) {
     if (lesson.id === excludeLessonId) continue
+    if (localDateKey(lesson.lessonDate) !== date) continue
     if (hasTimeOverlap(startTime, endTime, lesson.startTime, lesson.endTime)) {
       conflicts.push({
         type: 'teacher',
@@ -87,6 +88,7 @@ export async function checkScheduleConflict(input: ConflictCheckInput, prismaCli
 
     for (const lesson of studentLessons) {
       if (lesson.id === excludeLessonId) continue
+      if (localDateKey(lesson.lessonDate) !== date) continue
       if (hasTimeOverlap(startTime, endTime, lesson.startTime, lesson.endTime)) {
         conflicts.push({
           type: 'student',
@@ -115,6 +117,7 @@ export async function checkScheduleConflict(input: ConflictCheckInput, prismaCli
 
     for (const lesson of roomLessons) {
       if (lesson.id === excludeLessonId) continue
+      if (localDateKey(lesson.lessonDate) !== date) continue
       if (hasTimeOverlap(startTime, endTime, lesson.startTime, lesson.endTime)) {
         conflicts.push({
           type: 'room',

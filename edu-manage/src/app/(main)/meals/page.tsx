@@ -9,6 +9,7 @@ import {
 import { DownloadOutlined, EditOutlined } from '@ant-design/icons'
 import dayjs, { Dayjs } from 'dayjs'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { StudentMealLedger } from './StudentMealLedger'
 
 const { Title, Text } = Typography
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六']
@@ -154,6 +155,11 @@ export default function MealsPage() {
     <div>
       <Title level={4} style={{ marginTop: 0 }}>就餐管理</Title>
       <Tabs items={[
+        {
+          key: 'student-ledger',
+          label: '学生就餐台账',
+          children: <StudentMealLedger />,
+        },
         {
           key: 'templates',
           label: '周期菜单',

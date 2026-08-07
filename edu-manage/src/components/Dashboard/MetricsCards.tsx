@@ -49,15 +49,15 @@ export function MetricsCards({ data }: { data: AdminDashboardMetrics }) {
       extra: <Progress percent={data.hoursProgress} size="small" strokeColor={COLORS.purple} />,
     },
     {
-      title: '待处理事项',
+      title: '运营待办',
       value: data.pendingTasks,
       suffix: '项',
       icon: <ExclamationCircleOutlined />,
       color: COLORS.red,
       extra: data.pendingTasksUrgent > 0 ? (
-        <Badge count={`${data.pendingTasksUrgent}项紧急`} style={{ backgroundColor: COLORS.red }} />
+        <Badge count={`${data.pendingTasksUrgent}项优先`} style={{ backgroundColor: COLORS.red }} />
       ) : (
-        <span style={{ color: COLORS.green }}>暂无紧急</span>
+        <span style={{ color: COLORS.green }}>详见下方待办清单</span>
       ),
     },
   ]

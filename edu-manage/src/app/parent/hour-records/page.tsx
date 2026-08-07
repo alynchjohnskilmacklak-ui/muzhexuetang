@@ -3,6 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { parentActiveEnrollmentWhere, parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { ParentHourRecordsClient } from './client'
+import { calculateIntensiveDeductHours } from '@/lib/intensive-class'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,7 +37,15 @@ export default async function ParentHourRecordsPage() {
   const attendances = await db.attendance.findMany({
     where: {
       student: parentLinkedStudentWhere(userId),
-      hoursDeducted: { gt: 0 },
+      OR: [
+        { hoursDeducted: { gt: 0 } },
+        {
+          lesson: {
+            intensiveReviewStatus: 'APPROVED',
+            group: { intensiveMode: 'INTENSIVE' },
+          },
+        },
+      ],
     },
     include: {
       student: { select: { id: true, name: true } },
@@ -87,7 +96,18 @@ export default async function ParentHourRecordsPage() {
   })
 
   const records = [
-    ...attendances,
+    ...attendances.map((attendance) => ({
+      ...attendance,
+      isIntensiveApproved: attendance.lesson?.group?.intensiveMode === 'INTENSIVE'
+        && attendance.lesson?.intensiveReviewStatus === 'APPROVED',
+      approvedTeachingHours: attendance.lesson?.group?.intensiveMode === 'INTENSIVE'
+        && attendance.lesson?.intensiveReviewStatus === 'APPROVED'
+        ? calculateIntensiveDeductHours(
+            attendance.status,
+            Number(attendance.actualMinutes || attendance.lesson.actualMinutes || 0),
+          )
+        : 0,
+    })),
     ...hourTransactions.map((transaction) => ({
       id: transaction.id,
       student: transaction.student,

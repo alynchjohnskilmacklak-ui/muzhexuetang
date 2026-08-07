@@ -15,9 +15,12 @@ import {
   Tabs,
   Tag,
   Typography,
+  Alert,
   message,
 } from 'antd'
-import { EditOutlined, KeyOutlined, LinkOutlined, PlusOutlined, StopOutlined } from '@ant-design/icons'
+import { EditOutlined, HistoryOutlined, KeyOutlined, LinkOutlined, PlusOutlined, StopOutlined } from '@ant-design/icons'
+import { isUserActive } from '@/lib/user-status'
+import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
 
 type AccountStatus = 'active' | 'disabled' | string
 
@@ -27,10 +30,17 @@ interface UserAccount {
   name: string
   role: 'admin' | 'teacher' | 'parent' | string
   status: AccountStatus
+  isSuperAdmin?: boolean
   lastLoginAt: string | null
   lastLoginIp?: string | null
   lastLoginDevice?: string | null
   createdAt: string
+  passwordSecurity: {
+    encrypted: boolean
+    changedAt: string | null
+    source: string
+    history: Array<{ changedAt: string; source: string; operator: string }>
+  }
 }
 
 interface TeacherAccount {
@@ -66,8 +76,6 @@ interface AccountsResponse {
 }
 
 type ModalMode = 'admin' | 'teacher' | 'parent' | 'edit' | 'reset' | 'bind'
-const SUPER_ADMIN_NAME = '任文涛'
-
 const fetcher = async (url: string) => {
   const res = await fetch(url)
   const data = await res.json().catch(() => ({}))
@@ -80,7 +88,7 @@ function formatDate(value: string | null) {
 }
 
 function statusTag(status: AccountStatus) {
-  return <Tag color={status === 'active' ? 'green' : 'red'}>{status === 'active' ? '正常' : '已停用'}</Tag>
+  return <Tag color={isUserActive(status) ? 'green' : 'red'}>{isUserActive(status) ? '正常' : '已停用'}</Tag>
 }
 
 export function AdminsTab({ currentUserId }: { currentUserId: string }) {
@@ -91,6 +99,8 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
   const [mode, setMode] = useState<ModalMode | null>(null)
   const [target, setTarget] = useState<UserAccount | TeacherAccount | ParentAccount | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [issuedCredential, setIssuedCredential] = useState<{ email: string; password: string } | null>(null)
+  const [passwordHistoryTarget, setPasswordHistoryTarget] = useState<UserAccount | null>(null)
   const [form] = Form.useForm()
 
   const studentsWithoutParent = data?.studentsWithoutParent || []
@@ -126,7 +136,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
         method: 'PATCH',
         body: JSON.stringify({ action: 'status', userId, status }),
       })
-      message.success(status === 'active' ? '账号已启用' : '账号已停用')
+      message.success(isUserActive(status) ? '账号已启用' : '账号已停用')
       mutate()
     } catch (error) {
       message.error(error instanceof Error ? error.message : '操作失败')
@@ -164,7 +174,11 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
           method: 'POST',
           body: JSON.stringify({ ...values, role: mode }),
         })
-        message.success(payload.initialPassword ? `账号已创建，初始密码：${payload.initialPassword}` : '账号已创建')
+        if (payload.initialPassword) {
+          setIssuedCredential({ email: payload.user.email, password: payload.initialPassword })
+        } else {
+          message.success('账号已创建')
+        }
       }
       if (mode === 'edit' && target && 'id' in target) {
         await runJson('/api/settings/accounts', {
@@ -201,10 +215,46 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
     return (!keyword || text.includes(keyword.toLowerCase())) && (!statusFilter || item.status === statusFilter)
   })
 
+  const passwordRule = {
+    validator: async (_: unknown, value: unknown) => {
+      const result = validatePassword(String(value || ''))
+      if (!result.valid) throw new Error(result.errors[0])
+    },
+  }
+
+  const optionalPasswordRule = {
+    validator: async (_: unknown, value: unknown) => {
+      if (!value) return
+      const result = validatePassword(String(value))
+      if (!result.valid) throw new Error(result.errors[0])
+    },
+  }
+
+  const passwordSecurity = (_: unknown, record: UserAccount) => (
+    <Space direction="vertical" size={0}>
+      <Tag color={record.passwordSecurity.encrypted ? 'green' : 'red'}>
+        {record.passwordSecurity.encrypted ? '已加密' : '需处理'}
+      </Tag>
+      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+        {record.passwordSecurity.source}
+        {record.passwordSecurity.changedAt ? ` · ${formatDate(record.passwordSecurity.changedAt)}` : ''}
+      </Typography.Text>
+      <Button
+        type="link"
+        size="small"
+        icon={<HistoryOutlined />}
+        style={{ padding: 0, height: 'auto' }}
+        onClick={() => setPasswordHistoryTarget(record)}
+      >
+        查看修改记录
+      </Button>
+    </Space>
+  )
+
   const admins = filterUsers(data?.admins || [])
   const parents = filterUsers(data?.parents || [])
   const currentAdmin = (data?.admins || []).find((admin) => admin.id === currentUserId)
-  const currentIsSuperAdmin = currentAdmin?.name === SUPER_ADMIN_NAME
+  const currentIsSuperAdmin = currentAdmin?.isSuperAdmin === true
   const teachers = (data?.teachers || []).filter((teacher) => {
     const text = `${teacher.name}${teacher.phone}${teacher.email || ''}${teacher.account?.email || ''}`.toLowerCase()
     return (!keyword || text.includes(keyword.toLowerCase())) && (!statusFilter || teacher.account?.status === statusFilter)
@@ -214,7 +264,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
     <Space wrap>
       <Button size="small" icon={<EditOutlined />} onClick={() => openModal('edit', record)}>编辑</Button>
       <Button size="small" icon={<KeyOutlined />} onClick={() => openModal('reset', record)}>重置密码</Button>
-      {record.status === 'active' ? (
+      {isUserActive(record.status) ? (
         <Popconfirm title="确定停用该账号？" onConfirm={() => changeStatus(record.id, 'disabled')}>
           <Button size="small" danger icon={<StopOutlined />} disabled={record.id === currentUserId}>停用</Button>
         </Popconfirm>
@@ -231,6 +281,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
     { title: '姓名', dataIndex: 'name', key: 'name', width: 140 },
     { title: '邮箱', dataIndex: 'email', key: 'email', width: 220 },
     { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: statusTag },
+    { title: '密码状态', key: 'passwordSecurity', width: 210, render: passwordSecurity },
     { title: '最近登录', dataIndex: 'lastLoginAt', key: 'lastLoginAt', width: 180, render: formatDate },
     {
       title: '操作',
@@ -238,7 +289,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
       width: 360,
       render: (_: unknown, record: UserAccount) => {
         if (record.id === currentUserId) return <Typography.Text type="secondary">当前账号</Typography.Text>
-        if (record.name === SUPER_ADMIN_NAME && !currentIsSuperAdmin) {
+        if (record.isSuperAdmin && !currentIsSuperAdmin) {
           return <Typography.Text type="secondary">最高权益管理员</Typography.Text>
         }
         return userActions(record)
@@ -252,6 +303,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
     { title: '教师邮箱', dataIndex: 'email', key: 'email', width: 200, render: (value: string | null) => value || '-' },
     { title: '登录账号', key: 'account', width: 240, render: (_: unknown, record: TeacherAccount) => record.account?.email || <Tag>未创建</Tag> },
     { title: '状态', key: 'status', width: 100, render: (_: unknown, record: TeacherAccount) => record.account ? statusTag(record.account.status) : '-' },
+    { title: '密码状态', key: 'passwordSecurity', width: 210, render: (_: unknown, record: TeacherAccount) => record.account ? passwordSecurity(_, record.account) : '-' },
     {
       title: '操作',
       key: 'action',
@@ -268,6 +320,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
     { title: '家长', dataIndex: 'name', key: 'name', width: 120 },
     { title: '账号', dataIndex: 'email', key: 'email', width: 220 },
     { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: statusTag },
+    { title: '密码状态', key: 'passwordSecurity', width: 210, render: passwordSecurity },
     {
       title: '绑定学员',
       key: 'students',
@@ -366,8 +419,8 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
               <Form.Item name="email" label="登录邮箱" tooltip="留空时优先使用教师邮箱，没有教师邮箱则使用手机号生成 @tea.com 账号">
                 <Input placeholder={target.email || `${target.phone}@tea.com`} />
               </Form.Item>
-              <Form.Item name="password" label="初始密码" tooltip="留空时使用手机号后 6 位">
-                <Input.Password placeholder="留空自动生成" />
+              <Form.Item name="password" label="初始密码" tooltip="留空时由系统生成独立强密码；只在创建成功后显示一次" rules={[optionalPasswordRule]}>
+                <Input.Password placeholder="留空自动生成强密码" autoComplete="new-password" />
               </Form.Item>
             </>
           )}
@@ -402,8 +455,8 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
                   options={studentsWithoutParent.map((student) => ({ label: `${student.name}${student.grade ? ` / ${student.grade}` : ''}`, value: student.id }))}
                 />
               </Form.Item>
-              <Form.Item name="password" label="初始密码" tooltip="留空时使用手机号后 6 位">
-                <Input.Password placeholder="留空自动生成" />
+              <Form.Item name="password" label="初始密码" tooltip="留空时由系统生成独立强密码；只在创建成功后显示一次" rules={[optionalPasswordRule]}>
+                <Input.Password placeholder="留空自动生成强密码" autoComplete="new-password" />
               </Form.Item>
             </>
           )}
@@ -414,16 +467,16 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
               label="初始密码"
               rules={[
                 { required: true, message: '请输入初始密码' },
-                { min: 8, message: '管理员密码至少 8 位' },
+                passwordRule,
               ]}
             >
-              <Input.Password />
+              <Input.Password autoComplete="new-password" placeholder={`至少 ${PASSWORD_MIN_LENGTH} 位，包含字母和数字`} />
             </Form.Item>
           )}
 
           {mode === 'reset' && (
-            <Form.Item name="password" label="新密码" rules={[{ required: true, message: '请输入新密码' }, { min: 6, message: '密码至少 6 位' }]}>
-              <Input.Password />
+            <Form.Item name="password" label="新密码" rules={[{ required: true, message: '请输入新密码' }, passwordRule]}>
+              <Input.Password autoComplete="new-password" placeholder={`至少 ${PASSWORD_MIN_LENGTH} 位，包含字母和数字`} />
             </Form.Item>
           )}
 
@@ -437,6 +490,59 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
             </Form.Item>
           )}
         </Form>
+      </Modal>
+
+      <Modal
+        title="账号创建成功"
+        open={Boolean(issuedCredential)}
+        onCancel={() => setIssuedCredential(null)}
+        footer={<Button type="primary" onClick={() => setIssuedCredential(null)}>我已安全保存</Button>}
+        width={460}
+        centered
+      >
+        <Alert
+          type="warning"
+          showIcon
+          message="初始密码仅显示这一次"
+          description="请通过安全方式交给本人。系统不会保存可查看的明文密码，关闭后只能重新重置。"
+          style={{ marginBottom: 18 }}
+        />
+        <Typography.Paragraph>
+          <Typography.Text type="secondary">登录账号</Typography.Text><br />
+          <Typography.Text strong copyable>{issuedCredential?.email}</Typography.Text>
+        </Typography.Paragraph>
+        <Typography.Paragraph>
+          <Typography.Text type="secondary">初始密码</Typography.Text><br />
+          <Typography.Text strong copyable>{issuedCredential?.password}</Typography.Text>
+        </Typography.Paragraph>
+      </Modal>
+
+      <Modal
+        title={`${passwordHistoryTarget?.name || ''} · 密码安全记录`}
+        open={Boolean(passwordHistoryTarget)}
+        onCancel={() => setPasswordHistoryTarget(null)}
+        footer={<Button onClick={() => setPasswordHistoryTarget(null)}>关闭</Button>}
+        width={560}
+      >
+        <Alert
+          type="info"
+          showIcon
+          message="系统只记录修改时间、方式和操作人，不保存或展示明文密码。"
+          style={{ marginBottom: 16 }}
+        />
+        <Table
+          size="small"
+          rowKey={(record) => `${record.changedAt}-${record.source}`}
+          pagination={false}
+          dataSource={passwordHistoryTarget?.passwordSecurity.history || []}
+          columns={[
+            { title: '时间', dataIndex: 'changedAt', render: formatDate, width: 190 },
+            { title: '方式', dataIndex: 'source', width: 150 },
+            { title: '操作人', dataIndex: 'operator' },
+          ]}
+          locale={{ emptyText: '暂无历史审计记录' }}
+          scroll={{ x: 480 }}
+        />
       </Modal>
     </Card>
   )

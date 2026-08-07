@@ -4,6 +4,9 @@ import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { parentActiveStudentWhere } from '@/lib/business-visibility'
 import { getRequestDivision } from '@/lib/division'
+import { getAccessibleParentMessageWhere } from '@/lib/parent-message-access'
+import { getParentMessageWorkflowState } from '@/lib/parent-message-workflow'
+import { notifyTeacherAboutParentMessage } from '@/lib/parent-message-notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,35 +20,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const status = searchParams.get('status') || undefined
   const division = getRequestDivision(user, searchParams.get('division'))
 
-  let where: Record<string, unknown> = {}
-  if (user.role === 'parent') {
-    where = { parentId: user.id }
-  } else if (user.role === 'teacher') {
-    if (!user.teacherId) {
-      return NextResponse.json({ messages: [] })
-    }
-    const enrollments = await prisma.enrollment.findMany({
-      where: {
-        status: 'ACTIVE',
-        group: {
-          OR: [
-            { teacherId: user.teacherId },
-            { teacherAssignments: { some: { teacherId: user.teacherId } } },
-          ],
-        },
-      },
-      select: { studentId: true },
-    })
-    const taughtStudentIds = Array.from(new Set(enrollments.map((e) => e.studentId)))
-
-    where = {
-      studentId: { in: taughtStudentIds.length > 0 ? taughtStudentIds : ['__none__'] },
-      OR: [{ teacherId: user.teacherId }, { teacherId: null }],
-    }
-  }
-  if (user.role === 'admin') {
-    where.student = { division }
-  }
+  let where = await getAccessibleParentMessageWhere(prisma, user, division)
+  if (!where) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   if (status) {
     if (where.OR) {
       const { OR, ...baseWhere } = where
@@ -55,22 +31,72 @@ export const GET = apiHandler(async (req: NextRequest) => {
     }
   }
 
-  const messages = await prisma.parentMessage.findMany({
-    where,
-    include: {
-      parent: { select: { id: true, name: true } },
-      student: { select: { id: true, name: true } },
-      teacher: { select: { id: true, name: true } },
-      replies: {
-        orderBy: { createdAt: 'asc' },
-        take: 50,
+  const [messages, total] = await Promise.all([
+    prisma.parentMessage.findMany({
+      where,
+      include: {
+        parent: { select: { id: true, name: true } },
+        student: { select: { id: true, name: true } },
+        teacher: { select: { id: true, name: true } },
+        feedback: {
+          select: {
+            id: true,
+            teacherId: true,
+            studentIds: true,
+            createdAt: true,
+            summary: true,
+            overallComment: true,
+            classLesson: {
+              select: {
+                lessonDate: true,
+                subject: true,
+                group: { select: { course: { select: { name: true, subject: true } } } },
+              },
+            },
+          },
+        },
+        replies: {
+          orderBy: { createdAt: 'asc' },
+          take: 50,
+        },
       },
+      orderBy: { updatedAt: 'desc' },
+      take: 100,
+    }),
+    prisma.parentMessage.count({ where }),
+  ])
+  const reminderRows = user.role === 'admin' && messages.length > 0
+    ? await prisma.notification.findMany({
+        where: {
+          type: 'PARENT_MESSAGE_REMINDER',
+          relatedType: 'PARENT_MESSAGE',
+          relatedId: { in: messages.map((message) => message.id) },
+        },
+        select: { relatedId: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+      })
+    : []
+  const remindersByMessage = reminderRows.reduce<Record<string, { count: number; lastRemindedAt: string }>>(
+    (result, reminder) => {
+      if (!reminder.relatedId) return result
+      const current = result[reminder.relatedId]
+      result[reminder.relatedId] = {
+        count: (current?.count || 0) + 1,
+        lastRemindedAt: current?.lastRemindedAt || reminder.createdAt.toISOString(),
+      }
+      return result
     },
-    orderBy: { updatedAt: 'desc' },
-    take: 100,
-  })
+    {},
+  )
 
-  return NextResponse.json({ messages })
+  return NextResponse.json({
+    total,
+    messages: messages.map((message) => ({
+      ...message,
+      workflow: getParentMessageWorkflowState(message),
+      reminder: remindersByMessage[message.id] || { count: 0, lastRemindedAt: null },
+    })),
+  })
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {
@@ -166,30 +192,46 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (!teacherId) return NextResponse.json({ error: '暂未找到该学员的任课教师，请联系管理员检查课程关系' }, { status: 400 })
   }
 
-  const message = await prisma.parentMessage.create({
-    data: {
-      parentId: user.id,
-      studentId,
-      teacherId,
-      subject,
-      title,
-      replies: {
-        create: {
-          authorId: user.id,
-          authorName: user.name || '家长',
-          role: 'parent',
-          content,
-          isReadByTeacher: false,
-          isReadByParent: true,
+  const message = await prisma.$transaction(async (tx) => {
+    const created = await tx.parentMessage.create({
+      data: {
+        parentId: user.id,
+        studentId,
+        teacherId,
+        subject,
+        title,
+        replies: {
+          create: {
+            authorId: user.id,
+            authorName: user.name || '家长',
+            role: 'parent',
+            content,
+            isReadByTeacher: false,
+            isReadByParent: true,
+          },
         },
       },
-    },
-    include: {
-      parent: { select: { id: true, name: true } },
-      student: { select: { id: true, name: true } },
-      teacher: { select: { id: true, name: true } },
-      replies: { orderBy: { createdAt: 'asc' } },
-    },
+      include: {
+        parent: { select: { id: true, name: true } },
+        student: { select: { id: true, name: true } },
+        teacher: { select: { id: true, name: true } },
+        feedback: { select: { id: true, createdAt: true } },
+        replies: { orderBy: { createdAt: 'asc' } },
+      },
+    })
+
+    if (teacherId) {
+      await notifyTeacherAboutParentMessage(tx, {
+        teacherId,
+        messageId: created.id,
+        parentName: user.name || '家长',
+        studentId,
+        studentName: created.student?.name || null,
+        senderId: user.id,
+      })
+    }
+
+    return created
   })
 
   return NextResponse.json(message, { status: 201 })

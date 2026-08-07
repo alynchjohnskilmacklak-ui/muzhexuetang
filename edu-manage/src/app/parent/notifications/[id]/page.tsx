@@ -8,6 +8,7 @@ import {
   visibleNotificationWhere,
   visiblePerformancePostWhere,
 } from '@/lib/business-visibility'
+import { redactFeedbackForParent } from '@/lib/classroom-feedback/access'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,13 +45,14 @@ export default async function NotificationDetailPage({ params }: { params: Promi
   if (notification.relatedType && notification.relatedId) {
     switch (notification.relatedType) {
       case 'CLASSROOM_FEEDBACK': {
-        relatedData = await db.classroomFeedback.findFirst({
+        const feedback = await db.classroomFeedback.findFirst({
           where: { id: notification.relatedId, ...visibleClassroomFeedbackWhere, studentIds: { hasSome: parentStudentIds } },
           include: {
             teacher: { select: { id: true, name: true } },
             classLesson: { include: { group: { include: { course: true } } } },
           },
         })
+        relatedData = feedback ? redactFeedbackForParent(feedback, parentStudentIds) : null
         break
       }
       case 'PERFORMANCE_FEEDBACK': {

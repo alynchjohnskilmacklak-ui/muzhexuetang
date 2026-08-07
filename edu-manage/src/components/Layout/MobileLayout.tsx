@@ -6,7 +6,7 @@ import { CloseOutlined, DownOutlined, LogoutOutlined, MenuOutlined, RightOutline
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useKickListener } from '@/hooks/useKickListener'
+import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 
 const TAB_BAR_HEIGHT = 60
 
@@ -44,8 +44,6 @@ export function MobileLayout({
   const pathname = usePathname()
   const router = useRouter()
 
-  useKickListener()
-
   const hasBottomTabs = showBottomTabs ?? mode === 'tabs'
   const drawerItems = mode === 'tabs' ? (moreItems || navItems) : navItems
   const tabs = bottomTabs.length > 0 ? bottomTabs : navItems.slice(0, 5)
@@ -57,7 +55,10 @@ export function MobileLayout({
       icon: <LogoutOutlined />,
       label: '退出登录',
       danger: true,
-      onClick: () => signOut({ callbackUrl: `${window.location.origin}/login` }),
+      onClick: () => {
+        clearSensitiveBrowserStorage()
+        return signOut({ callbackUrl: `${window.location.origin}/login` })
+      },
     }],
   }
 
@@ -78,7 +79,7 @@ export function MobileLayout({
   return (
     <div id="mobile-root" style={{ minHeight: '100dvh', backgroundColor: '#faf8f5', maxWidth: '100vw', overflowX: 'hidden' }}>
       {/* ---- Top Header ---- */}
-      <header style={{
+      <header className="mobile-app-header" style={{
         position: 'fixed',
         inset: '0 0 auto',
         zIndex: 300,
@@ -333,7 +334,10 @@ export function MobileLayout({
         }}>
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: `${window.location.origin}/login` })}
+            onClick={() => {
+              clearSensitiveBrowserStorage()
+              return signOut({ callbackUrl: `${window.location.origin}/login` })
+            }}
             style={{
               width: '100%',
               display: 'flex',

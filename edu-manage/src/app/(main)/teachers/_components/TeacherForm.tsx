@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useState } from 'react'
-import { Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, DatePicker, Upload } from 'antd'
+import { Alert, Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, DatePicker, Upload } from 'antd'
 import { UserOutlined, BookOutlined, IdcardOutlined, UploadOutlined } from '@ant-design/icons'
 import type { UploadProps } from 'antd'
 import dayjs from 'dayjs'
@@ -18,6 +18,7 @@ export function TeacherForm({
   const [form] = Form.useForm()
   const [current, setCurrent] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [submitError, setSubmitError] = useState<{ message: string; field?: string } | null>(null)
   const [photoOptions, setPhotoOptions] = useState<{ label: string; value: string }[]>([])
   const avatar = Form.useWatch('avatar', form)
   const isMobile = useIsMobile() ?? false
@@ -25,6 +26,7 @@ export function TeacherForm({
   useEffect(() => {
     if (!open) return
     setCurrent(0)
+    setSubmitError(null)
     fetch('/api/teacher-photos')
       .then(res => res.json())
       .then(data => setPhotoOptions(Array.isArray(data.photos) ? data.photos.map((item: { name: string; url: string }) => ({ label: item.name, value: item.url })) : []))
@@ -49,6 +51,7 @@ export function TeacherForm({
   const handleNext = async () => {
     try {
       await form.validateFields(stepFields[current] || [])
+      setSubmitError(null)
       setCurrent(value => value + 1)
     } catch {
       // antd will mark invalid fields
@@ -61,6 +64,7 @@ export function TeacherForm({
     } catch {
       return
     }
+    setSubmitError(null)
     setLoading(true)
     try {
       const values = form.getFieldsValue(true)
@@ -75,12 +79,16 @@ export function TeacherForm({
           subjects: values.subjects.join(','),
         }),
       })
+      const payload = await res.json().catch(() => ({})) as {
+        error?: string
+        field?: string
+        loginEmail?: string
+        initialPassword?: string | null
+      }
       if (!res.ok) {
-        const errorText = (await res.json().catch(() => ({}))).error || `操作失败：${res.status}`
-        if (res.status === 409) {
-          setCurrent(0)
-          form.setFields([{ name: 'phone', errors: [errorText] }])
-        }
+        const errorText = payload.error || `操作失败：${res.status}`
+        setSubmitError({ message: errorText, field: payload.field })
+        if (payload.field) form.setFields([{ name: payload.field, errors: [errorText] }])
         message.error(errorText)
         return
       }
@@ -88,6 +96,29 @@ export function TeacherForm({
       form.resetFields()
       setCurrent(0)
       onClose()
+      if (mode === 'create' && payload.initialPassword && payload.loginEmail) {
+        Modal.success({
+          title: '教师账号已创建，请立即保存',
+          width: isMobile ? 'calc(100vw - 32px)' : 460,
+          content: (
+            <Space direction="vertical" size={12} style={{ width: '100%', marginTop: 12 }}>
+              <Alert type="warning" showIcon message="初始密码仅显示本次，关闭后无法再次查看" />
+              <Input addonBefore="账号" value={payload.loginEmail} readOnly />
+              <Input.Password addonBefore="密码" value={payload.initialPassword} readOnly visibilityToggle />
+              <Button
+                block
+                onClick={() => {
+                  void navigator.clipboard.writeText(`账号：${payload.loginEmail}\n初始密码：${payload.initialPassword}`)
+                  message.success('账号和初始密码已复制')
+                }}
+              >
+                复制登录信息
+              </Button>
+            </Space>
+          ),
+          okText: '我已保存',
+        })
+      }
     } catch {
       message.error('提交失败')
     } finally {
@@ -142,6 +173,26 @@ export function TeacherForm({
       }
     >
       <Steps current={current} items={steps} size="small" style={{ marginBottom: 24 }} />
+      {submitError && (
+        <Alert
+          type="error"
+          showIcon
+          closable
+          onClose={() => setSubmitError(null)}
+          message="教师信息未能保存"
+          description={(
+            <Space direction="vertical" size={8}>
+              <span>{submitError.message}</span>
+              {submitError.field && current !== 0 && (
+                <Button size="small" onClick={() => setCurrent(0)}>
+                  返回基本信息修改
+                </Button>
+              )}
+            </Space>
+          )}
+          style={{ marginBottom: 16 }}
+        />
+      )}
       <Form form={form} layout="vertical" size="middle" requiredMark={false}>
         {current === 0 && (
           <Row gutter={16}>

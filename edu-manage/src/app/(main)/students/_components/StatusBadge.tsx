@@ -10,16 +10,22 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   INACTIVE: { label: '离校', color: '#62666d' },
 }
 
-export function StatusBadge({ status, remainHours }: { status: string; remainHours?: number }) {
+export function StatusBadge({
+  status,
+  isOwed = false,
+}: {
+  status: string
+  isOwed?: boolean
+}) {
   const config = STATUS_MAP[status] || { label: status, color: '#8a8f98' }
-  const isOwed = typeof remainHours === 'number' && remainHours <= 0 && status === 'ACTIVE'
+  const showOwed = isOwed && status === 'ACTIVE'
 
   return (
     <Tag
-      color={isOwed ? '#e03e2d' : config.color}
+      color={showOwed ? '#e03e2d' : config.color}
       style={{ borderRadius: 9999, border: 'none', fontWeight: 600, fontSize: 12 }}
     >
-      {isOwed ? '欠费' : config.label}
+      {showOwed ? '欠费' : config.label}
     </Tag>
   )
 }

@@ -22,7 +22,7 @@ const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 type Reply = {
   id: string; messageId: string; authorName: string; role: string
-  content: string; isReadByParent: boolean; createdAt: string
+  content: string; isReadByParent: boolean; isReadByTeacher: boolean; createdAt: string
 }
 type Message = {
   id: string; title: string; subject: string | null; status: string
@@ -84,6 +84,16 @@ function ChatBubble({ reply, isOwn }: { reply: Reply; isOwn: boolean }) {
         }}>
           {reply.content}
         </div>
+        {isOwn && (
+          <div style={{ marginTop: 4, fontSize: 10, color: '#9A8E7A', textAlign: 'right' }}>
+            {reply.isReadByTeacher ? '老师已查看' : '老师未查看'}
+          </div>
+        )}
+        {!isOwn && (
+          <div style={{ marginTop: 4, fontSize: 10, color: '#9A8E7A' }}>
+            {reply.isReadByParent ? '已查看' : '新回复'}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -171,7 +181,7 @@ export function ParentMessagesClient({
   const [filterChildId, setFilterChildId] = useState<string>(activeChildId)
   const { data, mutate } = usePausableSWR('/api/messages', fetcher, {
     fallbackData: { messages: initialMessages },
-    refreshInterval: 15_000,
+    refreshInterval: 5_000,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
   })
@@ -213,6 +223,7 @@ export function ParentMessagesClient({
       })
       if (!res.ok) { toast.error('发送失败'); return }
       setReplyText('')
+      toast.success('留言已发送，教师端将显示待回复提示')
       mutate()
     } catch { toast.error('网络错误') }
     finally { setSubmitting(false) }

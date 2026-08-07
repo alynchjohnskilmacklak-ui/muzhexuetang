@@ -35,8 +35,14 @@ export const PATCH = apiHandler(async () => {
         isReadByTeacher: false,
         role: 'parent',
         message: {
-          studentId: { in: taughtStudentIds.length ? taughtStudentIds : ['__none__'] },
-          OR: [{ teacherId: user.teacherId }, { teacherId: null }],
+          OR: [
+            { feedbackId: { not: null }, feedback: { teacherId: user.teacherId } },
+            {
+              feedbackId: null,
+              studentId: { in: taughtStudentIds.length ? taughtStudentIds : ['__none__'] },
+              OR: [{ teacherId: user.teacherId }, { teacherId: null }],
+            },
+          ],
         },
       },
       data: { isReadByTeacher: true },

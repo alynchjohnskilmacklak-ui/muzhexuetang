@@ -1,24 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getRequestPrisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/get-user'
+import { AuthError, requireAuthenticatedUser } from '@/lib/auth/guards'
 import { apiHandler } from '@/lib/api-handler'
+import { resolveTeacherForUser } from '@/lib/performance'
+import { canAccessFeedbackImage } from '@/lib/classroom-feedback/access'
+import { assertCanAccessFileAsset } from '@/lib/upload-access'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const { id } = await params
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
-
-  const prisma = await getRequestPrisma()
+  const user = await requireAuthenticatedUser()
+  const prisma = user.prisma
 
   try {
-    const file = await (prisma as unknown as { fileAsset: { findUnique: Function } }).fileAsset.findUnique({
+    const file = await prisma.fileAsset.findUnique({
       where: { id },
       select: {
         id: true, filename: true, originalName: true, mimeType: true, size: true,
         storageDriver: true, storageKey: true, url: true,
-        ownerType: true, studentId: true, feedbackId: true, postId: true,
+        ownerType: true, studentId: true, lessonId: true, feedbackId: true, postId: true,
         visibility: true, uploadedById: true, createdAt: true,
       },
     })
@@ -27,29 +27,32 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
 
     const f = file as Record<string, unknown>
 
-    // Permission check
-    if (user.role === 'admin') {
-      // Admin: allowed
-    } else if (user.role === 'teacher') {
-      if (f.visibility === 'ADMIN_ONLY') return NextResponse.json({ error: '无权访问该文件' }, { status: 403 })
-      // Teacher can access their own uploads + teacher-visible files
-      if (f.visibility === 'PRIVATE' && f.uploadedById !== user.id) {
-        return NextResponse.json({ error: '无权访问该文件' }, { status: 403 })
+    const isFeedbackAsset = f.ownerType === 'feedback'
+    if (isFeedbackAsset) {
+      let teacherId = user.teacherId
+      if (String(user.role).toLowerCase() === 'teacher' && !teacherId) {
+        teacherId = (await resolveTeacherForUser(user, prisma))?.id || null
       }
-    } else if (user.role === 'parent') {
-      if (f.visibility !== 'PARENT_VISIBLE' && f.visibility !== 'PUBLIC') {
-        return NextResponse.json({ error: '无权访问该文件' }, { status: 403 })
+      const storageKey = String(f.storageKey || '')
+      const access = await canAccessFeedbackImage(
+        prisma,
+        { id: user.id, role: user.role, teacherId },
+        [storageKey],
+      )
+      if (!access.get(storageKey)?.allowed) {
+        return NextResponse.json({ error: '无权访问该反馈图片' }, { status: 403 })
       }
-      // Verify parent is linked to the student
-      if (f.studentId) {
-        const linked = await prisma.student.findFirst({
-          where: { id: f.studentId as string, parentUserId: user.id },
-          select: { id: true },
-        })
-        if (!linked) return NextResponse.json({ error: '无权访问该文件' }, { status: 403 })
-      }
-    } else {
-      return NextResponse.json({ error: '无权访问' }, { status: 403 })
+    }
+
+    if (!isFeedbackAsset) {
+      await assertCanAccessFileAsset(user, {
+        ownerType: String(f.ownerType || ''),
+        visibility: String(f.visibility || ''),
+        uploadedById: String(f.uploadedById || ''),
+        studentId: f.studentId ? String(f.studentId) : null,
+        lessonId: f.lessonId ? String(f.lessonId) : null,
+        postId: f.postId ? String(f.postId) : null,
+      })
     }
 
     return NextResponse.json({
@@ -63,7 +66,8 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
       ownerType: f.ownerType,
       createdAt: f.createdAt,
     })
-  } catch {
+  } catch (error) {
+    if (error instanceof AuthError) throw error
     return NextResponse.json({ error: '文件不存在或FileAsset表未就绪' }, { status: 404 })
   }
 })

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { teacherCanAccessParentMessage } from '@/lib/parent-message-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,23 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
       parent: { select: { id: true, name: true } },
       student: { select: { id: true, name: true } },
       teacher: { select: { id: true, name: true } },
+      feedback: {
+        select: {
+          id: true,
+          teacherId: true,
+          studentIds: true,
+          createdAt: true,
+          summary: true,
+          overallComment: true,
+          classLesson: {
+            select: {
+              lessonDate: true,
+              subject: true,
+              group: { select: { course: { select: { name: true, subject: true } } } },
+            },
+          },
+        },
+      },
       replies: { orderBy: { createdAt: 'asc' } },
     },
   })
@@ -27,13 +45,9 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   if (user.role === 'teacher') {
-    if (!user.teacherId || !message.studentId || (message.teacherId && message.teacherId !== user.teacherId)) {
+    if (!user.teacherId || !await teacherCanAccessParentMessage(prisma, message, user.teacherId)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
-    const taught = await prisma.enrollment.count({
-      where: { studentId: message.studentId, status: 'ACTIVE', group: { OR: [{ teacherId: user.teacherId }, { teacherAssignments: { some: { teacherId: user.teacherId } } }] } },
-    })
-    if (taught === 0) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   if (user.role === 'parent' && message.parentId === user.id) {
@@ -41,12 +55,12 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
       where: { messageId: id, isReadByParent: false },
       data: { isReadByParent: true },
     })
-  } else if (user.role === 'teacher' || user.role === 'admin') {
+  } else if (user.role === 'teacher') {
     await prisma.parentMessageReply.updateMany({
       where: { messageId: id, isReadByTeacher: false },
       data: { isReadByTeacher: true },
     })
-    if (user.role === 'teacher' && message.status === 'OPEN') {
+    if (message.status === 'OPEN') {
       await prisma.parentMessage.update({ where: { id }, data: { status: 'READ' } })
     }
   }
@@ -64,13 +78,9 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const existing = await prisma.parentMessage.findUnique({ where: { id } })
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   if (user.role === 'teacher') {
-    if (!user.teacherId || !existing.studentId || (existing.teacherId && existing.teacherId !== user.teacherId)) {
+    if (!user.teacherId || !await teacherCanAccessParentMessage(prisma, existing, user.teacherId)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
-    const taught = await prisma.enrollment.count({
-      where: { studentId: existing.studentId, status: 'ACTIVE', group: { OR: [{ teacherId: user.teacherId }, { teacherAssignments: { some: { teacherId: user.teacherId } } }] } },
-    })
-    if (taught === 0) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const body = await req.json()

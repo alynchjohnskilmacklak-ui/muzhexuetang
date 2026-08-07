@@ -3,9 +3,9 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { requireAdminUser } from '@/lib/teacher-portal'
-import { isPayableFeedback, triggerFeedbackBonus } from '@/lib/teacher-salary'
+import { triggerFeedbackBonus } from '@/lib/teacher-salary'
 import { divisionWhere } from '@/lib/division'
-import { resolveFeedbackImageVariants, variantsForFeedback } from '@/lib/file-asset-variants'
+import { normalizeLessonContent } from '@/lib/classroom-feedback/access'
 
 import { apiHandler } from '@/lib/api-handler'
 
@@ -64,8 +64,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
     })
 
     const allStudentIds = [...new Set(feedbacks.flatMap((feedback) => feedback.studentIds))]
-    const allImageKeys = [...new Set(feedbacks.flatMap((feedback) => feedback.imageUrls).filter(Boolean))]
-    const imageVariantMap = await resolveFeedbackImageVariants(prisma, allImageKeys)
     const students = allStudentIds.length
       ? await prisma.student.findMany({
           where: { id: { in: allStudentIds } },
@@ -89,30 +87,19 @@ export const GET = apiHandler(async (req: NextRequest) => {
       date,
       feedbacks: feedbacks.map((feedback) => ({
         id: feedback.id,
-        teacherId: feedback.teacherId,
+        studentName: feedback.studentIds
+          .map((studentId) => studentMap.get(studentId)?.name)
+          .filter(Boolean)
+          .join('、') || '未知学生',
         teacherName: feedback.teacher.name,
-        lessonName: feedback.classLesson?.group?.name ?? '-',
-        courseName: feedback.classLesson?.group?.course?.name ?? '-',
-        subject: feedback.classLesson?.group?.course?.subject ?? '-',
-        status: feedback.status,
-        isValid: isPayableFeedback(feedback),
-        studentIds: feedback.studentIds,
-        studentCount: feedback.studentIds.length,
-        students: feedback.studentIds.map((studentId) => studentMap.get(studentId)).filter(Boolean),
-        knowledgePoints: feedback.knowledgePoints,
-        summary: feedback.summary,
-        homework: feedback.homework,
-        imageUrls: feedback.imageUrls,
-        images: variantsForFeedback(feedback.imageUrls, imageVariantMap),
-        studentRatings: feedback.studentRatings,
-        parentReply: feedback.parentReply,
-        parentRepliedAt: feedback.parentRepliedAt?.toISOString() ?? null,
-        adminReply: feedback.adminReply,
-        adminRepliedAt: feedback.adminRepliedAt?.toISOString() ?? null,
-        mood: feedback.mood,
+        lessonContent: feedback.lessonContent?.slice(0, 120) || null,
+        subject: feedback.classLesson?.subject
+          ?? feedback.classLesson?.group?.course?.subject
+          ?? '-',
+        date: (feedback.classLesson?.lessonDate ?? feedback.createdAt).toISOString(),
         tags: feedback.tags,
-        badge: feedback.badge,
-        createdAt: feedback.createdAt.toISOString(),
+        hasImage: feedback.imageUrls.length > 0,
+        status: feedback.status,
       })),
       lessons: allLessons.map((lesson) => ({
         id: lesson.id,
@@ -142,10 +129,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
     const body = await req.json()
     const { 
-      teacherId, studentIds, knowledgePoints, summary, homework, imageUrls, 
+      teacherId, studentIds, lessonContent: rawLessonContent, knowledgePoints, summary, homework, imageUrls,
       source = 'admin', status = 'DRAFT',
       mood, tags, badge, overallComment, classLessonId
     } = body
+    const lessonContent = normalizeLessonContent(rawLessonContent)
 
     if (!teacherId) return NextResponse.json({ error: '缺少 teacherId' }, { status: 400 })
     if (!Array.isArray(studentIds) || !studentIds.length) return NextResponse.json({ error: '请选择学员' }, { status: 400 })
@@ -166,6 +154,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           source,
           targetType: 'CLASS',
           studentIds,
+          lessonContent: lessonContent || null,
           knowledgePoints: Array.isArray(knowledgePoints) ? knowledgePoints : [],
           summary: summary || null,
           homework: Array.isArray(homework) ? homework : [],

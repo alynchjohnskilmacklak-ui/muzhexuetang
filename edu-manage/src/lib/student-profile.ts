@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 import { visiblePerformancePostWhere, visibleTeacherWhere } from '@/lib/business-visibility'
 import { resolveFeedbackImageVariants, variantsForFeedback, type FeedbackImageVariant } from '@/lib/file-asset-variants'
+import { calculateIntensiveDeductHours } from '@/lib/intensive-class'
 
 export interface ProfileRange { from: Date; to: Date }
 
@@ -56,11 +57,13 @@ export async function getStudentProfile(
       }),
       prisma.classroomFeedback.findMany({
         where: { studentIds: { has: studentId }, status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
-        select: { id: true, mood: true, tags: true, knowledgePoints: true, summary: true, overallComment: true,
+        select: { id: true, mood: true, tags: true, lessonContent: true, knowledgePoints: true, summary: true, overallComment: true,
+          feedbackGroupId: true,
           homework: true, badge: true,
           imageUrls: true,
           homeworkDone: true, inClassRating: true,
-          createdAt: true, teacher: { select: { name: true, subjects: true } } },
+          createdAt: true, teacher: { select: { id: true, name: true, subjects: true } },
+          classLesson: { select: { subject: true, actualMinutes: true, intensiveReviewStatus: true, group: { select: { intensiveMode: true, course: { select: { subject: true } }, teacherAssignments: { select: { teacherId: true, subject: true } } } } } } },
         orderBy: { createdAt: 'desc' }, take: 50,
       }),
       prisma.performancePost.findMany({
@@ -70,7 +73,11 @@ export async function getStudentProfile(
       }),
       prisma.attendance.findMany({
         where: { studentId, createdAt: { gte: from, lte: to } },
-        select: { status: true },
+        select: {
+          status: true,
+          actualMinutes: true,
+          lesson: { select: { actualMinutes: true, intensiveReviewStatus: true, group: { select: { intensiveMode: true } } } },
+        },
       }),
       prisma.stageSummary.findFirst({
         where: { studentId, status: 'PUBLISHED' },
@@ -87,6 +94,16 @@ export async function getStudentProfile(
     ])
 
   if (!student) return null
+  const feedbackGroupIds = [...new Set(feedbacks.map((feedback) => feedback.feedbackGroupId).filter((id): id is string => Boolean(id)))]
+  const feedbackGroups = feedbackGroupIds.length ? await prisma.classGroup.findMany({
+    where: { id: { in: feedbackGroupIds } },
+    select: {
+      id: true,
+      course: { select: { subject: true } },
+      teacherAssignments: { select: { teacherId: true, subject: true } },
+    },
+  }) : []
+  const feedbackGroupMap = new Map(feedbackGroups.map((group) => [group.id, group]))
   const feedbackImageVariants = await resolveFeedbackImageVariants(prisma, feedbacks.flatMap(feedback => feedback.imageUrls))
 
   // ── 学：知识掌握 ──
@@ -109,6 +126,13 @@ export async function getStudentProfile(
   const attTotal = attendances.length
   const attPresent = attendances.filter(a => a.status === 'PRESENT' || a.status === 'MAKEUP').length
   const attendanceRate = attTotal ? Math.round((attPresent / attTotal) * 100) : null
+  const approvedIntensiveHours = Math.round(attendances.reduce((total, attendance) => {
+    if (attendance.lesson?.group?.intensiveMode !== 'INTENSIVE' || attendance.lesson.intensiveReviewStatus !== 'APPROVED') return total
+    return total + calculateIntensiveDeductHours(
+      attendance.status,
+      Number(attendance.actualMinutes || attendance.lesson.actualMinutes || 0),
+    )
+  }, 0) * 100) / 100
   const moodTimeline = feedbacks
     .filter(f => f.mood)
     .slice(0, 8)
@@ -202,8 +226,20 @@ export async function getStudentProfile(
 
   const subjOf = (t?: { subjects?: string | null }) =>
     (t?.subjects || '').split(/[，,、\s]+/).filter(Boolean)[0] || ''
+  const subjectOfFeedback = (feedback: typeof feedbacks[number]) => {
+    const lessonSubject = feedback.classLesson?.subject
+      || feedback.classLesson?.group?.teacherAssignments.find(
+        (assignment) => assignment.teacherId === feedback.teacher.id && assignment.subject,
+      )?.subject
+      || feedback.classLesson?.group?.course?.subject
+    if (lessonSubject) return lessonSubject
+    const group = feedback.feedbackGroupId ? feedbackGroupMap.get(feedback.feedbackGroupId) : null
+    return group?.teacherAssignments.find(
+      (assignment) => assignment.teacherId === feedback.teacher.id && assignment.subject,
+    )?.subject || group?.course?.subject || subjOf(feedback.teacher)
+  }
 
-  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; teacherSubject?: string; images?: Array<string | FeedbackImageVariant>; refType?: 'feedback' | 'paper' | 'post'; refId?: string; detail?: { comment?: string; summary?: string; knowledgePoints?: string[]; homework?: string[]; tags?: string[]; badge?: string | null; mood?: string | null } }
+  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; teacherSubject?: string; images?: Array<string | FeedbackImageVariant>; refType?: 'feedback' | 'paper' | 'post'; refId?: string; detail?: { lessonContent?: string; comment?: string; summary?: string; knowledgePoints?: string[]; homework?: string[]; tags?: string[]; badge?: string | null; mood?: string | null } }
   const timeline: TLItem[] = []
   for (const p of papers) {
     const m = p.questions.filter(q => q.mastery === 'MASTERED').length
@@ -212,10 +248,11 @@ export async function getStudentProfile(
   for (const f of feedbacks) timeline.push({
     type: 'feedback', title: '课堂反馈',
     sub: f.overallComment || f.summary || (f.tags || []).join(' '),
-    date: f.createdAt, teacher: f.teacher?.name, teacherSubject: subjOf(f.teacher),
+    date: f.createdAt, teacher: f.teacher?.name, teacherSubject: subjectOfFeedback(f),
     images: variantsForFeedback(f.imageUrls, feedbackImageVariants),
     refType: 'feedback', refId: f.id,
     detail: {
+      lessonContent: f.lessonContent || undefined,
       comment: f.overallComment || undefined,
       summary: f.summary || undefined,
       knowledgePoints: f.knowledgePoints || [],
@@ -239,6 +276,9 @@ export async function getStudentProfile(
     overview: {
       attendanceRate, totalHours: student.totalHours,
       paperCount: papers.length, badgeCount: badges.length,
+      feedbackCount: feedbacks.length,
+      subjectCount: new Set(feedbacks.map(subjectOfFeedback).filter(Boolean)).size,
+      approvedIntensiveHours,
     },
     study: {
       mastery,

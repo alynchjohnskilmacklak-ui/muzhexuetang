@@ -5,6 +5,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { revalidatePath } from 'next/cache'
 import { apiHandler } from '@/lib/api-handler'
+import { calculateApprovedIntensiveHours, calculateTaughtHours } from '@/lib/student-taught-hours'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,14 +52,18 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
   if (!student) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   // Ownership check: parents can only see their own children, teachers only their assigned students
-  if (user.role === 'parent' && student.parentUserId !== user.id) {
+  if (!['admin', 'SUPER_ADMIN', 'teacher', 'parent'].includes(user.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  if (user.role === 'parent' && student.parentUserId !== user.id && student.parentId !== user.id) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
   if (user.role === 'teacher') {
     const teacher = await resolveTeacherForUser(user, prisma)
     if (!teacher) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     const isAssigned = student.enrollments.some(
-      e => e.group?.teacherAssignments?.some(ta => ta.teacherId === teacher.id)
+      e => e.group?.teacherId === teacher.id
+        || e.group?.teacherAssignments?.some(ta => ta.teacherId === teacher.id)
     )
     if (!isAssigned) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
@@ -67,13 +72,46 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     && enrollment.group?.status !== 'ARCHIVED'
     && enrollment.group?.course?.isActive !== false
   ))
+  const approvedIntensiveAttendances = await prisma.attendance.findMany({
+    where: {
+      studentId: student.id,
+      lesson: {
+        intensiveReviewStatus: 'APPROVED',
+        group: { intensiveMode: 'INTENSIVE' },
+      },
+    },
+    select: {
+      status: true,
+      actualMinutes: true,
+      lesson: { select: { actualMinutes: true } },
+    },
+  })
   const remainHours = activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.remainHours || 0), 0)
   const totalHours = activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.totalHours || 0), 0)
+  const taughtHours = calculateTaughtHours(
+    activeEnrollments,
+    calculateApprovedIntensiveHours(approvedIntensiveAttendances),
+  )
+  const visibleStudent = user.role === 'teacher'
+    ? {
+        ...student,
+        parent: undefined,
+        fees: undefined,
+        parentName: undefined,
+        parentPhone: undefined,
+        parentId: undefined,
+        parentUserId: undefined,
+        phone: undefined,
+        email: undefined,
+      }
+    : student
+
   return NextResponse.json({
-    ...student,
+    ...visibleStudent,
     enrollments: activeEnrollments,
     remainHours,
     totalHours,
+    taughtHours,
   })
 })
 

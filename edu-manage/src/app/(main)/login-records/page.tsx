@@ -1,14 +1,16 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Card, Input, message, Modal, Select, Space, Statistic, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { ReloadOutlined, SafetyOutlined, SearchOutlined } from '@ant-design/icons'
+import { isUserDisabled } from '@/lib/user-status'
 
 const { Text, Title } = Typography
 
 type LoginRecordRow = {
   id: string
+  division: 'JUNIOR' | 'SENIOR'
   email: string
   success: boolean
   failReason?: string
@@ -36,6 +38,7 @@ export default function LoginRecordsPage() {
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState<string>('')
+  const [division, setDivision] = useState<'ALL' | 'JUNIOR' | 'SENIOR'>('ALL')
   const [search, setSearch] = useState('')
 
   const fetchRecords = async (nextPage = page) => {
@@ -46,6 +49,7 @@ export default function LoginRecordsPage() {
         limit: '50',
       })
       if (success) params.set('success', success)
+      params.set('division', division)
       if (search.trim()) params.set('search', search.trim())
 
       const res = await fetch(`/api/login-records?${params.toString()}`)
@@ -65,10 +69,10 @@ export default function LoginRecordsPage() {
   useEffect(() => {
     fetchRecords(1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [success])
+  }, [success, division])
 
-  const handleToggleStatus = async (userId: string, currentStatus?: string) => {
-    const isDisabled = currentStatus === 'disabled'
+  const handleToggleStatus = async (row: LoginRecordRow) => {
+    const isDisabled = isUserDisabled(row.userStatus)
     const action = isDisabled ? '恢复' : '禁用'
 
     Modal.confirm({
@@ -81,10 +85,10 @@ export default function LoginRecordsPage() {
       okButtonProps: { danger: !isDisabled },
       onOk: async () => {
         const newStatus = isDisabled ? 'active' : 'disabled'
-        const res = await fetch(`/api/users/${userId}/status`, {
+        const res = await fetch(`/api/users/${row.userId}/status`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({ status: newStatus, division: row.division }),
         })
         if (res.ok) {
           message.success(`账号已${action}`)
@@ -97,7 +101,7 @@ export default function LoginRecordsPage() {
     })
   }
 
-  const columns = useMemo<ColumnsType<LoginRecordRow>>(() => [
+  const columns: ColumnsType<LoginRecordRow> = [
     {
       title: '用户',
       dataIndex: 'email',
@@ -105,12 +109,22 @@ export default function LoginRecordsPage() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Text strong style={{ fontSize: 14 }}>{row.userName || email}</Text>
-            {row.userStatus === 'disabled' && (
+            {row.userStatus && isUserDisabled(row.userStatus) && (
               <Tag color="error" style={{ fontSize: 10, padding: '0 4px' }}>已禁用</Tag>
             )}
           </div>
           <Text type="secondary" style={{ fontSize: 12 }}>{email}</Text>
         </div>
+      ),
+    },
+    {
+      title: '学部',
+      dataIndex: 'division',
+      width: 80,
+      render: (value: LoginRecordRow['division']) => (
+        <Tag color={value === 'JUNIOR' ? 'orange' : 'blue'}>
+          {value === 'JUNIOR' ? '初中' : '高中'}
+        </Tag>
       ),
     },
     {
@@ -132,7 +146,11 @@ export default function LoginRecordsPage() {
       dataIndex: 'success',
       width: 110,
       render: (ok: boolean, row) => {
-        if (ok) return <Tag color="success">登录成功</Tag>
+        if (ok) {
+          return row.failReason === 'session_resume'
+            ? <Tag color="processing">免密访问</Tag>
+            : <Tag color="success">密码登录</Tag>
+        }
         const reasonMap: Record<string, string> = {
           wrong_password: '密码错误',
           not_found: '账号不存在',
@@ -178,7 +196,7 @@ export default function LoginRecordsPage() {
 
         return (
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            {row.userStatus === 'disabled' ? (
+            {isUserDisabled(row.userStatus) ? (
               <Button
                 size="small"
                 style={{
@@ -186,7 +204,7 @@ export default function LoginRecordsPage() {
                   borderColor: '#27a644',
                   fontSize: 12,
                 }}
-                onClick={() => handleToggleStatus(row.userId!, row.userStatus)}
+                onClick={() => handleToggleStatus(row)}
               >
                 恢复账号
               </Button>
@@ -196,7 +214,7 @@ export default function LoginRecordsPage() {
                 danger
                 type="text"
                 style={{ fontSize: 12 }}
-                onClick={() => handleToggleStatus(row.userId!, row.userStatus)}
+                onClick={() => handleToggleStatus(row)}
               >
                 禁用账号
               </Button>
@@ -205,7 +223,7 @@ export default function LoginRecordsPage() {
         )
       },
     },
-  ], [])
+  ]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -218,7 +236,7 @@ export default function LoginRecordsPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
-        <Card size="small"><Statistic title="今日登录次数" value={stats.todayTotal} prefix={<SafetyOutlined />} /></Card>
+        <Card size="small"><Statistic title="今日成功访问" value={stats.todayTotal} prefix={<SafetyOutlined />} /></Card>
         <Card size="small"><Statistic title="今日失败次数" value={stats.todayFail} valueStyle={{ color: '#cf1322' }} /></Card>
         <Card size="small"><Statistic title="当前锁定账号" value={stats.lockedCount} valueStyle={{ color: '#d46b08' }} /></Card>
       </div>
@@ -228,6 +246,16 @@ export default function LoginRecordsPage() {
         title="登录明细"
         extra={
           <Space wrap>
+            <Select
+              value={division}
+              style={{ width: 110 }}
+              onChange={setDivision}
+              options={[
+                { value: 'ALL', label: '全部学部' },
+                { value: 'JUNIOR', label: '初中部' },
+                { value: 'SENIOR', label: '高中部' },
+              ]}
+            />
             <Select
               value={success}
               style={{ width: 120 }}
@@ -251,7 +279,7 @@ export default function LoginRecordsPage() {
         }
       >
         <Table
-          rowKey="id"
+          rowKey={(row) => `${row.division}:${row.id}`}
           loading={loading}
           columns={columns}
           dataSource={records}

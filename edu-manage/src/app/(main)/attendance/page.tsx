@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Drawer, Select, Space, Spin, Empty, Tag, Typography, message, Input } from 'antd'
+import { Button, Card, Drawer, Modal, Select, Space, Empty, Tag, Typography, message, Input, InputNumber } from 'antd'
 import { CheckCircleOutlined, TeamOutlined, EnvironmentOutlined, ClockCircleOutlined, UserOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { format } from 'date-fns'
@@ -18,6 +18,8 @@ type AttStatus = 'present' | 'leave' | 'absent' | 'late'
 
 const CLASS_TYPE_LABELS: Record<string, string> = {
   ONE_ON_ONE: '一对一',
+  ONE_ON_TWO: '一对二',
+  ONE_ON_THREE: '一对三',
   SMALL_GROUP: '小班课',
   GROUP: '班课',
   SMALL_CLASS: '小班课',
@@ -75,6 +77,11 @@ export default function AttendancePage() {
   const [attMap, setAttMap] = useState<Map<string, AttStatus>>(new Map())
   const [submitting, setSubmitting] = useState(false)
   const [attendanceDrawerOpen, setAttendanceDrawerOpen] = useState(false)
+  const [actualMinutes, setActualMinutes] = useState<number | null>(null)
+  const [adjustmentOpen, setAdjustmentOpen] = useState(false)
+  const [adjustmentMinutes, setAdjustmentMinutes] = useState<number | null>(null)
+  const [adjustmentReason, setAdjustmentReason] = useState('')
+  const [adjusting, setAdjusting] = useState(false)
 
   const teacherList: Record<string, unknown>[] = Array.isArray(teachersData?.teachers) ? teachersData.teachers : Array.isArray(teachersData) ? teachersData : []
   const schedules: Record<string, unknown>[] = Array.isArray(lessonsRaw) ? lessonsRaw.map((lesson: Record<string, unknown>) => {
@@ -84,7 +91,9 @@ export default function AttendancePage() {
       status: toLocalStatus(student.status),
     }))
     const lessonDate = String(lesson.lessonDate || selectedDate).slice(0, 10)
-    const classType = group?.type as string || ''
+    const classType = lesson.intensiveMode === 'INTENSIVE'
+      ? lesson.teachingType as string || 'ONE_ON_ONE'
+      : group?.type as string || ''
     return {
       id: lesson.id,
       lessonId: lesson.id,
@@ -96,6 +105,11 @@ export default function AttendancePage() {
       roomName: group?.roomName || '未分配',
       studentCount: lesson.totalStudents || students.length,
       attendanceStatus: Number(lesson.attendanceCount || 0) > 0 ? 'done' : 'pending',
+      intensiveMode: lesson.intensiveMode,
+      teachingType: lesson.teachingType,
+      plannedMinutes: lesson.plannedMinutes,
+      actualMinutes: lesson.actualMinutes,
+      settlementStatus: lesson.settlementStatus,
       students,
       attendances: students.filter((student) => student.status).map((student) => ({
         studentId: student.studentId,
@@ -135,6 +149,7 @@ export default function AttendancePage() {
       newMap.set(stu.studentId as string, (existing?.status as AttStatus) || 'present')
     })
     setAttMap(newMap)
+    setActualMinutes(Number(schedule.actualMinutes || schedule.plannedMinutes || 0) || null)
     if (isMobile) {
       setAttendanceDrawerOpen(true)
     }
@@ -169,7 +184,13 @@ export default function AttendancePage() {
     const records = students.map(s => ({
       studentId: s.studentId,
       status: toApiStatus(attMap.get(s.studentId as string) || 'present'),
+      actualMinutes: selectedSchedule.intensiveMode === 'INTENSIVE' ? actualMinutes : undefined,
     }))
+    if (selectedSchedule.intensiveMode === 'INTENSIVE' && !actualMinutes) {
+      message.warning('请填写实际授课分钟')
+      setSubmitting(false)
+      return
+    }
     try {
       const lessonId = (selectedSchedule.lessonId || selectedSchedule.id) as string
       const res = await fetch('/api/admin/attendance/submit', {
@@ -184,6 +205,44 @@ export default function AttendancePage() {
     } catch (e: unknown) {
       message.error(e instanceof Error ? e.message : '提交失败')
     } finally { setSubmitting(false) }
+  }
+
+  const openSettlementAdjustment = () => {
+    if (!selectedSchedule) return
+    setAdjustmentMinutes(Number(selectedSchedule.actualMinutes || 0) || null)
+    setAdjustmentReason('')
+    setAdjustmentOpen(true)
+  }
+
+  const handleSettlementAdjustment = async () => {
+    if (!selectedSchedule || !adjustmentMinutes || !adjustmentReason.trim()) {
+      message.warning('请填写新的实际分钟和调整原因')
+      return
+    }
+    setAdjusting(true)
+    try {
+      const lessonId = (selectedSchedule.lessonId || selectedSchedule.id) as string
+      const res = await fetch('/api/admin/intensive-settlement/adjust', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lessonId, newMinutes: adjustmentMinutes, reason: adjustmentReason.trim() }),
+      })
+      const payload = await res.json()
+      if (!res.ok) throw new Error(payload.error || '调整失败')
+      message.success(payload.idempotent ? '结算数据未变化，无需重复调整' : '结算调整成功')
+      setAdjustmentOpen(false)
+      setActualMinutes(adjustmentMinutes)
+      setSelectedSchedule((current) => current ? {
+        ...current,
+        actualMinutes: adjustmentMinutes,
+        settlementStatus: 'ADJUSTED',
+      } : current)
+      await mutateData()
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '调整失败')
+    } finally {
+      setAdjusting(false)
+    }
   }
 
   const statusBtnStyle = (active: boolean, target: AttStatus) => {
@@ -217,6 +276,8 @@ export default function AttendancePage() {
             getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
             options={[
               { label: '一对一', value: 'ONE_ON_ONE' },
+              { label: '一对二', value: 'ONE_ON_TWO' },
+              { label: '一对三', value: 'ONE_ON_THREE' },
               { label: '小班课', value: 'SMALL_CLASS' },
             ]} />
           <Text type="secondary" style={{ fontSize: 12 }}>共 {allSchedules.length} 节课</Text>
@@ -312,9 +373,35 @@ export default function AttendancePage() {
                           <span style={{ fontSize: 12, color: '#98A2B3' }}><TeamOutlined style={{ marginRight: 4 }} />{students.length}人</span>
                         </Space>
                       </div>
-                      <Button onClick={setAllPresent}>全部出勤</Button>
+                      <Button
+                        disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}
+                        onClick={setAllPresent}
+                      >全部出勤</Button>
                     </div>
                   </Card>
+
+                  {selectedSchedule.intensiveMode === 'INTENSIVE' && (
+                    <Card bordered={false} style={{ borderRadius: 10, background: '#faf8f5', border: '1px solid #EEE7E1' }} bodyStyle={{ padding: '10px 16px' }}>
+                      <Space wrap>
+                        <Text strong>实际授课分钟</Text>
+                        <InputNumber
+                          min={1}
+                          max={600}
+                          value={actualMinutes}
+                          disabled={selectedSchedule.settlementStatus !== 'UNSETTLED'}
+                          onChange={(value) => setActualMinutes(value)}
+                          addonAfter="分钟"
+                        />
+                        <Text type="secondary">计划 {String(selectedSchedule.plannedMinutes || '-')} 分钟</Text>
+                        {selectedSchedule.settlementStatus !== 'UNSETTLED' && (
+                          <>
+                            <Tag color="green">已结算锁定</Tag>
+                            <Button onClick={openSettlementAdjustment}>调整结算</Button>
+                          </>
+                        )}
+                      </Space>
+                    </Card>
+                  )}
 
                   <div style={{ maxHeight: isMobile ? 'none' : 'calc(100vh - 500px)', overflowY: 'auto' }}>
                     {students.map((s: Record<string, unknown>) => {
@@ -334,7 +421,9 @@ export default function AttendancePage() {
                             </div>
                             <Space size={4}>
                               {(['present', 'leave', 'absent', 'late'] as AttStatus[]).map(t => (
-                                <button key={t} onClick={() => setStudentStatus(s.studentId as string, t)}
+                                <button key={t}
+                                  disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}
+                                  onClick={() => setStudentStatus(s.studentId as string, t)}
                                   style={statusBtnStyle(status === t, t)}>
                                   {t === 'present' ? '出勤' : t === 'leave' ? '请假' : t === 'absent' ? '旷课' : '迟到'}
                                 </button>
@@ -355,6 +444,7 @@ export default function AttendancePage() {
                         <span style={{ fontSize: 13, color: '#6464dc' }}>迟到 {summary.late}</span>
                       </Space>
                       <Button type="primary" loading={submitting} onClick={handleSubmit}
+                        disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}
                         style={{ background: '#E8784A', borderColor: '#E8784A', minWidth: 120 }}
                         icon={<CheckCircleOutlined />}>提交考勤</Button>
                     </div>
@@ -404,9 +494,32 @@ export default function AttendancePage() {
                     </span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-                    <Button size="small" onClick={setAllPresent}>全部出勤</Button>
+                    <Button
+                      size="small"
+                      disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}
+                      onClick={setAllPresent}
+                    >全部出勤</Button>
                   </div>
                 </div>
+
+                {selectedSchedule.intensiveMode === 'INTENSIVE' && (
+                  <div style={{ padding: '10px 16px', background: '#faf8f5', borderBottom: '1px solid #EEE7E1' }}>
+                    <Space wrap>
+                      <Text strong style={{ fontSize: 12 }}>实际授课分钟</Text>
+                      <InputNumber
+                        min={1}
+                        max={600}
+                        value={actualMinutes}
+                        disabled={selectedSchedule.settlementStatus !== 'UNSETTLED'}
+                        onChange={(value) => setActualMinutes(value)}
+                        addonAfter="分钟"
+                      />
+                      {selectedSchedule.settlementStatus !== 'UNSETTLED' && (
+                        <Button size="small" onClick={openSettlementAdjustment}>调整结算</Button>
+                      )}
+                    </Space>
+                  </div>
+                )}
 
                 {/* 学生列表 */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
@@ -443,6 +556,7 @@ export default function AttendancePage() {
                             const c = statusColors[t]
                             return (
                               <button key={t}
+                                disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}
                                 onClick={() => setStudentStatus(s.studentId as string, t)}
                                 style={{
                                   padding: '8px 0',
@@ -492,6 +606,7 @@ export default function AttendancePage() {
                       </div>
                     </div>
                     <Button type="primary" loading={submitting} size="large"
+                      disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}
                       onClick={async () => { await handleSubmit(); setAttendanceDrawerOpen(false) }}
                       style={{ background: '#E8784A', borderColor: '#E8784A', height: 44, borderRadius: 8, padding: '0 24px' }}
                       icon={<CheckCircleOutlined />}>
@@ -504,6 +619,43 @@ export default function AttendancePage() {
           })()}
         </Drawer>
       )}
+      <Modal
+        title="调整突击班结算"
+        open={adjustmentOpen}
+        confirmLoading={adjusting}
+        okText="确认调整"
+        cancelText="取消"
+        onOk={handleSettlementAdjustment}
+        onCancel={() => setAdjustmentOpen(false)}
+        destroyOnHidden
+      >
+        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+          <Text type="secondary">原实际授课分钟：{String(selectedSchedule?.actualMinutes || '-')}</Text>
+          <div>
+            <Text strong>调整后分钟</Text>
+            <InputNumber
+              min={1}
+              max={600}
+              value={adjustmentMinutes}
+              onChange={(value) => setAdjustmentMinutes(value)}
+              addonAfter="分钟"
+              style={{ width: '100%', marginTop: 8 }}
+            />
+          </div>
+          <div>
+            <Text strong>调整原因</Text>
+            <Input.TextArea
+              value={adjustmentReason}
+              onChange={(event) => setAdjustmentReason(event.target.value)}
+              maxLength={500}
+              rows={4}
+              showCount
+              placeholder="请填写实际授课时间变更原因"
+              style={{ marginTop: 8 }}
+            />
+          </div>
+        </Space>
+      </Modal>
     </PageLayout>
   )
 }

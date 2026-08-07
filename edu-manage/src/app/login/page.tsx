@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { Button, Input, Tag, Typography } from 'antd'
+import { Button, Checkbox, Input, Tag, Typography } from 'antd'
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
@@ -15,6 +14,12 @@ import {
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { SplashScreen } from '@/components/SplashScreen'
 import { toast } from 'sonner'
+import {
+  clearLoginPreference,
+  offerPasswordManagerSave,
+  readLoginPreference,
+  writeLoginPreference,
+} from '@/lib/login-preferences'
 
 const { Text } = Typography
 
@@ -61,6 +66,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   DISABLED: '该账号已被停用，请联系管理员',
   LOCKED: '密码连续输错次数过多，账号已临时锁定，请30分钟后重试',
   ACCOUNT_LOCKED: '该账号尝试次数过多，请15分钟后重试',
+  RATE_LIMITED: '登录请求过于频繁，请稍后再试',
   uninitialized: '账号未初始化，请联系管理员创建账号',
 }
 
@@ -116,7 +122,7 @@ function BrandLeft({ mounted }: { mounted: boolean }) {
 
 function RightForm({
   role, setRole, division, setDivision, loading, formError, setFormError, onFinish, showPwd, setShowPwd, mounted,
-  detectedRole, onEmailBlur, isMobile, reason,
+  detectedRole, onEmailBlur, isMobile, reason, initialEmail, rememberAccount, setRememberAccount,
 }: {
   role: LoginRole; setRole: (r: LoginRole) => void
   division: LoginDivision; setDivision: (d: LoginDivision) => void
@@ -129,9 +135,16 @@ function RightForm({
   onEmailBlur: (email: string) => void
   isMobile: boolean
   reason?: string | null
+  initialEmail: string
+  rememberAccount: boolean
+  setRememberAccount: (remember: boolean) => void
 }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+
+  useEffect(() => {
+    if (initialEmail) setEmail((current) => current || initialEmail)
+  }, [initialEmail])
 
   const handleLogin = async () => {
     setFormError('')
@@ -223,11 +236,23 @@ function RightForm({
           <div style={{ fontSize: 22, fontWeight: 800, color: '#1a1201', marginBottom: 4 }}>欢迎回来</div>
           <Text style={{ color: '#9a8e7a', display: 'block', marginBottom: 26, fontSize: 14 }}>请选择对应身份入口，再输入账号密码。</Text>
 
+          <form
+            autoComplete="on"
+            onSubmit={(event) => {
+              event.preventDefault()
+              void handleLogin()
+            }}
+          >
           <div style={{ marginBottom: 16 }}>
             <Input
+              id="login-username"
+              name="username"
+              aria-label="登录账号"
               prefix={<UserOutlined style={{ color: '#C5A28A' }} />}
               placeholder={PLACEHOLDER_MAP[role].email}
               autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
               value={email}
               onChange={(e) => { setEmail(e.target.value); setFormError('') }}
               onBlur={(e) => { const v = e.target.value.trim(); if (v) onEmailBlur(v) }}
@@ -238,6 +263,9 @@ function RightForm({
           </div>
           <div style={{ marginBottom: 8 }}>
             <Input
+              id="login-password"
+              name="password"
+              aria-label="登录密码"
               prefix={<LockOutlined style={{ color: '#C5A28A' }} />}
               type={showPwd ? 'text' : 'password'}
               placeholder={PLACEHOLDER_MAP[role].pwd}
@@ -249,6 +277,15 @@ function RightForm({
               suffix={<span onClick={() => setShowPwd(!showPwd)} style={{ cursor: 'pointer', color: '#C5A28A' }}>{showPwd ? <EyeOutlined /> : <EyeInvisibleOutlined />}</span>}
               style={{ borderRadius: isMobile ? 12 : 10, height: isMobile ? 48 : 46, background: '#FAFAFA' }}
             />
+          </div>
+          <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+            <Checkbox
+              checked={rememberAccount}
+              onChange={(event) => setRememberAccount(event.target.checked)}
+            >
+              记住账号
+            </Checkbox>
+            <Text style={{ color: '#9a8e7a', fontSize: 12 }}>密码由手机或浏览器安全保存</Text>
           </div>
           {detectedRole && (
             <div style={{ marginBottom: 16, fontSize: 11, color: '#E87545' }}>
@@ -262,7 +299,8 @@ function RightForm({
               <span style={{ flex: 1 }}>{formError}</span>
             </div>
           ) : null}
-          <Button type="primary" loading={loading} onClick={handleLogin} block style={{ height: isMobile ? 48 : 46, borderRadius: isMobile ? 12 : 10, fontSize: 16, fontWeight: 700, background: 'linear-gradient(135deg, #E87545, #F09A5B)', border: 'none', boxShadow: '0 6px 18px rgba(232,117,69,.3)' }}>登录</Button>
+          <Button type="primary" htmlType="submit" loading={loading} block style={{ height: isMobile ? 48 : 46, borderRadius: isMobile ? 12 : 10, fontSize: 16, fontWeight: 700, background: 'linear-gradient(135deg, #E87545, #F09A5B)', border: 'none', boxShadow: '0 6px 18px rgba(232,117,69,.3)' }}>登录</Button>
+          </form>
         </div>
 
         <p style={{ textAlign: 'center', fontSize: 10, color: '#c8c4be', marginTop: 10 }}>牧哲学堂 · 让每一位学生学有所成</p>
@@ -304,10 +342,7 @@ function MobileBrandBar() {
 
 /* ── Main Page ── */
 export default function LoginPage() {
-  const [showSplash, setShowSplash] = useState(() => {
-    if (typeof window !== 'undefined') return !sessionStorage.getItem('splash-shown')
-    return false
-  })
+  const [showSplash, setShowSplash] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showPwd, setShowPwd] = useState(false)
   const [role, setRole] = useState<LoginRole>('admin')
@@ -316,17 +351,30 @@ export default function LoginPage() {
   const [detectedRole, setDetectedRole] = useState<LoginRole | null>(null)
   const [reason, setReason] = useState<string | null>(null)
   const [formError, setFormError] = useState('')
-  const router = useRouter()
+  const [initialEmail, setInitialEmail] = useState('')
+  const [rememberAccount, setRememberAccount] = useState(true)
   const isMobile = useIsMobile() ?? false
+
+  const handleSplashDone = useCallback(() => {
+    setShowSplash(false)
+    window.sessionStorage.setItem('splash-shown', '1')
+  }, [])
 
   useEffect(() => {
     setMounted(true)
     setReason(new URLSearchParams(window.location.search).get('reason'))
+    const preference = readLoginPreference()
+    if (preference) {
+      setInitialEmail(preference.email)
+      setRole(preference.role)
+      setDivision(preference.division)
+    }
+    if (!window.sessionStorage.getItem('splash-shown')) setShowSplash(true)
   }, [])
 
-  const handleSplashDone = () => {
-    setShowSplash(false)
-    if (typeof window !== 'undefined') sessionStorage.setItem('splash-shown', '1')
+  const updateRememberAccount = (remember: boolean) => {
+    setRememberAccount(remember)
+    if (!remember) clearLoginPreference()
   }
 
   const detectRole = async (email: string) => {
@@ -348,46 +396,34 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const email = values.email.trim().toLowerCase()
-      const loginRes = await fetch('/api/auth/login-check', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: values.password, loginRole: role, division }),
+      const result = await signIn('credentials', {
+        email, password: values.password, loginRole: role, division, redirect: false,
       })
-      const loginData = await loginRes.json().catch(() => null)
 
-      if (!loginRes.ok) {
-        const code = loginData?.code || ''
-        const msg = ERROR_MESSAGES[code] || loginData?.error || '登录失败，请检查后重试'
+      if (!result || result.error) {
+        const code = result?.code || ''
+        const msg = ERROR_MESSAGES[code] || '账号或密码不正确，请重新尝试'
         setFormError(msg)
         toast.error(msg, { duration: code === 'LOCKED' || code === 'ACCOUNT_LOCKED' ? 8000 : 5000 })
         setLoading(false)
         return
       }
 
-      const result = await signIn('credentials', {
-        email, password: values.password, loginRole: role, division, redirect: false,
-      })
-
-      if (!result || result.error) {
-        setFormError('登录失败，请重新尝试')
-        toast.error('登录失败，请重新尝试', { duration: 5000 })
-        setLoading(false)
-        return
-      }
-
-      fetch('/api/auth/log-device', { method: 'POST' }).catch((error) => console.warn('设备日志记录失败', error))
-
-      const sessionRes = await fetch('/api/auth/session')
-      const sessionData = await sessionRes.json()
-      const userRole = sessionData?.user?.role
-
       setFormError('')
+      if (rememberAccount) {
+        writeLoginPreference({ email, role, division })
+        await offerPasswordManagerSave(email, values.password)
+      } else {
+        clearLoginPreference()
+      }
       toast.success('登录成功，正在跳转...', { duration: 2000 })
 
-      if (userRole === 'parent') router.push('/parent/dashboard')
-      else if (userRole === 'teacher') router.push(`/teacher/dashboard?division=${division}`)
-      else router.push(`/dashboard?division=${division}`)
-      router.refresh()
+      const destination = role === 'parent'
+        ? '/parent/dashboard'
+        : role === 'teacher'
+          ? `/teacher/dashboard?division=${division}`
+          : `/dashboard?division=${division}`
+      window.location.replace(destination)
     } catch {
       const msg = '网络异常，请检查网络连接后重试'
       setFormError(msg)
@@ -413,6 +449,8 @@ export default function LoginPage() {
           mounted={mounted}
           detectedRole={detectedRole} onEmailBlur={detectRole}
           isMobile={isMobile} reason={reason}
+          initialEmail={initialEmail}
+          rememberAccount={rememberAccount} setRememberAccount={updateRememberAccount}
         />
       </div>
     </>

@@ -6,7 +6,19 @@ import { triggerFeedbackBonus } from '@/lib/teacher-salary'
 import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestPrisma } from '@/lib/prisma'
+import { resolveUserForTeacher } from '@/lib/teacher-account-binding'
 import type { Prisma } from '@prisma/client'
+import {
+  canViewFeedback,
+  filterStudentRatingsForStudents,
+  getParentFeedbackStudentIds,
+  hasRequiredLessonContent,
+  hasMeaningfulFeedbackContent,
+  normalizeLessonContent,
+  parseFeedbackCourseType,
+  redactFeedbackForParent,
+  resolveTeacherFeedbackCreationScope,
+} from '@/lib/classroom-feedback/access'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,33 +47,61 @@ async function createClassroomFeedbackCompat(tx: Prisma.TransactionClient, data:
   }
 }
 
-// GET: list feedbacks (admin sees all, teacher sees own)
+// GET: list feedbacks scoped to the current role.
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   const user = session?.user as { id: string; role: string } | undefined
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
 
   const sp = req.nextUrl.searchParams
+  const feedbackId = sp.get('id') || undefined
+  const requestedStudentId = sp.get('studentId') || undefined
   const teacherId = sp.get('teacherId') || undefined
   const date = sp.get('date') || undefined
   const all = sp.get('all') === '1'
   const division = sp.get('division')
   const limit = Math.min(200, Number(sp.get('limit') || 50))
 
-  const where: Record<string, unknown> = { status: 'PUBLISHED' }
+  const role = String(user.role || '').toLowerCase()
+  if (!['admin', 'teacher', 'parent'].includes(role)) {
+    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
+
+  const where: Prisma.ClassroomFeedbackWhereInput = { status: 'PUBLISHED' }
+  if (feedbackId) where.id = feedbackId
   let prisma = await getRequestPrisma()
-  if (user.role === 'teacher') {
+  let parentStudentIds: string[] = []
+  let actorTeacherId: string | null = null
+  if (role === 'teacher') {
     const { teacher, prisma: tPrisma } = await requireCurrentTeacher()
     prisma = tPrisma
-    where.teacherId = teacher.id
+    actorTeacherId = teacher.id
+    where.OR = [
+      { teacherId: teacher.id },
+      { classLesson: { teacherId: teacher.id } },
+    ]
+  } else if (role === 'parent') {
+    parentStudentIds = await getParentFeedbackStudentIds(prisma, user.id)
+    if (!parentStudentIds.length) {
+      return feedbackId || requestedStudentId
+        ? NextResponse.json({ error: '无权查看该反馈' }, { status: 403 })
+        : NextResponse.json({ feedbacks: [] })
+    }
+    if (requestedStudentId && !parentStudentIds.includes(requestedStudentId)) {
+      return NextResponse.json({ error: '无权查看该学生反馈' }, { status: 403 })
+    }
+    where.studentIds = { hasSome: requestedStudentId ? [requestedStudentId] : parentStudentIds }
   } else if (teacherId) {
     where.teacherId = teacherId
-  } else if (user.role === 'admin' && division && division !== 'ALL') {
+  } else if (division && division !== 'ALL') {
     where.classLesson = { division }
   }
   if (date && !all) {
     const d = new Date(date)
     where.createdAt = { gte: new Date(d.setHours(0, 0, 0, 0)), lte: new Date(d.setHours(23, 59, 59, 999)) }
+  }
+  if (requestedStudentId && role !== 'parent') {
+    where.studentIds = { has: requestedStudentId }
   }
 
   const feedbacks = await prisma.classroomFeedback.findMany({
@@ -73,6 +113,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
     orderBy: { createdAt: 'desc' },
     take: limit,
   })
+  if (feedbackId && feedbacks.length === 0) {
+    return NextResponse.json({ error: '无权查看该反馈' }, { status: role === 'admin' ? 404 : 403 })
+  }
 
   const allStudentIds = [...new Set(feedbacks.flatMap(f => f.studentIds))]
   const students = allStudentIds.length
@@ -80,11 +123,20 @@ export const GET = apiHandler(async (req: NextRequest) => {
     : []
   const studentMap = new Map(students.map(s => [s.id, s]))
 
+  const actor = { id: user.id, role, teacherId: actorTeacherId }
+  const scopedFeedbacks = feedbacks
+    .filter((feedback) => canViewFeedback(actor, feedback, parentStudentIds))
+    .map((feedback) => ({
+      ...feedback,
+      students: feedback.studentIds.flatMap((id) => {
+        const student = studentMap.get(id)
+        return student ? [student] : []
+      }),
+    }))
   return NextResponse.json({
-    feedbacks: feedbacks.map(f => ({
-      ...f,
-      students: f.studentIds.map(id => studentMap.get(id)).filter(Boolean),
-    })),
+    feedbacks: role === 'parent'
+      ? scopedFeedbacks.map((feedback) => redactFeedbackForParent(feedback, parentStudentIds))
+      : scopedFeedbacks,
   })
 })
 
@@ -100,10 +152,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const body = await req.json()
   const status = body.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT'
   const classLessonId = typeof body.classLessonId === 'string' && body.classLessonId ? body.classLessonId : null
-  const submittedCourseType = body.feedbackCourseType === 'ONE_ON_ONE' || body.courseType === 'ONE_ON_ONE' || body.classType === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
+  const rawCourseType = body.feedbackCourseType ?? body.courseType ?? body.classType
+  const submittedCourseType = parseFeedbackCourseType(rawCourseType)
+  if (!submittedCourseType) {
+    return NextResponse.json({ error: '反馈课程类型不合法' }, { status: 400 })
+  }
   let feedbackCourseType = submittedCourseType
   let feedbackGroupId = typeof body.feedbackGroupId === 'string' && body.feedbackGroupId ? body.feedbackGroupId : typeof body.groupId === 'string' && body.groupId ? body.groupId : null
   const studentIds = asArr(body.studentIds)
+  const lessonContent = normalizeLessonContent(body.lessonContent)
   const knowledgePoints = asArr(body.knowledgePoints, 10)
   const imageUrls = asArr(body.imageUrls, 9)
   const tags = asArr(body.tags, 15)
@@ -114,8 +171,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const badge = typeof body.badge === 'string' ? body.badge.trim().slice(0, 30) : ''
   const studentRatings = body.studentRatings && typeof body.studentRatings === 'object' ? body.studentRatings : {}
 
-  if (status === 'PUBLISHED' && imageUrls.length === 0) {
-    return NextResponse.json({ error: '请上传课堂资料照片后提交反馈' }, { status: 400 })
+  if (status === 'PUBLISHED' && !hasRequiredLessonContent(lessonContent)) {
+    return NextResponse.json({ error: '请填写课堂反馈内容（至少10个字）' }, { status: 400 })
+  }
+
+  if (!hasMeaningfulFeedbackContent({ lessonContent, overallComment, summary, knowledgePoints, homework, studentRatings, badge, tags })) {
+    return NextResponse.json({ error: '反馈内容不能为空' }, { status: 400 })
   }
 
   // Determine teacherId
@@ -131,11 +192,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (classLessonId) {
       const lesson = await prisma.classLesson.findUnique({
         where: { id: classLessonId },
-        select: { teacherId: true, groupId: true, group: { select: { course: { select: { type: true } } } } },
+        select: { teacherId: true, groupId: true, group: { select: { intensiveMode: true, course: { select: { type: true } } } } },
       })
       teacherId = lesson?.teacherId || body.teacherId || ''
       feedbackGroupId = lesson?.groupId || feedbackGroupId
-      feedbackCourseType = lesson?.group?.course?.type === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : feedbackCourseType
+      feedbackCourseType = lesson?.group?.intensiveMode === 'INTENSIVE' || lesson?.group?.course?.type === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : feedbackCourseType
     } else {
       teacherId = body.teacherId || ''
     }
@@ -143,31 +204,62 @@ export const POST = apiHandler(async (req: NextRequest) => {
     teacherName = (await prisma.teacher.findUnique({ where: { id: teacherId }, select: { name: true } }))?.name || '管理员'
   }
 
-  // Resolve student list from lesson enrollment
+  // Resolve every teacher-controlled relationship from the database. Never
+  // trust studentIds, groupId, lessonId or teacherId supplied by the client.
   let resolvedStudentIds = studentIds
-  if (classLessonId) {
+  let scopedStudents: Array<{ id: string; name: string; parentId: string | null; parentUserId: string | null }> | null = null
+  if (isTeacher) {
+    const scope = await resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId,
+      classLessonId,
+      feedbackGroupId,
+      requestedStudentIds: studentIds,
+      expandClassTarget: false,
+      submittedCourseType,
+    })
+    if (!scope.allowed) {
+      const message = scope.reason === 'group'
+        ? '班级不存在或无权操作'
+        : scope.reason === 'lesson'
+          ? '课次不存在或无权操作'
+          : '包含不属于当前教师授课范围的学员'
+      return NextResponse.json({ error: message }, { status: 403 })
+    }
+    scopedStudents = scope.students
+    resolvedStudentIds = scope.students.map((student) => student.id)
+    feedbackGroupId = scope.feedbackGroupId
+    feedbackCourseType = scope.feedbackCourseType
+  } else if (classLessonId) {
     const lesson = await prisma.classLesson.findFirst({
       where: { id: classLessonId },
-      include: { group: { include: { course: { select: { type: true } }, enrollments: { where: { status: 'ACTIVE' }, include: { student: { select: { id: true } } } } } } },
+      include: { group: { include: { course: { select: { type: true } }, enrollments: { where: { status: 'ACTIVE' }, include: { student: { select: { id: true } } } } } }, lessonStudents: { select: { studentId: true } } },
     })
     if (!lesson) return NextResponse.json({ error: '课次不存在' }, { status: 404 })
-    const lessonStudentIds = lesson.group.enrollments.map(e => e.student.id)
-    resolvedStudentIds = studentIds.length ? studentIds.filter(id => lessonStudentIds.includes(id)) : lessonStudentIds
+    const lessonStudentIds = lesson.group.intensiveMode === 'INTENSIVE'
+      ? lesson.lessonStudents.map((item) => item.studentId)
+      : lesson.group.enrollments.map(e => e.student.id)
+    if (studentIds.some((studentId) => !lessonStudentIds.includes(studentId))) {
+      return NextResponse.json({ error: '包含不属于该课次的学员' }, { status: 403 })
+    }
+    resolvedStudentIds = studentIds.length ? studentIds : lessonStudentIds
     feedbackGroupId = lesson.groupId || feedbackGroupId
-    feedbackCourseType = lesson.group.course?.type === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
+    feedbackCourseType = lesson.group.intensiveMode === 'INTENSIVE' || lesson.group.course?.type === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
   }
-  if (!resolvedStudentIds.length && !summary && !knowledgePoints.length) {
-    return NextResponse.json({ error: '请选择学员或填写反馈内容' }, { status: 400 })
+  if (!resolvedStudentIds.length) {
+    return NextResponse.json({ error: '请选择学员' }, { status: 400 })
   }
 
   if (isTeacher && resolvedStudentIds.length > 3) {
     return NextResponse.json({ error: '一次最多反馈3名学生' }, { status: 400 })
   }
 
+  const resolvedStudentRatings = filterStudentRatingsForStudents(studentRatings, resolvedStudentIds)
+
   // Get student-parent mapping for notifications
-  const studentsData = resolvedStudentIds.length
-    ? await prisma.student.findMany({ where: { id: { in: resolvedStudentIds } }, select: { id: true, name: true, parentId: true, parentUserId: true } })
-    : []
+  const studentsData = scopedStudents ?? await prisma.student.findMany({
+    where: { id: { in: resolvedStudentIds } },
+    select: { id: true, name: true, parentId: true, parentUserId: true },
+  })
 
   const feedback = await prisma.$transaction(async (tx) => {
     const created = await createClassroomFeedbackCompat(tx, {
@@ -178,6 +270,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         source: isAdmin ? 'admin' : 'teacher',
         targetType: body.targetType === 'STUDENT' ? 'STUDENT' : 'CLASS',
         studentIds: resolvedStudentIds,
+        lessonContent: lessonContent || null,
         knowledgePoints,
         summary: summary || null,
         overallComment: overallComment || null,
@@ -186,7 +279,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         tags,
         mood,
         badge: badge || null,
-        studentRatings,
+        studentRatings: resolvedStudentRatings as Prisma.InputJsonValue,
         status,
         notifySent: status === 'PUBLISHED',
       })
@@ -200,7 +293,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             userId: parentUserId,
             type: 'CLASSROOM_FEEDBACK',
             title: `${teacherName}老师发布了成长反馈`,
-            content: `${student.name}: ${overallComment || summary || knowledgePoints.join('、') || badge || '课堂资料已更新'}`.slice(0, 80),
+            content: `${student.name}: ${overallComment || lessonContent || summary || knowledgePoints.join('、') || badge || '课堂反馈已更新'}`.slice(0, 80),
             link: '/parent/class-feedback',
             relatedType: 'CLASSROOM_FEEDBACK',
             relatedId: created.id,
@@ -215,7 +308,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         userId: user.id,
         teacherId,
         action: status === 'PUBLISHED' ? TEACHER_LOG_ACTIONS.CLASSROOM_FEEDBACK_PUBLISH : TEACHER_LOG_ACTIONS.CLASSROOM_FEEDBACK_DRAFT,
-        detail: `${resolvedStudentIds.length}名学员 · ${knowledgePoints.join('/') || overallComment || '成长反馈'}`,
+        detail: `${resolvedStudentIds.length}名学员 · ${knowledgePoints.join('/') || overallComment || lessonContent || '成长反馈'}`,
         entityType: 'ClassroomFeedback',
         entityId: created.id,
         metadata: { status, source: isAdmin ? 'admin' : 'teacher', studentCount: resolvedStudentIds.length, feedbackCourseType, feedbackGroupId },
@@ -241,7 +334,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
 // PATCH: parent reply or admin reply
 export const PATCH = apiHandler(async (req: NextRequest) => {
   const session = await auth()
-  const user = session?.user as { id: string; role: string } | undefined
+  const user = session?.user as { id: string; role: string; teacherId?: string | null } | undefined
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
 
 
@@ -285,10 +378,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
         select: { teacherId: true, studentIds: true },
       })
       if (fb?.teacherId) {
-        const teacherUser = await prisma.user.findFirst({
-          where: { teacherId: fb.teacherId, role: 'teacher', status: 'ACTIVE' },
-          select: { id: true },
-        })
+        const teacherUser = await resolveUserForTeacher(prisma, fb.teacherId)
         if (teacherUser) {
           const student = await prisma.student.findFirst({
             where: { id: { in: fb.studentIds }, parentUserId: user.id },
@@ -312,9 +402,12 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
   } else if ((user.role === 'admin' || user.role === 'teacher') && adminReply !== undefined) {
     const feedback = await prisma.classroomFeedback.findUnique({
       where: { id },
-      select: { studentIds: true },
+      select: { studentIds: true, teacherId: true },
     })
     if (!feedback) return NextResponse.json({ error: '反馈不存在' }, { status: 404 })
+    if (user.role === 'teacher' && (!user.teacherId || feedback.teacherId !== user.teacherId)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     await prisma.classroomFeedback.update({
       where: { id },

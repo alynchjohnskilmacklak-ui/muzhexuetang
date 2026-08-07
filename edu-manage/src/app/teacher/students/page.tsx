@@ -9,7 +9,6 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatPercent } from '@/lib/format'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
-import { formatRemaining } from '@/lib/lesson-units'
 
 const { Title, Text } = Typography
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
@@ -22,6 +21,7 @@ type TeacherStudent = {
   school?: string | null
   remainHours?: number | string | null
   totalHours?: number | string | null
+  taughtHours?: number | string | null
   attendanceRate?: number | null
   daysSinceLastFeedback?: number | null
   primaryCourseType?: 'ONE_ON_ONE' | 'SMALL_GROUP' | 'GROUP' | string | null
@@ -37,27 +37,6 @@ type TeacherStudent = {
   }>
 }
 
-function enrollmentBalance(student: TeacherStudent) {
-  const enrollments = Array.isArray(student.enrollments) ? student.enrollments : []
-  if (!enrollments.length) {
-    return {
-      remainText: formatRemaining(Number(student.remainHours || 0), student.primaryCourseType || null, 40).text,
-      totalText: formatRemaining(Number(student.totalHours || 0), student.primaryCourseType || null, 40).text,
-      remainValue: Number(student.remainHours || 0),
-    }
-  }
-  const first = enrollments[0]
-  const courseType = first.group?.course?.type || student.primaryCourseType || null
-  const lessonMinutes = Number(first.group?.lessonMinutes || 40)
-  const remain = formatRemaining(Number(first.remainHours || 0), courseType, lessonMinutes)
-  const total = formatRemaining(Number(first.totalHours || 0), courseType, lessonMinutes)
-  return {
-    remainText: `${remain.text}${enrollments.length > 1 ? ` +${enrollments.length - 1}门` : ''}`,
-    totalText: total.text,
-    remainValue: remain.value,
-  }
-}
-
 function avatarColor(name: string) {
   const palette = ['#E8784A', '#534AB7', '#1D9E75', '#5B8FF9', '#f5a623', '#8892f0', '#FF6B6B']
   let h = 0
@@ -66,9 +45,7 @@ function avatarColor(name: string) {
 }
 
 function getStatusChip(student: TeacherStudent) {
-  const remain = Number(student.remainHours || 0)
   const days = student.daysSinceLastFeedback == null ? 999 : Number(student.daysSinceLastFeedback)
-  if (remain <= 2) return { text: '课时不足', color: '#E24B4A' }
   if (days > 7) return { text: '未反馈', color: '#D4537E' }
   return { text: '已反馈', color: '#1D9E75' }
 }
@@ -86,7 +63,7 @@ export default function TeacherStudentsPage() {
     () => Array.from(new Set(students.map((student) => student.grade).filter(Boolean))).map(String),
     [students],
   )
-  const filters = ['全部', '课时不足', '未反馈', '初一', '初二', '初三']
+  const filters = ['全部', '未反馈', '初一', '初二', '初三']
 
   const filtered = useMemo(() => students.filter((student) => {
     const searchText = [
@@ -97,7 +74,6 @@ export default function TeacherStudentsPage() {
     ].join('')
     const matchSearch = !q.trim() || searchText.includes(q.trim())
     const matchFilter = filter === '全部'
-      || (filter === '课时不足' && Number(student.remainHours || 0) <= 2)
       || (filter === '未反馈' && (student.daysSinceLastFeedback == null ? 999 : Number(student.daysSinceLastFeedback)) > 7)
       || student.grade === filter
     const matchGrade = !gradeFilter || student.grade === gradeFilter
@@ -112,13 +88,10 @@ export default function TeacherStudentsPage() {
   }, [filtered])
 
   const renderStudentCard = (student: TeacherStudent, index: number) => {
-    const remain = Number(student.remainHours || 0)
-    const total = Number(student.totalHours || 0)
-    const balance = enrollmentBalance(student)
+    const taughtHours = Number(student.taughtHours || 0)
     const status = getStatusChip(student)
     const initial = (student.name || '?')[0]
     const gradeGender = [student.grade, student.gender].filter(Boolean).join(' · ')
-    const remainColor = balance.remainValue <= 2 ? '#E24B4A' : balance.remainValue <= 15 ? '#f5a623' : '#1F2329'
     const subjects = [
       ...new Set(
         (student.enrollments || [])
@@ -134,7 +107,7 @@ export default function TeacherStudentsPage() {
         style={{
           width: '100%',
           borderRadius: 10,
-          borderLeft: remain <= 2 ? '3px solid #E24B4A' : '3px solid transparent',
+          border: '1px solid var(--color-hairline)',
           cursor: 'pointer',
           animationDelay: `${Math.min(index, 8) * 40}ms`,
         }}
@@ -191,11 +164,11 @@ export default function TeacherStudentsPage() {
             <b style={{ color: '#1D9E75' }}>{formatPercent(student.attendanceRate)}</b>
           </span>
           <span>
-            剩余{' '}
-            <b style={{ color: remainColor }}>{balance.remainText}</b>
+            已上{' '}
+            <b style={{ color: '#E8784A' }}>{taughtHours.toFixed(1)} 小时</b>
           </span>
           <span>
-            总量 <b>{total ? balance.totalText : '0'}</b>
+            课程 <b>{student.enrollments?.length || 0} 门</b>
           </span>
         </div>
 
@@ -259,7 +232,7 @@ export default function TeacherStudentsPage() {
             我的学员
           </Title>
           <Text type="secondary" style={{ display: 'block', marginTop: 4 }}>
-            按课时、反馈状态和年级快速筛选
+            查看自己授课范围内学员的累计已上课时和反馈状态
           </Text>
         </div>
 

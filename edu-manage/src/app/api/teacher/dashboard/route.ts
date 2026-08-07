@@ -20,7 +20,7 @@ export const GET = apiHandler(async () => {
         unreadMessages: 0,
       },
     }, {
-      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
+      headers: { 'Cache-Control': 'private, no-store' },
     })
   } catch {
     return NextResponse.json({ error: '无权限' }, { status: 403 })

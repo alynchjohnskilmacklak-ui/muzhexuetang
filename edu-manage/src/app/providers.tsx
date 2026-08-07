@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { NextAuthProvider } from './NextAuthProvider'
 import { AntdRegistry } from '@ant-design/nextjs-registry'
-import { ConfigProvider, App as AntdApp } from 'antd'
+import { ConfigProvider, App as AntdApp, message } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import { SWRConfig } from 'swr'
 import { Toaster } from 'sonner'
@@ -25,6 +25,14 @@ const swrConfig = {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [toastPos, setToastPos] = useState<'top-center' | 'bottom-center'>('top-center')
+
+  useEffect(() => {
+    message.config({
+      duration: 2,
+      maxCount: 2,
+      top: 72,
+    })
+  }, [])
 
   useEffect(() => {
     const check = () => setToastPos(window.innerWidth < 768 ? 'bottom-center' : 'top-center')
@@ -85,7 +93,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
             {children}
           </AntdApp>
         </NextAuthProvider>
-        <Toaster position={toastPos} richColors style={{ zIndex: 10000 }} />
+        <Toaster
+          position={toastPos}
+          richColors
+          closeButton
+          toastOptions={{ duration: 2200 }}
+          style={{ zIndex: 10000 }}
+        />
       </ConfigProvider>
     </AntdRegistry>
     </SWRConfig>

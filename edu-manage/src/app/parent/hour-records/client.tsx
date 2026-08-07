@@ -45,6 +45,7 @@ function recordMeta(record: any) {
 
 function enrollmentLine(enrollment: any) {
   const group = enrollment.group
+  if (group?.intensiveMode === 'INTENSIVE') return null
   const name = group?.course?.name || group?.name || '课程'
   const remain = formatRemaining(Number(enrollment.remainHours || 0), group?.course?.type || null, Number(group?.lessonMinutes || 40)).text
   const total = formatRemaining(Number(enrollment.totalHours || 0), group?.course?.type || null, Number(group?.lessonMinutes || 40)).text
@@ -61,15 +62,23 @@ export function ParentHourRecordsClient({ students, records }: { students: any[]
   )
   const summary = useMemo(() => {
     const enrollments = selectedStudent?.enrollments || []
-    return { lines: enrollments.map(enrollmentLine) }
-  }, [selectedStudent])
+    const prepaidLines = enrollments.map(enrollmentLine).filter(Boolean) as string[]
+    const intensive = new Map<string, number>()
+    filteredRecords.filter((record) => record.isIntensiveApproved).forEach((record) => {
+      const meta = recordMeta(record)
+      const key = `${meta.courseName} · ${meta.teacherName}`
+      intensive.set(key, (intensive.get(key) || 0) + Number(record.approvedTeachingHours || 0))
+    })
+    const intensiveLines = [...intensive.entries()].map(([label, hours]) => `${label}：已审核 ${hours.toFixed(2)} 小时`)
+    return { lines: [...prepaidLines, ...intensiveLines] }
+  }, [filteredRecords, selectedStudent])
 
   return (
     <div className="parent-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-end', marginBottom: 16, flexWrap: 'wrap' }}>
         <div>
           <Title level={4} style={{ margin: 0 }}>课时明细</Title>
-          <Text type="secondary">查看每次扣课记录，不包含缴费金额</Text>
+          <Text type="secondary">小班课显示扣课流水，个性化课程显示管理员审核通过的实际授课</Text>
         </div>
         <Select
           value={studentId || undefined}
@@ -81,11 +90,11 @@ export function ParentHourRecordsClient({ students, records }: { students: any[]
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
-        {[
-          ['当前剩余', summary.lines.length ? summary.lines : ['暂无课程'], '#1D9E75'],
-          ['课程数', `${summary.lines.length}门`, '#E8784A'],
-          ['扣课记录', `${filteredRecords.length}条`, '#534AB7'],
-        ].map(([label, value, color]) => (
+        {([
+          { label: '当前课时', value: summary.lines.length ? summary.lines : ['暂无课程'], color: '#1D9E75' },
+          { label: '课程数', value: `${summary.lines.length}门`, color: '#E8784A' },
+          { label: '课时记录', value: `${filteredRecords.length}条`, color: '#534AB7' },
+        ] as Array<{ label: string; value: string | string[]; color: string }>).map(({ label, value, color }) => (
           <Card key={label} bordered={false} className="parent-card" style={{ borderRadius: 12, border: '1px solid #F0DDD2' }}>
             <Text type="secondary" style={{ fontSize: 12 }}>{label}</Text>
             {Array.isArray(value) ? (
@@ -114,12 +123,14 @@ export function ParentHourRecordsClient({ students, records }: { students: any[]
                   <span><ClockCircleOutlined /> {meta.time || '时间待确认'}</span>
                   <span><TeamOutlined /> 老师：{meta.teacherName}</span>
                   <span>教室：{meta.roomName}</span>
-                  <span>扣课：{formatDeducted(Number(record.hoursDeducted || 0), meta.courseType, meta.lessonMinutes)}</span>
+                  <span>{record.isIntensiveApproved
+                    ? `计入授课：${Number(record.approvedTeachingHours || 0).toFixed(2)} 小时`
+                    : `扣课：${formatDeducted(Number(record.hoursDeducted || 0), meta.courseType, meta.lessonMinutes)}`}</span>
                 </div>
               </Card>
             )
           })}
-          {!filteredRecords.length && <Empty description="暂无扣课记录" />}
+          {!filteredRecords.length && <Empty description="暂无课时记录" />}
         </div>
       ) : (
         <Card bordered={false} className="parent-card" style={{ borderRadius: 12, border: '1px solid #F0DDD2' }}>
@@ -128,15 +139,17 @@ export function ParentHourRecordsClient({ students, records }: { students: any[]
             dataSource={filteredRecords}
             pagination={{ pageSize: 12 }}
             scroll={{ x: 640 }}
-            locale={{ emptyText: '暂无扣课记录' }}
+            locale={{ emptyText: '暂无课时记录' }}
             columns={[
               { title: '日期', key: 'date', render: (_: unknown, record: any) => fmtDate(recordMeta(record).date) },
               { title: '课程', key: 'course', render: (_: unknown, record: any) => recordMeta(record).courseName },
               { title: '老师', key: 'teacher', render: (_: unknown, record: any) => recordMeta(record).teacherName },
               { title: '状态', dataIndex: 'status', render: (value: string) => <Tag color={(STATUS_LABEL[value] || {}).color}>{STATUS_LABEL[value]?.text || value}</Tag> },
-              { title: '扣除', key: 'hoursDeducted', render: (_: unknown, record: any) => {
+              { title: '计入课时', key: 'hoursDeducted', render: (_: unknown, record: any) => {
                 const meta = recordMeta(record)
-                return <Text strong>{formatDeducted(Number(record.hoursDeducted || 0), meta.courseType, meta.lessonMinutes)}</Text>
+                return <Text strong>{record.isIntensiveApproved
+                  ? `${Number(record.approvedTeachingHours || 0).toFixed(2)} 小时`
+                  : formatDeducted(Number(record.hoursDeducted || 0), meta.courseType, meta.lessonMinutes)}</Text>
               } },
             ]}
           />
@@ -146,7 +159,7 @@ export function ParentHourRecordsClient({ students, records }: { students: any[]
       <Card bordered={false} style={{ marginTop: 12, borderRadius: 12, background: '#FFFBF7', border: '1px solid #F0DDD2' }}>
         <Space direction="vertical" size={4}>
           <Text strong>说明</Text>
-          <Text type="secondary" style={{ fontSize: 12 }}>小班课请假、出勤和旷课会按系统规则扣课时；补课记录不重复扣原课时。</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>小班课按余额扣课；一对一/二/三按管理员审核通过的实际授课分钟累计，不再显示无意义的 0/0 余额。</Text>
         </Space>
       </Card>
     </div>

@@ -2,6 +2,8 @@ import { prisma, getPrismaForDivision, isDualDbEnabled } from '@/lib/prisma'
 import { chineseToPinyin } from '@/lib/pinyin'
 import bcrypt from 'bcryptjs'
 import type { PrismaClient } from '@prisma/client'
+import { isUserDisabled } from '@/lib/user-status'
+import { resolveTeacherForUser } from '@/lib/teacher-account-binding'
 /**
  * Resolve the prisma client for a login attempt. In dual-DB mode the client
  * for the requested division is used; otherwise the legacy single client.
@@ -33,6 +35,7 @@ type LoginUser = {
   name: string
   role: LoginRole
   division: string
+  teacherId: string | null
 }
 
 type ValidationResult =
@@ -43,6 +46,7 @@ type TeacherLoginAccount = {
   id: string
   name: string
   phone: string
+  status?: string
 }
 
 
@@ -112,11 +116,36 @@ async function recordLoginSuccess(user: LoginUser, meta?: RequestMeta, division?
 async function findTeacherByLoginEmail(email: string, division?: string): Promise<TeacherLoginAccount | null> {
   const db = resolveLoginPrisma(division)
   if (!db) return null
+  const direct = await db.teacher.findFirst({
+    where: { email, status: { not: 'RESIGNED' } },
+    select: { id: true, name: true, phone: true },
+  })
+  if (direct) return direct
+
+  // Compatibility only: old unbound teacher accounts used generated pinyin
+  // addresses that are not stored on Teacher. New/bound accounts never take
+  // this full-scan path.
   const teachers = await db.teacher.findMany({
     where: { status: { not: 'RESIGNED' } },
     select: { id: true, name: true, phone: true },
   })
   return teachers.find((teacher) => `${chineseToPinyin(teacher.name)}@tea.com` === email) || null
+}
+
+async function resolveTeacherLoginAccount(
+  user: { id: string; email: string; name: string; role: string; teacherId?: string | null },
+  _email: string,
+  division?: string,
+): Promise<TeacherLoginAccount | null> {
+  const db = resolveLoginPrisma(division)
+  if (!db) return null
+  return resolveTeacherForUser(db, {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    teacherId: user.teacherId ?? null,
+  })
 }
 
 export async function detectLoginRole(emailInput: string, division?: string): Promise<LoginRole | null> {
@@ -140,10 +169,10 @@ async function verifyPassword(plainPassword: string, storedPassword: string): Pr
   return bcrypt.compare(plainPassword, storedPassword)
 }
 
-function toLoginUser(user: { id: string; email: string; name: string; role: string; division?: string | null }): LoginUser | null {
+function toLoginUser(user: { id: string; email: string; name: string; role: string; division?: string | null; teacherId?: string | null }): LoginUser | null {
   if (user.role !== 'admin' && user.role !== 'teacher' && user.role !== 'parent') return null
   const division = user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
-  return { id: user.id, email: user.email, name: user.name, role: user.role, division }
+  return { id: user.id, email: user.email, name: user.name, role: user.role, division, teacherId: user.teacherId ?? null }
 }
 
 async function validateDatabaseUser(
@@ -151,7 +180,6 @@ async function validateDatabaseUser(
   password: string,
   expectedRole: LoginRole,
   options: { recordAttempt?: boolean; recordSuccess?: boolean },
-  teacher?: TeacherLoginAccount | null,
   meta?: RequestMeta,
   division?: string,
 ): Promise<ValidationResult> {
@@ -162,10 +190,13 @@ async function validateDatabaseUser(
   const user = await db.user.findUnique({ where: { email } })
 
   if (!user) {
-    if (options.recordAttempt) await recordLoginFailure(email, teacher ? 'uninitialized' : 'not_found', undefined, meta, division)
+    const legacyTeacher = expectedRole === 'teacher'
+      ? await findTeacherByLoginEmail(email, division)
+      : null
+    if (options.recordAttempt) await recordLoginFailure(email, legacyTeacher ? 'uninitialized' : 'not_found', undefined, meta, division)
     return {
       ok: false,
-      error: teacher ? '账号未初始化，请联系管理员' : '用户名输入错误',
+      error: legacyTeacher ? '账号未初始化，请联系管理员' : '用户名输入错误',
       code: 'BAD_USERNAME',
     }
   }
@@ -175,9 +206,18 @@ async function validateDatabaseUser(
     return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
   }
 
-  if (user.status === 'disabled' || user.status === 'INACTIVE' || user.status === 'inactive') {
+  if (isUserDisabled(user.status)) {
     if (options.recordAttempt) await recordLoginFailure(email, 'disabled', user.id, meta, division)
     return { ok: false, error: '账号已停用，请联系管理员', code: 'DISABLED' }
+  }
+
+  let resolvedTeacher: TeacherLoginAccount | null = null
+  if (expectedRole === 'teacher') {
+    resolvedTeacher = await resolveTeacherLoginAccount(user, email, division)
+    if (!resolvedTeacher) {
+      if (options.recordAttempt) await recordLoginFailure(email, 'uninitialized', user.id, meta, division)
+      return { ok: false, error: '教师档案未绑定，请联系管理员', code: 'BAD_USERNAME' }
+    }
   }
 
   const pwdOk = await verifyPassword(password, user.password)
@@ -200,6 +240,7 @@ async function validateDatabaseUser(
 
   const scopedLoginUser = {
     ...loginUser,
+    teacherId: resolvedTeacher?.id ?? loginUser.teacherId,
     division: effectiveDivision,
   }
 
@@ -230,25 +271,36 @@ export async function validateLoginAccount(
     }
   }
 
-  const actualRole = await detectLoginRole(email, division)
+  return validateDatabaseUser(email, password, loginRole, options, meta, division)
+}
 
+/**
+ * Password-free preflight used by /api/auth/login-check.
+ * The authoritative password verification remains exclusively in NextAuth authorize().
+ */
+export async function precheckLoginAccount(
+  emailInput: string,
+  loginRole: LoginRole,
+  division?: string,
+): Promise<{ ok: true } | Extract<ValidationResult, { ok: false }>> {
+  const email = normalizeLoginEmail(emailInput)
+
+  if (hasInvalidDualDbDivision(division)) {
+    return { ok: false, error: 'Missing division', code: 'BAD_DIVISION' }
+  }
+
+  const status = await getLoginStatus(email, division)
+  if (status.locked) {
+    return { ok: false, error: '密码连续错误次数过多，账号已临时锁定，请30分钟后重试', code: 'LOCKED' }
+  }
+
+  const actualRole = await detectLoginRole(email, division)
   if (!actualRole) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta, division)
     return { ok: false, error: '用户名输入错误', code: 'BAD_USERNAME' }
   }
   if (actualRole !== loginRole) {
-    if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta, division)
     return { ok: false, error: '身份不对，请切换到正确入口登录', code: 'BAD_ROLE' }
   }
 
-  if (loginRole === 'teacher') {
-    const teacher = await findTeacherByLoginEmail(email, division)
-    if (!teacher) {
-      if (options.recordAttempt) await recordLoginFailure(email, 'not_found', undefined, meta, division)
-      return { ok: false, error: '用户名输入错误', code: 'BAD_USERNAME' }
-    }
-    return validateDatabaseUser(email, password, 'teacher', options, teacher, meta, division)
-  }
-
-  return validateDatabaseUser(email, password, loginRole, options, undefined, meta, division)
+  return { ok: true }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { checkRateLimit } from './rate-limit'
 import { ValidationError } from './api-validate'
+import { AuthError } from './auth/guards'
 
 type Handler = (...args: any[]) => Promise<Response>
 
@@ -49,6 +50,9 @@ export function apiHandler<T extends Handler>(handler: T): T {
       }
       return await handler(...args)
     } catch (err) {
+      if (err instanceof AuthError) {
+        return NextResponse.json({ error: err.message }, { status: err.status })
+      }
       if (err instanceof Error && (err.message === 'TEACHER_UNAUTHORIZED' || err.message === 'ADMIN_UNAUTHORIZED' || err.message === '无权限')) {
         return NextResponse.json({ error: '无权限' }, { status: 403 })
       }

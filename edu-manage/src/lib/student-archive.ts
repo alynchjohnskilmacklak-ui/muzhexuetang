@@ -11,6 +11,7 @@
 import type { PrismaClient } from '@prisma/client'
 import { getStudentProfile, type ProfileRange, type StudentProfile } from '@/lib/student-profile'
 import { resolveFeedbackImageVariants, variantsForFeedback, type FeedbackImageVariant } from '@/lib/file-asset-variants'
+import { filterStudentRatingsForStudents } from '@/lib/classroom-feedback/access'
 
 // ---- types ----
 
@@ -69,6 +70,7 @@ export interface ArchiveFeedback {
   id: string; lessonId: string | null; classGroupId: string | null
   teacher: { id: string; name: string } | null
   studentIds: string[]
+  lessonContent: string | null
   knowledgePoints: string[]
   summary: string | null
   homework: unknown
@@ -315,9 +317,9 @@ async function fetchFeedbacks(prisma: PrismaClient, studentId: string, viewer: A
   return feedbacks.map(f => ({
     id: f.id, lessonId: f.classLessonId, classGroupId: null,
     teacher: f.teacher ? { id: f.teacher.id, name: f.teacher.name } : null,
-    studentIds: f.studentIds, knowledgePoints: f.knowledgePoints,
+    studentIds: [studentId], lessonContent: f.lessonContent, knowledgePoints: f.knowledgePoints,
     summary: f.summary, homework: f.homework, overallComment: f.overallComment,
-    mood: f.mood, tags: f.tags, studentRatings: f.studentRatings,
+    mood: f.mood, tags: f.tags, studentRatings: filterStudentRatingsForStudents(f.studentRatings, [studentId]),
     imageUrls: f.imageUrls, parentReply: f.parentReply, parentRepliedAt: f.parentRepliedAt,
     images: variantsForFeedback(f.imageUrls, imageVariants),
     adminReply: f.adminReply, createdAt: f.createdAt, status: f.status,

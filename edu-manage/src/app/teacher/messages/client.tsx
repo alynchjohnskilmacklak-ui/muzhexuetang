@@ -23,12 +23,23 @@ const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 type Reply = {
   id: string; authorName: string; role: string
-  content: string; isReadByTeacher: boolean; createdAt: string
+  content: string; isReadByTeacher: boolean; isReadByParent: boolean; createdAt: string
 }
 type Message = {
   id: string; title: string; subject: string | null; status: string
   parent: { id: string; name: string }
   student: { id: string; name: string } | null
+  feedback: {
+    id: string
+    createdAt: string
+    summary: string | null
+    overallComment: string | null
+    classLesson: {
+      lessonDate: string
+      subject: string | null
+      group: { course: { name: string; subject: string } }
+    } | null
+  } | null
   replies: Reply[]
   updatedAt: string
 }
@@ -64,6 +75,16 @@ function ChatBubble({ reply }: { reply: Reply }) {
         }}>
           {reply.content}
         </div>
+        {isTeacher && (
+          <div style={{ marginTop: 4, fontSize: 10, color: '#9A8E7A', textAlign: 'right' }}>
+            {reply.isReadByParent ? '家长已查看' : '家长未查看'}
+          </div>
+        )}
+        {!isTeacher && (
+          <div style={{ marginTop: 4, fontSize: 10, color: '#9A8E7A' }}>
+            {reply.isReadByTeacher ? '已查看' : '新留言'}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -92,6 +113,11 @@ function MessageCard({ msg, onClick, active, index }: { msg: Message; onClick: (
         {msg.student && (
           <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#f5f5f5', color: '#5a4e3a', border: 'none' }}>
             {msg.student.name}
+          </Tag>
+        )}
+        {msg.feedback && (
+          <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#fff3ec', color: '#E8784A', border: 'none' }}>
+            课堂反馈留言
           </Tag>
         )}
         {msg.subject && subjectColor && (
@@ -123,10 +149,13 @@ export function TeacherMessagesClient() {
   const [replyText, setReplyText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [closing, setClosing] = useState(false)
+  const [mobileViewport, setMobileViewport] = useState({ height: 0, bottomInset: 0 })
   const bottomRef = useRef<HTMLDivElement>(null)
+  const conversationRef = useRef<HTMLDivElement>(null)
+  const composerRef = useRef<HTMLDivElement>(null)
 
   const { data, mutate, isLoading } = usePausableSWR('/api/messages', fetcher, {
-    refreshInterval: 15_000,
+    refreshInterval: 5_000,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
   })
@@ -134,9 +163,62 @@ export function TeacherMessagesClient() {
   const messages = allMessages.filter(m => filter === 'ALL' || (filter === 'OPEN' ? m.status !== 'CLOSED' : m.status === 'CLOSED'))
   const active = allMessages.find(m => m.id === activeId) || null
 
+  const scrollConversationToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    const conversation = conversationRef.current
+    if (!conversation) return
+    conversation.scrollTo({ top: conversation.scrollHeight, behavior })
+  }
+
   useEffect(() => {
-    if (active) setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
-  }, [active?.replies.length])
+    if (!activeId) return
+    const timer = window.setTimeout(() => scrollConversationToBottom(), 100)
+    return () => window.clearTimeout(timer)
+  }, [activeId, active?.replies.length])
+
+  useEffect(() => {
+    if (!isMobile) return
+
+    const updateViewport = () => {
+      const viewport = window.visualViewport
+      const height = Math.round(viewport?.height ?? window.innerHeight)
+      const bottomInset = viewport
+        ? Math.max(0, Math.round(window.innerHeight - viewport.height - viewport.offsetTop))
+        : 0
+
+      setMobileViewport(current => (
+        current.height === height && current.bottomInset === bottomInset
+          ? current
+          : { height, bottomInset }
+      ))
+    }
+
+    updateViewport()
+    window.addEventListener('resize', updateViewport)
+    window.visualViewport?.addEventListener('resize', updateViewport)
+    window.visualViewport?.addEventListener('scroll', updateViewport)
+
+    return () => {
+      window.removeEventListener('resize', updateViewport)
+      window.visualViewport?.removeEventListener('resize', updateViewport)
+      window.visualViewport?.removeEventListener('scroll', updateViewport)
+    }
+  }, [isMobile])
+
+  useEffect(() => {
+    if (!isMobile || !activeId) return
+    const timer = window.setTimeout(() => scrollConversationToBottom('auto'), 50)
+    return () => window.clearTimeout(timer)
+  }, [activeId, isMobile, mobileViewport.height, mobileViewport.bottomInset])
+
+  const handleReplyFocus = () => {
+    const revealComposer = () => {
+      composerRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
+      scrollConversationToBottom()
+    }
+
+    window.requestAnimationFrame(revealComposer)
+    window.setTimeout(revealComposer, 300)
+  }
 
   const handleSelect = async (id: string) => {
     setActiveId(id)
@@ -155,6 +237,7 @@ export function TeacherMessagesClient() {
       })
       if (!res.ok) { toast.error('发送失败'); return }
       setReplyText('')
+      toast.success('回复已发送，家长首页将显示新回复提示')
       mutate()
     } catch { toast.error('网络错误') }
     finally { setSubmitting(false) }
@@ -176,7 +259,7 @@ export function TeacherMessagesClient() {
   }
 
   const chatPanel = (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       {active && (
         <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(0,0,0,.07)', background: '#fff', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -197,10 +280,18 @@ export function TeacherMessagesClient() {
                 学员：{active.student.name}
               </Tag>
             )}
+            {active.feedback && (
+              <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#fff3ec', color: '#E8784A', border: 'none' }}>
+                {active.feedback.classLesson?.group.course.name || active.feedback.classLesson?.subject || '课堂反馈'} · {fmtDateTime(active.feedback.createdAt)}
+              </Tag>
+            )}
           </div>
         </div>
       )}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', background: '#faf8f5' }}>
+      <div ref={conversationRef} style={{
+        flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 16px',
+        background: '#faf8f5', overscrollBehavior: 'contain', scrollPaddingBottom: 88,
+      }}>
         {!active ? (
           <BrandEmpty title="选择留言开始回复" icon={<MessageOutlined />} />
         ) : (
@@ -211,14 +302,18 @@ export function TeacherMessagesClient() {
         )}
       </div>
       {active && active.status !== 'CLOSED' && (
-        <div style={{
-          padding: '12px 16px', background: '#fff',
+        <div ref={composerRef} style={{
+          padding: isMobile
+            ? '12px 12px calc(12px + env(safe-area-inset-bottom, 0px))'
+            : '12px 16px',
+          background: '#fff',
           borderTop: '1px solid rgba(0,0,0,.07)', flexShrink: 0,
-          display: 'flex', gap: 8, alignItems: 'flex-end',
+          display: 'flex', gap: 8, alignItems: 'flex-end', position: 'relative', zIndex: 2,
         }}>
           <TextArea
             value={replyText}
             onChange={e => setReplyText(e.target.value)}
+            onFocus={handleReplyFocus}
             placeholder="回复家长..."
             autoSize={{ minRows: 1, maxRows: 4 }}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleReply() } }}
@@ -268,8 +363,12 @@ export function TeacherMessagesClient() {
         ))}
         <Drawer
           open={!!activeId} onClose={() => setActiveId(null)}
-          placement="bottom" height="85vh"
+          placement="bottom"
+          height={mobileViewport.height
+            ? Math.min(720, Math.max(240, Math.round(mobileViewport.height * 0.9)))
+            : '85dvh'}
           title={null} closable={false}
+          rootStyle={{ bottom: mobileViewport.bottomInset }}
           bodyStyle={{ padding: 0, display: 'flex', flexDirection: 'column', height: '100%' }}
           headerStyle={{ display: 'none' }}
           style={{ borderRadius: '16px 16px 0 0' }}
@@ -287,7 +386,7 @@ export function TeacherMessagesClient() {
               <CloseOutlined style={{ fontSize: 12 }} />
             </button>
           </div>
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             {chatPanel}
           </div>
         </Drawer>

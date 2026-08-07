@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { getRequestDivision } from '@/lib/division'
+import { classifySalaryBucket, type SalaryBucket } from '@/lib/salary-bucket'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,10 @@ export async function GET(req: NextRequest) {
     const prisma = adminUser.prisma
     const teacherId = req.nextUrl.searchParams.get('teacherId')
     const period = req.nextUrl.searchParams.get('period') || 'month'
+    const requestedBucket = req.nextUrl.searchParams.get('bucket')
+    const bucket = requestedBucket === 'SMALL_CLASS' || requestedBucket === 'INTENSIVE'
+      ? requestedBucket
+      : 'ALL'
     const division = getRequestDivision(adminUser, req.nextUrl.searchParams.get('division'))
     const since = salaryPeriodStart(period)
     const where = {
@@ -28,25 +33,16 @@ export async function GET(req: NextRequest) {
     const page = Math.max(1, Number(req.nextUrl.searchParams.get('page') || 1))
     const limit = Math.min(200, Math.max(1, Number(req.nextUrl.searchParams.get('limit') || 50)))
 
-    const [transactions, total, teachers, aggregates, feedbackAggregates] = await Promise.all([
-      prisma.teacherSalaryTransaction.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        include: { teacher: { select: { id: true, name: true, avatar: true } } },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      prisma.teacherSalaryTransaction.count({ where }),
+    const [teachers, summaryTransactions, feedbackAggregates] = await Promise.all([
       prisma.teacher.findMany({
         where: { status: 'ACTIVE', division },
         select: { id: true, name: true, avatar: true },
         orderBy: { createdAt: 'asc' },
       }),
-      prisma.teacherSalaryTransaction.groupBy({
-        by: ['teacherId', 'type'],
+      prisma.teacherSalaryTransaction.findMany({
         where,
-        _sum: { amount: true },
-        _count: { _all: true },
+        include: { teacher: { select: { id: true, name: true, avatar: true } } },
+        orderBy: { createdAt: 'desc' },
       }),
       prisma.classroomFeedback.groupBy({
         by: ['teacherId'],
@@ -60,21 +56,62 @@ export async function GET(req: NextRequest) {
       }),
     ])
 
-    const summaryMap = new Map<string, { teacherId: string; name: string; avatar: string | null; lesson: number; feedback: number; feedbackCount: number; rewardCount: number; total: number }>()
+    const contextTransactions = summaryTransactions
+    const lessonIds = [...new Set(contextTransactions.map((item) => item.lessonId).filter((id): id is string => Boolean(id)))]
+    const feedbackIds = [...new Set(contextTransactions.map((item) => item.feedbackId).filter((id): id is string => Boolean(id)))]
+    const [salaryLessons, salaryFeedbacks] = await Promise.all([
+      lessonIds.length ? prisma.classLesson.findMany({
+        where: { id: { in: lessonIds } },
+        select: { id: true, group: { select: { intensiveMode: true } } },
+      }) : [],
+      feedbackIds.length ? prisma.classroomFeedback.findMany({
+        where: { id: { in: feedbackIds } },
+        select: {
+          id: true,
+          feedbackCourseType: true,
+          feedbackGroupId: true,
+          classLesson: { select: { group: { select: { intensiveMode: true } } } },
+        },
+      }) : [],
+    ])
+    const feedbackGroupIds = [...new Set(salaryFeedbacks.map((item) => item.feedbackGroupId).filter((id): id is string => Boolean(id)))]
+    const salaryGroups = feedbackGroupIds.length ? await prisma.classGroup.findMany({
+      where: { id: { in: feedbackGroupIds } },
+      select: { id: true, intensiveMode: true },
+    }) : []
+    const lessonIntensiveMap = new Map(salaryLessons.map((item) => [item.id, item.group.intensiveMode === 'INTENSIVE']))
+    const groupIntensiveMap = new Map(salaryGroups.map((item) => [item.id, item.intensiveMode === 'INTENSIVE']))
+    const feedbackIntensiveMap = new Map(salaryFeedbacks.map((item) => [
+      item.id,
+      item.classLesson?.group.intensiveMode === 'INTENSIVE'
+        || (item.feedbackGroupId ? groupIntensiveMap.get(item.feedbackGroupId) === true : false)
+        || ['ONE_ON_ONE', 'ONE_ON_TWO', 'ONE_ON_THREE'].includes(item.feedbackCourseType || ''),
+    ]))
+    const salaryBucket = (item: { lessonId?: string | null; feedbackId?: string | null; description?: string | null }) =>
+      classifySalaryBucket({
+        lessonIsIntensive: item.lessonId ? lessonIntensiveMap.get(item.lessonId) === true : false,
+        feedbackIsIntensive: item.feedbackId ? feedbackIntensiveMap.get(item.feedbackId) === true : false,
+        description: item.description,
+      })
+
+    const summaryMap = new Map<string, { teacherId: string; name: string; avatar: string | null; lesson: number; feedback: number; adjustment: number; smallClass: number; intensive: number; feedbackCount: number; rewardCount: number; total: number }>()
     for (const teacher of teachers) {
       if (!teacherId || teacher.id === teacherId) {
-        summaryMap.set(teacher.id, { teacherId: teacher.id, name: teacher.name, avatar: teacher.avatar, lesson: 0, feedback: 0, feedbackCount: 0, rewardCount: 0, total: 0 })
+        summaryMap.set(teacher.id, { teacherId: teacher.id, name: teacher.name, avatar: teacher.avatar, lesson: 0, feedback: 0, adjustment: 0, smallClass: 0, intensive: 0, feedbackCount: 0, rewardCount: 0, total: 0 })
       }
     }
-    for (const item of aggregates) {
+    for (const item of summaryTransactions) {
       const row = summaryMap.get(item.teacherId)
       if (!row) continue
-      const amount = item._sum.amount ?? 0
-      if (item.type === 'LESSON_PAY') row.lesson += amount
+      const amount = item.amount
+      if (item.type === 'LESSON_PAY' || item.type === 'LESSON_PAY_ADJUSTMENT') row.lesson += amount
       if (item.type === 'FEEDBACK_BONUS') {
         row.feedback += amount
-        row.rewardCount = item._count._all
+        row.rewardCount += 1
       }
+      if (!['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT', 'FEEDBACK_BONUS'].includes(item.type)) row.adjustment += amount
+      if (salaryBucket(item) === 'INTENSIVE') row.intensive += amount
+      else row.smallClass += amount
       row.total += amount
     }
     for (const item of feedbackAggregates) {
@@ -103,20 +140,29 @@ export async function GET(req: NextRequest) {
       ...row,
       lesson: Number(row.lesson.toFixed(2)),
       feedback: Number(row.feedback.toFixed(2)),
+      adjustment: Number(row.adjustment.toFixed(2)),
+      smallClass: Number(row.smallClass.toFixed(2)),
+      intensive: Number(row.intensive.toFixed(2)),
       total: Number(row.total.toFixed(2)),
     }))
+    const filteredTransactions = bucket === 'ALL'
+      ? summaryTransactions
+      : summaryTransactions.filter((item) => salaryBucket(item) === bucket)
+    const pagedTransactions = filteredTransactions.slice((page - 1) * limit, page * limit)
 
     return NextResponse.json({
       period,
-      total,
+      bucket,
+      total: filteredTransactions.length,
       page,
       limit,
       summary,
-      transactions: transactions.map((item) => ({
+      transactions: pagedTransactions.map((item) => ({
         id: item.id,
         teacherId: item.teacher.id,
         teacherName: item.teacher.name,
         type: item.type,
+        salaryBucket: salaryBucket(item),
         amount: item.amount,
         description: item.description,
         lessonDate: item.lessonDate?.toISOString() ?? null,
@@ -136,10 +182,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const adminUser = await requireAdminUser()
-    const body = await req.json() as { teacherId?: unknown; amount?: unknown; description?: unknown }
+    const body = await req.json() as { teacherId?: unknown; amount?: unknown; description?: unknown; salaryBucket?: unknown }
     const teacherId = typeof body.teacherId === 'string' ? body.teacherId.trim() : ''
     const amount = body.amount
     const description = typeof body.description === 'string' ? body.description.trim() : ''
+    const salaryBucket: SalaryBucket = body.salaryBucket === 'INTENSIVE' ? 'INTENSIVE' : 'SMALL_CLASS'
 
     if (!teacherId) return NextResponse.json({ error: '请选择教师' }, { status: 400 })
     if (typeof amount !== 'number' || !Number.isFinite(amount) || amount === 0) {
@@ -158,7 +205,7 @@ export async function POST(req: NextRequest) {
         teacherId,
         type: 'manual_adjust',
         amount,
-        description,
+        description: `${salaryBucket === 'INTENSIVE' ? '[一对一/二/三]' : '[小班课]'} ${description}`,
         createdAt: new Date(),
       },
     })

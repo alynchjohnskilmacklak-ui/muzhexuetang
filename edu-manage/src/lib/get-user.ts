@@ -1,17 +1,46 @@
 import { auth } from './auth'
+import { getPrismaForDivision } from './prisma'
+import { resolveTeacherForUser } from './teacher-account-binding'
+import { isSuperAdminEmail } from './super-admin'
 
 export async function getCurrentUser() {
   const session = await auth()
   if (!session?.user) return null
 
   const u = session.user as Record<string, unknown>
+  const division = (u.division as string) === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+  let teacherId = (u.teacherId as string | null) ?? null
+  if (String(u.role || '').toLowerCase() === 'teacher' && !teacherId && u.id) {
+    try {
+      const prisma = getPrismaForDivision(division)
+      const account = await prisma.user.findUnique({
+        where: { id: u.id as string },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          teacherId: true,
+        },
+      })
+      if (account) {
+        teacherId = (await resolveTeacherForUser(prisma, account))?.id ?? null
+      }
+    } catch (error) {
+      console.error('[current-user:teacher-binding]', {
+        userId: u.id,
+        division,
+        message: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
   return {
     id: u.id as string,
     email: session.user.email,
     name: session.user.name,
     role: u.role as string,
-    teacherId: (u.teacherId as string | null) ?? null,
-    division: (u.division as string) === 'SENIOR' ? 'SENIOR' : 'JUNIOR',
+    teacherId,
+    division,
   }
 }
 
@@ -26,11 +55,7 @@ export async function requireRole(allowedRoles: string[]) {
  *  登录层只认小写 admin/teacher/parent，role 必须保持 admin。 */
 export async function requireSuperAdmin() {
   const user = await requireRole(['admin'])
-  const supers = (process.env.SUPER_ADMIN_EMAILS || '')
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean)
-  if (!user.email || !supers.includes(user.email.toLowerCase())) {
+  if (!isSuperAdminEmail(user.email)) {
     throw new Error('无权限')
   }
   return user

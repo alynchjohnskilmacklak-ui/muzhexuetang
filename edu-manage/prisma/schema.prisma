@@ -37,6 +37,7 @@ model User {
   paperComments          PaperComment[]
   volunteerConsultations VolunteerConsultation[]
   mealMenus              MealMenu[]              @relation("MealMenuCreator")
+  mealAttendanceEntries  StudentMealAttendance[] @relation("MealAttendanceRecorder")
   loginRecords           LoginRecord[]
   passwordResetTokens    PasswordResetToken[]
   uploadedMaterials      StudyMaterial[]         @relation("MaterialUploader")
@@ -72,26 +73,28 @@ model Student {
   mainTeacherId   String?
   division        String    @default("JUNIOR")
 
-  parent            User?              @relation(fields: [parentId], references: [id])
-  mainTeacher       Teacher?           @relation(fields: [mainTeacherId], references: [id])
-  fees              Fee[]
-  schedules         ScheduleStudent[]
-  enrollments       Enrollment[]
-  attendances       Attendance[]
-  gradeRecords      GradeRecord[]
-  highlights        ClassHighlight[]
-  makeupRequests    MakeupRequest[]
-  performancePosts  PerformancePost[]
-  hourTransactions  HourTransaction[]
-  achievementBadges AchievementBadge[]
-  examPapers        ExamPaper[]
-  learningGoals     LearningGoal[]
-  weaknessRecords   WeaknessRecord[]
-  stageSummaries    StageSummary[]
-  notifications     Notification[]
-  leaveRequests     LeaveRequest[]
-  mealChoices       ParentMealChoice[]
-  parentMessages    ParentMessage[]
+  parent              User?                @relation(fields: [parentId], references: [id])
+  mainTeacher         Teacher?             @relation(fields: [mainTeacherId], references: [id])
+  fees                Fee[]
+  schedules           ScheduleStudent[]
+  enrollments         Enrollment[]
+  classLessonStudents ClassLessonStudent[]
+  attendances         Attendance[]
+  gradeRecords        GradeRecord[]
+  highlights          ClassHighlight[]
+  makeupRequests      MakeupRequest[]
+  performancePosts    PerformancePost[]
+  hourTransactions    HourTransaction[]
+  achievementBadges   AchievementBadge[]
+  examPapers          ExamPaper[]
+  learningGoals       LearningGoal[]
+  weaknessRecords     WeaknessRecord[]
+  stageSummaries      StageSummary[]
+  notifications       Notification[]
+  leaveRequests       LeaveRequest[]
+  mealChoices         ParentMealChoice[]
+  mealAttendances     StudentMealAttendance[]
+  parentMessages      ParentMessage[]
 
   @@index([status, createdAt])
   @@index([grade])
@@ -194,28 +197,41 @@ enum GroupStatus {
   ARCHIVED
 }
 
+enum ClassMode {
+  NORMAL
+  INTENSIVE
+}
+
+enum IntensiveTeachingType {
+  ONE_ON_ONE
+  ONE_ON_TWO
+  ONE_ON_THREE
+}
+
 model ClassGroup {
-  id               String      @id @default(cuid())
+  id               String                 @id @default(cuid())
   name             String
-  division         String      @default("JUNIOR")
+  division         String                 @default("JUNIOR")
   courseId         String
-  course           Course      @relation(fields: [courseId], references: [id])
+  course           Course                 @relation(fields: [courseId], references: [id])
   teacherId        String
-  teacher          Teacher     @relation(fields: [teacherId], references: [id])
+  teacher          Teacher                @relation(fields: [teacherId], references: [id])
   roomId           String?
-  room             Room?       @relation(fields: [roomId], references: [id])
-  maxStudents      Int         @default(20)
+  room             Room?                  @relation(fields: [roomId], references: [id])
+  maxStudents      Int                    @default(20)
   startDate        DateTime
   endDate          DateTime?
-  status           GroupStatus @default(WAITING)
+  status           GroupStatus            @default(WAITING)
   totalLessons     Int
-  completedLessons Int         @default(0)
+  completedLessons Int                    @default(0)
   recurringDays    String[]
   lessonStartTime  String
-  lessonMinutes    Int         @default(90)
+  lessonMinutes    Int                    @default(90)
   note             String?
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  intensiveMode    ClassMode              @default(NORMAL)
+  teachingType     IntensiveTeachingType?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
 
   enrollments        Enrollment[]
   classLessons       ClassLesson[]
@@ -249,36 +265,109 @@ enum LessonStatus {
   POSTPONED
 }
 
+enum SettlementStatus {
+  UNSETTLED
+  SETTLED
+  ADJUSTED
+}
+
+enum IntensiveReviewStatus {
+  NOT_REQUIRED
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model ClassLesson {
-  id                    String       @id @default(cuid())
-  division              String       @default("JUNIOR")
+  id                    String           @id @default(cuid())
+  division              String           @default("JUNIOR")
   groupId               String
-  group                 ClassGroup   @relation(fields: [groupId], references: [id])
+  group                 ClassGroup       @relation(fields: [groupId], references: [id])
   teacherId             String?
-  teacher               Teacher?     @relation("ClassLessonTeacher", fields: [teacherId], references: [id])
+  teacher               Teacher?         @relation("ClassLessonTeacher", fields: [teacherId], references: [id])
   subject               String?
   lessonDate            DateTime
   startTime             String
   endTime               String
-  status                LessonStatus @default(SCHEDULED)
+  status                LessonStatus     @default(SCHEDULED)
   cancelReason          String?
   postponeFrom          DateTime?
   note                  String?
   hoursDeductedAt       DateTime?
   attendanceSubmittedAt DateTime?
-  isManual              Boolean      @default(false)
-  createdAt             DateTime     @default(now())
+  isManual              Boolean          @default(false)
+  plannedMinutes        Int?
+  actualMinutes         Int?
+  settlementStatus      SettlementStatus @default(UNSETTLED)
+  intensiveReviewStatus IntensiveReviewStatus @default(NOT_REQUIRED)
+  createdAt             DateTime         @default(now())
 
-  attendances        Attendance[]
-  performancePosts   PerformancePost[]
-  examPapers         ExamPaper[]
-  classroomFeedbacks ClassroomFeedback[]
+  attendances           Attendance[]
+  performancePosts      PerformancePost[]
+  examPapers            ExamPaper[]
+  classroomFeedbacks    ClassroomFeedback[]
+  lessonStudents        ClassLessonStudent[]
+  settlementAdjustments LessonSettlementAdjustment[]
+  intensiveReviews      IntensiveLessonReview[]
 
   @@index([lessonDate, status])
   @@index([status, lessonDate])
   @@index([teacherId, lessonDate])
   @@index([groupId, lessonDate])
   @@index([division, lessonDate])
+}
+
+model IntensiveLessonReview {
+  id                 String                @id @default(cuid())
+  lessonId           String
+  lesson             ClassLesson           @relation(fields: [lessonId], references: [id], onDelete: Restrict)
+  revision           Int                   @default(1)
+  teacherId          String
+  submittedById      String
+  actualMinutes      Int
+  attendanceSnapshot Json
+  teacherNote        String?
+  status             IntensiveReviewStatus @default(PENDING)
+  submittedAt        DateTime              @default(now())
+  reviewedById       String?
+  reviewedAt         DateTime?
+  reviewNote         String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  @@unique([lessonId, revision])
+  @@index([status, submittedAt])
+  @@index([teacherId, status, submittedAt])
+  @@index([reviewedById, reviewedAt])
+}
+
+model LessonSettlementAdjustment {
+  id         String      @id @default(cuid())
+  lessonId   String
+  lesson     ClassLesson @relation(fields: [lessonId], references: [id], onDelete: Restrict)
+  oldMinutes Int
+  newMinutes Int
+  reason     String
+  operatorId String
+  createdAt  DateTime    @default(now())
+
+  salaryTransaction TeacherSalaryTransaction?
+
+  @@index([lessonId, createdAt])
+  @@index([operatorId, createdAt])
+}
+
+model ClassLessonStudent {
+  id        String      @id @default(cuid())
+  lessonId  String
+  lesson    ClassLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  studentId String
+  student   Student     @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  createdAt DateTime    @default(now())
+
+  @@unique([lessonId, studentId])
+  @@index([studentId])
 }
 
 enum EnrollStatus {
@@ -676,6 +765,7 @@ model ClassroomFeedback {
   targetType         String       @default("CLASS")
   source             String       @default("teacher")
   studentIds         String[]
+  lessonContent      String?      @db.Text
   knowledgePoints    String[]
   summary            String?      @db.Text
   mood               String?
@@ -697,6 +787,8 @@ model ClassroomFeedback {
   notifySent         Boolean      @default(false)
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
+
+  parentMessages ParentMessage[]
 
   @@index([teacherId, createdAt])
   @@index([teacherId, status, createdAt])
@@ -928,6 +1020,24 @@ model ParentMealChoice {
   menu    MealMenu @relation(fields: [menuId], references: [id])
 
   @@unique([studentId, menuId, choiceDate])
+}
+
+model StudentMealAttendance {
+  id         String   @id @default(cuid())
+  studentId  String
+  mealDate   DateTime @db.Date
+  division   String   @default("JUNIOR")
+  recordedBy String
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  student  Student @relation(fields: [studentId], references: [id])
+  recorder User    @relation("MealAttendanceRecorder", fields: [recordedBy], references: [id])
+
+  @@unique([studentId, mealDate])
+  @@index([division, mealDate])
+  @@index([studentId, mealDate])
 }
 
 model StudyMaterial {
@@ -1239,22 +1349,24 @@ model TeacherSalaryConfig {
 
 // Teacher salary transaction generated by attendance and classroom feedback.
 model TeacherSalaryTransaction {
-  id          String    @id @default(cuid())
-  teacherId   String
-  teacher     Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  type        String
-  amount      Float
-  lessonId    String?
-  feedbackId  String?
-  description String?
-  lessonDate  DateTime?
-  createdAt   DateTime  @default(now())
+  id           String                      @id @default(cuid())
+  teacherId    String
+  teacher      Teacher                     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  type         String
+  amount       Float
+  lessonId     String?
+  feedbackId   String?
+  adjustmentId String?                     @unique
+  adjustment   LessonSettlementAdjustment? @relation(fields: [adjustmentId], references: [id], onDelete: Restrict)
+  description  String?
+  lessonDate   DateTime?
+  createdAt    DateTime                    @default(now())
 
-  @@unique([lessonId, type])
   @@unique([feedbackId, type])
   @@index([teacherId, createdAt])
   @@index([teacherId, lessonDate])
   @@index([lessonId])
+  @@index([lessonId, type])
   @@index([feedbackId])
 }
 
@@ -1270,13 +1382,15 @@ model FeedbackRewardRecord {
   courseKey       String
   courseLabel     String?
   amount          Float
+  rewardDate      DateTime @db.Date
   isFirstFeedback Boolean  @default(true)
-  isActive       Boolean  @default(true)
-  invalidReason  String?
+  isActive        Boolean  @default(true)
+  invalidReason   String?
   createdAt       DateTime @default(now())
 
   @@index([feedbackId])
   @@index([teacherId, createdAt])
+  @@index([teacherId, rewardDate])
   @@index([studentId, createdAt])
 }
 
@@ -1354,23 +1468,27 @@ model JuniorEnrollment {
 
 // ── 家长留言 ──────────────────────────────────────────────
 model ParentMessage {
-  id        String   @id @default(cuid())
-  parentId  String
-  parent    User     @relation("ParentMessages", fields: [parentId], references: [id], onDelete: Cascade)
-  studentId String?
-  student   Student? @relation(fields: [studentId], references: [id])
-  teacherId String?
-  teacher   Teacher? @relation("TeacherMessages", fields: [teacherId], references: [id])
-  subject   String?
-  title     String
-  status    String   @default("OPEN")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String             @id @default(cuid())
+  parentId   String
+  parent     User               @relation("ParentMessages", fields: [parentId], references: [id], onDelete: Cascade)
+  studentId  String?
+  student    Student?           @relation(fields: [studentId], references: [id])
+  teacherId  String?
+  teacher    Teacher?           @relation("TeacherMessages", fields: [teacherId], references: [id])
+  feedbackId String?
+  feedback   ClassroomFeedback? @relation(fields: [feedbackId], references: [id], onDelete: SetNull)
+  subject    String?
+  title      String
+  status     String             @default("OPEN")
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
 
   replies ParentMessageReply[]
 
+  @@unique([feedbackId, parentId])
   @@index([parentId, createdAt])
   @@index([teacherId, status, createdAt])
+  @@index([feedbackId])
   @@index([status, createdAt])
 }
 

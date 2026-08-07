@@ -193,6 +193,15 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   } : null
 
   const latestTeacherUpdate = profile?.record.timeline.find(item => item.type === 'feedback')
+  const subjectInsights = profile ? [...profile.record.timeline
+    .filter((item) => item.type === 'feedback')
+    .reduce((map, item) => {
+      const subject = item.teacherSubject || '综合'
+      const existing = map.get(subject)
+      if (!existing) map.set(subject, { subject, latest: item, count: 1 })
+      else existing.count += 1
+      return map
+    }, new Map<string, { subject: string; latest: StudentProfile['record']['timeline'][number]; count: number }>()).values()] : []
   const highlights = profile?.growth.highlights
   const hasHighlights = Boolean(highlights && (highlights.badgeTotal > 0 || highlights.praiseCount > 0 || highlights.topTags.length > 0))
   const attendanceText = profile?.overview.attendanceRate !== null && profile?.overview.attendanceRate !== undefined
@@ -240,6 +249,37 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
         <Card bordered={false} className="parent-growth-status">
           <Text strong className="parent-growth-status-title">{statusSummary}</Text>
         </Card>
+
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
+          {[
+            ['课堂反馈', `${profile.overview.feedbackCount} 条`],
+            ['覆盖学科', `${profile.overview.subjectCount} 门`],
+            ['本期出勤', attendanceText],
+            ['个性化授课', `${profile.overview.approvedIntensiveHours.toFixed(2)} h`],
+          ].map(([label, value]) => (
+            <Card key={label} bordered={false} className="parent-card" styles={{ body: { padding: isMobile ? 12 : 14 } }}>
+              <Text type="secondary" style={{ fontSize: 11 }}>{label}</Text>
+              <div style={{ marginTop: 4, fontSize: isMobile ? 18 : 22, fontWeight: 800, color: 'var(--color-primary)', overflowWrap: 'anywhere' }}>{value}</div>
+            </Card>
+          ))}
+        </div>
+
+        {!!subjectInsights.length && <Card bordered={false} className="parent-growth-latest">
+          <div className="parent-growth-section-head"><div><BookOutlined /><Text strong>各科老师本期评价</Text></div></div>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {subjectInsights.slice(0, 6).map(({ subject, latest, count }) => (
+              <div key={subject} style={{ padding: 12, borderRadius: 10, background: 'var(--color-surface-3)', border: '1px solid var(--color-hairline)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+                  <Text strong>{subject} · {latest.teacher || '任课'}老师</Text>
+                  <Text type="secondary" style={{ fontSize: 11 }}>本期 {count} 次 · {fmtDate(latest.date)}</Text>
+                </div>
+                <Paragraph ellipsis={{ rows: 3 }} style={{ margin: '8px 0 0', lineHeight: 1.7 }}>
+                  {latest.detail?.comment || latest.detail?.summary || latest.sub || '老师已记录本次课堂情况'}
+                </Paragraph>
+              </div>
+            ))}
+          </div>
+        </Card>}
 
         {latestTeacherUpdate && <Card bordered={false} className="parent-growth-latest">
           <div className="parent-growth-section-head">
@@ -369,8 +409,8 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
               {[
                 { label: '出勤率', value: profile.overview.attendanceRate !== null ? `${profile.overview.attendanceRate}%` : '—' },
-                { label: '本期试卷', value: `${profile.overview.paperCount} 份` },
-                { label: '获得徽章', value: `${profile.overview.badgeCount} 枚` },
+                { label: '课堂反馈', value: `${profile.overview.feedbackCount} 条` },
+                { label: '个性化授课', value: `${profile.overview.approvedIntensiveHours.toFixed(2)} 小时` },
               ].map(item => (
                 <div key={item.label} style={{ padding: 10, borderRadius: 10, background: '#FFFBF7', textAlign: 'center', border: '1px solid #EEE7E1' }}>
                   <div style={{ fontSize: 10, color: '#7A869A', marginBottom: 2 }}>{item.label}</div>
@@ -420,24 +460,20 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
               )
             })()}
 
-            {/* C1: Recent positive feedback */}
-            {(() => {
-              const fbItems = profile.record.timeline.filter(t => t.type === 'feedback' || t.type === 'post').slice(0, 5)
-              if (!fbItems.length) return null
-              return (
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#6A5ACD', marginBottom: 6 }}>近期老师反馈</div>
-                  {fbItems.map((f, i) => (
-                    <div key={i} style={{ fontSize: 12, marginBottom: 6, padding: '6px 10px', background: '#F9F7FF', borderRadius: 8, color: '#4B5563' }}>
-                      <div style={{ fontWeight: 600, fontSize: 11, color: '#7A869A', marginBottom: 2 }}>
-                        {fmtDate(f.date)} {f.teacher ? `${f.teacher} 老师${f.teacherSubject ? ` · ${f.teacherSubject}` : ''}` : ''}
-                      </div>
-                      “{f.sub}”
+            {/* 按学科呈现教师原始评价，避免把不同学科混成一段泛化总结。 */}
+            {subjectInsights.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#6A5ACD', marginBottom: 6 }}>各科老师本期评价</div>
+                {subjectInsights.map(({ subject, latest, count }) => (
+                  <div key={subject} style={{ fontSize: 12, marginBottom: 6, padding: '8px 10px', background: '#F9F7FF', borderRadius: 8, color: '#4B5563' }}>
+                    <div style={{ fontWeight: 600, fontSize: 11, color: '#7A869A', marginBottom: 2 }}>
+                      {subject} · {latest.teacher || '任课'}老师 · 本期 {count} 次反馈 · 最近 {fmtDate(latest.date)}
                     </div>
-                  ))}
-                </div>
-              )
-            })()}
+                    {latest.detail?.comment || latest.detail?.summary || latest.sub || '老师已记录本次课堂情况'}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Weak points */}
             {profile.study.weaknesses.length > 0 && (

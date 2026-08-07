@@ -1,8 +1,8 @@
 ﻿'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Card, Descriptions, Image, Tag, Typography } from 'antd'
-import { ArrowLeftOutlined, BookOutlined, ClockCircleOutlined, EnvironmentOutlined, TeamOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, BookOutlined, ClockCircleOutlined, EnvironmentOutlined, ReloadOutlined, TeamOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { fmtDateTime } from '@/lib/format-date'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -14,15 +14,26 @@ function subjectOfTeacher(subjects?: string | null) {
   return (subjects || '').split(/[，,、\s]+/).filter(Boolean)[0] || ''
 }
 
+function parentMasteryLabel(value: unknown) {
+  const raw = value && typeof value === 'object' && 'rating' in value
+    ? (value as { rating?: unknown }).rating
+    : value
+  if (typeof raw !== 'string') return ''
+  return ({ GREAT: '掌握良好', OKAY: '基本掌握', NEEDS_IMPROVEMENT: '需要加强' } as Record<string, string>)[raw] || raw
+}
+
 export function FeedbackDetailClient({ feedback }: { feedback: any }) {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
+  const [imagePreviewOpen, setImagePreviewOpen] = useState(false)
   const imageUrls = Array.isArray(feedback.imageUrls) ? feedback.imageUrls : []
   const images = Array.isArray(feedback.images) && feedback.images.length === imageUrls.length
     ? feedback.images
     : imageUrls.map((url: string) => ({ originalUrl: url, previewUrl: url, thumbnailUrl: url }))
-  const { urls: signedThumbnails } = useSignedUrls(images.map((image: any) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
-  const { urls: signedPreviews } = useSignedUrls(images.map((image: any) => image.previewUrl || image.thumbnailUrl || image.originalUrl))
+  const { urls: signedThumbnails, error: thumbnailError, refresh: retryThumbnails } = useSignedUrls(images.map((image: any) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
+  const { urls: signedPreviews, error: previewError, refresh: retryPreviews } = useSignedUrls(imagePreviewOpen
+    ? images.map((image: any) => image.previewUrl || image.thumbnailUrl || image.originalUrl)
+    : [])
 
   useEffect(() => {
     if (feedback.parentReadAt || feedback.status !== 'PUBLISHED') return
@@ -74,6 +85,15 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
           )}
         </Descriptions>
 
+        {feedback.lessonContent && (
+          <div style={{ background: '#FFFBF7', borderRadius: 10, padding: 16, marginBottom: 16 }}>
+            <Text strong style={{ display: 'block', marginBottom: 8 }}>本节课学习内容</Text>
+            <Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
+              {feedback.lessonContent}
+            </Paragraph>
+          </div>
+        )}
+
         {/* Knowledge points */}
         {feedback.knowledgePoints?.length > 0 && (
           <div style={{ marginBottom: 16 }}>
@@ -87,11 +107,20 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
         )}
 
         {/* Summary */}
-        {feedback.summary && (
+        {(feedback.summary || parentMasteryLabel(feedback.studentRating)) && (
           <div style={{ background: '#FFFBF7', borderRadius: 10, padding: 16, marginBottom: 16 }}>
-            <Text strong style={{ display: 'block', marginBottom: 8 }}>本节学习内容 / 孩子课堂表现</Text>
+            <Text strong style={{ display: 'block', marginBottom: 8 }}>孩子掌握情况</Text>
             <Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
-              {feedback.summary}
+              {feedback.summary || parentMasteryLabel(feedback.studentRating)}
+            </Paragraph>
+          </div>
+        )}
+
+        {feedback.overallComment && (
+          <div style={{ background: '#F5F2EE', borderRadius: 10, padding: 16, marginBottom: 16 }}>
+            <Text strong style={{ display: 'block', marginBottom: 8 }}>课堂反馈</Text>
+            <Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
+              {feedback.overallComment}
             </Paragraph>
           </div>
         )}
@@ -119,13 +148,31 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
         {imageUrls.length > 0 && (
           <div>
             <Text strong style={{ display: 'block', marginBottom: 12 }}>课堂资料</Text>
-            <Image.PreviewGroup>
+            {(thumbnailError || previewError) && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10,
+                marginBottom: 10,
+                padding: '10px 12px',
+                borderRadius: 10,
+                background: '#FFF4DE',
+                color: '#8A5B00',
+                fontSize: 12,
+              }}>
+                <span>图片连接暂时失败，文字反馈不受影响。</span>
+                <Button size="small" icon={<ReloadOutlined />} onClick={() => { retryThumbnails(); retryPreviews() }}>重新加载</Button>
+              </div>
+            )}
+            <Image.PreviewGroup preview={{ onVisibleChange: setImagePreviewOpen }}>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
                 {images.map((image: any, i: number) => (
                   <Image
                     key={i}
                     src={signedThumbnails[i]}
-                    preview={{ src: signedPreviews[i] }}
+                    loading="lazy"
+                    preview={{ src: signedPreviews[i] || signedThumbnails[i] }}
                     alt={`资料 ${i + 1}`}
                     width="100%"
                     height={isMobile ? 120 : 140}

@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { apiHandler } from '@/lib/api-handler'
+import { intensiveStudentCountError, toIntensiveTeachingType } from '@/lib/intensive-class'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,9 +33,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         endTime: true,
         status: true,
         groupId: true,
+        lessonStudents: { select: { studentId: true } },
         group: {
           select: {
             roomId: true,
+            intensiveMode: true,
+            teachingType: true,
             enrollments: { where: { status: 'ACTIVE' }, select: { studentId: true } },
           },
         },
@@ -48,7 +52,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const effectiveEnd = endTimeVal || existing.endTime
     const effectiveStudentIds: string[] = Array.isArray(studentIds)
       ? [...new Set(studentIds)] as string[]
-      : existing.group.enrollments.map(e => e.studentId)
+      : existing.group.intensiveMode === 'INTENSIVE'
+        ? existing.lessonStudents.map((item) => item.studentId)
+        : existing.group.enrollments.map(e => e.studentId)
+
+    const intensiveTeachingType = toIntensiveTeachingType(existing.group.teachingType)
+    if (existing.group.intensiveMode === 'INTENSIVE' && intensiveTeachingType) {
+      const countError = intensiveStudentCountError(intensiveTeachingType, effectiveStudentIds.length)
+      if (countError) return NextResponse.json({ error: countError }, { status: 400 })
+    }
 
     if (effectiveStart >= effectiveEnd) {
       return NextResponse.json({ error: '结束时间必须晚于开始时间' }, { status: 400 })
@@ -86,6 +98,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       if (startDate) lessonData.lessonDate = new Date(`${effectiveDate}T00:00:00`)
       if (startTimeVal !== undefined) lessonData.startTime = startTimeVal
       if (endTimeVal !== undefined) lessonData.endTime = endTimeVal
+      if (existing.group.intensiveMode === 'INTENSIVE' && (startTimeVal !== undefined || endTimeVal !== undefined)) {
+        const [sh, sm] = effectiveStart.split(':').map(Number)
+        const [eh, em] = effectiveEnd.split(':').map(Number)
+        lessonData.plannedMinutes = (eh * 60 + em) - (sh * 60 + sm)
+      }
 
       // Update group room if provided
       if (roomId !== undefined) {
@@ -97,6 +114,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
       // Sync enrollments if studentIds provided
       if (studentIds !== undefined) {
+        if (existing.group.intensiveMode === 'INTENSIVE') {
+          for (const sid of effectiveStudentIds) {
+            await tx.enrollment.upsert({
+              where: { studentId_groupId: { studentId: sid, groupId: existing.groupId } },
+              update: { status: 'ACTIVE' },
+              create: { groupId: existing.groupId, studentId: sid, totalHours: 0, remainHours: 0, status: 'ACTIVE' },
+            })
+          }
+          await tx.classLessonStudent.deleteMany({ where: { lessonId: id } })
+          await tx.classLessonStudent.createMany({
+            data: effectiveStudentIds.map((studentId) => ({ lessonId: id, studentId })),
+            skipDuplicates: true,
+          })
+        } else {
         const group = await tx.classGroup.findUnique({
           where: { id: existing.groupId },
           select: { id: true, maxStudents: true },
@@ -117,6 +148,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             where: { id: existing.groupId },
             data: { maxStudents: Math.max(group.maxStudents, effectiveStudentIds.length) },
           })
+        }
         }
       }
 
@@ -140,11 +172,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     revalidatePath('/schedule')
     revalidatePath('/teacher/schedule')
     return NextResponse.json({ success: true, lesson })
-  } catch (e: any) {
-    if (e?.status) {
-      const body: Record<string, unknown> = { error: e.message }
-      if (e.conflicts) body.conflicts = e.conflicts
-      return NextResponse.json(body, { status: e.status })
+  } catch (e: unknown) {
+    const routeError = e as { status?: number; message?: string; conflicts?: unknown }
+    if (routeError.status) {
+      const body: Record<string, unknown> = { error: routeError.message }
+      if (routeError.conflicts) body.conflicts = routeError.conflicts
+      return NextResponse.json(body, { status: routeError.status })
     }
     console.error('[schedules:update]', e)
     return NextResponse.json({ error: '更新课次失败' }, { status: 500 })

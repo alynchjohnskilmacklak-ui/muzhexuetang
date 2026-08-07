@@ -2,14 +2,15 @@ import { NextResponse } from 'next/server'
 import { requireSuperAdmin } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { createActivityLog } from '@/lib/data-admin/entities-server'
-import { exec } from 'child_process'
+import { execFile } from 'child_process'
 import { promisify } from 'util'
 import fs from 'fs'
 import path from 'path'
+import { isValidBackupId, resolveBackupDirectory } from '@/lib/backup-id'
 
 export const dynamic = 'force-dynamic'
 
-const execAsync = promisify(exec)
+const execFileAsync = promisify(execFile)
 
 const BACKUP_DIR = process.env.BACKUP_DIR || '/data/backups/edu-manage'
 
@@ -18,7 +19,7 @@ export const POST = apiHandler(async () => {
   const APP_ROOT = process.env.APP_ROOT || '/opt/edu-manage'
   const scriptPath = process.env.BACKUP_SCRIPT || `${APP_ROOT}/scripts/backup-now.sh`
 
-  const { stdout, stderr } = await execAsync(`bash ${scriptPath}`, {
+  const { stdout, stderr } = await execFileAsync('bash', [scriptPath], {
     cwd: APP_ROOT,
     timeout: 300_000,
     env: { ...process.env },
@@ -30,16 +31,25 @@ export const POST = apiHandler(async () => {
 
   const lines = stdout.trim().split('\n')
   const backupPath = lines[lines.length - 1] || ''
+  const backupId = path.basename(backupPath)
+  const expectedBackupPath = resolveBackupDirectory(BACKUP_DIR, backupId)
+  const resolvedBackupPath = path.resolve(backupPath)
+  if (!expectedBackupPath || resolvedBackupPath !== expectedBackupPath) {
+    throw new Error('备份脚本未返回有效的受控备份目录')
+  }
+  if (!isValidBackupId(backupId)) {
+    throw new Error('备份标识格式无效')
+  }
 
   await createActivityLog(user.id, 'MANUAL_BACKUP', 'System', 'backup', {
-    path: backupPath,
+    backupId,
   })
 
   return NextResponse.json({
     success: true,
-    path: backupPath,
+    backupId,
     timestamp: new Date().toISOString(),
-  })
+  }, { headers: { 'Cache-Control': 'no-store' } })
 })
 
 export const GET = apiHandler(async () => {
@@ -47,10 +57,9 @@ export const GET = apiHandler(async () => {
 
   const manualDir = path.join(BACKUP_DIR)
   const history: {
+    id: string
     name: string
-    path: string
     timestamp: string
-    metadata?: unknown
   }[] = []
 
   if (fs.existsSync(manualDir)) {
@@ -58,24 +67,19 @@ export const GET = apiHandler(async () => {
     for (const entry of entries) {
       if (!entry.isDirectory() || !entry.name.startsWith('manual-')) continue
       const dirPath = path.join(manualDir, entry.name)
-      const metaPath = path.join(dirPath, 'backup-metadata.json')
-      let metadata: unknown = null
-      if (fs.existsSync(metaPath)) {
-        try {
-          metadata = JSON.parse(fs.readFileSync(metaPath, 'utf-8'))
-        } catch { /* ignore parse errors */ }
-      }
       const stat = fs.statSync(dirPath)
       history.push({
+        id: entry.name,
         name: entry.name,
-        path: dirPath,
         timestamp: stat.birthtime.toISOString(),
-        metadata,
       })
     }
   }
 
   history.sort((a, b) => b.name.localeCompare(a.name))
 
-  return NextResponse.json({ success: true, data: history })
+  return NextResponse.json(
+    { success: true, data: history },
+    { headers: { 'Cache-Control': 'no-store' } },
+  )
 })

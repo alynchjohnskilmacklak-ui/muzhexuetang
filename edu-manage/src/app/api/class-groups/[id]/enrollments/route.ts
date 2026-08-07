@@ -100,17 +100,23 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   if (totalHours > 0) {
     hours = roundHours(totalHours)
   } else {
-    const peerEnrollments = await prisma.enrollment.findMany({
-      where: { groupId: id, status: 'ACTIVE', studentId: { not: studentId } },
-      select: { remainHours: true },
-      orderBy: { enrolledAt: 'asc' },
+    const remainingLessonCount = await prisma.classLesson.count({
+      where: {
+        groupId: id,
+        status: { in: ['SCHEDULED', 'IN_PROGRESS'] },
+      },
     })
-    if (peerEnrollments.length) {
-      hours = trimmedMeanHours(peerEnrollments.map((enrollment) => Number(enrollment.remainHours || 0)))
-    } else {
-      const totalLessonCount = Number(group.totalLessons || group._count?.classLessons || 0)
-      const remainingLessonCount = Math.max(0, totalLessonCount - Number(group.completedLessons || 0))
+    if (remainingLessonCount > 0) {
       hours = roundHours(remainingLessonCount * hoursPerLesson(group.lessonMinutes))
+    } else {
+      const peerEnrollments = await prisma.enrollment.findMany({
+        where: { groupId: id, status: 'ACTIVE', studentId: { not: studentId } },
+        select: { remainHours: true },
+        orderBy: { enrolledAt: 'asc' },
+      })
+      hours = peerEnrollments.length
+        ? trimmedMeanHours(peerEnrollments.map((enrollment) => Number(enrollment.remainHours || 0)))
+        : 0
     }
   }
   const enrollment = await prisma.$transaction(async (tx) => {

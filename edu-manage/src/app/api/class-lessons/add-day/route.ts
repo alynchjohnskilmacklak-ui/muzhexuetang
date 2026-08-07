@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { selectReplacementTeachingDay } from '@/lib/class-schedule-plan'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +15,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const body = await req.json().catch(() => ({}))
   const date = typeof body.date === 'string' && body.date.trim() ? body.date.trim() : ''
   const targetDivision = typeof body.division === 'string' && body.division ? body.division : undefined
+  const keepPlannedTotal = body.keepPlannedTotal !== false
   const groupIds: string[] = Array.isArray(body.groupIds)
     ? body.groupIds.filter((id: unknown): id is string => typeof id === 'string' && id.length > 0)
     : []
@@ -29,7 +31,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   // 1. 查出目标班级集合
   const groupWhere: Prisma.ClassGroupWhereInput = {
-    status: { not: 'ARCHIVED' },
+    status: { in: ['WAITING', 'ACTIVE'] },
     course: { isActive: true },
   }
   if (targetDivision) {
@@ -41,7 +43,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   const groups = await prisma.classGroup.findMany({
     where: groupWhere,
-    select: { id: true, name: true, division: true, totalLessons: true },
+    select: {
+      id: true,
+      name: true,
+      division: true,
+      totalLessons: true,
+      course: { select: { totalLessons: true } },
+    },
   })
 
   if (groups.length === 0) {
@@ -61,6 +69,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
   let createdLessons = 0
   let skipped = 0
   let skippedNoTemplate = 0
+  let skippedNoReplacement = 0
+  let replacedGroups = 0
+  let replacedLessons = 0
+  let alreadyBalanced = 0
+  const replacementDates = new Set<string>()
 
   // 2. 逐个班级处理
   for (const group of groups) {
@@ -69,29 +82,40 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const dayEnd = new Date(targetDate)
     dayEnd.setDate(dayEnd.getDate() + 1)
 
-    const existingCount = await prisma.classLesson.count({
+    const existingLessons = await prisma.classLesson.findMany({
       where: {
         groupId: group.id,
         lessonDate: { gte: dayStart, lt: dayEnd },
         status: { not: 'CANCELLED' },
       },
+      select: {
+        id: true,
+        teacherId: true,
+        subject: true,
+        startTime: true,
+        endTime: true,
+        isManual: true,
+      },
     })
-    if (existingCount > 0) {
+    const existingCount = existingLessons.length
+    if (existingCount > 0 && existingLessons.some((lesson) => !lesson.isManual)) {
       skipped++
       continue
     }
 
     // b. 找"样板日"
     // 优先未来最近的一天
-    let templateLesson = await prisma.classLesson.findFirst({
-      where: {
-        groupId: group.id,
-        status: { notIn: ['CANCELLED', 'POSTPONED'] },
-        lessonDate: { gte: today },
-      },
-      orderBy: { lessonDate: 'asc' },
-      select: { lessonDate: true },
-    })
+    let templateLesson = existingCount
+      ? { lessonDate: targetDate }
+      : await prisma.classLesson.findFirst({
+          where: {
+            groupId: group.id,
+            status: { notIn: ['CANCELLED', 'POSTPONED'] },
+            lessonDate: { gte: today },
+          },
+          orderBy: { lessonDate: 'asc' },
+          select: { lessonDate: true },
+        })
 
     // 若没有未来课次，取最近的过去一天
     if (!templateLesson) {
@@ -117,21 +141,63 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const templateDayEnd = new Date(templateDayStart)
     templateDayEnd.setDate(templateDayEnd.getDate() + 1)
 
-    const slots = await prisma.classLesson.findMany({
-      where: {
-        groupId: group.id,
-        status: { notIn: ['CANCELLED', 'POSTPONED'] },
-        lessonDate: { gte: templateDayStart, lt: templateDayEnd },
-      },
-      select: { teacherId: true, subject: true, startTime: true, endTime: true },
-    })
+    const slots = existingCount
+      ? existingLessons.map(({ teacherId, subject, startTime, endTime }) => ({
+          teacherId,
+          subject,
+          startTime,
+          endTime,
+        }))
+      : await prisma.classLesson.findMany({
+          where: {
+            groupId: group.id,
+            status: { notIn: ['CANCELLED', 'POSTPONED'] },
+            lessonDate: { gte: templateDayStart, lt: templateDayEnd },
+          },
+          select: { teacherId: true, subject: true, startTime: true, endTime: true },
+        })
 
     if (!slots.length) {
       skippedNoTemplate++
       continue
     }
 
-    // c. 复制到 targetDate
+    const activeLessonCount = await prisma.classLesson.count({
+      where: { groupId: group.id, status: { not: 'CANCELLED' } },
+    })
+    const plannedDays = Number(group.course.totalLessons || 0)
+    const plannedLessonCount = plannedDays > 0 ? plannedDays * slots.length : 0
+
+    let replacement: ReturnType<typeof selectReplacementTeachingDay> = null
+    if (keepPlannedTotal) {
+      const needsExistingRepair = existingCount > 0
+        && (plannedLessonCount === 0 || activeLessonCount > plannedLessonCount)
+
+      if (existingCount > 0 && !needsExistingRepair) {
+        alreadyBalanced++
+        continue
+      }
+
+      const tomorrow = new Date(today)
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      const replacementStart = new Date(Math.max(tomorrow.getTime(), dayEnd.getTime()))
+      const candidates = await prisma.classLesson.findMany({
+        where: {
+          groupId: group.id,
+          lessonDate: { gte: replacementStart },
+          status: 'SCHEDULED',
+          isManual: false,
+        },
+        select: { id: true, lessonDate: true },
+      })
+      replacement = selectReplacementTeachingDay(candidates, slots.length)
+      if (!replacement) {
+        skippedNoReplacement++
+        continue
+      }
+    }
+
+    // c. 复制到 targetDate；计划内调课时同时取消一个未来原排课日
     const data = slots.map((slot) => ({
       groupId: group.id,
       teacherId: slot.teacherId,
@@ -144,15 +210,43 @@ export const POST = apiHandler(async (req: NextRequest) => {
       isManual: true,
     }))
 
-    await prisma.classLesson.createMany({ data, skipDuplicates: true })
+    const result = await prisma.$transaction(async (tx) => {
+      const created = existingCount > 0
+        ? 0
+        : (await tx.classLesson.createMany({ data, skipDuplicates: true })).count
 
-    // d. 更新 totalLessons
-    await prisma.classGroup.update({
-      where: { id: group.id },
-      data: { totalLessons: { increment: data.length } },
+      let replaced = 0
+      if (replacement) {
+        const updated = await tx.classLesson.updateMany({
+          where: {
+            id: { in: replacement.lessonIds },
+            status: 'SCHEDULED',
+          },
+          data: {
+            status: 'CANCELLED',
+            cancelReason: `计划内调课：替换为 ${date}`,
+          },
+        })
+        replaced = updated.count
+      }
+
+      const nextTotal = await tx.classLesson.count({
+        where: { groupId: group.id, status: { not: 'CANCELLED' } },
+      })
+      await tx.classGroup.update({
+        where: { id: group.id },
+        data: { totalLessons: nextTotal },
+      })
+
+      return { created, replaced }
     })
 
-    createdLessons += data.length
+    createdLessons += result.created
+    replacedLessons += result.replaced
+    if (result.replaced > 0 && replacement) {
+      replacedGroups++
+      replacementDates.add(replacement.date.toISOString().slice(0, 10))
+    }
     affectedGroups++
   }
 
@@ -161,8 +255,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
     await prisma.activityLog.create({
       data: {
         userId: user.id,
-        action: '新增上课日',
-        detail: `${date} 共${affectedGroups}个班 ${createdLessons}节课`,
+        action: keepPlannedTotal ? '计划内调整上课日' : '新增上课日',
+        detail: keepPlannedTotal
+          ? `${date} 计划内调课：${affectedGroups}个班新增${createdLessons}节，替换${replacedLessons}节`
+          : `${date} 额外加课：${affectedGroups}个班新增${createdLessons}节`,
       },
     })
   }
@@ -173,5 +269,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
     createdLessons,
     skipped,
     skippedNoTemplate,
+    skippedNoReplacement,
+    replacedGroups,
+    replacedLessons,
+    replacementDates: [...replacementDates].sort(),
+    alreadyBalanced,
+    keepPlannedTotal,
   })
 })

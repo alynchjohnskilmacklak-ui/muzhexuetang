@@ -26,7 +26,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     } else if (type === 'GROUP') {
       where.group = { ...(where.group as Record<string, unknown> || {}), course: { type: 'GROUP' } }
     } else if (type === 'INTENSIVE') {
-      where.group = { ...(where.group as Record<string, unknown> || {}), course: { type: { in: ['ONE_ON_ONE', 'SMALL_GROUP'] } } }
+      where.group = { ...(where.group as Record<string, unknown> || {}), intensiveMode: 'INTENSIVE' }
     }
 
     const lessons = await prisma.classLesson.findMany({
@@ -38,11 +38,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
             teacher: { select: { id: true, name: true, subjects: true } },
             teacherAssignments: { include: { teacher: { select: { id: true, name: true, subjects: true } } }, orderBy: { createdAt: 'asc' } },
             room: { select: { id: true, name: true, capacity: true, type: true } },
-            enrollments: { where: activeEnrollmentWhere, select: { id: true, student: { select: { id: true, name: true } } } },
+            enrollments: { where: activeEnrollmentWhere, select: { id: true, totalHours: true, usedHours: true, remainHours: true, student: { select: { id: true, name: true } } } },
           },
         },
         teacher: { select: { id: true, name: true, subjects: true } },
         attendances: { select: { id: true, status: true } },
+        lessonStudents: { include: { student: { select: { id: true, name: true } } }, orderBy: { createdAt: 'asc' } },
+        classroomFeedbacks: { where: { teacherId: teacher.id, status: 'PUBLISHED' }, select: { studentIds: true } },
       },
       orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
     })
@@ -51,7 +53,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       currentTeacherId: teacher.id,
       lessons: lessons.map((lesson) => ({
         ...lesson,
-        assignedSubject: lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.subject || lesson.group.course.subject,
+        assignedSubject: lesson.subject || lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject,
       })),
     })
 })

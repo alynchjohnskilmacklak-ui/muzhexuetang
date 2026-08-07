@@ -1,3 +1,19 @@
 node_modules/
 *.tar
+*.tar.gz
 .claude/settings.local.json
+
+# local cache
+cachenpm/
+
+# other projects (not part of this repo)
+_old_tar_backup/
+firecrawl/
+github-mcp-server/
+01muzhexuetang*/
+mu-zhe-smart-edu-video/
+
+# deploy artifacts
+edu-manage-deploy-*/
+edu-manage-deploy-*.sh
+edu-manage-code-review-*.md

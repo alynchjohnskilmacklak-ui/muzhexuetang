@@ -1,9 +1,14 @@
 import { auth } from '@/lib/auth'
 import { getPrismaForDivision } from '@/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isUserDisabled } from '@/lib/user-status'
 
 function jsonUnauthorized(error: string) {
   return NextResponse.json({ error }, { status: 401 })
+}
+
+function jsonServiceUnavailable() {
+  return NextResponse.json({ error: '服务暂时不可用，请稍后重试' }, { status: 503 })
 }
 
 function isApiRequest(pathname: string) {
@@ -38,11 +43,13 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const user = session?.user as { role?: string; id?: string; sessionMark?: string; division?: string } | undefined
   const apiRequest = isApiRequest(pathname)
+  const loginRequest = pathname === '/login' || pathname.startsWith('/login/')
+  const resetPasswordRequest = pathname === '/reset-password' || pathname.startsWith('/reset-password/')
 
   // Allow public routes and explicitly protected self-contained setup endpoint.
   if (
-    pathname.startsWith('/login') ||
     pathname.startsWith('/api/auth') ||
+    resetPasswordRequest ||
     pathname === '/api/setup' ||
     pathname.startsWith('/api/wxpusher/callback') ||
     pathname.startsWith('/people/') ||
@@ -50,14 +57,22 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/UI_picture/') ||
     pathname.startsWith('/volunteer/picture/') ||
     pathname.startsWith('/volunteer/docs/') ||
+    pathname === '/0a039113432e6c816c8f59c7c6c7f211.txt' ||
     pathname === '/api/volunteer/schools'
   ) {
     return NextResponse.next()
   }
 
   if (!user) {
+    if (loginRequest) return NextResponse.next()
     if (apiRequest) return jsonUnauthorized('Unauthorized')
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  if (user.id && !user.sessionMark) {
+    if (loginRequest) return NextResponse.next()
+    if (apiRequest) return jsonUnauthorized('登录状态已过期，请重新登录')
+    return NextResponse.redirect(new URL('/login?reason=expired', request.url))
   }
 
   // Reset fail counter after 60s of successful DB queries
@@ -78,27 +93,44 @@ export async function proxy(request: NextRequest) {
         setCachedSession(cacheKey, dbUser)
       }
 
-      if (dbUser?.status === 'disabled') {
+      if (!dbUser) {
+        if (apiRequest) return jsonUnauthorized('账号不存在')
+        if (loginRequest) return NextResponse.next()
+        return NextResponse.redirect(new URL('/login', request.url))
+      }
+
+      if (dbUser && isUserDisabled(dbUser.status)) {
         if (apiRequest) return jsonUnauthorized('账号已停用')
+        if (loginRequest) return NextResponse.next()
         return NextResponse.redirect(new URL('/login?reason=disabled', request.url))
       }
 
-      if (dbUser?.currentSessionToken && dbUser.currentSessionToken !== user.sessionMark) {
+      if (dbUser?.currentSessionToken !== user.sessionMark) {
         if (apiRequest) return jsonUnauthorized('账号已在其他设备登录，请重新登录')
+        if (loginRequest) return NextResponse.next()
         return NextResponse.redirect(new URL('/login?reason=kicked', request.url))
       }
     } catch (err) {
       console.error('[proxy] session validation DB error:', err instanceof Error ? err.message : err)
-      // Fail closed after 3 consecutive DB errors to prevent security bypass during outages
+      // Mutating APIs fail closed immediately; reads fail closed after repeated DB errors.
       failCount += 1
-      if (failCount >= 3) {
-        if (apiRequest) return jsonUnauthorized('服务暂时不可用，请稍后重试')
+      const isMutation = apiRequest && !['GET', 'HEAD', 'OPTIONS'].includes(request.method)
+      if (isMutation || failCount >= 3) {
+        if (apiRequest) return jsonServiceUnavailable()
+        if (loginRequest) return NextResponse.next()
         return NextResponse.redirect(new URL('/login?reason=db-error', request.url))
       }
+      if (loginRequest) return NextResponse.next()
     }
   }
 
   const role = user.role
+
+  if (loginRequest) {
+    if (role === 'parent') return NextResponse.redirect(new URL('/parent/dashboard', request.url))
+    if (role === 'teacher') return NextResponse.redirect(new URL('/teacher/dashboard', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
 
   // Page role redirects only. API permission checks remain inside API handlers.
   const isParentRoute = pathname === '/parent' || pathname.startsWith('/parent/')

@@ -1,10 +1,11 @@
-import NextAuth from 'next-auth'
+import NextAuth, { CredentialsSignin } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { headers } from 'next/headers'
-import { validateLoginAccount, type LoginRole } from './login-accounts'
+import type { LoginRole } from './login-accounts'
 import { parseUserAgent } from './device'
 import { emitKick } from './session-events'
-import { prisma, getPrismaForDivision } from './prisma'
+import { getPrismaForDivision } from './prisma'
+import { authenticateCredentialInput } from './credential-auth'
 
 declare module 'next-auth' {
   interface Session {
@@ -30,6 +31,15 @@ async function getClientIp() {
   }
 }
 
+class LoginCredentialsError extends CredentialsSignin {
+  code: string
+
+  constructor(code: string) {
+    super()
+    this.code = code
+  }
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   providers: [
@@ -41,41 +51,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         loginRole: { label: 'Login Role', type: 'text' },
         division:  { label: 'Division',   type: 'text' },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password || !credentials?.loginRole) return null
 
         const loginRole = credentials.loginRole as LoginRole
         if (!['admin', 'teacher', 'parent'].includes(loginRole)) return null
 
-        const ip = await getClientIp() || '未知'
-        let ua = ''
-        try { const h = await headers(); ua = h.get('user-agent') || '' } catch { /* ignore */ }
+        const division = (credentials.division as string) || undefined
+        const email = String(credentials.email).trim().toLowerCase()
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+          || request.headers.get('x-real-ip')
+          || '未知'
+        const ua = request.headers.get('user-agent') || ''
         const { device, os, browser } = parseUserAgent(ua)
         const meta = { ip, userAgent: ua, device, os, browser }
-
-        const result = await validateLoginAccount(
-          credentials.email as string,
-          credentials.password as string,
+        const result = await authenticateCredentialInput({
+          email,
+          password: credentials.password as string,
           loginRole,
-          { persistUser: true, recordAttempt: true, recordSuccess: true },
+          division,
           meta,
-          (credentials.division as string) || undefined,
-        )
-        if (!result.ok) return null
-
-        const userDb = getPrismaForDivision(result.user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR')
-        const dbUser = await userDb.user.findUnique({
-          where: { id: result.user.id },
-          select: { teacherId: true, division: true },
         })
+        if (!result.ok) throw new LoginCredentialsError(result.code)
 
         return {
           id:        result.user.id,
           email:     result.user.email,
           name:      result.user.name,
           role:      result.user.role,
-          teacherId: dbUser?.teacherId ?? null,
+          teacherId: result.user.teacherId,
           division:  result.user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR',
+          loginIp:   ip,
+          loginDevice: device,
         }
       },
     }),
@@ -117,8 +124,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           data: {
             currentSessionToken: sessionMark,
             lastLoginAt: new Date(),
-            lastLoginIp: await getClientIp(),
-            lastLoginDevice: 'Web',
+            lastLoginIp: (u.loginIp as string | undefined) || await getClientIp(),
+            lastLoginDevice: (u.loginDevice as string | undefined) || 'Web',
           },
         })
 
@@ -149,7 +156,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         httpOnly: true,
         sameSite: 'lax',
         path:     '/',
-        secure:   process.env.NEXTAUTH_URL?.startsWith('https://') === true,
+        secure:   process.env.NODE_ENV === 'production' || process.env.NEXTAUTH_URL?.startsWith('https://') === true,
         maxAge:   30 * 24 * 60 * 60,
       },
     },

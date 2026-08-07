@@ -15,17 +15,16 @@ import {
 import { useRouter } from 'next/navigation'
 import { DashboardHero } from '@/components/Dashboard/DashboardHero'
 import { MetricsCards } from '@/components/Dashboard/MetricsCards'
-import { OperationHighlightsCard } from '@/components/Dashboard/OperationHighlightsCard'
 import { StudentGrowthChart } from '@/components/Dashboard/StudentGrowthChart'
 import { TodayScheduleCard } from '@/components/Dashboard/TodaySchedule'
 import { TeacherWorkloadCard } from '@/components/Dashboard/TeacherWorkload'
 import { ActivityLogCard } from '@/components/Dashboard/ActivityLog'
-import { PendingItemsCard } from '@/components/Dashboard/PendingItemsCard'
+import { AdminExceptionCenter } from '@/components/Dashboard/AdminExceptionCenter'
 import { DashboardSkeleton } from '@/components/Dashboard/DashboardSkeleton'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
 import { formatHours } from '@/lib/format'
-import type { AdminDashboardData, TodaySchedule } from '@/types/dashboard'
+import type { AdminDashboardData, IntensiveAppointment, TodaySchedule } from '@/types/dashboard'
 
 const { Text } = Typography
 
@@ -46,6 +45,86 @@ const statusColors: Record<TodaySchedule['statusLabel'], string> = {
   已完成: '#9a8e7a',
 }
 
+function IntensiveAppointmentCard({
+  items,
+  compact = false,
+}: {
+  items: IntensiveAppointment[]
+  compact?: boolean
+}) {
+  const router = useRouter()
+
+  return (
+    <Card
+      bordered={false}
+      title={(
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#1a1201' }}>
+          <CalendarOutlined style={{ color: '#E8784A' }} />
+          教师约课动态
+          {items.length > 0 && <Badge count={items.length} style={{ backgroundColor: '#E8784A' }} />}
+        </span>
+      )}
+      extra={(
+        <Button type="link" size="small" onClick={() => router.push('/schedule/intensive?section=appointments')}>
+          全部 <RightOutlined />
+        </Button>
+      )}
+      style={{ borderRadius: 14, border: '1px solid rgba(0,0,0,.06)' }}
+      styles={{ body: { padding: compact ? 12 : 16 } }}
+    >
+      {items.length === 0 ? (
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无教师约课动态" />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {items.slice(0, compact ? 4 : 6).map((item) => {
+            const date = new Date(item.lessonDate)
+            const dateLabel = Number.isNaN(date.getTime())
+              ? '-'
+              : `${date.getMonth() + 1}月${date.getDate()}日`
+            return (
+              <button
+                className="pressable"
+                key={item.id}
+                onClick={() => router.push(`/schedule/intensive?appointmentLessonId=${encodeURIComponent(item.id)}`)}
+                style={{
+                  width: '100%',
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(0, 1fr) auto',
+                  gap: 10,
+                  padding: compact ? '11px 12px' : '12px 14px',
+                  textAlign: 'left',
+                  background: '#fffaf6',
+                  border: '1px solid rgba(232,120,74,.16)',
+                  borderRadius: 12,
+                  cursor: 'pointer',
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <strong style={{ color: '#1a1201', fontSize: 14 }}>{item.teacher}</strong>
+                    <Tag color="orange" style={{ margin: 0 }}>{item.subject}</Tag>
+                    {item.teachingTypeLabel && <Tag color="purple" style={{ margin: 0 }}>{item.teachingTypeLabel}</Tag>}
+                    {item.isHistorical && <Tag color="gold" style={{ margin: 0 }}>历史补录</Tag>}
+                  </div>
+                  <div style={{ marginTop: 5, color: '#5a4e3a', fontSize: 13, overflowWrap: 'anywhere' }}>
+                    {item.students.length ? item.students.join('、') : item.groupName}
+                  </div>
+                  <div style={{ marginTop: 4, color: '#9a8e7a', fontSize: 12 }}>
+                    {dateLabel} {item.time} · {item.createdTimeAgo}提交
+                  </div>
+                </div>
+                <div style={{ alignSelf: 'center', color: '#E8784A', fontSize: 12, whiteSpace: 'nowrap' }}>
+                  查看 <RightOutlined style={{ fontSize: 10 }} />
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </Card>
+  )
+}
+
 
 function MobileDashboard({ data }: { data: AdminDashboardData }) {
   const router = useRouter()
@@ -63,7 +142,7 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
     { icon: <CalendarOutlined />, label: '考勤管理', href: '/attendance', badge: metrics.todayLessonsPendingAttendance, color: '#E8784A' },
     { icon: <TeamOutlined />, label: '学员管理', href: '/students', color: '#185FA5' },
     { icon: <BookOutlined />, label: '课程管理', href: '/courses', color: '#1D9E75' },
-    { icon: <ExclamationCircleOutlined />, label: '待处理', href: '/notifications', badge: metrics.pendingTasks, color: '#7a7fad' },
+    { icon: <ExclamationCircleOutlined />, label: '运营待办', href: '/dashboard#admin-exception-center', badge: metrics.pendingTasks, color: '#7a7fad' },
   ]
 
   const activeHighlights = data.operatingHighlights.filter((highlight) => Number(highlight.value) > 0)
@@ -139,6 +218,14 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
             </button>
           ))}
         </div>
+      </section>
+
+      <section style={{ padding: '14px 16px 0' }}>
+        <AdminExceptionCenter metrics={metrics} />
+      </section>
+
+      <section style={{ padding: '14px 16px 0' }}>
+        <IntensiveAppointmentCard items={data.intensiveAppointments} compact />
       </section>
 
       {activeHighlights.length > 0 && (
@@ -273,8 +360,11 @@ export default function DashboardPage() {
   const isMobile = useIsMobile() ?? false
   const { division } = useDivision()
   const { data, error, isLoading } = useSWR(`/api/dashboard?division=${division}`, fetcher, {
-    refreshInterval: 120_000,
+    // 教师约课后，管理首页应在较短时间内自动出现动态。
+    refreshInterval: 30_000,
     revalidateOnFocus: true,
+    dedupingInterval: 10_000,
+    keepPreviousData: true,
   })
 
   if (isLoading) {
@@ -300,7 +390,13 @@ export default function DashboardPage() {
     <div style={{ paddingBottom: 24 }}>
       <DashboardHero metrics={data.metrics} />
       <MetricsCards data={data.metrics} />
-      <OperationHighlightsCard data={data.operatingHighlights} />
+      <div style={{ marginTop: 16 }}>
+        <AdminExceptionCenter metrics={data.metrics} />
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        <IntensiveAppointmentCard items={data.intensiveAppointments} />
+      </div>
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={16}>
@@ -312,13 +408,10 @@ export default function DashboardPage() {
       </Row>
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col xs={24} lg={8}>
+        <Col xs={24} lg={12}>
           <TeacherWorkloadCard data={data.workloads} />
         </Col>
-        <Col xs={24} lg={8}>
-          <PendingItemsCard data={data.metrics} />
-        </Col>
-        <Col xs={24} lg={8}>
+        <Col xs={24} lg={12}>
           <ActivityLogCard data={data.logs} />
         </Col>
       </Row>

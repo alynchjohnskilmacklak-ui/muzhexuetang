@@ -19,6 +19,19 @@ export const visibleClassGroupWhere = {
   course: visibleCourseWhere,
 } satisfies Prisma.ClassGroupWhereInput
 
+/**
+ * Only individualized courses create an actionable makeup workflow.
+ * Historical small-class leave/absence rows may still have legacy makeup
+ * records, but they must not be surfaced as admin work items.
+ */
+export const makeupEligibleClassGroupWhere = {
+  ...visibleClassGroupWhere,
+  OR: [
+    { intensiveMode: 'INTENSIVE' },
+    { course: { isActive: true, type: 'ONE_ON_ONE' } },
+  ],
+} satisfies Prisma.ClassGroupWhereInput
+
 export const visibleClassLessonWhere = {
   status: { notIn: ['CANCELLED', 'POSTPONED'] },
   group: visibleClassGroupWhere,

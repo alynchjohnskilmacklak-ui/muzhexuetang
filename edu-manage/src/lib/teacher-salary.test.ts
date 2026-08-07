@@ -13,12 +13,12 @@ import {
   triggerFeedbackBonus,
 } from './teacher-salary'
 
-type FeedbackSpec = { id: string; groupId: string }
+type FeedbackSpec = { id: string; groupId: string; createdAt?: string }
 
 function createFeedbackRewardHarness(specs: FeedbackSpec[]) {
   const ledger = new Set<string>()
   const salaryCreates: Array<{ amount: number; feedbackId: string }> = []
-  const feedbacks = new Map(specs.map(({ id, groupId }) => [id, {
+  const feedbacks = new Map(specs.map(({ id, groupId, createdAt }) => [id, {
     id,
     teacherId: 't1',
     studentIds: ['s1'],
@@ -34,6 +34,7 @@ function createFeedbackRewardHarness(specs: FeedbackSpec[]) {
     feedbackGroupId: groupId,
     feedbackCourseType: 'GROUP',
     classLesson: null,
+    createdAt: new Date(createdAt || '2026-07-20T02:00:00.000Z'),
   }]))
   const groups: Record<string, any> = {
     'junior-math': {
@@ -56,15 +57,21 @@ function createFeedbackRewardHarness(specs: FeedbackSpec[]) {
       course: { id: 'course-senior-math', name: '高中数学', subject: '数学', type: 'GROUP', division: 'SENIOR' },
       teacherAssignments: [],
     },
+    'junior-all-subjects': {
+      division: 'JUNIOR',
+      course: { id: 'course-junior-all', name: '初二全科班', subject: '物理、语文、数学、英语', type: 'GROUP', division: 'JUNIOR' },
+      teacherAssignments: [{ subject: '物理' }],
+    },
   }
+  const rewardDateKey = (value: Date) => value.toISOString().slice(0, 10)
   const rewardModel = {
     findMany: vi.fn(async ({ where }: any) => where.studentId.in
-      .filter((studentId: string) => ledger.has(`${where.teacherId}:${studentId}:${where.subjectKey}`))
+      .filter((studentId: string) => ledger.has(`${where.teacherId}:${studentId}:${where.subjectKey}:${rewardDateKey(where.rewardDate)}`))
       .map((studentId: string) => ({ studentId }))),
     createMany: vi.fn(async ({ data }: any) => {
       let count = 0
       for (const row of data) {
-        const key = `${row.teacherId}:${row.studentId}:${row.subjectKey}`
+        const key = `${row.teacherId}:${row.studentId}:${row.subjectKey}:${rewardDateKey(row.rewardDate)}`
         if (ledger.has(key)) continue
         ledger.add(key)
         count += 1
@@ -184,7 +191,7 @@ describe('teacher salary calculations', () => {
     expect(first.amount).toBe(0.5)
     expect(second.amount).toBe(0)
     expect(second.duplicateCount).toBe(1)
-    expect(ledger).toEqual(new Set(['t1:s1:JUNIOR_MATH']))
+    expect(ledger).toEqual(new Set(['t1:s1:JUNIOR_MATH:2026-07-20']))
     expect(salaryCreates).toHaveLength(1)
     expect(prisma.feedbackRewardRecord.findMany).toHaveBeenCalledWith(expect.objectContaining({
       where: expect.objectContaining({ isActive: true }),
@@ -206,7 +213,7 @@ describe('teacher salary calculations', () => {
 
     expect(math.amount).toBe(0.5)
     expect(physics.amount).toBe(0.5)
-    expect(ledger).toEqual(new Set(['t1:s1:JUNIOR_MATH', 't1:s1:JUNIOR_PHYSICS']))
+    expect(ledger).toEqual(new Set(['t1:s1:JUNIOR_MATH:2026-07-20', 't1:s1:JUNIOR_PHYSICS:2026-07-20']))
     expect(salaryCreates).toHaveLength(2)
   })
 
@@ -219,7 +226,7 @@ describe('teacher salary calculations', () => {
     await triggerFeedbackBonus('f1', prisma)
     await triggerFeedbackBonus('f2', prisma)
 
-    expect(ledger).toEqual(new Set(['t1:s1:JUNIOR_MATH', 't1:s1:SENIOR_MATH']))
+    expect(ledger).toEqual(new Set(['t1:s1:JUNIOR_MATH:2026-07-20', 't1:s1:SENIOR_MATH:2026-07-20']))
     expect(salaryCreates).toHaveLength(2)
   })
 
@@ -235,7 +242,7 @@ describe('teacher salary calculations', () => {
     expect(firstGroup.amount).toBe(0.5)
     expect(secondGroup.amount).toBe(0)
     expect(secondGroup.duplicateCount).toBe(1)
-    expect(ledger).toEqual(new Set(['t1:s1:JUNIOR_MATH']))
+    expect(ledger).toEqual(new Set(['t1:s1:JUNIOR_MATH:2026-07-20']))
     expect(salaryCreates).toHaveLength(1)
   })
 
@@ -256,6 +263,35 @@ describe('teacher salary calculations', () => {
     expect(results.reduce((sum, result) => sum + (result.amount || 0), 0)).toBe(0.5)
   })
 
+  it('rewards the same teacher, student and subject again on the next China-local day', async () => {
+    const { ledger, salaryCreates, prisma } = createFeedbackRewardHarness([
+      { id: 'f1', groupId: 'junior-math', createdAt: '2026-07-20T02:00:00.000Z' },
+      { id: 'f2', groupId: 'junior-math', createdAt: '2026-07-21T02:00:00.000Z' },
+    ])
+
+    const firstDay = await triggerFeedbackBonus('f1', prisma)
+    const secondDay = await triggerFeedbackBonus('f2', prisma)
+
+    expect(firstDay.amount).toBe(0.5)
+    expect(secondDay.amount).toBe(0.5)
+    expect(ledger).toEqual(new Set([
+      't1:s1:JUNIOR_MATH:2026-07-20',
+      't1:s1:JUNIOR_MATH:2026-07-21',
+    ]))
+    expect(salaryCreates).toHaveLength(2)
+  })
+
+  it('uses the current teacher assignment instead of a composite course subject', async () => {
+    const { ledger, prisma } = createFeedbackRewardHarness([
+      { id: 'f1', groupId: 'junior-all-subjects' },
+    ])
+
+    const result = await triggerFeedbackBonus('f1', prisma)
+
+    expect(result.subjectKey).toBe('JUNIOR_PHYSICS')
+    expect(ledger).toEqual(new Set(['t1:s1:JUNIOR_PHYSICS:2026-07-20']))
+  })
+
   it('archives only same-subject duplicates and preserves cross-subject audit rows in migration', () => {
     const migration = readFileSync(
       new URL('../../prisma/migrations/20260718223000_feedback_reward_teacher_student_unique/migration.sql', import.meta.url),
@@ -265,5 +301,19 @@ describe('teacher salary calculations', () => {
     expect(migration).toContain('PARTITION BY r."teacherId", r."studentId", r."subjectKey"')
     expect(migration).toContain('FeedbackRewardRecord duplicate audit backup is incomplete')
     expect(migration).toContain('"FeedbackRewardRecord_teacherId_studentId_subjectKey_key"')
+  })
+
+  it('migrates feedback reward uniqueness from lifetime to China-local daily scope safely', () => {
+    const migration = readFileSync(
+      new URL('../../prisma/migrations/20260721113000_feedback_reward_daily/migration.sql', import.meta.url),
+      'utf8',
+    )
+    expect(migration).toContain('"FeedbackRewardRecordDailyRuleArchive"')
+    expect(migration).toContain('AT TIME ZONE \'Asia/Shanghai\'')
+    expect(migration).toContain('"ClassGroupTeacher"')
+    expect(migration).toContain('PARTITION BY r."teacherId", r."studentId", r."subjectKey", r."rewardDate"')
+    expect(migration).toContain('"FeedbackRewardRecord_teacher_student_subject_date_key"')
+    expect(migration).not.toMatch(/\bDELETE\s+FROM\s+"FeedbackRewardRecord"/i)
+    expect(migration).not.toMatch(/\bDROP\s+TABLE\s+"FeedbackRewardRecord"/i)
   })
 })

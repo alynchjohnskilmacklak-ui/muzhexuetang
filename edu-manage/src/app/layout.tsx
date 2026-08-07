@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import 'katex/dist/katex.min.css'
+import { SiteFilingFooter } from '@/components/SiteFilingFooter'
 import { Providers } from './providers'
 import './globals.css'
 
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen">
         <div id="admin-root">
           <Providers>{children}</Providers>
+          <SiteFilingFooter />
         </div>
       </body>
     </html>

@@ -8,6 +8,11 @@ import { getRequestDivision } from '@/lib/division'
 export const dynamic = 'force-dynamic'
 
 const WEEK_DAYS = new Set(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'])
+const INTENSIVE_STUDENT_LIMIT = {
+  ONE_ON_ONE: 1,
+  ONE_ON_TWO: 2,
+  ONE_ON_THREE: 3,
+} as const
 
 function normalizeRecurringDays(value: unknown) {
   if (!Array.isArray(value)) return []
@@ -85,14 +90,24 @@ export const GET = apiHandler(async (req: NextRequest) => {
     room: { select: { id: true, name: true } },
     enrollments: { where: activeEnrollmentWhere, include: { student: { select: { id: true, name: true } } } },
     classLessons: { orderBy: { lessonDate: 'asc' as const } },
-    _count: { select: { enrollments: { where: activeEnrollmentWhere }, classLessons: true } },
+    _count: {
+      select: {
+        enrollments: { where: activeEnrollmentWhere },
+        classLessons: { where: { status: { not: 'CANCELLED' as const } } },
+      },
+    },
   }
   const includeSimple = {
     course: { select: { id: true, name: true, subject: true, type: true, grade: true, color: true, lessonMinutes: true } },
     teacher: { select: { id: true, name: true } },
     teacherAssignments: { include: { teacher: { select: { id: true, name: true, subjects: true } } }, orderBy: { createdAt: 'asc' as const } },
     room: { select: { id: true, name: true } },
-    _count: { select: { enrollments: { where: activeEnrollmentWhere }, classLessons: true } },
+    _count: {
+      select: {
+        enrollments: { where: activeEnrollmentWhere },
+        classLessons: { where: { status: { not: 'CANCELLED' as const } } },
+      },
+    },
   }
 
   const groups = await prisma.classGroup.findMany({
@@ -116,27 +131,41 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const normalizedRecurringDays = normalizeRecurringDays(recurringDays)
   const normalizedAssignments = normalizeTeacherAssignments(body)
   const primaryTeacherId = typeof teacherId === 'string' && teacherId ? teacherId : normalizedAssignments[0]?.teacherId
+  const intensiveMode = body.intensiveMode === 'INTENSIVE'
+  const teachingType = typeof body.teachingType === 'string'
+    && body.teachingType in INTENSIVE_STUDENT_LIMIT
+    ? body.teachingType as keyof typeof INTENSIVE_STUDENT_LIMIT
+    : null
 
-  if (!name || !courseId || !primaryTeacherId || !startDate || !lessonStartTime) {
-    return NextResponse.json({ error: '请填写必填字段：班级名称、课程、教师、开班日期、上课时间' }, { status: 400 })
+  if (!name || !courseId || !primaryTeacherId || !startDate) {
+    return NextResponse.json({ error: '请填写必填字段：班级名称、课程、教师和开班日期' }, { status: 400 })
   }
 
-  if (!normalizedRecurringDays.length) {
-    return NextResponse.json({ error: '璇烽€夋嫨鑷冲皯涓€涓笂璇炬棩' }, { status: 400 })
+  if (intensiveMode && !teachingType) {
+    return NextResponse.json({ error: '请选择一对一、一对二或一对三班型' }, { status: 400 })
+  }
+  if (!intensiveMode && (!lessonStartTime || !normalizedRecurringDays.length)) {
+    return NextResponse.json({ error: '普通班课必须设置上课时间和至少一个上课日' }, { status: 400 })
   }
 
   const group = await prisma.$transaction(async (tx) => {
     const g = await tx.classGroup.create({
       data: {
         name, courseId, teacherId: primaryTeacherId, roomId: roomId || null,
-        maxStudents: maxStudents || 20,
+        maxStudents: intensiveMode && teachingType
+          ? INTENSIVE_STUDENT_LIMIT[teachingType]
+          : maxStudents || 20,
         startDate: new Date(startDate),
-        totalLessons: totalLessons || 1,
-        recurringDays: normalizedRecurringDays,
-        lessonStartTime,
-        lessonMinutes: lessonMinutes || 90,
+        // 个性化课程按实际约课、考勤和审核累计，不使用普通班的固定计划课次。
+        totalLessons: intensiveMode ? 0 : totalLessons || 1,
+        recurringDays: intensiveMode ? [] : normalizedRecurringDays,
+        lessonStartTime: intensiveMode ? (lessonStartTime || '18:00') : lessonStartTime,
+        lessonMinutes: lessonMinutes || (intensiveMode ? 60 : 90),
         division,
-        note, status: 'WAITING',
+        note,
+        status: intensiveMode ? 'ACTIVE' : 'WAITING',
+        intensiveMode: intensiveMode ? 'INTENSIVE' : 'NORMAL',
+        teachingType: intensiveMode ? teachingType : null,
       },
     })
 
@@ -151,7 +180,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
     })
 
     await tx.activityLog.create({
-      data: { userId: user.id, action: '新建班级', detail: name },
+      data: {
+        userId: user.id,
+        action: intensiveMode ? '新建突击全能班' : '新建班级',
+        detail: intensiveMode && teachingType ? `${name} · ${teachingType}` : name,
+      },
     })
 
     return g

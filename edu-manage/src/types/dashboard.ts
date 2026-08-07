@@ -13,10 +13,14 @@ export interface AdminDashboardMetrics {
   waitingGroups: number
   renewalWarnings: number
   pendingMakeups: number
+  pendingIntensiveAppointments: number
+  pendingIntensiveReviews: number
   unpublishedPapers: number
   unreadParentComments: number
   unreadPerformanceComments: number
   unreadComments: number
+  pendingTeacherReplies: number
+  pendingParentReads: number
   masteredRate: number
   performancePostsToday: number
 }
@@ -63,6 +67,23 @@ export interface OperatingHighlight {
   href: string
 }
 
+export interface IntensiveAppointment {
+  id: string
+  groupId: string
+  groupName: string
+  teacher: string
+  subject: string
+  students: string[]
+  lessonDate: string
+  time: string
+  createdAt: string
+  createdTimeAgo: string
+  isHistorical: boolean
+  teachingType?: string
+  teachingTypeLabel?: string
+  reviewStatus?: string
+}
+
 export interface AdminDashboardData {
   metrics: AdminDashboardMetrics
   growthData: StudentGrowthData
@@ -70,4 +91,5 @@ export interface AdminDashboardData {
   operatingHighlights: OperatingHighlight[]
   workloads: TeacherWorkload[]
   logs: ActivityLog[]
+  intensiveAppointments: IntensiveAppointment[]
 }

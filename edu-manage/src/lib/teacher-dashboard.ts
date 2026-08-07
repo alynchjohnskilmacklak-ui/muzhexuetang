@@ -3,6 +3,8 @@ import type { PrismaClient } from '@prisma/client'
 import { teacherLessonWhere, teacherStudentWhere, todayRange, weekRange } from '@/lib/teacher-portal'
 import { visibleStudentWhere } from '@/lib/business-visibility'
 import { minutesToHours, roundHours } from '@/lib/hours'
+import { buildLatestFeedbackDateByStudent } from '@/lib/teacher-feedback-freshness'
+import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
 
 function atTime(date: Date, time: string) {
   const [hour, minute] = time.split(':').map(Number)
@@ -11,12 +13,16 @@ function atTime(date: Date, time: string) {
   return value
 }
 
-function lessonStatusLabel(lesson: { lessonDate: Date; startTime: string; endTime: string; status: string; attendanceSubmittedAt?: Date | null }, now = new Date()) {
+function lessonStatusLabel(
+  lesson: { lessonDate: Date; startTime: string; endTime: string; status: string },
+  attendanceSubmitted: boolean,
+  now = new Date(),
+) {
   const start = atTime(lesson.lessonDate, lesson.startTime)
   const end = atTime(lesson.lessonDate, lesson.endTime)
 
-  if (lesson.status === 'COMPLETED' && lesson.attendanceSubmittedAt) return { label: '已完成', tone: 'green' }
-  if (lesson.attendanceSubmittedAt) return { label: '已考勤', tone: 'green' }
+  if (lesson.status === 'COMPLETED' && attendanceSubmitted) return { label: '已完成', tone: 'green' }
+  if (attendanceSubmitted) return { label: '已考勤', tone: 'green' }
   if (now < start) return { label: '待上课', tone: 'blue' }
   if (now >= start && now <= end) return { label: '上课中', tone: 'orange' }
   return { label: '待考勤', tone: 'red' }
@@ -68,6 +74,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
           },
         },
         attendances: true,
+        lessonStudents: { select: { studentId: true } },
         classroomFeedbacks: { where: { teacherId, status: 'PUBLISHED' }, select: { id: true } },
       },
       orderBy: { startTime: 'asc' },
@@ -76,6 +83,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       where: { ...lessonWhere, lessonDate: { gte: weekStart, lt: weekEnd } },
       include: {
         attendances: true,
+        lessonStudents: { select: { studentId: true } },
         classroomFeedbacks: { where: { teacherId, status: 'PUBLISHED' }, select: { id: true } },
       },
     }),
@@ -85,26 +93,39 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     }),
     prisma.student.findMany({
       where: studentWhere,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        grade: true,
+        school: true,
         enrollments: {
           where: { status: 'ACTIVE' },
-          include: { group: { include: { course: true } } },
+          select: {
+            status: true,
+            totalHours: true,
+            remainHours: true,
+            enrolledAt: true,
+          },
         },
         attendances: {
           where: { lesson: lessonWhere },
           orderBy: { createdAt: 'desc' },
           take: 3,
+          select: { status: true },
         },
         performancePosts: {
           where: { teacherId, deletedAt: null },
           orderBy: { createdAt: 'desc' },
           take: 1,
+          select: { createdAt: true },
         },
         examPapers: {
           where: { teacherId, status: { not: 'DELETED' } },
-          include: { questions: true },
           orderBy: { createdAt: 'desc' },
           take: 3,
+          select: {
+            questions: { select: { mastery: true } },
+          },
         },
       },
       orderBy: { name: 'asc' },
@@ -116,7 +137,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
         paperDate: { gte: weekStart, lt: weekEnd },
         student: visibleStudentWhere,
       },
-      include: { student: { select: { id: true, name: true, grade: true, school: true } } },
+      select: { status: true },
       orderBy: { createdAt: 'desc' },
     }),
     prisma.examPaper.findMany({
@@ -158,6 +179,24 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     }),
   ])
 
+  const publishedClassroomFeedbacks = students.length
+    ? await prisma.classroomFeedback.findMany({
+        where: {
+          teacherId,
+          status: 'PUBLISHED',
+          studentIds: { hasSome: students.map((student) => student.id) },
+        },
+        select: {
+          studentIds: true,
+          createdAt: true,
+        },
+      })
+    : []
+  const latestFeedbackDateByStudent = buildLatestFeedbackDateByStudent(
+    students,
+    publishedClassroomFeedbacks,
+  )
+
   const coveredByLesson = new Map<string, Set<string>>()
   const coveredByGroup = new Map<string, Set<string>>()
   for (const feedback of todayPublishedFeedbacks) {
@@ -181,8 +220,16 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
   }
 
   const decoratedTodayLessons = todayLessons.map((lesson) => {
-    const status = lessonStatusLabel(lesson, now)
-    const expectedStudentIds = lesson.group.enrollments.map((enrollment) => enrollment.student.id)
+    const expectedStudentIds = lesson.group.intensiveMode === 'INTENSIVE'
+      ? lesson.lessonStudents.map((student) => student.studentId)
+      : lesson.group.enrollments.map((enrollment) => enrollment.student.id)
+    const attendanceSubmitted = hasSubmittedLessonAttendance({
+      attendanceSubmittedAt: lesson.attendanceSubmittedAt,
+      status: lesson.status,
+      attendances: lesson.attendances,
+      expectedStudentIds,
+    })
+    const status = lessonStatusLabel(lesson, attendanceSubmitted, now)
     const covered = coveredStudentIdsFor(lesson)
     return {
       id: lesson.id,
@@ -197,7 +244,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       status: lesson.status,
       statusLabel: status.label,
       statusTone: status.tone,
-      attendanceSubmittedAt: lesson.attendanceSubmittedAt,
+      attendanceSubmittedAt: lesson.attendanceSubmittedAt || (attendanceSubmitted ? lesson.attendances[0]?.createdAt : null),
       lessonId: lesson.id,
       hasFeedback: expectedStudentIds.length > 0
         ? expectedStudentIds.every((studentId) => covered.has(studentId))
@@ -207,9 +254,20 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
   })
 
   const endedTodayLessons = todayLessons.filter((lesson) => atTime(lesson.lessonDate, lesson.endTime) < now)
-  const pendingAttendanceLessons = endedTodayLessons.filter((lesson) => !lesson.attendanceSubmittedAt)
+  const attendanceSubmittedFor = (lesson: typeof todayLessons[number]) => {
+    const expectedStudentIds = lesson.group.intensiveMode === 'INTENSIVE'
+      ? lesson.lessonStudents.map((student) => student.studentId)
+      : lesson.group.enrollments.map((enrollment) => enrollment.student.id)
+    return hasSubmittedLessonAttendance({
+      attendanceSubmittedAt: lesson.attendanceSubmittedAt,
+      status: lesson.status,
+      attendances: lesson.attendances,
+      expectedStudentIds,
+    })
+  }
+  const pendingAttendanceLessons = endedTodayLessons.filter((lesson) => !attendanceSubmittedFor(lesson))
   const pendingFeedbackLessons = todayLessons.filter((lesson) => {
-    if (!lesson.attendanceSubmittedAt) return false
+    if (!attendanceSubmittedFor(lesson)) return false
     const expectedStudentIds = lesson.group.enrollments.map((enrollment) => enrollment.student.id)
     if (expectedStudentIds.length === 0) return false
     const covered = coveredStudentIdsFor(lesson)
@@ -277,7 +335,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     const activeEnrollments = student.enrollments.filter((enrollment) => enrollment.status === 'ACTIVE')
     const hasPaidEnrollment = activeEnrollments.some((enrollment) => Number(enrollment.totalHours || 0) > 0)
     const remainHours = roundHours(activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.remainHours || 0), 0))
-    const lastPost = student.performancePosts[0]?.createdAt
+    const lastFeedbackAt = latestFeedbackDateByStudent.get(student.id)
     const firstEnrolledAt = activeEnrollments
       .map((enrollment) => enrollment.enrolledAt)
       .sort((a, b) => a.getTime() - b.getTime())[0]
@@ -300,7 +358,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
         href: `/teacher/students/${student.id}`,
       })
     }
-    if (daysFromEnroll >= 3 && daysSince(lastPost) > 7) {
+    if (daysFromEnroll >= 3 && daysSince(lastFeedbackAt) > 7) {
       warnings.push({
         id: `${student.id}-feedback`,
         studentId: student.id,
@@ -308,10 +366,10 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
         grade: student.grade || '-',
         school: student.school || '-',
         type: '长期未反馈',
-        reason: lastPost ? `${daysSince(lastPost)} 天未发布表现反馈` : '从未发布表现反馈',
+        reason: lastFeedbackAt ? `${daysSince(lastFeedbackAt)} 天未发布课堂反馈` : '从未发布课堂反馈',
         tone: 'purple',
         actionLabel: '发布反馈',
-        href: `/teacher/performance?studentId=${student.id}`,
+        href: '/teacher/feedback',
       })
     }
     if (recentBadAttendance >= 2) {
@@ -371,22 +429,28 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
           .filter((enrollment) => enrollment.status === 'ACTIVE')
           .map((enrollment) => enrollment.enrolledAt)
           .sort((a, b) => a.getTime() - b.getTime())[0]
-        return daysSince(enrolledAt) >= 3 && daysSince(student.performancePosts[0]?.createdAt) > 7
+        return daysSince(enrolledAt) >= 3
+          && daysSince(latestFeedbackDateByStudent.get(student.id)) > 7
       })
       .slice(0, 4)
       .map((student) => ({
-        id: `performance-${student.id}`,
-        type: '表现反馈',
+        id: `feedback-${student.id}`,
+        type: '课堂反馈',
         title: student.name,
-        description: '本周还没有表现反馈',
+        description: '最近 7 天还没有课堂反馈',
         tone: 'orange',
-        actionLabel: '发布表现反馈',
-        href: `/teacher/performance?studentId=${student.id}`,
+        actionLabel: '发布课堂反馈',
+        href: '/teacher/feedback',
       })),
   ].slice(0, 8)
 
   const endedWeekLessons = weekLessons.filter((lesson) => atTime(lesson.lessonDate, lesson.endTime) < now)
-  const attendanceDone = endedWeekLessons.filter((lesson) => lesson.attendanceSubmittedAt || lesson.attendances.length > 0).length
+  const attendanceDone = endedWeekLessons.filter((lesson) => hasSubmittedLessonAttendance({
+    attendanceSubmittedAt: lesson.attendanceSubmittedAt,
+    status: lesson.status,
+    attendances: lesson.attendances,
+    expectedStudentIds: lesson.lessonStudents.map((student) => student.studentId),
+  })).length
   const feedbackExpectedGroupIds = new Set(
     weekLessons
       .filter((lesson) => lesson.status === 'COMPLETED' || lesson.attendanceSubmittedAt)
@@ -402,13 +466,13 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
   })
   const classroomDone = [...feedbackExpectedGroupIds].filter((groupId) => feedbackDoneGroupIds.has(groupId)).length
   const paperDone = weekPapers.filter((paper) => paper.status === 'PUBLISHED').length
-  const weekPerformanceStudentIds = new Set(
+  const weekFeedbackStudentIds = new Set(
     students
       .filter((student) => {
-        const lastPost = student.performancePosts[0]?.createdAt
-        return !!lastPost && lastPost >= weekStart && lastPost < weekEnd
+        const latestFeedbackAt = latestFeedbackDateByStudent.get(student.id)
+        return !!latestFeedbackAt && latestFeedbackAt >= weekStart && latestFeedbackAt < weekEnd
       })
-      .map((student) => student.id)
+      .map((student) => student.id),
   )
   const monthlyHours = roundHours(monthLessons.reduce((sum, lesson) => sum + minutesToHours(lesson.group.lessonMinutes), 0))
 
@@ -454,7 +518,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     weeklyRates: {
       attendance: { done: attendanceDone, total: endedWeekLessons.length },
       papers: { done: paperDone, total: weekPapers.length },
-      feedback: { done: weekPerformanceStudentIds.size, total: students.length },
+      feedback: { done: weekFeedbackStudentIds.size, total: students.length },
     },
   }
 }

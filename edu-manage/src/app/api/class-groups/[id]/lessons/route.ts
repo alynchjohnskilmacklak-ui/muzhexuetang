@@ -98,14 +98,17 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         status: 'SCHEDULED',
         division: group.division,
         isManual: true,
+        intensiveReviewStatus: group.intensiveMode === 'INTENSIVE' ? 'DRAFT' : 'NOT_REQUIRED',
       },
       include: { teacher: { select: { id: true, name: true, subjects: true } } },
     })
 
-    await tx.classGroup.update({
-      where: { id },
-      data: { totalLessons: { increment: 1 } },
-    })
+    if (group.intensiveMode !== 'INTENSIVE') {
+      await tx.classGroup.update({
+        where: { id },
+        data: { totalLessons: { increment: 1 } },
+      })
+    }
 
     await tx.activityLog.create({
       data: {

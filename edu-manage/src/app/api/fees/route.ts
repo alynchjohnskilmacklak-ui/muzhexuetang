@@ -176,10 +176,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
 
-  const db = await getRequestPrisma()
   const body = await req.json()
 
   const { studentId, type, amount, hours, campus, operator, notes, paidAt, courseId } = body
+  const requestedDivision: Division = body.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+  const db = isDualDbEnabled()
+    ? getPrismaForDivision(requestedDivision)
+    : await getRequestPrisma()
 
   if (!studentId || typeof studentId !== 'string') {
     return NextResponse.json({ error: '请选择学生' }, { status: 400 })
@@ -193,6 +196,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   const student = await db.student.findUnique({ where: { id: studentId }, select: { id: true, division: true } })
   if (!student) return NextResponse.json({ error: '学生不存在' }, { status: 404 })
+  if (student.division !== requestedDivision) {
+    return NextResponse.json({ error: '学生学部与收费记录不一致' }, { status: 400 })
+  }
 
   const fee = await db.fee.create({
     data: {

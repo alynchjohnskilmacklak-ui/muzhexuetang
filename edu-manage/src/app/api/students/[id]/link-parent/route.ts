@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestPrisma } from '@/lib/prisma'
+import { isUserActive } from '@/lib/user-status'
+import { generateTemporaryPassword } from '@/lib/temporary-password'
+import { getPasswordPolicyError } from '@/lib/password-policy'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +19,8 @@ export const POST = apiHandler(async (
   if (!session?.user || (session.user as { role?: string }).role !== 'admin') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
+  const actorId = (session.user as { id?: string }).id
+  if (!actorId) return NextResponse.json({ error: '登录状态无效，请重新登录' }, { status: 401 })
 
   const body = await req.json().catch(() => ({}))
   const mode = body.mode as 'existing' | 'new' | undefined
@@ -33,9 +38,20 @@ export const POST = apiHandler(async (
     })
     if (!parentUser) return NextResponse.json({ error: '家长账号不存在' }, { status: 404 })
 
-    await prisma.student.update({
-      where: { id },
-      data: { parentId: parentUser.id, parentUserId: parentUser.id },
+    await prisma.$transaction(async (tx) => {
+      await tx.student.update({
+        where: { id },
+        data: { parentId: parentUser.id, parentUserId: parentUser.id },
+      })
+      await tx.activityLog.create({
+        data: {
+          userId: actorId,
+          action: 'PARENT_ACCOUNT_BOUND',
+          detail: `为学生 ${student.name} 绑定已有家长账号 ${parentUser.email}`,
+          entityType: 'Student',
+          entityId: student.id,
+        },
+      })
     })
 
     return NextResponse.json({
@@ -49,7 +65,7 @@ export const POST = apiHandler(async (
   if (mode === 'new') {
     const email = typeof body.email === 'string' ? body.email.trim() : ''
     const name = typeof body.name === 'string' ? body.name.trim() : ''
-    const password = typeof body.password === 'string' ? body.password.trim() : ''
+    const password = typeof body.password === 'string' ? body.password : ''
     if (!email) return NextResponse.json({ error: '请输入登录邮箱' }, { status: 400 })
 
     const existing = await prisma.user.findUnique({ where: { email } })
@@ -57,31 +73,45 @@ export const POST = apiHandler(async (
       return NextResponse.json({ error: '该邮箱已被其他角色使用' }, { status: 409 })
     }
 
-    let initialPassword: string | null = null
-    const parentUser = existing || await (async () => {
-      const plainPwd = password || email.split('@')[0]
-      initialPassword = plainPwd
-      const hashed = await bcrypt.hash(plainPwd, 10)
-      return prisma.user.create({
-        data: {
-          email,
-          password: hashed,
-          name: name || student.parentName || `${student.name}家长`,
-          role: 'parent',
-        },
-      })
-    })()
-
-    if (existing && existing.status !== 'active') {
-      await prisma.user.update({
-        where: { id: existing.id },
-        data: { status: 'active' },
-      })
+    const initialPassword = existing ? null : (password || generateTemporaryPassword())
+    if (initialPassword) {
+      const passwordError = getPasswordPolicyError(initialPassword, { identifiers: [email, name, student.name] })
+      if (passwordError) return NextResponse.json({ error: passwordError }, { status: 400 })
     }
 
-    await prisma.student.update({
-      where: { id },
-      data: { parentId: parentUser.id, parentUserId: parentUser.id },
+    const parentUser = await prisma.$transaction(async (tx) => {
+      const linkedParent = existing
+        ? await tx.user.update({
+            where: { id: existing.id },
+            data: !isUserActive(existing.status) ? { status: 'active' } : {},
+          })
+        : await tx.user.create({
+            data: {
+              email,
+              password: await bcrypt.hash(initialPassword!, 12),
+              name: name || student.parentName || `${student.name}家长`,
+              role: 'parent',
+              division: student.division,
+            },
+          })
+
+      await tx.student.update({
+        where: { id },
+        data: { parentId: linkedParent.id, parentUserId: linkedParent.id },
+      })
+      await tx.activityLog.create({
+        data: {
+          userId: actorId,
+          action: existing ? 'PARENT_ACCOUNT_BOUND' : 'PASSWORD_INITIALIZED',
+          detail: existing
+            ? `为学生 ${student.name} 绑定家长账号 ${email}`
+            : `创建并绑定家长账号：${email}`,
+          entityType: existing ? 'Student' : 'User',
+          entityId: existing ? student.id : linkedParent.id,
+          metadata: existing ? undefined : { source: 'STUDENT_PARENT_BIND' },
+        },
+      })
+      return linkedParent
     })
 
     return NextResponse.json({

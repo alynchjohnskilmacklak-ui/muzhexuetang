@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation'
 import { UserOutlined, TeamOutlined, MailOutlined, CalendarOutlined, LockOutlined, RightOutlined } from '@ant-design/icons'
 import { fmtFull } from '@/lib/format-date'
 import { toast } from 'sonner'
+import { signOut } from 'next-auth/react'
+import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
+import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 
 const { Title, Text } = Typography
 
@@ -33,6 +36,8 @@ export function ParentProfileClient({
       toast.success('密码已修改，下次登录请使用新密码')
       setChangingPwd(false)
       form.resetFields()
+      clearSensitiveBrowserStorage()
+      await signOut({ callbackUrl: `${window.location.origin}/login?reason=password-changed` })
     } catch { toast.error('网络错误') }
     finally { setSubmitting(false) }
   }
@@ -131,9 +136,15 @@ export function ParentProfileClient({
           </Form.Item>
           <Form.Item name="newPassword" label="新密码" rules={[
             { required: true, message: '请输入新密码' },
-            { min: 6, message: '新密码至少6位' },
+            {
+              validator: async (_rule, value) => {
+                if (!value) return
+                const result = validatePassword(value)
+                if (!result.valid) throw new Error(result.errors[0])
+              },
+            },
           ]}>
-            <Input.Password placeholder="输入新密码（至少6位）" style={{ borderRadius: 8 }} />
+            <Input.Password placeholder={`至少${PASSWORD_MIN_LENGTH}位，包含字母和数字`} style={{ borderRadius: 8 }} />
           </Form.Item>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <Button onClick={() => { setChangingPwd(false); form.resetFields() }}>取消</Button>

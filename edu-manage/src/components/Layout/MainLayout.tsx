@@ -84,7 +84,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false)
   const { data: session } = useSession()
   useKickListener()
-  useSessionPing()
+  useSessionPing({ initialDelay: 6000 })
 
   const isSenior = (session?.user as { division?: string } | undefined)?.division === 'SENIOR'
 

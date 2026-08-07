@@ -3,11 +3,13 @@
 import { type ReactNode, useState } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
-import { Button, Card, Col, Descriptions, Empty, Form, Input, Modal, Progress, Radio, Row, Select, Spin, Statistic, Table, Tag, message } from 'antd'
-import { ArrowLeftOutlined, DisconnectOutlined, HeartOutlined, LinkOutlined, MessageOutlined, UserAddOutlined } from '@ant-design/icons'
+import { Avatar, Button, Card, Col, Descriptions, Empty, Form, Input, Modal, Progress, Radio, Row, Select, Spin, Statistic, Table, Tag, message } from 'antd'
+import { ArrowLeftOutlined, BookOutlined, CalendarOutlined, CheckCircleOutlined, DisconnectOutlined, DownloadOutlined, HeartOutlined, HistoryOutlined, LinkOutlined, MessageOutlined, TeamOutlined, UserAddOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { ImageUploader } from '@/app/(main)/performance/_components/ImageUploader'
 import { formatDeducted, formatRemaining } from '@/lib/lesson-units'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import type { StudentGrowthArchive } from '@/lib/student-growth/archive'
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
@@ -49,7 +51,12 @@ function attendanceDeductedText(record: any) {
 export default function StudentDetailPage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
+  const isMobile = useIsMobile() ?? false
   const { data: student, isLoading, mutate } = useSWR(params.id ? `/api/students/${params.id}` : null, fetcher)
+  const { data: growthArchive, isLoading: growthLoading, error: growthError } = useSWR<StudentGrowthArchive>(
+    params.id ? `/api/admin/students/${params.id}/growth-archive` : null,
+    fetcher,
+  )
   const { data: parentAccountsData } = useSWR('/api/settings/parent-accounts', fetcher)
   const [parentModalOpen, setParentModalOpen] = useState(false)
   const [parentMode, setParentMode] = useState<'existing' | 'new'>('existing')
@@ -62,6 +69,7 @@ export default function StudentDetailPage() {
   const [feedbackMood, setFeedbackMood] = useState('GOOD')
   const [feedbackTags, setFeedbackTags] = useState<string[]>([])
   const [feedbackImages, setFeedbackImages] = useState<string[]>([])
+  const [exportingFeedback, setExportingFeedback] = useState(false)
   const [parentForm] = Form.useForm()
   const parentAccounts = Array.isArray(parentAccountsData?.accounts) ? parentAccountsData.accounts : []
 
@@ -70,7 +78,8 @@ export default function StudentDetailPage() {
 
   const remainHours = Number(student.remainHours || 0)
   const totalHours = Number(student.totalHours || 0)
-  const usedHours = Math.max(0, totalHours - remainHours)
+  const prepaidUsedHours = Math.max(0, totalHours - remainHours)
+  const taughtHours = Number(student.taughtHours || 0)
   const balanceLines = enrollmentBalanceLines(student.enrollments, remainHours, totalHours)
 
   const unlinkParent = async () => {
@@ -169,19 +178,77 @@ export default function StudentDetailPage() {
     }
   }
 
+  const exportFeedbackArchive = async () => {
+    setExportingFeedback(true)
+    try {
+      const loadPage = async (page: number) => {
+        const response = await fetch(
+          `/api/admin/students/${student.id}/feedback-archive?page=${page}&pageSize=100`,
+        )
+        const payload = await response.json().catch(() => ({}))
+        if (!response.ok) throw new Error(payload.error || '反馈档案加载失败')
+        return payload
+      }
+      const firstPage = await loadPage(1)
+      const remainingPages = await Promise.all(
+        Array.from(
+          { length: Math.max(0, firstPage.pagination.totalPages - 1) },
+          (_value, index) => loadPage(index + 2),
+        ),
+      )
+      const archive = {
+        ...firstPage,
+        items: [firstPage, ...remainingPages].flatMap((page) => page.items),
+      }
+      const { renderParentFeedbackPdf } = await import('@/lib/classroom-feedback/parent-pdf')
+      const { blob, embeddedImages, skippedImages } = await renderParentFeedbackPdf(archive)
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `${student.name}_家长版课堂反馈.pdf`
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(url)
+      if (skippedImages) {
+        message.warning(
+          `PDF已导出，已加入${embeddedImages}张课堂照片，另有${skippedImages}张读取失败`,
+        )
+      } else if (embeddedImages) {
+        message.success(`家长版课堂反馈PDF已导出，已加入${embeddedImages}张课堂照片`)
+      } else {
+        message.success('家长版课堂反馈PDF已导出')
+      }
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '导出失败')
+    } finally {
+      setExportingFeedback(false)
+    }
+  }
+
   return (
     <PageLayout
       title={student.name}
       subtitle={`${student.grade || '未设年级'} · ${student.school || '未填写学校'} · ${student.status || '-'}`}
       actions={<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <Button type="primary" icon={<DownloadOutlined />} loading={exportingFeedback} onClick={exportFeedbackArchive}>导出家长版PDF</Button>
+        <Button icon={<HistoryOutlined />} onClick={() => router.push(`/students/${student.id}/feedback-archive`)}>课堂反馈档案</Button>
         <Button icon={<HeartOutlined />} style={{ background: '#1D9E75', borderColor: '#1D9E75', color: '#ffffff' }} onClick={() => setQuickPraiseOpen(true)}>快速表扬</Button>
         <Button icon={<MessageOutlined />} style={{ background: '#534AB7', borderColor: '#534AB7', color: '#ffffff' }} onClick={() => setGrowthFeedbackOpen(true)}>成长反馈</Button>
         <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/students')}>返回学员管理</Button>
       </div>}
     >
+      <StudentGrowthArchivePanel
+        archive={growthArchive}
+        loading={growthLoading}
+        error={growthError as Error | undefined}
+        isMobile={isMobile}
+        onViewAllFeedback={() => router.push(`/students/${student.id}/feedback-archive`)}
+      />
+
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={12} lg={6}><Metric title="课程余额" value={balanceLines.slice(0, 2)} /></Col>
-        <Col xs={12} lg={6}><Metric title="在读课程" value={balanceLines.length} /></Col>
+        <Col xs={12} lg={6}><Metric title="累计已上" value={`${taughtHours.toFixed(1)} 小时`} /></Col>
         <Col xs={12} lg={6}><Metric title="考勤记录" value={student.attendances?.length || 0} /></Col>
         <Col xs={12} lg={6}><Metric title="缴费记录" value={student.fees?.length || 0} /></Col>
       </Row>
@@ -221,7 +288,7 @@ export default function StudentDetailPage() {
         </Descriptions>
         <div style={{ marginTop: 18 }}>
           <div style={{ color: '#98A2B3', marginBottom: 6 }}>课时进度</div>
-          <Progress percent={totalHours ? Math.round((usedHours / totalHours) * 100) : 0} strokeColor="#E8784A" />
+          <Progress percent={totalHours ? Math.round((prepaidUsedHours / totalHours) * 100) : 0} strokeColor="#E8784A" />
         </div>
       </Card>
 
@@ -371,5 +438,154 @@ function Metric({ title, value }: { title: string; value: ReactNode | ReactNode[
         </div>
       )}
     </Card>
+  )
+}
+
+function formatArchiveDate(value?: string | null) {
+  return value ? new Date(value).toLocaleDateString('zh-CN') : '-'
+}
+
+function attendanceLabel(status: string) {
+  return ({ PRESENT: '出勤', LEAVE: '请假', ABSENT: '缺勤', MAKEUP: '补课' } as Record<string, string>)[status] || status
+}
+
+function StudentGrowthArchivePanel({
+  archive,
+  loading,
+  error,
+  isMobile,
+  onViewAllFeedback,
+}: {
+  archive?: StudentGrowthArchive
+  loading: boolean
+  error?: Error
+  isMobile: boolean
+  onViewAllFeedback: () => void
+}) {
+  if (loading) {
+    return <Card bordered={false} style={{ marginBottom: 16, border: '1px solid var(--color-hairline)', borderRadius: 14 }}><div style={{ display: 'grid', placeItems: 'center', minHeight: 220 }}><Spin size="large" /></div></Card>
+  }
+  if (error || !archive) {
+    return <Card bordered={false} style={{ marginBottom: 16, border: '1px solid var(--color-hairline)', borderRadius: 14 }}><Empty description={error?.message || '成长档案暂时无法加载'} /></Card>
+  }
+
+  const overviewItems = [
+    { label: '累计反馈', value: `${archive.overview.feedbackCount} 次`, icon: <MessageOutlined /> },
+    { label: '累计上课', value: `${Number(archive.overview.usedHours || 0) + Number(archive.overview.approvedIntensiveHours || 0)} 小时`, icon: <BookOutlined /> },
+    { label: '剩余课时', value: `${archive.overview.remainingHours} 小时`, icon: <CheckCircleOutlined /> },
+    { label: '最近反馈', value: formatArchiveDate(archive.overview.latestFeedbackDate), icon: <CalendarOutlined /> },
+  ]
+
+  return (
+    <section style={{ marginBottom: 24, maxWidth: '100%', overflow: 'hidden' }}>
+      <Card bordered={false} style={{ marginBottom: 12, border: '1px solid var(--color-hairline)', borderRadius: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+          <Avatar size={isMobile ? 52 : 64} style={{ background: 'var(--color-primary)', color: 'var(--color-surface-1)', fontWeight: 700 }}>
+            {archive.student.name.slice(0, 1)}
+          </Avatar>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ color: 'var(--color-ink)', fontSize: isMobile ? 18 : 22, fontWeight: 700 }}>{archive.student.name}</div>
+            <div style={{ color: 'var(--color-ink-muted)', marginTop: 4 }}>{archive.student.grade || '未设置年级'} · {archive.student.className || '未加入班级'}</div>
+          </div>
+          <Tag icon={<TeamOutlined />} style={{ marginLeft: isMobile ? 0 : 'auto', borderRadius: 9999 }}>{archive.attendance.summary.total} 条考勤记录</Tag>
+        </div>
+      </Card>
+
+      <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
+        {overviewItems.map((item) => (
+          <Col xs={12} lg={6} key={item.label}>
+            <Card bordered={false} style={{ height: '100%', border: '1px solid var(--color-hairline)', borderRadius: 14 }} styles={{ body: { padding: isMobile ? 12 : 16 } }}>
+              <div style={{ color: 'var(--color-primary)', fontSize: 18 }}>{item.icon}</div>
+              <div style={{ color: 'var(--color-ink-subtle)', fontSize: 12, marginTop: 8 }}>{item.label}</div>
+              <div style={{ color: 'var(--color-ink)', fontSize: isMobile ? 16 : 20, fontWeight: 700, marginTop: 2 }}>{item.value}</div>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      <Card
+        title="课堂反馈"
+        extra={<Button type="link" onClick={onViewAllFeedback}>查看全部反馈</Button>}
+        bordered={false}
+        style={{ marginBottom: 12, border: '1px solid var(--color-hairline)', borderRadius: 14 }}
+      >
+        <Table
+          rowKey="id"
+          size="small"
+          pagination={false}
+          scroll={{ x: 'max-content' }}
+          dataSource={archive.feedback.items}
+          columns={[
+            { title: '日期', dataIndex: 'date', width: 120, render: formatArchiveDate },
+            { title: '学科', dataIndex: 'subject', width: 100, render: (value: string) => <Tag color="orange">{value}</Tag> },
+            { title: '教师', dataIndex: ['teacher', 'name'], width: 100 },
+            { title: '课堂标签', dataIndex: 'tags', width: 180, render: (tags: string[]) => tags.length ? tags.map((tag) => <Tag key={tag}>{tag}</Tag>) : '-' },
+            { title: '简评', key: 'summary', width: 280, ellipsis: true, render: (_value, record) => record.summary || record.overallComment || '-' },
+          ]}
+          locale={{ emptyText: <Empty description="暂无课堂反馈" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
+        />
+      </Card>
+
+      <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
+        <Col xs={24} lg={10}>
+          <Card title="考勤情况" bordered={false} style={{ height: '100%', border: '1px solid var(--color-hairline)', borderRadius: 14 }}>
+            <Row gutter={[8, 12]}>
+              <Col span={12}><Statistic title="总课次" value={archive.attendance.summary.total} /></Col>
+              <Col span={12}><Statistic title="出勤率" value={archive.attendance.summary.rate ?? 0} suffix="%" /></Col>
+              <Col span={12}><Statistic title="请假次数" value={archive.attendance.summary.leave} /></Col>
+              <Col span={12}><Statistic title="缺勤次数" value={archive.attendance.summary.absent} /></Col>
+            </Row>
+          </Card>
+        </Col>
+        <Col xs={24} lg={14}>
+          <Card title="课时情况" bordered={false} style={{ height: '100%', border: '1px solid var(--color-hairline)', borderRadius: 14 }}>
+            <Row gutter={[8, 12]} style={{ marginBottom: 12 }}>
+              <Col span={8}><Statistic title="购买课时" value={archive.hours.totalHours} /></Col>
+              <Col span={8}><Statistic title="已消耗" value={archive.hours.usedHours} /></Col>
+              <Col span={8}><Statistic title="剩余" value={archive.hours.remainingHours} /></Col>
+            </Row>
+            <Table
+              rowKey="id"
+              size="small"
+              pagination={false}
+              scroll={{ x: 'max-content' }}
+              dataSource={archive.hours.transactions}
+              columns={[
+                { title: '日期', dataIndex: 'createdAt', width: 110, render: formatArchiveDate },
+                { title: '类型', dataIndex: 'type', width: 130 },
+                { title: '变动', dataIndex: 'amount', width: 90 },
+                { title: '原因', dataIndex: 'reason', width: 200, render: (value: string | null) => value || '-' },
+              ]}
+              locale={{ emptyText: <Empty description="暂无课时流水" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      <Card title="成绩变化" bordered={false} style={{ border: '1px solid var(--color-hairline)', borderRadius: 14 }}>
+        {archive.grades.trend.length ? (
+          <Table
+            rowKey="id"
+            size="small"
+            pagination={false}
+            scroll={{ x: 'max-content' }}
+            dataSource={archive.grades.trend}
+            columns={[
+              { title: '日期', dataIndex: 'date', width: 120, render: formatArchiveDate },
+              { title: '考试', dataIndex: 'assessmentName', width: 180 },
+              { title: '学科', dataIndex: 'subject', width: 100 },
+              { title: '成绩', key: 'score', width: 120, render: (_value, record) => `${record.score}/${record.fullScore}` },
+              { title: '得分率', dataIndex: 'percentage', width: 100, render: (value: number) => `${value}%` },
+            ]}
+          />
+        ) : <Empty description="暂无成绩数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+      </Card>
+
+      {archive.attendance.recentRecords.length > 0 && (
+        <div style={{ marginTop: 8, color: 'var(--color-ink-subtle)', fontSize: 12 }}>
+          最近考勤：{formatArchiveDate(archive.attendance.recentRecords[0].date)} · {attendanceLabel(archive.attendance.recentRecords[0].status)}
+        </div>
+      )}
+    </section>
   )
 }

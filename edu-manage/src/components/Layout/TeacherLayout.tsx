@@ -22,6 +22,7 @@ import {
   MenuUnfoldOutlined,
   MessageFilled,
   MessageOutlined,
+  ScheduleOutlined,
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons'
@@ -31,6 +32,8 @@ import { normalizeUploadUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
+import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
+import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 import { MobileLayout, type MobileNavItem } from './MobileLayout'
 
 const { Sider, Content, Header } = Layout
@@ -51,6 +54,7 @@ const navItems: NavItem[] = [
   { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
   { key: 'teaching-group', icon: <CalendarOutlined />, label: '教学工作', children: [
     { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '我的课表' },
+    { key: '/teacher/intensive', icon: <ScheduleOutlined />, label: '个性化课程' },
     { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
     { key: '/teacher/feedback', icon: <MessageOutlined />, label: '成长反馈', badgeKey: 'unpublished' },
   ] },
@@ -92,11 +96,17 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   const isMobile = useIsMobile()
   const [collapsed, setCollapsed] = useState(false)
   const [data, setData] = useState<TeacherData | null>(initialData || null)
+  const [backgroundReady, setBackgroundReady] = useState(false)
   const [changingPwd, setChangingPwd] = useState(false)
   const [pwdSubmitting, setPwdSubmitting] = useState(false)
   const [pwdForm] = Form.useForm()
   useKickListener()
-  useSessionPing()
+  useSessionPing({ initialDelay: 6000 })
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setBackgroundReady(true), 1200)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     const saved = localStorage.getItem('teacher_sider_collapsed')
@@ -107,27 +117,40 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     localStorage.setItem('teacher_sider_collapsed', String(collapsed))
   }, [collapsed])
 
-  const { data: dashData } = useSWR('/api/teacher/dashboard', fetcher, {
+  const { data: dashData } = useSWR(backgroundReady ? '/api/teacher/dashboard' : null, fetcher, {
     refreshInterval: 300_000,
     revalidateOnFocus: true,
     dedupingInterval: 30_000,
   })
 
-  const { data: msgUnreadData } = useSWR('/api/messages/unread-count', fetcher, {
-    refreshInterval: 60_000,
+  const { data: msgUnreadData } = useSWR(backgroundReady ? '/api/messages/unread-count' : null, fetcher, {
+    refreshInterval: 5_000,
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
   })
 
   useEffect(() => {
     if (dashData?.teacher) {
-      setData({
+      setData((current) => ({
         teacher: dashData.teacher,
         badges: {
           ...(dashData.badges || { unsubmitted: 0, unpublished: 0, unread: 0 }),
-          unreadMessages: Number(msgUnreadData?.count || 0),
+          unreadMessages: Number(msgUnreadData?.count ?? current?.badges.unreadMessages ?? 0),
         },
-      })
+      }))
     }
   }, [dashData, msgUnreadData])
+
+  useEffect(() => {
+    if (!msgUnreadData) return
+    setData((current) => current ? {
+      ...current,
+      badges: {
+        ...current.badges,
+        unreadMessages: Number(msgUnreadData.count || 0),
+      },
+    } : current)
+  }, [msgUnreadData])
 
   const leafItems = useMemo(() => flattenNavItems(navItems), [])
   const selectedKey = leafItems
@@ -150,6 +173,8 @@ export function TeacherLayout({ children, initialData }: { children: React.React
       toast.success('密码已修改，下次登录请使用新密码')
       setChangingPwd(false)
       pwdForm.resetFields()
+      clearSensitiveBrowserStorage()
+      await signOut({ callbackUrl: `${window.location.origin}/login?reason=password-changed` })
     } catch { toast.error('网络错误') }
     finally { setPwdSubmitting(false) }
   }
@@ -268,7 +293,10 @@ export function TeacherLayout({ children, initialData }: { children: React.React
           {data ? (
             <Dropdown menu={{ items: [
               { key: 'change-pwd', icon: <LockOutlined />, label: '修改密码', onClick: () => setChangingPwd(true) },
-              { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: () => signOut({ callbackUrl: `${window.location.origin}/login` }) },
+              { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: () => {
+                clearSensitiveBrowserStorage()
+                return signOut({ callbackUrl: `${window.location.origin}/login` })
+              } },
             ] }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <Avatar size={28} icon={<UserOutlined />} src={normalizeUploadUrl(data.teacher.avatar) || undefined} />
@@ -297,9 +325,15 @@ export function TeacherLayout({ children, initialData }: { children: React.React
           </Form.Item>
           <Form.Item name="newPassword" label="新密码" rules={[
             { required: true, message: '请输入新密码' },
-            { min: 6, message: '新密码至少6位' },
+            {
+              validator: async (_rule, value) => {
+                if (!value) return
+                const result = validatePassword(value)
+                if (!result.valid) throw new Error(result.errors[0])
+              },
+            },
           ]}>
-            <Input.Password placeholder="输入新密码（至少6位）" style={{ borderRadius: 8 }} />
+            <Input.Password placeholder={`至少${PASSWORD_MIN_LENGTH}位，包含字母和数字`} style={{ borderRadius: 8 }} />
           </Form.Item>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <Button onClick={() => { setChangingPwd(false); pwdForm.resetFields() }}>取消</Button>

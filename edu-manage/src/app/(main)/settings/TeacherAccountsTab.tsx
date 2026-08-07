@@ -3,6 +3,7 @@
 import useSWR from 'swr'
 import { Alert, Button, Card, Popconfirm, Space, Table, Tag, Typography, message } from 'antd'
 import { StopOutlined } from '@ant-design/icons'
+import { isUserActive } from '@/lib/user-status'
 
 type AccountStatus = 'active' | 'disabled' | string
 
@@ -31,7 +32,7 @@ function formatDate(value: string | null) {
 }
 
 function statusTag(status: AccountStatus) {
-  return <Tag color={status === 'active' ? 'green' : 'red'}>{status === 'active' ? '正常' : '已停用'}</Tag>
+  return <Tag color={isUserActive(status) ? 'green' : 'red'}>{isUserActive(status) ? '正常' : '已停用'}</Tag>
 }
 
 export function TeacherAccountsTab() {
@@ -46,7 +47,7 @@ export function TeacherAccountsTab() {
       })
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(payload.error || '操作失败')
-      message.success(status === 'active' ? '账号已恢复' : '账号已停用')
+      message.success(isUserActive(status) ? '账号已恢复' : '账号已停用')
       mutate()
     } catch (error) {
       message.error(error instanceof Error ? error.message : '操作失败')
@@ -62,7 +63,7 @@ export function TeacherAccountsTab() {
       title: '操作',
       key: 'action',
       width: 140,
-      render: (_: unknown, record: UserAccount) => record.status === 'active' ? (
+      render: (_: unknown, record: UserAccount) => isUserActive(record.status) ? (
         <Popconfirm title="确定停用该教师账号？" onConfirm={() => changeStatus(record, 'disabled')}>
           <Button size="small" danger icon={<StopOutlined />}>停用</Button>
         </Popconfirm>
@@ -78,7 +79,7 @@ export function TeacherAccountsTab() {
         <Typography.Title level={4} style={{ margin: 0 }}>教师登录账号</Typography.Title>
         <Alert
           type="info"
-          message="教师账号由系统自动创建，邮箱格式为「拼音@tea.com」，初始密码为手机号后6位。停用后教师将立即无法登录，直到恢复。"
+          message="教师账号由系统自动创建，邮箱格式为「拼音@tea.com」。独立强初始密码只在创建成功后显示一次；停用后教师将立即无法登录，直到恢复。"
           style={{ marginBottom: 12 }}
           showIcon
         />

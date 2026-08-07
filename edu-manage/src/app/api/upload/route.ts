@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/get-user'
-import { getRequestPrisma } from '@/lib/prisma'
-import { uploadBuffer } from '@/lib/storage'
+import { requireAuthenticatedUser } from '@/lib/auth/guards'
+import { deleteFile, uploadBuffer } from '@/lib/storage'
 import { apiHandler } from '@/lib/api-handler'
 import { generateImageVariants } from '@/lib/image-variants'
+import {
+  canUseUploadType,
+  normalizeUploadType,
+  ownerTypeForUpload,
+  uploadAllowsDocument,
+  uploadRequiresImage,
+  validateUploadAssociations,
+} from '@/lib/upload-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,15 +23,6 @@ function getSizeLimit(uploadType: string | null): number {
     case 'avatar':          return 5 * 1024 * 1024    // 5MB
     default:                return 10 * 1024 * 1024   // 10MB
   }
-}
-
-function getOwnerType(uploadType: string | null, role: string): string {
-  if (uploadType === 'teacher-feedback') return 'feedback'
-  if (uploadType === 'parent-upload') return 'parent_upload'
-  if (uploadType === 'admin-material') return 'admin_material'
-  if (role === 'teacher') return 'teacher_upload'
-  if (role === 'parent') return 'parent_upload'
-  return 'admin_material'
 }
 
 function isValidImageBuffer(buffer: Buffer): { ok: boolean; heic?: boolean } {
@@ -45,19 +43,35 @@ function isValidImageBuffer(buffer: Buffer): { ok: boolean; heic?: boolean } {
   return { ok: false }
 }
 
+function isImageUpload(file: File): boolean {
+  return file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif|avif)$/i.test(file.name)
+}
+
+function isAllowedDocument(file: File): boolean {
+  return /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|zip|rar|7z)$/i.test(file.name)
+}
+
 export const POST = apiHandler(async (req: NextRequest) => {
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  const user = await requireAuthenticatedUser()
 
   const formData = await req.formData()
   const file = formData.get('file') as File | null
   if (!file) return NextResponse.json({ error: '请选择文件' }, { status: 400 })
 
-  const uploadType = (formData.get('uploadType') as string) || null
+  const rawUploadType = (formData.get('uploadType') as string) || null
+  const uploadType = normalizeUploadType(rawUploadType)
+  if (!uploadType) {
+    return NextResponse.json({ error: '上传类型不合法' }, { status: 400 })
+  }
+  if (!canUseUploadType(user.role, uploadType)) {
+    return NextResponse.json({ error: '无权使用该上传类型' }, { status: 403 })
+  }
   const studentId = (formData.get('studentId') as string) || null
   const lessonId = (formData.get('lessonId') as string) || null
   const feedbackId = (formData.get('feedbackId') as string) || null
   const postId = (formData.get('postId') as string) || null
+
+  await validateUploadAssociations(user, { studentId, lessonId, feedbackId, postId })
 
   // Size check
   const limit = getSizeLimit(uploadType)
@@ -66,16 +80,24 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: `文件过大，最大支持 ${limitMB}MB` }, { status: 400 })
   }
 
-  const ownerType = getOwnerType(uploadType, user.role)
+  const ownerType = ownerTypeForUpload(uploadType, user.role)
   const visibility = user.role === 'parent' ? 'PARENT_VISIBLE'
     : user.role === 'admin' ? 'ADMIN_ONLY'
     : 'TEACHER_VISIBLE'
 
   // Read buffer ONCE — validate + upload use the same buffer
   const buffer = Buffer.from(await file.arrayBuffer())
+  const isImage = isImageUpload(file)
+
+  if (uploadRequiresImage(uploadType) && !isImage) {
+    return NextResponse.json({ error: '该上传场景仅支持图片' }, { status: 400 })
+  }
+  if (!isImage && (!uploadAllowsDocument(uploadType) || !isAllowedDocument(file))) {
+    return NextResponse.json({ error: '文件类型不在允许范围内' }, { status: 400 })
+  }
 
   // Validation: image magic bytes
-  if (file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif|avif)$/i.test(file.name)) {
+  if (isImage) {
     const check = isValidImageBuffer(buffer)
     if (!check.ok) {
       return NextResponse.json({ error: '文件格式不合法，仅支持 JPG/PNG/GIF/WebP/HEIC' }, { status: 400 })
@@ -83,38 +105,57 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   try {
-    const result = await uploadBuffer(buffer, { originalName: file.name, mimeType: file.type, prefix: ownerType })
     let preview: Awaited<ReturnType<typeof uploadBuffer>> | null = null
     let thumbnail: Awaited<ReturnType<typeof uploadBuffer>> | null = null
     let width: number | null = null
     let height: number | null = null
-    const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif|avif)$/i.test(file.name)
-    if (isImage) {
-      try {
-        const generated = await generateImageVariants(buffer)
-        width = generated.width
-        height = generated.height
-        preview = await uploadBuffer(generated.previewBuffer, {
+    const originalUpload = uploadBuffer(buffer, {
+      originalName: file.name,
+      mimeType: file.type,
+      prefix: ownerType,
+    })
+    const generatedVariants = isImage
+      ? generateImageVariants(buffer).catch((variantError) => {
+          // HEIC support depends on the server libvips build. Keep the original usable.
+          console.warn('[upload:variants]', file.name, variantError instanceof Error ? variantError.message : variantError)
+          return null
+        })
+      : Promise.resolve(null)
+
+    // Original persistence and Sharp processing are independent and can run in
+    // parallel. The original remains mandatory; variants remain best-effort.
+    const [result, generated] = await Promise.all([originalUpload, generatedVariants])
+    if (generated) {
+      width = generated.width
+      height = generated.height
+      const variantUploads = await Promise.allSettled([
+        uploadBuffer(generated.previewBuffer, {
           originalName: `${file.name.replace(/\.[^.]+$/, '')}-preview.webp`,
           mimeType: 'image/webp',
           prefix: `${ownerType}-preview`,
-        })
-        thumbnail = await uploadBuffer(generated.thumbnailBuffer, {
+        }),
+        uploadBuffer(generated.thumbnailBuffer, {
           originalName: `${file.name.replace(/\.[^.]+$/, '')}-thumbnail.webp`,
           mimeType: 'image/webp',
           prefix: `${ownerType}-thumbnail`,
-        })
-      } catch (thumbnailError) {
-        // HEIC support depends on the server libvips build. Keep the original usable.
-        console.warn('[upload:thumbnail]', file.name, thumbnailError instanceof Error ? thumbnailError.message : thumbnailError)
+        }),
+      ])
+      if (variantUploads[0].status === 'fulfilled') {
+        preview = variantUploads[0].value
+      } else {
+        console.warn('[upload:preview]', file.name, variantUploads[0].reason)
+      }
+      if (variantUploads[1].status === 'fulfilled') {
+        thumbnail = variantUploads[1].value
+      } else {
+        console.warn('[upload:thumbnail]', file.name, variantUploads[1].reason)
       }
     }
 
     // The original file has already been persisted at this point. FileAsset is the
     // durable link that lets every client resolve preview/thumbnail variants after
     // a refresh, so a failure here must be observable instead of silently ignored.
-    const prisma = await getRequestPrisma()
-    let assetPersisted = false
+    const prisma = user.prisma
     try {
       const fileAsset = (prisma as unknown as { fileAsset: { create(args: { data: Record<string, unknown> }): Promise<unknown> } }).fileAsset
       await fileAsset.create({ data: {
@@ -140,7 +181,6 @@ export const POST = apiHandler(async (req: NextRequest) => {
         height,
         fileSize: file.size,
       } })
-      assetPersisted = true
     } catch (assetError) {
       console.error('[upload:file-asset-persist]', {
         storageKey: result.storageKey,
@@ -149,13 +189,19 @@ export const POST = apiHandler(async (req: NextRequest) => {
         uploadedById: user.id,
         message: assetError instanceof Error ? assetError.message : String(assetError),
       })
+      await Promise.allSettled(
+        [result, preview, thumbnail]
+          .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
+          .map((entry) => deleteFile(entry.storageKey))
+      )
+      return NextResponse.json({ error: '文件记录保存失败，请重试' }, { status: 500 })
     }
 
     return NextResponse.json({
       url: result.url,
       previewUrl: preview?.url ?? null,
       thumbnailUrl: thumbnail?.url ?? null,
-      assetPersisted,
+      assetPersisted: true,
       legacyUrl: result.url.replace('/api/uploads/', '/uploads/'),
       file: {
         storageKey: result.storageKey,

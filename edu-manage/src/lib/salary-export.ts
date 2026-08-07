@@ -1,9 +1,12 @@
 import * as XLSX from 'xlsx'
+import { salaryBucketLabel, type SalaryBucket } from './salary-bucket'
 
 export type SalaryExportRow = {
   id: string
   type: string
   typeLabel: string
+  salaryBucket: SalaryBucket
+  payCategory?: SalaryPayCategory
   amount: number
   description: string
   lessonDate: Date | null
@@ -17,8 +20,58 @@ export type SalaryExportRow = {
   lessonMinutes: number | null
   studentNames: string
   studentCount: number | null
+  validFeedbackCount?: number | null
+  unitAmount?: number | null
   lessonId: string
   feedbackId: string
+}
+
+export type SalaryPayCategory =
+  | 'SMALL_CLASS_LESSON'
+  | 'SMALL_CLASS_FEEDBACK'
+  | 'INTENSIVE_LESSON'
+  | 'INTENSIVE_FEEDBACK'
+  | 'MANAGEMENT_ADJUSTMENT'
+
+const PAY_CATEGORY_ORDER: SalaryPayCategory[] = [
+  'SMALL_CLASS_LESSON',
+  'SMALL_CLASS_FEEDBACK',
+  'INTENSIVE_LESSON',
+  'INTENSIVE_FEEDBACK',
+  'MANAGEMENT_ADJUSTMENT',
+]
+
+export function classifySalaryPayCategory(row: Pick<SalaryExportRow, 'type' | 'salaryBucket'>): SalaryPayCategory {
+  if (row.type === 'FEEDBACK_BONUS') {
+    return row.salaryBucket === 'INTENSIVE' ? 'INTENSIVE_FEEDBACK' : 'SMALL_CLASS_FEEDBACK'
+  }
+  if (row.type === 'LESSON_PAY' || row.type === 'LESSON_PAY_ADJUSTMENT') {
+    return row.salaryBucket === 'INTENSIVE' ? 'INTENSIVE_LESSON' : 'SMALL_CLASS_LESSON'
+  }
+  return 'MANAGEMENT_ADJUSTMENT'
+}
+
+export function salaryPayCategoryLabel(category: SalaryPayCategory) {
+  return {
+    SMALL_CLASS_LESSON: '小班课课时工资',
+    SMALL_CLASS_FEEDBACK: '小班课反馈奖励',
+    INTENSIVE_LESSON: '个性化课程课时工资',
+    INTENSIVE_FEEDBACK: '个性化课程反馈奖励',
+    MANAGEMENT_ADJUSTMENT: '管理调整工资',
+  }[category]
+}
+
+function categoryOf(row: SalaryExportRow) {
+  return row.payCategory || classifySalaryPayCategory(row)
+}
+
+export function dedupeSalaryExportRows(rows: SalaryExportRow[]) {
+  const seen = new Set<string>()
+  return rows.filter((row) => {
+    if (seen.has(row.id)) return false
+    seen.add(row.id)
+    return true
+  })
 }
 
 export type SalaryExportInput = {
@@ -28,8 +81,6 @@ export type SalaryExportInput = {
   exportedAt: Date
   rows: SalaryExportRow[]
 }
-
-const TYPE_ORDER = ['LESSON_PAY', 'FEEDBACK_BONUS', 'manual_adjust']
 
 function sum(values: number[]) {
   return Number(values.reduce((total, value) => total + value, 0).toFixed(2))
@@ -54,30 +105,33 @@ function setDateTimeFormat(sheet: XLSX.WorkSheet, columnIndex: number, startRow:
 }
 
 function buildSummarySheet(input: SalaryExportInput) {
-  const typeRows = TYPE_ORDER.map((type) => {
-    const rows = input.rows.filter((row) => row.type === type)
+  const rows = dedupeSalaryExportRows(input.rows)
+  const typeRows = PAY_CATEGORY_ORDER.map((category) => {
+    const categoryRows = rows.filter((row) => categoryOf(row) === category)
+    const lessonHours = category.endsWith('_LESSON')
+      ? sum(categoryRows.map((row) => Number(row.lessonMinutes || 0) / 60))
+      : 0
+    const validFeedbackCount = category.endsWith('_FEEDBACK')
+      ? sum(categoryRows.map((row) => Number(row.validFeedbackCount ?? row.studentCount ?? 0)))
+      : 0
     return {
-      type,
-      label: rows[0]?.typeLabel || (type === 'LESSON_PAY' ? '课时薪资' : type === 'FEEDBACK_BONUS' ? '反馈奖励' : '手动调整'),
-      count: rows.length,
-      amount: sum(rows.map((row) => row.amount)),
+      type: category,
+      label: salaryPayCategoryLabel(category),
+      count: categoryRows.length,
+      quantity: category.endsWith('_LESSON') ? `${lessonHours}小时` : category.endsWith('_FEEDBACK') ? `${validFeedbackCount}次有效反馈` : `${categoryRows.length}笔`,
+      amount: sum(categoryRows.map((row) => row.amount)),
     }
   })
-  const knownTypes = new Set(TYPE_ORDER)
-  const otherRows = input.rows.filter((row) => !knownTypes.has(row.type))
-  if (otherRows.length) {
-    typeRows.push({ type: 'OTHER', label: '其他调整', count: otherRows.length, amount: sum(otherRows.map((row) => row.amount)) })
-  }
 
-  const totalAmount = sum(input.rows.map((row) => row.amount))
+  const totalAmount = sum(rows.map((row) => row.amount))
   const data: Array<Array<string | number | Date | null>> = [
     [`${input.teacherName}老师薪资流水汇总`, '', '', ''],
     ['统计范围', input.periodLabel, '具体区间', input.rangeLabel],
-    ['导出时间', input.exportedAt, '流水总数', input.rows.length],
+    ['导出时间', input.exportedAt, '去重后流水总数', rows.length],
     [],
-    ['汇总项目', '流水笔数', '金额（元）', '金额占比'],
-    ...typeRows.map((item) => [item.label, item.count, item.amount, totalAmount === 0 ? 0 : item.amount / totalAmount]),
-    ['合计', input.rows.length, totalAmount, 1],
+    ['汇总项目', '核对数量', '金额（元）', '金额占比'],
+    ...typeRows.map((item) => [item.label, item.quantity, item.amount, totalAmount === 0 ? 0 : item.amount / totalAmount]),
+    ['合计', `${rows.length}笔流水`, totalAmount, 1],
   ]
   const sheet = XLSX.utils.aoa_to_sheet(data, { cellDates: true })
   sheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }]
@@ -121,15 +175,19 @@ function buildSubjectSheet(input: SalaryExportInput) {
   return sheet
 }
 
-function buildDetailSheet(input: SalaryExportInput) {
+function buildDetailSheet(input: SalaryExportInput, category?: SalaryPayCategory) {
+  const sourceRows = dedupeSalaryExportRows(input.rows)
+    .filter((row) => !category || categoryOf(row) === category)
   const headers = [
-    '序号', '计薪日期', '记录时间', '薪资类型', '金额（元）', '课程', '班级', '科目', '课程类型', '年级',
-    '上课时间', '课时分钟', '关联学生', '学生人数', '详细说明', '课次ID', '反馈ID', '流水ID',
+    '序号', '计薪日期', '记录时间', '工资分类', '工资归属', '流水类型', '金额（元）', '课程', '班级', '科目', '课程类型', '年级',
+    '上课时间', '计薪分钟', '计薪小时', '关联学生', '有效反馈数', '单价（元）', '详细说明', '课次ID', '反馈ID', '流水ID',
   ]
-  const rows = input.rows.map((row, index) => [
+  const rows = sourceRows.map((row, index) => [
     index + 1,
     row.lessonDate,
     row.createdAt,
+    salaryPayCategoryLabel(categoryOf(row)),
+    salaryBucketLabel(row.salaryBucket),
     row.typeLabel,
     row.amount,
     row.courseName,
@@ -139,15 +197,17 @@ function buildDetailSheet(input: SalaryExportInput) {
     row.grade,
     row.lessonTime,
     row.lessonMinutes,
+    row.lessonMinutes ? Number((row.lessonMinutes / 60).toFixed(2)) : null,
     row.studentNames,
-    row.studentCount,
+    row.validFeedbackCount ?? row.studentCount,
+    row.unitAmount,
     row.description,
     row.lessonId,
     row.feedbackId,
     row.id,
   ])
   const data: Array<Array<string | number | Date | null>> = [
-    [`${input.teacherName}老师薪资流水明细`, ...Array(headers.length - 1).fill('')],
+    [`${input.teacherName}老师${category ? salaryPayCategoryLabel(category) : '全部薪资'}明细`, ...Array(headers.length - 1).fill('')],
     [`统计范围：${input.periodLabel}（${input.rangeLabel}）`, ...Array(headers.length - 1).fill('')],
     [],
     headers,
@@ -158,19 +218,26 @@ function buildDetailSheet(input: SalaryExportInput) {
     { s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } },
     { s: { r: 1, c: 0 }, e: { r: 1, c: headers.length - 1 } },
   ]
-  sheet['!autofilter'] = { ref: `A4:R${Math.max(4, data.length)}` }
-  setColumnWidths(sheet, [8, 18, 20, 14, 14, 20, 20, 12, 14, 10, 18, 12, 28, 12, 48, 24, 24, 24])
+  sheet['!autofilter'] = { ref: `A4:${XLSX.utils.encode_col(headers.length - 1)}${Math.max(4, data.length)}` }
+  setColumnWidths(sheet, [8, 18, 20, 24, 18, 18, 14, 20, 20, 12, 14, 10, 18, 12, 12, 28, 14, 12, 54, 24, 24, 24])
   setDateTimeFormat(sheet, 1, 5, data.length)
   setDateTimeFormat(sheet, 2, 5, data.length)
-  setCurrencyFormat(sheet, 4, 5, data.length)
+  setCurrencyFormat(sheet, 6, 5, data.length)
+  setCurrencyFormat(sheet, 17, 5, data.length)
   return sheet
 }
 
 export function buildSalaryExportWorkbook(input: SalaryExportInput) {
+  const cleanInput = { ...input, rows: dedupeSalaryExportRows(input.rows) }
   const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, buildSummarySheet(input), '薪资汇总')
-  XLSX.utils.book_append_sheet(workbook, buildSubjectSheet(input), '按科目汇总')
-  XLSX.utils.book_append_sheet(workbook, buildDetailSheet(input), '流水明细')
+  XLSX.utils.book_append_sheet(workbook, buildSummarySheet(cleanInput), '工资总览')
+  XLSX.utils.book_append_sheet(workbook, buildDetailSheet(cleanInput, 'SMALL_CLASS_LESSON'), '小班课时明细')
+  XLSX.utils.book_append_sheet(workbook, buildDetailSheet(cleanInput, 'SMALL_CLASS_FEEDBACK'), '小班反馈明细')
+  XLSX.utils.book_append_sheet(workbook, buildDetailSheet(cleanInput, 'INTENSIVE_LESSON'), '个性化课时明细')
+  XLSX.utils.book_append_sheet(workbook, buildDetailSheet(cleanInput, 'INTENSIVE_FEEDBACK'), '个性化反馈明细')
+  XLSX.utils.book_append_sheet(workbook, buildDetailSheet(cleanInput, 'MANAGEMENT_ADJUSTMENT'), '管理调整明细')
+  XLSX.utils.book_append_sheet(workbook, buildSubjectSheet(cleanInput), '按科目汇总')
+  XLSX.utils.book_append_sheet(workbook, buildDetailSheet(cleanInput), '全部流水审计')
   workbook.Props = {
     Title: `${input.teacherName}老师薪资流水`,
     Subject: `${input.periodLabel}薪资汇总及明细`,

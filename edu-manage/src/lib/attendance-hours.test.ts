@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculateAttendanceDeductHours } from './attendance-hours'
+import { calculateAttendanceDeductHours, shouldCreateMakeupRequest } from './attendance-hours'
 import { calculateAttendanceRate, clampDeductHours } from './attendance-stats'
 
 describe('attendance hour deduction', () => {
@@ -23,5 +23,18 @@ describe('attendance rate', () => {
   it('calculates present ratio and treats no records as 100 percent', () => {
     expect(calculateAttendanceRate(2, 4)).toBe(50)
     expect(calculateAttendanceRate(0, 0)).toBe(100)
+  })
+})
+
+describe('makeup request eligibility', () => {
+  it('does not turn ordinary small-class leave into an admin makeup task', () => {
+    expect(shouldCreateMakeupRequest({ status: 'LEAVE', courseType: 'GROUP' })).toBe(false)
+    expect(shouldCreateMakeupRequest({ status: 'ABSENT', courseType: 'GROUP' })).toBe(false)
+  })
+
+  it('keeps individualized-course makeup workflows', () => {
+    expect(shouldCreateMakeupRequest({ status: 'LEAVE', courseType: 'ONE_ON_ONE' })).toBe(true)
+    expect(shouldCreateMakeupRequest({ status: 'ABSENT', intensiveMode: 'INTENSIVE' })).toBe(true)
+    expect(shouldCreateMakeupRequest({ status: 'PRESENT', courseType: 'ONE_ON_ONE' })).toBe(false)
   })
 })

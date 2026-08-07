@@ -2,12 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { teacherCanAccessParentMessage } from '@/lib/parent-message-access'
+import {
+  notifyParentAboutMessageReply,
+  notifyTeacherAboutParentMessage,
+} from '@/lib/parent-message-notifications'
 
 export const dynamic = 'force-dynamic'
 
 export const POST = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!['parent', 'teacher', 'admin'].includes(user.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
   const prisma = await getRequestPrisma()
   const { id } = await params
 
@@ -19,22 +27,8 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   if (user.role === 'teacher') {
-    if (!user.teacherId) {
+    if (!user.teacherId || !await teacherCanAccessParentMessage(prisma, message, user.teacherId)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-    if (message.teacherId && message.teacherId !== user.teacherId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-    if (!message.studentId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    const taught = await prisma.enrollment.count({
-      where: { studentId: message.studentId, status: 'ACTIVE', group: { OR: [{ teacherId: user.teacherId }, { teacherAssignments: { some: { teacherId: user.teacherId } } }] } },
-    })
-    if (taught === 0) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    if (!message.teacherId) {
-      await prisma.parentMessage.update({
-        where: { id },
-        data: { teacherId: user.teacherId },
-      })
     }
   }
 
@@ -45,21 +39,58 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
 
   const isParent = user.role === 'parent'
 
-  const reply = await prisma.parentMessageReply.create({
-    data: {
-      messageId: id,
-      authorId: user.id,
-      authorName: user.name || user.role,
-      role: user.role,
-      content,
-      isReadByParent: isParent,
-      isReadByTeacher: !isParent,
-    },
-  })
+  const reply = await prisma.$transaction(async (tx) => {
+    if (user.role === 'teacher' && user.teacherId && !message.teacherId) {
+      await tx.parentMessage.update({ where: { id }, data: { teacherId: user.teacherId } })
+    }
 
-  await prisma.parentMessage.update({
-    where: { id },
-    data: { updatedAt: new Date(), status: isParent ? 'OPEN' : 'REPLIED' },
+    const created = await tx.parentMessageReply.create({
+      data: {
+        messageId: id,
+        authorId: user.id,
+        authorName: user.name || user.role,
+        role: user.role,
+        content,
+        isReadByParent: isParent,
+        isReadByTeacher: !isParent,
+      },
+    })
+
+    const nextStatus = isParent
+      ? 'OPEN'
+      : user.role === 'teacher'
+        ? 'REPLIED'
+        : message.status
+
+    await tx.parentMessage.update({
+      where: { id },
+      data: { updatedAt: new Date(), status: nextStatus },
+    })
+
+    const targetTeacherId = message.teacherId || (
+      user.role === 'teacher' ? user.teacherId : null
+    )
+    if (isParent && targetTeacherId) {
+      await notifyTeacherAboutParentMessage(tx, {
+        teacherId: targetTeacherId,
+        messageId: message.id,
+        parentName: user.name || '家长',
+        studentId: message.studentId,
+        studentName: null,
+        senderId: user.id,
+      })
+    } else if (!isParent && (user.role === 'teacher' || user.role === 'admin')) {
+      await notifyParentAboutMessageReply(tx, {
+        parentId: message.parentId,
+        messageId: message.id,
+        replierName: user.name || (user.role === 'admin' ? '管理员' : '老师'),
+        replierRole: user.role,
+        studentId: message.studentId,
+        senderId: user.id,
+      })
+    }
+
+    return created
   })
 
   return NextResponse.json(reply, { status: 201 })

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { Avatar, Input, Spin, Tooltip, message } from 'antd'
 import {
   CameraOutlined,
@@ -19,6 +20,11 @@ import rehypeKatex from 'rehype-katex'
 import { MODEL_CONFIG, type AIRole, type ModelId } from '@/data/ai-prompts'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { normalizeAIAnswer } from '@/lib/ai/normalize-answer'
+import {
+  readSensitiveSessionValue,
+  removeLegacySensitiveStorage,
+  writeSensitiveSessionValue,
+} from '@/lib/client-sensitive-storage'
 
 const { TextArea } = Input
 
@@ -143,6 +149,7 @@ interface AIChatPanelProps {
 }
 
 export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuickAskHandled }: AIChatPanelProps) {
+  const { data: session, status: sessionStatus } = useSession()
   const isMobile = useIsMobile() ?? false
   const [conversations, setConversations] = useState<Conversations>(EMPTY_CONVERSATIONS)
   const [input, setInput] = useState('')
@@ -150,9 +157,11 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
   const [modelId, setModelId] = useState<ModelId>('deepseek')
   const [attachment, setAttachment] = useState<Attachment | null>(null)
   const [extracting, setExtracting] = useState(false)
+  const [hydratedStorageKey, setHydratedStorageKey] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const storageKey = `muzhe_ai_conversations_${aiRole}`
+  const userId = session?.user?.id || ''
+  const storageKey = userId ? `muzhe_ai_conversations_${userId}_${aiRole}` : ''
   const messages = conversations[modelId] || []
   const currentModel = MODEL_CONFIG.find((model) => model.id === modelId) || MODEL_CONFIG[0]
 
@@ -168,23 +177,21 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
   }, [modelId, updateConversation])
 
   useEffect(() => {
-    const raw = localStorage.getItem(storageKey)
-    if (!raw) return
-    try {
-      const parsed = JSON.parse(raw) as Partial<Conversations>
-      setConversations({
-        deepseek: Array.isArray(parsed.deepseek) ? parsed.deepseek : [],
-        mimo: Array.isArray(parsed.mimo) ? parsed.mimo : [],
-        kimi: Array.isArray(parsed.kimi) ? parsed.kimi : [],
-      })
-    } catch {
-      // Ignore invalid old localStorage payloads.
-    }
-  }, [storageKey])
+    if (sessionStatus !== 'authenticated' || !storageKey) return
+    removeLegacySensitiveStorage()
+    const parsed = readSensitiveSessionValue<Partial<Conversations>>(storageKey, 8 * 60 * 60 * 1000)
+    setConversations({
+      deepseek: Array.isArray(parsed?.deepseek) ? parsed.deepseek : [],
+      mimo: Array.isArray(parsed?.mimo) ? parsed.mimo : [],
+      kimi: Array.isArray(parsed?.kimi) ? parsed.kimi : [],
+    })
+    setHydratedStorageKey(storageKey)
+  }, [sessionStatus, storageKey])
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(sanitizeForStorage(conversations)))
-  }, [storageKey, conversations])
+    if (!storageKey || hydratedStorageKey !== storageKey) return
+    writeSensitiveSessionValue(storageKey, sanitizeForStorage(conversations))
+  }, [storageKey, hydratedStorageKey, conversations])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

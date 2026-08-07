@@ -6,7 +6,6 @@ import { ValidationError } from '@/lib/api-validate'
 export interface DangerAuthBody {
   password: string
   confirmPhrase: string
-  expectedPhrase: string
 }
 
 export interface DangerAuthResult {
@@ -23,18 +22,17 @@ export interface DangerAuthResult {
  *
  * 绝不硬编码密码 — repo 是公开的。
  */
-export async function assertDangerAuth(body: DangerAuthBody): Promise<DangerAuthResult> {
+export async function assertDangerAuth(
+  body: DangerAuthBody,
+  expectedPhrase: string,
+): Promise<DangerAuthResult> {
   const user = await requireSuperAdmin()
 
   if (!body.password || typeof body.password !== 'string' || body.password.trim().length === 0) {
     throw new ValidationError('请输入密码')
   }
 
-  if (!body.expectedPhrase || typeof body.expectedPhrase !== 'string') {
-    throw new ValidationError('缺少确认短语')
-  }
-
-  if (body.confirmPhrase !== body.expectedPhrase) {
+  if (!expectedPhrase || body.confirmPhrase !== expectedPhrase) {
     throw new ValidationError('确认短语不匹配，请重新输入')
   }
 

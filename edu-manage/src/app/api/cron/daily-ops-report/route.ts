@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { PrismaClient } from '@prisma/client'
 import { getPrismaForDivision } from '@/lib/prisma'
 import { sendWxMessage } from '@/lib/wxpusher'
+import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +23,8 @@ async function collectDailyStats(db: PrismaClient, dayStart: Date, dayEnd: Date)
       },
       select: {
         attendanceSubmittedAt: true,
+        status: true,
+        attendances: { select: { studentId: true } },
         classroomFeedbacks: {
           where: { status: 'PUBLISHED' },
           select: { id: true },
@@ -35,7 +38,11 @@ async function collectDailyStats(db: PrismaClient, dayStart: Date, dayEnd: Date)
 
   return {
     totalLessons: lessons.length,
-    missingAttendance: lessons.filter((lesson) => !lesson.attendanceSubmittedAt).length,
+    missingAttendance: lessons.filter((lesson) => !hasSubmittedLessonAttendance({
+      attendanceSubmittedAt: lesson.attendanceSubmittedAt,
+      status: lesson.status,
+      attendances: lesson.attendances,
+    })).length,
     publishedFeedbacks,
     lessonsWithoutFeedback: lessons.filter((lesson) => lesson.classroomFeedbacks.length === 0).length,
   }

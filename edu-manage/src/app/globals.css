@@ -18,6 +18,7 @@
   --color-primary: #E8784A;
   --color-primary-hover: #f08a5f;
   --color-primary-focus: #d0683a;
+  --color-primary-bg: #fff3ec;
   --color-brand-secure: #7a7fad;
 
   /* ---- Text / Ink ---- */
@@ -39,7 +40,9 @@
 
   /* ---- Semantic ---- */
   --color-success: #1D9E75;
+  --color-success-bg: #eaf7f1;
   --color-warning: #f5a623;
+  --color-warning-text: #C77F00;
   --color-error: #E24B4A;
   --color-info: #E8784A;
   --color-overlay: #000000;
@@ -1729,6 +1732,30 @@ button:focus:not(:focus-visible) {
 .ant-modal .ant-modal-footer { margin: 0; padding: 14px 22px; border-top: 1px solid rgba(0,0,0,.06); }
 .ant-modal .ant-modal-close { top: 15px; inset-inline-end: 16px; }
 
+.site-filing-footer {
+  min-height: 44px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--color-hairline);
+  background: var(--color-canvas);
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.site-filing-footer__record {
+  color: var(--color-ink-muted);
+}
+
+.site-filing-footer__separator {
+  color: var(--color-ink-tertiary);
+}
+
 /* Mobile scroll safety: avoid stale overlay/dropdown locks trapping one-finger scroll. */
 @media (max-width: 768px) {
   html,
@@ -2260,17 +2287,184 @@ button:focus:not(:focus-visible) {
   }
 }
 
+/* ---- Teacher feedback responsive polish ---- */
+.teacher-feedback-page,
+.teacher-feedback-page * {
+  box-sizing: border-box;
+}
+
+.teacher-feedback-page,
+.teacher-feedback-workspace,
+.teacher-feedback-form,
+.teacher-feedback-page .ant-card,
+.teacher-feedback-page .ant-card-body {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.teacher-feedback-page .ant-input-textarea-show-count {
+  margin-bottom: 22px;
+}
+
+.teacher-feedback-page .ant-input-textarea-show-count .ant-input-data-count {
+  bottom: -20px;
+  inset-inline-end: 2px;
+  height: 18px;
+  color: var(--color-ink-subtle);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.teacher-feedback-page .ant-tag,
+.teacher-feedback-page .teacher-feedback-more-copy,
+.teacher-feedback-page .teacher-feedback-more-copy > span {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.teacher-feedback-page .teacher-feedback-more-copy {
+  flex: 1;
+}
+
+.teacher-feedback-page .teacher-feedback-mood-button,
+.teacher-feedback-page .teacher-feedback-ai-actions .ant-btn,
+.teacher-feedback-page .teacher-feedback-submit-bar .ant-btn {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .teacher-feedback-page {
+    width: 100%;
+    max-width: 100%;
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-x: clip;
+  }
+
+  .teacher-feedback-page > div:first-child {
+    margin-bottom: 14px !important;
+  }
+
+  .teacher-feedback-page > div:first-child h2 {
+    font-size: 20px !important;
+    line-height: 1.3;
+  }
+
+  .teacher-feedback-page .ant-card-body {
+    padding: 14px;
+  }
+
+  .teacher-feedback-page .ant-input-textarea-show-count {
+    margin-bottom: 24px;
+  }
+
+  .teacher-feedback-page .ant-input-textarea-show-count .ant-input-data-count {
+    bottom: -21px;
+    font-size: 11px !important;
+  }
+
+  .teacher-feedback-student-tools {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+  }
+
+  .teacher-feedback-student-tools .ant-btn {
+    min-width: 52px;
+    padding-inline: 8px;
+    white-space: nowrap;
+  }
+
+  .teacher-feedback-mood-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px !important;
+  }
+
+  .teacher-feedback-mood-button {
+    width: 100%;
+    justify-content: center;
+    padding-inline: 8px !important;
+    white-space: nowrap;
+  }
+
+  .teacher-feedback-ai-actions .ant-btn {
+    height: auto;
+    min-height: 42px;
+    padding: 7px 8px;
+    white-space: normal;
+    line-height: 1.35;
+  }
+
+  .teacher-feedback-submit-bar {
+    grid-template-columns: 64px minmax(82px, .9fr) minmax(126px, 1.35fr) !important;
+    gap: 7px !important;
+    margin-inline: -12px !important;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+    box-shadow: 0 -8px 24px rgba(26, 18, 1, .06);
+  }
+
+  .teacher-feedback-submit-bar .ant-btn {
+    padding-inline: 7px;
+    font-size: 13px !important;
+    white-space: nowrap;
+  }
+
+  .teacher-feedback-submit-bar .ant-btn .anticon {
+    margin-inline-end: 3px;
+  }
+}
+
+@media (max-width: 374px) {
+  .teacher-feedback-page .ant-card-body {
+    padding: 12px;
+  }
+
+  .teacher-feedback-student-tools {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .teacher-feedback-student-tools .ant-btn:last-child {
+    grid-column: 2;
+  }
+
+  .teacher-feedback-submit-bar {
+    grid-template-columns: 54px 76px minmax(118px, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .teacher-feedback-submit-bar .ant-btn {
+    padding-inline: 5px;
+    font-size: 12px !important;
+  }
+}
+
 /* ---- Mobile scroll final guard: keep this block at the very end of globals.css ---- */
 @media (max-width: 768px) {
   html,
-  body,
-  #admin-root,
-  #mobile-root,
-  .mobile-page-content {
+  body {
     overflow-y: auto !important;
     touch-action: pan-y !important;
     overscroll-behavior-y: auto !important;
     -webkit-overflow-scrolling: touch;
+  }
+
+  #admin-root,
+  #mobile-root,
+  .mobile-page-content {
+    overflow-y: visible !important;
+    touch-action: pan-y !important;
+    overscroll-behavior-y: auto !important;
+  }
+
+  .mobile-app-header {
+    position: fixed !important;
+    top: 0;
+    right: 0;
+    left: 0;
+    isolation: isolate;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   .ant-select-dropdown,

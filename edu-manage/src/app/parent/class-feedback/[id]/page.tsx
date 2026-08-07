@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import { FeedbackDetailClient } from './client'
 import { parentLinkedStudentWhere, visibleClassroomFeedbackWhere, visibleTeacherWhere } from '@/lib/business-visibility'
 import { resolveFeedbackImageVariants, variantsForFeedback } from '@/lib/file-asset-variants'
+import { redactFeedbackForParent } from '@/lib/classroom-feedback/access'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,10 +41,11 @@ export default async function FeedbackDetailPage({ params }: { params: Promise<{
 
   if (!feedback) notFound()
 
-  const imageVariantMap = await resolveFeedbackImageVariants(prisma, feedback.imageUrls)
+  const parentFeedback = redactFeedbackForParent(feedback, studentIds)
+  const imageVariantMap = await resolveFeedbackImageVariants(prisma, parentFeedback.imageUrls)
   const feedbackWithImages = {
-    ...feedback,
-    images: variantsForFeedback(feedback.imageUrls, imageVariantMap),
+    ...parentFeedback,
+    images: variantsForFeedback(parentFeedback.imageUrls, imageVariantMap),
   }
 
   return <FeedbackDetailClient feedback={JSON.parse(JSON.stringify(feedbackWithImages))} />

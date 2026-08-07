@@ -4,6 +4,8 @@ import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { calculateAttendanceDeductHours } from '@/lib/attendance-hours'
 import { triggerLessonPay } from '@/lib/teacher-salary'
+import { resolveIntensiveActualMinutes } from '@/lib/intensive-class'
+import { createIntensiveLessonPayInTransaction } from '@/lib/intensive-settlement'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,6 +44,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           },
         },
       },
+      lessonStudents: { select: { studentId: true } },
     },
   })
 
@@ -60,27 +63,54 @@ export const POST = apiHandler(async (req: NextRequest) => {
     )
   }
 
+  const isIntensive = lesson.group.intensiveMode === 'INTENSIVE'
+  if (isIntensive && lesson.settlementStatus !== 'UNSETTLED') {
+    return NextResponse.json({ error: '该突击班课次已经结算，如需修改实际分钟请使用结算调整流程' }, { status: 409 })
+  }
+  if (isIntensive && lesson.intensiveReviewStatus === 'PENDING') {
+    return NextResponse.json({ error: '教师已经提交授课审核，请在个性化课程审核区处理，不能绕过审核直接结算' }, { status: 409 })
+  }
+  const snapshotStudentIds = new Set(lesson.lessonStudents.map((item) => item.studentId))
   const enrollmentByStudentId = new Map(lesson.group.enrollments.map((enrollment) => [enrollment.studentId, enrollment]))
-  const validRecords = records.filter((record) => typeof record.studentId === 'string' && enrollmentByStudentId.has(record.studentId))
+  const validRecords = records.filter((record) => typeof record.studentId === 'string'
+    && enrollmentByStudentId.has(record.studentId)
+    && (!isIntensive || snapshotStudentIds.has(record.studentId)))
   if (validRecords.length === 0) {
     return NextResponse.json({ error: '没有有效考勤记录，请检查学生是否仍在班级中' }, { status: 400 })
   }
 
-  const alreadyDeducted = !!lesson.hoursDeductedAt || await prisma.attendance.count({
-    where: { lessonId, hoursDeducted: { gt: 0 } },
-  }) > 0
+  const alreadyDeducted = !isIntensive && (
+    !!lesson.hoursDeductedAt || await prisma.attendance.count({
+      where: { lessonId, hoursDeducted: { gt: 0 } },
+    }) > 0
+  )
   let processedCount = 0
   let deductedCount = 0
   const now = new Date()
+  const intensiveActualMinutes = isIntensive
+    ? resolveIntensiveActualMinutes(
+        lesson.plannedMinutes || lesson.group.lessonMinutes,
+        validRecords.map((record) => record.actualMinutes),
+      )
+    : null
 
-  await prisma.$transaction(async (tx) => {
+  try {
+    await prisma.$transaction(async (tx) => {
+    if (isIntensive) {
+      const claimed = await tx.classLesson.updateMany({
+        where: { id: lessonId, settlementStatus: 'UNSETTLED' },
+        data: { settlementStatus: 'SETTLED' },
+      })
+      if (claimed.count !== 1) throw new Error('INTENSIVE_SETTLEMENT_LOCKED')
+    }
+
     for (const record of validRecords) {
       const studentId = typeof record.studentId === 'string' ? record.studentId : ''
       const enrollment = enrollmentByStudentId.get(studentId)
       if (!enrollment) continue
 
       const status = normalizeStatus(record.status) as 'PRESENT' | 'LEAVE' | 'ABSENT' | 'MAKEUP'
-      const actualMinutes = Number(record.actualMinutes) || null
+      const actualMinutes = isIntensive ? intensiveActualMinutes : Number(record.actualMinutes) || null
       processedCount += 1
 
       const attendance = await tx.attendance.upsert({
@@ -100,6 +130,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           courseType: lesson.group.course.type,
           lessonMinutes: lesson.group.lessonMinutes,
           actualMinutes,
+          intensiveMode: lesson.group.intensiveMode,
         })
         if (hoursDeducted > 0 && (!attendance.hoursDeducted || attendance.hoursDeducted <= 0)) {
           const safeDeduct = Math.min(hoursDeducted, enrollment.remainHours)
@@ -134,6 +165,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
       data: {
         status: 'COMPLETED',
         attendanceSubmittedAt: now,
+        actualMinutes: isIntensive ? intensiveActualMinutes : undefined,
+        settlementStatus: isIntensive ? 'SETTLED' : undefined,
+        intensiveReviewStatus: isIntensive ? 'APPROVED' : undefined,
         hoursDeductedAt: alreadyDeducted
           ? lesson.hoursDeductedAt || now
           : deductedCount > 0
@@ -141,9 +175,53 @@ export const POST = apiHandler(async (req: NextRequest) => {
             : null,
       },
     })
-  })
 
-  if (!alreadyDeducted) {
+    if (isIntensive) {
+      const latestReview = await tx.intensiveLessonReview.findFirst({
+        where: { lessonId },
+        select: { revision: true },
+        orderBy: { revision: 'desc' },
+      })
+      const review = await tx.intensiveLessonReview.create({
+        data: {
+          lessonId,
+          revision: (latestReview?.revision || 0) + 1,
+          teacherId: lesson.teacherId || lesson.group.teacherId,
+          submittedById: user.id,
+          actualMinutes: Number(intensiveActualMinutes),
+          attendanceSnapshot: validRecords.map((record) => ({
+            studentId: record.studentId,
+            status: normalizeStatus(record.status),
+          })),
+          teacherNote: '管理员直接登记并审核',
+          status: 'APPROVED',
+          reviewedById: user.id,
+          reviewedAt: now,
+          reviewNote: '管理员直接登记并审核',
+        },
+      })
+      await createIntensiveLessonPayInTransaction(tx, lessonId)
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          teacherId: lesson.teacherId || lesson.group.teacherId,
+          action: 'INTENSIVE_ADMIN_DIRECT_APPROVE',
+          detail: `${lesson.group.name} · 管理员直接登记并审核${intensiveActualMinutes}分钟`,
+          entityType: 'IntensiveLessonReview',
+          entityId: review.id,
+          metadata: { lessonId, actualMinutes: intensiveActualMinutes },
+        },
+      })
+    }
+    })
+  } catch (error) {
+    if (error instanceof Error && error.message === 'INTENSIVE_SETTLEMENT_LOCKED') {
+      return NextResponse.json({ error: '该突击班课次已被结算，请刷新后通过结算调整流程修改' }, { status: 409 })
+    }
+    throw error
+  }
+
+  if (!isIntensive && !alreadyDeducted) {
     await triggerLessonPay(lessonId)
   }
 

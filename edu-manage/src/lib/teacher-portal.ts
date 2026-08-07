@@ -1,9 +1,11 @@
 import { redirect } from 'next/navigation'
-import { getPrismaForDivision, getRequestPrisma } from '@/lib/prisma'
+import { getRequestPrisma } from '@/lib/prisma'
 import type { Prisma, PrismaClient } from '@prisma/client'
-import { auth } from '@/lib/auth'
-import { getCurrentUser } from '@/lib/get-user'
-import { resolveTeacherForUser } from '@/lib/performance'
+import {
+  AuthError,
+  requireAdminUser as requireGuardedAdminUser,
+  requireTeacherUser,
+} from '@/lib/auth/guards'
 import { visibleClassGroupWhere, visibleClassLessonWhere, visibleStudentWhere } from '@/lib/business-visibility'
 
 export const TEACHER_LOG_ACTIONS = {
@@ -56,51 +58,38 @@ export function isAdminRole(role?: string | null) {
 }
 
 export async function getCurrentTeacher() {
-  const user = await getCurrentUser()
-  if (!user || !isTeacherRole(user.role)) return null
-  const prisma = getPrismaForDivision(user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR')
-  const teacher = await resolveTeacherForUser({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-  }, prisma)
-  if (!teacher || teacher.status === 'RESIGNED') return null
-  return { user, teacher, prisma }
+  try {
+    const user = await requireTeacherUser()
+    const teacher = await user.prisma.teacher.findUnique({ where: { id: user.teacherId } })
+    return teacher ? { user, teacher, prisma: user.prisma } : null
+  } catch (error) {
+    if (error instanceof AuthError) return null
+    throw error
+  }
 }
 
 export async function requireCurrentTeacher() {
-  const result = await getCurrentTeacher()
-  if (!result) {
-    throw new Error('TEACHER_UNAUTHORIZED')
-  }
-  return result
+  const user = await requireTeacherUser()
+  const teacher = await user.prisma.teacher.findUnique({ where: { id: user.teacherId } })
+  if (!teacher) throw new AuthError('教师档案不存在', 404)
+  return { user, teacher, prisma: user.prisma }
 }
 
 export async function requireTeacherPage() {
-  const session = await auth()
-  const role = (session?.user as { role?: string } | undefined)?.role
-  if (!session?.user || !isTeacherRole(role)) redirect('/login')
-
-  const division = (session.user as { division?: string }).division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
-  const prisma = getPrismaForDivision(division)
-  const teacher = await resolveTeacherForUser({
-    id: (session.user as { id?: string }).id || '',
-    email: session.user.email,
-    name: session.user.name,
-    role,
-  }, prisma)
-  if (!teacher || teacher.status === 'RESIGNED') redirect('/login')
-  return teacher
+  try {
+    const user = await requireTeacherUser()
+    const teacher = await user.prisma.teacher.findUnique({ where: { id: user.teacherId } })
+    if (!teacher) redirect('/login')
+    return teacher
+  } catch (error) {
+    if (error instanceof AuthError) redirect('/login')
+    throw error
+  }
 }
 
 export async function requireAdminUser() {
-  const user = await getCurrentUser()
-  if (!user || !isAdminRole(user.role)) {
-    throw new Error('ADMIN_UNAUTHORIZED')
-  }
-  const prisma = getPrismaForDivision(user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR')
-  return Object.assign(user, { user, prisma })
+  const user = await requireGuardedAdminUser()
+  return Object.assign(user, { user })
 }
 
 export async function assertTeacherOwnsStudent(teacherId: string, studentId: string, prismaClient?: PrismaClient) {

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Row, Col, Card, Tag, Typography, Button, Space } from 'antd'
-import { BellOutlined, ClockCircleOutlined, HeartOutlined, TeamOutlined, EnvironmentOutlined, IdcardOutlined, BookOutlined, BulbOutlined, FileTextOutlined, StarOutlined } from '@ant-design/icons'
+import { BellOutlined, ClockCircleOutlined, HeartOutlined, TeamOutlined, EnvironmentOutlined, IdcardOutlined, BookOutlined, BulbOutlined, FileTextOutlined, RiseOutlined, StarOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -12,6 +12,10 @@ import { TodayStatus } from '@/components/Parent/TodayStatus'
 import { WeeklyReport } from '@/components/Parent/WeeklyReport'
 import { fillName, MEMBERSHIP_SERVICE_CARD, MEMBERSHIP_THEME, MEMBERSHIP_WELCOME, resolveMembership } from '@/constants/membership'
 import { useCountUp } from '@/hooks/useCountUp'
+import { MessageWorkflowNotice } from '@/components/MessageWorkflowNotice'
+import { ParentTodayTimeline } from '@/components/Parent/ParentTodayTimeline'
+import { ParentUsageGuide } from '@/components/Parent/ParentUsageGuide'
+import { buildParentTodayTimeline } from '@/lib/dashboard-workflows'
 
 const { Title, Text } = Typography
 
@@ -40,6 +44,8 @@ const NOTIFICATION_META: Record<string, { label: string; icon: React.ReactNode; 
   EXAM_PAPER: { label: '试卷', icon: <FileTextOutlined />, color: '#185FA5', bg: '#eaf1f9' },
   PAPER_PUBLISHED: { label: '试卷', icon: <FileTextOutlined />, color: '#185FA5', bg: '#eaf1f9' },
   CLASSROOM_FEEDBACK: { label: '反馈', icon: <BookOutlined />, color: '#8892f0', bg: '#f0eeff' },
+  PARENT_MESSAGE: { label: '留言', icon: <BellOutlined />, color: '#E8784A', bg: '#fff3ec' },
+  PARENT_MESSAGE_REPLY: { label: '新回复', icon: <BellOutlined />, color: '#E8784A', bg: '#fff3ec' },
   PERFORMANCE_FEEDBACK: { label: '表现', icon: <StarOutlined />, color: '#E8784A', bg: '#fff3ec' },
   ATTENDANCE: { label: '考勤', icon: <ClockCircleOutlined />, color: '#C77F00', bg: '#fdf4e3' },
   SYSTEM: { label: '通知', icon: <BellOutlined />, color: '#5a4e3a', bg: '#f5f2ee' },
@@ -95,7 +101,7 @@ export function ParentDashboardClient({
   students, studentTeachers, todaySchedules, todayClassLessons,
   notifications, latestPost, latestClassroomFeedback,
   monthMoods, monthClassroomFeedbacks, attendanceRate, badgeCount,
-  studentStats = {}, todayAttendances = [], todayFeedbackCount = 0, todayPaperCount = 0, todayMeal = null,
+  studentStats = {}, todayAttendances = [], todayFeedbacks = [], todayFeedbackCount = 0, todayPaperCount = 0, todayMeal = null,
 }: {
   parentUserId?: string
   students: any[]
@@ -111,6 +117,7 @@ export function ParentDashboardClient({
   badgeCount: number
   studentStats?: Record<string, { attendanceRate: number; badgeCount: number; todayFeedbackCount: number; todayPaperCount: number }>
   todayAttendances?: any[]
+  todayFeedbacks?: any[]
   todayFeedbackCount?: number
   todayPaperCount?: number
   todayMeal?: any
@@ -126,6 +133,12 @@ export function ParentDashboardClient({
   const [activeChildId, setActiveChildId] = useState(childIdFromUrl || students[0]?.id || '')
   const [welcomeMounted, setWelcomeMounted] = useState(false)
   const [welcomeVisible, setWelcomeVisible] = useState(false)
+  const [deferredSectionsReady, setDeferredSectionsReady] = useState(false)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDeferredSectionsReady(true), 2_600)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     if (childIdFromUrl) setActiveChildId(childIdFromUrl)
@@ -148,8 +161,8 @@ export function ParentDashboardClient({
     setWelcomeMounted(true)
     setWelcomeVisible(false)
     const showTimer = window.setTimeout(() => setWelcomeVisible(true), 30)
-    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 3000)
-    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 3600)
+    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 1800)
+    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 2200)
     return () => {
       window.clearTimeout(showTimer)
       window.clearTimeout(fadeTimer)
@@ -158,7 +171,10 @@ export function ParentDashboardClient({
   }, [activeStudent?.id, parentUserId])
 
   const selectChild = (childId: string) => {
-    window.location.href = `/parent/dashboard?childId=${childId}`
+    setActiveChildId(childId)
+    const url = new URL(window.location.href)
+    url.searchParams.set('childId', childId)
+    window.history.replaceState(window.history.state, '', url)
   }
 
   // Build mood map
@@ -234,6 +250,15 @@ export function ParentDashboardClient({
   const activeTodayAttendances = students.length <= 1 || !activeChildId
     ? todayAttendances
     : todayAttendances.filter((attendance: any) => attendance.studentId === activeChildId)
+  const activeTodayFeedbacks = students.length <= 1 || !activeChildId
+    ? todayFeedbacks
+    : todayFeedbacks.filter((feedback: any) => feedback.studentIds?.includes(activeChildId))
+  const todayTimeline = buildParentTodayTimeline({
+    lessons: todayLessons,
+    feedbacks: activeTodayFeedbacks,
+    notifications: activeNotifications,
+    now: today,
+  })
   const completedAttendanceCount = todayLessons.filter((lesson) => lesson.attendanceSubmittedAt).length
   const pendingConfirmCount = todayLessons.filter((lesson) => getLessonStatus(lesson).text === '待老师确认').length
   const activeLesson = todayLessons.find((lesson) => getLessonStatus(lesson).text === '上课中')
@@ -294,7 +319,10 @@ export function ParentDashboardClient({
       type: '课堂反馈',
       teacherName: activeLatestClassroomFeedback.teacher?.name || '老师',
       studentName: '',
-      content: activeLatestClassroomFeedback.summary || '课堂资料已更新',
+      content: activeLatestClassroomFeedback.overallComment
+        || activeLatestClassroomFeedback.summary
+        || activeLatestClassroomFeedback.lessonContent
+        || '课堂反馈已更新',
       date: new Date(activeLatestClassroomFeedback.createdAt),
       id: activeLatestClassroomFeedback.id,
     })
@@ -304,14 +332,18 @@ export function ParentDashboardClient({
 
   return (
     <div>
+      <div style={{ marginBottom: 16 }}>
+        <MessageWorkflowNotice audience="parent" deferMs={1_400} />
+      </div>
+      <ParentUsageGuide parentUserId={parentUserId} />
       {welcomeMounted && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           padding: isMobile ? 18 : 24, pointerEvents: 'none',
           background: welcomeVisible ? 'rgba(18,60,53,.10)' : 'rgba(18,60,53,0)',
-          backdropFilter: welcomeVisible ? 'blur(6px)' : 'blur(0px)',
-          WebkitBackdropFilter: welcomeVisible ? 'blur(6px)' : 'blur(0px)',
+          backdropFilter: !isMobile && welcomeVisible ? 'blur(4px)' : 'none',
+          WebkitBackdropFilter: !isMobile && welcomeVisible ? 'blur(4px)' : 'none',
           transition: 'background .45s ease, backdrop-filter .45s ease',
         }}>
           <div style={{
@@ -487,6 +519,25 @@ export function ParentDashboardClient({
                   「每一个孩子都有花期，我们静待花开。」
                 </Text>
               </div>
+
+              {activeStudent?.id && (
+                <div style={{ marginTop: 14 }}>
+                  <Button
+                    icon={<RiseOutlined />}
+                    onClick={() => router.push(`/parent/students/${activeStudent.id}/growth-report`)}
+                    style={{
+                      minHeight: 42,
+                      width: isMobile ? '100%' : 'auto',
+                      borderColor: 'rgba(255,255,255,.65)',
+                      background: 'rgba(255,255,255,.16)',
+                      color: '#fff',
+                      fontWeight: 700,
+                    }}
+                  >
+                    查看成长档案
+                  </Button>
+                </div>
+              )}
             </Col>
 
             {!isMobile && (
@@ -535,6 +586,11 @@ export function ParentDashboardClient({
         </div>
       </div>
 
+      <ParentTodayTimeline
+        events={todayTimeline}
+        studentName={activeStudent?.name || '孩子'}
+      />
+
       {(membershipLevel === 'VIP' || membershipLevel === 'SVIP') && (() => {
         const service = MEMBERSHIP_SERVICE_CARD[membershipLevel]
         return (
@@ -566,8 +622,12 @@ export function ParentDashboardClient({
         )
       })()}
 
-      <TodayStatus activeChildId={students.length > 1 ? activeChildId : undefined} />
-      <WeeklyReport activeChildId={activeChildId} />
+      {deferredSectionsReady && (
+        <>
+          <TodayStatus activeChildId={students.length > 1 ? activeChildId : undefined} />
+          <WeeklyReport activeChildId={activeChildId} />
+        </>
+      )}
 
       <div style={{
         margin: '16px 0',

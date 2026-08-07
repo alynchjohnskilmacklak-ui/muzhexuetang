@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import { assertDangerAuth } from '@/lib/danger-guard'
-import { getPrismaForDivision, isDualDbEnabled, getRequestPrisma } from '@/lib/prisma'
+import { getPrismaForDivision, isDualDbEnabled } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { requireSuperAdmin } from '@/lib/get-user'
 import { createActivityLog } from '@/lib/data-admin/entities-server'
@@ -209,17 +209,27 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '双库未启用，禁止清理数据' }, { status: 400 })
   }
 
-  const prisma = await getRequestPrisma()
   const body = await req.json()
 
-  const auth = await assertDangerAuth(body)
-
   const division: string = body.division || 'JUNIOR'
-  const selectedCats: string[] = body.categories || []
+  const requestedCategories: unknown[] = Array.isArray(body.categories) ? body.categories : []
+  const selectedCats: string[] = [
+    ...new Set(requestedCategories.filter((value): value is string => typeof value === 'string')),
+  ]
 
   if (selectedCats.length === 0) {
     return NextResponse.json({ error: '请至少选择一个清理类别' }, { status: 400 })
   }
+  if (!['JUNIOR', 'SENIOR', 'BOTH'].includes(division)) {
+    return NextResponse.json({ error: '无效清理范围' }, { status: 400 })
+  }
+  if (selectedCats.some((key) => !CLEANUP_CATEGORIES[key])) {
+    return NextResponse.json({ error: '包含无效清理类别' }, { status: 400 })
+  }
+
+  const scope = division === 'BOTH' ? '全部' : division === 'SENIOR' ? '高中部' : '初中部'
+  const categoryNames = selectedCats.map((key) => CLEANUP_CATEGORIES[key].label).join('、')
+  const auth = await assertDangerAuth(body, `清空${scope}的${categoryNames}`)
 
   const divisions: Division[] =
     division === 'BOTH' ? ['JUNIOR', 'SENIOR'] : [division as Division]

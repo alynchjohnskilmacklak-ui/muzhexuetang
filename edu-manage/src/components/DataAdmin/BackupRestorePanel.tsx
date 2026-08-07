@@ -94,7 +94,7 @@ export default function BackupRestorePanel() {
       const res = await fetch('/api/admin/data-admin/backup', { method: 'POST' })
       const data = await res.json()
       if (res.ok && data.success) {
-        message.success(`备份完成：${data.path}`)
+        message.success(`备份完成：${data.backupId}`)
         refreshHistory()
       } else {
         message.error(data.error || '备份失败')
@@ -127,9 +127,8 @@ export default function BackupRestorePanel() {
             body: JSON.stringify({
               password: restorePassword,
               confirmPhrase: restoreConfirm,
-              expectedPhrase: CONFIRM_PHRASES.restore,
-              backupFile: selectedBackup,
-              targetDivision: restoreDivision === 'BOTH' ? undefined : restoreDivision,
+              backupId: selectedBackup,
+              targetDivision: restoreDivision,
             }),
           })
           const data = await res.json()
@@ -178,7 +177,6 @@ export default function BackupRestorePanel() {
             body: JSON.stringify({
               password: resetPassword,
               confirmPhrase: resetConfirm,
-              expectedPhrase: expectedResetPhrase,
               division: resetDivision,
               categories: selectedCats,
             }),
@@ -210,7 +208,6 @@ export default function BackupRestorePanel() {
   const historyCols = [
     { title: '名称', dataIndex: 'name', key: 'name', ellipsis: true },
     { title: '时间', dataIndex: 'timestamp', key: 'timestamp', render: (v: string) => new Date(v).toLocaleString('zh-CN') },
-    { title: '路径', dataIndex: 'path', key: 'path', ellipsis: true },
   ]
 
   return (
@@ -274,7 +271,7 @@ export default function BackupRestorePanel() {
               placeholder="选择要恢复的备份"
               value={selectedBackup}
               onChange={setSelectedBackup}
-              options={history.map((h: { name: string; path: string }) => ({ label: h.name, value: h.path }))}
+              options={history.map((h: { id: string; name: string }) => ({ label: h.name, value: h.id }))}
             />
           </div>
 

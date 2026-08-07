@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { Badge, Button, Empty, Input, Select, Tag, Typography } from 'antd'
 import {
   CheckCircleOutlined, SendOutlined, SearchOutlined,
-  MessageOutlined, UserOutlined,
+  BellOutlined, MessageOutlined, UserOutlined,
 } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { usePausableSWR } from '@/lib/use-pausable-swr'
@@ -21,16 +21,47 @@ const ADMIN = '#534AB7'
 const PARENT = '#E8784A'
 const TEACHER = '#1D9E75'
 
-type Reply = { id: string; authorName: string; role: string; content: string; isReadByTeacher: boolean; createdAt: string }
+type Reply = {
+  id: string
+  authorName: string
+  role: string
+  content: string
+  isReadByTeacher: boolean
+  isReadByParent: boolean
+  createdAt: string
+}
 type Message = {
   id: string; title: string; subject: string | null; status: string
   parent: { id: string; name: string }
   teacher: { id: string; name: string } | null
   student: { id: string; name: string } | null
   replies: Reply[]; updatedAt: string
+  workflow?: {
+    pendingTeacherReply: boolean
+    pendingParentRead: boolean
+    unreadForTeacher: number
+    unreadForParent: number
+    waitingMinutes: number
+    overdue: boolean
+    parentMessageViewedByTeacher: boolean
+    staffReplyViewedByParent: boolean
+    parentFollowUpCount: number
+  }
+  reminder?: { count: number; lastRemindedAt: string | null }
 }
 
 const unreadCount = (m: Message) => m.replies.filter(r => !r.isReadByTeacher && r.role === 'parent').length
+const isPendingTeacherReply = (m: Message) => m.workflow?.pendingTeacherReply ?? (
+  m.status !== 'CLOSED' && m.replies[m.replies.length - 1]?.role === 'parent'
+)
+const isPendingParentRead = (m: Message) => m.workflow?.pendingParentRead ?? (
+  m.replies.some((reply) => reply.role !== 'parent' && !reply.isReadByParent)
+)
+const formatWaitingTime = (minutes = 0) => {
+  if (minutes < 60) return `等待 ${Math.max(1, minutes)} 分钟`
+  if (minutes < 24 * 60) return `等待 ${Math.floor(minutes / 60)} 小时`
+  return `等待 ${Math.floor(minutes / 1440)} 天`
+}
 
 function ChatBubble({ reply }: { reply: Reply }) {
   const isParent = reply.role === 'parent'
@@ -53,6 +84,16 @@ function ChatBubble({ reply }: { reply: Reply }) {
           padding: '10px 14px', fontSize: 14, lineHeight: 1.6,
           boxShadow: '0 2px 8px rgba(0,0,0,.05)', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
         }}>{reply.content}</div>
+        <div style={{
+          marginTop: 4,
+          fontSize: 10,
+          color: '#9A8E7A',
+          textAlign: isParent ? 'left' : 'right',
+        }}>
+          {isParent
+            ? (reply.isReadByTeacher ? '教师已查看' : '教师未查看')
+            : (reply.isReadByParent ? '家长已查看' : '家长未查看')}
+        </div>
       </div>
     </div>
   )
@@ -79,9 +120,31 @@ function ConversationItem({ msg, onClick, active }: { msg: Message; onClick: () 
       </div>
       <Text style={{ fontSize: 13, color: '#3a3320', display: 'block', marginBottom: 4 }} ellipsis>{msg.title}</Text>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+        {isPendingTeacherReply(msg) && (
+          <Tag style={{
+            margin: 0,
+            fontSize: 10,
+            borderRadius: 9999,
+            background: msg.workflow?.overdue ? '#FDECEC' : '#FFF4DE',
+            color: msg.workflow?.overdue ? '#E24B4A' : '#C77F00',
+            border: 'none',
+          }}>
+            {formatWaitingTime(msg.workflow?.waitingMinutes)}
+          </Tag>
+        )}
+        {isPendingParentRead(msg) && (
+          <Tag style={{ margin: 0, fontSize: 10, borderRadius: 9999, background: '#FFF6F1', color: PARENT, border: 'none' }}>
+            待家长查看
+          </Tag>
+        )}
         {msg.teacher && <Tag style={{ margin: 0, fontSize: 10, borderRadius: 9999, background: '#F0F9F5', color: TEACHER, border: 'none' }}>{msg.teacher.name}</Tag>}
         {msg.subject && sc && <Tag style={{ margin: 0, fontSize: 10, borderRadius: 9999, background: sc.bg, color: sc.color, border: 'none' }}>{msg.subject}</Tag>}
         {msg.student && <Tag style={{ margin: 0, fontSize: 10, borderRadius: 9999, background: '#f5f2ee', color: '#8a7e6a', border: 'none' }}>{msg.student.name}</Tag>}
+        {!!msg.reminder?.count && (
+          <Tag style={{ margin: 0, fontSize: 10, borderRadius: 9999, background: '#F4F3FE', color: ADMIN, border: 'none' }}>
+            已督促 {msg.reminder.count} 次
+          </Tag>
+        )}
         <span style={{ marginLeft: 'auto', fontSize: 11, color: '#bbb' }}>
           {formatDistanceToNow(new Date(msg.updatedAt), { addSuffix: true, locale: zhCN })}
         </span>
@@ -94,17 +157,23 @@ function ConversationItem({ msg, onClick, active }: { msg: Message; onClick: () 
 export function AdminMessagesClient() {
   const isMobile = useIsMobile() ?? false
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [filter, setFilter] = useState<'ALL' | 'OPEN' | 'CLOSED'>('ALL')
+  const [filter, setFilter] = useState<'ALL' | 'PENDING_TEACHER' | 'PENDING_PARENT' | 'CLOSED'>('ALL')
   const [teacherFilter, setTeacherFilter] = useState('')
   const [search, setSearch] = useState('')
   const [replyText, setReplyText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [closing, setClosing] = useState(false)
+  const [reminding, setReminding] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const { data, mutate } = usePausableSWR('/api/messages', fetcher, {
-    refreshInterval: 15_000, revalidateOnFocus: true, revalidateOnReconnect: true,
+    refreshInterval: 5_000, revalidateOnFocus: true, revalidateOnReconnect: true,
   })
+  const { data: workflowSummary, mutate: mutateWorkflowSummary } = usePausableSWR(
+    '/api/messages/unread-count',
+    fetcher,
+    { refreshInterval: 5_000, revalidateOnFocus: true, revalidateOnReconnect: true },
+  )
   const allMessages: Message[] = data?.messages || []
 
   const teacherOptions = useMemo(() => {
@@ -114,20 +183,78 @@ export function AdminMessagesClient() {
   }, [allMessages])
 
   const stats = useMemo(() => ({
-    total: allMessages.length,
-    open: allMessages.filter(m => m.status !== 'CLOSED').length,
-    unread: allMessages.reduce((s, m) => s + unreadCount(m), 0),
-  }), [allMessages])
+    total: Number(data?.total ?? allMessages.length),
+    pendingTeacher: Number(
+      workflowSummary?.pendingTeacherReplies
+      ?? allMessages.filter(isPendingTeacherReply).length,
+    ),
+    pendingParent: Number(
+      workflowSummary?.pendingParentReads
+      ?? allMessages.filter(isPendingParentRead).length,
+    ),
+    overdue: Number(
+      workflowSummary?.overdueTeacherReplies
+      ?? allMessages.filter(message => message.workflow?.overdue).length,
+    ),
+  }), [allMessages, data?.total, workflowSummary])
+
+  const serviceMetrics = useMemo(() => {
+    const responseMinutes: number[] = []
+    let parentFollowUps = 0
+    const pendingByTeacher = new Map<string, { name: string; count: number }>()
+
+    allMessages.forEach((message) => {
+      parentFollowUps += message.workflow?.parentFollowUpCount || 0
+      if (isPendingTeacherReply(message) && message.teacher) {
+        const current = pendingByTeacher.get(message.teacher.id)
+        pendingByTeacher.set(message.teacher.id, {
+          name: message.teacher.name,
+          count: (current?.count || 0) + 1,
+        })
+      }
+      message.replies.forEach((reply, index) => {
+        if (reply.role !== 'parent') return
+        const replyAt = new Date(reply.createdAt).getTime()
+        const staffReply = message.replies
+          .slice(index + 1)
+          .find(candidate => candidate.role === 'teacher')
+        if (staffReply) {
+          responseMinutes.push(Math.max(0, (new Date(staffReply.createdAt).getTime() - replyAt) / 60_000))
+        }
+      })
+    })
+
+    const averageMinutes = responseMinutes.length
+      ? Math.round(responseMinutes.reduce((sum, value) => sum + value, 0) / responseMinutes.length)
+      : 0
+    const within24Hours = responseMinutes.filter(value => value <= 24 * 60).length
+    return {
+      averageMinutes: Number(workflowSummary?.averageReplyMinutes ?? averageMinutes),
+      replyRate24h: Number(workflowSummary?.replyRate24h ?? (
+        responseMinutes.length ? Math.round(within24Hours / responseMinutes.length * 100) : 100
+      )),
+      parentFollowUps: Number(workflowSummary?.parentFollowUps ?? parentFollowUps),
+      pendingByTeacher: Array.isArray(workflowSummary?.pendingByTeacher)
+        ? workflowSummary.pendingByTeacher
+        : [...pendingByTeacher.values()].sort((a, b) => b.count - a.count),
+    }
+  }, [allMessages, workflowSummary])
 
   const messages = useMemo(() => {
     const kw = search.trim()
     return allMessages
-      .filter(m => filter === 'ALL' || (filter === 'OPEN' ? m.status !== 'CLOSED' : m.status === 'CLOSED'))
+      .filter(m => (
+        filter === 'ALL'
+        || (filter === 'PENDING_TEACHER' && isPendingTeacherReply(m))
+        || (filter === 'PENDING_PARENT' && isPendingParentRead(m))
+        || (filter === 'CLOSED' && m.status === 'CLOSED')
+      ))
       .filter(m => !teacherFilter || m.teacher?.id === teacherFilter)
       .filter(m => !kw || `${m.title} ${m.parent.name} ${m.teacher?.name || ''} ${m.student?.name || ''} ${m.subject || ''}`.includes(kw) || m.replies.some(r => r.content.includes(kw)))
       .sort((a, b) => {
-        const ua = unreadCount(a), ub = unreadCount(b)
-        if (ua !== ub) return ub - ua
+        const pa = isPendingTeacherReply(a) ? 1 : 0
+        const pb = isPendingTeacherReply(b) ? 1 : 0
+        if (pa !== pb) return pb - pa
         return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
       })
   }, [allMessages, filter, teacherFilter, search])
@@ -149,7 +276,10 @@ export function AdminMessagesClient() {
         body: JSON.stringify({ content: replyText.trim() }),
       })
       if (!res.ok) { toast.error('发送失败'); return }
-      setReplyText(''); mutate()
+      setReplyText('')
+      toast.success('回复已发送，家长端将显示新回复提示')
+      mutate()
+      mutateWorkflowSummary()
     } catch { toast.error('网络错误') } finally { setSubmitting(false) }
   }
 
@@ -165,18 +295,78 @@ export function AdminMessagesClient() {
     } catch { toast.error('操作失败') } finally { setClosing(false) }
   }
 
+  const handleRemindTeacher = async () => {
+    if (!activeId) return
+    setReminding(true)
+    try {
+      const res = await fetch(`/api/messages/${activeId}/remind`, { method: 'POST' })
+      const result = await res.json()
+      if (!res.ok) {
+        toast.error(result.error || '提醒失败')
+        return
+      }
+      toast.success(result.reminded ? '已提醒教师及时回复' : result.message)
+    } catch {
+      toast.error('网络错误，请稍后重试')
+    } finally {
+      setReminding(false)
+    }
+  }
+
   const statCards = (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 14 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,minmax(0,1fr))' : 'repeat(4,minmax(0,1fr))', gap: 10, marginBottom: 14 }}>
       {[
         { label: '沟通总数', value: stats.total, color: ADMIN, bg: '#F4F3FE' },
-        { label: '进行中', value: stats.open, color: PARENT, bg: '#FFF6F1' },
-        { label: '待处理', value: stats.unread, color: '#E24B4A', bg: '#FDECEC' },
+        { label: '待教师回复', value: stats.pendingTeacher, color: '#E24B4A', bg: '#FDECEC' },
+        { label: '待家长查看', value: stats.pendingParent, color: PARENT, bg: '#FFF6F1' },
+        { label: '超时未回复', value: stats.overdue, color: '#C0392B', bg: '#FFF0EE' },
       ].map(c => (
         <div key={c.label} style={{ background: c.bg, borderRadius: 12, padding: '10px 14px' }}>
           <div style={{ fontSize: 11, color: '#98A2B3', marginBottom: 2 }}>{c.label}</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: c.color }}>{c.value}</div>
         </div>
       ))}
+    </div>
+  )
+
+  const servicePanel = (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: isMobile ? 'repeat(2,minmax(0,1fr))' : 'repeat(3,minmax(0,1fr))',
+      gap: 10,
+      marginBottom: 14,
+      padding: 12,
+      borderRadius: 14,
+      border: '1px solid rgba(0,0,0,.06)',
+      background: '#fff',
+    }}>
+      <div>
+        <Text type="secondary" style={{ fontSize: 11 }}>平均回复时间</Text>
+        <div style={{ marginTop: 3, fontSize: 17, fontWeight: 750, color: '#1A1201' }}>
+          {formatWaitingTime(serviceMetrics.averageMinutes).replace('等待 ', '')}
+        </div>
+      </div>
+      <div>
+        <Text type="secondary" style={{ fontSize: 11 }}>24小时回复率</Text>
+        <div style={{ marginTop: 3, fontSize: 17, fontWeight: 750, color: TEACHER }}>
+          {serviceMetrics.replyRate24h}%
+        </div>
+      </div>
+      <div>
+        <Text type="secondary" style={{ fontSize: 11 }}>家长重复追问</Text>
+        <div style={{ marginTop: 3, fontSize: 17, fontWeight: 750, color: PARENT }}>
+          {serviceMetrics.parentFollowUps} 次
+        </div>
+      </div>
+      {serviceMetrics.pendingByTeacher.length > 0 && (
+        <div style={{ gridColumn: '1 / -1', display: 'flex', flexWrap: 'wrap', gap: 6, paddingTop: 4 }}>
+          {serviceMetrics.pendingByTeacher.slice(0, 8).map((item: { name: string; count: number }) => (
+            <Tag key={item.name} style={{ margin: 0, borderRadius: 9999, border: 0, background: '#FFF4DE', color: '#8A5B00' }}>
+              {item.name}待回复 {item.count}
+            </Tag>
+          ))}
+        </div>
+      )}
     </div>
   )
 
@@ -188,8 +378,13 @@ export function AdminMessagesClient() {
       <Select allowClear placeholder="按老师" value={teacherFilter || undefined}
         onChange={v => setTeacherFilter(v || '')} options={teacherOptions} style={{ width: 130 }}
         showSearch filterOption={(i, o) => String(o?.label || '').includes(i)} />
-      <Select value={filter} onChange={v => setFilter(v)} style={{ width: 110 }}
-        options={[{ value: 'ALL', label: '全部状态' }, { value: 'OPEN', label: '进行中' }, { value: 'CLOSED', label: '已关闭' }]} />
+      <Select value={filter} onChange={v => setFilter(v)} style={{ width: 130 }}
+        options={[
+          { value: 'ALL', label: '全部状态' },
+          { value: 'PENDING_TEACHER', label: '待教师回复' },
+          { value: 'PENDING_PARENT', label: '待家长查看' },
+          { value: 'CLOSED', label: '已关闭' },
+        ]} />
     </div>
   )
 
@@ -218,6 +413,17 @@ export function AdminMessagesClient() {
           <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(0,0,0,.07)', background: '#fff', flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Text strong style={{ fontSize: 15, flex: 1 }}>{active.title}</Text>
+              {active.teacher && isPendingTeacherReply(active) && active.status !== 'CLOSED' && (
+                <Button
+                  size="small"
+                  icon={<BellOutlined />}
+                  onClick={handleRemindTeacher}
+                  loading={reminding}
+                  style={{ borderRadius: 8, fontSize: 12, color: '#E24B4A', borderColor: '#F2B8B5' }}
+                >
+                  督促教师
+                </Button>
+              )}
               {active.status !== 'CLOSED' && <Button size="small" onClick={handleClose} loading={closing} style={{ borderRadius: 8, fontSize: 12 }}>关闭会话</Button>}
             </div>
             <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
@@ -257,6 +463,7 @@ export function AdminMessagesClient() {
         {!activeId ? (
           <>
             {statCards}
+            {servicePanel}
             {filterBar}
             <div style={{ background: '#fff', borderRadius: 14, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden' }}>
               {conversationList}
@@ -281,12 +488,13 @@ export function AdminMessagesClient() {
         <Text type="secondary" style={{ fontSize: 13 }}>查看全部教师与家长的留言往来，可随时以管理员身份介入</Text>
       </div>
       {statCards}
+      {servicePanel}
       <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 16, height: 'calc(100vh - 260px)', minHeight: 480 }}>
         <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '14px 14px 0' }}>{filterBar}</div>
           <div style={{ padding: '0 14px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(0,0,0,.06)' }}>
             <Text strong style={{ fontSize: 13, color: '#5a4e3a' }}>会话列表（{messages.length}）</Text>
-            {stats.unread > 0 && <Badge count={stats.unread} size="small" />}
+            {stats.pendingTeacher > 0 && <Badge count={stats.pendingTeacher} size="small" />}
           </div>
           {conversationList}
         </div>

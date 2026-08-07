@@ -1,25 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getRequestPrisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { requireAuthenticatedUser } from '@/lib/auth/guards'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
+import { getPasswordPolicyError } from '@/lib/password-policy'
 
 export const dynamic = 'force-dynamic'
 
 export const POST = apiHandler(async (req: NextRequest) => {
-  const user = await getCurrentUser()
-  if (!user) return NextResponse.json({ error: '请先登录' }, { status: 401 })
-
-
-  const prisma = await getRequestPrisma()
+  const user = await requireAuthenticatedUser()
+  const prisma = user.prisma
   const body = await req.json()
   const oldPassword = typeof body.oldPassword === 'string' ? body.oldPassword.trim() : ''
-  const newPassword = typeof body.newPassword === 'string' ? body.newPassword.trim() : ''
+  const newPassword = typeof body.newPassword === 'string' ? body.newPassword : ''
 
   if (!oldPassword) return NextResponse.json({ error: '请输入当前密码' }, { status: 400 })
   if (!newPassword) return NextResponse.json({ error: '请输入新密码' }, { status: 400 })
-  if (newPassword.length < 6) return NextResponse.json({ error: '新密码至少6位' }, { status: 400 })
-  if (newPassword.length > 50) return NextResponse.json({ error: '新密码不能超过50位' }, { status: 400 })
+  const policyError = getPasswordPolicyError(newPassword)
+  if (policyError) return NextResponse.json({ error: policyError }, { status: 400 })
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
@@ -35,10 +33,22 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!valid) return NextResponse.json({ error: '当前密码不正确' }, { status: 400 })
 
   const hashed = await bcrypt.hash(newPassword, 12)
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { password: hashed },
-  })
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashed, currentSessionToken: crypto.randomUUID() },
+    }),
+    prisma.activityLog.create({
+      data: {
+        userId: user.id,
+        action: 'PASSWORD_CHANGED_SELF',
+        detail: '用户自行修改密码并撤销旧登录状态',
+        entityType: 'User',
+        entityId: user.id,
+        metadata: { source: 'SELF_SERVICE' },
+      },
+    }),
+  ])
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, sessionRevoked: true })
 })

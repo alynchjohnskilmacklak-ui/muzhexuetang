@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation'
 import { getRequestPrisma } from '@/lib/prisma'
 import { requireTeacherPage } from '@/lib/teacher-portal'
 import { fmtDate } from '@/lib/format-date'
-import { formatDeducted, formatRemaining } from '@/lib/lesson-units'
+import { formatDeducted } from '@/lib/lesson-units'
+import { calculateApprovedIntensiveHours, calculateTaughtHours } from '@/lib/student-taught-hours'
 
 export default async function TeacherStudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const teacher = await requireTeacherPage()
@@ -65,18 +66,37 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
   })
   if (!student) notFound()
 
-  const remainHours = student.enrollments.reduce((sum, enrollment) => sum + Number(enrollment.remainHours || 0), 0)
-  const totalHours = student.enrollments.reduce((sum, enrollment) => sum + Number(enrollment.totalHours || 0), 0)
+  const approvedIntensiveAttendances = await db.attendance.findMany({
+    where: {
+      studentId: student.id,
+      lesson: {
+        intensiveReviewStatus: 'APPROVED',
+        group: { intensiveMode: 'INTENSIVE' },
+        OR: [
+          { teacherId: teacher.id },
+          {
+            teacherId: null,
+            group: {
+              OR: [
+                { teacherId: teacher.id },
+                { teacherAssignments: { some: { teacherId: teacher.id } } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    select: {
+      status: true,
+      actualMinutes: true,
+      lesson: { select: { actualMinutes: true } },
+    },
+  })
+  const taughtHours = calculateTaughtHours(
+    student.enrollments,
+    calculateApprovedIntensiveHours(approvedIntensiveAttendances),
+  )
   const courseNames = [...new Set(student.enrollments.map((enrollment) => enrollment.group.course.name))]
-  const firstEnrollment = student.enrollments[0]
-  const firstCourseType = firstEnrollment?.group.course.type || null
-  const firstLessonMinutes = Number(firstEnrollment?.group.lessonMinutes || 40)
-  const remainText = firstEnrollment
-    ? `${formatRemaining(Number(firstEnrollment.remainHours || 0), firstCourseType, firstLessonMinutes).text}${student.enrollments.length > 1 ? ` +${student.enrollments.length - 1}门` : ''}`
-    : formatRemaining(remainHours, null, 40).text
-  const totalText = firstEnrollment
-    ? `${formatRemaining(Number(firstEnrollment.totalHours || 0), firstCourseType, firstLessonMinutes).text}${student.enrollments.length > 1 ? ` +${student.enrollments.length - 1}门` : ''}`
-    : formatRemaining(totalHours, null, 40).text
 
   return (
     <div style={{ padding: '0 0 32px' }}>
@@ -99,8 +119,8 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
 
       <div style={{ background: '#fff', border: '1px solid #EEE7E1', borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 14 }}>
-          <MetricCell label="课程余额" value={remainText} color={remainHours <= 2 ? '#D4537E' : remainHours <= 10 ? '#f5a623' : '#1F2329'} />
-          <MetricCell label="课程总量" value={totalText} />
+          <MetricCell label="累计已上" value={`${taughtHours.toFixed(1)}小时`} color="#E8784A" />
+          <MetricCell label="考勤记录" value={`${student.attendances.length}条`} />
           <MetricCell
             label="状态"
             value={

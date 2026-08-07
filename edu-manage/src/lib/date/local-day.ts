@@ -74,6 +74,28 @@ export function todayLocal(timezone = DEFAULT_TIMEZONE): string {
   return `${y}-${m}-${d}`
 }
 
+/** 将任意时刻转换为指定时区下的本地日期 YYYY-MM-DD。 */
+export function localDateKey(input: Date | string = new Date(), timezone = DEFAULT_TIMEZONE): string {
+  const date = input instanceof Date ? input : new Date(input)
+  if (isNaN(date.getTime())) throw new Error('Invalid date input')
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+  const parts = fmt.formatToParts(date)
+  const y = parts.find(p => p.type === 'year')!.value
+  const m = parts.find(p => p.type === 'month')!.value
+  const d = parts.find(p => p.type === 'day')!.value
+  return `${y}-${m}-${d}`
+}
+
+/** Prisma 的 PostgreSQL DATE 字段使用 UTC 零点承载纯日期值。 */
+export function localDateColumnValue(input: Date | string = new Date(), timezone = DEFAULT_TIMEZONE): Date {
+  return new Date(`${localDateKey(input, timezone)}T00:00:00.000Z`)
+}
+
 /** 返回从 startDate 开始连续 n 天的日期字符串数组 */
 export function dateRangeDays(startDate: string, count: number): string[] {
   const start = new Date(`${startDate}T00:00:00+08:00`)

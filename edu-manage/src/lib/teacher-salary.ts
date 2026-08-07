@@ -1,6 +1,8 @@
 import * as Sentry from '@sentry/nextjs'
 import { getRequestPrisma } from '@/lib/prisma'
 import type { Prisma, PrismaClient } from '@prisma/client'
+import { INTENSIVE_FEEDBACK_RATE, shouldGenerateIntensiveLessonPay } from '@/lib/intensive-class'
+import { getLocalDayRange, localDateColumnValue, localDateKey } from '@/lib/date/local-day'
 
 function isUniqueConstraintError(error: unknown): error is { code: 'P2002' } {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002'
@@ -127,7 +129,7 @@ export async function triggerLessonPay(
     const prisma = prismaClient ?? await getRequestPrisma()
     const lesson = await prisma.classLesson.findUnique({
       where: { id: lessonId },
-      include: { group: { include: { course: true } } },
+      include: { group: { include: { course: true } }, attendances: { select: { status: true } } },
     })
     const teacherId = lesson?.teacherId || lesson?.group.teacherId
     if (!lesson || !teacherId) return { success: false, error: '课次或教师不存在' }
@@ -139,16 +141,26 @@ export async function triggerLessonPay(
       })
       if (existing) return { success: true }
 
+      const isIntensive = lesson.group.intensiveMode === 'INTENSIVE'
+      if (isIntensive && (
+        lesson.status !== 'COMPLETED'
+        || lesson.intensiveReviewStatus !== 'APPROVED'
+        || !shouldGenerateIntensiveLessonPay(lesson.attendances.map((attendance) => attendance.status), lesson.actualMinutes)
+      )) {
+        return { success: true, skipped: true }
+      }
+
       const cfg = await getTeacherSalaryConfig(teacherId, tx)
       const grade = inferGrade(lesson.group.course.grade, lesson.group.name, lesson.group.course.name)
+      const salaryMinutes = isIntensive ? Number(lesson.actualMinutes || 0) : lesson.group.lessonMinutes
       const amount = calcLessonPay({
-        courseType: lesson.group.course.type, grade,
-        lessonMinutes: lesson.group.lessonMinutes,
+        courseType: isIntensive ? 'ONE_ON_ONE' : lesson.group.course.type, grade,
+        lessonMinutes: salaryMinutes,
         groupRateJunior: cfg.groupRateJunior, groupRateSenior: cfg.groupRateSenior,
         oneOnOneRates: cfg.oneOnOneRates,
       })
 
-      const rateLabel = lesson.group.course.type === 'ONE_ON_ONE'
+      const rateLabel = isIntensive || lesson.group.course.type === 'ONE_ON_ONE'
         ? `${cfg.oneOnOneRates[grade || ''] ?? 25}元/小时`
         : `${isSeniorGrade(grade) ? cfg.groupRateSenior : cfg.groupRateJunior}元/小时`
 
@@ -156,7 +168,7 @@ export async function triggerLessonPay(
         data: {
           teacherId, type: 'LESSON_PAY', amount, lessonId,
           lessonDate: lesson.lessonDate,
-          description: `${lesson.group.name}（${lesson.group.lessonMinutes}分钟 x ${rateLabel}）`,
+          description: `${lesson.group.name}（${salaryMinutes}分钟 x ${rateLabel}）`,
         },
       })
       await tx.activityLog.create({
@@ -166,7 +178,7 @@ export async function triggerLessonPay(
           entityType: 'TeacherSalaryTransaction',
           entityId: salaryTx.id,
           detail: `课时费 ¥${amount}：${lesson.group.name}`,
-          metadata: { lessonId, amount, lessonDate: lesson.lessonDate, courseType: lesson.group.course.type },
+          metadata: { lessonId, amount, lessonDate: lesson.lessonDate, courseType: lesson.group.course.type, intensiveMode: lesson.group.intensiveMode, actualMinutes: lesson.actualMinutes },
         },
       })
       return { success: true }
@@ -193,6 +205,7 @@ export type FeedbackBonusPreview = {
   courseLabel: string
   subjectKey: string
   subjectLabel: string
+  rewardDate: string
   rewardLedgerAvailable: boolean
   label: string
   rate: number
@@ -229,8 +242,9 @@ export function toFeedbackCourseBucket(value: unknown): FeedbackCourseBucket {
 
 export function resolveFeedbackCourseBucket(feedback: {
   feedbackCourseType?: string | null
-  classLesson?: { group?: { course?: { type?: string | null } | null } | null } | null
+  classLesson?: { group?: { intensiveMode?: string | null; course?: { type?: string | null } | null } | null } | null
 }): FeedbackCourseBucket {
+  if (feedback.classLesson?.group?.intensiveMode === 'INTENSIVE') return 'ONE_ON_ONE'
   const lessonCourseType = feedback.classLesson?.group?.course?.type
   if (lessonCourseType === 'ONE_ON_ONE') return 'ONE_ON_ONE'
   if (lessonCourseType) return 'GROUP'
@@ -244,6 +258,8 @@ type FeedbackRewardContext = {
   subjectKey: string
   subjectLabel: string
 }
+
+type ResolvedFeedbackRewardContext = FeedbackRewardContext & { isIntensive: boolean }
 
 type FeedbackRewardModel = {
   findMany(args: unknown): Promise<Array<{ studentId: string }>>
@@ -280,13 +296,23 @@ export function normalizeFeedbackSubjectKey(division: string | null | undefined,
   return `${divisionKey}_${subjectToken}`
 }
 
+function isCompositeSubjectLabel(subject: string | null | undefined) {
+  return Boolean(subject && /[、,，/|]/.test(subject))
+}
+
+function resolveSpecificFeedbackSubject(...subjects: Array<string | null | undefined>) {
+  return subjects
+    .map((subject) => subject?.trim())
+    .find((subject): subject is string => Boolean(subject && !isCompositeSubjectLabel(subject)))
+}
+
 export function rewardContextFromCourse(
   course: { id?: string | null; name?: string | null; subject?: string | null; type?: string | null; division?: string | null } | null | undefined,
   fallbackType?: string | null,
-  override?: { subject?: string | null; division?: string | null },
+  override?: { subject?: string | null; division?: string | null; courseBucket?: FeedbackCourseBucket },
 ): FeedbackRewardContext {
-  const courseBucket = toFeedbackCourseBucket(course?.type || fallbackType)
-  const subjectLabel = override?.subject?.trim() || course?.subject?.trim() || '未分类'
+  const courseBucket = override?.courseBucket || toFeedbackCourseBucket(course?.type || fallbackType)
+  const subjectLabel = resolveSpecificFeedbackSubject(override?.subject, course?.subject) || '未分类'
   const subjectKey = normalizeFeedbackSubjectKey(override?.division || course?.division, subjectLabel)
   const courseKey = course?.id ? `course:${course.id}` : subjectLabel !== '未分类' ? `subject:${subjectLabel.toLowerCase()}` : `type:${courseBucket}`
   return {
@@ -304,7 +330,7 @@ async function resolveFeedbackRewardContext(opts: {
   feedbackCourseType?: string | null
   teacherId: string
   prismaClient: PrismaClient | Prisma.TransactionClient
-}): Promise<FeedbackRewardContext> {
+}): Promise<ResolvedFeedbackRewardContext> {
   const prisma = opts.prismaClient
   if (opts.lessonId) {
     const lesson = await prisma.classLesson.findUnique({
@@ -315,6 +341,7 @@ async function resolveFeedbackRewardContext(opts: {
         group: {
           select: {
             division: true,
+            intensiveMode: true,
             course: { select: { id: true, name: true, subject: true, type: true, division: true } },
             teacherAssignments: { where: { teacherId: opts.teacherId }, select: { subject: true }, take: 1 },
           },
@@ -322,11 +349,17 @@ async function resolveFeedbackRewardContext(opts: {
       },
     })
     if (lesson?.group?.course) {
-      const subject = lesson.subject?.trim() || lesson.group.course.subject?.trim() || lesson.group.teacherAssignments[0]?.subject?.trim()
-      return rewardContextFromCourse(lesson.group.course, opts.feedbackCourseType, {
+      const subject = resolveSpecificFeedbackSubject(
+        lesson.subject,
+        lesson.group.teacherAssignments[0]?.subject,
+        lesson.group.course.subject,
+      )
+      const isIntensive = lesson.group.intensiveMode === 'INTENSIVE'
+      return { ...rewardContextFromCourse(lesson.group.course, opts.feedbackCourseType, {
         subject,
         division: lesson.division || lesson.group.division || lesson.group.course.division,
-      })
+        courseBucket: isIntensive ? 'ONE_ON_ONE' : undefined,
+      }), isIntensive }
     }
   }
   if (opts.groupId) {
@@ -334,17 +367,22 @@ async function resolveFeedbackRewardContext(opts: {
       where: { id: opts.groupId },
       select: {
         division: true,
+        intensiveMode: true,
         course: { select: { id: true, name: true, subject: true, type: true, division: true } },
         teacherAssignments: { where: { teacherId: opts.teacherId }, select: { subject: true }, take: 1 },
       },
     })
     if (group?.course) {
-      const subject = group.course.subject?.trim() || group.teacherAssignments[0]?.subject?.trim()
-      return rewardContextFromCourse(group.course, opts.feedbackCourseType, { subject, division: group.division || group.course.division })
+      const subject = resolveSpecificFeedbackSubject(
+        group.teacherAssignments[0]?.subject,
+        group.course.subject,
+      )
+      const isIntensive = group.intensiveMode === 'INTENSIVE'
+      return { ...rewardContextFromCourse(group.course, opts.feedbackCourseType, { subject, division: group.division || group.course.division, courseBucket: isIntensive ? 'ONE_ON_ONE' : undefined }), isIntensive }
     }
   }
   const teacher = await prisma.teacher.findUnique({ where: { id: opts.teacherId }, select: { division: true } })
-  return rewardContextFromCourse(null, opts.feedbackCourseType, { division: teacher?.division })
+  return { ...rewardContextFromCourse(null, opts.feedbackCourseType, { division: teacher?.division }), isIntensive: false }
 }
 
 export async function resolveFeedbackCourseBucketFromContext(opts: {
@@ -357,16 +395,18 @@ export async function resolveFeedbackCourseBucketFromContext(opts: {
   if (opts.lessonId) {
     const lesson = await prisma.classLesson.findUnique({
       where: { id: opts.lessonId },
-      select: { group: { select: { course: { select: { type: true } } } } },
+      select: { group: { select: { intensiveMode: true, course: { select: { type: true } } } } },
     })
+    if (lesson?.group?.intensiveMode === 'INTENSIVE') return 'ONE_ON_ONE'
     const type = lesson?.group?.course?.type
     if (type) return toFeedbackCourseBucket(type)
   }
   if (opts.groupId) {
     const group = await prisma.classGroup.findUnique({
       where: { id: opts.groupId },
-      select: { course: { select: { type: true } } },
+      select: { intensiveMode: true, course: { select: { type: true } } },
     })
+    if (group?.intensiveMode === 'INTENSIVE') return 'ONE_ON_ONE'
     const type = group?.course?.type
     if (type) return toFeedbackCourseBucket(type)
   }
@@ -392,10 +432,13 @@ export async function getFeedbackBonusPreview(opts: {
   groupId?: string | null
   feedbackCourseType?: string | null
   excludeFeedbackId?: string | null
+  rewardAt?: Date | string
   prismaClient?: PrismaClient | Prisma.TransactionClient
 }): Promise<FeedbackBonusPreview> {
   const prisma = opts.prismaClient ?? await getRequestPrisma()
   const selectedIds = [...new Set(opts.studentIds.filter(Boolean))]
+  const rewardDate = localDateKey(opts.rewardAt || new Date())
+  const rewardDateValue = localDateColumnValue(opts.rewardAt || new Date())
   const rewardContext = await resolveFeedbackRewardContext({
     teacherId: opts.teacherId,
     lessonId: opts.lessonId,
@@ -403,16 +446,22 @@ export async function getFeedbackBonusPreview(opts: {
     feedbackCourseType: opts.feedbackCourseType,
     prismaClient: prisma,
   })
-  const { courseBucket, courseKey, courseLabel, subjectKey, subjectLabel } = rewardContext
+  const { courseBucket, courseKey, courseLabel, subjectKey, subjectLabel, isIntensive } = rewardContext
   const cfg = await getTeacherSalaryConfig(opts.teacherId, prisma)
-  const rate = courseBucket === 'ONE_ON_ONE' ? cfg.feedbackRateOneOne : cfg.feedbackRateGroup
+  const rate = isIntensive ? INTENSIVE_FEEDBACK_RATE : courseBucket === 'ONE_ON_ONE' ? cfg.feedbackRateOneOne : cfg.feedbackRateGroup
 
   const rewardedStudentIds = new Set<string>()
   let rewardModel = feedbackRewardModel(prisma)
   if (rewardModel) {
     try {
       const records = await rewardModel.findMany({
-        where: { teacherId: opts.teacherId, subjectKey, isActive: true, studentId: { in: selectedIds } },
+        where: {
+          teacherId: opts.teacherId,
+          subjectKey,
+          rewardDate: rewardDateValue,
+          isActive: true,
+          studentId: { in: selectedIds },
+        },
         select: { studentId: true },
       })
       records.forEach((record) => rewardedStudentIds.add(record.studentId))
@@ -424,8 +473,13 @@ export async function getFeedbackBonusPreview(opts: {
   }
   if (!rewardModel) {
     // Safe compatibility before the reviewed migration is deployed.
+    const rewardDayRange = getLocalDayRange(rewardDate)
     const previousBonuses = await prisma.teacherSalaryTransaction.findMany({
-      where: { teacherId: opts.teacherId, type: 'FEEDBACK_BONUS' },
+      where: {
+        teacherId: opts.teacherId,
+        type: 'FEEDBACK_BONUS',
+        createdAt: { gte: rewardDayRange.start, lt: rewardDayRange.end },
+      },
       select: { feedbackId: true },
     })
     const feedbackIds = previousBonuses.map((item) => item.feedbackId).filter((id): id is string => Boolean(id && id !== opts.excludeFeedbackId))
@@ -460,8 +514,8 @@ export async function getFeedbackBonusPreview(opts: {
   const label = `${courseLabel} · ${feedbackBucketLabel(courseBucket)}`
   const total = Number((eligibleStudentIds.length * rate).toFixed(4))
   const message = duplicateStudentIds.length
-    ? `${label} · ${formatMoney(rate)}元/人；首次奖励：${eligibleStudentNames.join('、') || '无'}；仅记录反馈：${duplicateStudentNames.join('、')}`
-    : `${label} · ${formatMoney(rate)}元/人；${eligibleStudentNames.join('、') || '所选学生'}可获得该教师首次反馈奖励，预计${formatMoney(total)}元`
+    ? `${label} · ${formatMoney(rate)}元/人；今日首次奖励：${eligibleStudentNames.join('、') || '无'}；今日已奖励：${duplicateStudentNames.join('、')}`
+    : `${label} · ${formatMoney(rate)}元/人；${eligibleStudentNames.join('、') || '所选学生'}可获得该教师今日首次反馈奖励，预计${formatMoney(total)}元`
 
   return {
     courseBucket,
@@ -469,6 +523,7 @@ export async function getFeedbackBonusPreview(opts: {
     courseLabel,
     subjectKey,
     subjectLabel,
+    rewardDate,
     rewardLedgerAvailable: Boolean(rewardModel),
     label,
     rate,
@@ -519,6 +574,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       groupId: feedback.feedbackGroupId,
       feedbackCourseType: feedback.feedbackCourseType,
       excludeFeedbackId: feedbackId,
+      rewardAt: feedback.createdAt,
       prismaClient: prisma,
     })
 
@@ -544,7 +600,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
         eligibleCount: 0,
         duplicateCount: preview.duplicateCount,
         amount: 0,
-        message: '本次反馈已记录，该学科首次反馈奖励已发放过，本次不重复计奖',
+        message: '本次反馈已记录，该教师今日对该学生该学科的首次反馈奖励已发放，本次不重复计奖',
       }
     }
 
@@ -568,6 +624,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
             courseKey: preview.courseKey,
             courseLabel: preview.courseLabel,
             amount: preview.rate,
+            rewardDate: localDateColumnValue(feedback.createdAt),
             isFirstFeedback: true,
             isActive: true,
           })),
@@ -617,7 +674,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       duplicateStudentNames: preview.duplicateStudentNames,
       message: (result.awardedCount ?? 0) > 0
         ? `首次奖励：${preview.eligibleStudentNames.slice(0, result.awardedCount ?? 0).join('、')}，共${formatMoney(result.amount ?? 0)}元${preview.duplicateStudentNames.length ? `；仅记录反馈：${preview.duplicateStudentNames.join('、')}` : ''}`
-        : `本次反馈已记录；${preview.duplicateStudentNames.join('、') || '所选学生'}已获得${preview.subjectLabel}首次反馈奖励，本次不重复计奖`,
+        : `本次反馈已记录；${preview.duplicateStudentNames.join('、') || '所选学生'}今日已获得${preview.subjectLabel}首次反馈奖励，本次不重复计奖`,
     }
   } catch (err) {
     if (isUniqueConstraintError(err)) {

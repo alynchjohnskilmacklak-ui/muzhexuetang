@@ -71,6 +71,11 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
+      const requiredStudentCount = getPersonalClassLimit(values.classType)
+      if (requiredStudentCount && selectedStudentIds.length !== requiredStudentCount) {
+        message.warning(`${TYPE_LABELS[values.classType] || '突击班'}需要选择${requiredStudentCount}名学生`)
+        return
+      }
       setSubmitting(true)
       setConflicts(null)
 
@@ -225,10 +230,10 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
           </Form.Item>
         </div>
 
-        <Form.Item label={isPersonalClassType(classType) ? `选择学生（最多 ${getPersonalClassLimit(classType)} 人）` : '选择学生（可多选）'}>
+        <Form.Item label={isPersonalClassType(classType) ? `选择学生（需要 ${getPersonalClassLimit(classType)} 人）` : '选择学生（可多选）'}>
           <Select
             mode="multiple"
-            placeholder={isPersonalClassType(classType) ? `请选择 ${getPersonalClassLimit(classType)} 名以内学生` : '选择多名学生'}
+            placeholder={isPersonalClassType(classType) ? `请选择 ${getPersonalClassLimit(classType)} 名学生` : '选择多名学生'}
             value={selectedStudentIds}
             onChange={(value: string[]) => {
               const limit = getPersonalClassLimit(classType)

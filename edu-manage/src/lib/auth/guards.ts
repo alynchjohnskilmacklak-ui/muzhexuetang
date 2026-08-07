@@ -5,12 +5,14 @@
  */
 
 import { auth } from '@/lib/auth'
-import { getPrismaForDivision, getRequestPrisma, isDualDbEnabled } from '@/lib/prisma'
+import { getPrismaForDivision, isDualDbEnabled } from '@/lib/prisma'
 import type { PrismaClient } from '@prisma/client'
+import { isUserActive } from '@/lib/user-status'
+import { resolveTeacherForUser } from '@/lib/teacher-account-binding'
 
 // ---- type helpers ----
 
-interface SessionUser {
+export interface SessionUser {
   id: string
   email: string
   name: string
@@ -50,16 +52,18 @@ export class AuthError extends Error {
  * 不一致说明账号已在其他设备登录，旧 token 失效。
  */
 export async function validateSessionMark(user: SessionUser): Promise<void> {
-  if (!user.sessionMark) return // 兼容无 sessionMark 的旧 session
+  if (!user.sessionMark) {
+    throw new AuthError('登录状态已过期，请重新登录', 401)
+  }
   const prisma = getPrismaForDivision(user.division as 'JUNIOR' | 'SENIOR')
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
     select: { currentSessionToken: true, status: true },
   })
-  if (!dbUser || dbUser.status !== 'ACTIVE') {
+  if (!dbUser || !isUserActive(dbUser.status)) {
     throw new AuthError('账号已被禁用', 401)
   }
-  if (dbUser.currentSessionToken && dbUser.currentSessionToken !== user.sessionMark) {
+  if (dbUser.currentSessionToken !== user.sessionMark) {
     throw new AuthError('账号已在其他设备登录，请重新登录', 401)
   }
 }
@@ -74,17 +78,27 @@ export async function requireAdminUser(): Promise<SessionUser & { prisma: Prisma
   return Object.assign(user, { prisma })
 }
 
+export async function requireAuthenticatedUser(): Promise<SessionUser & { prisma: PrismaClient }> {
+  const user = await getSessionUser()
+  await validateSessionMark(user)
+  const prisma = getPrismaForDivision(user.division as 'JUNIOR' | 'SENIOR')
+  return Object.assign(user, { prisma })
+}
+
 export async function requireTeacherUser(): Promise<SessionUser & { prisma: PrismaClient; teacherId: string }> {
   const user = await getSessionUser()
   if (user.role !== 'teacher') throw new AuthError('需要教师权限')
   await validateSessionMark(user)
   const prisma = getPrismaForDivision(user.division as 'JUNIOR' | 'SENIOR')
-  const tid = user.teacherId
-  if (!tid) throw new AuthError('未绑定教师档案')
-  // 验证教师未离职
-  const teacher = await prisma.teacher.findUnique({ where: { id: tid }, select: { status: true } })
-  if (!teacher || teacher.status === 'RESIGNED') throw new AuthError('教师档案已停用')
-  return { ...user, prisma, teacherId: tid }
+  const teacher = await resolveTeacherForUser(prisma, {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    teacherId: user.teacherId ?? null,
+  })
+  if (!teacher) throw new AuthError('未绑定可用的教师档案')
+  return { ...user, prisma, teacherId: teacher.id }
 }
 
 export async function requireParentUser(): Promise<SessionUser & { prisma: PrismaClient }> {

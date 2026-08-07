@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 export function PageLayout({
   title,
@@ -13,16 +14,18 @@ export function PageLayout({
   children: ReactNode
   actions?: ReactNode
 }) {
+  const isMobile = useIsMobile() ?? false
+
   return (
-    <div style={{ position: 'relative', minHeight: '100%' }}>
+    <div style={{ position: 'relative', minHeight: '100%', width: '100%', maxWidth: '100%', overflowX: 'clip' }}>
       {/* Logo watermark — fixed bottom-right */}
       <div
         style={{
           position: 'fixed',
-          right: '60px',
-          bottom: '40px',
-          width: '280px',
-          height: '160px',
+          right: isMobile ? '12px' : '60px',
+          bottom: isMobile ? '20px' : '40px',
+          width: isMobile ? '160px' : '280px',
+          height: isMobile ? '92px' : '160px',
           backgroundImage: 'url(/images/logo.jpg)',
           backgroundSize: 'contain',
           backgroundRepeat: 'no-repeat',
@@ -64,22 +67,24 @@ export function PageLayout({
       <div
         style={{
           display: 'flex',
-          alignItems: 'center',
+          alignItems: isMobile ? 'stretch' : 'center',
+          flexDirection: isMobile ? 'column' : 'row',
           justifyContent: 'space-between',
+          gap: isMobile ? '12px' : '16px',
           marginBottom: '16px',
           position: 'relative',
           zIndex: 1,
         }}
       >
-        <div>
-          <h1 style={{ fontSize: '20px', fontWeight: 500, margin: 0, color: '#1a1201' }}>{title}</h1>
+        <div style={{ minWidth: 0, width: isMobile ? '100%' : 'auto' }}>
+          <h1 style={{ fontSize: isMobile ? '24px' : '20px', lineHeight: 1.25, fontWeight: 600, margin: 0, color: '#1a1201', wordBreak: 'keep-all' }}>{title}</h1>
           {subtitle && (
             <div style={{ fontSize: '13px', color: '#9a8e7a', marginTop: 4 }}>
               {subtitle}
             </div>
           )}
         </div>
-        {actions && <div style={{ display: 'flex', gap: '8px' }}>{actions}</div>}
+        {actions && <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>{actions}</div>}
       </div>
 
       {/* Content */}

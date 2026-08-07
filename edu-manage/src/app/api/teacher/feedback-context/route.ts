@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { requireCurrentTeacher, teacherLessonWhere, teacherStudentWhere } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
+import { getLocalDayRange, todayLocal } from '@/lib/date/local-day'
+import { buildTodayFeedbackScopeSet, feedbackTodayScopeKey } from '@/lib/classroom-feedback/today-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +27,7 @@ export const GET = apiHandler(async () => {
     },
     include: {
       course: { select: { id: true, name: true, subject: true, grade: true, type: true } },
+      teacherAssignments: { where: { teacherId: teacher.id }, select: { subject: true }, take: 1 },
       enrollments: {
         where: { status: 'ACTIVE' },
         include: {
@@ -35,15 +38,14 @@ export const GET = apiHandler(async () => {
         where: { status: { not: 'CANCELLED' } },
         orderBy: { lessonDate: 'desc' },
         take: 5,
-        select: { id: true, lessonDate: true, startTime: true, endTime: true },
+        select: { id: true, lessonDate: true, startTime: true, endTime: true, lessonStudents: { select: { studentId: true } } },
       },
     },
   })
 
   // Recent lessons
   const now = new Date()
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const tomorrowStart = new Date(todayStart.getTime() + 86400000)
+  const { start: todayStart, end: tomorrowStart } = getLocalDayRange(todayLocal())
   const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000)
   const recentLessons = await prisma.classLesson.findMany({
     where: {
@@ -61,6 +63,7 @@ export const GET = apiHandler(async () => {
           },
         },
       },
+      lessonStudents: { select: { studentId: true } },
     },
     orderBy: [{ lessonDate: 'desc' }, { startTime: 'asc' }],
     take: 100,
@@ -83,10 +86,14 @@ export const GET = apiHandler(async () => {
       status: 'PUBLISHED',
       createdAt: { gte: todayStart, lt: tomorrowStart },
     },
-    select: { studentIds: true },
+    select: {
+      studentIds: true,
+      feedbackGroupId: true,
+      classLesson: { select: { groupId: true } },
+    },
   })
   const feedbackedTodayIds = [...new Set(todayFeedbacks.flatMap((feedback) => feedback.studentIds))]
-  const feedbackedTodaySet = new Set(feedbackedTodayIds)
+  const feedbackedTodayScopes = buildTodayFeedbackScopeSet(todayFeedbacks)
 
   // Build student feedback map
   const studentFeedbackMap = new Map<string, Date>()
@@ -123,7 +130,9 @@ export const GET = apiHandler(async () => {
     name: g.name,
     courseName: g.course?.name || '-',
     courseType: g.course?.type || 'GROUP',
-    subject: g.course?.subject || null,
+    intensiveMode: g.intensiveMode,
+    teachingType: g.teachingType,
+    subject: g.teacherAssignments[0]?.subject || g.course?.subject || null,
     grade: g.course?.grade || null,
     studentCount: g.enrollments.length,
     recentLesson: g.classLessons[0] ? {
@@ -142,11 +151,11 @@ export const GET = apiHandler(async () => {
         name: e.student.name,
         grade: e.student.grade,
         school: e.student.school,
-        remainHours: e.student.remainHours,
+        remainHours: g.intensiveMode === 'INTENSIVE' ? e.remainHours : e.student.remainHours,
         attendanceRate: attRate,
         daysSinceLastFeedback,
         lastFeedbackAt: lastFb,
-        todayFeedback: feedbackedTodaySet.has(e.student.id),
+        todayFeedback: feedbackedTodayScopes.has(feedbackTodayScopeKey(g.id, e.student.id)),
       }
     }),
   }))
@@ -169,10 +178,14 @@ export const GET = apiHandler(async () => {
     groupId: l.groupId,
     groupName: l.group?.course?.name || '-',
     courseType: l.group?.course?.type || 'GROUP',
+    intensiveMode: l.group?.intensiveMode,
+    teachingType: l.group?.teachingType,
     lessonDate: l.lessonDate,
     startTime: l.startTime,
     endTime: l.endTime,
-    studentIds: l.group?.enrollments?.map(e => e.studentId) || [],
+    studentIds: l.group?.intensiveMode === 'INTENSIVE'
+      ? l.lessonStudents.map((item) => item.studentId)
+      : l.group?.enrollments?.map(e => e.studentId) || [],
   }))
 
   return NextResponse.json({ groups: groupsOut, lessons: lessonsOut, feedbackedTodayIds })

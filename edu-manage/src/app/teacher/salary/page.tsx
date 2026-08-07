@@ -19,6 +19,7 @@ const PERIOD_OPTIONS = [
 
 const TYPE_META: Record<string, { color: string; label: string }> = {
   LESSON_PAY: { color: '#1D9E75', label: '课时费' },
+  LESSON_PAY_ADJUSTMENT: { color: '#C77F00', label: '课时费结算调整' },
   FEEDBACK_BONUS: { color: '#E8784A', label: '反馈奖励' },
   manual_adjust: { color: '#7A6F5F', label: '薪资调整' },
 }
@@ -26,6 +27,7 @@ const TYPE_META: Record<string, { color: string; label: string }> = {
 interface SalaryTransaction {
   id: string
   type: string
+  salaryBucket: 'SMALL_CLASS' | 'INTENSIVE'
   typeLabel?: string
   amount: number
   description?: string | null
@@ -35,6 +37,8 @@ interface SalaryTransaction {
 
 interface SalaryPayload {
   total: number
+  totalSmallClass: number
+  totalIntensive: number
   totalLesson: number
   totalFeedback: number
   totalAdjustment: number
@@ -44,8 +48,11 @@ interface SalaryPayload {
 export default function TeacherSalaryPage() {
   const isMobile = useIsMobile() ?? false
   const [period, setPeriod] = useState('month')
+  const [salaryBucket, setSalaryBucket] = useState<'ALL' | 'SMALL_CLASS' | 'INTENSIVE'>('ALL')
   const { data, isLoading } = useSWR<SalaryPayload>(`/api/teacher/salary?period=${period}`, fetcher)
-  const transactions = data?.transactions ?? []
+  const transactions = (data?.transactions ?? []).filter((item) => (
+    salaryBucket === 'ALL' || item.salaryBucket === salaryBucket
+  ))
 
   const renderAmount = (value: number) => (
     <Text strong style={{ color: value >= 0 ? '#1D9E75' : '#C0392B' }}>
@@ -60,6 +67,17 @@ export default function TeacherSalaryPage() {
       key: 'createdAt',
       width: 140,
       render: (value: string) => new Date(value).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+    },
+    {
+      title: '归属',
+      dataIndex: 'salaryBucket',
+      key: 'salaryBucket',
+      width: 120,
+      render: (value: SalaryTransaction['salaryBucket']) => (
+        <Tag color={value === 'INTENSIVE' ? 'purple' : 'green'} style={{ borderRadius: 999 }}>
+          {value === 'INTENSIVE' ? '一对一/二/三' : '小班课'}
+        </Tag>
+      ),
     },
     {
       title: '类型',
@@ -94,10 +112,21 @@ export default function TeacherSalaryPage() {
       <Title level={4} style={{ marginTop: 0 }}>我的薪资</Title>
 
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
-        <Segmented options={PERIOD_OPTIONS} value={period} onChange={(value) => setPeriod(value as string)} />
+        <Space wrap>
+          <Segmented options={PERIOD_OPTIONS} value={period} onChange={(value) => setPeriod(value as string)} />
+          <Segmented
+            value={salaryBucket}
+            onChange={(value) => setSalaryBucket(value as typeof salaryBucket)}
+            options={[
+              { label: '全部', value: 'ALL' },
+              { label: '小班课', value: 'SMALL_CLASS' },
+              { label: '一对一/二/三', value: 'INTENSIVE' },
+            ]}
+          />
+        </Space>
 
         <Row gutter={[12, 12]}>
-          <Col xs={24} sm={6}>
+          <Col xs={24} sm={8}>
             <Card bordered={false} style={{ borderRadius: 8, background: 'linear-gradient(135deg,#1D9E75,#27B885)' }}>
               <Statistic
                 title={<span style={{ color: 'rgba(255,255,255,.82)', fontSize: 13 }}>合计薪资</span>}
@@ -110,19 +139,14 @@ export default function TeacherSalaryPage() {
               />
             </Card>
           </Col>
-          <Col xs={12} sm={6}>
+          <Col xs={12} sm={8}>
             <Card bordered={false} style={{ borderRadius: 8 }}>
-              <Statistic title="课时薪资" value={data?.totalLesson ?? 0} precision={2} suffix="元" valueStyle={{ color: '#1D9E75' }} loading={isLoading} />
+              <Statistic title="小班课薪资" value={data?.totalSmallClass ?? 0} precision={2} suffix="元" valueStyle={{ color: '#1D9E75' }} loading={isLoading} />
             </Card>
           </Col>
-          <Col xs={12} sm={6}>
+          <Col xs={12} sm={8}>
             <Card bordered={false} style={{ borderRadius: 8 }}>
-              <Statistic title="反馈奖励" value={data?.totalFeedback ?? 0} precision={2} suffix="元" valueStyle={{ color: '#E8784A' }} loading={isLoading} />
-            </Card>
-          </Col>
-          <Col xs={12} sm={6}>
-            <Card bordered={false} style={{ borderRadius: 8 }}>
-              <Statistic title="其他调整" value={data?.totalAdjustment ?? 0} precision={2} suffix="元" valueStyle={{ color: '#7A6F5F' }} loading={isLoading} />
+              <Statistic title="一对一/二/三薪资" value={data?.totalIntensive ?? 0} precision={2} suffix="元" valueStyle={{ color: '#534AB7' }} loading={isLoading} />
             </Card>
           </Col>
         </Row>
@@ -136,6 +160,9 @@ export default function TeacherSalaryPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                       <Tag color={TYPE_META[transaction.type]?.color ?? 'default'} style={{ margin: 0, borderRadius: 999 }}>
                         {TYPE_META[transaction.type]?.label ?? transaction.typeLabel ?? '其他调整'}
+                      </Tag>
+                      <Tag color={transaction.salaryBucket === 'INTENSIVE' ? 'purple' : 'green'} style={{ margin: 0, borderRadius: 999 }}>
+                        {transaction.salaryBucket === 'INTENSIVE' ? '一对一/二/三' : '小班课'}
                       </Tag>
                       {renderAmount(transaction.amount)}
                     </div>

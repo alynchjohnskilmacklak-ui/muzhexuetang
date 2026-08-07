@@ -43,9 +43,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
           teacher: { select: { id: true, name: true } },
           room: { select: { id: true, name: true } },
           enrollments: {
-            where: activeEnrollmentWhere,
             include: {
-              student: { select: { id: true, name: true, phone: true } },
+              student: { select: { id: true, name: true, phone: true, status: true } },
             },
           },
         },
@@ -61,16 +60,28 @@ export const GET = apiHandler(async (req: NextRequest) => {
         },
       },
       teacher: { select: { id: true, name: true } },
+      lessonStudents: { include: { student: { select: { id: true, name: true, phone: true } } }, orderBy: { createdAt: 'asc' } },
     },
     orderBy: { startTime: 'asc' },
   })
 
-  const result = lessons.map((lesson) => ({
+  const result = lessons.map((lesson) => {
+    const displayEnrollments = lesson.group.intensiveMode === 'INTENSIVE'
+      ? lesson.lessonStudents
+          .map((snapshot) => lesson.group.enrollments.find((enrollment) => enrollment.studentId === snapshot.studentId))
+          .filter((enrollment): enrollment is NonNullable<typeof enrollment> => Boolean(enrollment))
+      : lesson.group.enrollments.filter((enrollment) => enrollment.status === 'ACTIVE' && enrollment.student.status !== 'INACTIVE')
+    return ({
     id: lesson.id,
     lessonDate: lesson.lessonDate,
     startTime: lesson.startTime,
     endTime: lesson.endTime,
     status: lesson.status,
+    intensiveMode: lesson.group.intensiveMode,
+    teachingType: lesson.group.teachingType,
+    plannedMinutes: lesson.plannedMinutes,
+    actualMinutes: lesson.actualMinutes,
+    settlementStatus: lesson.settlementStatus,
     group: {
       id: lesson.group.id,
       name: lesson.group.name,
@@ -83,7 +94,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       primaryTeacherName: lesson.group.teacher.name,
       roomName: lesson.group.room?.name || '未分配',
     },
-    students: lesson.group.enrollments.map((e) => ({
+    students: displayEnrollments.map((e) => ({
       studentId: e.student.id,
       studentName: e.student.name,
       enrollmentId: e.id,
@@ -91,8 +102,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
       status: lesson.attendances.find((a) => a.studentId === e.student.id)?.status || null,
     })),
     attendanceCount: lesson.attendances.length,
-    totalStudents: lesson.group.enrollments.length,
-  }))
+    totalStudents: displayEnrollments.length,
+  })})
 
   return NextResponse.json(result)
 })

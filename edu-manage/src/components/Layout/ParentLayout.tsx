@@ -33,6 +33,7 @@ import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
+import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 import { MobileLayout, type MobileNavItem } from './MobileLayout'
 
 const { Sider, Content, Header } = Layout
@@ -59,9 +60,19 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const isMobile = useIsMobile()
   const [collapsed, setCollapsed] = useState(false)
-  const { data: unreadData, mutate: mutateUnread } = useSWR('/api/parent/unread-counts', fetcher, { refreshInterval: 120_000 })
+  const [backgroundReady, setBackgroundReady] = useState(false)
+  const { data: unreadData, mutate: mutateUnread } = useSWR(
+    backgroundReady ? '/api/parent/unread-counts' : null,
+    fetcher,
+    { refreshInterval: 120_000, revalidateOnFocus: true, revalidateOnReconnect: true },
+  )
   useKickListener()
-  useSessionPing()
+  useSessionPing({ initialDelay: 6_000 })
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setBackgroundReady(true), 1_200)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     const saved = localStorage.getItem('parent_sider_collapsed')
@@ -72,7 +83,11 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     localStorage.setItem('parent_sider_collapsed', String(collapsed))
   }, [collapsed])
 
-  const { data: msgUnreadData } = useSWR('/api/messages/unread-count', fetcher, { refreshInterval: 60_000 })
+  const { data: msgUnreadData } = useSWR(backgroundReady ? '/api/messages/unread-count' : null, fetcher, {
+    refreshInterval: 5_000,
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+  })
   const unread = {
     papers: Number(unreadData?.papers || 0),
     posts: Number(unreadData?.posts || 0),
@@ -86,7 +101,10 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     items: [
       { key: 'profile', icon: <UserOutlined />, label: '个人中心' },
       { type: 'divider' as const },
-      { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', danger: true, onClick: () => signOut({ callbackUrl: `${window.location.origin}/login` }) },
+      { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', danger: true, onClick: () => {
+        clearSensitiveBrowserStorage()
+        return signOut({ callbackUrl: `${window.location.origin}/login` })
+      } },
     ],
     onClick: ({ key }: { key: string }) => {
       if (key === 'profile') router.push('/parent/profile')

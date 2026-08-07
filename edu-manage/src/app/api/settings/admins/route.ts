@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
+import { getPasswordPolicyError } from '@/lib/password-policy'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,9 +54,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!name) {
     return NextResponse.json({ error: '姓名不能为空' }, { status: 400 })
   }
-  if (password.length < 8) {
-    return NextResponse.json({ error: '密码至少 8 位' }, { status: 400 })
-  }
+  const passwordError = getPasswordPolicyError(password, { identifiers: [email, name] })
+  if (passwordError) return NextResponse.json({ error: passwordError }, { status: 400 })
 
   const existing = await prisma.user.findUnique({ where: { email } })
   if (existing) {
@@ -63,30 +63,35 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 12)
-  const admin = await prisma.user.create({
-    data: {
-      email,
-      password: passwordHash,
-      name,
-      role: 'admin',
-      status: 'active',
-      division: currentDivision,
-    },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      status: true,
-      createdAt: true,
-    },
-  })
-
-  await prisma.activityLog.create({
-    data: {
-      userId: currentUser.id,
-      action: '创建管理员',
-      detail: `${admin.name}（${admin.email}）`,
-    },
+  const admin = await prisma.$transaction(async (tx) => {
+    const created = await tx.user.create({
+      data: {
+        email,
+        password: passwordHash,
+        name,
+        role: 'admin',
+        status: 'active',
+        division: currentDivision,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        status: true,
+        createdAt: true,
+      },
+    })
+    await tx.activityLog.create({
+      data: {
+        userId: currentUser.id,
+        action: 'PASSWORD_INITIALIZED',
+        detail: `创建管理员账号：${created.name}（${created.email}）`,
+        entityType: 'User',
+        entityId: created.id,
+        metadata: { source: 'ADMIN_CREATE' },
+      },
+    })
+    return created
   })
 
   return NextResponse.json(admin, { status: 201 })

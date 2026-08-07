@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import ExamClient from './client'
 import { parentActiveStudentWhere, parentVisibleExamPaperWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
+import { redactFeedbackForParent } from '@/lib/classroom-feedback/access'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,5 +47,6 @@ export default async function ParentGradesPage({ searchParams }: { searchParams?
     take: 30,
   }) : []
 
-  return <ExamClient papers={JSON.parse(JSON.stringify(papers))} feedbacks={JSON.parse(JSON.stringify(feedbacks))} parentId={parentId} />
+  const parentFeedbacks = feedbacks.map((feedback) => redactFeedbackForParent(feedback, scopedChildIds))
+  return <ExamClient papers={JSON.parse(JSON.stringify(papers))} feedbacks={JSON.parse(JSON.stringify(parentFeedbacks))} parentId={parentId} />
 }

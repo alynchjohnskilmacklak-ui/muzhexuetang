@@ -47,7 +47,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       startTime: lesson.startTime,
       endTime: lesson.endTime,
       status: lesson.status,
-      subject: lesson.group.teacherAssignments[0]?.subject || lesson.subject || lesson.group.course.subject,
+      subject: lesson.subject || lesson.group.teacherAssignments[0]?.subject || lesson.group.course.subject,
       groupName: lesson.group.name,
       courseName: lesson.group.course.name,
       courseType: lesson.group.course.type,

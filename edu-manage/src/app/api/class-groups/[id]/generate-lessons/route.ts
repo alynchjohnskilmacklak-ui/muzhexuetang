@@ -41,15 +41,38 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
 
   const group = await prisma.classGroup.findFirst({
     where: { id, ...visibleClassGroupWhere },
-    include: { course: true, teacherAssignments: { orderBy: { createdAt: 'asc' } } },
+    include: {
+      course: true,
+      teacherAssignments: { orderBy: { createdAt: 'asc' } },
+      classLessons: {
+        where: { status: { notIn: ['CANCELLED', 'POSTPONED'] } },
+        select: {
+          lessonDate: true,
+          teacherId: true,
+          subject: true,
+          startTime: true,
+          endTime: true,
+        },
+      },
+    },
   })
   if (!group) return NextResponse.json({ error: '班级不存在' }, { status: 404 })
+  if (group.intensiveMode === 'INTENSIVE') {
+    return NextResponse.json({
+      error: '个性化课程不生成固定课表，请由教师逐次约课，或由管理员进行历史补录。',
+    }, { status: 409 })
+  }
+  if (group.status !== 'WAITING') {
+    return NextResponse.json({
+      error: '进行中班级不能重新生成整张课表，请使用“调整上课日”修改未来安排，避免覆盖历史课次。',
+    }, { status: 409 })
+  }
 
   const start = startDate ? new Date(startDate) : group.startDate
   const requestDays = normalizeRecurringDays(recurringDays)
   const days = requestDays.length ? requestDays : group.recurringDays
   const mins = lessonMinutes || group.lessonMinutes || 45
-  const total = totalDays || totalLessons || group.totalLessons
+  const total = Number(totalDays || totalLessons || group.course.totalLessons || group.totalLessons)
   const startTime = lessonStartTime || group.lessonStartTime
 
   if (!days.length) return NextResponse.json({ error: '请选择上课日期' }, { status: 400 })
@@ -89,8 +112,26 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   const assignments = group.teacherAssignments.length
     ? group.teacherAssignments
     : [{ teacherId: group.teacherId, subject: group.course.subject }]
+  const lessonsByDay = new Map<number, typeof group.classLessons>()
+  for (const lesson of group.classLessons) {
+    const key = new Date(lesson.lessonDate).setHours(0, 0, 0, 0)
+    const current = lessonsByDay.get(key) || []
+    current.push(lesson)
+    lessonsByDay.set(key, current)
+  }
+  const inferredTemplate = [...lessonsByDay.values()]
+    .sort((left, right) => right.length - left.length)[0]
+    ?.map((lesson, index) => ({
+      teacherId: lesson.teacherId || group.teacherId,
+      subject: lesson.subject || group.course.subject,
+      startTime: lesson.startTime,
+      endTime: lesson.endTime,
+      order: index + 1,
+    })) || []
   const dailyTemplate = scheduleTemplate.length
     ? scheduleTemplate
+    : inferredTemplate.length
+      ? inferredTemplate
     : assignments.slice(0, 1).map((assignment) => ({
         teacherId: assignment.teacherId,
         subject: assignment.subject || group.course.subject,
@@ -123,13 +164,13 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     created += result.count
   }
 
-  const manualLessonCount = await prisma.classLesson.count({
-    where: { groupId: id, isManual: true, status: { not: 'CANCELLED' } },
+  const activeLessonCount = await prisma.classLesson.count({
+    where: { groupId: id, status: { not: 'CANCELLED' } },
   })
 
   await prisma.classGroup.update({
     where: { id },
-    data: { totalLessons: created + manualLessonCount, lessonStartTime: startTime, lessonMinutes: mins,
+    data: { totalLessons: activeLessonCount, lessonStartTime: startTime, lessonMinutes: mins,
       recurringDays: days, startDate: start },
   })
 

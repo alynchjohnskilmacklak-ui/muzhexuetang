@@ -3,6 +3,7 @@
 import { Alert, Button, Card, Input, Radio, Space } from 'antd'
 import useSWR from 'swr'
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { MobileSelect } from '@/components/MobileSelect'
 import { BadgePicker } from './BadgePicker'
@@ -10,6 +11,12 @@ import { ImageUploader } from './ImageUploader'
 import { MoodPicker, MoodValue } from './MoodPicker'
 import { RatingMap, RatingStars } from './RatingStars'
 import { TagPicker } from './TagPicker'
+import {
+  readSensitiveSessionValue,
+  removeLegacySensitiveStorage,
+  removeSensitiveSessionValue,
+  writeSensitiveSessionValue,
+} from '@/lib/client-sensitive-storage'
 
 const fetcher = (url: string) => fetch(url).then((res) => {
   if (!res.ok) throw new Error('加载失败')
@@ -17,9 +24,9 @@ const fetcher = (url: string) => fetch(url).then((res) => {
 })
 
 const defaultRatings: RatingMap = { focus: 4, mastery: 4, interaction: 4, homework: 4 }
-const DRAFT_KEY = 'performance:draft'
-
 export function PostComposer({ onPublished }: { onPublished?: (studentId?: string) => void }) {
+  const { data: session, status: sessionStatus } = useSession()
+  const draftKey = session?.user?.id ? `performance:draft:${session.user.id}` : ''
   const { data: studentsData } = useSWR('/api/students?status=ACTIVE&limit=200', fetcher)
   const students = Array.isArray(studentsData?.students) ? studentsData.students : []
 
@@ -36,21 +43,23 @@ export function PostComposer({ onPublished }: { onPublished?: (studentId?: strin
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    setHasDraft(Boolean(localStorage.getItem(DRAFT_KEY)))
-  }, [])
+    if (sessionStatus !== 'authenticated' || !draftKey) return
+    removeLegacySensitiveStorage()
+    setHasDraft(Boolean(readSensitiveSessionValue(draftKey, 8 * 60 * 60 * 1000)))
+  }, [draftKey, sessionStatus])
 
   const loadDraft = () => {
-    const draft = localStorage.getItem(DRAFT_KEY)
-    if (!draft) return
+    if (!draftKey) return
+    const parsed = readSensitiveSessionValue<Record<string, unknown>>(draftKey, 8 * 60 * 60 * 1000)
+    if (!parsed) return
     try {
-      const parsed = JSON.parse(draft)
-      setStudentId(parsed.studentId || '')
-      setVisibility(parsed.visibility || 'PARENT_ONLY')
-      setType(parsed.type || 'DAILY')
-      setMood(parsed.mood || 'GOOD')
+      setStudentId(typeof parsed.studentId === 'string' ? parsed.studentId : '')
+      setVisibility(typeof parsed.visibility === 'string' ? parsed.visibility : 'PARENT_ONLY')
+      setType(typeof parsed.type === 'string' ? parsed.type : 'DAILY')
+      setMood((typeof parsed.mood === 'string' ? parsed.mood : 'GOOD') as MoodValue)
       setTags(Array.isArray(parsed.tags) ? parsed.tags : [])
-      setContent(parsed.content || '')
-      setRatings(parsed.ratings || defaultRatings)
+      setContent(typeof parsed.content === 'string' ? parsed.content : '')
+      setRatings((parsed.ratings as RatingMap) || defaultRatings)
       setImages(Array.isArray(parsed.images) ? parsed.images : [])
       setBadges(Array.isArray(parsed.badges) ? parsed.badges : [])
       toast.success('已恢复草稿')
@@ -69,12 +78,13 @@ export function PostComposer({ onPublished }: { onPublished?: (studentId?: strin
     setRatings(defaultRatings)
     setImages([])
     setBadges([])
-    localStorage.removeItem(DRAFT_KEY)
+    if (draftKey) removeSensitiveSessionValue(draftKey)
     setHasDraft(false)
   }
 
   const saveDraft = () => {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ studentId, visibility, type, mood, tags, content, ratings, images, badges }))
+    if (!draftKey) return toast.error('登录状态未就绪，请刷新后重试')
+    writeSensitiveSessionValue(draftKey, { studentId, visibility, type, mood, tags, content, ratings, images, badges })
     setHasDraft(true)
     toast.success('草稿已保存，可在发布框顶部恢复')
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestDivision } from '@/lib/division'
 import { writeSalaryExportWorkbook, type SalaryExportRow } from '@/lib/salary-export'
 import { requireAdminUser } from '@/lib/teacher-portal'
+import { classifySalaryBucket } from '@/lib/salary-bucket'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +20,7 @@ function periodLabel(period: string) {
 
 function typeLabel(type: string) {
   if (type === 'LESSON_PAY') return '课时薪资'
+  if (type === 'LESSON_PAY_ADJUSTMENT') return '课时薪资结算调整'
   if (type === 'FEEDBACK_BONUS') return '反馈奖励'
   if (type === 'manual_adjust') return '手动调整'
   return '其他调整'
@@ -26,6 +28,8 @@ function typeLabel(type: string) {
 
 function courseTypeLabel(type: string | null | undefined) {
   if (type === 'ONE_ON_ONE') return '一对一'
+  if (type === 'ONE_ON_TWO') return '一对二'
+  if (type === 'ONE_ON_THREE') return '一对三'
   if (type === 'SMALL_GROUP') return '小组课'
   if (type === 'GROUP') return '班课'
   return type || ''
@@ -72,8 +76,8 @@ export async function GET(req: NextRequest) {
       lessonIds.length ? prisma.classLesson.findMany({
         where: { id: { in: lessonIds } },
         select: {
-          id: true, lessonDate: true, startTime: true, endTime: true, subject: true,
-          group: { select: { name: true, lessonMinutes: true, course: { select: { name: true, subject: true, type: true, grade: true } } } },
+          id: true, lessonDate: true, startTime: true, endTime: true, subject: true, actualMinutes: true,
+          group: { select: { name: true, lessonMinutes: true, intensiveMode: true, course: { select: { name: true, subject: true, type: true, grade: true } } } },
         },
       }) : [],
       feedbackIds.length ? prisma.classroomFeedback.findMany({
@@ -82,8 +86,8 @@ export async function GET(req: NextRequest) {
           id: true, studentIds: true, feedbackCourseType: true, feedbackGroupId: true,
           classLesson: {
             select: {
-              id: true, lessonDate: true, startTime: true, endTime: true, subject: true,
-              group: { select: { name: true, lessonMinutes: true, course: { select: { name: true, subject: true, type: true, grade: true } } } },
+              id: true, lessonDate: true, startTime: true, endTime: true, subject: true, actualMinutes: true,
+              group: { select: { name: true, lessonMinutes: true, intensiveMode: true, course: { select: { name: true, subject: true, type: true, grade: true } } } },
             },
           },
         },
@@ -93,9 +97,14 @@ export async function GET(req: NextRequest) {
     const fallbackGroupIds = [...new Set(feedbacks.map((item) => item.feedbackGroupId).filter((id): id is string => Boolean(id)))]
     const fallbackGroups = fallbackGroupIds.length ? await prisma.classGroup.findMany({
       where: { id: { in: fallbackGroupIds } },
-      select: { id: true, name: true, lessonMinutes: true, course: { select: { name: true, subject: true, type: true, grade: true } } },
+      select: { id: true, name: true, lessonMinutes: true, intensiveMode: true, course: { select: { name: true, subject: true, type: true, grade: true } } },
     }) : []
-    const studentIds = [...new Set(feedbacks.flatMap((item) => item.studentIds))]
+    const rewardRecords = feedbackIds.length ? await prisma.feedbackRewardRecord.findMany({
+      where: { feedbackId: { in: feedbackIds }, isActive: true },
+      select: { feedbackId: true, studentId: true, subjectLabel: true, amount: true },
+      orderBy: { createdAt: 'asc' },
+    }) : []
+    const studentIds = [...new Set([...feedbacks.flatMap((item) => item.studentIds), ...rewardRecords.map((item) => item.studentId)])]
     const students = studentIds.length ? await prisma.student.findMany({
       where: { id: { in: studentIds } },
       select: { id: true, name: true },
@@ -105,6 +114,13 @@ export async function GET(req: NextRequest) {
     const feedbackMap = new Map(feedbacks.map((item) => [item.id, item]))
     const groupMap = new Map(fallbackGroups.map((item) => [item.id, item]))
     const studentMap = new Map(students.map((item) => [item.id, item.name]))
+    const rewardsByFeedback = new Map<string, typeof rewardRecords>()
+    for (const reward of rewardRecords) {
+      if (!reward.feedbackId) continue
+      const current = rewardsByFeedback.get(reward.feedbackId) || []
+      current.push(reward)
+      rewardsByFeedback.set(reward.feedbackId, current)
+    }
 
     const rows: SalaryExportRow[] = transactions.map((transaction) => {
       const lesson = transaction.lessonId ? lessonMap.get(transaction.lessonId) : null
@@ -114,24 +130,48 @@ export async function GET(req: NextRequest) {
       const group = lesson?.group || feedbackLesson?.group || feedbackGroup || null
       const course = group?.course || null
       const effectiveLesson = lesson || feedbackLesson
-      const names = feedback?.studentIds.map((id) => studentMap.get(id) || id) || []
+      const validRewards = transaction.feedbackId ? rewardsByFeedback.get(transaction.feedbackId) || [] : []
+      const validStudentIds = validRewards.length ? validRewards.map((item) => item.studentId) : feedback?.studentIds || []
+      const names = validStudentIds.map((id) => studentMap.get(id) || id)
+      const salaryBucket = classifySalaryBucket({
+        lessonIsIntensive: group?.intensiveMode === 'INTENSIVE',
+        feedbackIsIntensive: ['ONE_ON_ONE', 'ONE_ON_TWO', 'ONE_ON_THREE'].includes(feedback?.feedbackCourseType || ''),
+        description: transaction.description,
+      })
+      const isFeedback = transaction.type === 'FEEDBACK_BONUS'
+      const validFeedbackCount = isFeedback ? validStudentIds.length : null
+      const lessonMinutes = group?.intensiveMode === 'INTENSIVE'
+        ? Number(effectiveLesson?.actualMinutes || group?.lessonMinutes || 0) || null
+        : group?.lessonMinutes ?? null
+      const subject = validRewards.find((item) => item.subjectLabel)?.subjectLabel || effectiveLesson?.subject || course?.subject || ''
+      const unitAmount = isFeedback && validFeedbackCount
+        ? Number((transaction.amount / validFeedbackCount).toFixed(2))
+        : null
+      const detailDescription = isFeedback
+        ? `${subject || '未标注科目'}反馈：${validFeedbackCount || 0}次有效反馈${names.length ? `（${names.join('、')}）` : ''}，单价￥${Number(unitAmount || 0).toFixed(2)}，合计￥${Number(transaction.amount).toFixed(2)}`
+        : transaction.type === 'LESSON_PAY' || transaction.type === 'LESSON_PAY_ADJUSTMENT'
+          ? `${formatDate(transaction.lessonDate || effectiveLesson?.lessonDate || transaction.createdAt)} ${effectiveLesson?.startTime ? `${effectiveLesson.startTime}-${effectiveLesson.endTime}` : ''}，${course?.name || group?.name || '课程'}，计薪${lessonMinutes || 0}分钟，合计￥${Number(transaction.amount).toFixed(2)}${transaction.description ? `；${transaction.description}` : ''}`
+          : transaction.description || '管理员工资调整'
       return {
         id: transaction.id,
         type: transaction.type,
         typeLabel: typeLabel(transaction.type),
+        salaryBucket,
         amount: transaction.amount,
-        description: transaction.description || '',
+        description: detailDescription,
         lessonDate: transaction.lessonDate || effectiveLesson?.lessonDate || null,
         createdAt: transaction.createdAt,
         courseName: course?.name || '',
         className: group?.name || '',
-        subject: effectiveLesson?.subject || course?.subject || '',
+        subject,
         courseType: courseTypeLabel(course?.type || feedback?.feedbackCourseType),
         grade: course?.grade || '',
         lessonTime: effectiveLesson?.startTime ? `${effectiveLesson.startTime}-${effectiveLesson.endTime}` : '',
-        lessonMinutes: group?.lessonMinutes ?? null,
+        lessonMinutes,
         studentNames: names.join('、'),
-        studentCount: feedback ? feedback.studentIds.length : null,
+        studentCount: feedback ? validStudentIds.length : null,
+        validFeedbackCount,
+        unitAmount,
         lessonId: transaction.lessonId || feedbackLesson?.id || '',
         feedbackId: transaction.feedbackId || '',
       }

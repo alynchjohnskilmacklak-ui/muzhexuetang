@@ -17,6 +17,8 @@ const RATE_RULES: Array<{ prefix: string; rpm: number }> = [
   { prefix: '/api/auth/login-status',          rpm: 10  },
   { prefix: '/api/auth/check-role',            rpm: 10  },
   { prefix: '/api/auth/change-password',       rpm: 5   },
+  { prefix: '/api/auth/forgot-password',       rpm: 5   },
+  { prefix: '/api/auth/reset-password',        rpm: 10  },
   { prefix: '/api/ai',                         rpm: 10  },
   { prefix: '/api/teacher/ai-feedback',        rpm: 6   },
   { prefix: '/api/exam-papers/recognize',      rpm: 6   },
@@ -32,11 +34,11 @@ const RATE_RULES: Array<{ prefix: string; rpm: number }> = [
   { prefix: '/api',                            rpm: 200 },
 ]
 
-function getRpm(path: string): number {
+function getRule(path: string): { prefix: string; rpm: number } {
   for (const rule of RATE_RULES) {
-    if (path.startsWith(rule.prefix)) return rule.rpm
+    if (path.startsWith(rule.prefix)) return rule
   }
-  return 200
+  return { prefix: '/api', rpm: 200 }
 }
 
 // ---- memory driver ----
@@ -57,6 +59,11 @@ function memCheck(key: string, rpm: number): { allowed: boolean; retryAfter?: nu
     for (const [k, v] of memBuckets) {
       if (now >= v.resetAt) memBuckets.delete(k)
     }
+  }
+  while (memBuckets.size > 50_000) {
+    const oldestKey = memBuckets.keys().next().value as string | undefined
+    if (!oldestKey) break
+    memBuckets.delete(oldestKey)
   }
   return { allowed: true }
 }
@@ -118,8 +125,9 @@ export async function checkRateLimit(
   path: string,
   tenant?: string,
 ): Promise<{ allowed: boolean; retryAfter?: number }> {
-  const rpm = getRpm(path)
-  const segment = tenant ? `rate:${tenant}:${path}` : path
+  const rule = getRule(path)
+  const rpm = rule.rpm
+  const segment = tenant ? `rate:${tenant}:${rule.prefix}` : rule.prefix
   const key = `${ip}:${segment}`
 
   if (resolveDriver() === 'redis') {
@@ -133,6 +141,6 @@ export function checkRateLimitSync(
   ip: string,
   path: string,
 ): { allowed: boolean; retryAfter?: number } {
-  const rpm = getRpm(path)
-  return memCheck(`${ip}:${path}`, rpm)
+  const rule = getRule(path)
+  return memCheck(`${ip}:${rule.prefix}`, rule.rpm)
 }

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readFile, stat } from 'fs/promises'
 import path from 'path'
-import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
+import { isOssEnabled, readStoredBuffer } from '@/lib/storage'
+import { requireAuthenticatedUser } from '@/lib/auth/guards'
+import { resolveTeacherForUser } from '@/lib/performance'
+import { canAccessFeedbackImage } from '@/lib/classroom-feedback/access'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,10 +59,7 @@ async function findUploadedFile(relativePath: string) {
 }
 
 export const GET = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ filename: string }> }) => {
-  const session = await auth()
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const user = await requireAuthenticatedUser()
 
   const { filename } = await params
   const relativePath = safeRelativePath(filename)
@@ -67,8 +67,41 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     return NextResponse.json({ error: 'Invalid file' }, { status: 400 })
   }
 
+  const prisma = user.prisma
+  let teacherId = user.teacherId
+  if (String(user.role).toLowerCase() === 'teacher' && !teacherId) {
+    teacherId = (await resolveTeacherForUser(user, prisma))?.id || null
+  }
+  const access = await canAccessFeedbackImage(
+    prisma,
+    { id: user.id, role: user.role, teacherId },
+    [relativePath],
+  )
+  if (!access.get(relativePath)?.allowed) {
+    console.warn('[uploads/read] denied feedback image', { key: relativePath, userId: user.id, role: user.role })
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const filePath = await findUploadedFile(relativePath)
-  if (!filePath) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!filePath) {
+    if (!isOssEnabled()) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    try {
+      const body = await readStoredBuffer(relativePath, 'aliyun-oss')
+      const ext = relativePath.split('.').pop()?.toLowerCase() || ''
+      return new NextResponse(new Uint8Array(body), {
+        headers: {
+          'Content-Type': CONTENT_TYPES[ext] || 'application/octet-stream',
+          'Cache-Control': 'private, max-age=3600, stale-while-revalidate=86400',
+        },
+      })
+    } catch (error) {
+      console.error('[uploads:oss-fallback]', {
+        key: relativePath,
+        message: error instanceof Error ? error.message : String(error),
+      })
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+  }
 
   const fileInfo = await stat(filePath)
   const etag = `"${relativePath}-${fileInfo.mtimeMs}"`

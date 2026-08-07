@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { apiHandler } from '@/lib/api-handler'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
 import { visibleStudentWhere } from '@/lib/business-visibility'
+import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +16,6 @@ export const GET = apiHandler(async () => {
     where: {
       ...teacherLessonWhere(teacher.id),
       lessonDate: { gte: todayStart, lt: todayEnd },
-      attendanceSubmittedAt: { not: null },
     },
     include: {
       classroomFeedbacks: {
@@ -31,6 +31,8 @@ export const GET = apiHandler(async () => {
           },
         },
       },
+      attendances: { select: { studentId: true } },
+      lessonStudents: { select: { studentId: true } },
     },
     orderBy: { startTime: 'asc' },
   })
@@ -39,6 +41,16 @@ export const GET = apiHandler(async () => {
   let completedCount = 0
 
   for (const lesson of todayLessons) {
+    const expectedStudentIds = lesson.group.intensiveMode === 'INTENSIVE'
+      ? lesson.lessonStudents.map((student) => student.studentId)
+      : lesson.group.enrollments.map((enrollment) => enrollment.student.id)
+    if (!hasSubmittedLessonAttendance({
+      attendanceSubmittedAt: lesson.attendanceSubmittedAt,
+      status: lesson.status,
+      attendances: lesson.attendances,
+      expectedStudentIds,
+    })) continue
+
     const feedbackedStudentIds = new Set(lesson.classroomFeedbacks.flatMap((feedback) => feedback.studentIds))
     completedCount += lesson.classroomFeedbacks.length
     const lessonName = lesson.group.course?.name || lesson.group.name

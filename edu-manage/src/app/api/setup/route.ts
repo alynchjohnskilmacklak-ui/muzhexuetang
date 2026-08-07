@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { chineseToPinyin } from '@/lib/pinyin'
+import { generateTemporaryPassword } from '@/lib/temporary-password'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,12 +12,6 @@ function unauthorizedSetup() {
 
 function setupTokenFromRequest(request: NextRequest) {
   return request.nextUrl.searchParams.get('token') || request.headers.get('x-setup-token') || ''
-}
-
-function teacherInitialPassword(phone: string) {
-  const digits = phone.replace(/\D/g, '')
-  if (digits.length < 6) throw new Error(`Teacher phone is invalid: ${phone}`)
-  return digits.slice(-6)
 }
 
 export async function GET(request: NextRequest) {
@@ -34,10 +29,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const parentHash = await bcrypt.hash('123456', 10)
+    const parentPassword1 = generateTemporaryPassword()
+    const parentPassword2 = generateTemporaryPassword()
+    const [parentHash1, parentHash2] = await Promise.all([
+      bcrypt.hash(parentPassword1, 12),
+      bcrypt.hash(parentPassword2, 12),
+    ])
 
-    await prisma.user.upsert({ where: { email: 'parent1@test.com' }, update: {}, create: { email: 'parent1@test.com', password: parentHash, name: '家长1', role: 'parent' } })
-    await prisma.user.upsert({ where: { email: 'parent2@test.com' }, update: {}, create: { email: 'parent2@test.com', password: parentHash, name: '家长2', role: 'parent' } })
+    await prisma.user.upsert({ where: { email: 'parent1@test.com' }, update: {}, create: { email: 'parent1@test.com', password: parentHash1, name: '家长1', role: 'parent' } })
+    await prisma.user.upsert({ where: { email: 'parent2@test.com' }, update: {}, create: { email: 'parent2@test.com', password: parentHash2, name: '家长2', role: 'parent' } })
 
     const teachers = await Promise.all([
       prisma.teacher.upsert({ where: { id: 't1' }, update: {}, create: { id: 't1', name: '王老师', phone: '13800001001', subjects: '音乐' } }),
@@ -47,14 +47,23 @@ export async function GET(request: NextRequest) {
       prisma.teacher.upsert({ where: { id: 't5' }, update: {}, create: { id: 't5', name: '陈老师', phone: '13800001005', subjects: '美术' } }),
     ])
 
+    const teacherCredentials: Array<{ email: string; initialPassword: string }> = []
     for (const teacher of teachers) {
       const email = `${chineseToPinyin(teacher.name)}@tea.com`
-      const hash = await bcrypt.hash(teacherInitialPassword(teacher.phone), 10)
+      const initialPassword = generateTemporaryPassword()
+      const hash = await bcrypt.hash(initialPassword, 12)
       await prisma.user.upsert({
         where: { email },
-        update: { name: teacher.name, role: 'teacher' },
-        create: { email, password: hash, name: teacher.name, role: 'teacher' },
+        update: { name: teacher.name, role: 'teacher', teacherId: teacher.id },
+        create: {
+          email,
+          password: hash,
+          name: teacher.name,
+          role: 'teacher',
+          teacherId: teacher.id,
+        },
       })
+      teacherCredentials.push({ email, initialPassword })
     }
 
     const [t1, t2, t3, t4, t5] = teachers
@@ -80,6 +89,13 @@ export async function GET(request: NextRequest) {
       usersCreated: {
         parents: 2,
         teachers: teachers.length,
+      },
+      developmentCredentials: {
+        parents: [
+          { email: 'parent1@test.com', initialPassword: parentPassword1 },
+          { email: 'parent2@test.com', initialPassword: parentPassword2 },
+        ],
+        teachers: teacherCredentials,
       },
     })
   } catch (e: unknown) {

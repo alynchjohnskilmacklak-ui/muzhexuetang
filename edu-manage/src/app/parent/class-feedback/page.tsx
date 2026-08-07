@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { ClassFeedbackClient } from './client'
 import { parentLinkedStudentWhere, visibleClassroomFeedbackWhere, visibleTeacherWhere } from '@/lib/business-visibility'
 import { resolveFeedbackImageVariants, variantsForFeedback } from '@/lib/file-asset-variants'
+import { redactFeedbackForParent } from '@/lib/classroom-feedback/access'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,9 +27,8 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
   const scopedStudentIds = childId && studentIds.includes(childId) ? [childId] : studentIds
 
   // If feedbackId is provided, fetch the specific feedback for auto-open
-  let highlightedFeedback: any = null
-  if (feedbackId && scopedStudentIds.length > 0) {
-    highlightedFeedback = await prisma.classroomFeedback.findFirst({
+  const highlightedFeedback = feedbackId && scopedStudentIds.length > 0
+    ? await prisma.classroomFeedback.findFirst({
       where: {
         id: feedbackId,
         ...visibleClassroomFeedbackWhere,
@@ -37,14 +37,19 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
       },
       include: {
         teacher: { select: { id: true, name: true, subjects: true } },
+        parentMessages: {
+          where: { parentId: userId },
+          include: { replies: { orderBy: { createdAt: 'asc' } } },
+          take: 1,
+        },
         classLesson: {
           include: {
             group: { include: { course: true, room: true } },
           },
         },
       },
-    })
-  }
+      })
+    : null
 
   const feedbacks = await prisma.classroomFeedback.findMany({
     where: {
@@ -54,13 +59,22 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
     },
     include: {
       teacher: { select: { id: true, name: true, subjects: true } },
+      parentMessages: {
+        where: { parentId: userId },
+        include: { replies: { orderBy: { createdAt: 'asc' } } },
+        take: 1,
+      },
       classLesson: { include: { group: { include: { course: true, teacherAssignments: { select: { teacherId: true, subject: true } } } } } },
     },
     orderBy: { createdAt: 'desc' },
     take: 50,
   })
 
-  const allImageUrls = [...feedbacks, ...(highlightedFeedback ? [highlightedFeedback] : [])]
+  const parentFeedbacks = feedbacks.map((feedback) => redactFeedbackForParent(feedback, scopedStudentIds))
+  const parentHighlightedFeedback = highlightedFeedback
+    ? redactFeedbackForParent(highlightedFeedback, scopedStudentIds)
+    : null
+  const allImageUrls = [...parentFeedbacks, ...(parentHighlightedFeedback ? [parentHighlightedFeedback] : [])]
     .flatMap((feedback) => feedback.imageUrls)
   const imageVariantMap = await resolveFeedbackImageVariants(prisma, allImageUrls)
   const withImages = <T extends { imageUrls: string[] }>(feedback: T) => ({
@@ -69,7 +83,7 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
   })
 
   return <ClassFeedbackClient
-    feedbacks={JSON.parse(JSON.stringify(feedbacks.map(withImages)))}
-    highlightedFeedback={highlightedFeedback ? JSON.parse(JSON.stringify(withImages(highlightedFeedback))) : null}
+    feedbacks={JSON.parse(JSON.stringify(parentFeedbacks.map(withImages)))}
+    highlightedFeedback={parentHighlightedFeedback ? JSON.parse(JSON.stringify(withImages(parentHighlightedFeedback))) : null}
   />
 }

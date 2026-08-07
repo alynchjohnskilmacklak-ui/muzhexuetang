@@ -66,7 +66,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       courseName: lesson.group?.course?.name || '',
       subject: lesson.subject || lesson.group?.course?.subject || '',
       grade: lesson.group?.course?.grade || '',
-      courseType: lesson.group?.course?.type || 'GROUP',
+      courseType: lesson.group?.teachingType || lesson.group?.course?.type || 'GROUP',
       headcount: lesson.group?.enrollments?.length || 0,
       startTime: lesson.startTime,
     })

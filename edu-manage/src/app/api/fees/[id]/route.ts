@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getRequestPrisma } from '@/lib/prisma'
+import { getPrismaForDivision, getRequestPrisma, isDualDbEnabled } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { revalidatePath } from 'next/cache'
 
 export const dynamic = 'force-dynamic'
+
+async function requestFeePrisma(req: NextRequest) {
+  const division = new URL(req.url).searchParams.get('division') === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+  return isDualDbEnabled() ? getPrismaForDivision(division) : getRequestPrisma()
+}
 
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await auth()
@@ -12,7 +17,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
 
-  const db = await getRequestPrisma()
+  const db = await requestFeePrisma(req)
   const { id } = await params
   const body = await req.json()
 
@@ -30,7 +35,11 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   if (notes !== undefined) data.notes = notes
   if (paidAt !== undefined) data.paidAt = paidAt ? new Date(paidAt) : null
   if (courseId !== undefined) data.courseId = courseId
-  if (studentId !== undefined) data.studentId = studentId
+  if (studentId !== undefined) {
+    const student = await db.student.findUnique({ where: { id: studentId }, select: { id: true } })
+    if (!student) return NextResponse.json({ error: '学生不存在' }, { status: 404 })
+    data.studentId = studentId
+  }
 
   const updated = await db.fee.update({ where: { id }, data })
 
@@ -49,7 +58,7 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
 
-  const db = await getRequestPrisma()
+  const db = await requestFeePrisma(req)
   const { id } = await params
 
   const existing = await db.fee.findUnique({ where: { id }, include: { student: { select: { name: true } } } })

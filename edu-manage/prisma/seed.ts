@@ -28,10 +28,14 @@ async function main() {
     update: { password: huHash, name: '胡思同', role: 'teacher', status: 'active', division: 'JUNIOR' },
     create: { email: 'husitong@tea.com', password: huHash, name: '胡思同', role: 'teacher', status: 'active', division: 'JUNIOR' },
   })
-  await prisma.teacher.upsert({
+  const huTeacher = await prisma.teacher.upsert({
     where: { id: 't6' },
     update: { name: '胡思同', email: 'husitong@tea.com', phone: '13800001006', status: 'ACTIVE', division: 'JUNIOR' },
     create: { id: 't6', name: '胡思同', gender: '男', phone: '13800001006', email: 'husitong@tea.com', subjects: '数学', bio: '8年数学教学经验', employmentType: 'FULL_TIME', education: '硕士', university: '南京大学', major: '应用数学', monthlyHours: 36, division: 'JUNIOR' },
+  })
+  await prisma.user.update({
+    where: { email: 'husitong@tea.com' },
+    data: { teacherId: huTeacher.id },
   })
 
   // ── 收费类型 ──────────────────────────────────────────────

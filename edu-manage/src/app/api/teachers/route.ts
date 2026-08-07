@@ -7,13 +7,9 @@ import { chineseToPinyin } from '@/lib/pinyin'
 import bcrypt from 'bcryptjs'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { generateTemporaryPassword } from '@/lib/temporary-password'
 
 export const dynamic = 'force-dynamic'
-
-function teacherInitialPassword(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  return digits.slice(-6)
-}
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
@@ -115,9 +111,9 @@ export async function POST(req: NextRequest) {
     const phone = typeof body.phone === 'string' ? body.phone.trim() : ''
     const subjects = typeof body.subjects === 'string' ? body.subjects.trim() : ''
 
-    if (!name) return NextResponse.json({ error: '姓名不能为空' }, { status: 400 })
-    if (!phone) return NextResponse.json({ error: '手机号不能为空' }, { status: 400 })
-    if (!subjects) return NextResponse.json({ error: '至少选择一个授课科目' }, { status: 400 })
+    if (!name) return NextResponse.json({ error: '姓名不能为空', field: 'name' }, { status: 400 })
+    if (!phone) return NextResponse.json({ error: '手机号不能为空', field: 'phone' }, { status: 400 })
+    if (!subjects) return NextResponse.json({ error: '至少选择一个授课科目', field: 'subjects' }, { status: 400 })
 
     const teacherData: Prisma.TeacherCreateInput = {
       name,
@@ -142,55 +138,93 @@ export async function POST(req: NextRequest) {
 
     const existingTeacher = await prisma.teacher.findUnique({ where: { phone } })
     if (existingTeacher && existingTeacher.status !== 'RESIGNED') {
-      return NextResponse.json({ error: '该手机号已有在职教师，请更换手机号或编辑原教师' }, { status: 409 })
+      return NextResponse.json({
+        error: `手机号 ${phone} 已绑定在职教师“${existingTeacher.name}”，请修改手机号或编辑已有教师档案`,
+        field: 'phone',
+        code: 'TEACHER_PHONE_EXISTS',
+      }, { status: 409 })
     }
-
-    const teacher = existingTeacher
-      ? await prisma.teacher.update({
-          where: { id: existingTeacher.id },
-          data: { ...teacherData, status: 'ACTIVE' },
-        })
-      : await prisma.teacher.create({ data: teacherData })
-
-    const teacherEmail = `${chineseToPinyin(teacher.name)}@tea.com`
-    const initialPwd = teacherInitialPassword(teacher.phone)
-    const pwdHash = await bcrypt.hash(initialPwd, 10)
-
-    await prisma.user.upsert({
-      where: { email: teacherEmail },
-      update: { name: teacher.name },
-      create: {
-        email: teacherEmail,
-        password: pwdHash,
-        name: teacher.name,
-        role: 'teacher',
-        status: 'active',
-        division: (teacherData.division as string) || 'JUNIOR',
-      },
-    })
 
     const userId = (session.user as { id?: string }).id
-    if (userId) {
-      try {
-        await prisma.activityLog.create({
-          data: { userId, action: existingTeacher ? '恢复教师' : '添加教师', detail: teacher.name },
+    if (!userId) return NextResponse.json({ error: '登录状态无效，请重新登录' }, { status: 401 })
+
+    const initialPassword = generateTemporaryPassword()
+    const result = await prisma.$transaction(async (tx) => {
+      const teacher = existingTeacher
+        ? await tx.teacher.update({
+            where: { id: existingTeacher.id },
+            data: { ...teacherData, status: 'ACTIVE' },
+          })
+        : await tx.teacher.create({ data: teacherData })
+
+      const teacherEmail = `${chineseToPinyin(teacher.name)}@tea.com`
+      const existingAccount = await tx.user.findUnique({ where: { email: teacherEmail } })
+      const account = existingAccount
+        ? await tx.user.update({
+            where: { id: existingAccount.id },
+            data: {
+              name: teacher.name,
+              role: 'teacher',
+              status: 'active',
+              division: (teacherData.division as string) || 'JUNIOR',
+              teacherId: teacher.id,
+            },
+          })
+        : await tx.user.create({
+            data: {
+              email: teacherEmail,
+              password: await bcrypt.hash(initialPassword, 12),
+              name: teacher.name,
+              role: 'teacher',
+              status: 'active',
+              division: (teacherData.division as string) || 'JUNIOR',
+              teacherId: teacher.id,
+            },
+          })
+
+      await tx.activityLog.create({
+        data: {
+          userId,
+          teacherId: teacher.id,
+          action: existingTeacher ? '恢复教师' : '添加教师',
+          detail: teacher.name,
+          entityType: 'Teacher',
+          entityId: teacher.id,
+        },
+      })
+      if (!existingAccount) {
+        await tx.activityLog.create({
+          data: {
+            userId,
+            teacherId: teacher.id,
+            action: 'PASSWORD_INITIALIZED',
+            detail: `创建教师登录账号：${teacher.name}（${teacherEmail}）`,
+            entityType: 'User',
+            entityId: account.id,
+            metadata: { source: 'TEACHER_CREATE' },
+          },
         })
-      } catch (logError) {
-        console.error('[teachers:create] activity log skipped', logError)
       }
-    } else {
-      console.error('[teachers:create] session user id missing; skipped activity log')
-    }
+      return { teacher, teacherEmail, issuedPassword: existingAccount ? null : initialPassword }
+    })
 
     revalidatePath('/dashboard')
     revalidatePath('/teachers')
 
-    return NextResponse.json(teacher, { status: existingTeacher ? 200 : 201 })
+    return NextResponse.json({
+      ...result.teacher,
+      loginEmail: result.teacherEmail,
+      initialPassword: result.issuedPassword,
+    }, { status: existingTeacher ? 200 : 201 })
   } catch (error: unknown) {
     console.error('[teachers:create] failed', error)
     if ((error as { code?: string }).code === 'P2002') {
-      return NextResponse.json({ error: '手机号已存在' }, { status: 409 })
+      return NextResponse.json({
+        error: '教师手机号或账号已经存在，请检查后重试',
+        field: 'phone',
+        code: 'TEACHER_UNIQUE_CONFLICT',
+      }, { status: 409 })
     }
-    return NextResponse.json({ error: '添加教师失败，请查看服务器日志' }, { status: 500 })
+    return NextResponse.json({ error: '添加教师失败，请稍后重试' }, { status: 500 })
   }
 }

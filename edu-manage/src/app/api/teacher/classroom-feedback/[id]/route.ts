@@ -47,6 +47,7 @@ export const GET = apiHandler(async (
       ? `${feedback.classLesson.startTime}-${feedback.classLesson.endTime}`
       : null,
     knowledgePoints: feedback.knowledgePoints,
+    lessonContent: feedback.lessonContent,
     summary: feedback.summary,
     homework: feedback.homework,
     imageUrls: feedback.imageUrls,

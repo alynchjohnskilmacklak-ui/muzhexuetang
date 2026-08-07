@@ -6,6 +6,7 @@ import { validateScheduleStudentCount } from '@/lib/schedule-class-type'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { apiHandler } from '@/lib/api-handler'
 import { normalizeWritableDivision } from '@/lib/division'
+import { intensiveStudentCountError, toIntensiveTeachingType } from '@/lib/intensive-class'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,8 +29,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const {
       title, courseId, teacherId, roomId,
       startDate, startTimeVal, endTimeVal,
-      color, notes, classType, studentIds,
-      classGroupId, groupName,
+      notes, classType, studentIds,
+      classGroupId,
     } = body
 
     if (!title || !teacherId || !startDate || !startTimeVal || !endTimeVal) {
@@ -54,6 +55,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const requestedDivision = normalizeWritableDivision(body.division)
 
     const dedupedStudentIds = [...new Set(Array.isArray(studentIds) ? studentIds : [])] as string[]
+    const intensiveTeachingType = toIntensiveTeachingType(classType)
     const room = roomId
       ? await prisma.room.findUnique({ where: { id: roomId }, select: { capacity: true } })
       : null
@@ -65,6 +67,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (studentCountError) {
       return NextResponse.json({ error: studentCountError }, { status: 400 })
     }
+    if (intensiveTeachingType) {
+      const intensiveCountError = intensiveStudentCountError(intensiveTeachingType, dedupedStudentIds.length)
+      if (intensiveCountError) {
+        return NextResponse.json({ error: intensiveCountError }, { status: 400 })
+      }
+    }
 
     // Pre-transaction conflict check against ClassLesson
     const allConflicts: Array<{ type: string; lessonId: string; courseName: string; timeRange: string; roomName?: string }> = []
@@ -73,7 +81,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       const conflicts = await checkScheduleConflict({
         teacherId,
         studentId: isStudentCheck ? sid : undefined,
-        roomId: roomId || undefined,
+        roomId: intensiveTeachingType ? undefined : roomId || undefined,
         date: startDate,
         startTime: startTimeVal,
         endTime: endTimeVal,
@@ -118,14 +126,26 @@ export const POST = apiHandler(async (req: NextRequest) => {
       const groupName = body.groupName || `${course.name}·${teacher.name}·${startDate}`
       let group = classGroupId
         ? await tx.classGroup.findFirst({ where: { id: classGroupId, status: { not: 'ARCHIVED' } } })
-        : await tx.classGroup.findFirst({ where: { name: groupName, teacherId, courseId, status: { not: 'ARCHIVED' }, division: lessonDivision } })
+        : await tx.classGroup.findFirst({
+            where: {
+              name: groupName,
+              teacherId,
+              courseId,
+              status: { not: 'ARCHIVED' },
+              division: lessonDivision,
+              intensiveMode: intensiveTeachingType ? 'INTENSIVE' : 'NORMAL',
+            },
+          })
+      if (group && intensiveTeachingType && (group.intensiveMode !== 'INTENSIVE' || group.teachingType !== intensiveTeachingType)) {
+        throw { status: 400, message: '所选班级与突击班类型不一致' }
+      }
       if (!group) {
         group = await tx.classGroup.create({
           data: {
             name: groupName,
             courseId,
             teacherId,
-            roomId: roomId || null,
+            roomId: intensiveTeachingType ? null : roomId || null,
             maxStudents: Math.max(1, dedupedStudentIds.length),
             startDate: lessonDate,
             totalLessons: 1,
@@ -134,9 +154,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
             recurringDays: [],
             status: 'ACTIVE',
             division: lessonDivision,
+            intensiveMode: intensiveTeachingType ? 'INTENSIVE' : 'NORMAL',
+            teachingType: intensiveTeachingType,
           },
         })
-      } else if (roomId && group.roomId !== roomId) {
+      } else if (!intensiveTeachingType && roomId && group.roomId !== roomId) {
         // 复用已有 group 但教室不同时，更新为本次值
         await tx.classGroup.update({ where: { id: group.id }, data: { roomId } })
       }
@@ -170,6 +192,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
           status: 'SCHEDULED',
           note: notes || null,
           division: lessonDivision,
+          isManual: intensiveTeachingType ? true : undefined,
+          plannedMinutes: intensiveTeachingType ? lessonMinutes : null,
+          intensiveReviewStatus: intensiveTeachingType ? 'DRAFT' : 'NOT_REQUIRED',
         },
         include: {
           group: {
@@ -184,6 +209,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
         },
       })
 
+      if (intensiveTeachingType && dedupedStudentIds.length) {
+        await tx.classLessonStudent.createMany({
+          data: dedupedStudentIds.map((studentId) => ({ lessonId: lesson.id, studentId })),
+          skipDuplicates: true,
+        })
+      }
+
       return lesson
     })
 
@@ -191,11 +223,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
     revalidatePath('/teacher/schedule')
 
     return NextResponse.json({ success: true, id: result.id, lesson: result }, { status: 201 })
-  } catch (e: any) {
-    if (e?.status) {
-      const body: Record<string, unknown> = { error: e.message }
-      if (e.conflicts) body.conflicts = e.conflicts
-      return NextResponse.json(body, { status: e.status })
+  } catch (e: unknown) {
+    const routeError = e as { status?: number; message?: string; conflicts?: unknown }
+    if (routeError.status) {
+      const body: Record<string, unknown> = { error: routeError.message }
+      if (routeError.conflicts) body.conflicts = routeError.conflicts
+      return NextResponse.json(body, { status: routeError.status })
     }
     console.error('[schedules:create]', e)
     return NextResponse.json({ error: '创建排课失败' }, { status: 500 })

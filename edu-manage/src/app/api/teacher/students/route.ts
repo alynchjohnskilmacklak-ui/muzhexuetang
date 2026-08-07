@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { differenceInDays } from 'date-fns'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
+import { calculateApprovedIntensiveHours, calculateTaughtHours } from '@/lib/student-taught-hours'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +27,12 @@ export const GET = apiHandler(async () => {
           },
         },
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        grade: true,
+        gender: true,
+        school: true,
         enrollments: {
           where: {
             status: 'ACTIVE',
@@ -39,13 +45,25 @@ export const GET = apiHandler(async () => {
               ],
             },
           },
-          include: {
+          select: {
+            id: true,
+            status: true,
+            remainHours: true,
+            totalHours: true,
+            usedHours: true,
             group: {
-              include: {
-                course: true,
+              select: {
+                id: true,
+                name: true,
+                status: true,
+                lessonMinutes: true,
+                intensiveMode: true,
+                course: {
+                  select: { id: true, name: true, subject: true, type: true, isActive: true },
+                },
                 teacherAssignments: {
                   where: { teacherId: teacher.id },
-                  include: { teacher: { select: { id: true, name: true, subjects: true } } },
+                  select: { subject: true },
                 },
               },
             },
@@ -53,7 +71,7 @@ export const GET = apiHandler(async () => {
         },
         attendances: {
           where: { createdAt: { gte: monthStart }, lesson: { OR: [{ teacherId: teacher.id }, { group: { teacherId: teacher.id } }, { group: { teacherAssignments: { some: { teacherId: teacher.id } } } }] } },
-          select: { id: true, status: true, createdAt: true, lesson: { select: { id: true, lessonDate: true, startTime: true, endTime: true, group: { select: { name: true, course: { select: { name: true, subject: true } } } } } } },
+          select: { status: true },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -68,6 +86,45 @@ export const GET = apiHandler(async () => {
       orderBy: { createdAt: 'desc' },
       select: { studentIds: true, createdAt: true },
     })
+    const approvedIntensiveAttendances = students.length
+      ? await prisma.attendance.findMany({
+          where: {
+            studentId: { in: students.map((student) => student.id) },
+            lesson: {
+              intensiveReviewStatus: 'APPROVED',
+              group: {
+                intensiveMode: 'INTENSIVE',
+                status: { not: 'ARCHIVED' },
+                course: { isActive: true },
+              },
+              OR: [
+                { teacherId: teacher.id },
+                {
+                  teacherId: null,
+                  group: {
+                    OR: [
+                      { teacherId: teacher.id },
+                      { teacherAssignments: { some: { teacherId: teacher.id } } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          select: {
+            studentId: true,
+            status: true,
+            actualMinutes: true,
+            lesson: { select: { actualMinutes: true } },
+          },
+        })
+      : []
+    const approvedIntensiveByStudent = new Map<string, typeof approvedIntensiveAttendances>()
+    for (const attendance of approvedIntensiveAttendances) {
+      const current = approvedIntensiveByStudent.get(attendance.studentId) || []
+      current.push(attendance)
+      approvedIntensiveByStudent.set(attendance.studentId, current)
+    }
     const lastFeedbackMap = new Map<string, Date>()
     for (const feedback of lastFeedbacks) {
       for (const studentId of feedback.studentIds) {
@@ -83,6 +140,10 @@ export const GET = apiHandler(async () => {
       ))
       const remainHours = activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.remainHours || 0), 0)
       const totalHours = activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.totalHours || 0), 0)
+      const taughtHours = calculateTaughtHours(
+        activeEnrollments,
+        calculateApprovedIntensiveHours(approvedIntensiveByStudent.get(student.id) || []),
+      )
       const attendanceTotal = student.attendances.length
       const present = student.attendances.filter((attendance) => attendance.status === 'PRESENT').length
       const lastFeedback = lastFeedbackMap.get(student.id) || null
@@ -92,10 +153,35 @@ export const GET = apiHandler(async () => {
           ? 'SMALL_GROUP'
           : 'GROUP'
       return {
-        ...student,
-        enrollments: activeEnrollments,
+        id: student.id,
+        name: student.name,
+        grade: student.grade,
+        gender: student.gender,
+        school: student.school,
+        enrollments: activeEnrollments.map((enrollment) => ({
+          id: enrollment.id,
+          remainHours: enrollment.remainHours,
+          totalHours: enrollment.totalHours,
+          usedHours: enrollment.usedHours,
+          group: enrollment.group ? {
+            id: enrollment.group.id,
+            name: enrollment.group.name,
+            lessonMinutes: enrollment.group.lessonMinutes,
+            intensiveMode: enrollment.group.intensiveMode,
+            course: enrollment.group.course ? {
+              id: enrollment.group.course.id,
+              name: enrollment.group.course.name,
+              subject: enrollment.group.course.subject,
+              type: enrollment.group.course.type,
+            } : null,
+            teacherAssignments: enrollment.group.teacherAssignments.map((assignment) => ({
+              subject: assignment.subject,
+            })),
+          } : null,
+        })),
         remainHours,
         totalHours,
+        taughtHours,
         attendanceRate: attendanceTotal ? Math.round((present / attendanceTotal) * 100) : 100,
         lastFeedback,
         daysSinceLastFeedback: lastFeedback ? differenceInDays(now, lastFeedback) : 999,

@@ -1,20 +1,21 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import {
-  App, Button, Card, Col, DatePicker, Descriptions, Divider, Empty,
+  App, Button, Card, Col, DatePicker,
   Form, Input, InputNumber, Modal, Popconfirm, Row, Select, Space,
   Statistic, Table, Tag, Typography,
 } from 'antd'
 import {
   DeleteOutlined, DownloadOutlined, EditOutlined,
-  PlusOutlined, SearchOutlined, UserOutlined,
+  PlusOutlined,
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
-const { Text, Title } = Typography
+const { Text } = Typography
 const { RangePicker } = DatePicker
 
 const DIVISION_OPTIONS = [
@@ -23,7 +24,18 @@ const DIVISION_OPTIONS = [
   { label: '高中部', value: 'SENIOR' },
 ]
 
-const fetcher = (url: string) => fetch(url).then(r => r.json())
+const fetcher = async (url: string) => {
+  const response = await fetch(url)
+  const payload = await response.json()
+  if (!response.ok) throw new Error(payload.error || '加载失败')
+  return payload
+}
+
+type StudentOption = {
+  label: string
+  value: string
+  division: 'JUNIOR' | 'SENIOR'
+}
 
 interface FeeRow {
   id: string
@@ -67,6 +79,7 @@ interface StudentAggregate {
 
 export function FeesClient() {
   const { message } = App.useApp()
+  const isMobile = useIsMobile() ?? false
   const [division, setDivision] = useState('all')
   const [type, setType] = useState<string>()
   const [campus, setCampus] = useState<string>()
@@ -84,6 +97,7 @@ export function FeesClient() {
   // Student aggregate modal
   const [studentModalOpen, setStudentModalOpen] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null)
+  const [selectedStudentDivision, setSelectedStudentDivision] = useState<'JUNIOR' | 'SENIOR'>('JUNIOR')
 
   const params = new URLSearchParams()
   params.set('division', division)
@@ -97,7 +111,7 @@ export function FeesClient() {
   params.set('page', String(page))
   params.set('limit', String(pageSize))
 
-  const { data, error, isLoading, mutate } = useSWR<FeeListData>(
+  const { data, isLoading, mutate } = useSWR<FeeListData>(
     `/api/fees?${params.toString()}`,
     fetcher,
     { refreshInterval: 0, revalidateOnFocus: false },
@@ -105,7 +119,7 @@ export function FeesClient() {
 
   // Student aggregate
   const { data: studentAgg } = useSWR<StudentAggregate>(
-    selectedStudent ? `/api/fees?studentId=${selectedStudent}&aggregate=true&division=${division}` : null,
+    selectedStudent ? `/api/fees?studentId=${selectedStudent}&aggregate=true&division=${selectedStudentDivision}` : null,
     fetcher,
   )
 
@@ -116,19 +130,32 @@ export function FeesClient() {
   )
 
   // Students for search
-  const [studentOptions, setStudentOptions] = useState<{ label: string; value: string }[]>([])
+  const [studentOptions, setStudentOptions] = useState<StudentOption[]>([])
   const [searchingStudents, setSearchingStudents] = useState(false)
 
   const handleStudentSearch = useCallback(async (name: string) => {
-    if (!name || name.length < 1) { setStudentOptions([]); return }
     setSearchingStudents(true)
     try {
-      const res = await fetch(`/api/students?search=${encodeURIComponent(name)}&limit=20&division=${division === 'all' ? '' : division}`)
+      const res = await fetch(`/api/fees/students?q=${encodeURIComponent(name)}&limit=50&division=${division}`)
       const json = await res.json()
-      const list = json.students || json.data || []
-      setStudentOptions(list.map((s: { id: string; name: string }) => ({ label: s.name, value: s.id })))
+      if (!res.ok) throw new Error(json.error || '学生加载失败')
+      const list = json.students || []
+      setStudentOptions(list.map((student: { id: string; name: string; grade?: string | null; division: 'JUNIOR' | 'SENIOR' }) => ({
+        label: `${student.name} · ${student.grade || '未填年级'} · ${student.division === 'SENIOR' ? '高中部' : '初中部'}`,
+        value: student.id,
+        division: student.division,
+      })))
+    } catch (studentError) {
+      message.error(studentError instanceof Error ? studentError.message : '学生加载失败')
     } finally { setSearchingStudents(false) }
-  }, [division])
+  }, [division, message])
+
+  const openCreateModal = () => {
+    setEditingId(null)
+    form.resetFields()
+    setModalOpen(true)
+    void handleStudentSearch('')
+  }
 
   // Unique campuses and types from data
   const campusOptions = useMemo(() => {
@@ -142,7 +169,11 @@ export function FeesClient() {
       render: (v: string | null) => v ? dayjs(v).format('YYYY-MM-DD') : '-' },
     { title: '学生', dataIndex: ['student', 'name'], key: 'student', width: 100,
       render: (name: string, record: FeeRow) => (
-        <a onClick={() => { setSelectedStudent(record.studentId); setStudentModalOpen(true) }}>
+        <a onClick={() => {
+          setSelectedStudent(record.studentId)
+          setSelectedStudentDivision(record.student.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR')
+          setStudentModalOpen(true)
+        }}>
           {name}
         </a>
       ) },
@@ -163,6 +194,13 @@ export function FeesClient() {
           <Button type="link" size="small" icon={<EditOutlined />}
             onClick={() => {
               setEditingId(r.id)
+              setStudentOptions((options) => options.some((option) => option.value === r.studentId)
+                ? options
+                : [{
+                  label: `${r.student.name} · ${r.student.division === 'SENIOR' ? '高中部' : '初中部'}`,
+                  value: r.studentId,
+                  division: r.student.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR',
+                }, ...options])
               form.setFieldsValue({
                 studentId: r.studentId,
                 studentName: r.student.name,
@@ -177,7 +215,12 @@ export function FeesClient() {
               setModalOpen(true)
             }} />
           <Popconfirm title="确定删除此记录？" onConfirm={async () => {
-            await fetch(`/api/fees/${r.id}`, { method: 'DELETE' })
+            const response = await fetch(`/api/fees/${r.id}?division=${r.student.division}`, { method: 'DELETE' })
+            if (!response.ok) {
+              const payload = await response.json()
+              message.error(payload.error || '删除失败')
+              return
+            }
             message.success('已删除')
             mutate()
           }}>
@@ -192,6 +235,14 @@ export function FeesClient() {
     try {
       const values = await form.validateFields()
       setSubmitting(true)
+      const selectedOption = studentOptions.find((option) => option.value === values.studentId)
+      const recordDivision = editingId
+        ? (selectedOption?.division || selectedStudentDivision)
+        : selectedOption?.division
+      if (!recordDivision) {
+        message.error('无法确认学生所属学部，请重新选择学生')
+        return
+      }
       const body = {
         studentId: values.studentId,
         type: values.type || '其他',
@@ -201,8 +252,9 @@ export function FeesClient() {
         operator: values.operator || null,
         notes: values.notes || null,
         paidAt: values.paidAt ? values.paidAt.format('YYYY-MM-DD') : undefined,
+        division: recordDivision,
       }
-      const url = editingId ? `/api/fees/${editingId}` : '/api/fees'
+      const url = editingId ? `/api/fees/${editingId}?division=${recordDivision}` : '/api/fees'
       const method = editingId ? 'PATCH' : 'POST'
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       if (!res.ok) {
@@ -316,11 +368,15 @@ export function FeesClient() {
             options={campusOptions} style={{ width: 120 }} />
           <Select allowClear showSearch placeholder="搜索学生" value={studentSearch || undefined}
             onSearch={handleStudentSearch} onChange={(v) => { setStudentSearch(v || ''); setPage(1) }}
+            onDropdownVisibleChange={(open) => { if (open) void handleStudentSearch('') }}
             filterOption={false} options={studentOptions} loading={searchingStudents}
             style={{ width: 180 }} />
-          <RangePicker value={dateRange as any} onChange={(v) => { setDateRange(v as any); setPage(1) }}
+          <RangePicker value={dateRange} onChange={(value) => {
+            setDateRange(value?.[0] && value?.[1] ? [value[0], value[1]] : null)
+            setPage(1)
+          }}
             placeholder={['开始日期', '结束日期']} allowClear />
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingId(null); form.resetFields(); setModalOpen(true) }}>
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreateModal}>
             录入收费
           </Button>
           <Button icon={<DownloadOutlined />} onClick={handleExport}>导出</Button>
@@ -373,46 +429,52 @@ export function FeesClient() {
         onCancel={() => { setModalOpen(false); setEditingId(null); form.resetFields() }}
         confirmLoading={submitting}
         destroyOnClose
-        width={520}
+        width={isMobile ? 'calc(100vw - 24px)' : 560}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="studentId" label="学生" rules={[{ required: true, message: '请选择学生' }]}>
             <Select showSearch placeholder="按名字搜索学生" filterOption={false}
-              onSearch={handleStudentSearch} options={studentOptions} loading={searchingStudents} />
+              onSearch={handleStudentSearch}
+              onDropdownVisibleChange={(open) => { if (open) void handleStudentSearch('') }}
+              notFoundContent={searchingStudents ? '正在加载学生…' : '没有匹配的学生'}
+              options={studentOptions}
+              loading={searchingStudents}
+              optionRender={(option) => <div style={{ whiteSpace: 'normal', lineHeight: 1.45 }}>{option.label}</div>}
+            />
           </Form.Item>
           <Row gutter={12}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="type" label="收费类型" rules={[{ required: true }]}>
                 <Select placeholder="选择类型" options={
                   (feeTypes || []).map((t: { name: string }) => ({ label: t.name, value: t.name }))
                 } />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="paidAt" label="收费日期">
                 <DatePicker style={{ width: '100%' }} />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={12}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="amount" label="费用" rules={[{ required: true, message: '请输入金额' }]}>
                 <InputNumber inputMode="decimal" min={0} prefix="¥" style={{ width: '100%' }} />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="hours" label="课时数">
                 <InputNumber inputMode="decimal" min={0} style={{ width: '100%' }} placeholder="0" />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={12}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="campus" label="校区">
                 <Input placeholder="如: 35校区" />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="operator" label="经办人">
                 <Input placeholder="经办人姓名" />
               </Form.Item>

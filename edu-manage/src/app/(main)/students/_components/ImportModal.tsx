@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Modal, Button, Upload, Table, message, Alert } from 'antd'
-import { DownloadOutlined, InboxOutlined } from '@ant-design/icons'
+import { Modal, Button, Upload, Table, message, Alert, Typography } from 'antd'
+import { DownloadOutlined, InboxOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
 import * as XLSX from 'xlsx'
 
 const { Dragger } = Upload
@@ -17,6 +17,7 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
   const [rows, setRows] = useState<Array<Record<string, string>>>([])
   const [errors, setErrors] = useState<string[]>([])
   const [importing, setImporting] = useState(false)
+  const [credentials, setCredentials] = useState<Array<{ name: string; email: string; password: string }>>([])
 
   const handleParse = (file: File) => {
     const reader = new FileReader()
@@ -40,6 +41,7 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
     if (errors.length > 0) { message.warning('请先修正错误行再导入'); return }
     setImporting(true)
     let success = 0, fail = 0
+    const issued: Array<{ name: string; email: string; password: string }> = []
     for (const row of rows) {
       try {
         const res = await fetch('/api/students', {
@@ -55,11 +57,29 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
             source: '批量导入',
           }),
         })
-        if (res.ok) success++; else fail++
+        const payload = await res.json().catch(() => ({}))
+        if (res.ok) {
+          success++
+          if (payload.parentPlainPassword && payload.parentEmail) {
+            issued.push({
+              name: row['家长姓名'] || `${row['姓名']}家长`,
+              email: payload.parentEmail,
+              password: payload.parentPlainPassword,
+            })
+          }
+        } else fail++
       } catch { fail++ }
     }
     message.success(`导入完成：成功 ${success} 条，失败 ${fail} 条`)
     setImporting(false)
+    setCredentials(issued)
+    if (!issued.length) handleClose()
+  }
+
+  const handleClose = () => {
+    setRows([])
+    setErrors([])
+    setCredentials([])
     onClose()
   }
 
@@ -72,9 +92,57 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
 
   const columns = TEMPLATE_HEADERS.map(h => ({ title: h, dataIndex: h, key: h }))
 
+  const downloadCredentials = () => {
+    const ws = XLSX.utils.json_to_sheet(credentials.map((item) => ({
+      家长姓名: item.name,
+      登录账号: item.email,
+      初始密码: item.password,
+      安全提示: '首次登录后请立即修改密码',
+    })))
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, '新建家长账号')
+    XLSX.writeFile(wb, `家长初始账号_${new Date().toISOString().slice(0, 10)}.xlsx`)
+  }
+
   return (
-    <Modal title="批量导入学员" open={open} onCancel={onClose} onOk={handleImport} okText="确认导入"
-      width={720} confirmLoading={importing} okButtonProps={{ disabled: rows.length === 0 }}>
+    <Modal
+      title={credentials.length ? '保存新建家长账号' : '批量导入学员'}
+      open={open}
+      onCancel={handleClose}
+      onOk={credentials.length ? handleClose : handleImport}
+      okText={credentials.length ? '我已安全保存' : '确认导入'}
+      width={720}
+      confirmLoading={importing}
+      okButtonProps={{ disabled: !credentials.length && rows.length === 0 }}
+    >
+      {credentials.length ? (
+        <>
+          <Alert
+            type="warning"
+            showIcon
+            icon={<SafetyCertificateOutlined />}
+            message="初始密码仅在本次导入后显示"
+            description="请立即下载并通过安全方式交给家长。关闭窗口后，管理端只能查看密码变更记录，不能再次查看明文。"
+            style={{ marginBottom: 16 }}
+          />
+          <Button type="primary" icon={<DownloadOutlined />} onClick={downloadCredentials} style={{ marginBottom: 16 }}>
+            下载初始账号表
+          </Button>
+          <Table
+            size="small"
+            rowKey="email"
+            pagination={false}
+            scroll={{ x: 560 }}
+            dataSource={credentials}
+            columns={[
+              { title: '家长', dataIndex: 'name', width: 120 },
+              { title: '登录账号', dataIndex: 'email', width: 240, render: (value: string) => <Typography.Text copyable>{value}</Typography.Text> },
+              { title: '初始密码', dataIndex: 'password', width: 180, render: (value: string) => <Typography.Text strong copyable>{value}</Typography.Text> },
+            ]}
+          />
+        </>
+      ) : (
+        <>
       <Button icon={<DownloadOutlined />} onClick={downloadTemplate} style={{ marginBottom: 16 }}>
         下载导入模板
       </Button>
@@ -93,6 +161,8 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
       {rows.length > 0 && (
         <Table columns={columns} dataSource={rows.map((r, i) => ({ ...r, key: i }))}
           size="small" scroll={{ x: 600 }} pagination={false} />
+      )}
+        </>
       )}
     </Modal>
   )

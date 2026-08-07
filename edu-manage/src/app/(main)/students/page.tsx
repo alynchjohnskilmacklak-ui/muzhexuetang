@@ -9,6 +9,7 @@ import { ImportModal } from './_components/ImportModal'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
+import { hasLowPrepaidHours } from '@/lib/student-billing-status'
 
 const { Text } = Typography
 
@@ -46,15 +47,18 @@ type Student = {
   enrolledAt: string
   remainHours: number
   totalHours: number
+  taughtHours: number
   source?: string | null
   courseType?: string | null
   enrollments?: Array<{
     id: string
     remainHours?: number | null
     totalHours?: number | null
+    usedHours?: number | null
     group?: {
       name?: string | null
       lessonMinutes?: number | null
+      intensiveMode?: string | null
       course?: { name?: string | null; type?: string | null } | null
     } | null
   }>
@@ -109,7 +113,9 @@ export default function StudentsPage() {
 
   const allStudents = useMemo(() => Object.values(grouped).flat(), [grouped])
   const activeCount = allStudents.filter((student) => student.status === 'ACTIVE').length
-  const lowHourCount = allStudents.filter((student) => student.status === 'ACTIVE' && student.remainHours <= 3).length
+  const lowHourCount = allStudents.filter((student) => (
+    student.status === 'ACTIVE' && hasLowPrepaidHours(student.enrollments)
+  )).length
 
   const updateUrl = useCallback((next: { grade?: string; courseType?: string; q?: string; status?: string; lowHour?: boolean; sortBy?: StudentSortBy }) => {
     if (typeof window === 'undefined') return
@@ -274,17 +280,25 @@ export default function StudentsPage() {
       <div style={{ display: 'flex', background: '#fffdfb', border: '1px solid #EEE7E1', borderRadius: 8, overflow: 'hidden' }}>
         {!isMobile && sidebar}
         <main style={{ flex: 1, minWidth: 0, padding: isMobile ? 12 : 16 }}>
-          <Space direction={isMobile ? 'vertical' : 'horizontal'} wrap style={{ width: '100%', marginBottom: 16, justifyContent: 'space-between' }}>
-            <Space direction={isMobile ? 'vertical' : 'horizontal'} wrap style={{ flex: 1, width: isMobile ? '100%' : undefined }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 10, width: '100%', marginBottom: 16, justifyContent: 'space-between' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : '320px 132px 132px 152px', gap: 8, flex: 1, width: '100%' }}>
               <Input
                 placeholder="搜索姓名、手机、家长"
                 prefix={<SearchOutlined style={{ color: '#98A2B3' }} />}
                 value={search}
                 onChange={(event) => handleSearchChange(event.target.value)}
-                style={{ width: isMobile ? '100%' : 320 }}
+                style={{ width: '100%', gridColumn: isMobile ? '1 / -1' : undefined }}
                 allowClear
               />
-              <Select
+              {isMobile ? <select
+                aria-label="学员状态"
+                value={filterStatus || ''}
+                onChange={(event) => handleStatusChange(event.target.value || undefined)}
+                style={{ width: '100%', minWidth: 0, height: 40, padding: '0 10px', border: '1px solid #EFE3DC', borderRadius: 10, background: '#fff', color: '#1a1201' }}
+              >
+                <option value="">全部状态</option>
+                <option value="LEAD">潜客</option><option value="TRIAL">试听</option><option value="ACTIVE">在读</option><option value="COMPLETED">结课</option><option value="INACTIVE">离校</option>
+              </select> : <Select
                 placeholder="全部状态"
                 value={filterStatus}
                 onChange={handleStatusChange}
@@ -297,16 +311,31 @@ export default function StudentsPage() {
                   { label: '结课', value: 'COMPLETED' },
                   { label: '离校', value: 'INACTIVE' },
                 ]}
-              />
-              <Select
+              />}
+              {isMobile ? <select
+                aria-label="年级筛选"
+                value={filterGrade === 'all' ? '' : filterGrade}
+                onChange={(event) => handleGradeChange(event.target.value || 'all')}
+                style={{ width: '100%', minWidth: 0, height: 40, padding: '0 10px', border: '1px solid #EFE3DC', borderRadius: 10, background: '#fff', color: '#1a1201' }}
+              >
+                <option value="">全部年级</option>
+                {GRADE_SELECT_OPTIONS.map((grade) => <option key={grade} value={grade}>{grade}</option>)}
+              </select> : <Select
                 placeholder="年级筛选"
                 value={filterGrade === 'all' ? undefined : filterGrade}
                 onChange={(value) => handleGradeChange(value || 'all')}
                 allowClear
                 style={{ width: isMobile ? '100%' : 132 }}
                 options={GRADE_SELECT_OPTIONS.map((grade) => ({ label: grade, value: grade }))}
-              />
-              <Select
+              />}
+              {isMobile ? <select
+                aria-label="排序方式"
+                value={sortBy}
+                onChange={(event) => handleSortChange(event.target.value as StudentSortBy)}
+                style={{ width: '100%', minWidth: 0, height: 40, padding: '0 10px', border: '1px solid #EFE3DC', borderRadius: 10, background: '#fff', color: '#1a1201', gridColumn: '1 / -1' }}
+              >
+                <option value="createdAt">最近添加</option><option value="nameAsc">姓名 A-Z</option><option value="nameDesc">姓名 Z-A</option><option value="remainHoursAsc">已上课时升序</option><option value="remainHoursDesc">已上课时降序</option>
+              </select> : <Select
                 value={sortBy}
                 onChange={handleSortChange}
                 style={{ width: isMobile ? '100%' : 152 }}
@@ -317,13 +346,13 @@ export default function StudentsPage() {
                   { label: '剩余课时升序', value: 'remainHoursAsc' },
                   { label: '剩余课时降序', value: 'remainHoursDesc' },
                 ]}
-              />
-            </Space>
-            <Space>
-              <Button icon={<ImportOutlined />} onClick={() => setImportOpen(true)}>导入</Button>
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditData(null); setFormOpen(true) }} style={{ background: '#E87545', borderColor: '#E8784A' }}>添加学员</Button>
-            </Space>
-          </Space>
+              />}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.35fr)', gap: 8, width: isMobile ? '100%' : 'auto' }}>
+              <Button block={isMobile} icon={<ImportOutlined />} onClick={() => setImportOpen(true)}>导入</Button>
+              <Button block={isMobile} type="primary" icon={<PlusOutlined />} onClick={() => { setEditData(null); setFormOpen(true) }} style={{ background: '#E87545', borderColor: '#E8784A' }}>添加学员</Button>
+            </div>
+          </div>
 
           {loading ? (
             <div style={{ textAlign: 'center', padding: 80 }}><Spin size="large" /></div>

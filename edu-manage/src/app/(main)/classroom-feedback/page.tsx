@@ -14,28 +14,16 @@ import { useSignedUrls } from '@/hooks/useSignedUrls'
 import Image from 'next/image'
 
 const fetcher = (url: string) => fetch(url).then((res) => { if (!res.ok) throw new Error('加载失败'); return res.json() })
-
 type AdminFeedback = {
   id: string
+  studentName: string
   teacherName: string
-  lessonName?: string
-  courseName?: string
-  subject?: string
+  lessonContent: string | null
+  subject: string
+  date: string
+  tags: string[]
+  hasImage: boolean
   status: string
-  students?: Array<{ id: string; name: string; grade?: string | null }>
-  knowledgePoints?: string[]
-  summary?: string | null
-  homework?: unknown
-  imageUrls?: string[]
-  images?: AdminFeedbackImage[]
-  parentReply?: string | null
-  parentRepliedAt?: string | null
-  adminReply?: string | null
-  adminRepliedAt?: string | null
-  mood?: string | null
-  tags?: string[]
-  badge?: string | null
-  createdAt: string
 }
 
 type AdminFeedbackImage = {
@@ -43,6 +31,34 @@ type AdminFeedbackImage = {
   originalUrl: string
   previewUrl: string
   thumbnailUrl: string
+}
+
+type AdminFeedbackDetail = {
+  id: string
+  date: string
+  teacher: { id: string; name: string }
+  subject: string
+  course: string | null
+  className: string | null
+  students: Array<{ id: string; name: string; grade?: string | null; studentRating?: unknown }>
+  overallComment: string | null
+  lessonContent: string | null
+  summary: string | null
+  knowledgePoints: string[]
+  homework: unknown
+  tags: string[]
+  badge: string | null
+  mood: string | null
+  images: AdminFeedbackImage[]
+  parentReply: string | null
+  adminReply: string | null
+  parentMessages: Array<{
+    id: string
+    title: string
+    replies: Array<{ id: string; authorName: string; role: string; content: string; createdAt: string }>
+  }>
+  status: string
+  createdAt: string
 }
 
 type AdminLesson = {
@@ -92,11 +108,13 @@ function FeedbackImage({ src, size, onClick }: { src: string; size: number; onCl
 function FeedbackImageViewer({ images, initialIndex, onClose }: { images: AdminFeedbackImage[]; initialIndex: number; onClose: () => void }) {
   const [current, setCurrent] = useState(initialIndex)
   const { urls: signedPreviews } = useSignedUrls(images.map((image) => image.previewUrl || image.thumbnailUrl || image.originalUrl))
-  const { urls: signedOriginals, loading: originalsLoading } = useSignedUrls(images.map((image) => image.originalUrl))
   const activeImage = images[current]
+  const { urls: signedActiveOriginal, loading: originalLoading } = useSignedUrls(
+    activeImage && !activeImage.assetId ? [activeImage.originalUrl] : [],
+  )
   const downloadHref = activeImage?.assetId
     ? `/api/admin/classroom-feedback/image-download?assetId=${encodeURIComponent(activeImage.assetId)}`
-    : signedOriginals[current]
+    : signedActiveOriginal[0]
 
   return (
     <Modal
@@ -125,7 +143,7 @@ function FeedbackImageViewer({ images, initialIndex, onClose }: { images: AdminF
         ))}
       </Carousel>
       <div style={{ display: 'flex', justifyContent: 'center', padding: '12px max(12px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom, 0px))', background: '#FAF8F5' }}>
-        <Button type="primary" icon={<DownloadOutlined />} href={downloadHref} disabled={!activeImage?.assetId && originalsLoading} target="_blank" rel="noopener noreferrer" style={{ background: '#E8784A', borderColor: '#E8784A' }}>
+        <Button type="primary" icon={<DownloadOutlined />} href={downloadHref} disabled={!activeImage?.assetId && originalLoading} target="_blank" rel="noopener noreferrer" style={{ background: '#E8784A', borderColor: '#E8784A' }}>
           下载原图
         </Button>
       </div>
@@ -133,69 +151,34 @@ function FeedbackImageViewer({ images, initialIndex, onClose }: { images: AdminF
   )
 }
 
-function FeedbackItemCard({ item, onOpen, signedThumbnailMap }: { item: AdminFeedback; onOpen: (item: AdminFeedback) => void; signedThumbnailMap: Map<string, string> }) {
-  const students = Array.isArray(item.students) ? item.students : []
-  const points = Array.isArray(item.knowledgePoints) ? item.knowledgePoints : []
-  const originalImages = Array.isArray(item.imageUrls) ? item.imageUrls : []
-  const images = Array.isArray(item.images) && item.images.length === originalImages.length
-    ? item.images
-    : originalImages.map((url) => ({ assetId: null, originalUrl: url, previewUrl: url, thumbnailUrl: url }))
-  const thumbnails = images.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl)
-  const homework = formatHomework(item.homework)
-  const performanceTags = Array.isArray(item.tags) ? item.tags : []
+function FeedbackItemCard({ item, onOpen }: { item: AdminFeedback; onOpen: (item: AdminFeedback) => void }) {
   return (
     <Card className="pressable" onClick={() => onOpen(item)} bordered={false} style={{ borderRadius: 10, border: '1px solid #EEE7E1', background: '#fff', cursor: 'pointer' }} styles={{ body: { padding: '12px 14px' } }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, flexWrap: 'wrap', gap: 4 }}>
-        <span style={{ fontWeight: 600, fontSize: 14, color: '#1F2329' }}>{item.teacherName}</span>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 14, color: '#1F2329' }}>{item.studentName}</div>
+          <div style={{ marginTop: 3, fontSize: 12, color: '#667085' }}>{item.teacherName} · {item.subject}</div>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Tag color={item.status === 'PUBLISHED' ? 'green' : 'orange'} style={{ borderRadius: 9999, fontSize: 10, margin: 0 }}>
             {item.status === 'PUBLISHED' ? '已发布' : '草稿'}
           </Tag>
-          {item.parentReply && <Tag color="green" style={{ borderRadius: 9999, fontSize: 10, margin: 0 }}>家长已回复</Tag>}
-          {item.adminReply && <Tag color="orange" style={{ borderRadius: 9999, fontSize: 10, margin: 0 }}>管理员已回复</Tag>}
+          {item.hasImage && <Tag style={{ borderRadius: 9999, fontSize: 10, margin: 0 }}>有图片</Tag>}
           <span style={{ fontSize: 11, color: '#C4BAB0' }}>
-            {new Date(item.createdAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            {formatFeedbackTime(item.date)}
           </span>
         </div>
       </div>
-      {students.length > 0 && (
-        <div style={{ marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-          {students.map(s => <Tag key={s.id} style={{ borderRadius: 9999, fontSize: 11, margin: 0 }}>{s.name}{s.grade ? ` · ${s.grade}` : ''}</Tag>)}
+      {item.lessonContent && (
+        <div style={{ color: '#5A4E3A', fontSize: 12, lineHeight: 1.6, marginBottom: item.tags.length ? 8 : 0 }}>
+          <strong>授课内容：</strong>{item.lessonContent}
         </div>
       )}
-      {points.length > 0 && (
-        <div style={{ marginBottom: 6 }}>
-          {points.map(p => <Tag key={p} style={{ borderRadius: 9999, fontSize: 11, background: '#FFF3EC', color: '#E8784A', border: 'none', margin: '0 3px 2px 0' }}>{p}</Tag>)}
-        </div>
-      )}
-      {(item.mood || performanceTags.length > 0 || item.badge) && (
-        <div style={{ marginBottom: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          {item.mood && <Tag style={{ borderRadius: 9999, margin: 0, background: '#F5F2EE', color: '#5A4E3A' }}>课堂情绪：{item.mood}</Tag>}
-          {performanceTags.map((tag) => <Tag key={tag} style={{ borderRadius: 9999, margin: 0 }}>{tag}</Tag>)}
-          {item.badge && <Tag color="gold" style={{ borderRadius: 9999, margin: 0 }}>徽章：{item.badge}</Tag>}
-        </div>
-      )}
-      {item.summary && (
-        <div style={{ padding: '6px 10px', background: '#FCFBF9', borderRadius: 6, borderLeft: '3px solid #E8784A', fontSize: 13, color: '#1F2329', lineHeight: 1.6 }}>
-          {item.summary}
-        </div>
-      )}
-      {homework.length > 0 && (
-        <div style={{ marginTop: 4, fontSize: 12, color: '#98A2B3' }}>
-          作业 {homework.length} 项
-        </div>
-      )}
-      {images.length > 0 && (
-        <div onClick={(event) => event.stopPropagation()} style={{ marginTop: 6, display: 'flex', gap: 4 }}>
-          {images.slice(0, 4).map((image, i) => (
-            <FeedbackImage key={`${image.originalUrl}-${i}`} src={signedThumbnailMap.get(thumbnails[i]) || thumbnails[i]} size={48} />
+      {item.tags.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          {item.tags.map((tag) => (
+            <Tag key={tag} style={{ borderRadius: 9999, margin: 0, background: '#FFF3EC', color: '#E8784A', border: 'none' }}>{tag}</Tag>
           ))}
-          {images.length > 4 && <div style={{ width: 48, height: 48, borderRadius: 6, background: '#f5f2ee', display: 'grid', placeItems: 'center', fontSize: 11, color: '#98A2B3' }}>+{images.length - 4}</div>}
-        </div>
-      )}
-      {item.parentReply && (
-        <div style={{ marginTop: 8, padding: '8px 10px', borderRadius: 8, background: '#EAF7F1', border: '1px solid #B6E2D2', color: '#176C53', fontSize: 12, lineHeight: 1.6 }}>
-          <strong>家长回复：</strong>{item.parentReply}{item.parentRepliedAt ? ` · ${formatFeedbackTime(item.parentRepliedAt)}` : ''}
         </div>
       )}
     </Card>
@@ -221,7 +204,6 @@ export default function ClassroomFeedbackAdminPage() {
   const [teacherFilter, setTeacherFilter] = useState('')
   const [q, setQ] = useState('')
   const [viewAll, setViewAll] = useState(false)
-  const groupByClass = true
 
   // Compose drawer state
   const [composeOpen, setComposeOpen] = useState(false)
@@ -230,15 +212,17 @@ export default function ClassroomFeedbackAdminPage() {
   const [submitting, setSubmitting] = useState(false)
   const [composeTeacherId, setComposeTeacherId] = useState('')
   const [composeLessonId, setComposeLessonId] = useState('')
-  const [detailFeedback, setDetailFeedback] = useState<AdminFeedback | null>(null)
+  const [detailFeedback, setDetailFeedback] = useState<AdminFeedbackDetail | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
   const [adminReply, setAdminReply] = useState('')
   const [replying, setReplying] = useState(false)
   const [viewerIndex, setViewerIndex] = useState<number | null>(null)
-  const detailOriginalImages = Array.isArray(detailFeedback?.imageUrls) ? detailFeedback.imageUrls : []
-  const detailImages: AdminFeedbackImage[] = Array.isArray(detailFeedback?.images) && detailFeedback.images.length === detailOriginalImages.length
-    ? detailFeedback.images
-    : detailOriginalImages.map((url) => ({ assetId: null, originalUrl: url, previewUrl: url, thumbnailUrl: url }))
-  const { urls: signedDetailImages } = useSignedUrls(detailImages.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
+  const detailImages = detailFeedback?.images || []
+  const {
+    urls: signedDetailImages,
+    error: detailImageError,
+    refresh: retryDetailImages,
+  } = useSignedUrls(detailImages.map((image) => image.previewUrl || image.thumbnailUrl))
   const { urls: signedComposeImages } = useSignedUrls(composeImages)
 
   const params = new URLSearchParams({ date, limit: '200' })
@@ -250,18 +234,6 @@ export default function ClassroomFeedbackAdminPage() {
   const teachers = Array.isArray(teachersData?.teachers) ? teachersData.teachers : []
 
   const feedbacks: AdminFeedback[] = useMemo(() => Array.isArray(data?.feedbacks) ? data.feedbacks : [], [data])
-  const listThumbnailKeys = useMemo(() => feedbacks.flatMap((feedback) => {
-    const originals = Array.isArray(feedback.imageUrls) ? feedback.imageUrls : []
-    const images = Array.isArray(feedback.images) && feedback.images.length === originals.length
-      ? feedback.images
-      : originals.map((url) => ({ assetId: null, originalUrl: url, previewUrl: url, thumbnailUrl: url }))
-    return images.slice(0, 4).map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl)
-  }), [feedbacks])
-  const { urls: signedListThumbnails } = useSignedUrls(listThumbnailKeys)
-  const signedThumbnailMap = useMemo(
-    () => new Map(listThumbnailKeys.map((key, index) => [key, signedListThumbnails[index]])),
-    [listThumbnailKeys, signedListThumbnails],
-  )
   const allLessons: AdminLesson[] = useMemo(() => Array.isArray(data?.lessons) ? data.lessons : [], [data])
   const missingLessons = allLessons.filter(l => !l.hasFeedback)
   const noFeedback: Array<{ id: string; name: string }> = Array.isArray(data?.teachersWithoutFeedback) ? data.teachersWithoutFeedback : []
@@ -312,9 +284,20 @@ export default function ClassroomFeedbackAdminPage() {
     }
   }
 
-  const openDetail = (feedback: AdminFeedback) => {
-    setDetailFeedback(feedback)
-    setAdminReply(feedback.adminReply || '')
+  const openDetail = async (feedback: AdminFeedback) => {
+    setDetailLoading(true)
+    setViewerIndex(null)
+    try {
+      const response = await fetch(`/api/admin/classroom-feedback/${feedback.id}/detail`)
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error || '详情加载失败')
+      setDetailFeedback(payload)
+      setAdminReply(payload.adminReply || '')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '详情加载失败')
+    } finally {
+      setDetailLoading(false)
+    }
   }
 
   const submitAdminReply = async () => {
@@ -330,8 +313,7 @@ export default function ClassroomFeedbackAdminPage() {
       })
       const payload = await response.json()
       if (!response.ok) { toast.error(payload.error || '回复失败'); return }
-      const repliedAt = new Date().toISOString()
-      setDetailFeedback((current) => current ? { ...current, adminReply: reply, adminRepliedAt: repliedAt } : current)
+      setDetailFeedback((current) => current ? { ...current, adminReply: reply } : current)
       toast.success('回复已发送并通知家长')
       await mutate()
     } catch {
@@ -344,25 +326,8 @@ export default function ClassroomFeedbackAdminPage() {
   const filtered = feedbacks.filter((feedback) => {
     const keyword = q.trim()
     if (!keyword) return true
-    return `${feedback.teacherName} ${feedback.lessonName || ''} ${feedback.courseName || ''} ${feedback.summary || ''}`.includes(keyword)
-      || feedback.students?.some((student) => student.name.includes(keyword))
-      || feedback.knowledgePoints?.some((point) => point.includes(keyword))
+    return `${feedback.studentName} ${feedback.teacherName} ${feedback.subject} ${feedback.lessonContent || ''} ${feedback.tags.join(' ')}`.includes(keyword)
   })
-
-  const groupedByClass = useMemo(() => {
-    if (!groupByClass) return null
-    const groups = new Map<string, { className: string; subject: string; items: AdminFeedback[] }>()
-    filtered.forEach(item => {
-      const key = item.lessonName || item.courseName || '未关联班级'
-      const existing = groups.get(key)
-      if (existing) {
-        existing.items.push(item)
-      } else {
-        groups.set(key, { className: key, subject: item.subject || '-', items: [item] })
-      }
-    })
-    return Array.from(groups.values()).sort((a, b) => a.className.localeCompare(b.className))
-  }, [filtered, groupByClass])
 
   const submitOnBehalf = async (status: 'DRAFT' | 'PUBLISHED') => {
     const values = await composeForm.validateFields().catch(() => null)
@@ -513,39 +478,20 @@ export default function ClassroomFeedbackAdminPage() {
           <Empty description={viewAll ? '暂无反馈记录' : `${date} 暂无课堂反馈`} />
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Feedbacks listed by class or time */}
-          {groupByClass && groupedByClass ? (
-            groupedByClass.map(group => (
-              <div key={group.className}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <div style={{ width: 4, height: 18, borderRadius: 2, background: '#E8784A', flexShrink: 0 }} />
-                  <span style={{ fontWeight: 700, fontSize: 15, color: '#1F2329' }}>{group.className}</span>
-                  <span style={{ fontSize: 12, padding: '1px 8px', borderRadius: 9999, background: '#FFF3EC', color: '#E8784A' }}>
-                    {group.subject}
-                  </span>
-                  <span style={{ fontSize: 12, color: '#98A2B3' }}>{group.items.length} 条反馈</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 14, borderLeft: '2px solid #F5EDE8' }}>
-                  {group.items.map(item => <FeedbackItemCard key={item.id} item={item} onOpen={openDetail} signedThumbnailMap={signedThumbnailMap} />)}
-                </div>
-              </div>
-            ))
-          ) : (
-            filtered.map(item => <FeedbackItemCard key={item.id} item={item} onOpen={openDetail} signedThumbnailMap={signedThumbnailMap} />)
-          )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filtered.map(item => <FeedbackItemCard key={item.id} item={item} onOpen={openDetail} />)}
         </div>
       )}
 
       {/* Read-only feedback detail and admin reply */}
       <Drawer
-        open={!!detailFeedback}
+        open={detailLoading || !!detailFeedback}
         onClose={() => { setDetailFeedback(null); setAdminReply(''); setViewerIndex(null) }}
         title="课堂反馈详情"
         width={isMobile ? '100%' : 520}
         placement={isMobile ? 'bottom' : 'right'}
         height={isMobile ? '90vh' : undefined}
-        footer={
+        footer={detailFeedback ? (
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <Button onClick={() => { setDetailFeedback(null); setAdminReply('') }}>关闭</Button>
             <Button type="primary" icon={<SendOutlined />} loading={replying} onClick={submitAdminReply}
@@ -553,10 +499,10 @@ export default function ClassroomFeedbackAdminPage() {
               发送回复
             </Button>
           </div>
-        }
+        ) : null}
         styles={{ body: { paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))' } }}
       >
-        {detailFeedback && (() => {
+        {detailLoading ? <div style={{ display: 'grid', placeItems: 'center', minHeight: 240 }}><Spin size="large" /></div> : detailFeedback && (() => {
           const students = Array.isArray(detailFeedback.students) ? detailFeedback.students : []
           const points = Array.isArray(detailFeedback.knowledgePoints) ? detailFeedback.knowledgePoints : []
           const homework = formatHomework(detailFeedback.homework)
@@ -566,15 +512,15 @@ export default function ClassroomFeedbackAdminPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ padding: '12px 14px', borderRadius: 10, background: '#FAF8F5', border: '1px solid #EEE7E1' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-                  <strong style={{ color: '#1A1201' }}>{detailFeedback.teacherName}</strong>
-                  <span style={{ color: '#9A8E7A', fontSize: 12 }}>{formatFeedbackTime(detailFeedback.createdAt)}</span>
+                  <strong style={{ color: '#1A1201' }}>{detailFeedback.teacher.name}</strong>
+                  <span style={{ color: '#9A8E7A', fontSize: 12 }}>{formatFeedbackTime(detailFeedback.date)}</span>
                 </div>
                 <div style={{ marginTop: 4, color: '#5A4E3A', fontSize: 13 }}>
-                  {detailFeedback.lessonName || '未关联课次'} · {detailFeedback.courseName || detailFeedback.subject || '课程未填写'}
+                  {detailFeedback.className || '未关联班级'} · {detailFeedback.course || detailFeedback.subject || '课程未填写'}
                 </div>
               </div>
 
-              {students.length > 0 && <DetailSection label="学员"><div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{students.map((student) => <Tag key={student.id} style={{ borderRadius: 9999, margin: 0 }}>{student.name}{student.grade ? ` · ${student.grade}` : ''}</Tag>)}</div></DetailSection>}
+              {students.length > 0 && <DetailSection label="学员"><div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{students.map((student) => <Tag key={student.id} style={{ borderRadius: 9999, margin: 0 }}>{student.name}{student.grade ? ` · ${student.grade}` : ''}{student.studentRating ? ` · ${String(student.studentRating)}` : ''}</Tag>)}</div></DetailSection>}
               {points.length > 0 && <DetailSection label="知识点"><div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{points.map((point) => <Tag key={point} style={{ borderRadius: 9999, margin: 0, background: '#FFF3EC', color: '#E8784A', border: 'none' }}>{point}</Tag>)}</div></DetailSection>}
               {(detailFeedback.mood || performanceTags.length > 0 || detailFeedback.badge) && (
                 <DetailSection label="课堂表现">
@@ -585,21 +531,46 @@ export default function ClassroomFeedbackAdminPage() {
                   </div>
                 </DetailSection>
               )}
+              {detailFeedback.lessonContent && <DetailSection label="本节授课内容"><div style={{ color: '#1A1201', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{detailFeedback.lessonContent}</div></DetailSection>}
+              {detailFeedback.overallComment && <DetailSection label="总体评价"><div style={{ color: '#1A1201', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{detailFeedback.overallComment}</div></DetailSection>}
               {detailFeedback.summary && <DetailSection label="课堂小结"><div style={{ color: '#1A1201', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{detailFeedback.summary}</div></DetailSection>}
               {homework.length > 0 && <DetailSection label="作业"><ol style={{ margin: 0, paddingLeft: 20 }}>{homework.map((item, index) => <li key={`${index}-${item}`}>{item}</li>)}</ol></DetailSection>}
-              {images.length > 0 && <DetailSection label="课堂资料（点击预览）"><div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', maxWidth: '100%' }}>{images.map((image, index) => <FeedbackImage key={`${image.originalUrl}-${index}`} src={signedDetailImages[index]} size={72} onClick={() => setViewerIndex(index)} />)}</div></DetailSection>}
+              {images.length > 0 && (
+                <DetailSection label="课堂资料（点击预览）">
+                  {detailImageError && (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10, padding: '9px 10px', borderRadius: 10, background: '#FFF4DE', color: '#8A5B00', fontSize: 12 }}>
+                      <span>图片签名暂时失败，反馈文字仍可正常查看。</span>
+                      <Button size="small" icon={<ReloadOutlined />} onClick={retryDetailImages}>重新加载</Button>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', maxWidth: '100%' }}>
+                    {images.map((image, index) => <FeedbackImage key={`${image.originalUrl}-${index}`} src={signedDetailImages[index]} size={72} onClick={() => setViewerIndex(index)} />)}
+                  </div>
+                </DetailSection>
+              )}
 
               {detailFeedback.parentReply && (
                 <div style={{ padding: '10px 12px', borderRadius: 8, background: '#EAF7F1', border: '1px solid #B6E2D2', color: '#176C53', lineHeight: 1.7 }}>
                   <strong>家长回复：</strong>{detailFeedback.parentReply}
-                  {detailFeedback.parentRepliedAt && <div style={{ fontSize: 11, opacity: 0.75 }}>{formatFeedbackTime(detailFeedback.parentRepliedAt)}</div>}
                 </div>
               )}
               {detailFeedback.adminReply && (
                 <div style={{ padding: '10px 12px', borderRadius: 8, background: '#FFF3EC', border: '1px solid #FFD9BF', color: '#B85D32', lineHeight: 1.7 }}>
                   <strong>管理员已回复：</strong>{detailFeedback.adminReply}
-                  {detailFeedback.adminRepliedAt && <div style={{ fontSize: 11, opacity: 0.75 }}>{formatFeedbackTime(detailFeedback.adminRepliedAt)}</div>}
                 </div>
+              )}
+              {detailFeedback.parentMessages.flatMap((message) => message.replies).length > 0 && (
+                <DetailSection label="家校留言">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {detailFeedback.parentMessages.flatMap((message) => message.replies).map((reply) => (
+                      <div key={reply.id}>
+                        <strong>{reply.authorName}</strong>
+                        <span style={{ marginLeft: 8, color: '#9A8E7A', fontSize: 11 }}>{formatFeedbackTime(reply.createdAt)}</span>
+                        <div style={{ marginTop: 2, whiteSpace: 'pre-wrap' }}>{reply.content}</div>
+                      </div>
+                    ))}
+                  </div>
+                </DetailSection>
               )}
 
               <div style={{ borderTop: '1px solid #EEE7E1', paddingTop: 14 }}>

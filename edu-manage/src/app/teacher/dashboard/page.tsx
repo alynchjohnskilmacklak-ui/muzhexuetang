@@ -23,6 +23,8 @@ import { fillName, resolveTier, TIER_QUICK_PERKS, TIER_THEME, TIER_WELCOME } fro
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { PullToRefresh } from '@/components/PullToRefresh'
+import { MessageWorkflowNotice } from '@/components/MessageWorkflowNotice'
+import { TeacherDailyWorkflow } from '@/components/Dashboard/TeacherDailyWorkflow'
 
 const { Text } = Typography
 
@@ -59,6 +61,8 @@ interface DashboardTask {
 interface DashboardLesson {
   id: string
   time: string
+  startTime?: string
+  endTime?: string
   courseName: string
   groupName: string
   room: string
@@ -66,6 +70,7 @@ interface DashboardLesson {
   statusLabel: string
   statusTone: Tone
   hasFeedback: boolean
+  attendanceSubmittedAt?: string | null
   lessonId?: string
   feedbackId?: string | null
 }
@@ -173,14 +178,22 @@ function CompletionRow({ label, item, color }: { label: string; item: Completion
 export default function TeacherDashboardPage() {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
-  const { data, isLoading, mutate } = useSWR<DashboardData>('/api/teacher/dashboard', fetcher, { refreshInterval: 180_000 })
+  const { data, isLoading, mutate } = useSWR<DashboardData>('/api/teacher/dashboard', fetcher, {
+    refreshInterval: 180_000,
+    dedupingInterval: 30_000,
+    keepPreviousData: true,
+    revalidateOnFocus: true,
+  })
   const [welcomeMounted, setWelcomeMounted] = useState(false)
   const [welcomeVisible, setWelcomeVisible] = useState(false)
 
   useEffect(() => {
-    fetch('/api/teacher/dashboard', { method: 'POST' }).catch((error) =>
-      console.warn('教师仪表盘状态同步失败', error)
-    )
+    const timer = window.setTimeout(() => {
+      fetch('/api/teacher/dashboard', { method: 'POST' }).catch((error) =>
+        console.warn('教师仪表盘状态同步失败', error)
+      )
+    }, 2500)
+    return () => window.clearTimeout(timer)
   }, [])
 
   useEffect(() => {
@@ -190,8 +203,8 @@ export default function TeacherDashboardPage() {
     if (markWelcomeShown(storageKey)) return
     setWelcomeMounted(true)
     const showTimer = window.setTimeout(() => setWelcomeVisible(true), 30)
-    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 3500)
-    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 4100)
+    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 1600)
+    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 2200)
     return () => {
       window.clearTimeout(showTimer)
       window.clearTimeout(fadeTimer)
@@ -208,7 +221,7 @@ export default function TeacherDashboardPage() {
   if (isLoading) return <CardSkeleton rows={3} />
   if (!data?.teacher) return <BrandEmpty title="未找到教师信息" icon={<UserOutlined />} />
 
-  const { teacher, heroStats, todayLessons, todos, studentWarnings, feedbackTasks, weekCompletion, monthlyStats, pendingTasks, quickActions } = data
+  const { teacher, heroStats, todayLessons, todos, studentWarnings, feedbackTasks, weekCompletion, monthlyStats, quickActions } = data
   const tier = resolveTier(teacher.tierLevel)
   const tierTheme = TIER_THEME[tier]
   const tierWelcome = TIER_WELCOME[tier]
@@ -223,14 +236,15 @@ export default function TeacherDashboardPage() {
   return (
     <PullToRefresh onRefresh={async () => { await mutate() }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <MessageWorkflowNotice audience="teacher" deferMs={1400} />
       {welcomeMounted && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           padding: isMobile ? 18 : 24, pointerEvents: 'none',
           background: welcomeVisible ? 'rgba(18,51,38,.10)' : 'rgba(18,51,38,0)',
-          backdropFilter: welcomeVisible ? 'blur(6px)' : 'blur(0px)',
-          WebkitBackdropFilter: welcomeVisible ? 'blur(6px)' : 'blur(0px)',
+          backdropFilter: welcomeVisible && !isMobile ? 'blur(6px)' : 'blur(0px)',
+          WebkitBackdropFilter: welcomeVisible && !isMobile ? 'blur(6px)' : 'blur(0px)',
           transition: 'background .45s ease, backdrop-filter .45s ease',
         }}>
           <div style={{
@@ -321,6 +335,8 @@ export default function TeacherDashboardPage() {
           </div>
         </div>
       </section>
+
+      <TeacherDailyWorkflow lessons={todayLessons} />
 
       <Row gutter={[16, 16]}>
         <Col xs={24} xl={16}>
@@ -449,7 +465,7 @@ export default function TeacherDashboardPage() {
               {[
                 { label: '在带学员', value: `${monthlyStats.totalStudents}人`, icon: <TeamOutlined />, color: '#123C35' },
                 { label: '本月课时', value: `${formatHours(monthlyStats.monthlyHours)}h`, icon: <ClockCircleOutlined />, color: '#123C35' },
-                { label: '未读留言', value: `${pendingTasks.unreadParentComments}条`, icon: <MessageOutlined />, color: '#E8784A' },
+                { label: '家长留言', value: '点击查看', icon: <MessageOutlined />, color: '#E8784A' },
                 { label: '待处理', value: `${heroStats.totalTodos}项`, icon: <AlertOutlined />, color: '#E8784A' },
               ].map((item) => (
                 <div key={item.label} style={{ background: '#FAF8F5', borderRadius: 10, padding: 12 }}>
@@ -459,9 +475,14 @@ export default function TeacherDashboardPage() {
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 12, padding: 12, borderRadius: 10, background: '#F7F4F0', color: '#8D806F', fontSize: 12, lineHeight: 1.7 }}>
-              家长留言功能即将开放；当前统计包含试卷与表现动态评论。
-            </div>
+            <Button
+              block
+              icon={<MessageOutlined />}
+              onClick={() => router.push('/teacher/messages')}
+              style={{ marginTop: 12, borderRadius: 10 }}
+            >
+              查看并回复家长留言
+            </Button>
           </Card>
 
           <Card bordered={false} title="快捷操作" style={{ borderRadius: 12 }}>
