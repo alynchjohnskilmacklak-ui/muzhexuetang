@@ -16,16 +16,38 @@ export const QUICK_TAGS = ['积极发言', '专注听讲', '作业优秀', '进�
 export const QUICK_KPS = ['新知识讲解', '错题订正', '课堂练习', '复习巩固', '测验讲评', '作业讲解']
 export const BADGES = ['🌟今日之星', '🚀进步飞速', '💡思维达人', '✅作业之王', '💪坚持不懈', '🎯精准破题']
 
-export function FeedbackCard({ item, compact = false, onReply }: { item: any; compact?: boolean; onReply?: (id: string, text: string) => void }) {
+type FeedbackStudent = { id: string; name: string }
+type HomeworkItem = string | { content?: string }
+type FeedbackItem = {
+  id: string
+  mood?: (typeof MOODS)[number]['value']
+  status?: string
+  students?: FeedbackStudent[]
+  knowledgePoints?: string[]
+  tags?: string[]
+  imageUrls?: string[]
+  homework?: HomeworkItem[]
+  teacher?: { name?: string }
+  teacherName?: string
+  classLesson?: { group?: { course?: { name?: string } } }
+  badge?: string
+  createdAt: string | Date
+  overallComment?: string
+  summary?: string
+  parentReply?: string
+  adminReply?: string
+}
+
+export function FeedbackCard({ item, compact = false, onReply }: { item: FeedbackItem; compact?: boolean; onReply?: (id: string, text: string) => void }) {
   const [replyText, setReplyText] = useState('')
   const [showReply, setShowReply] = useState(false)
   const moodInfo = MOODS.find(m => m.value === item.mood) || MOODS[1]
-  const students: any[] = Array.isArray(item.students) ? item.students : []
+  const students: FeedbackStudent[] = Array.isArray(item.students) ? item.students : []
   const kps: string[] = Array.isArray(item.knowledgePoints) ? item.knowledgePoints : []
   const tags: string[] = Array.isArray(item.tags) ? item.tags : []
   const images: string[] = Array.isArray(item.imageUrls) ? item.imageUrls : []
   const { urls: signedImageUrls } = useSignedUrls(images)
-  const hw: any[] = Array.isArray(item.homework) ? item.homework : []
+  const hw: HomeworkItem[] = Array.isArray(item.homework) ? item.homework : []
 
   return (
     <div style={{
@@ -59,7 +81,7 @@ export function FeedbackCard({ item, compact = false, onReply }: { item: any; co
       <div style={{ padding: '12px 16px' }}>
         {students.length > 0 && (
           <div style={{ marginBottom: 8, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-            {students.map((s: any) => (
+            {students.map((s) => (
               <span key={s.id} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 9999, background: '#F5F2EE', color: '#5a4e3a' }}>
                 {s.name}
               </span>

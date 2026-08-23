@@ -8,113 +8,26 @@ import useSWR from 'swr'
 import { Badge, Layout, Menu, Tooltip } from 'antd'
 import type { MenuProps } from 'antd'
 import {
-  BarChartOutlined,
-  BellOutlined,
-  BookOutlined,
-  CalendarOutlined,
-  CheckSquareOutlined,
-  CommentOutlined,
-  ClockCircleOutlined,
-  CoffeeOutlined,
-  DashboardOutlined,
-  DatabaseOutlined,
-  DollarOutlined,
-  ExperimentOutlined,
-  FileTextOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  MessageFilled,
-  MessageOutlined,
-  ReadOutlined,
-  SafetyOutlined,
-  SettingOutlined,
-  TeamOutlined,
-  UserOutlined,
 } from '@ant-design/icons'
+import { adminNavItems } from './admin-nav'
+import type { MobileNavItem } from './MobileLayout'
 
 const { Sider } = Layout
 const fetcher = (url: string) => fetch(url).then((res) => res.ok ? res.json() : [])
 
-// Desktop admin menu. Keep in sync with MainLayout.tsx adminNavItems for mobile.
-// When adding or removing admin routes, update both places.
-const menuItems: MenuProps['items'] = [
-  { key: '/dashboard', icon: <DashboardOutlined />, label: '数据总览' },
-  { key: '/students', icon: <UserOutlined />, label: '学员管理' },
-  {
-    key: 'teacher-group',
-    icon: <TeamOutlined />,
-    label: '教师管理',
-    children: [
-      { key: '/teachers', label: '教师档案' },
-      { key: '/teacher-logs', icon: <ClockCircleOutlined />, label: '行为日志' },
-      { key: '/teacher-salary', icon: <DollarOutlined />, label: '薪资管理' },
-    ],
-  },
-  { key: '/courses', icon: <BookOutlined />, label: '课程管理' },
-  {
-    key: 'schedule-group',
-    icon: <CalendarOutlined />,
-    label: '排课系统',
-    children: [
-      { key: '/schedule', label: '教室矩阵（精品班课）' },
-      { key: '/schedule/intensive', label: '突击全能班（1对1/2/3）' },
-      { key: '/schedule?view=teacher-week', label: '教师课表' },
-      { key: '/schedule?view=week-heatmap', label: '周总览' },
-    ],
-  },
-  { key: '/attendance', icon: <CheckSquareOutlined />, label: '考勤管理' },
-  { key: '/classroom-feedback', icon: <MessageOutlined />, label: '成长反馈' },
-  {
-    key: 'finance-group',
-    icon: <DollarOutlined />,
-    label: '财务后勤',
-    children: [
-      { key: '/fees', label: '收费管理' },
-      { key: '/meals', icon: <CoffeeOutlined />, label: '就餐管理' },
-    ],
-  },
-  { key: '/student-archive', icon: <FileTextOutlined />, label: '学习档案' },
-  {
-    key: 'comm-group',
-    icon: <CommentOutlined />,
-    label: '沟通中心',
-    children: [
-      { key: '/parent-messages', label: '家长留言' },
-      { key: '/notifications', icon: <BellOutlined />, label: '消息通知' },
-    ],
-  },
-  {
-    key: 'volunteer-group',
-    icon: <ExperimentOutlined />,
-    label: '中考志愿',
-    children: [
-      { key: '/volunteer', label: '志愿咨询' },
-      { key: '/volunteer-sim', label: '中考模拟测算' },
-      { key: '/volunteer-sim/schools', label: '高中学校库' },
-      { key: '/volunteer-sim/rank-query', label: '一分一档位次' },
-    ],
-  },
-  { key: '/reports', icon: <BarChartOutlined />, label: '数据报表' },
-  { key: '/data-admin', icon: <DatabaseOutlined />, label: '数据管理' },
-  { key: '/login-records', icon: <SafetyOutlined />, label: '登录记录' },
-  {
-    key: 'resource-group',
-    icon: <ReadOutlined />,
-    label: '教学资源',
-    children: [
-      { key: '/materials', label: '学习资料' },
-      { key: '/phet', label: '仿真教学' },
-      { key: '/ai', label: 'AI 助手' },
-    ],
-  },
-  { key: '/settings', icon: <SettingOutlined />, label: '系统设置' },
-]
+type SidebarMenuItem = Omit<MobileNavItem, 'label' | 'children'> & {
+  label: React.ReactNode
+  children?: SidebarMenuItem[]
+}
+const menuItems: SidebarMenuItem[] = adminNavItems
 
 function flattenMenuKeys(items: MenuProps['items']): string[] {
-  return (items || []).flatMap((item: any) => {
+  return (items || []).flatMap((item) => {
     if (!item) return []
     const ownKey = typeof item.key === 'string' && item.key.startsWith('/') ? [item.key] : []
-    return [...ownKey, ...flattenMenuKeys(item.children)]
+    return [...ownKey, ...flattenMenuKeys('children' in item ? item.children : undefined)]
   })
 }
 
@@ -147,7 +60,7 @@ export function Sidebar({
     refreshInterval: 300_000,
     dedupingInterval: 30_000,
   })
-  const alertCount = Array.isArray(alerts) ? alerts.filter((a: any) => !a.isResolved).length : 0
+  const alertCount = Array.isArray(alerts) ? alerts.filter((a) => !a.isResolved).length : 0
   const isSenior = (session?.user as { division?: string } | undefined)?.division === 'SENIOR'
 
   useEffect(() => {
@@ -186,16 +99,14 @@ export function Sidebar({
   const JUNIOR_ONLY_GROUP_KEY = 'volunteer-group'
   const visibleMenuItems = useMemo(() => {
     if (!isSenior) return menuItems
-    return (menuItems as { key: string; [k: string]: unknown }[]).filter(
-      (item) => item.key !== JUNIOR_ONLY_GROUP_KEY,
-    )
+    return menuItems?.filter((item) => item?.key !== JUNIOR_ONLY_GROUP_KEY)
   }, [isSenior])
 
-  const items = useMemo(() => (visibleMenuItems as any[]).map((item: any) => {
+  const items = useMemo(() => visibleMenuItems.map((item): SidebarMenuItem => {
     if (item.key === 'teacher-group') {
       return {
         ...item,
-        children: item.children?.map((child: any) =>
+        children: item.children?.map((child) =>
           child.key === '/teacher-logs'
             ? { ...child, label: <Badge count={alertCount} size="small" offset={[8, 0]}>行为日志</Badge> }
             : child

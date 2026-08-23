@@ -4,6 +4,8 @@ import { PrismaClient } from '@prisma/client'
 import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,10 +15,11 @@ async function requireSession() {
   return session
 }
 
-async function getEffectiveTeacherStudents(teacherId: string, client: PrismaClient) {
+async function getEffectiveTeacherStudents(teacherId: string, termId: string, client: PrismaClient) {
   const groups = await client.classGroup.findMany({
     where: {
       status: { not: 'ARCHIVED' },
+      termId,
       course: { isActive: true },
       OR: [
         { teacherId },
@@ -47,21 +50,19 @@ async function getEffectiveTeacherStudents(teacherId: string, client: PrismaClie
   return { groups, students: [...studentMap.values()] }
 }
 
-export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+export const GET = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await requireSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const role = (session.user as { role?: string }).role
   if (role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
   const prisma = await getRequestPrisma()
+  const division = getRequestDivision(session.user as Record<string, unknown>, req.nextUrl.searchParams.get('division'))
+  const selectedTerm = await resolveAdminTermScope(prisma, division, req)
 
   const { id } = await params
   const teacher = await prisma.teacher.findUnique({
     where: { id },
     include: {
-      schedules: {
-        where: { status: { not: 'cancelled' }, course: { isActive: true } },
-        include: { course: { select: { id: true, name: true } } },
-      },
       studyMaterials: {
         where: { status: { not: 'DELETED' } },
         select: {
@@ -76,20 +77,61 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
         orderBy: { createdAt: 'desc' },
         take: 5,
       },
-      _count: { select: { schedules: true, courses: true } },
+      _count: { select: { courses: true } },
     },
   })
 
   if (!teacher) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const effective = await getEffectiveTeacherStudents(id, prisma)
+  const effective = await getEffectiveTeacherStudents(id, selectedTerm?.id || '__NO_SELECTED_TERM__', prisma)
+  const scopedLessons = await prisma.classLesson.findMany({
+    where: {
+      division,
+      status: { notIn: ['CANCELLED', 'POSTPONED'] },
+      group: {
+        termId: selectedTerm?.id || '__NO_SELECTED_TERM__',
+        status: { not: 'ARCHIVED' },
+      },
+      OR: [
+        { teacherId: id },
+        {
+          teacherId: null,
+          group: {
+            OR: [
+              { teacherId: id },
+              { teacherAssignments: { some: { teacherId: id } } },
+            ],
+          },
+        },
+      ],
+    },
+    select: {
+      actualMinutes: true,
+      plannedMinutes: true,
+      startTime: true,
+      endTime: true,
+      status: true,
+      group: { select: { lessonMinutes: true } },
+    },
+  })
+  const termTaughtHours = scopedLessons
+    .filter((lesson) => lesson.status === 'COMPLETED')
+    .reduce((sum, lesson) => {
+      const [startHour = 0, startMinute = 0] = lesson.startTime.split(':').map(Number)
+      const [endHour = 0, endMinute = 0] = lesson.endTime.split(':').map(Number)
+      const scheduledMinutes = Math.max(0, (endHour * 60 + endMinute) - (startHour * 60 + startMinute))
+      return sum + (lesson.actualMinutes || lesson.plannedMinutes || lesson.group.lessonMinutes || scheduledMinutes) / 60
+    }, 0)
   return NextResponse.json({
     ...teacher,
     students: effective.students,
     classGroups: effective.groups,
+    term: selectedTerm,
+    termTaughtHours: Number(termTaughtHours.toFixed(1)),
     _count: {
       ...teacher._count,
       students: effective.students.length,
+      schedules: scopedLessons.length,
     },
   })
 })
@@ -154,7 +196,12 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
   })
   if (!teacher) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const effective = await getEffectiveTeacherStudents(id, prisma)
+  const teacherDivision = (session.user as { division?: string }).division || 'JUNIOR'
+  const activeTerm = await prisma.academicTerm.findFirst({
+    where: { division: teacherDivision, status: 'ACTIVE' },
+    select: { id: true },
+  })
+  const effective = await getEffectiveTeacherStudents(id, activeTerm?.id || '__NO_ACTIVE_TERM__', prisma)
   const userId = (session.user as { id?: string }).id
   const affectedParents = await prisma.student.findMany({
     where: {

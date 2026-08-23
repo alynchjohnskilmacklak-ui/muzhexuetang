@@ -9,10 +9,12 @@ import {
   type EntityKey,
 } from '@/lib/data-admin/entities'
 import { createActivityLog, createDeletedRecord } from '@/lib/data-admin/entities-server'
+import { getDynamicModel } from '@/lib/data-admin/dynamic-model'
+import type { Prisma } from '@prisma/client'
 
 const ALLOWED_ENTITIES = Object.keys(DATA_ADMIN_ENTITIES)
 
-async function syncStudentHours(client: any, studentId: string) {
+async function syncStudentHours(client: Pick<Prisma.TransactionClient, 'enrollment' | 'student'>, studentId: string) {
   const activeEnrollments = await client.enrollment.findMany({
     where: {
       studentId,
@@ -47,7 +49,7 @@ export async function GET(
   const entityKey = entity as EntityKey
   const def = DATA_ADMIN_ENTITIES[entityKey]
   const prisma = await getRequestPrisma()
-  const prismaModel = (prisma as any)[def.model]
+  const prismaModel = getDynamicModel(prisma, def.model)
   if (!prismaModel) {
     return NextResponse.json({ error: '模型不存在' }, { status: 500 })
   }
@@ -81,7 +83,7 @@ export async function PUT(
   const entityKey = entity as EntityKey
   const def = DATA_ADMIN_ENTITIES[entityKey]
   const prisma = await getRequestPrisma()
-  const prismaModel = (prisma as any)[def.model]
+  const prismaModel = getDynamicModel(prisma, def.model)
   if (!prismaModel) {
     return NextResponse.json({ error: '模型不存在' }, { status: 500 })
   }
@@ -143,7 +145,7 @@ export async function DELETE(
   const entityKey = entity as EntityKey
   const def = DATA_ADMIN_ENTITIES[entityKey]
   const prisma = await getRequestPrisma()
-  const prismaModel = (prisma as any)[def.model]
+  const prismaModel = getDynamicModel(prisma, def.model)
   if (!prismaModel) {
     return NextResponse.json({ error: '模型不存在' }, { status: 500 })
   }
@@ -175,7 +177,8 @@ export async function DELETE(
     }
 
     // Determine entity name for deleted record
-    const entityName = (before as any).name || (before as any).title || null
+    const entityName = (typeof before.name === 'string' ? before.name : null)
+      || (typeof before.title === 'string' ? before.title : null)
 
     await createDeletedRecord(def.model, id, entityName, sanitizeDataAdminRecord(before), session.user.id, reason)
     await createActivityLog(session.user.id, 'DATA_ADMIN_SOFT_DELETE', def.model, id, {
@@ -209,7 +212,7 @@ export async function PATCH(
   const entityKey = entity as EntityKey
   const def = DATA_ADMIN_ENTITIES[entityKey]
   const prisma = await getRequestPrisma()
-  const prismaModel = (prisma as any)[def.model]
+  const prismaModel = getDynamicModel(prisma, def.model)
   if (!prismaModel) {
     return NextResponse.json({ error: '模型不存在' }, { status: 500 })
   }
@@ -264,8 +267,6 @@ export async function PATCH(
       }
 
       const beforeStudentHours = student.remainHours || 0
-      const beforeTotalHours = student.totalHours || 0
-
       // Update student hours
       await prisma.student.update({
         where: { id: studentId },

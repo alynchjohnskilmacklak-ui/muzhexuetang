@@ -108,6 +108,8 @@ interface ScheduleDraft {
   note: string
 }
 
+type ScheduleMode = 'schedule' | 'history' | 'edit'
+
 function localDateInput(date = new Date()) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -160,6 +162,7 @@ export default function TeacherIntensivePage() {
     { refreshInterval: 5000, revalidateOnFocus: true, revalidateOnReconnect: true },
   )
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [scheduleMode, setScheduleMode] = useState<ScheduleMode>('schedule')
   const [saving, setSaving] = useState(false)
   const [subjectFilter, setSubjectFilter] = useState('ALL')
   const [draft, setDraft] = useState<ScheduleDraft>({
@@ -174,7 +177,7 @@ export default function TeacherIntensivePage() {
   })
 
   const groups = useMemo(() => data?.groups || [], [data?.groups])
-  const now = Date.now()
+  const [pageOpenedAt] = useState(() => Date.now())
   const approvedHours = groups.reduce((total, group) => total + Number(group.approvedHours || 0), 0)
   const pendingReviewHours = groups.reduce((total, group) => total + Number(group.pendingHours || 0), 0)
   const selectedGroup = groups.find((group) => group.id === draft.scopeId)
@@ -184,6 +187,7 @@ export default function TeacherIntensivePage() {
     : groups.filter((group) => group.subject === subjectFilter)
 
   const openCreate = (group: IntensiveGroup) => {
+    setScheduleMode('schedule')
     const startTime = '18:00'
     const limit = expectedStudents(group.teachingType)
     setDraft({
@@ -199,7 +203,18 @@ export default function TeacherIntensivePage() {
     setDrawerOpen(true)
   }
 
+  const openHistory = (group: IntensiveGroup) => {
+    openCreate(group)
+    setScheduleMode('history')
+    setDraft((current) => ({
+      ...current,
+      lessonDate: localDateInput(new Date(pageOpenedAt - 86400000)),
+      note: '历史课次补录：',
+    }))
+  }
+
   const openEdit = (group: IntensiveGroup, lesson: IntensiveLesson) => {
+    setScheduleMode('edit')
     setDraft({
       lessonId: lesson.id,
       scopeId: group.id,
@@ -339,7 +354,15 @@ export default function TeacherIntensivePage() {
                 onClick={() => openCreate(visibleGroups[0] || groups[0])}
                 style={{ minHeight: 44, borderRadius: 10, flex: isMobile ? 1 : undefined }}
               >
-                安排或补录课程
+                安排课程
+              </Button>
+            )}
+            {!!groups.length && (
+              <Button
+                onClick={() => openHistory(visibleGroups[0] || groups[0])}
+                style={{ minHeight: 44, borderRadius: 10, flex: isMobile ? 1 : undefined }}
+              >
+                补录历史课次
               </Button>
             )}
             <Button
@@ -347,7 +370,7 @@ export default function TeacherIntensivePage() {
               onClick={() => router.push('/teacher/schedule')}
               style={{ minHeight: 44, borderRadius: 10, flex: isMobile ? 1 : undefined }}
             >
-              查看课表
+              课表
             </Button>
           </Space>
         </div>
@@ -428,7 +451,7 @@ export default function TeacherIntensivePage() {
           }}>
             {visibleGroups.map((group) => {
               const groupLessons = group.lessons
-                .filter((lesson) => lesson.status === 'SCHEDULED' && lessonTimestamp(lesson) >= now - 30 * 60_000)
+                .filter((lesson) => lesson.status === 'SCHEDULED' && lessonTimestamp(lesson) >= pageOpenedAt - 30 * 60_000)
                 .sort((a, b) => lessonTimestamp(a) - lessonTimestamp(b))
               const nextLesson = groupLessons[0]
               const reviewLesson = group.lessons.find((lesson) => (
@@ -455,13 +478,38 @@ export default function TeacherIntensivePage() {
                         {group.name} · 上课地点灵活安排 · 默认{group.defaultMinutes || 60}分钟
                       </Text>
                     </div>
+                    {!isMobile && (
+                      <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => openCreate(group)}
+                        style={{ minHeight: 40, borderRadius: 10, flexShrink: 0 }}
+                      >
+                        安排新课
+                      </Button>
+                    )}
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: 8,
+                    marginTop: 14,
+                  }}>
                     <Button
                       type="primary"
                       icon={<PlusOutlined />}
                       onClick={() => openCreate(group)}
-                      style={{ minHeight: 40, borderRadius: 10, flexShrink: 0 }}
+                      style={{ minHeight: 44, borderRadius: 10 }}
                     >
-                      约课
+                      安排课程
+                    </Button>
+                    <Button
+                      icon={<ClockCircleOutlined />}
+                      onClick={() => openHistory(group)}
+                      style={{ minHeight: 44, borderRadius: 10 }}
+                    >
+                      补录历史课次
                     </Button>
                   </div>
 
@@ -584,7 +632,11 @@ export default function TeacherIntensivePage() {
       </div>
 
       <Drawer
-        title={draft.lessonId ? '调整上课时间' : '安排个性化课程'}
+        title={scheduleMode === 'edit'
+          ? '调整上课时间'
+          : scheduleMode === 'history'
+            ? '补录历史课次'
+            : '安排课程'}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         placement={isMobile ? 'bottom' : 'right'}
@@ -598,16 +650,16 @@ export default function TeacherIntensivePage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <Button onClick={() => setDrawerOpen(false)} style={{ minHeight: 46, borderRadius: 10 }}>取消</Button>
             <Button type="primary" loading={saving} onClick={saveSchedule} style={{ minHeight: 46, borderRadius: 10 }}>
-              {draft.lessonId ? '保存调整' : '确认约课'}
+              {scheduleMode === 'edit' ? '保存调整' : scheduleMode === 'history' ? '确认补录' : '确认安排'}
             </Button>
           </div>
         )}
       >
         <Space direction="vertical" size={16} style={{ width: '100%' }}>
           <Alert
-            type={draft.lessonDate < localDateInput() ? 'warning' : 'info'}
+            type={scheduleMode === 'history' || draft.lessonDate < localDateInput() ? 'warning' : 'info'}
             showIcon
-            message={draft.lessonDate < localDateInput()
+            message={scheduleMode === 'history' || draft.lessonDate < localDateInput()
               ? '这是历史补录：建立课次后还需填写实际时长和考勤，管理员审核通过后才累计课时和工资。'
               : '未来课次可提前60天安排；未开始且未结算的课次可由教师调整。'}
           />
@@ -636,7 +688,7 @@ export default function TeacherIntensivePage() {
               <Input
                 type="date"
                 value={draft.lessonDate}
-                min={localDateInput(new Date(Date.now() - 365 * 86400000))}
+                min={localDateInput(new Date(pageOpenedAt - 365 * 86400000))}
                 onChange={(event) => setDraft((current) => ({ ...current, lessonDate: event.target.value }))}
                 style={{ marginTop: 6, minHeight: 44 }}
               />
@@ -649,7 +701,7 @@ export default function TeacherIntensivePage() {
                     size="small"
                     onClick={() => setDraft((current) => ({
                       ...current,
-                      lessonDate: localDateInput(new Date(Date.now() - 86400000)),
+                      lessonDate: localDateInput(new Date(pageOpenedAt - 86400000)),
                     }))}
                   >
                     昨天

@@ -2,15 +2,86 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 import { activeEnrollmentWhere } from '@/lib/business-visibility'
+import { dateRangeDays } from '@/lib/date/local-day'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (req: NextRequest) => {
-    const { teacher, prisma } = await requireCurrentTeacher()
+    const { user, teacher, prisma } = await requireCurrentTeacher()
     const { searchParams } = req.nextUrl
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const type = searchParams.get('type') || 'ALL'
+    if (type === 'STUDY_HALL') {
+      if (!startDate || !endDate) return NextResponse.json({ currentTeacherId: teacher.id, lessons: [] })
+      const start = new Date(`${startDate}T00:00:00+08:00`)
+      const end = new Date(`${endDate}T00:00:00+08:00`)
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) {
+        return NextResponse.json({ error: '课表日期范围不正确' }, { status: 400 })
+      }
+      const dayCount = Math.min(31, Math.floor((end.getTime() - start.getTime()) / 86400000) + 1)
+      const days = dateRangeDays(startDate, dayCount)
+      const classes = await prisma.studyHallClass.findMany({
+        where: {
+          division: teacher.division,
+          status: 'ACTIVE',
+          term: { status: 'ACTIVE' },
+          teachers: { some: { teacherId: user.id, active: true } },
+        },
+        include: {
+          students: { where: { status: 'ACTIVE' }, select: { student: { select: { id: true, name: true } } } },
+          sessions: { where: { active: true }, orderBy: [{ weekday: 'asc' }, { startTime: 'asc' }] },
+        },
+        orderBy: { name: 'asc' },
+      })
+      const closures = classes.length ? await prisma.studyHallClosure.findMany({
+        where: {
+          division: teacher.division,
+          termId: { in: [...new Set(classes.map((studyClass) => studyClass.termId))] },
+          startDate: { lte: end },
+          endDate: { gte: start },
+          OR: [{ classId: null }, { classId: { in: classes.map((studyClass) => studyClass.id) } }],
+        },
+        select: { classId: true, startDate: true, endDate: true },
+      }) : []
+      const lessons = classes.flatMap((studyClass) => days.flatMap((date) => {
+        const weekday = new Date(`${date}T00:00:00+08:00`).getDay() || 7
+        if (!studyClass.weekdays.includes(weekday)) return []
+        const studyDate = new Date(`${date}T00:00:00+08:00`)
+        const isClosed = closures.some((closure) => (
+          (!closure.classId || closure.classId === studyClass.id)
+          && closure.startDate <= studyDate
+          && closure.endDate >= studyDate
+        ))
+        if (isClosed) return []
+        const enrollments = studyClass.students.map((item) => ({ student: item.student }))
+        if (studyClass.scheduleType === 'WEEKEND') {
+          return studyClass.sessions
+            .filter((session) => session.weekday === weekday && session.teacherId === user.id)
+            .map((session) => ({
+              id: `study-hall:${studyClass.id}:${date}:${session.id}`,
+              lessonDate: date,
+              startTime: session.startTime,
+              endTime: session.endTime,
+              status: 'SCHEDULED',
+              scheduleKind: 'STUDY_HALL',
+              subject: session.subject || '作业辅导',
+              group: { id: studyClass.id, name: studyClass.name, room: null, enrollments, course: { name: '周末作业辅导', subject: session.subject || '作业辅导' } },
+            }))
+        }
+        return [{
+          id: `study-hall:${studyClass.id}:${date}:day`,
+          lessonDate: date,
+          startTime: studyClass.timeWindowStart || '18:30',
+          endTime: studyClass.timeWindowEnd || '20:00',
+          status: 'SCHEDULED',
+          scheduleKind: 'STUDY_HALL',
+          subject: '晚托与作业辅导',
+          group: { id: studyClass.id, name: studyClass.name, room: null, enrollments, course: { name: '晚托与作业辅导', subject: '晚托与作业辅导' } },
+        }]
+      }))
+      return NextResponse.json({ currentTeacherId: teacher.id, lessons })
+    }
     const where: Record<string, unknown> = {
       ...teacherLessonWhere(teacher.id),
       status: { notIn: ['CANCELLED', 'POSTPONED'] },

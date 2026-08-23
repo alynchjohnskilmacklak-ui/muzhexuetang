@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { apiHandler } from '@/lib/api-handler'
 import { intensiveStudentCountError, toIntensiveTeachingType } from '@/lib/intensive-class'
+import { isClassLessonInActiveTerm } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,6 +19,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const prisma = await getRequestPrisma()
 
   try {
+    if (!await isClassLessonInActiveTerm(prisma, id)) {
+      return NextResponse.json({ error: '历史批次只允许查看，不能修改排课' }, { status: 409 })
+    }
     const body = await req.json()
     const {
       teacherId, roomId, startDate, startTimeVal, endTimeVal,
@@ -36,6 +40,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         lessonStudents: { select: { studentId: true } },
         group: {
           select: {
+            termId: true,
             roomId: true,
             intensiveMode: true,
             teachingType: true,
@@ -77,6 +82,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         startTime: effectiveStart,
         endTime: effectiveEnd,
         excludeLessonId: id,
+        termId: existing.group.termId || undefined,
       })
       for (const c of conflicts) {
         if (!allConflicts.some(e => e.lessonId === c.lessonId && e.type === c.type)) {
@@ -192,6 +198,9 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
   }
   const prisma = await getRequestPrisma()
   const { id } = await params
+  if (!await isClassLessonInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能取消课次' }, { status: 409 })
+  }
   const existing = await prisma.classLesson.findUnique({ where: { id }, select: { id: true } })
   if (!existing) return NextResponse.json({ error: '课次不存在' }, { status: 404 })
   await prisma.classLesson.update({ where: { id }, data: { status: 'CANCELLED' } })

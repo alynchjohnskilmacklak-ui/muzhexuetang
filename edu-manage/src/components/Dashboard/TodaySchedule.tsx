@@ -1,11 +1,12 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Button, Card, Empty, Select, Tag, Typography } from 'antd'
+import { Button, Card, Select, Tag, Typography } from 'antd'
 import { ClockCircleOutlined, EnvironmentOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import type { TodaySchedule } from '@/types/dashboard'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 
 const { Title, Text } = Typography
 
@@ -58,12 +59,9 @@ export function TodayScheduleCard({ data }: { data: TodaySchedule[] }) {
       </div>
 
       {data.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '32px 0' }}>
-          <Empty description="今日暂无课程安排，可以查看排课系统或处理待办事项。" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-          <Button style={{ height: 40, marginTop: 8 }} onClick={() => router.push('/schedule')}>查看排课系统</Button>
-        </div>
+        <GuidedEmpty title="今日暂无课程安排" description="可以查看后续排课，或者先处理今天的其他运营待办。" actionLabel="查看排课系统" onAction={() => router.push('/schedule')} compact />
       ) : filtered.length === 0 ? (
-        <Empty description="当前筛选下暂无课程" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        <GuidedEmpty title="当前筛选下暂无课程" description="可以切换状态、老师或教室，查看其他课程安排。" compact />
       ) : (
         <div style={{
           display: 'grid',

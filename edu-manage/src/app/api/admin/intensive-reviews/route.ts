@@ -3,6 +3,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { getCurrentUser } from '@/lib/get-user'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +14,8 @@ export const GET = apiHandler(async (request: NextRequest) => {
   }
   const prisma = await getRequestPrisma()
   const division = getRequestDivision(user, request.nextUrl.searchParams.get('division'))
+  const selectedTerm = await resolveAdminTermScope(prisma, division, request)
+  const termId = selectedTerm?.id || '__NO_SELECTED_TERM__'
   const requestedStatus = request.nextUrl.searchParams.get('status')
   const status = requestedStatus === 'APPROVED' || requestedStatus === 'REJECTED'
     ? requestedStatus
@@ -24,7 +27,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
         status,
         lesson: {
           division,
-          group: { intensiveMode: 'INTENSIVE' },
+          group: { intensiveMode: 'INTENSIVE', termId },
         },
       },
       include: {
@@ -54,7 +57,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
         status: 'PENDING',
         lesson: {
           division,
-          group: { intensiveMode: 'INTENSIVE' },
+          group: { intensiveMode: 'INTENSIVE', termId },
         },
       },
     }),
@@ -62,6 +65,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
 
   return NextResponse.json({
     division,
+    term: selectedTerm,
     status,
     pendingCount,
     reviews: reviews.map((review) => ({

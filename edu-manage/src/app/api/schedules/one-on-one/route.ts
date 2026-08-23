@@ -5,6 +5,8 @@ import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { revalidatePath } from 'next/cache'
 
 import { apiHandler } from '@/lib/api-handler'
+import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,10 +15,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
   const prisma = await getRequestPrisma()
+  const division = getRequestDivision(user, req.nextUrl.searchParams.get('division'))
+  const activeTerm = await resolveAdminTermScope(prisma, division, req)
+  if (!activeTerm || activeTerm.status !== 'ACTIVE') {
+    return NextResponse.json({ error: '历史批次只允许查看，请切换到当前运营批次后再安排一对一课程' }, { status: 409 })
+  }
 
   try {
     const body = await req.json()
-    const { teacherId, studentId, subject, date, startTime, endTime, roomId, note } = body
+    const { teacherId, studentId, subject, date, startTime, endTime, roomId: _roomId, note } = body
 
     if (!teacherId || !studentId || !subject || !date || !startTime || !endTime) {
       return NextResponse.json({ error: '缺少必填字段（老师/学员/科目/日期/时间）' }, { status: 400 })
@@ -30,11 +37,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
 
     // Validate teacher exists
-    const teacher = await prisma.teacher.findUnique({ where: { id: teacherId } })
+    const teacher = await prisma.teacher.findFirst({ where: { id: teacherId, division } })
     if (!teacher) return NextResponse.json({ error: '教师不存在' }, { status: 400 })
 
     // Validate student exists
-    const student = await prisma.student.findUnique({ where: { id: studentId } })
+    const student = await prisma.student.findFirst({
+      where: { id: studentId, division, termMemberships: { some: { termId: activeTerm.id, status: 'ACTIVE' } } },
+    })
     if (!student) return NextResponse.json({ error: '学员不存在' }, { status: 400 })
 
     // Conflict check
@@ -44,6 +53,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       date,
       startTime,
       endTime,
+      termId: activeTerm.id,
     })
 
     if (conflicts.length > 0) {
@@ -89,6 +99,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           status: { not: 'ARCHIVED' },
           intensiveMode: 'INTENSIVE',
           teachingType: 'ONE_ON_ONE',
+          termId: activeTerm.id,
           enrollments: { some: { studentId, status: 'ACTIVE' } },
         },
       })
@@ -108,6 +119,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
             status: 'ACTIVE',
             intensiveMode: 'INTENSIVE',
             teachingType: 'ONE_ON_ONE',
+            termId: activeTerm.id,
+            division,
           },
         })
         // Enroll student

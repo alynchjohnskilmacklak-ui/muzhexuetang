@@ -11,6 +11,8 @@ import {
   type IntensiveReviewAttendanceRecord,
 } from '@/lib/intensive-review'
 import { canSubmitIntensiveAttendance } from '@/lib/teacher-intensive-scheduling'
+import { syncAutomaticMealAttendance } from '@/lib/meal-attendance-sync'
+import { isFirstTeachingPeriod, normalizeSchedulePeriods } from '@/lib/schedule-periods'
 
 import { apiHandler } from '@/lib/api-handler'
 
@@ -52,6 +54,20 @@ export const GET = apiHandler(async (request: NextRequest) => {
             .map((snapshot) => lesson.group.enrollments.find((enrollment) => enrollment.student.id === snapshot.studentId))
             .filter((enrollment): enrollment is NonNullable<typeof enrollment> => Boolean(enrollment))
         : lesson.group.enrollments
+      const scheduleConfig = await prisma.systemConfig.findUnique({
+        where: { id: 'singleton' },
+        select: { schedulePeriods: true },
+      })
+      const isSystemFirstPeriod = isFirstTeachingPeriod(
+        normalizeSchedulePeriods(scheduleConfig?.schedulePeriods),
+        lesson.startTime,
+      )
+      const mealDate = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T00:00:00.000Z`)
+      const mealRecords = await prisma.studentMealAttendance.findMany({
+        where: { studentId: { in: displayEnrollments.map((enrollment) => enrollment.student.id) }, mealDate },
+        select: { studentId: true, eating: true },
+      })
+      const eatingStudentIds = new Set(mealRecords.filter((record) => record.eating).map((record) => record.studentId))
       return NextResponse.json({
         lesson: {
           id: lesson.id,
@@ -74,6 +90,9 @@ export const GET = apiHandler(async (request: NextRequest) => {
           status: lesson.status,
           hoursDeducted: !!lesson.hoursDeductedAt,
           attendanceSubmitted: !!lesson.attendanceSubmittedAt,
+          isSystemFirstPeriod,
+          // Compatibility for an already-open client during a rolling deploy.
+          isTeacherFirstLessonToday: isSystemFirstPeriod,
         },
         students: displayEnrollments.map((enrollment) => ({
           studentId: enrollment.student.id,
@@ -84,6 +103,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
           courseType: lesson.group.course.type,
           lessonMinutes: lesson.group.lessonMinutes,
           status: lesson.attendances.find((attendance) => attendance.studentId === enrollment.student.id)?.status || 'PRESENT',
+          eating: eatingStudentIds.has(enrollment.student.id),
         })),
       })
     }
@@ -132,6 +152,9 @@ export const POST = apiHandler(async (request: NextRequest) => {
     const body = await request.json()
     const lessonId = typeof body.lessonId === 'string' ? body.lessonId : ''
     const records = Array.isArray(body.records) ? body.records : []
+    const mealStudentIds: string[] | null = Array.isArray(body.mealStudentIds)
+      ? body.mealStudentIds.filter((value: unknown): value is string => typeof value === 'string')
+      : null
     if (!lessonId || !records.length) return NextResponse.json({ error: '无效数据' }, { status: 400 })
 
     const session = await auth()
@@ -168,6 +191,21 @@ export const POST = apiHandler(async (request: NextRequest) => {
       include: { group: { include: { course: true } }, lessonStudents: { select: { studentId: true } } },
     })
     if (!lesson) return NextResponse.json({ error: '不可操作' }, { status: 403 })
+
+    const scheduleConfig = await prisma.systemConfig.findUnique({
+      where: { id: 'singleton' },
+      select: { schedulePeriods: true },
+    })
+    const isSystemFirstPeriod = isFirstTeachingPeriod(
+      normalizeSchedulePeriods(scheduleConfig?.schedulePeriods),
+      lesson.startTime,
+    )
+    if (session.user.role === 'teacher' && isSystemFirstPeriod && mealStudentIds === null) {
+      return NextResponse.json({ error: '系统第一课节需要同时提交学生就餐情况' }, { status: 400 })
+    }
+    if (!isSystemFirstPeriod && mealStudentIds !== null) {
+      return NextResponse.json({ error: '就餐只能随系统第一课节登记' }, { status: 400 })
+    }
 
     const [lessonHour, lessonMinute = 0] = (lesson.startTime || '00:00').split(':').map(Number)
     const lessonStart = new Date(lesson.lessonDate)
@@ -221,6 +259,27 @@ export const POST = apiHandler(async (request: NextRequest) => {
         records: intensiveRecords,
         teacherNote: typeof body.note === 'string' ? body.note : null,
       })
+      if (isSystemFirstPeriod && mealStudentIds !== null) {
+        const eligibleStudentIds = records
+          .map((record: { studentId?: unknown }) => typeof record.studentId === 'string' ? record.studentId : '')
+          .filter((studentId: string) => snapshotStudentIds.has(studentId))
+        const selectedMealIds = [...new Set<string>(mealStudentIds)].filter((studentId) => eligibleStudentIds.includes(studentId))
+        const mealDate = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T00:00:00.000Z`)
+        await prisma.$transaction(async (tx) => {
+          await syncAutomaticMealAttendance(tx, {
+            eligibleStudentIds,
+            eatingStudentIds: selectedMealIds,
+            mealDate,
+            division: lesson.division,
+            recordedBy: user.id,
+            groupId: group.id,
+            groupName: group.name,
+            lessonId: lesson.id,
+            teacherId: teacher.id,
+            teacherName: teacher.name || '教师',
+          })
+        })
+      }
       return NextResponse.json({
         success: true,
         pendingReview: true,
@@ -235,6 +294,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
     const alreadyDeducted = !isIntensive && (!!lesson.hoursDeductedAt || existingDeductedCount > 0)
     let processedCount = 0
     let deductedCount = 0
+    const processedStudentIds: string[] = []
 
     await prisma.$transaction(async (tx) => {
       if (isIntensive) {
@@ -262,6 +322,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
         if (!enrollment) continue
         counts[status] += 1
         processedCount += 1
+        processedStudentIds.push(studentId)
         const actualMinutes = isIntensive ? intensiveActualMinutes : Number(rec.actualMinutes) || null
 
         const attendance = await tx.attendance.upsert({
@@ -341,6 +402,23 @@ export const POST = apiHandler(async (request: NextRequest) => {
 
       if (processedCount === 0) {
         throw new Error('NO_VALID_ATTENDANCE_RECORDS')
+      }
+
+      if (isSystemFirstPeriod && mealStudentIds !== null) {
+        const selectedMealIds = [...new Set<string>(mealStudentIds)].filter((studentId) => processedStudentIds.includes(studentId))
+        const mealDate = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T00:00:00.000Z`)
+        await syncAutomaticMealAttendance(tx, {
+          eligibleStudentIds: processedStudentIds,
+          eatingStudentIds: selectedMealIds,
+          mealDate,
+          division: lesson.division,
+          recordedBy: user.id,
+          groupId: group.id,
+          groupName: group.name,
+          lessonId: lesson.id,
+          teacherId: teacher.id,
+          teacherName: teacher.name || '教师',
+        })
       }
 
       const now = new Date()

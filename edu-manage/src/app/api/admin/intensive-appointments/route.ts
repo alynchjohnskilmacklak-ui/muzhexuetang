@@ -5,6 +5,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getRequestDivision } from '@/lib/division'
 import { intensiveTeachingTypeLabel } from '@/lib/intensive-class'
 import type { Prisma } from '@prisma/client'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,12 +17,14 @@ export const GET = apiHandler(async (request: NextRequest) => {
 
   const prisma = await getRequestPrisma()
   const division = getRequestDivision(user, request.nextUrl.searchParams.get('division'))
+  const selectedTerm = await resolveAdminTermScope(prisma, division, request)
   const where: Prisma.ClassLessonWhereInput = {
     division,
     status: { notIn: ['CANCELLED', 'POSTPONED'] },
     intensiveReviewStatus: 'DRAFT',
     attendanceSubmittedAt: null,
     group: {
+      termId: selectedTerm?.id || '__NO_SELECTED_TERM__',
       intensiveMode: 'INTENSIVE',
       status: { not: 'ARCHIVED' },
     },
@@ -53,6 +56,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
 
   return NextResponse.json({
     division,
+    term: selectedTerm,
     total,
     appointments: appointments.map((lesson) => ({
       id: lesson.id,

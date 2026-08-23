@@ -1,12 +1,13 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { Button, Card, Descriptions, Image, Tag, Typography } from 'antd'
-import { ArrowLeftOutlined, BookOutlined, ClockCircleOutlined, EnvironmentOutlined, ReloadOutlined, TeamOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, BookOutlined, ClockCircleOutlined, EnvironmentOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { fmtDateTime } from '@/lib/format-date'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
+import type { FeedbackImageVariant } from '@/lib/file-asset-variants'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -21,8 +22,25 @@ function parentMasteryLabel(value: unknown) {
   if (typeof raw !== 'string') return ''
   return ({ GREAT: '掌握良好', OKAY: '基本掌握', NEEDS_IMPROVEMENT: '需要加强' } as Record<string, string>)[raw] || raw
 }
+type HomeworkItem = string | { title?: string; content?: string }
+type FeedbackDetail = {
+  id: string
+  status: string
+  parentReadAt?: string | null
+  createdAt: string
+  lessonContent?: string | null
+  summary?: string | null
+  overallComment?: string | null
+  studentRating?: unknown
+  knowledgePoints: string[]
+  homework: HomeworkItem[]
+  imageUrls: string[]
+  images: FeedbackImageVariant[]
+  teacher?: { name?: string; subjects?: string | null } | null
+  classLesson?: { startTime?: string | null; endTime?: string | null; group?: { course?: { name?: string }; room?: { name?: string } | null } | null } | null
+}
 
-export function FeedbackDetailClient({ feedback }: { feedback: any }) {
+export function FeedbackDetailClient({ feedback }: { feedback: FeedbackDetail }) {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false)
@@ -30,9 +48,9 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
   const images = Array.isArray(feedback.images) && feedback.images.length === imageUrls.length
     ? feedback.images
     : imageUrls.map((url: string) => ({ originalUrl: url, previewUrl: url, thumbnailUrl: url }))
-  const { urls: signedThumbnails, error: thumbnailError, refresh: retryThumbnails } = useSignedUrls(images.map((image: any) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
+  const { urls: signedThumbnails, error: thumbnailError, refresh: retryThumbnails } = useSignedUrls(images.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
   const { urls: signedPreviews, error: previewError, refresh: retryPreviews } = useSignedUrls(imagePreviewOpen
-    ? images.map((image: any) => image.previewUrl || image.thumbnailUrl || image.originalUrl)
+    ? images.map((image) => image.previewUrl || image.thumbnailUrl || image.originalUrl)
     : [])
 
   useEffect(() => {
@@ -129,9 +147,9 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
         {feedback.homework?.length > 0 && (
           <div style={{ background: '#F5F3FF', borderRadius: 10, padding: 16, marginBottom: 16 }}>
             <Text strong style={{ display: 'block', marginBottom: 8 }}>作业 / 复习任务</Text>
-            {feedback.homework.map((hw: any, i: number) => (
+            {feedback.homework.map((hw, i: number) => (
               <div key={i} style={{ fontSize: 13, marginBottom: 4, color: '#4B5563' }}>
-                {hw.title || hw.content || `作业 ${i + 1}`}
+                {typeof hw === 'string' ? hw : hw.title || hw.content || `作业 ${i + 1}`}
               </div>
             ))}
           </div>
@@ -167,7 +185,7 @@ export function FeedbackDetailClient({ feedback }: { feedback: any }) {
             )}
             <Image.PreviewGroup preview={{ onVisibleChange: setImagePreviewOpen }}>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-                {images.map((image: any, i: number) => (
+                {images.map((image, i: number) => (
                   <Image
                     key={i}
                     src={signedThumbnails[i]}

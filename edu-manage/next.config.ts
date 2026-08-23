@@ -49,6 +49,14 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.aliyuncs.com.cn' },
     ],
   },
+  async rewrites() {
+    return [
+      // Local-development fallback. In production Nginx serves this prefix
+      // directly from /srv/edu-manage-assets before the request reaches Next.
+      { source: '/business-assets/services/:path*', destination: '/services/:path*' },
+      { source: '/business-assets/marketing/:path*', destination: '/marketing/:path*' },
+    ]
+  },
   async headers() {
     return [
       {
@@ -71,6 +79,18 @@ const nextConfig: NextConfig = {
         source: '/images/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/services/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/business-assets/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=604800' },
         ],
       },
       {

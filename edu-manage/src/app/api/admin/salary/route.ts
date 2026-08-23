@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { getRequestDivision } from '@/lib/division'
 import { classifySalaryBucket, type SalaryBucket } from '@/lib/salary-bucket'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,11 +24,16 @@ export async function GET(req: NextRequest) {
       ? requestedBucket
       : 'ALL'
     const division = getRequestDivision(adminUser, req.nextUrl.searchParams.get('division'))
+    const selectedTerm = await resolveAdminTermScope(prisma, division, req)
+    const termGroupIds = selectedTerm ? (await prisma.classGroup.findMany({
+      where: { termId: selectedTerm.id }, select: { id: true },
+    })).map((group) => group.id) : []
     const since = salaryPeriodStart(period)
     const where = {
       ...(teacherId ? { teacherId } : {}),
       teacher: { division },
       createdAt: { gte: since },
+      termId: selectedTerm?.id || '__NO_SELECTED_TERM__',
     }
 
     const page = Math.max(1, Number(req.nextUrl.searchParams.get('page') || 1))
@@ -44,16 +50,22 @@ export async function GET(req: NextRequest) {
         include: { teacher: { select: { id: true, name: true, avatar: true } } },
         orderBy: { createdAt: 'desc' },
       }),
-      prisma.classroomFeedback.groupBy({
+      selectedTerm ? prisma.classroomFeedback.groupBy({
         by: ['teacherId'],
         where: {
           ...(teacherId ? { teacherId } : {}),
           teacher: { division },
           status: 'PUBLISHED',
           createdAt: { gte: since },
+          ...(selectedTerm ? {
+            OR: [
+              { classLesson: { group: { termId: selectedTerm.id } } },
+              { feedbackGroupId: { in: termGroupIds } },
+            ],
+          } : {}),
         },
         _count: { _all: true },
-      }),
+      }) : Promise.resolve([]),
     ])
 
     const contextTransactions = summaryTransactions
@@ -95,6 +107,7 @@ export async function GET(req: NextRequest) {
       })
 
     const summaryMap = new Map<string, { teacherId: string; name: string; avatar: string | null; lesson: number; feedback: number; adjustment: number; smallClass: number; intensive: number; feedbackCount: number; rewardCount: number; total: number }>()
+    const studyHallRewardCount = new Map<string, number>()
     for (const teacher of teachers) {
       if (!teacherId || teacher.id === teacherId) {
         summaryMap.set(teacher.id, { teacherId: teacher.id, name: teacher.name, avatar: teacher.avatar, lesson: 0, feedback: 0, adjustment: 0, smallClass: 0, intensive: 0, feedbackCount: 0, rewardCount: 0, total: 0 })
@@ -105,11 +118,12 @@ export async function GET(req: NextRequest) {
       if (!row) continue
       const amount = item.amount
       if (item.type === 'LESSON_PAY' || item.type === 'LESSON_PAY_ADJUSTMENT') row.lesson += amount
-      if (item.type === 'FEEDBACK_BONUS') {
+      if (item.type === 'FEEDBACK_BONUS' || item.type === 'STUDY_HALL_BONUS') {
         row.feedback += amount
         row.rewardCount += 1
       }
-      if (!['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT', 'FEEDBACK_BONUS'].includes(item.type)) row.adjustment += amount
+      if (item.type === 'STUDY_HALL_BONUS') studyHallRewardCount.set(item.teacherId, (studyHallRewardCount.get(item.teacherId) || 0) + 1)
+      if (!['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT', 'FEEDBACK_BONUS', 'STUDY_HALL_BONUS'].includes(item.type)) row.adjustment += amount
       if (salaryBucket(item) === 'INTENSIVE') row.intensive += amount
       else row.smallClass += amount
       row.total += amount
@@ -122,14 +136,19 @@ export async function GET(req: NextRequest) {
     const rewardClient = (prisma as unknown as { feedbackRewardRecord?: { groupBy(args: unknown): Promise<Array<{ teacherId: string; _count: { _all: number } }>> } }).feedbackRewardRecord
     if (rewardClient) {
       try {
-        const rewardAggregates = await rewardClient.groupBy({
+        const rewardAggregates = feedbackIds.length ? await rewardClient.groupBy({
           by: ['teacherId'],
-          where: { ...(teacherId ? { teacherId } : {}), amount: { gt: 0 }, createdAt: { gte: since } },
+          where: {
+            ...(teacherId ? { teacherId } : {}),
+            feedbackId: { in: feedbackIds },
+            amount: { gt: 0 },
+            createdAt: { gte: since },
+          },
           _count: { _all: true },
-        })
+        }) : []
         for (const item of rewardAggregates) {
           const row = summaryMap.get(item.teacherId)
-          if (row) row.rewardCount = item._count._all
+          if (row) row.rewardCount = item._count._all + (studyHallRewardCount.get(item.teacherId) || 0)
         }
       } catch {
         // Migration not deployed yet: transaction count remains the compatibility value.
@@ -152,6 +171,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       period,
+      term: selectedTerm,
+      readOnly: selectedTerm?.status !== 'ACTIVE',
       bucket,
       total: filteredTransactions.length,
       page,
@@ -182,6 +203,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const adminUser = await requireAdminUser()
+    const division = getRequestDivision(adminUser, req.nextUrl.searchParams.get('division'))
+    const selectedTerm = await resolveAdminTermScope(adminUser.prisma, division, req)
+    if (!selectedTerm || selectedTerm.status !== 'ACTIVE') {
+      return NextResponse.json({ error: '历史批次工资只允许查看，请切换到当前运营批次后再调整工资' }, { status: 409 })
+    }
     const body = await req.json() as { teacherId?: unknown; amount?: unknown; description?: unknown; salaryBucket?: unknown }
     const teacherId = typeof body.teacherId === 'string' ? body.teacherId.trim() : ''
     const amount = body.amount
@@ -203,6 +229,7 @@ export async function POST(req: NextRequest) {
     const transaction = await adminUser.prisma.teacherSalaryTransaction.create({
       data: {
         teacherId,
+        termId: selectedTerm.id,
         type: 'manual_adjust',
         amount,
         description: `${salaryBucket === 'INTENSIVE' ? '[一对一/二/三]' : '[小班课]'} ${description}`,
@@ -223,14 +250,20 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const adminUser = await requireAdminUser()
+    const division = getRequestDivision(adminUser, req.nextUrl.searchParams.get('division'))
+    const selectedTerm = await resolveAdminTermScope(adminUser.prisma, division, req)
+    if (!selectedTerm || selectedTerm.status !== 'ACTIVE') {
+      return NextResponse.json({ error: '历史批次工资只允许查看' }, { status: 409 })
+    }
     const id = req.nextUrl.searchParams.get('id')?.trim() || ''
     if (!id) return NextResponse.json({ error: '缺少流水ID' }, { status: 400 })
 
     const transaction = await adminUser.prisma.teacherSalaryTransaction.findUnique({
       where: { id },
-      select: { id: true, type: true },
+      select: { id: true, type: true, termId: true },
     })
     if (!transaction) return NextResponse.json({ error: '流水不存在' }, { status: 404 })
+    if (transaction.termId !== selectedTerm.id) return NextResponse.json({ error: '该流水不属于当前运营批次' }, { status: 409 })
     if (transaction.type !== 'manual_adjust') {
       return NextResponse.json({ error: '只能删除手动调整流水' }, { status: 400 })
     }

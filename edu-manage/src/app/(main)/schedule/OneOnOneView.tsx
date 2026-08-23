@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import { addDays, subDays, setHours, setMinutes } from 'date-fns'
+import { addDays, subDays } from 'date-fns'
 import { Spin, Empty, Tag, Typography } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
@@ -38,15 +38,17 @@ export function OneOnOneView({
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
   const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}&division=${division}`, fetcher, { refreshInterval: 180_000 })
 
-  const matrix = (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown>>>
+  const matrix = useMemo(
+    () => (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown>>>,
+    [daily],
+  )
 
   // Gather all one-on-one lessons: { lesson, roomId, hourId }
   const oneOnOneLessons = useMemo(() => {
     const list: { lesson: Record<string, unknown>; roomId: string; hourId: string }[] = []
     Object.entries(matrix).forEach(([roomId, periods]) => {
-      Object.entries(periods).forEach(([periodId, lesson]) => {
+      Object.entries(periods).forEach(([_periodId, lesson]) => {
         if ((lesson.courseType as string) === 'ONE_ON_ONE') {
-          const hourId = getHourSlot(periodId === 'am1' ? '08:00' : periodId === 'am2' ? '08:00' : lesson.startTime as string || '')
           // Use the lesson's actual startTime to find the hour slot
           const slot = getHourSlot(lesson.startTime as string || '')
           if (slot) {
@@ -66,15 +68,6 @@ export function OneOnOneView({
       if (grid[hourId]) grid[hourId].push({ lesson, roomId })
     })
     return grid
-  }, [oneOnOneLessons])
-
-  // Get unique rooms from one-on-one lessons
-  const rooms = useMemo(() => {
-    const roomSet = new Map<string, string>()
-    oneOnOneLessons.forEach(({ roomId }) => {
-      if (!roomSet.has(roomId)) roomSet.set(roomId, roomId === 'unknown' ? '未分配教室' : roomId)
-    })
-    return Array.from(roomSet.entries()).map(([id, name]) => ({ id, name }))
   }, [oneOnOneLessons])
 
   return (

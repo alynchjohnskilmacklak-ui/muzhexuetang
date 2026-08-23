@@ -5,6 +5,7 @@ import { Modal, Spin, Select, message, Divider } from 'antd'
 import useSWR from 'swr'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
+type TeacherOption = { id: string; name: string; subjects: string; status: string }
 
 export function DeleteConfirmModal({
   open, teacherId, teacherName, onClose, onDeleted,
@@ -14,11 +15,11 @@ export function DeleteConfirmModal({
   const [deleting, setDeleting] = useState(false)
   const [transferTo, setTransferTo] = useState('')
 
-  const { data: teachers } = useSWR(open ? '/api/teachers?status=ACTIVE&limit=200' : null, fetcher)
+  const { data: teachers } = useSWR<TeacherOption[]>(open ? '/api/teachers?status=ACTIVE&limit=200' : null, fetcher)
   const availableTeachers = (teachers?.filter
-    ? teachers.filter((t: any) => t.id !== teacherId && t.status === 'ACTIVE')
+    ? teachers.filter((t) => t.id !== teacherId && t.status === 'ACTIVE')
     : []
-  ) as { id: string; name: string; subjects: string }[]
+  )
 
   useEffect(() => {
     if (open && teacherId) {

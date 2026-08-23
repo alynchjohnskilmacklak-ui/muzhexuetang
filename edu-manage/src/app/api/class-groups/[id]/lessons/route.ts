@@ -3,6 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { visibleClassGroupWhere, visibleStudentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,6 +40,9 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
 
   const prisma = await getRequestPrisma()
   const { id } = await params
+  if (!await isClassGroupInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能新增课次' }, { status: 409 })
+  }
   const body = await req.json().catch(() => ({}))
   const lessonDate = typeof body.lessonDate === 'string' ? body.lessonDate : ''
   const startTime = typeof body.startTime === 'string' ? body.startTime : ''

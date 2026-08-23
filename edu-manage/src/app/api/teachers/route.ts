@@ -8,6 +8,8 @@ import bcrypt from 'bcryptjs'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { generateTemporaryPassword } from '@/lib/temporary-password'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +26,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '100')
+  const selectedTerm = (session.user as { role?: string }).role === 'admin'
+    ? await resolveAdminTermScope(prisma, division, req)
+    : await getActiveAcademicTerm(prisma, division)
 
   const where: Record<string, unknown> = { division }
   if (type === 'FULL_TIME' || type === 'PART_TIME') where.employmentType = type
@@ -50,11 +55,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
   ])
 
   const teacherIds = teachers.map((teacher) => teacher.id)
-  const groupStudentRows = teacherIds.length
-    ? await prisma.classGroup.findMany({
+  const [groupStudentRows, scopedLessonRows] = teacherIds.length
+    ? await Promise.all([
+      prisma.classGroup.findMany({
         where: {
           status: { not: 'ARCHIVED' },
           division,
+          termId: selectedTerm?.id || '__NO_SELECTED_TERM__',
           course: { isActive: true },
           OR: [
             { teacherId: { in: teacherIds } },
@@ -69,11 +76,38 @@ export const GET = apiHandler(async (req: NextRequest) => {
             select: { studentId: true },
           },
         },
-      })
-    : []
+      }),
+      prisma.classLesson.findMany({
+        where: {
+          division,
+          status: { notIn: ['CANCELLED', 'POSTPONED'] },
+          group: {
+            termId: selectedTerm?.id || '__NO_SELECTED_TERM__',
+            status: { not: 'ARCHIVED' },
+            OR: [
+              { teacherId: { in: teacherIds } },
+              { teacherAssignments: { some: { teacherId: { in: teacherIds } } } },
+            ],
+          },
+        },
+        select: {
+          id: true,
+          teacherId: true,
+          group: {
+            select: {
+              teacherId: true,
+              teacherAssignments: { where: { teacherId: { in: teacherIds } }, select: { teacherId: true } },
+            },
+          },
+        },
+      }),
+    ])
+    : [[], []]
 
   const studentIdsByTeacher = new Map<string, Set<string>>()
+  const lessonIdsByTeacher = new Map<string, Set<string>>()
   for (const teacherId of teacherIds) studentIdsByTeacher.set(teacherId, new Set())
+  for (const teacherId of teacherIds) lessonIdsByTeacher.set(teacherId, new Set())
   for (const group of groupStudentRows) {
     const assignedTeacherIds = new Set([group.teacherId, ...group.teacherAssignments.map((item) => item.teacherId)])
     for (const teacherId of assignedTeacherIds) {
@@ -82,16 +116,29 @@ export const GET = apiHandler(async (req: NextRequest) => {
       for (const enrollment of group.enrollments) studentIds.add(enrollment.studentId)
     }
   }
+  for (const lesson of scopedLessonRows) {
+    const assignedTeacherIds = lesson.teacherId
+      ? [lesson.teacherId]
+      : [lesson.group.teacherId, ...lesson.group.teacherAssignments.map((item) => item.teacherId)]
+    for (const teacherId of assignedTeacherIds) lessonIdsByTeacher.get(teacherId)?.add(lesson.id)
+  }
 
   const teachersWithCounts = teachers.map((teacher) => ({
     ...teacher,
     _count: {
       ...teacher._count,
       students: studentIdsByTeacher.get(teacher.id)?.size ?? 0,
+      schedules: lessonIdsByTeacher.get(teacher.id)?.size ?? 0,
     },
   }))
 
-  return NextResponse.json({ teachers: teachersWithCounts, total, page, limit })
+  return NextResponse.json({
+    teachers: teachersWithCounts,
+    total,
+    page,
+    limit,
+    term: selectedTerm,
+  })
 })
 
 export async function POST(req: NextRequest) {

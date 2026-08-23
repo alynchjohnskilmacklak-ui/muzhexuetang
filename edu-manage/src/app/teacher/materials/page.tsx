@@ -1,8 +1,9 @@
 ﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import NextImage from 'next/image'
 import {
-  Button, Col, Empty, Form, Input, Modal, Popconfirm, Row, Select, Skeleton, Space,
+  Button, Col, Form, Input, Modal, Popconfirm, Row, Select, Skeleton, Space,
   Tabs, Tag, Typography, Upload,
 } from 'antd'
 import {
@@ -16,6 +17,7 @@ import {
   materialAudienceText,
   materialFileLabel,
 } from '@/lib/material-format'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -219,7 +221,7 @@ export default function TeacherMaterialsPage() {
           <Skeleton active paragraph={{ rows: 3 }} />
         </div>
       ) : materials.length === 0 ? (
-        <div className="materials-empty"><Empty description="暂无资料,点击右上角上传" /></div>
+        <div className="materials-empty"><GuidedEmpty title="还没有教学资料" description="上传讲义、练习或答案后，学生和教师可按权限查看，便于重复使用。" actionLabel="上传第一份资料" onAction={() => setModalOpen(true)} /></div>
       ) : (
         <div className="materials-list">
           {materials.map((material) => (
@@ -307,7 +309,7 @@ export default function TeacherMaterialsPage() {
       <Modal title="资料预览" open={!!previewUrl} footer={null} onCancel={() => setPreviewUrl(null)} width="90vw" style={{ top: 20 }} styles={{ body: { padding: 0 } }}>
         {previewUrl && previewType === 'pdf' && <iframe src={previewUrl} title="PDF预览" style={{ width: '100%', height: '80vh', border: 0 }} />}
         {previewUrl && previewType === 'word' && <iframe src={previewUrl} title="Word预览" style={{ width: '100%', height: '80vh', border: 0 }} />}
-        {previewUrl && previewType === 'image' && <div style={{ textAlign: 'center', padding: 16 }}><img src={previewUrl} alt="" style={{ maxWidth: '100%', maxHeight: '78vh', objectFit: 'contain' }} /></div>}
+        {previewUrl && previewType === 'image' && <div style={{ textAlign: 'center', padding: 16 }}><NextImage src={previewUrl} alt="资料预览" width={1200} height={800} unoptimized style={{ width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: '78vh', objectFit: 'contain' }} /></div>}
       </Modal>
 
       <style jsx>{`

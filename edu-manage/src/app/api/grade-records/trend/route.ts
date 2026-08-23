@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
+import { assertCanAccessStudent } from '@/lib/auth/guards'
 import { apiHandler } from '@/lib/api-handler'
 
 export const GET = apiHandler(async (req: NextRequest) => {
@@ -15,6 +16,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (!studentId || !groupId) {
     return NextResponse.json({ error: '请指定学员和班级' }, { status: 400 })
   }
+
+  // 归属校验：家长只能看自己孩子，教师只能看自己学生，管理员不受限。
+  await assertCanAccessStudent({ ...user, prisma }, studentId)
 
   // Get all assessments for this group
   const assessments = await prisma.assessment.findMany({

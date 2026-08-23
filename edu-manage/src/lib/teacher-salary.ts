@@ -167,6 +167,7 @@ export async function triggerLessonPay(
       const salaryTx = await tx.teacherSalaryTransaction.create({
         data: {
           teacherId, type: 'LESSON_PAY', amount, lessonId,
+          termId: lesson.group.termId,
           lessonDate: lesson.lessonDate,
           description: `${lesson.group.name}（${salaryMinutes}分钟 x ${rateLabel}）`,
         },
@@ -557,6 +558,9 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
 
     const teacherId = feedback.teacherId
     const lesson = feedback.classLesson
+    const feedbackTermId = feedback.termId || lesson?.group.termId || (feedback.feedbackGroupId
+      ? (await prisma.classGroup.findUnique({ where: { id: feedback.feedbackGroupId }, select: { termId: true } }))?.termId
+      : null)
 
     const existingBonus = await prisma.teacherSalaryTransaction.findFirst({
       where: { feedbackId, type: 'FEEDBACK_BONUS' },
@@ -643,6 +647,7 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       await tx.teacherSalaryTransaction.create({
         data: {
           teacherId, type: 'FEEDBACK_BONUS', amount: finalAmount, feedbackId,
+          termId: feedbackTermId || null,
           lessonId: lesson?.id ?? null,
           lessonDate: lesson?.lessonDate ?? new Date(),
           description: descParts.join(''),

@@ -1,9 +1,9 @@
-﻿'use client'
+'use client'
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
-import { Avatar, Button, Card, Col, Empty, Input, List, Popconfirm, Row, Select, Space, Spin, Tag, Typography, message } from 'antd'
+import { Avatar, Button, Card, Col, Empty, Input, List, Popconfirm, Row, Select, Space, Tag, Typography, message } from 'antd'
 import { CheckOutlined, DeleteOutlined, MessageOutlined, ReloadOutlined, SendOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -15,6 +15,20 @@ const fetcher = async (url: string) => {
   const res = await fetch(url)
   if (!res.ok) throw new Error('加载失败')
   return res.json()
+}
+type CommunicationItem = {
+  id: string
+  type: string
+  targetId: string
+  targetTitle?: string | null
+  scene: string
+  content: string
+  createdAt: string
+  isRead: boolean
+  author?: { role?: string; name?: string; label?: string } | null
+  student?: { name?: string } | null
+  teacher?: { name?: string } | null
+  parent?: { name?: string } | null
 }
 
 export default function CommunicationsPage() {
@@ -28,17 +42,17 @@ export default function CommunicationsPage() {
   const params = new URLSearchParams({ source, limit: '80' })
   if (unread) params.set('unread', '1')
   if (q.trim()) params.set('q', q.trim())
-  const { data, mutate, isLoading } = useSWR(`/api/parent-communications?${params.toString()}`, fetcher)
-  const items = Array.isArray(data?.items) ? data.items : []
+  const { data, mutate, isLoading } = useSWR<{ items?: CommunicationItem[] }>(`/api/parent-communications?${params.toString()}`, fetcher)
+  const items = useMemo(() => Array.isArray(data?.items) ? data.items : [], [data])
 
   const stats = useMemo(() => ({
     total: items.length,
-    unread: items.filter((item: any) => item.author?.role === 'parent' && !item.isRead).length,
-    parent: items.filter((item: any) => item.author?.role === 'parent').length,
-    staff: items.filter((item: any) => item.author?.role !== 'parent').length,
+    unread: items.filter((item) => item.author?.role === 'parent' && !item.isRead).length,
+    parent: items.filter((item) => item.author?.role === 'parent').length,
+    staff: items.filter((item) => item.author?.role !== 'parent').length,
   }), [items])
 
-  const markRead = async (item: any) => {
+  const markRead = async (item: CommunicationItem) => {
     const res = await fetch('/api/parent-communications', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -49,14 +63,14 @@ export default function CommunicationsPage() {
     mutate()
   }
 
-  const deleteComment = async (item: any) => {
+  const deleteComment = async (item: CommunicationItem) => {
     const res = await fetch(`/api/parent-communications?type=${item.type}&id=${item.id}&targetId=${item.targetId}`, { method: 'DELETE' })
     if (!res.ok) return message.error('删除失败')
     message.success('该条关联沟通已清除')
     mutate()
   }
 
-  const sendReply = async (item: any) => {
+  const sendReply = async (item: CommunicationItem) => {
     if (!replyText.trim()) return message.warning('请输入回复内容')
     const res = await fetch('/api/parent-communications', {
       method: 'POST',
@@ -148,7 +162,7 @@ export default function CommunicationsPage() {
           <List
             itemLayout="vertical"
             dataSource={items}
-            renderItem={(item: any) => {
+            renderItem={(item) => {
               const fromParent = item.author?.role === 'parent'
               const unreadParent = fromParent && !item.isRead
               return (

@@ -6,10 +6,13 @@ import { chineseToPinyin, generateParentCredentialsHashed } from '@/lib/pinyin'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { calculateApprovedIntensiveHours, calculateTaughtHours } from '@/lib/student-taught-hours'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { calculatePurchasedDayBalance, dateKey } from '@/lib/study-hall/domain'
 
 export const dynamic = 'force-dynamic'
 
 const normalizeCourseTypeFilter = (courseType: string) => {
+  if (courseType === 'STUDY_HALL') return 'STUDY_HALL'
   if (courseType === 'ONE_ON_TWO' || courseType === 'ONE_ON_THREE') return 'SMALL_GROUP'
   if (courseType === 'GROUP' || courseType === 'ONE_ON_ONE' || courseType === 'SMALL_GROUP') return courseType
   return null
@@ -50,6 +53,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const groupByGrade = searchParams.get('groupByGrade') === 'true'
   const lowHours = searchParams.get('lowHours') === '1'
   const q = searchParams.get('q') || ''
+  const requestedTermId = searchParams.get('termId')?.trim() || null
   const requestedSort = searchParams.get('sortBy')
   const sortBy: StudentSortBy = STUDENT_SORTS.includes(requestedSort as StudentSortBy) ? requestedSort as StudentSortBy : 'createdAt'
   const page = parseInt(searchParams.get('page') || '1')
@@ -58,9 +62,17 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const skip = (page - 1) * limit
 
   const where: Record<string, unknown> = { division }
+  const selectedTerm = await resolveAdminTermScope(prisma, division, req)
+  if (requestedTermId && !selectedTerm) {
+    return NextResponse.json({ error: '运营批次不存在或不属于当前学部' }, { status: 404 })
+  }
+  if (!selectedTerm) {
+    return NextResponse.json(groupByGrade ? {} : { students: [], total: 0, page, limit, contextState: 'NO_SELECTED_TERM' })
+  }
+  where.termMemberships = { some: { termId: selectedTerm.id } }
   if (status) {
     where.status = status.toUpperCase()
-  } else {
+  } else if (selectedTerm.status !== 'ARCHIVED') {
     where.status = { not: 'INACTIVE' }
   }
   if (grade && grade !== 'all') where.grade = grade
@@ -70,7 +82,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
     if (!normalizedCourseType) {
       return NextResponse.json({ error: '无效课程类型' }, { status: 400 })
     }
-    where.enrollments = {
+    if (normalizedCourseType === 'STUDY_HALL') where.studyHallClasses = {
+      some: { status: 'ACTIVE', studyClass: { termId: selectedTerm.id, status: 'ACTIVE' } },
+    }
+    else where.enrollments = {
       some: {
         status: 'ACTIVE',
         group: {
@@ -128,6 +143,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
           include: { group: { include: { course: { select: { id: true, name: true, type: true, isActive: true } } } } },
           orderBy: { enrolledAt: 'desc' },
         },
+        studyHallClasses: {
+          where: { status: 'ACTIVE', studyClass: { termId: selectedTerm.id, status: 'ACTIVE' } },
+          include: { studyClass: { select: { id: true, name: true, scheduleType: true, gradeScope: true } } },
+          orderBy: { joinedAt: 'desc' },
+        },
       },
       orderBy: { createdAt: 'desc' },
     }),
@@ -154,6 +174,16 @@ export const GET = apiHandler(async (req: NextRequest) => {
         },
       })
     : []
+  const studyHallAttendanceRows = students.length
+    ? await prisma.studyHallHomeworkEntry.findMany({
+        where: {
+          studentId: { in: students.map((student) => student.id) },
+          OR: [{ checkedIn: true }, { attendanceStatus: { in: ['PERSONAL_LEAVE', 'ABSENT'] } }],
+          classRecord: { studyClass: { termId: selectedTerm.id } },
+        },
+        select: { studentId: true, classRecord: { select: { classId: true, studyDate: true } } },
+      })
+    : []
   const approvedIntensiveByStudent = new Map<string, typeof approvedIntensiveAttendances>()
   for (const attendance of approvedIntensiveAttendances) {
     const current = approvedIntensiveByStudent.get(attendance.studentId) || []
@@ -173,13 +203,20 @@ export const GET = apiHandler(async (req: NextRequest) => {
       activeEnrollments,
       calculateApprovedIntensiveHours(approvedIntensiveByStudent.get(student.id) || []),
     )
+    const studyHallMemberships = student.studyHallClasses.map((membership) => {
+      const dates = studyHallAttendanceRows
+        .filter((row) => row.studentId === student.id && row.classRecord.classId === membership.classId)
+        .map((row) => dateKey(row.classRecord.studyDate))
+      return { ...membership, ...calculatePurchasedDayBalance(membership.purchasedDays, membership.adjustedDays, dates) }
+    })
     return {
       ...student,
       enrollments: activeEnrollments,
       remainHours,
       totalHours,
       taughtHours,
-      courseType: activeEnrollments[0]?.group.course.type || null,
+      studyHallMemberships,
+      courseType: activeEnrollments[0]?.group.course.type || (studyHallMemberships.length ? 'STUDY_HALL' : null),
     }
   })
   const sorted = [...normalized].sort((a, b) => compareStudents(a, b, sortBy))
@@ -216,6 +253,33 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
     const userId = (session.user as { id?: string }).id
     if (!userId) return NextResponse.json({ error: '登录状态异常，请重新登录' }, { status: 401 })
+
+    const selectedTerm = await resolveAdminTermScope(prisma, division, req)
+    if (!selectedTerm) {
+      return NextResponse.json({ error: '请先在“运营批次”中创建并进入一个批次，再添加学员' }, { status: 400 })
+    }
+    if (selectedTerm.status !== 'ACTIVE') {
+      return NextResponse.json({ error: '历史归档批次仅供查看，请先切换到当前运营批次' }, { status: 409 })
+    }
+
+    const requestedStudyHallMemberships = (Array.isArray(body.studyHallMemberships) ? body.studyHallMemberships : []).map((raw: unknown) => {
+      const item = raw as { classId?: unknown; purchasedDays?: unknown }
+      return { classId: typeof item.classId === 'string' ? item.classId : '', purchasedDays: Number(item.purchasedDays) }
+    })
+    if (requestedStudyHallMemberships.some((item: { classId: string; purchasedDays: number }) => !item.classId || !Number.isInteger(item.purchasedDays) || item.purchasedDays <= 0 || item.purchasedDays > 366)) {
+      return NextResponse.json({ error: '作业班或购买天数填写不正确' }, { status: 400 })
+    }
+    if (new Set(requestedStudyHallMemberships.map((item: { classId: string }) => item.classId)).size !== requestedStudyHallMemberships.length) {
+      return NextResponse.json({ error: '不能重复选择同一个作业班' }, { status: 400 })
+    }
+    const requestedClasses = requestedStudyHallMemberships.length ? await prisma.studyHallClass.findMany({
+      where: { id: { in: requestedStudyHallMemberships.map((item: { classId: string }) => item.classId) }, termId: selectedTerm.id, division, status: 'ACTIVE' },
+      select: { id: true, scheduleType: true, gradeScope: true },
+    }) : []
+    if (requestedClasses.length !== requestedStudyHallMemberships.length) return NextResponse.json({ error: '所选作业班无效或不属于当前运营期' }, { status: 409 })
+    if (new Set(requestedClasses.map((item) => item.scheduleType)).size !== requestedClasses.length) return NextResponse.json({ error: '同一学员在一个运营期最多参加一个晚托班和一个周末班' }, { status: 409 })
+    const studentGrade = typeof body.grade === 'string' ? body.grade.trim() : ''
+    if (studentGrade && requestedClasses.some((item) => item.gradeScope.length && !item.gradeScope.includes(studentGrade))) return NextResponse.json({ error: '学员年级与所选作业班的适用年级不一致' }, { status: 409 })
 
     const creds = await generateParentCredentialsHashed(name)
     const creation = await prisma.$transaction(async (tx) => {
@@ -255,9 +319,21 @@ export const POST = apiHandler(async (req: NextRequest) => {
           division,
           remainHours: body.remainHours ? parseFloat(body.remainHours) : 0,
           tags: JSON.stringify(body.tags || []),
-          status: 'TRIAL',
+          status: requestedStudyHallMemberships.length ? 'ACTIVE' : 'TRIAL',
           membershipLevel: body.membershipLevel || 'NORMAL',
         },
+      })
+
+      await tx.studentTermMembership.create({
+        data: {
+          termId: selectedTerm.id,
+          studentId: student.id,
+          grade: student.grade,
+        },
+      })
+
+      if (requestedStudyHallMemberships.length) await tx.studyHallClassStudent.createMany({
+        data: requestedStudyHallMemberships.map((item: { classId: string; purchasedDays: number }) => ({ classId: item.classId, studentId: student.id, purchasedDays: item.purchasedDays })),
       })
 
       await tx.activityLog.create({

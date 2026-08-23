@@ -88,8 +88,8 @@ describe('getLocalDayRange', () => {
 describe('teacher-only-access logic', () => {
   it('teacher should only see own lessons (logical test)', () => {
     // This test verifies the logic pattern without DB access
-    let teacherId: string = 'teacher-A'
-    let requestedTeacherId: string = 'teacher-B'
+    const teacherId: string = 'teacher-A'
+    const requestedTeacherId: string = 'teacher-B'
 
     // If teacher and requested mismatch, should reject
     expect(teacherId !== requestedTeacherId).toBe(true)

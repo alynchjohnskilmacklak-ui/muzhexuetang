@@ -4,6 +4,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { getLocalDayRange, localDateKey } from '@/lib/date/local-day'
 import { checkScheduleConflict, type ConflictInfo } from '@/lib/schedule-conflict'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 import {
   calculatePlannedMinutes,
   canTeacherEditIntensiveLesson,
@@ -15,11 +16,16 @@ export const dynamic = 'force-dynamic'
 
 async function getOwnedLesson(id: string) {
   const context = await requireCurrentTeacher()
+  const activeTerm = await getActiveAcademicTerm(context.prisma, context.teacher.division)
   const lesson = await context.prisma.classLesson.findFirst({
     where: {
       id,
       ...teacherLessonWhere(context.teacher.id),
-      group: { intensiveMode: 'INTENSIVE', status: { not: 'ARCHIVED' } },
+      group: {
+        intensiveMode: 'INTENSIVE',
+        status: { not: 'ARCHIVED' },
+        termId: activeTerm?.id || '__NO_ACTIVE_TERM__',
+      },
     },
     include: {
       group: {
@@ -71,6 +77,7 @@ export const PATCH = apiHandler(async (
       startTime,
       endTime,
       excludeLessonId: lesson.id,
+      termId: lesson.group.termId || undefined,
     }, prisma)
     for (const conflict of current) {
       if (!conflicts.some((item) => item.type === conflict.type && item.lessonId === conflict.lessonId)) {

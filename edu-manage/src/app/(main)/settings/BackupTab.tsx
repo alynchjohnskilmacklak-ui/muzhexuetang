@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, Button, Typography, message, Popconfirm, Spin } from 'antd'
-import { DownloadOutlined, CloudUploadOutlined, FileExcelOutlined, DeleteOutlined, ScanOutlined } from '@ant-design/icons'
+import { DownloadOutlined, CloudUploadOutlined, FileExcelOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import useSWR from 'swr'
 

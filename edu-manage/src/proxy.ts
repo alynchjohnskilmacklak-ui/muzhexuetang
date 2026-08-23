@@ -54,6 +54,8 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/api/wxpusher/callback') ||
     pathname.startsWith('/people/') ||
     pathname.startsWith('/images/') ||
+    pathname.startsWith('/business-assets/') ||
+    pathname.startsWith('/services/') ||
     pathname.startsWith('/UI_picture/') ||
     pathname.startsWith('/volunteer/picture/') ||
     pathname.startsWith('/volunteer/docs/') ||
@@ -164,5 +166,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|images|people|UI_picture|volunteer/picture|volunteer/docs|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|images|business-assets|services|people|UI_picture|volunteer/picture|volunteer/docs|favicon.ico).*)'],
 }

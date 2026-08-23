@@ -4,10 +4,11 @@ import { apiHandler } from '@/lib/api-handler'
 import { requireCurrentTeacher, teacherStudentWhere } from '@/lib/teacher-portal'
 import { getRequestDivision } from '@/lib/division'
 import { getRequestPrisma } from '@/lib/prisma'
+import type { Prisma } from '@prisma/client'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
-  if (!session?.user || !['admin', 'teacher'].includes((session.user as any).role)) {
+  if (!session?.user || !['admin', 'teacher'].includes(session.user.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
 
@@ -18,8 +19,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const skip = (page - 1) * limit
   const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
 
-  const role = (session.user as any).role
-  const where: any = {}
+  const role = session.user.role
+  const where: Prisma.LeaveRequestWhereInput = {}
   if (status) where.status = status
   let prisma = await getRequestPrisma()
   if (role === 'teacher') {
@@ -28,7 +29,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     where.student = teacherStudentWhere(result.teacher.id)
   }
   if (role === 'admin') {
-    where.student = { ...(where.student || {}), division }
+    where.student = { division }
   }
 
   const [records, total] = await Promise.all([

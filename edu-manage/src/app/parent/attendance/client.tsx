@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Card, Empty, Select, Table, Tag, Typography } from 'antd'
-import { ClockCircleOutlined } from '@ant-design/icons'
 import { useSearchParams } from 'next/navigation'
 import { ChildSwitcher } from '@/components/Parent/ChildSwitcher'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -17,8 +16,18 @@ const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> =
   ABSENT: { label: '旷课', color: '#E24B4A', bg: '#FCEBEB' },
   MAKEUP: { label: '补课', color: '#534AB7', bg: '#EEEDFE' },
 }
+type AttendanceRecord = {
+  id: string
+  status: string
+  createdAt: string
+  hoursDeducted?: number | null
+  student?: { id: string; name: string } | null
+  lesson?: { group?: { name?: string | null; lessonMinutes?: number | null; course?: { name?: string | null; type?: string | null } | null } | null } | null
+  makeupRequest?: { status: string; makeupDate?: string | null; note?: string | null } | null
+}
+type StudentOption = { id: string; name: string }
 
-function MakeupStatusLine({ record }: { record: any }) {
+function MakeupStatusLine({ record }: { record: AttendanceRecord }) {
   if (!['ABSENT', 'LEAVE'].includes(record.status)) return null
   const makeup = record.makeupRequest
   if (makeup?.status === 'CANCELLED') return null
@@ -35,7 +44,7 @@ function MakeupStatusLine({ record }: { record: any }) {
   return null
 }
 
-function attendanceCourseUnit(record: any) {
+function attendanceCourseUnit(record: AttendanceRecord) {
   const group = record.lesson?.group
   return {
     courseType: group?.course?.type || null,
@@ -43,16 +52,16 @@ function attendanceCourseUnit(record: any) {
   }
 }
 
-function deductedText(record: any) {
+function deductedText(record: AttendanceRecord) {
   const unit = attendanceCourseUnit(record)
   return formatDeducted(Number(record.hoursDeducted || 0), unit.courseType, unit.lessonMinutes)
 }
 
-function summarizeDeducted(records: any[]) {
+function summarizeDeducted(records: AttendanceRecord[]) {
   const totals = new Map<string, { hours: number; courseType: string | null; lessonMinutes: number }>()
   records
-    .filter((record: any) => record.status === 'PRESENT' || record.status === 'ABSENT')
-    .forEach((record: any) => {
+    .filter((record) => record.status === 'PRESENT' || record.status === 'ABSENT')
+    .forEach((record) => {
       const unit = attendanceCourseUnit(record)
       const key = `${unit.courseType || 'GROUP'}:${unit.lessonMinutes}`
       const current = totals.get(key) || { hours: 0, ...unit }
@@ -65,7 +74,7 @@ function summarizeDeducted(records: any[]) {
   return parts.length ? parts.join(' + ') : '0 节'
 }
 
-export function ParentAttendanceClient({ records, students }: { records: any[]; students: any[] }) {
+export function ParentAttendanceClient({ records, students }: { records: AttendanceRecord[]; students: StudentOption[] }) {
   const isMobile = useIsMobile() ?? false
   const searchParams = useSearchParams()
   const childId = searchParams.get('childId') || ''
@@ -74,7 +83,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
 
   const filteredRecords = useMemo(() =>
-    selectedStudentId ? records.filter((r: any) => r.student?.id === selectedStudentId) : records,
+    selectedStudentId ? records.filter((r) => r.student?.id === selectedStudentId) : records,
     [records, selectedStudentId]
   )
 
@@ -83,19 +92,19 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
   }, [childId])
 
   const stats = useMemo(() => ({
-    present: filteredRecords.filter((r: any) => r.status === 'PRESENT').length,
-    leave: filteredRecords.filter((r: any) => r.status === 'LEAVE').length,
-    absent: filteredRecords.filter((r: any) => r.status === 'ABSENT').length,
-    arrangedCount: filteredRecords.filter((r: any) => r.makeupRequest?.status === 'ARRANGED').length,
-    pendingCount: filteredRecords.filter((r: any) => r.makeupRequest?.status === 'PENDING').length,
+    present: filteredRecords.filter((r) => r.status === 'PRESENT').length,
+    leave: filteredRecords.filter((r) => r.status === 'LEAVE').length,
+    absent: filteredRecords.filter((r) => r.status === 'ABSENT').length,
+    arrangedCount: filteredRecords.filter((r) => r.makeupRequest?.status === 'ARRANGED').length,
+    pendingCount: filteredRecords.filter((r) => r.makeupRequest?.status === 'PENDING').length,
     deductedText: summarizeDeducted(filteredRecords),
     total: filteredRecords.length,
   }), [filteredRecords])
 
   // Build attendance map by day
   const attMap = useMemo(() => {
-    const m: Record<number, any> = {}
-    filteredRecords.forEach((r: any) => {
+    const m: Record<number, AttendanceRecord> = {}
+    filteredRecords.forEach((r) => {
       const d = new Date(r.createdAt).getDate()
       if (!m[d]) m[d] = r
     })
@@ -113,7 +122,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
           </Text>
         </div>
         <Select value={selectedStudentId || undefined} style={{ width: 160 }} onChange={v => setSelectedStudentId(v)}
-          options={students.map((s: any) => ({ label: s.name, value: s.id }))} />
+          options={students.map((s) => ({ label: s.name, value: s.id }))} />
       </div>
 
       {/* 4 Stat Cards */}
@@ -172,7 +181,7 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
       <Card bordered={false} style={{ borderRadius: 10, background: '#fff', border: '1px solid #EEE7E1' }}>
         {isMobile ? (
           <div style={{ display: 'grid', gap: 10 }}>
-            {filteredRecords.map((record: any) => {
+            {filteredRecords.map((record) => {
               const status = STATUS_MAP[record.status] || { label: record.status, color: '#5a4e3a', bg: '#fff' }
               return (
                 <div key={record.id} style={{ border: '1px solid #EEE7E1', borderRadius: 10, padding: 12 }}>
@@ -194,20 +203,20 @@ export function ParentAttendanceClient({ records, students }: { records: any[]; 
         ) : <Table
           rowKey="id" size="small" pagination={{ pageSize: 15 }}
           scroll={{ x: 680 }}
-          dataSource={filteredRecords.map((r: any) => ({ ...r, key: r.id }))}
+          dataSource={filteredRecords.map((r) => ({ ...r, key: r.id }))}
           locale={{ emptyText: '暂无考勤记录' }}
           columns={[
             { title: '学员', dataIndex: ['student', 'name'], key: 'student', width: 80 },
             { title: '班级', dataIndex: ['lesson', 'group', 'name'], key: 'group', ellipsis: true },
             { title: '课程', dataIndex: ['lesson', 'group', 'course', 'name'], key: 'course', ellipsis: true },
-            { title: '日期', key: 'date', width: 100, render: (_: any, r: any) => fmtDate(r.createdAt) },
+            { title: '日期', key: 'date', width: 100, render: (_, r) => fmtDate(r.createdAt) },
             { title: '状态', dataIndex: 'status', key: 'status', width: 80,
-              render: (s: string, record: any) => {
+              render: (s: string, record) => {
                 const m = STATUS_MAP[s] || { label: s, color: 'default', bg: 'transparent' }
                 return <div style={{ display: 'grid', gap: 5 }}><Tag color={m.color} style={{ width: 'fit-content', margin: 0 }}>{m.label}</Tag><MakeupStatusLine record={record} /></div>
               }},
             { title: '扣课', key: 'hours', width: 90,
-              render: (_: unknown, record: any) => Number(record.hoursDeducted || 0) > 0 ? <Text style={{ color: '#E24B4A' }}>-{deductedText(record)}</Text> : <Text type="secondary">0</Text> },
+              render: (_: unknown, record) => Number(record.hoursDeducted || 0) > 0 ? <Text style={{ color: '#E24B4A' }}>-{deductedText(record)}</Text> : <Text type="secondary">0</Text> },
           ]}
         />}
       </Card>

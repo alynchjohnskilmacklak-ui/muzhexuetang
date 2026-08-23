@@ -68,6 +68,17 @@ export function buildSafeHomeContent(studentName: string): string {
 }
 
 /**
+ * Build the push payload (content + summary) for a notification type.
+ * feedback 与 safe 两类通知共用此入口，避免各处重复拼接。
+ */
+export function buildPushPayload(type: string, studentName: string): { content: string; summary: string } {
+  if (type === 'wxpusher_safe') {
+    return { content: buildSafeHomeContent(studentName), summary: '平安回家通知' }
+  }
+  return { content: buildFeedbackContent(studentName), summary: '课堂反馈通知' }
+}
+
+/**
  * Create a QR code with extra parameter for parent WeChat binding.
  * extra = system user ID, passed back via WxPusher callback.
  */

@@ -177,11 +177,6 @@ function contentToText(content: MessageContent): string {
     .join('\n')
 }
 
-function looksLikeScienceQuestion(messages: AIMessage[]) {
-  const text = messages.map((message) => contentToText(message.content)).join('\n')
-  return /数学|物理|化学|方程|欧姆|电路|电压|电流|电阻|密度|力|功率|反应|化学方程式|函数|几何|证明|计算/.test(text)
-}
-
 function mapProviderError(modelId: ModelId, responseStatus: number, detail: string) {
   if (responseStatus === 401 || responseStatus === 403) {
     return {

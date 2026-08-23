@@ -3,6 +3,7 @@ import { getPrismaForDivision, getRequestPrisma, isDualDbEnabled } from '@/lib/p
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { revalidatePath } from 'next/cache'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +23,10 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const body = await req.json()
 
   const existing = await db.fee.findUnique({ where: { id } })
+  const selectedTerm = existing ? await resolveAdminTermScope(db, existing.division, req) : null
+  if (existing && (!selectedTerm || selectedTerm.status !== 'ACTIVE' || existing.termId !== selectedTerm.id)) {
+    return NextResponse.json({ error: '只能修改当前已启用运营批次的收费记录' }, { status: 409 })
+  }
   if (!existing) return NextResponse.json({ error: '记录不存在' }, { status: 404 })
 
   const { amount, type, hours, campus, operator, notes, paidAt, courseId, studentId } = body
@@ -36,7 +41,14 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   if (paidAt !== undefined) data.paidAt = paidAt ? new Date(paidAt) : null
   if (courseId !== undefined) data.courseId = courseId
   if (studentId !== undefined) {
-    const student = await db.student.findUnique({ where: { id: studentId }, select: { id: true } })
+    const student = await db.student.findFirst({
+      where: {
+        id: studentId,
+        division: existing.division,
+        termMemberships: { some: { termId: selectedTerm!.id, status: 'ACTIVE' } },
+      },
+      select: { id: true },
+    })
     if (!student) return NextResponse.json({ error: '学生不存在' }, { status: 404 })
     data.studentId = studentId
   }
@@ -62,6 +74,10 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
   const { id } = await params
 
   const existing = await db.fee.findUnique({ where: { id }, include: { student: { select: { name: true } } } })
+  const selectedTerm = existing ? await resolveAdminTermScope(db, existing.division, req) : null
+  if (existing && (!selectedTerm || selectedTerm.status !== 'ACTIVE' || existing.termId !== selectedTerm.id)) {
+    return NextResponse.json({ error: '只能删除当前已启用运营批次的收费记录' }, { status: 409 })
+  }
   if (!existing) return NextResponse.json({ error: '记录不存在' }, { status: 404 })
 
   await db.fee.delete({ where: { id } })

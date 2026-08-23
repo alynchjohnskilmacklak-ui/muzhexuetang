@@ -229,6 +229,7 @@ export async function reviewIntensiveLesson(params: {
   prisma: PrismaClient
   reviewId: string
   division: string
+  termId: string
   reviewedById: string
   action: 'APPROVE' | 'REJECT'
   reviewNote?: string | null
@@ -249,6 +250,7 @@ export async function reviewIntensiveLesson(params: {
     if (
       !review
       || review.lesson.division !== params.division
+      || review.lesson.group.termId !== params.termId
       || review.lesson.group.intensiveMode !== 'INTENSIVE'
     ) {
       throw new IntensiveReviewError('REVIEW_NOT_FOUND', '待审核记录不存在', 404)

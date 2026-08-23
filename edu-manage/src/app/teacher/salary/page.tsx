@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Card, Col, Empty, Row, Segmented, Space, Statistic, Table, Tag, Typography } from 'antd'
-import { DollarOutlined } from '@ant-design/icons'
+import { Card, Empty, Segmented, Space, Table, Tag, Typography } from 'antd'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
@@ -53,6 +52,19 @@ export default function TeacherSalaryPage() {
   const transactions = (data?.transactions ?? []).filter((item) => (
     salaryBucket === 'ALL' || item.salaryBucket === salaryBucket
   ))
+  const todayKey = new Date().toLocaleDateString('sv-SE')
+  const todayIncome = useMemo(() => (data?.transactions ?? []).reduce((sum, item) => {
+    const source = item.lessonDate || item.createdAt
+    return new Date(source).toLocaleDateString('sv-SE') === todayKey ? sum + item.amount : sum
+  }, 0), [data?.transactions, todayKey])
+  const mobileGroups = useMemo(() => {
+    const groups = new Map<string, SalaryTransaction[]>()
+    for (const transaction of transactions) {
+      const key = new Date(transaction.lessonDate || transaction.createdAt).toLocaleDateString('sv-SE')
+      groups.set(key, [...(groups.get(key) || []), transaction])
+    }
+    return [...groups.entries()].sort(([a], [b]) => b.localeCompare(a))
+  }, [transactions])
 
   const renderAmount = (value: number) => (
     <Text strong style={{ color: value >= 0 ? '#1D9E75' : '#C0392B' }}>
@@ -125,52 +137,49 @@ export default function TeacherSalaryPage() {
           />
         </Space>
 
-        <Row gutter={[12, 12]}>
-          <Col xs={24} sm={8}>
-            <Card bordered={false} style={{ borderRadius: 8, background: 'linear-gradient(135deg,#1D9E75,#27B885)' }}>
-              <Statistic
-                title={<span style={{ color: 'rgba(255,255,255,.82)', fontSize: 13 }}>合计薪资</span>}
-                value={data?.total ?? 0}
-                precision={2}
-                prefix={<DollarOutlined />}
-                suffix="元"
-                valueStyle={{ color: '#fff', fontWeight: 700, fontSize: isMobile ? 22 : 26 }}
-                loading={isLoading}
-              />
-            </Card>
-          </Col>
-          <Col xs={12} sm={8}>
-            <Card bordered={false} style={{ borderRadius: 8 }}>
-              <Statistic title="小班课薪资" value={data?.totalSmallClass ?? 0} precision={2} suffix="元" valueStyle={{ color: '#1D9E75' }} loading={isLoading} />
-            </Card>
-          </Col>
-          <Col xs={12} sm={8}>
-            <Card bordered={false} style={{ borderRadius: 8 }}>
-              <Statistic title="一对一/二/三薪资" value={data?.totalIntensive ?? 0} precision={2} suffix="元" valueStyle={{ color: '#534AB7' }} loading={isLoading} />
-            </Card>
-          </Col>
-        </Row>
+        <Card className="teacher-salary-today" styles={{ body: { padding: isMobile ? 18 : 22 } }}>
+          <Text style={{ color: 'var(--color-ink-subtle)', fontSize: 13 }}>今日收入</Text>
+          <div style={{ marginTop: 4, color: 'var(--color-ink)', fontSize: isMobile ? 30 : 34, lineHeight: 1.2, fontWeight: 760 }}>
+            ¥{todayIncome.toFixed(2)}
+          </div>
+          <Text style={{ display: 'block', marginTop: 7, color: 'var(--color-ink-subtle)', fontSize: 12 }}>不随上方时间和课程类型筛选变化</Text>
+        </Card>
+
+        <div className="teacher-salary-summary-strip">
+          {[
+            ['当前筛选合计', data?.total ?? 0],
+            ['小班课', data?.totalSmallClass ?? 0],
+            ['一对一/二/三', data?.totalIntensive ?? 0],
+          ].map(([label, value]) => (
+            <div key={String(label)}>
+              <Text>{label}</Text>
+              <strong>¥{Number(value).toFixed(2)}</strong>
+            </div>
+          ))}
+        </div>
 
         <Card title="薪资明细" bordered={false} style={{ borderRadius: 8 }} extra={<Text type="secondary" style={{ fontSize: 12 }}>考勤和课堂反馈自动结算</Text>}>
           {isMobile ? (
             isLoading ? <CardSkeleton rows={3} /> : (
-              <div style={{ display: 'grid', gap: 10 }}>
-                {transactions.map((transaction) => (
-                  <div key={transaction.id} style={{ padding: 12, borderRadius: 10, border: '1px solid rgba(0,0,0,.06)', background: '#faf8f5' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                      <Tag color={TYPE_META[transaction.type]?.color ?? 'default'} style={{ margin: 0, borderRadius: 999 }}>
-                        {TYPE_META[transaction.type]?.label ?? transaction.typeLabel ?? '其他调整'}
-                      </Tag>
-                      <Tag color={transaction.salaryBucket === 'INTENSIVE' ? 'purple' : 'green'} style={{ margin: 0, borderRadius: 999 }}>
-                        {transaction.salaryBucket === 'INTENSIVE' ? '一对一/二/三' : '小班课'}
-                      </Tag>
-                      {renderAmount(transaction.amount)}
+              <div style={{ display: 'grid', gap: 16 }}>
+                {mobileGroups.map(([dateKey, dayTransactions]) => (
+                  <section key={dateKey}>
+                    <div className="teacher-salary-date-heading">
+                      <strong>{new Date(`${dateKey}T00:00:00`).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })}</strong>
+                      <span>¥{dayTransactions.reduce((sum, item) => sum + item.amount, 0).toFixed(2)}</span>
                     </div>
-                    <Text style={{ display: 'block', marginTop: 8, color: '#1a1201' }}>{transaction.description || '-'}</Text>
-                    <Text type="secondary" style={{ display: 'block', marginTop: 5, fontSize: 12 }}>
-                      {new Date(transaction.createdAt).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                    </Text>
-                  </div>
+                    <div className="teacher-salary-mobile-list">
+                      {dayTransactions.map((transaction) => (
+                        <div key={transaction.id}>
+                          <div style={{ minWidth: 0 }}>
+                            <Text strong>{TYPE_META[transaction.type]?.label ?? transaction.typeLabel ?? '其他调整'}</Text>
+                            <Text type="secondary" ellipsis style={{ display: 'block', fontSize: 12 }}>{transaction.description || '-'}</Text>
+                          </div>
+                          {renderAmount(transaction.amount)}
+                        </div>
+                      ))}
+                    </div>
+                  </section>
                 ))}
                 {!transactions.length && <Empty description="暂无薪资记录" />}
               </div>

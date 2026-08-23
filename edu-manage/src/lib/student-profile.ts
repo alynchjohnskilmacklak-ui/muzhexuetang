@@ -256,7 +256,11 @@ export async function getStudentProfile(
       comment: f.overallComment || undefined,
       summary: f.summary || undefined,
       knowledgePoints: f.knowledgePoints || [],
-      homework: Array.isArray(f.homework) ? (f.homework as any[]).map(h => typeof h === 'string' ? h : h?.content).filter(Boolean) : [],
+      homework: Array.isArray(f.homework) ? (f.homework as unknown[]).map((item) => {
+        if (typeof item === 'string') return item
+        if (!item || typeof item !== 'object' || !('content' in item)) return undefined
+        return typeof item.content === 'string' ? item.content : undefined
+      }).filter((item): item is string => Boolean(item)) : [],
       tags: f.tags || [],
       badge: f.badge || null,
       mood: f.mood || null,

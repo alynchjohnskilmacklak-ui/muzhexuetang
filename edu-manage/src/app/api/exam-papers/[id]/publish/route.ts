@@ -19,6 +19,10 @@ export const POST = apiHandler(async (_req: NextRequest, { params }: { params: P
     include: { student: { select: { id: true, name: true, parentId: true, parentUserId: true } }, teacher: { select: { name: true } } },
   })
   if (!paper) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
+  // Teachers may only publish their own papers.
+  if (user.role === 'teacher' && paper.teacherId !== user.teacherId) {
+    return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
+  }
 
   await prisma.$transaction(async (tx) => {
     await tx.examPaper.update({

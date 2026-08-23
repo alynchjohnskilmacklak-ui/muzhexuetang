@@ -58,7 +58,7 @@ export function ScheduleDetailPanel({
               </Space.Compact>
               <Select placeholder="本次课老师" value={editLesson.teacherId || undefined}
                 onChange={value => setEditLesson(prev => ({ ...prev, teacherId: value }))}
-                options={(Array.isArray(selectedGroup.teacherAssignments) ? selectedGroup.teacherAssignments : []).map((a: any) => ({
+                options={(Array.isArray(selectedGroup.teacherAssignments) ? selectedGroup.teacherAssignments : []).map((a) => ({
                   label: a.teacher?.name || '老师', value: a.teacherId,
                 }))} />
               <Select placeholder="本次课科目" value={editLesson.subject || undefined}

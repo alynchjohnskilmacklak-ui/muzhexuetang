@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
+import { useEffect } from 'react'
 import useSWR from 'swr'
 import { Button, Card, Col, List, Progress, Row, Space, Tag, Typography } from 'antd'
 import { useRouter } from 'next/navigation'
@@ -18,32 +19,20 @@ import {
 } from '@ant-design/icons'
 import { formatHours, formatPercent } from '@/lib/format'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { useCountUp } from '@/hooks/useCountUp'
-import { fillName, resolveTier, TIER_QUICK_PERKS, TIER_THEME, TIER_WELCOME } from '@/constants/teacher-tier'
+import { resolveTier, TIER_THEME } from '@/constants/teacher-tier'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { PullToRefresh } from '@/components/PullToRefresh'
 import { MessageWorkflowNotice } from '@/components/MessageWorkflowNotice'
-import { TeacherDailyWorkflow } from '@/components/Dashboard/TeacherDailyWorkflow'
+import { QuickStartGuide, type QuickStartStep } from '@/components/Common/QuickStartGuide'
 
 const { Text } = Typography
 
-function localDateKey(date = new Date()) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-function markWelcomeShown(key: string) {
-  try {
-    if (window.localStorage.getItem(key)) return true
-    window.localStorage.setItem(key, '1')
-    return false
-  } catch {
-    return false
-  }
-}
+const TEACHER_QUICK_STEPS: QuickStartStep[] = [
+  { title: '查看今天的课', description: '先确认上课时间、班级和教室，避免漏课或走错教室。', actionLabel: '打开我的课表', href: '/teacher/schedule', icon: <CalendarOutlined /> },
+  { title: '及时提交考勤', description: '课程结束后登记真实到勤情况，待办数量会同步减少。', actionLabel: '去录入考勤', href: '/teacher/attendance', icon: <CheckCircleOutlined /> },
+  { title: '发布我的反馈', description: '把本节课的学习内容和建议发给家长，形成连续成长记录。', actionLabel: '去写反馈', href: '/teacher/feedback', icon: <MessageOutlined /> },
+]
 
 type Tone = 'blue' | 'orange' | 'red' | 'green' | 'purple' | 'brown' | 'dark'
 
@@ -114,6 +103,7 @@ interface DashboardData {
   }
   monthlyStats: { totalStudents: number; monthlyHours: number }
   pendingTasks: { unreadParentComments: number; pendingLeave: number }
+  badges?: { unsubmitted: number; unpublished: number; unread: number; unreadMessages: number }
   quickActions: Array<{ label: string; desc: string; href: string; tone: Tone }>
 }
 
@@ -122,7 +112,7 @@ const toneColor: Record<Tone, string> = {
   orange: '#E8784A',
   red: '#D64545',
   green: '#123C35',
-  purple: '#8A8F99',
+  purple: '#9A8E7A',
   brown: '#E8784A',
   dark: '#123C35',
 }
@@ -132,7 +122,7 @@ const tagColor: Record<Tone, string> = {
   orange: '#E8784A',
   red: '#D64545',
   green: '#123C35',
-  purple: '#8A8F99',
+  purple: '#9A8E7A',
   brown: '#E8784A',
   dark: '#123C35',
 }
@@ -184,9 +174,6 @@ export default function TeacherDashboardPage() {
     keepPreviousData: true,
     revalidateOnFocus: true,
   })
-  const [welcomeMounted, setWelcomeMounted] = useState(false)
-  const [welcomeVisible, setWelcomeVisible] = useState(false)
-
   useEffect(() => {
     const timer = window.setTimeout(() => {
       fetch('/api/teacher/dashboard', { method: 'POST' }).catch((error) =>
@@ -196,147 +183,51 @@ export default function TeacherDashboardPage() {
     return () => window.clearTimeout(timer)
   }, [])
 
-  useEffect(() => {
-    const teacher = data?.teacher
-    if (!teacher?.id) return
-    const storageKey = `mz_welcome_${teacher.id}_${localDateKey()}`
-    if (markWelcomeShown(storageKey)) return
-    setWelcomeMounted(true)
-    const showTimer = window.setTimeout(() => setWelcomeVisible(true), 30)
-    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 1600)
-    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 2200)
-    return () => {
-      window.clearTimeout(showTimer)
-      window.clearTimeout(fadeTimer)
-      window.clearTimeout(unmountTimer)
-    }
-  }, [data?.teacher])
-
-  const animatedTodayLessons = useCountUp(Number(data?.heroStats?.todayLessons) || 0)
-  const animatedPendingAttendance = useCountUp(Number(data?.heroStats?.pendingAttendance) || 0)
-  const animatedPendingFeedback = useCountUp(Number(data?.heroStats?.pendingFeedback) || 0)
-  const animatedPendingLeave = useCountUp(Number(data?.heroStats?.pendingLeave) || 0)
-  const animatedPendingPapers = useCountUp(Number(data?.heroStats?.pendingPapers) || 0)
-
   if (isLoading) return <CardSkeleton rows={3} />
   if (!data?.teacher) return <BrandEmpty title="未找到教师信息" icon={<UserOutlined />} />
 
   const { teacher, heroStats, todayLessons, todos, studentWarnings, feedbackTasks, weekCompletion, monthlyStats, quickActions } = data
   const tier = resolveTier(teacher.tierLevel)
   const tierTheme = TIER_THEME[tier]
-  const tierWelcome = TIER_WELCOME[tier]
   const heroItems = [
-    { label: '今日课次', value: animatedTodayLessons, color: '#123C35', suffix: '节' },
-    { label: '待考勤', value: animatedPendingAttendance, color: '#E8784A', suffix: '节' },
-    { label: '待发反馈', value: animatedPendingFeedback, color: '#E8784A', suffix: '条' },
-    { label: '待批请假', value: animatedPendingLeave, color: '#E8784A', suffix: '条' },
-    { label: '待推送试卷', value: animatedPendingPapers, color: '#E8784A', suffix: '份' },
+    { label: '今日课次', value: heroStats.todayLessons, suffix: '节' },
+    { label: '待考勤', value: heroStats.pendingAttendance, suffix: '节' },
+    { label: '待发反馈', value: heroStats.pendingFeedback, suffix: '条' },
+    { label: '全部待办', value: heroStats.totalTodos, suffix: '项' },
   ]
+  const heroStyle = {
+    '--teacher-hero-bg': tierTheme.accent,
+    '--teacher-hero-highlight': tierTheme.gold || tierTheme.border,
+  } as CSSProperties
 
   return (
     <PullToRefresh onRefresh={async () => { await mutate() }}>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <MessageWorkflowNotice audience="teacher" deferMs={1400} />
-      {welcomeMounted && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: isMobile ? 18 : 24, pointerEvents: 'none',
-          background: welcomeVisible ? 'rgba(18,51,38,.10)' : 'rgba(18,51,38,0)',
-          backdropFilter: welcomeVisible && !isMobile ? 'blur(6px)' : 'blur(0px)',
-          WebkitBackdropFilter: welcomeVisible && !isMobile ? 'blur(6px)' : 'blur(0px)',
-          transition: 'background .45s ease, backdrop-filter .45s ease',
-        }}>
-          <div style={{
-            width: 'min(88vw, 430px)', borderRadius: 26,
-            padding: isMobile ? '24px 22px' : '28px 30px',
-            background: tier === 'SENIOR' ? 'linear-gradient(145deg,#F8F3E7,#FFFDF7)' : tierTheme.bg,
-            border: `1.5px solid ${tier === 'SENIOR' ? '#C9A45C' : tierTheme.border}`,
-            color: tierTheme.accent,
-            boxShadow: tier === 'SENIOR'
-              ? '0 26px 80px rgba(18,60,53,.30)'
-              : tier === 'EXPERIENCED'
-                ? '0 26px 80px rgba(232,120,74,.26)'
-                : '0 24px 70px rgba(62,142,110,.20)',
-            opacity: welcomeVisible ? 1 : 0,
-            transform: welcomeVisible ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)',
-            transition: 'opacity .45s ease, transform .58s cubic-bezier(.2,.9,.2,1)',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{
-              position: 'absolute', right: -24, top: -28, width: 90, height: 90,
-              borderRadius: '50%',
-              background: tier === 'SENIOR' ? 'rgba(201,164,92,.18)' : `${tierTheme.accent}18`,
-            }} />
-            <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-              <div style={{
-                width: 42, height: 42, borderRadius: 16, flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 20, fontWeight: 900, color: '#fff',
-                background: tier === 'SENIOR'
-                  ? 'linear-gradient(145deg, #123C35 0%, #C9A45C 150%)'
-                  : tier === 'EXPERIENCED'
-                    ? 'linear-gradient(145deg, #E8784A 0%, #F8B27F 100%)'
-                    : 'linear-gradient(145deg, #3E8E6E 0%, #7ABF9A 100%)',
-                boxShadow: tier === 'SENIOR'
-                  ? '0 10px 24px rgba(18,60,53,.25)'
-                  : `0 10px 24px ${tierTheme.accent}2E`,
-              }}>
-                {tier === 'SENIOR' ? '师' : tier === 'EXPERIENCED' ? '优' : '新'}
-              </div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: isMobile ? 17 : 18, fontWeight: 900, lineHeight: 1.55, color: tierTheme.accent, letterSpacing: .2, overflowWrap: 'anywhere' }}>
-                  {fillName(tierWelcome.title, teacher.name)}
-                </div>
-                <div style={{ marginTop: 10, fontSize: 14, lineHeight: 1.9, color: '#5A4E3A', fontWeight: 500 }}>
-                  {tierWelcome.body}
-                </div>
-                <div style={{ marginTop: 12 }}>
-                  {TIER_QUICK_PERKS[tier].map((perk) => (
-                    <div key={perk} style={{ display: 'flex', gap: 7, fontSize: 13, lineHeight: 1.9, color: '#5A4E3A' }}>
-                      <span style={{ color: tier === 'SENIOR' ? '#C9A45C' : tierTheme.accent, fontWeight: 900 }}>✦</span>
-                      <span>{perk}</span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ marginTop: 14, fontSize: 12, color: tier === 'SENIOR' ? '#8A6A2E' : tierTheme.accent, fontWeight: 700 }}>
-                  完整福利见 侧栏「我的福利」
-                </div>
-              </div>
-            </div>
+      <QuickStartGuide storageKey={`mz_teacher_quick_start_v1_${teacher.id}`} title="三步开始今天的教学工作" steps={TEACHER_QUICK_STEPS} />
+      <section className="teacher-dashboard-hero" style={heroStyle}>
+        <div className="teacher-dashboard-hero__intro">
+          <div className="teacher-dashboard-hero__date">{dateText()}</div>
+          <div className="teacher-dashboard-hero__heading">
+            <h1>{teacher.name}老师，{getGreeting()}</h1>
+            <span className="teacher-dashboard-hero__tier">{tierTheme.label}</span>
           </div>
+          <div className="teacher-dashboard-hero__summary">
+            今天的课程安排和待处理事项已集中整理，按顺序完成即可。
+          </div>
+          <div className="teacher-dashboard-hero__message">认真记录每一堂课，让孩子的成长被看见。</div>
         </div>
-      )}
-      <section style={{ background: '#123326', borderRadius: 12, padding: isMobile ? 16 : '26px 30px', color: '#fff', maxWidth: '100%', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', gap: 20, flexWrap: 'wrap' }}>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: 12, opacity: 0.72 }}>{dateText()}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: '8px 0' }}>
-              <h1 style={{ margin: 0, fontSize: isMobile ? 20 : 24, lineHeight: 1.3, letterSpacing: 0 }}>{teacher.name}老师，{getGreeting()}</h1>
-              <span style={{ background: 'rgba(255,255,255,.14)', color: '#fff', border: '1px solid rgba(255,255,255,.35)', borderRadius: 999, fontSize: 10, padding: '2px 8px', whiteSpace: 'nowrap' }}>
-                {tier === 'SENIOR' && <span style={{ color: '#C9A45C', marginRight: 3 }}>★</span>}
-                {tierTheme.label}
-              </span>
-            </div>
-            <div style={{ fontSize: 14, opacity: 0.86, lineHeight: 1.8 }}>
-              今日共有 {heroStats.todayLessons} 节课，{heroStats.pendingAttendance} 节待考勤，{heroStats.totalTodos} 条待处理事项
-            </div>
-            <div style={{ fontSize: 13, opacity: 0.72, marginTop: 10 }}>认真记录每一堂课，让孩子的成长被看见。</div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(96px, 1fr))', gap: 10, flex: '1 1 460px', width: '100%', minWidth: 0 }}>
-            {heroItems.map((item) => (
-              <div key={item.label} style={{ background: 'rgba(255,255,255,.94)', border: '1px solid rgba(255,255,255,.35)', borderRadius: 10, padding: 14 }}>
-                <div style={{ color: item.color, fontSize: 26, fontWeight: 800, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-                  {item.value}<span style={{ fontSize: 12, fontWeight: 500, marginLeft: 2 }}>{item.suffix}</span>
-                </div>
-                <div style={{ fontSize: 12, color: '#5A4E3A', marginTop: 4 }}>{item.label}</div>
+        <div className="teacher-dashboard-hero__metrics">
+          {heroItems.map((item) => (
+            <div className="teacher-dashboard-hero__metric" key={item.label}>
+              <div className="teacher-dashboard-hero__metric-value">
+                {item.value}<span>{item.suffix}</span>
               </div>
-            ))}
-          </div>
+              <div className="teacher-dashboard-hero__metric-label">{item.label}</div>
+            </div>
+          ))}
         </div>
       </section>
-
-      <TeacherDailyWorkflow lessons={todayLessons} />
 
       <Row gutter={[16, 16]}>
         <Col xs={24} xl={16}>
@@ -373,7 +264,7 @@ export default function TeacherDashboardPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '92px 1fr auto', width: '100%', gap: isMobile ? 8 : 14, alignItems: 'center', minWidth: 0 }}>
                       <div style={{ color: toneColor[lesson.statusTone], fontWeight: 700, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{lesson.time}</div>
                       <div>
-                        <div style={{ fontWeight: 700, color: '#1F2329' }}>{lesson.courseName} · {lesson.groupName}</div>
+                        <div style={{ fontWeight: 700, color: 'var(--color-ink)' }}>{lesson.courseName} · {lesson.groupName}</div>
                         <div style={{ fontSize: 12, color: '#8D806F', marginTop: 3 }}>
                           <CalendarOutlined /> {lesson.room} · <UserOutlined /> {lesson.studentCount}人 · {lesson.hasFeedback ? '已发反馈' : '未发反馈'}
                         </div>
@@ -404,11 +295,11 @@ export default function TeacherDashboardPage() {
             ) : (
               <div>
                 <BrandEmpty title="今日暂无课程" hint="可以整理课堂反馈、上传试卷或查看学生学习情况" icon={<CalendarOutlined />} />
-                <Space wrap style={{ marginTop: 12 }}>
+                <div className="teacher-dashboard-empty-actions">
                   <Button onClick={() => router.push('/teacher/students')}>查看我的学生</Button>
                   <Button onClick={() => router.push('/teacher/papers')}>上传试卷</Button>
                   <Button onClick={() => router.push('/teacher/classroom-feedback')}>发布课堂反馈</Button>
-                </Space>
+                </div>
               </div>
             )}
           </Card>
@@ -423,7 +314,7 @@ export default function TeacherDashboardPage() {
                       <Tag color={tagColor[item.tone]}>{item.type}</Tag>
                     </Space>
                     <div style={{ fontSize: 12, color: '#8D806F', marginTop: 4 }}>{item.grade} / {item.school}</div>
-                    <div style={{ fontSize: 13, color: '#1F2329', marginTop: 8 }}>{item.reason}</div>
+                    <div style={{ fontSize: 13, color: 'var(--color-ink)', marginTop: 8 }}>{item.reason}</div>
                     <Button size="small" type="link" style={{ paddingLeft: 0, marginTop: 6 }} onClick={() => router.push(item.href)}>{item.actionLabel}</Button>
                   </div>
                 ))}
@@ -465,7 +356,7 @@ export default function TeacherDashboardPage() {
               {[
                 { label: '在带学员', value: `${monthlyStats.totalStudents}人`, icon: <TeamOutlined />, color: '#123C35' },
                 { label: '本月课时', value: `${formatHours(monthlyStats.monthlyHours)}h`, icon: <ClockCircleOutlined />, color: '#123C35' },
-                { label: '家长留言', value: '点击查看', icon: <MessageOutlined />, color: '#E8784A' },
+                { label: '家长留言', value: `${data.badges?.unreadMessages ?? data.pendingTasks.unreadParentComments}条`, icon: <MessageOutlined />, color: '#E8784A' },
                 { label: '待处理', value: `${heroStats.totalTodos}项`, icon: <AlertOutlined />, color: '#E8784A' },
               ].map((item) => (
                 <div key={item.label} style={{ background: '#FAF8F5', borderRadius: 10, padding: 12 }}>
@@ -486,7 +377,7 @@ export default function TeacherDashboardPage() {
           </Card>
 
           <Card bordered={false} title="快捷操作" style={{ borderRadius: 12 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : '1fr 1fr', gap: 10 }}>
+            <div className="teacher-dashboard-quick-grid">
               {quickActions.map((item, index) => (
                 <button
                   className="pressable stagger-item"
@@ -512,8 +403,8 @@ export default function TeacherDashboardPage() {
                   }}
                 >
                   <div style={{ color: toneColor[item.tone], fontSize: 20, marginBottom: 8 }}>{quickIcons[index]}</div>
-                  <div style={{ color: '#1F2329', fontWeight: 700, fontSize: 13 }}>{item.label}</div>
-                  <div style={{ color: '#8D806F', fontSize: 11, lineHeight: 1.5, marginTop: 4 }}>{item.desc}</div>
+                  <div style={{ color: 'var(--color-ink)', fontWeight: 700, fontSize: 13 }}>{item.label}</div>
+                  <div className="teacher-dashboard-quick-desc" style={{ color: '#8D806F', fontSize: 11, lineHeight: 1.5, marginTop: 4 }}>{item.desc}</div>
                 </button>
               ))}
             </div>

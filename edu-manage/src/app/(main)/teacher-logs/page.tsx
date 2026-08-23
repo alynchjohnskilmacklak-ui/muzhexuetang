@@ -22,13 +22,30 @@ const ACTION_LABELS: Record<string, string> = {
   PERFORMANCE_POST: '表现反馈', TEACHER_LOGIN: '登录', COMMENT_REPLY: '回复留言',
   MAKEUP_ARRANGE: '安排补课',
 }
+type TeacherLogRow = {
+  teacherId: string
+  teacherName: string
+  subjects?: string
+  attendanceStatus: string
+  submittedCount: number
+  todayLessons: number
+  papersToday: number
+  postsToday: number
+  commentRepliesToday: number
+  lastAction?: string | null
+  status: string
+}
+type TeacherLogsData = {
+  teachers: TeacherLogRow[]
+  summary?: { attendanceCompleteTeachers?: number; pendingPapers?: number; weeklyFeedbackRate?: number; alertCount?: number }
+}
 
 export default function TeacherLogsPage() {
   const router = useRouter()
-  const { data, isLoading } = useSWR('/api/teacher-logs', fetcher, { refreshInterval: 120_000 })
+  const { data, isLoading } = useSWR<TeacherLogsData>('/api/teacher-logs', fetcher, { refreshInterval: 120_000 })
 
   const columns = [
-    { title: '教师', dataIndex: 'teacherName', key: 'teacherName', render: (name: string, r: any) => (
+    { title: '教师', dataIndex: 'teacherName', key: 'teacherName', render: (name: string) => (
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div style={{ width: 32, height: 32, borderRadius: 16, background: 'rgba(232,120,74,.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <UserOutlined style={{ color: '#E8784A', fontSize: 14 }} />
@@ -39,7 +56,7 @@ export default function TeacherLogsPage() {
     { title: '科目', dataIndex: 'subjects', key: 'subjects', width: 120 },
     { title: '今日考勤状态', dataIndex: 'attendanceStatus', key: 'attendanceStatus', width: 110 },
     { title: '已提交', dataIndex: 'submittedCount', key: 'submittedCount', width: 70,
-      render: (v: number, r: any) => <span style={{ color: v >= r.todayLessons ? '#1D9E75' : '#E8784A' }}>{v}</span> },
+      render: (v: number, r: TeacherLogRow) => <span style={{ color: v >= r.todayLessons ? '#1D9E75' : '#E8784A' }}>{v}</span> },
     { title: '试卷推送', dataIndex: 'papersToday', key: 'papersToday', width: 80 },
     { title: '表现反馈', dataIndex: 'postsToday', key: 'postsToday', width: 80 },
     { title: '留言回复', dataIndex: 'commentRepliesToday', key: 'commentRepliesToday', width: 80 },
@@ -47,7 +64,7 @@ export default function TeacherLogsPage() {
       render: (v: string) => v ? <Tag>{ACTION_LABELS[v] || v}</Tag> : <span style={{ color: '#ccc' }}>-</span> },
     { title: '状态', dataIndex: 'status', key: 'status', width: 100,
       render: (v: string) => <Tag color={STATUS_MAP[v]?.color}>{STATUS_MAP[v]?.label}</Tag> },
-    { title: '操作', key: 'actions', width: 80, render: (_: unknown, r: any) => (
+    { title: '操作', key: 'actions', width: 80, render: (_: unknown, r: TeacherLogRow) => (
       <Button size="small" type="link" onClick={() => router.push(`/teacher-logs/${r.teacherId}`)}>详情</Button>
     )},
   ]
@@ -65,7 +82,7 @@ export default function TeacherLogsPage() {
           <Card bordered={false}><Statistic title="本周反馈率" value={data?.summary?.weeklyFeedbackRate || 0} prefix={<CloseCircleOutlined style={{ color: '#8892f0' }} />} suffix="%" /></Card>
         </Col>
         <Col xs={12} lg={6}>
-          <Card bordered={false}><Statistic title="异常预警" value={data?.summary?.alertCount || 0} prefix={<WarningOutlined style={{ color: '#E8784A' }} />} suffix="条" valueStyle={{ color: data?.summary?.alertCount > 0 ? '#E8784A' : '#1D9E75' }} /></Card>
+          <Card bordered={false}><Statistic title="异常预警" value={data?.summary?.alertCount || 0} prefix={<WarningOutlined style={{ color: '#E8784A' }} />} suffix="条" valueStyle={{ color: (data?.summary?.alertCount || 0) > 0 ? '#E8784A' : '#1D9E75' }} /></Card>
         </Col>
       </Row>
       <Card bordered={false}>
@@ -77,7 +94,7 @@ export default function TeacherLogsPage() {
           pagination={false}
           scroll={{ x: 920 }}
           mobileEmptyText="暂无教师行为日志"
-          renderMobileItem={(teacher: any) => (
+          renderMobileItem={(teacher) => (
             <div key={teacher.teacherId} className="responsive-record-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start', marginBottom: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>

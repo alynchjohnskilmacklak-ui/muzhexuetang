@@ -79,14 +79,11 @@ export default function CourseGroupDetailPage() {
   const intensivePendingReview = lessons.filter((lesson: Record<string, unknown>) => (
     lesson.intensiveReviewStatus === 'PENDING'
   )).length
-  const pendingReviews = useMemo(
-    () => Array.isArray(reviewData?.reviews)
-      ? reviewData.reviews.filter((review: Record<string, unknown>) => (
-        lessons.some((lesson: Record<string, unknown>) => lesson.id === review.lessonId)
-      ))
-      : [],
-    [lessons, reviewData?.reviews],
-  )
+  const pendingReviews = Array.isArray(reviewData?.reviews)
+    ? reviewData.reviews.filter((review: Record<string, unknown>) => (
+      lessons.some((lesson: Record<string, unknown>) => lesson.id === review.lessonId)
+    ))
+    : []
   const selectedReview = pendingReviews.find((review: Record<string, unknown>) => review.id === reviewOpenId)
   const todayStr = format(new Date(), 'yyyy-MM-dd')
   const todayLessons = lessons.filter((lesson: Record<string, unknown>) => String(lesson.lessonDate || '').slice(0, 10) === todayStr)
@@ -137,6 +134,7 @@ export default function CourseGroupDetailPage() {
   const teacherTeam = Array.isArray(group?.teacherAssignments) && group.teacherAssignments.length
     ? group.teacherAssignments.map((item: Record<string, unknown>) => (item.teacher as Record<string, unknown>)?.name).filter(Boolean).join('、')
     : group?.teacher?.name
+  const isHistoricalTerm = Boolean(group?.term && group.term.status !== 'ACTIVE')
 
   const handleStartGroup = async () => {
     setStarting(true)
@@ -390,14 +388,15 @@ export default function CourseGroupDetailPage() {
           trigger={['click']}
           menu={{
             items: [
-              { key: 'change-teacher', icon: <UserSwitchOutlined />, label: '更换老师', onClick: openReplaceTeacher },
-              { key: 'regenerate', icon: <ReloadOutlined />, label: '重新生成课表', onClick: handleRegenerateLessons },
+              { key: 'change-teacher', icon: <UserSwitchOutlined />, label: '更换老师', disabled: isHistoricalTerm, onClick: openReplaceTeacher },
+              { key: 'regenerate', icon: <ReloadOutlined />, label: '重新生成课表', disabled: isHistoricalTerm, onClick: handleRegenerateLessons },
               { key: 'back', icon: <ArrowLeftOutlined />, label: '返回课程管理', onClick: () => router.push('/courses') },
               {
                 key: 'delete',
                 icon: <DeleteOutlined />,
                 label: '删除班级',
                 danger: true,
+                disabled: isHistoricalTerm,
                 onClick: () => {
                   Modal.confirm({
                     title: '确定删除这个班级？',
@@ -416,21 +415,30 @@ export default function CourseGroupDetailPage() {
         </Dropdown>
       ) : (
         <Space wrap>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a' }}>添加学员</Button>
-          {group.status === 'WAITING' && <Button type="primary" loading={starting} onClick={handleStartGroup} style={{ background: '#27a644' }}>开班并通知家长</Button>}
-          <Button icon={<UserSwitchOutlined />} onClick={openReplaceTeacher}>更换老师</Button>
-          {group.status === 'WAITING' && <Button icon={<ReloadOutlined />} onClick={handleRegenerateLessons}>重新生成课表</Button>}
+          <Button type="primary" icon={<PlusOutlined />} disabled={isHistoricalTerm} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a' }}>添加学员</Button>
+          {group.status === 'WAITING' && <Button type="primary" disabled={isHistoricalTerm} loading={starting} onClick={handleStartGroup} style={{ background: '#27a644' }}>开班并通知家长</Button>}
+          <Button icon={<UserSwitchOutlined />} disabled={isHistoricalTerm} onClick={openReplaceTeacher}>更换老师</Button>
+          {group.status === 'WAITING' && <Button icon={<ReloadOutlined />} disabled={isHistoricalTerm} onClick={handleRegenerateLessons}>重新生成课表</Button>}
           <Popconfirm title="确定删除这个班级？" description="删除后班级会归档，不再出现在课程和排课列表。" onConfirm={handleDeleteGroup}>
-            <Button danger icon={<DeleteOutlined />}>删除班级</Button>
+            <Button danger disabled={isHistoricalTerm} icon={<DeleteOutlined />}>删除班级</Button>
           </Popconfirm>
           <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/courses')}>返回课程管理</Button>
         </Space>
       )}
     >
+      {isHistoricalTerm && (
+        <Alert
+          showIcon
+          type="info"
+          message={`正在查看历史批次：${group.term?.name || '历史批次'}`}
+          description="历史班级、课次、考勤、反馈和工资仅供核对；如需新增或修改，请先在数据总览切换到当前运营批次。"
+          style={{ marginBottom: 16 }}
+        />
+      )}
       {isMobile && (
         <Space.Compact block style={{ marginBottom: 16 }}>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a', flex: 1 }}>添加学员</Button>
-          {group.status === 'WAITING' && <Button type="primary" loading={starting} onClick={handleStartGroup} style={{ background: '#27a644', flex: 1 }}>开班通知</Button>}
+          <Button type="primary" icon={<PlusOutlined />} disabled={isHistoricalTerm} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a', flex: 1 }}>添加学员</Button>
+          {group.status === 'WAITING' && <Button type="primary" disabled={isHistoricalTerm} loading={starting} onClick={handleStartGroup} style={{ background: '#27a644', flex: 1 }}>开班通知</Button>}
         </Space.Compact>
       )}
 
@@ -444,8 +452,8 @@ export default function CourseGroupDetailPage() {
               <Metric
                 title="待审核课次"
                 value={intensivePendingReview}
-                actionLabel={intensivePendingReview > 0 ? '立即审核' : undefined}
-                onAction={() => openLessonReview()}
+                actionLabel={!isHistoricalTerm && intensivePendingReview > 0 ? '立即审核' : undefined}
+                onAction={isHistoricalTerm ? undefined : () => openLessonReview()}
               />
             </Col>
           </>
@@ -487,9 +495,9 @@ export default function CourseGroupDetailPage() {
                   okText="确认校准"
                   cancelText="取消"
                 >
-                  <Button size="small" loading={syncingHours}>校准插班生课时</Button>
+                  <Button size="small" disabled={isHistoricalTerm} loading={syncingHours}>校准插班生课时</Button>
                 </Popconfirm>
-                <Button size="small" icon={<PlusOutlined />} onClick={() => setEnrollOpen(true)}>添加</Button>
+                <Button size="small" icon={<PlusOutlined />} disabled={isHistoricalTerm} onClick={() => setEnrollOpen(true)}>添加</Button>
               </Space>
             )}
             bordered={false}
@@ -508,7 +516,7 @@ export default function CourseGroupDetailPage() {
                         </div>
                       </div>
                       <Popconfirm title="确定把该学员移出班级？" onConfirm={() => handleRemoveStudent(enrollment.id as string)}>
-                        <Button size="small" danger type="text">移出</Button>
+                        <Button size="small" danger type="text" disabled={isHistoricalTerm}>移出</Button>
                       </Popconfirm>
                     </div>
                   )
@@ -557,7 +565,7 @@ export default function CourseGroupDetailPage() {
                   title: '操作',
                   width: 90,
                   render: (_: unknown, row: Record<string, unknown>) => (
-                    row.intensiveReviewStatus === 'PENDING' ? (
+                    !isHistoricalTerm && row.intensiveReviewStatus === 'PENDING' ? (
                       <Button
                         type="primary"
                         size="small"

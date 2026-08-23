@@ -293,7 +293,7 @@ export function TeacherMessagesClient() {
         background: '#faf8f5', overscrollBehavior: 'contain', scrollPaddingBottom: 88,
       }}>
         {!active ? (
-          <BrandEmpty title="选择留言开始回复" icon={<MessageOutlined />} />
+          <BrandEmpty title="选择一条留言查看对话" hint="家长的问题和你的回复会显示在这里，选择左侧留言即可继续沟通。" icon={<MessageOutlined />} />
         ) : (
           <>
             {active.replies.map((reply, index) => <div className="stagger-item" key={reply.id} style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}><ChatBubble reply={reply} /></div>)}
@@ -357,7 +357,7 @@ export function TeacherMessagesClient() {
           {filterBar}
         </div>
         {messages.length === 0 ? (
-          <BrandEmpty title="暂无留言" icon={<MessageOutlined />} />
+          <BrandEmpty title="还没有家长留言" hint="家长发来的问题会显示在这里，及时回复有助于减少信息遗漏。" icon={<MessageOutlined />} />
         ) : messages.map((msg, index) => (
           <MessageCard key={msg.id} msg={msg} index={index} onClick={() => handleSelect(msg.id)} active={false} />
         ))}
@@ -411,7 +411,7 @@ export function TeacherMessagesClient() {
           </div>
           <div style={{ overflowY: 'auto', flex: 1, padding: '12px 12px' }}>
             {messages.length === 0 ? (
-              <BrandEmpty title="暂无留言" icon={<MessageOutlined />} />
+              <BrandEmpty title="当前筛选下没有留言" hint="可以清除筛选条件，查看其他家长留言。" icon={<MessageOutlined />} />
             ) : messages.map((msg, index) => (
               <MessageCard key={msg.id} msg={msg} index={index} onClick={() => handleSelect(msg.id)} active={msg.id === activeId} />
             ))}

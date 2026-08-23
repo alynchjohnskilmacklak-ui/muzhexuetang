@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Layout, Badge, Avatar, Dropdown, Space } from 'antd'
-import { BellOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons'
+import { Layout, Badge, Avatar, Button, Dropdown, Space, Tooltip } from 'antd'
+import { BellOutlined, UserOutlined, LogoutOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import { signOut, useSession } from 'next-auth/react'
 import useSWR from 'swr'
 import { GlobalSearch } from '@/components/GlobalSearch'
@@ -40,6 +40,7 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
   const userMenu = {
     items: [
       { key: 'profile', icon: <UserOutlined />, label: '个人信息' },
+      { key: 'help', icon: <QuestionCircleOutlined />, label: '使用帮助', onClick: () => router.push('/dashboard?guide=1') },
       { type: 'divider' as const },
       {
         key: 'logout',
@@ -56,8 +57,10 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
 
   if (mobileMode) {
     return (
-      <Dropdown menu={userMenu} placement="bottomRight">
-        <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: '#E8784A', cursor: 'pointer' }} />
+      <Dropdown menu={userMenu} placement="bottomRight" trigger={['click']}>
+        <button type="button" aria-label="打开用户菜单" style={{ padding: 0, border: 0, background: 'transparent', cursor: 'pointer', borderRadius: '50%' }}>
+          <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: '#E8784A' }} />
+        </button>
       </Dropdown>
     )
   }
@@ -79,19 +82,25 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
     >
       <GlobalSearch />
       <Space size={20}>
+        <Tooltip title="使用帮助" trigger={['hover', 'focus']}><Button type="text" icon={<QuestionCircleOutlined />} onClick={() => router.push('/dashboard?guide=1')} aria-label="打开使用帮助" /></Tooltip>
         <Badge count={unreadCount} size="small" offset={[-2, 2]}>
-          <BellOutlined
-            style={{ fontSize: 18, cursor: 'pointer', color: '#5a4e3a' }}
+          <Button
+            type="text"
+            aria-label={unreadCount > 0 ? `打开家长留言，${unreadCount}条未读` : '打开家长留言'}
+            icon={<BellOutlined style={{ fontSize: 18 }} />}
+            style={{ color: '#5a4e3a' }}
             onClick={() => router.push('/parent-messages')}
           />
         </Badge>
-        <Dropdown menu={userMenu} placement="bottomRight">
-          <Space style={{ cursor: 'pointer' }}>
+        <Dropdown menu={userMenu} placement="bottomRight" trigger={['click']}>
+          <button type="button" aria-label="打开用户菜单" style={{ padding: 0, border: 0, background: 'transparent', cursor: 'pointer' }}>
+            <Space>
             <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: '#E8784A' }} />
             <span style={{ color: '#1a1201', fontSize: 14, fontWeight: 500 }}>
               {userName}｜{systemName}
             </span>
-          </Space>
+            </Space>
+          </button>
         </Dropdown>
       </Space>
     </Header>

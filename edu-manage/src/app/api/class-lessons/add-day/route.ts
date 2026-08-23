@@ -33,6 +33,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const groupWhere: Prisma.ClassGroupWhereInput = {
     status: { in: ['WAITING', 'ACTIVE'] },
     course: { isActive: true },
+    term: { status: 'ACTIVE' },
   }
   if (targetDivision) {
     groupWhere.division = targetDivision as 'JUNIOR' | 'SENIOR'

@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
+import type { PrismaClient } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
 const REACTIONS = new Set(['HEART', 'STAR', 'CLAP'])
 
-async function canAccessPost(userId: string, postId: string, client: any) {
+async function canAccessPost(userId: string, postId: string, client: Pick<PrismaClient, 'performancePost'>) {
   const post = await client.performancePost.findFirst({
     where: {
       id: postId,

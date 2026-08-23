@@ -57,7 +57,7 @@ function parseCsvToRows(csv: string): ImportRow[] {
 
 export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
-  if (!session?.user || (session.user as any).role !== 'admin') {
+  if (!session?.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: '需要管理员权限' }, { status: 403 })
   }
   const actorId = (session.user as { id?: string }).id

@@ -7,6 +7,8 @@ import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { apiHandler } from '@/lib/api-handler'
 import { normalizeWritableDivision } from '@/lib/division'
 import { intensiveStudentCountError, toIntensiveTeachingType } from '@/lib/intensive-class'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,6 +55,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
 
     const requestedDivision = normalizeWritableDivision(body.division)
+    const selectedTerm = await resolveAdminTermScope(
+      prisma,
+      getRequestDivision(session.user as Record<string, unknown>, requestedDivision),
+      req,
+    )
+    if (!selectedTerm || selectedTerm.status !== 'ACTIVE') {
+      return NextResponse.json({ error: '历史批次只允许查看，请切换到当前运营批次后再排课' }, { status: 409 })
+    }
 
     const dedupedStudentIds = [...new Set(Array.isArray(studentIds) ? studentIds : [])] as string[]
     const intensiveTeachingType = toIntensiveTeachingType(classType)
@@ -85,6 +95,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         date: startDate,
         startTime: startTimeVal,
         endTime: endTimeVal,
+        termId: selectedTerm.id,
       })
       for (const c of conflicts) {
         if (!allConflicts.some(e => e.lessonId === c.lessonId && e.type === c.type)) {
@@ -116,6 +127,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
       })
       if (!course) throw { status: 400, message: '所选课程不存在或已停用' }
       const lessonDivision = normalizeWritableDivision(course.division, requestedDivision)
+      if (lessonDivision !== getRequestDivision(session.user as Record<string, unknown>, requestedDivision)) {
+        throw { status: 400, message: '课程学部与当前运营批次不一致' }
+      }
       const teacher = await tx.teacher.findUnique({
         where: { id: teacherId },
         select: { id: true, name: true },
@@ -125,7 +139,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       // 使用已有 ClassGroup 或创建新班级（不再用"临时"前缀污染班级列表）
       const groupName = body.groupName || `${course.name}·${teacher.name}·${startDate}`
       let group = classGroupId
-        ? await tx.classGroup.findFirst({ where: { id: classGroupId, status: { not: 'ARCHIVED' } } })
+        ? await tx.classGroup.findFirst({ where: { id: classGroupId, termId: selectedTerm.id, status: { not: 'ARCHIVED' } } })
         : await tx.classGroup.findFirst({
             where: {
               name: groupName,
@@ -134,6 +148,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
               status: { not: 'ARCHIVED' },
               division: lessonDivision,
               intensiveMode: intensiveTeachingType ? 'INTENSIVE' : 'NORMAL',
+              termId: selectedTerm.id,
             },
           })
       if (group && intensiveTeachingType && (group.intensiveMode !== 'INTENSIVE' || group.teachingType !== intensiveTeachingType)) {
@@ -156,6 +171,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             division: lessonDivision,
             intensiveMode: intensiveTeachingType ? 'INTENSIVE' : 'NORMAL',
             teachingType: intensiveTeachingType,
+            termId: selectedTerm.id,
           },
         })
       } else if (!intensiveTeachingType && roomId && group.roomId !== roomId) {

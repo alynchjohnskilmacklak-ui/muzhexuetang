@@ -7,6 +7,7 @@ import { fmtDate, fmtDateTime } from '@/lib/format-date'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { ResponsiveTable } from '@/components/Layout/ResponsiveTable'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -130,6 +131,7 @@ export function ParentLeaveClient({
 
           <Form.Item name="leaveDate" label="请假日期" rules={[{ required: true, message: '请选择日期' }]}>
             <DatePicker
+              inputReadOnly={isMobile}
               style={{ width: '100%' }}
               getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
               disabledDate={(current) => current && current < dayjs().startOf('day')}
@@ -158,8 +160,22 @@ export function ParentLeaveClient({
           rowKey="id"
           scroll={{ x: 760 }}
           pagination={{ pageSize: 10, hideOnSinglePage: true }}
-          locale={{ emptyText: '暂无请假记录' }}
-          mobileEmptyText="暂无请假记录"
+          locale={{
+            emptyText: (
+              <GuidedEmpty
+                compact
+                title="还没有请假记录"
+                description="提交请假后，审批进度和老师回执会显示在这里，方便你随时确认。"
+              />
+            ),
+          }}
+          mobileEmpty={(
+            <GuidedEmpty
+              compact
+              title="还没有请假记录"
+              description="提交请假后，审批进度和老师回执会显示在这里，方便你随时确认。"
+            />
+          )}
           renderMobileItem={(r) => {
             const meta = leaveStatusMeta(r.status)
             return (

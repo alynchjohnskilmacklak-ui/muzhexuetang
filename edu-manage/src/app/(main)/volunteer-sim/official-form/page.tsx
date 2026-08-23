@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import NextImage from 'next/image'
 
 type School = {
   schoolId: string
@@ -198,7 +199,7 @@ export default function OfficialVolunteerFormPage() {
   return (
     <>
       <div className="page" ref={pageRef}>
-        <div className="brand"><img src="/images/volunteer-form-logo.jpg" alt="牧哲学堂 MOREJOY" /></div>
+        <div className="brand"><NextImage src="/images/volunteer-form-logo.jpg" alt="牧哲学堂 MOREJOY" width={360} height={96} /></div>
         <div className="page-title">2026中考志愿填报（模拟填报）</div>
 
         <div className="batch-wrap">

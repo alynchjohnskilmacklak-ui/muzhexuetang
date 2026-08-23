@@ -2,11 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react'
 import {
-  Avatar, Badge, Button, Drawer, Empty, Form, Input,
-  Modal, Select, Tag, Typography,
+  Avatar, Badge, Button, Drawer, Form, Input,
+  Select, Tag, Typography,
 } from 'antd'
 import {
-  MessageOutlined, PlusOutlined, SendOutlined,
+  PlusOutlined, SendOutlined,
   UserOutlined, CloseOutlined, CheckCircleOutlined,
 } from '@ant-design/icons'
 import { toast } from 'sonner'
@@ -15,8 +15,11 @@ import { fmtDateTime } from '@/lib/format-date'
 import { PullToRefresh } from '@/components/PullToRefresh'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { SUBJECT_COLORS } from '@/constants/subjects'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { SafeFormModal } from '@/components/Common/SafeFormModal'
+import { WorkspacePageHeader } from '@/components/Common/WorkspacePageHeader'
 
-const { Text, Title } = Typography
+const { Text } = Typography
 const { TextArea } = Input
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
@@ -167,6 +170,8 @@ export function ParentMessagesClient({
   const [replyText, setReplyText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [composeForm] = Form.useForm()
+  const composeValues = Form.useWatch([], composeForm)
+  void composeValues
   const composeStudentId = Form.useWatch('studentId', composeForm)
   const recommendedTeachers = composeStudentId ? teacherRecommendations[composeStudentId] || [] : []
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -195,7 +200,7 @@ export function ParentMessagesClient({
     if (active) {
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
     }
-  }, [active?.replies.length])
+  }, [active])
 
   useEffect(() => {
     if (!showCompose || !composeStudentId) return
@@ -296,7 +301,7 @@ export function ParentMessagesClient({
         background: '#faf8f5',
       }}>
         {!active ? (
-          <Empty description="选择一条留言查看对话" style={{ marginTop: 80 }} />
+          <div style={{ marginTop: 36 }}><GuidedEmpty title="选择一条留言查看对话" description="家长留言和老师回复会集中显示在这里，选择左侧记录即可继续沟通。" actionLabel={messages[0] ? '打开最新留言' : undefined} onAction={messages[0] ? () => handleSelect(messages[0].id) : undefined} compact /></div>
         ) : (
           <>
             {active.replies.map(r => (
@@ -332,7 +337,7 @@ export function ParentMessagesClient({
             disabled={!replyText.trim()}
             onClick={handleReply}
             style={{
-              background: 'linear-gradient(135deg,#E87545,#F09A5B)',
+              background: 'var(--color-primary)',
               border: 'none', borderRadius: 10, height: 36,
             }}
           />
@@ -355,16 +360,29 @@ export function ParentMessagesClient({
     </div>
   )
 
+  const closeCompose = () => {
+    setShowCompose(false)
+    composeForm.resetFields()
+  }
+
+  const openCompose = () => {
+    setShowCompose(true)
+    if (filterChildId) {
+      window.setTimeout(() => composeForm.setFieldValue('studentId', filterChildId), 50)
+    }
+  }
+
   const composeModal = (
-    <Modal
+    <SafeFormModal
       open={showCompose}
-      onCancel={() => { setShowCompose(false); composeForm.resetFields() }}
+      onClose={closeCompose}
+      onOk={() => composeForm.submit()}
+      dirty={showCompose && composeForm.isFieldsTouched()}
       title={<span style={{ fontWeight: 700, color: '#1a1201' }}>新建留言</span>}
-      footer={null}
-      width={isMobile ? '95vw' : 520}
-      centered
-      destroyOnClose
-      getContainer={() => document.body}
+      width={520}
+      mobileHeight="92dvh"
+      okText="发送"
+      confirmLoading={submitting}
     >
       <Form form={composeForm} layout="vertical" onFinish={handleCompose} style={{ marginTop: 16 }}>
         <Form.Item name="studentId" label="孩子" rules={[{ required: true, message: '请选择孩子' }]}>
@@ -421,44 +439,28 @@ export function ParentMessagesClient({
             style={{ borderRadius: 8 }}
           />
         </Form.Item>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <Button onClick={() => { setShowCompose(false); composeForm.resetFields() }}>取消</Button>
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={submitting}
-            icon={<SendOutlined />}
-            style={{ background: 'linear-gradient(135deg,#E87545,#F09A5B)', border: 'none', borderRadius: 8 }}
-          >
-            发送
-          </Button>
-        </div>
       </Form>
-    </Modal>
+    </SafeFormModal>
   )
 
   if (isMobile) {
     return (
       <div style={{ padding: '0 0 80px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div>
-            <Title level={4} style={{ marginBottom: 2 }}>我的留言</Title>
-            <Text type="secondary" style={{ fontSize: 13 }}>向老师提问，随时查看回复</Text>
-          </div>
+        <WorkspacePageHeader
+          eyebrow="家长端 · 家校沟通"
+          title="我的留言"
+          subtitle="向老师提问，随时查看回复"
+          actions={(
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => {
-            setShowCompose(true)
-            if (filterChildId) {
-              setTimeout(() => composeForm.setFieldValue('studentId', filterChildId), 50)
-            }
-          }}
-            style={{ background: 'linear-gradient(135deg,#E87545,#F09A5B)', border: 'none', borderRadius: 10 }}
+            onClick={openCompose}
+            style={{ background: 'var(--color-primary)', border: 'none', borderRadius: 10 }}
           >
             提问
           </Button>
-        </div>
+          )}
+        />
 
         {students.length > 1 && (
           <div style={{ display: 'flex', gap: 8, marginBottom: 12, overflowX: 'auto', scrollbarWidth: 'none' }}>
@@ -480,13 +482,14 @@ export function ParentMessagesClient({
             ))}
           </div>
         )}        {messages.length === 0 ? (
-          <div style={{
-            background: '#fff', borderRadius: 16, padding: '48px 24px',
-            textAlign: 'center', border: '1px solid rgba(0,0,0,.06)',
-          }}>
-            <MessageOutlined style={{ fontSize: 40, color: '#E8784A', opacity: .4, marginBottom: 12 }} />
-            <div style={{ fontSize: 15, color: '#5a4e3a', marginBottom: 6 }}>还没有留言</div>
-            <Text type="secondary" style={{ fontSize: 13 }}>有任何学习问题，都可以向老师提问</Text>
+          <div style={{ background: 'var(--color-surface-1)', borderRadius: 14, border: '1px solid var(--color-hairline)' }}>
+            <GuidedEmpty
+              title="还没有留言"
+              description="有任何学习问题，都可以直接向孩子的任课老师提问。"
+              actionLabel="发起第一条留言"
+              actionIcon={<PlusOutlined />}
+              onAction={openCompose}
+            />
           </div>
         ) : (
           messages.map(msg => (
@@ -512,10 +515,10 @@ export function ParentMessagesClient({
           }}>
             <Text strong>对话详情</Text>
             <button onClick={() => setActiveId(null)} style={{
-              width: 28, height: 28, borderRadius: 8, border: '1px solid rgba(0,0,0,.1)',
+              width: 44, height: 44, borderRadius: 10, border: '1px solid rgba(0,0,0,.1)',
               background: '#f5f5f5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <CloseOutlined style={{ fontSize: 12 }} />
+            }} aria-label="关闭对话详情">
+              <CloseOutlined style={{ fontSize: 15 }} />
             </button>
           </div>
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -531,25 +534,21 @@ export function ParentMessagesClient({
   return (
     <PullToRefresh onRefresh={async () => { await mutate() }}>
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <div>
-          <Title level={4} style={{ marginBottom: 2 }}>我的留言</Title>
-          <Text type="secondary" style={{ fontSize: 13 }}>向老师提问，随时查看回复</Text>
-        </div>
+      <WorkspacePageHeader
+        eyebrow="家长端 · 家校沟通"
+        title="我的留言"
+        subtitle="向老师提问，随时查看回复"
+        actions={(
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          onClick={() => {
-            setShowCompose(true)
-            if (filterChildId) {
-              setTimeout(() => composeForm.setFieldValue('studentId', filterChildId), 50)
-            }
-          }}
-          style={{ background: 'linear-gradient(135deg,#E87545,#F09A5B)', border: 'none', borderRadius: 10, height: 38 }}
+          onClick={openCompose}
+          style={{ background: 'var(--color-primary)', border: 'none', borderRadius: 10, minHeight: 44 }}
         >
           新建留言
         </Button>
-      </div>
+        )}
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 16, height: 'calc(100vh - 160px)' }}>
         <div style={{
@@ -587,7 +586,7 @@ export function ParentMessagesClient({
           </div>
           <div style={{ overflowY: 'auto', flex: 1, padding: '12px 12px' }}>
             {messages.length === 0 ? (
-              <Empty description="暂无留言" style={{ marginTop: 60 }} image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <div style={{ marginTop: 24 }}><GuidedEmpty title={filterChildId ? '这个孩子还没有留言' : '还没有留言'} description="需要了解课堂表现、作业或课程安排时，可以从这里向老师发起留言。" actionLabel="新建留言" onAction={() => setShowCompose(true)} compact /></div>
             ) : (
               messages.map(msg => (
                 <MessageCard key={msg.id} msg={msg} onClick={() => handleSelect(msg.id)} active={msg.id === activeId} />

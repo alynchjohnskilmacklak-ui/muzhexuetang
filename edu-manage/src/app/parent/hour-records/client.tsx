@@ -1,11 +1,13 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Card, Empty, Select, Space, Table, Tag, Typography } from 'antd'
+import { Card, Select, Space, Table, Tag, Typography } from 'antd'
 import { ClockCircleOutlined, TeamOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { fmtDate } from '@/lib/format-date'
 import { formatDeducted, formatRemaining } from '@/lib/lesson-units'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { useRouter } from 'next/navigation'
 
 const { Title, Text } = Typography
 
@@ -16,8 +18,25 @@ const STATUS_LABEL: Record<string, { text: string; color: string }> = {
   MAKEUP: { text: '补课', color: 'blue' },
   ADJUSTMENT: { text: '管理员调整', color: 'purple' },
 }
+type CourseRef = { name?: string | null; type?: string | null }
+type GroupRef = { name?: string | null; intensiveMode?: string | null; lessonMinutes?: number | null; course?: CourseRef | null; teacher?: { name?: string | null } | null; room?: { name?: string | null } | null }
+type Enrollment = { remainHours?: number | null; totalHours?: number | null; group?: GroupRef | null }
+type HourRecord = {
+  id: string
+  status: string
+  createdAt: string
+  hoursDeducted?: number | null
+  adjustmentReason?: string | null
+  isIntensiveApproved?: boolean
+  approvedTeachingHours?: number | null
+  student?: { id: string; name: string } | null
+  enrollment?: Enrollment | null
+  lesson?: { lessonDate?: string | null; startTime?: string | null; endTime?: string | null; group?: GroupRef | null; teacher?: { name?: string | null } | null } | null
+  schedule?: { startTime: string; endTime: string; duration?: number | null; course?: CourseRef | null; teacher?: { name?: string | null } | null; room?: { name?: string | null } | null } | null
+}
+type StudentWithEnrollments = { id: string; name: string; enrollments?: Enrollment[] }
 
-function recordMeta(record: any) {
+function recordMeta(record: HourRecord) {
   if (record.status === 'ADJUSTMENT') {
     const group = record.enrollment?.group
     return {
@@ -43,7 +62,7 @@ function recordMeta(record: any) {
   }
 }
 
-function enrollmentLine(enrollment: any) {
+function enrollmentLine(enrollment: Enrollment) {
   const group = enrollment.group
   if (group?.intensiveMode === 'INTENSIVE') return null
   const name = group?.course?.name || group?.name || '课程'
@@ -52,7 +71,8 @@ function enrollmentLine(enrollment: any) {
   return `${name}：${remain} / ${total}`
 }
 
-export function ParentHourRecordsClient({ students, records }: { students: any[]; records: any[] }) {
+export function ParentHourRecordsClient({ students, records }: { students: StudentWithEnrollments[]; records: HourRecord[] }) {
+  const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const [studentId, setStudentId] = useState(students[0]?.id || '')
   const selectedStudent = students.find((student) => student.id === studentId)
@@ -130,7 +150,7 @@ export function ParentHourRecordsClient({ students, records }: { students: any[]
               </Card>
             )
           })}
-          {!filteredRecords.length && <Empty description="暂无课时记录" />}
+          {!filteredRecords.length && <GuidedEmpty title="还没有课时记录" description="已经确认的上课与课时变动会显示在这里，方便你核对孩子的课程消耗。" actionLabel="看看课程表" onAction={() => router.push('/parent/schedule')} compact />}
         </div>
       ) : (
         <Card bordered={false} className="parent-card" style={{ borderRadius: 12, border: '1px solid #F0DDD2' }}>
@@ -139,13 +159,13 @@ export function ParentHourRecordsClient({ students, records }: { students: any[]
             dataSource={filteredRecords}
             pagination={{ pageSize: 12 }}
             scroll={{ x: 640 }}
-            locale={{ emptyText: '暂无课时记录' }}
+            locale={{ emptyText: <GuidedEmpty title="还没有课时记录" description="已经确认的上课与课时变动会显示在这里，方便你核对孩子的课程消耗。" actionLabel="看看课程表" onAction={() => router.push('/parent/schedule')} compact /> }}
             columns={[
-              { title: '日期', key: 'date', render: (_: unknown, record: any) => fmtDate(recordMeta(record).date) },
-              { title: '课程', key: 'course', render: (_: unknown, record: any) => recordMeta(record).courseName },
-              { title: '老师', key: 'teacher', render: (_: unknown, record: any) => recordMeta(record).teacherName },
+              { title: '日期', key: 'date', render: (_: unknown, record) => fmtDate(recordMeta(record).date) },
+              { title: '课程', key: 'course', render: (_: unknown, record) => recordMeta(record).courseName },
+              { title: '老师', key: 'teacher', render: (_: unknown, record) => recordMeta(record).teacherName },
               { title: '状态', dataIndex: 'status', render: (value: string) => <Tag color={(STATUS_LABEL[value] || {}).color}>{STATUS_LABEL[value]?.text || value}</Tag> },
-              { title: '计入课时', key: 'hoursDeducted', render: (_: unknown, record: any) => {
+              { title: '计入课时', key: 'hoursDeducted', render: (_: unknown, record) => {
                 const meta = recordMeta(record)
                 return <Text strong>{record.isIntensiveApproved
                   ? `${Number(record.approvedTeachingHours || 0).toFixed(2)} 小时`

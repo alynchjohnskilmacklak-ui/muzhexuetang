@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useState } from 'react'
+import NextImage from 'next/image'
 import { Alert, Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, DatePicker, Upload } from 'antd'
 import { UserOutlined, BookOutlined, IdcardOutlined, UploadOutlined } from '@ant-design/icons'
 import type { UploadProps } from 'antd'
@@ -199,8 +200,8 @@ export function TeacherForm({
             <Col span={24}>
               <Form.Item name="avatar" label="教师照片">
                 <Space align="start" size={16} style={{ width: '100%' }}>
-                  <div style={{ width: 104, height: 132, borderRadius: 10, overflow: 'hidden', border: '1px solid #30333a', background: '#0f1011', display: 'grid', placeItems: 'center', color: '#8a8f98' }}>
-                    {avatar ? <img src={normalizeUploadUrl(avatar)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} /> : '暂无照片'}
+                  <div style={{ width: 104, height: 132, position: 'relative', borderRadius: 10, overflow: 'hidden', border: '1px solid #30333a', background: '#0f1011', display: 'grid', placeItems: 'center', color: '#8a8f98' }}>
+                    {avatar ? <NextImage src={normalizeUploadUrl(avatar)} alt="教师照片" fill sizes="104px" unoptimized style={{ objectFit: 'cover', objectPosition: 'center top' }} /> : '暂无照片'}
                   </div>
                   <Space direction="vertical" style={{ flex: 1 }}>
                     <Select

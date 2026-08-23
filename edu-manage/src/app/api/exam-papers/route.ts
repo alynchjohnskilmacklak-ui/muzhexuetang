@@ -5,6 +5,9 @@ import { resolveTeacherForUser } from '@/lib/performance'
 import { parentVisibleExamPaperWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { resolveLearningRecordTermId } from '@/lib/learning-record-term'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,7 +35,12 @@ export const GET = apiHandler(async (req: NextRequest) => {
     if (status) where.status = status
     else where.status = { not: 'DELETED' }
     if (user.role === 'admin') {
+      const term = await resolveAdminTermScope(prisma, division, req)
       where.student = { division }
+      if (term) where.termId = term.id
+    } else {
+      const term = await getActiveAcademicTerm(prisma, division)
+      if (term) where.termId = term.id
     }
   }
   if (Object.keys(where).length === 0) {
@@ -81,8 +89,18 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '没有匹配到教师档案，请先在教师管理中创建至少一位在职教师' }, { status: 400 })
   }
 
+  const termId = await resolveLearningRecordTermId(prisma, {
+    division: getRequestDivision(user),
+    studentId,
+    classLessonId: classLessonId || null,
+  })
+  if (!termId) {
+    return NextResponse.json({ error: '该学员不在当前启用批次，或所选课次与学员不匹配' }, { status: 409 })
+  }
+
   const paper = await prisma.examPaper.create({
     data: {
+      termId,
       studentId,
       teacherId: teacher.id,
       classLessonId: classLessonId || null,

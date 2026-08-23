@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import {
   Alert,
@@ -21,7 +21,6 @@ import {
 import {
   CloudUploadOutlined,
   DeleteOutlined,
-  HistoryOutlined,
   ReloadOutlined,
   UndoOutlined,
   WarningOutlined,
@@ -56,7 +55,7 @@ function buildResetPhrase(division: string, selected: string[], cats: CleanupCat
   return `清空${scope}的${names}`
 }
 
-export default function BackupRestorePanel() {
+export default function BackupRestorePanel({ backupOnly = false }: { backupOnly?: boolean }) {
   const { message, modal } = App.useApp()
 
   // ---- Backup state ----
@@ -76,7 +75,7 @@ export default function BackupRestorePanel() {
 
   // ---- Reset state ----
   const { data: catData } = useSWR('/api/admin/data-admin/reset', fetcher)
-  const categories: CleanupCategory[] = catData?.data ?? []
+  const categories: CleanupCategory[] = useMemo(() => catData?.data ?? [], [catData?.data])
   const [selectedCats, setSelectedCats] = useState<string[]>([])
   const [resetPassword, setResetPassword] = useState('')
   const [resetDivision, setResetDivision] = useState<string>('BOTH')
@@ -104,7 +103,7 @@ export default function BackupRestorePanel() {
     } finally {
       setBacking(false)
     }
-  }, [refreshHistory])
+  }, [message, refreshHistory])
 
   const handleRestore = useCallback(async () => {
     if (!selectedBackup) {
@@ -146,7 +145,7 @@ export default function BackupRestorePanel() {
         }
       },
     })
-  }, [selectedBackup, restoreDivision, restorePassword, restoreConfirm])
+  }, [message, modal, selectedBackup, restoreDivision, restorePassword, restoreConfirm])
 
   const handleReset = useCallback(async () => {
     if (selectedCats.length === 0) {
@@ -197,7 +196,7 @@ export default function BackupRestorePanel() {
         }
       },
     })
-  }, [selectedCats, resetDivision, resetPassword, resetConfirm, expectedResetPhrase, categories])
+  }, [categories, message, modal, resetConfirm, resetDivision, resetPassword, selectedCats])
 
   const handlePresetAll = useCallback(() => {
     const presetKeys = categories.filter((c) => c.preset).map((c) => c.key)
@@ -251,6 +250,7 @@ export default function BackupRestorePanel() {
         </Space>
       </Card>
 
+      {!backupOnly && <>
       {/* ======== Restore Section ======== */}
       <Card
         title={<><UndoOutlined /> 数据恢复</>}
@@ -414,6 +414,7 @@ export default function BackupRestorePanel() {
           )}
         </Space>
       </Card>
+      </>}
     </div>
   )
 }

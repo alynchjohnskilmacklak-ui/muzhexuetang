@@ -15,10 +15,26 @@ function localDateKey(date: Date) {
 
 export const GET = apiHandler(async () => {
   const { teacher, prisma } = await requireCurrentTeacher()
+  const activeTerm = await prisma.academicTerm.findFirst({
+    where: { status: 'ACTIVE' },
+    orderBy: { startDate: 'desc' },
+    select: { id: true, name: true },
+  })
+
+  if (!activeTerm) {
+    return NextResponse.json({
+      groups: [],
+      lessons: [],
+      feedbackedTodayIds: [],
+      contextState: 'NO_ACTIVE_TERM',
+      contextMessage: '当前尚未进入运营批次，请联系管理员先在“运营批次”中选择当前工作区。',
+    })
+  }
 
   // Active groups for this teacher
   const groups = await prisma.classGroup.findMany({
     where: {
+      termId: activeTerm.id,
       status: { not: 'ARCHIVED' },
       OR: [
         { teacherId: teacher.id },
@@ -26,6 +42,7 @@ export const GET = apiHandler(async () => {
       ],
     },
     include: {
+      term: { select: { id: true, name: true } },
       course: { select: { id: true, name: true, subject: true, grade: true, type: true } },
       teacherAssignments: { where: { teacherId: teacher.id }, select: { subject: true }, take: 1 },
       enrollments: {
@@ -49,7 +66,10 @@ export const GET = apiHandler(async () => {
   const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000)
   const recentLessons = await prisma.classLesson.findMany({
     where: {
-      ...teacherLessonWhere(teacher.id),
+      AND: [
+        teacherLessonWhere(teacher.id),
+        { group: { termId: activeTerm.id } },
+      ],
       lessonDate: { gte: sevenDaysAgo },
       status: { not: 'CANCELLED' },
     },
@@ -129,6 +149,7 @@ export const GET = apiHandler(async () => {
     id: g.id,
     name: g.name,
     courseName: g.course?.name || '-',
+    termName: g.term?.name || activeTerm.name,
     courseType: g.course?.type || 'GROUP',
     intensiveMode: g.intensiveMode,
     teachingType: g.teachingType,
@@ -188,5 +209,11 @@ export const GET = apiHandler(async () => {
       : l.group?.enrollments?.map(e => e.studentId) || [],
   }))
 
-  return NextResponse.json({ groups: groupsOut, lessons: lessonsOut, feedbackedTodayIds })
+  return NextResponse.json({
+    groups: groupsOut,
+    lessons: lessonsOut,
+    feedbackedTodayIds,
+    contextState: 'READY',
+    activeTerm,
+  })
 })

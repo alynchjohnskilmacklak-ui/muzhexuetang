@@ -5,9 +5,10 @@ set -eu
 
 APP_NAME="${APP_NAME:-edu-manage}"
 TAR_FILE="${1:-/tmp/edu-manage.tar}"
-PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 BUILD_LOG="${PROJECT_DIR}/build.log"
 UPLOAD_BACKUP_DIR="/tmp/edu-manage-uploads-backup"
+PERSISTENT_ASSET_BACKUP_DIR="/tmp/edu-manage-persistent-assets-backup"
 PORT="${PORT:-3000}"
 
 cd "$PROJECT_DIR"
@@ -28,6 +29,15 @@ rm -rf "$UPLOAD_BACKUP_DIR"
 mkdir -p "$UPLOAD_BACKUP_DIR"
 cp -r public/uploads "$UPLOAD_BACKUP_DIR/" 2>/dev/null || true
 
+echo "[deploy] backup server-managed business assets"
+rm -rf "$PERSISTENT_ASSET_BACKUP_DIR"
+mkdir -p "$PERSISTENT_ASSET_BACKUP_DIR"
+for asset_dir in services marketing business-assets; do
+  if [ -d "public/$asset_dir" ]; then
+    cp -a "public/$asset_dir" "$PERSISTENT_ASSET_BACKUP_DIR/"
+  fi
+done
+
 echo "[deploy] stop current PM2 process"
 pm2 delete "$APP_NAME" 2>/dev/null || true
 
@@ -46,6 +56,13 @@ cp /tmp/edu-manage.env.bak .env 2>/dev/null || true
 echo "[deploy] restore public/uploads"
 mkdir -p public
 cp -r "$UPLOAD_BACKUP_DIR/uploads" public/ 2>/dev/null || true
+
+echo "[deploy] restore server-managed business assets"
+for asset_dir in services marketing business-assets; do
+  if [ -d "$PERSISTENT_ASSET_BACKUP_DIR/$asset_dir" ]; then
+    cp -a "$PERSISTENT_ASSET_BACKUP_DIR/$asset_dir" public/
+  fi
+done
 
 echo "[deploy] install dependencies"
 npm install

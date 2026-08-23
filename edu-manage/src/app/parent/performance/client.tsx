@@ -1,10 +1,9 @@
 ﻿'use client'
 
-import Image from 'next/image'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import useSWR from 'swr'
 import { Avatar, Button, Card, Empty, Image as AntImage, Input, Rate, Space, Tag } from 'antd'
-import { HeartFilled, HeartOutlined, MessageOutlined, StarOutlined, UserOutlined } from '@ant-design/icons'
+import { HeartFilled, HeartOutlined, MessageOutlined, UserOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { MOOD_META, PERFORMANCE_BADGES, RATING_LABELS } from '@/lib/mood-meta'
 import { normalizeUploadUrl } from '@/lib/upload-url'

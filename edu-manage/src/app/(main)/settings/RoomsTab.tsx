@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Table, Button, Modal, Form, Input, InputNumber, Select, Space, Popconfirm, message } from 'antd'
+import { Card, Table, Button, Modal, Form, Input, InputNumber, Space, Popconfirm, message } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 

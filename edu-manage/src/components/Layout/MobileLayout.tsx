@@ -5,7 +5,7 @@ import { Avatar, Badge, Drawer, Dropdown } from 'antd'
 import { CloseOutlined, DownOutlined, LogoutOutlined, MenuOutlined, RightOutlined, UserOutlined } from '@ant-design/icons'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 
 const TAB_BAR_HEIGHT = 60
@@ -29,20 +29,21 @@ export function MobileLayout({
   moreItems,
   showBottomTabs,
   drawerHeaderExtra,
+  menuLabel = '功能菜单',
 }: {
   children: React.ReactNode
   navItems: MobileNavItem[]
-  title?: string
+  title?: React.ReactNode
   mode?: MobileLayoutMode
   bottomTabs?: MobileNavItem[]
   moreItems?: MobileNavItem[]
   showBottomTabs?: boolean
   drawerHeaderExtra?: React.ReactNode
+  menuLabel?: string
 }) {
   const [open, setOpen] = useState(false)
   const { data: session } = useSession()
   const pathname = usePathname()
-  const router = useRouter()
 
   const hasBottomTabs = showBottomTabs ?? mode === 'tabs'
   const drawerItems = mode === 'tabs' ? (moreItems || navItems) : navItems
@@ -67,15 +68,6 @@ export function MobileLayout({
     drawerItems.filter(item => item.children?.some(child => isActive(child.key))).map(item => item.key),
   )
 
-  const navigate = (key: string) => {
-    if (key === '__more') {
-      setOpen(true)
-      return
-    }
-    router.push(key)
-    setOpen(false)
-  }
-
   return (
     <div id="mobile-root" style={{ minHeight: '100dvh', backgroundColor: '#faf8f5', maxWidth: '100vw', overflowX: 'hidden' }}>
       {/* ---- Top Header ---- */}
@@ -87,32 +79,43 @@ export function MobileLayout({
         backgroundColor: '#ffffff',
         borderBottom: '1px solid rgba(0,0,0,.06)',
       }}>
-        <div style={{
-          height: 52,
-          display: 'flex',
+        <div className="mobile-app-header__bar" style={{
+          height: 56,
+          display: 'grid',
+          gridTemplateColumns: '104px minmax(0, 1fr) 104px',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 16px',
+          gap: 6,
+          padding: '0 12px',
           maxWidth: '100vw',
         }}>
           <button
             type="button"
-            aria-label="打开导航菜单"
+            aria-label={`打开${menuLabel}`}
+            aria-expanded={open}
             onClick={() => setOpen(true)}
+            className="mobile-menu-trigger"
             style={{
-              width: 40,
-              height: 40,
+              width: 'fit-content',
+              minWidth: 84,
+              height: 44,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: 'none',
-              border: 0,
+              gap: 7,
+              padding: '0 10px',
+              background: 'var(--color-primary-bg)',
+              border: '1px solid rgba(232,120,74,.18)',
               borderRadius: 10,
               cursor: 'pointer',
-              color: '#5a4e3a',
+              color: 'var(--color-primary-focus)',
+              fontSize: 13,
+              fontWeight: 700,
+              whiteSpace: 'nowrap',
+              justifySelf: 'start',
             }}
           >
-            <MenuOutlined style={{ fontSize: 20 }} />
+            <MenuOutlined style={{ fontSize: 18 }} />
+            <span>{menuLabel}</span>
           </button>
 
           <span style={{
@@ -131,17 +134,21 @@ export function MobileLayout({
           </span>
 
           <Dropdown menu={userMenu} placement="bottomRight" trigger={['click']}>
-            <div style={{
+            <button type="button" aria-label="打开用户菜单" style={{
               display: 'flex',
               alignItems: 'center',
               gap: 6,
               cursor: 'pointer',
-              minWidth: 0,
               padding: '2px 6px',
+              minHeight: 44,
+              minWidth: 44,
               borderRadius: 20,
+              border: 0,
+              background: 'transparent',
+              justifySelf: 'end',
             }}>
               <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: '#E8784A', flexShrink: 0 }} />
-            </div>
+            </button>
           </Dropdown>
         </div>
       </header>
@@ -175,7 +182,7 @@ export function MobileLayout({
           backgroundColor: '#faf8f5',
         }}>
           <span style={{ fontSize: 17, fontWeight: 700, color: '#E8784A' }}>
-            {mode === 'tabs' ? '更多功能' : '牧哲学堂'}
+            {mode === 'tabs' ? '更多功能' : `${menuLabel}导航`}
           </span>
           <button
             type="button"
@@ -364,7 +371,7 @@ export function MobileLayout({
       <main
         className="mobile-page-content"
         style={{
-          paddingTop: 'calc(52px + env(safe-area-inset-top, 0px) + 2px)',
+          paddingTop: 'calc(56px + env(safe-area-inset-top, 0px) + 2px)',
           paddingBottom: hasBottomTabs
             ? `calc(${TAB_BAR_HEIGHT + 26}px + max(env(safe-area-inset-bottom, 0px), 8px))`
             : 'calc(24px + max(env(safe-area-inset-bottom, 0px), 8px))',

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import NextImage from 'next/image'
 import { useSession } from 'next-auth/react'
 import { Avatar, Input, Spin, Tooltip, message } from 'antd'
 import {
@@ -160,9 +161,10 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
   const [hydratedStorageKey, setHydratedStorageKey] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const handledQuickAskRef = useRef<string | null>(null)
   const userId = session?.user?.id || ''
   const storageKey = userId ? `muzhe_ai_conversations_${userId}_${aiRole}` : ''
-  const messages = conversations[modelId] || []
+  const messages = useMemo(() => conversations[modelId] || [], [conversations, modelId])
   const currentModel = MODEL_CONFIG.find((model) => model.id === modelId) || MODEL_CONFIG[0]
 
   const updateConversation = useCallback((targetModelId: ModelId, updater: (prev: Message[]) => Message[]) => {
@@ -196,13 +198,6 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
-
-  useEffect(() => {
-    if (quickAsk) {
-      void sendMessage(quickAsk)
-      onQuickAskHandled?.()
-    }
-  }, [quickAsk])
 
   const handleFile = useCallback(async (file: File) => {
     const ext = file.name.split('.').pop()?.toLowerCase() || ''
@@ -259,7 +254,7 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
     }
   }, [])
 
-  const sendMessage = async (text?: string, options?: { targetModelId?: ModelId; skipUserMessage?: boolean }) => {
+  const sendMessage = useCallback(async (text?: string, options?: { targetModelId?: ModelId; skipUserMessage?: boolean }) => {
     const activeModelId = options?.targetModelId || modelId
     const activeMessages = conversations[activeModelId] || []
     const selectedModel = MODEL_CONFIG.find((model) => model.id === activeModelId) || MODEL_CONFIG[0]
@@ -408,7 +403,14 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
     } finally {
       setLoading(false)
     }
-  }
+  }, [aiRole, attachment, conversations, input, loading, modelId, updateConversation])
+
+  useEffect(() => {
+    if (!quickAsk || handledQuickAskRef.current === quickAsk) return
+    handledQuickAskRef.current = quickAsk
+    void sendMessage(quickAsk)
+    onQuickAskHandled?.()
+  }, [onQuickAskHandled, quickAsk, sendMessage])
 
   const modelMessageCounts = useMemo(() => ({
     deepseek: conversations.deepseek.length,
@@ -630,9 +632,12 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
               )}
 
               {item.imagePreview && (
-                <img
+                <NextImage
                   src={item.imagePreview}
                   alt="上传图片"
+                  width={400}
+                  height={300}
+                  unoptimized
                   style={{
                     maxWidth: '100%',
                     maxHeight: 200,
@@ -774,7 +779,7 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
             gap: 10,
           }}>
             {attachment.type === 'image' && attachment.preview ? (
-              <img src={attachment.preview} alt="" style={{ height: 48, width: 48, objectFit: 'cover', borderRadius: 6 }} />
+              <NextImage src={attachment.preview} alt="" width={48} height={48} unoptimized style={{ objectFit: 'cover', borderRadius: 6 }} />
             ) : (
               <div style={{
                 width: 48,

@@ -5,6 +5,8 @@ import { activeEnrollmentWhere, visibleClassGroupWhere } from '@/lib/business-vi
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { getLocalDayRange } from '@/lib/date/local-day'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +24,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const courseType = searchParams.get('courseType')
   const intensiveMode = searchParams.get('intensiveMode')
   const division = getRequestDivision(user, searchParams.get('division'))
+  const selectedTerm = user.role === 'admin'
+    ? await resolveAdminTermScope(prisma, division, req)
+    : await getActiveAcademicTerm(prisma, division)
 
   const where: Record<string, unknown> = { status: { not: 'CANCELLED' }, division }
 
@@ -34,7 +39,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (groupId) where.groupId = groupId
 
   // Role-based access: teacher sees only own lessons, parent sees only children's
-  const groupWhere: Record<string, unknown> = { ...visibleClassGroupWhere }
+  const groupWhere: Record<string, unknown> = {
+    ...visibleClassGroupWhere,
+    termId: selectedTerm?.id || '__NO_SELECTED_TERM__',
+  }
 
   if (user.role === 'teacher') {
     if (!user.teacherId) return NextResponse.json({ error: '未绑定教师档案' }, { status: 403 })

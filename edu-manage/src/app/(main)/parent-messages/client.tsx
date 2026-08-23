@@ -174,7 +174,7 @@ export function AdminMessagesClient() {
     fetcher,
     { refreshInterval: 5_000, revalidateOnFocus: true, revalidateOnReconnect: true },
   )
-  const allMessages: Message[] = data?.messages || []
+  const allMessages = useMemo<Message[]>(() => data?.messages || [], [data])
 
   const teacherOptions = useMemo(() => {
     const map = new Map<string, string>()

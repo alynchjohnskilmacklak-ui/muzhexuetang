@@ -14,7 +14,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
   if (!session?.user || !['admin', 'teacher'].includes(role || '')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
-  const prisma = await getRequestPrisma()
+  let prisma = await getRequestPrisma()
 
   const reportDate = startOfLocalDay(request.nextUrl.searchParams.get('date') || new Date())
   if (!reportDate) return NextResponse.json({ error: 'Invalid date' }, { status: 400 })
@@ -25,16 +25,93 @@ export const GET = apiHandler(async (request: NextRequest) => {
   let teacherId: string | undefined
   if (role === 'teacher') {
     const current = await requireCurrentTeacher()
-    const prisma = current.prisma
+    prisma = current.prisma
     teacherId = current.teacher.id
   }
 
-  const reports = await prisma.mealReport.findMany({
-    where: { reportDate: { gte: reportDate, lt: nextDate }, ...(teacherId ? { teacherId } : {}), ...divisionFilter },
-    include: { teacher: { select: { id: true, name: true } }, menu: true },
-    orderBy: { submittedAt: 'desc' },
+  const [legacyReports, attendanceMeals] = await Promise.all([
+    prisma.mealReport.findMany({
+      where: { reportDate: { gte: reportDate, lt: nextDate }, ...(teacherId ? { teacherId } : {}), ...divisionFilter },
+      include: { teacher: { select: { id: true, name: true } }, menu: true },
+      orderBy: { submittedAt: 'desc' },
+    }),
+    prisma.studentMealAttendance.findMany({
+      where: {
+        mealDate: { gte: reportDate, lt: nextDate },
+        division,
+        ...(teacherId
+          ? { teacherId }
+          : {
+              OR: [
+                { teacherId: { not: null } },
+                { source: 'AUTO' },
+                { lessonId: { not: null } },
+              ],
+            }),
+      },
+      include: {
+        student: { select: { id: true, name: true } },
+        recorder: { select: { id: true, name: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+    }),
+  ])
+
+  const groupedAttendance = new Map<string, typeof attendanceMeals>()
+  for (const record of attendanceMeals) {
+    const key = record.lessonId || record.groupId || `${record.teacherId}:${record.groupName || '未标注班级'}`
+    groupedAttendance.set(key, [...(groupedAttendance.get(key) || []), record])
+  }
+
+  const attendanceReports = [...groupedAttendance.entries()].map(([key, records]) => {
+    const first = records[0]
+    const details = records
+      .filter((record) => record.eating)
+      .map((record) => ({
+        studentId: record.student.id,
+        studentName: record.student.name,
+        portion: 'single' as const,
+        groupName: record.groupName || '未标注班级',
+      }))
+    const submittedAt = records.reduce(
+      (latest, record) => record.updatedAt > latest ? record.updatedAt : latest,
+      first.updatedAt,
+    )
+    return {
+      id: `attendance:${key}`,
+      teacherId: first.teacherId,
+      reportDate,
+      submittedAt,
+      totalCount: details.length,
+      riceSingle: details.length,
+      riceDouble: 0,
+      noodleCount: 0,
+      notes: '首节课考勤同步上报',
+      details,
+      division,
+      menuId: null,
+      menu: null,
+      teacher: {
+        id: first.teacherId || first.recorder.id,
+        name: first.teacherName || first.recorder.name || '教师',
+      },
+    }
   })
-  return NextResponse.json({ reports })
+
+  const reports = [
+    ...attendanceReports,
+    ...legacyReports.map((report) => ({
+      ...report,
+      details: parseMealDetails(report.details).map((detail) => ({
+        ...detail,
+        groupName: detail.groupName || `${report.teacher.name}上报`,
+      })),
+    })),
+  ].sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+
+  return NextResponse.json({ reports, refreshedAt: new Date().toISOString() }, {
+    headers: { 'Cache-Control': 'no-store, max-age=0' },
+  })
 })
 
 export async function POST(request: NextRequest) {

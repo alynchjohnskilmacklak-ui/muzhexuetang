@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
-export const GET = apiHandler(async () => {
+export const GET = apiHandler(async (request: NextRequest) => {
   const user = await getCurrentUser()
   if (!user || (user.role !== 'admin' && user.role !== 'teacher')) {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
@@ -13,8 +16,11 @@ export const GET = apiHandler(async () => {
 
 
   const prisma = await getRequestPrisma()
-  const now = new Date()
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  const division = getRequestDivision(user, request.nextUrl.searchParams.get('division'))
+  const term = user.role === 'admin'
+    ? await resolveAdminTermScope(prisma, division, request)
+    : await getActiveAcademicTerm(prisma, division)
+  const termId = term?.id || '__NO_TERM__'
 
   const [
     totalPapers,
@@ -26,15 +32,16 @@ export const GET = apiHandler(async () => {
     subjectBreakdown,
     weakTopics,
   ] = await Promise.all([
-    prisma.examPaper.count({ where: { status: { not: 'DELETED' } } }),
-    prisma.examPaper.count({ where: { status: 'PUBLISHED' } }),
-    prisma.paperQuestion.count(),
-    prisma.paperQuestion.count({ where: { mastery: 'MASTERED' } }),
-    prisma.paperQuestion.count({ where: { mastery: 'NEEDS_PRACTICE' } }),
-    prisma.examPaper.count({ where: { status: 'PUBLISHED', isReadByParent: true } }),
-    prisma.examPaper.groupBy({ by: ['subject'], where: { status: 'PUBLISHED' }, _count: { id: true } }),
+    prisma.examPaper.count({ where: { termId, status: { not: 'DELETED' } } }),
+    prisma.examPaper.count({ where: { termId, status: 'PUBLISHED' } }),
+    prisma.paperQuestion.count({ where: { paper: { termId } } }),
+    prisma.paperQuestion.count({ where: { mastery: 'MASTERED', paper: { termId } } }),
+    prisma.paperQuestion.count({ where: { mastery: 'NEEDS_PRACTICE', paper: { termId } } }),
+    prisma.examPaper.count({ where: { termId, status: 'PUBLISHED', isReadByParent: true } }),
+    prisma.examPaper.groupBy({ by: ['subject'], where: { termId, status: 'PUBLISHED' }, _count: { id: true } }),
     prisma.weaknessRecord.groupBy({
       by: ['topic'],
+      where: { paper: { termId } },
       _count: { topic: true },
       orderBy: { _count: { topic: 'desc' } },
       take: 10,

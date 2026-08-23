@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Card, Empty, Input, Modal, Select, Space, Spin, Typography, message } from 'antd'
+import { Button, Card, Input, Modal, Select, Space, Spin, Typography, message } from 'antd'
 import { ImportOutlined, PlusOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons'
 import { StudentCard } from './_components/StudentCard'
 import { StudentForm } from './_components/StudentForm'
@@ -10,6 +10,10 @@ import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
 import { hasLowPrepaidHours } from '@/lib/student-billing-status'
+import useSWR, { useSWRConfig } from 'swr'
+import { useRouter } from 'next/navigation'
+import { isAdminTermScopedSWRKey } from '@/lib/admin-term-scope-client'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 
 const { Text } = Typography
 
@@ -35,6 +39,7 @@ const TYPE_FILTERS = [
   { value: 'ONE_ON_TWO', label: '一对二', color: '#185FA5' },
   { value: 'ONE_ON_THREE', label: '一对三', color: '#D4537E' },
   { value: 'GROUP', label: '班课', color: '#E8784A' },
+  { value: 'STUDY_HALL', label: '作业班', color: '#A63F18' },
 ]
 
 type Student = {
@@ -62,12 +67,32 @@ type Student = {
       course?: { name?: string | null; type?: string | null } | null
     } | null
   }>
+  studyHallMemberships?: Array<{
+    id: string
+    remainingDays: number | null
+    totalDays: number | null
+    quotaState: 'UNSET' | 'ACTIVE' | 'LOW' | 'EXPIRED'
+    studyClass: { name: string; scheduleType: 'WEEKDAY_LATE' | 'WEEKEND' }
+  }>
   mainTeacher?: { id: string; name: string } | null
   schedules?: Array<{ schedule: { course?: { id: string; name: string } | null } }>
 }
 
 type GroupedStudents = Record<string, Student[]>
 type StudentSortBy = 'createdAt' | 'nameAsc' | 'nameDesc' | 'remainHoursAsc' | 'remainHoursDesc'
+type AcademicTerm = {
+  id: string
+  name: string
+  status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED'
+  startDate: string
+  endDate: string
+}
+
+const termFetcher = (url: string) => fetch(url).then(async (response) => {
+  const payload = await response.json()
+  if (!response.ok) throw new Error(payload.error || '运营批次加载失败')
+  return payload
+})
 
 function readQuery() {
   if (typeof window === 'undefined') return { grade: 'all', courseType: 'all', q: '', status: '', sortBy: 'createdAt' as StudentSortBy }
@@ -86,6 +111,8 @@ function readQuery() {
 }
 
 export default function StudentsPage() {
+  const router = useRouter()
+  const { mutate: mutateCache } = useSWRConfig()
   const isMobile = useIsMobile() ?? false
   const { division } = useDivision()
   const [grouped, setGrouped] = useState<GroupedStudents>({})
@@ -97,6 +124,9 @@ export default function StudentsPage() {
   const [filterStatus, setFilterStatus] = useState<string | undefined>()
   const [lowHourOnly, setLowHourOnly] = useState(false)
   const [sortBy, setSortBy] = useState<StudentSortBy>('createdAt')
+  const { data: termData, mutate: mutateTerms } = useSWR<{ terms: AcademicTerm[]; selectedTermId?: string | null }>('/api/admin/academic-terms', termFetcher)
+  const terms = useMemo(() => termData?.terms || [], [termData?.terms])
+  const [selectedTermId, setSelectedTermId] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [editData, setEditData] = useState<Record<string, unknown> | null>(null)
   const [importOpen, setImportOpen] = useState(false)
@@ -110,6 +140,20 @@ export default function StudentsPage() {
     setFilterStatus(query.status || undefined)
     setSortBy(query.sortBy)
   }, [])
+
+  useEffect(() => {
+    if (terms.length === 0) return
+    const queryTermId = typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('termId') || ''
+    const selected = terms.find((term) => term.id === queryTermId)
+      || terms.find((term) => term.id === termData?.selectedTermId)
+      || terms.find((term) => term.status === 'ACTIVE')
+      || terms[0]
+    const nextTermId = selected?.id || ''
+    setSelectedTermId((current) => current === nextTermId ? current : nextTermId)
+  }, [termData?.selectedTermId, terms])
+
+  const selectedTerm = useMemo(() => terms.find((term) => term.id === selectedTermId), [selectedTermId, terms])
+  const canEditCurrentTerm = selectedTerm?.status === 'ACTIVE'
 
   const allStudents = useMemo(() => Object.values(grouped).flat(), [grouped])
   const activeCount = allStudents.filter((student) => student.status === 'ACTIVE').length
@@ -154,10 +198,11 @@ export default function StudentsPage() {
     if (search) params.set('q', search)
     if (lowHourOnly) params.set('lowHours', '1')
     params.set('sortBy', sortBy)
+    if (selectedTermId) params.set('termId', selectedTermId)
     try {
       const [studentRes, countRes] = await Promise.all([
         fetch(`/api/students?${params}`),
-        fetch('/api/students/grade-counts'),
+        fetch(`/api/students/grade-counts?division=${encodeURIComponent(division)}&termId=${encodeURIComponent(selectedTermId)}`),
       ])
       const studentPayload = await studentRes.json()
       const countPayload = await countRes.json()
@@ -168,7 +213,7 @@ export default function StudentsPage() {
     } finally {
       setLoading(false)
     }
-  }, [division, filterGrade, filterStatus, filterType, lowHourOnly, search, sortBy])
+  }, [division, filterGrade, filterStatus, filterType, lowHourOnly, search, selectedTermId, sortBy])
 
   useEffect(() => { fetchStudents() }, [fetchStudents])
 
@@ -276,12 +321,12 @@ export default function StudentsPage() {
   )
 
   return (
-    <PageLayout title="学员管理" subtitle="按年级、课程类型和课时风险快速定位学员">
+    <PageLayout title="学员管理" subtitle={selectedTerm ? `${selectedTerm.name}学员名单${selectedTerm.status === 'ARCHIVED' ? '（历史归档，只读查看）' : ''}` : '请选择运营批次'}>
       <div style={{ display: 'flex', background: '#fffdfb', border: '1px solid #EEE7E1', borderRadius: 8, overflow: 'hidden' }}>
         {!isMobile && sidebar}
         <main style={{ flex: 1, minWidth: 0, padding: isMobile ? 12 : 16 }}>
           <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 10, width: '100%', marginBottom: 16, justifyContent: 'space-between' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : '320px 132px 132px 152px', gap: 8, flex: 1, width: '100%' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : '260px 126px 132px 132px 152px', gap: 8, flex: 1, width: '100%' }}>
               <Input
                 placeholder="搜索姓名、手机、家长"
                 prefix={<SearchOutlined style={{ color: '#98A2B3' }} />}
@@ -289,6 +334,38 @@ export default function StudentsPage() {
                 onChange={(event) => handleSearchChange(event.target.value)}
                 style={{ width: '100%', gridColumn: isMobile ? '1 / -1' : undefined }}
                 allowClear
+              />
+              <Select
+                aria-label="运营批次"
+                value={selectedTermId || undefined}
+                placeholder="选择运营批次"
+                onChange={async (value: string) => {
+                  const response = await fetch('/api/admin/academic-terms/scope', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ termId: value }),
+                  })
+                  const payload = await response.json().catch(() => ({}))
+                  if (!response.ok) { message.error(payload.error || '切换运营批次失败'); return }
+                  const persistedTermId = payload.term?.id || value
+                  setSelectedTermId(persistedTermId)
+                  await mutateTerms((current) => current ? {
+                    ...current,
+                    selectedTermId: persistedTermId,
+                  } : current, { revalidate: false })
+                  await mutateCache(isAdminTermScopedSWRKey, undefined, { revalidate: false })
+                  const params = new URLSearchParams(window.location.search)
+                  params.delete('termId')
+                  window.history.replaceState(null, '', `${window.location.pathname}${params.toString() ? `?${params}` : ''}`)
+                  await mutateTerms()
+                  router.refresh()
+                  message.success(`已切换到“${payload.term?.name || '所选批次'}”`)
+                }}
+                style={{ width: '100%' }}
+                options={terms.map((term) => ({
+                  label: `${term.name}${term.status === 'ACTIVE' ? '（当前）' : term.status === 'ARCHIVED' ? '（已归档）' : '（未启用）'}`,
+                  value: term.id,
+                }))}
+                getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                virtual={false}
               />
               {isMobile ? <select
                 aria-label="学员状态"
@@ -349,8 +426,8 @@ export default function StudentsPage() {
               />}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.35fr)', gap: 8, width: isMobile ? '100%' : 'auto' }}>
-              <Button block={isMobile} icon={<ImportOutlined />} onClick={() => setImportOpen(true)}>导入</Button>
-              <Button block={isMobile} type="primary" icon={<PlusOutlined />} onClick={() => { setEditData(null); setFormOpen(true) }} style={{ background: '#E87545', borderColor: '#E8784A' }}>添加学员</Button>
+              <Button block={isMobile} icon={<ImportOutlined />} disabled={!canEditCurrentTerm} onClick={() => setImportOpen(true)}>导入</Button>
+              <Button block={isMobile} type="primary" icon={<PlusOutlined />} disabled={!canEditCurrentTerm} onClick={() => { setEditData(null); setFormOpen(true) }} style={{ background: '#E87545', borderColor: '#E8784A' }}>添加学员</Button>
             </div>
           </div>
 
@@ -358,7 +435,13 @@ export default function StudentsPage() {
             <div style={{ textAlign: 'center', padding: 80 }}><Spin size="large" /></div>
           ) : groupedEntries.length === 0 ? (
             <Card bordered={false} style={{ borderRadius: 8, textAlign: 'center', padding: 60, background: '#ffffff', border: '1px solid #EEE7E1' }}>
-              <Empty description="暂无学员数据"><Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>添加第一位学员</Button></Empty>
+              <GuidedEmpty
+                title={selectedTerm?.status === 'ARCHIVED' ? '这个历史批次没有学员记录' : (search || filterGrade !== 'all' || filterType !== 'all' || filterStatus || lowHourOnly) ? '没有符合条件的学员' : '还没有学员'}
+                description={selectedTerm?.status === 'ARCHIVED' ? '历史批次只用于查看，学员加入和课程安排请切换到当前运营批次。' : (search || filterGrade !== 'all' || filterType !== 'all' || filterStatus || lowHourOnly) ? '可以清除搜索和筛选条件，查看当前运营批次的全部学员。' : '添加学员后可以继续绑定课程、作业班和家长账号，建立完整学习档案。'}
+                actionLabel={selectedTerm?.status === 'ARCHIVED' ? undefined : (search || filterGrade !== 'all' || filterType !== 'all' || filterStatus || lowHourOnly) ? '清除筛选' : canEditCurrentTerm ? '添加第一位学员' : undefined}
+                actionIcon={!(search || filterGrade !== 'all' || filterType !== 'all' || filterStatus || lowHourOnly) ? <PlusOutlined /> : undefined}
+                onAction={selectedTerm?.status === 'ARCHIVED' ? undefined : (search || filterGrade !== 'all' || filterType !== 'all' || filterStatus || lowHourOnly) ? () => { setSearch(''); setFilterGrade('all'); setFilterType('all'); setFilterStatus(undefined); setLowHourOnly(false); router.replace('/students') } : canEditCurrentTerm ? () => setFormOpen(true) : undefined}
+              />
             </Card>
           ) : (
             <Space direction="vertical" size={18} style={{ width: '100%' }}>

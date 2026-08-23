@@ -302,6 +302,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ user, initialPassword: plainPassword }, { status: 201 })
   }
 
+  // 创建管理员属于提权操作，仅最高权益管理员可执行。
+  if (!isSuperAdminEmail(currentUser.email)) {
+    return NextResponse.json({ error: '仅最高权益管理员可创建管理员账号' }, { status: 403 })
+  }
+
   const email = normalizeEmail(body.email)
   if (!name) return NextResponse.json({ error: '姓名不能为空' }, { status: 400 })
   if (!emailPattern.test(email)) return NextResponse.json({ error: '邮箱格式不正确' }, { status: 400 })
@@ -319,6 +324,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         name,
         role: 'admin',
         status: 'active',
+        division: currentUser.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR',
       },
       select: { id: true, email: true, name: true, role: true, status: true },
     })

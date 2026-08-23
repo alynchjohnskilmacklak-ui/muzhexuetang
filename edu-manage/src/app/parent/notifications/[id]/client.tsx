@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { Alert, Button, Card, Descriptions, Tag, Typography } from 'antd'
+import NextImage from 'next/image'
 import { ArrowLeftOutlined, BookOutlined, StarOutlined, FileTextOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { fmtDateTime } from '@/lib/format-date'
@@ -23,14 +24,27 @@ const TYPE_LABELS: Record<string, string> = {
   PAPER_PUBLISHED: '试卷通知',
   EXAM_PAPER: '试卷通知',
   ATTENDANCE: '考勤通知',
+  STUDY_HALL_HOMEWORK: '作业班通知',
   SYSTEM: '系统通知',
+}
+type NotificationDetail = { type: string; title: string; content?: string | null; createdAt: string; readAt?: string | null; relatedType?: string | null; relatedId?: string | null; href?: string | null }
+type RelatedNotificationData = {
+  teacher?: { name?: string } | null
+  student?: { name?: string } | null
+  classLesson?: { group?: { course?: { name?: string } | null } | null } | null
+  content?: string | null
+  summary?: string | null
+  subject?: string | null
+  mood?: string | null
+  knowledgePoints: string[]
+  imageUrls: string[]
 }
 
 export function NotificationDetailClient({
   notification, relatedData,
 }: {
-  notification: any
-  relatedData: any
+  notification: NotificationDetail
+  relatedData: RelatedNotificationData | null
 }) {
   const router = useRouter()
   const typeLabel = TYPE_LABELS[notification.type] || notification.type || '通知'
@@ -130,7 +144,7 @@ export function NotificationDetailClient({
                 {relatedData.imageUrls?.length > 0 && (
                   <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
                     {relatedData.imageUrls.map((url: string, i: number) => (
-                      <img key={i} src={normalizeUploadUrl(url)} alt={`试卷 ${i + 1}`} style={{ width: 120, height: 160, objectFit: 'cover', borderRadius: 8, border: '1px solid #F0DDD2' }} />
+                      <NextImage key={i} src={normalizeUploadUrl(url)} alt={`试卷 ${i + 1}`} width={120} height={160} unoptimized style={{ objectFit: 'cover', borderRadius: 8, border: '1px solid #F0DDD2' }} />
                     ))}
                   </div>
                 )}
@@ -171,7 +185,7 @@ export function NotificationDetailClient({
             <Button
               type="primary"
               style={{ background: '#E8784A', borderColor: '#E8784A', borderRadius: 8 }}
-              onClick={() => router.push(notification.href)}
+              onClick={() => router.push(notification.href!)}
             >
               查看完整内容
             </Button>

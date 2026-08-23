@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import type { PrismaClient } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,15 +19,17 @@ interface FeeFilters {
   studentId?: string
   page?: number
   limit?: number
+  termId?: string
 }
 
 async function queryFees(
   db: PrismaClient,
   filters: FeeFilters,
 ) {
-  const { type, campus, from, to, studentId, page = 1, limit = 50 } = filters
+  const { type, campus, from, to, studentId, termId, page = 1, limit = 50 } = filters
   const where: Record<string, unknown> = {}
 
+  if (termId) where.termId = termId
   if (type) where.type = type
   if (campus) where.campus = campus
   if (studentId) where.studentId = studentId
@@ -125,8 +128,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
   const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)))
 
-  const filters: FeeFilters = { division, type, campus, from, to, studentId, page, limit }
-
   // Student aggregate mode
   if (studentId && searchParams.get('aggregate') === 'true') {
     const db = division === 'SENIOR'
@@ -135,8 +136,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
         ? getPrismaForDivision('JUNIOR')
         : await getRequestPrisma()
 
+    const scopedDivision = division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+    const selectedTerm = await resolveAdminTermScope(db, scopedDivision, req)
     const allRows = await db.fee.findMany({
-      where: { studentId },
+      where: { studentId, termId: selectedTerm?.id || '__NO_SELECTED_TERM__' },
       include: { student: { select: { id: true, name: true, division: true } }, course: { select: { id: true, name: true } } },
       orderBy: { paidAt: 'desc' },
     })
@@ -155,9 +158,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
   }
 
   if (division === 'all' && isDualDbEnabled()) {
+    const [juniorTerm, seniorTerm] = await Promise.all([
+      resolveAdminTermScope(getPrismaForDivision('JUNIOR'), 'JUNIOR', req),
+      resolveAdminTermScope(getPrismaForDivision('SENIOR'), 'SENIOR', req),
+    ])
     const [junior, senior] = await Promise.all([
-      queryFees(getPrismaForDivision('JUNIOR'), filters),
-      queryFees(getPrismaForDivision('SENIOR'), filters),
+      queryFees(getPrismaForDivision('JUNIOR'), { division, type, campus, from, to, studentId, page, limit, termId: juniorTerm?.id || '__NO_SELECTED_TERM__' }),
+      queryFees(getPrismaForDivision('SENIOR'), { division, type, campus, from, to, studentId, page, limit, termId: seniorTerm?.id || '__NO_SELECTED_TERM__' }),
     ])
     return NextResponse.json(mergeDualResults(junior, senior, page, limit))
   }
@@ -166,7 +173,12 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ? getPrismaForDivision('SENIOR')
     : getPrismaForDivision('JUNIOR')
 
-  const result = await queryFees(db, filters)
+  const scopedDivision = division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+  const selectedTerm = await resolveAdminTermScope(db, scopedDivision, req)
+  const result = await queryFees(db, {
+    division, type, campus, from, to, studentId, page, limit,
+    termId: selectedTerm?.id || '__NO_SELECTED_TERM__',
+  })
   return NextResponse.json({ ...result, total: result.summary.count, page, limit })
 })
 
@@ -200,8 +212,21 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '学生学部与收费记录不一致' }, { status: 400 })
   }
 
+  const selectedTerm = await resolveAdminTermScope(db, requestedDivision, req)
+  if (!selectedTerm || selectedTerm.status !== 'ACTIVE') {
+    return NextResponse.json({ error: '请先进入一个已启用的运营批次再录入收费' }, { status: 409 })
+  }
+  const membership = await db.studentTermMembership.findFirst({
+    where: { termId: selectedTerm.id, studentId, status: 'ACTIVE' },
+    select: { id: true },
+  })
+  if (!membership) {
+    return NextResponse.json({ error: '该学员不属于当前运营批次，不能录入本期收费' }, { status: 409 })
+  }
+
   const fee = await db.fee.create({
     data: {
+      termId: selectedTerm.id,
       studentId,
       courseId: courseId || null,
       amount,

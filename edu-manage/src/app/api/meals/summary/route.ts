@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
-import { startOfLocalDay } from '@/lib/meals'
+import { parseMealDetails, startOfLocalDay } from '@/lib/meals'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 
@@ -24,11 +24,20 @@ export const GET = apiHandler(async (request: NextRequest) => {
   weekStart.setDate(reportDate.getDate() - (dayOfWeek - 1))
   const division = getRequestDivision(session.user as Record<string, unknown> | undefined, request.nextUrl.searchParams.get('division'))
   const divisionFilter = { division }
-  const [reports, activeTeachers, parentChoices, totalStudents] = await Promise.all([
+  const [reports, attendanceMeals, activeTeachers, parentChoices, totalStudents] = await Promise.all([
     prisma.mealReport.findMany({
       where: { reportDate: { gte: reportDate, lt: nextDate }, ...divisionFilter },
       include: { teacher: { select: { id: true, name: true } }, menu: true },
       orderBy: { submittedAt: 'desc' },
+    }),
+    prisma.studentMealAttendance.findMany({
+      where: { mealDate: { gte: reportDate, lt: nextDate }, ...divisionFilter },
+      select: {
+        studentId: true,
+        eating: true,
+        teacherId: true,
+        teacherName: true,
+      },
     }),
     prisma.teacher.findMany({
       where: { status: { not: 'RESIGNED' }, ...divisionFilter },
@@ -42,14 +51,35 @@ export const GET = apiHandler(async (request: NextRequest) => {
     prisma.student.count({ where: { status: { not: 'INACTIVE' }, ...divisionFilter } }),
   ])
 
-  const reportedIds = new Set(reports.map((report) => report.teacherId))
+  const reportedIds = new Set([
+    ...reports.map((report) => report.teacherId),
+    ...attendanceMeals.flatMap((record) => record.teacherId ? [record.teacherId] : []),
+  ])
+  const effectiveMeals = new Map<string, 'single' | 'double' | 'none'>()
+  for (const record of attendanceMeals) {
+    effectiveMeals.set(record.studentId, record.eating ? 'single' : 'none')
+  }
+  for (const report of reports) {
+    for (const detail of parseMealDetails(report.details)) {
+      if (!effectiveMeals.has(detail.studentId)) effectiveMeals.set(detail.studentId, detail.portion)
+    }
+  }
+  const effectivePortions = [...effectiveMeals.values()].filter((portion) => portion !== 'none')
+  const attendanceTeachers = new Map(
+    attendanceMeals.flatMap((record) => record.teacherId
+      ? [[record.teacherId, { id: record.teacherId, name: record.teacherName || '教师' }] as const]
+      : []),
+  )
   const parentEating = parentChoices.filter((choice) => choice.eating).length
   const parentNotEating = parentChoices.filter((choice) => !choice.eating).length
   return NextResponse.json({
-    totalCount: reports.reduce((sum, report) => sum + report.totalCount, 0),
-    singleCount: reports.reduce((sum, report) => sum + report.riceSingle, 0),
-    doubleCount: reports.reduce((sum, report) => sum + report.riceDouble, 0),
-    reportedTeachers: reports.map((report) => report.teacher),
+    totalCount: effectivePortions.length,
+    singleCount: effectivePortions.filter((portion) => portion === 'single').length,
+    doubleCount: effectivePortions.filter((portion) => portion === 'double').length,
+    reportedTeachers: [
+      ...attendanceTeachers.values(),
+      ...reports.filter((report) => !attendanceTeachers.has(report.teacherId)).map((report) => report.teacher),
+    ],
     unreportedTeachers: activeTeachers.filter((teacher) => !reportedIds.has(teacher.id)),
     details: reports,
     parentStats: {

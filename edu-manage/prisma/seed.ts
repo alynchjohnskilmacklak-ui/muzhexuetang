@@ -3,54 +3,71 @@ import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
+// 账号凭据一律从环境变量读取，绝不硬编码在源码中（仓库可能公开）。
+// 生产环境请勿设置这些变量，避免种入已知口令账号。
+async function seedAccount(opts: {
+  email?: string
+  password?: string
+  name: string
+  role: 'admin' | 'teacher'
+  division: string
+  teacherId?: string
+}) {
+  const email = opts.email?.trim().toLowerCase()
+  if (!email || !opts.password) {
+    console.warn(`[seed] 跳过「${opts.name}」账号：缺少对应环境变量`)
+    return
+  }
+  const hash = await bcrypt.hash(opts.password, 12)
+  await prisma.user.upsert({
+    where: { email },
+    update: { password: hash, name: opts.name, role: opts.role, status: 'active', division: opts.division },
+    create: { email, password: hash, name: opts.name, role: opts.role, status: 'active', division: opts.division },
+  })
+  if (opts.teacherId) {
+    await prisma.user.update({ where: { email }, data: { teacherId: opts.teacherId } })
+  }
+}
+
 async function main() {
-  // ── 管理员账号 ──────────────────────────────────────────────
-  // 超级管理员 — 可进入任意学部
-  const renHash = await bcrypt.hash('ren031213', 10)
-  await prisma.user.upsert({
-    where: { email: 'renwentao@nuc.com' },
-    update: { password: renHash, name: '任文涛', role: 'admin', status: 'active', division: 'ALL' },
-    create: { email: 'renwentao@nuc.com', password: renHash, name: '任文涛', role: 'admin', status: 'active', division: 'ALL' },
+  await seedAccount({
+    email: process.env.SEED_SUPER_ADMIN_EMAIL,
+    password: process.env.SEED_SUPER_ADMIN_PASSWORD,
+    name: '超级管理员',
+    role: 'admin',
+    division: 'ALL',
   })
 
-  // 初中部管理员
-  const maHash = await bcrypt.hash('mashaokun', 10)
-  await prisma.user.upsert({
-    where: { email: 'mashaokun@nuc.com' },
-    update: { password: maHash, name: '马少坤', role: 'admin', status: 'active', division: 'JUNIOR' },
-    create: { email: 'mashaokun@nuc.com', password: maHash, name: '马少坤', role: 'admin', status: 'active', division: 'JUNIOR' },
+  await seedAccount({
+    email: process.env.SEED_ADMIN_EMAIL,
+    password: process.env.SEED_ADMIN_PASSWORD,
+    name: '管理员',
+    role: 'admin',
+    division: 'JUNIOR',
   })
 
-  // ── 真实教师 ────────────────────────────────────────────────
-  const huHash = await bcrypt.hash('husitong', 10)
-  await prisma.user.upsert({
-    where: { email: 'husitong@tea.com' },
-    update: { password: huHash, name: '胡思同', role: 'teacher', status: 'active', division: 'JUNIOR' },
-    create: { email: 'husitong@tea.com', password: huHash, name: '胡思同', role: 'teacher', status: 'active', division: 'JUNIOR' },
-  })
-  const huTeacher = await prisma.teacher.upsert({
-    where: { id: 't6' },
-    update: { name: '胡思同', email: 'husitong@tea.com', phone: '13800001006', status: 'ACTIVE', division: 'JUNIOR' },
-    create: { id: 't6', name: '胡思同', gender: '男', phone: '13800001006', email: 'husitong@tea.com', subjects: '数学', bio: '8年数学教学经验', employmentType: 'FULL_TIME', education: '硕士', university: '南京大学', major: '应用数学', monthlyHours: 36, division: 'JUNIOR' },
-  })
-  await prisma.user.update({
-    where: { email: 'husitong@tea.com' },
-    data: { teacherId: huTeacher.id },
-  })
+  // 教师账号（可选）：需同时提供邮箱与密码。
+  const teacherEmail = process.env.SEED_TEACHER_EMAIL?.trim().toLowerCase()
+  const teacherPassword = process.env.SEED_TEACHER_PASSWORD
+  if (teacherEmail && teacherPassword) {
+    const teacherId = 't6'
+    await seedAccount({ email: teacherEmail, password: teacherPassword, name: '教师', role: 'teacher', division: 'JUNIOR', teacherId })
+    await prisma.teacher.upsert({
+      where: { id: teacherId },
+      update: { email: teacherEmail },
+      create: { id: teacherId, name: '教师', gender: '男', phone: '13800001006', email: teacherEmail, subjects: '数学', division: 'JUNIOR' },
+    })
+  } else {
+    console.warn('[seed] 跳过教师账号：缺少 SEED_TEACHER_EMAIL / SEED_TEACHER_PASSWORD')
+  }
 
-  // ── 收费类型 ──────────────────────────────────────────────
+  // ── 收费类型 ──
   const feeTypes = ['1对1', '班课', '资料费', '其他']
   for (let i = 0; i < feeTypes.length; i++) {
-    await prisma.feeType.upsert({
-      where: { name: feeTypes[i] },
-      update: { order: i },
-      create: { name: feeTypes[i], order: i }
-    })
+    await prisma.feeType.upsert({ where: { name: feeTypes[i] }, update: { order: i }, create: { name: feeTypes[i], order: i } })
   }
 
   console.log('Seed complete')
-  console.log('  超级管理员: renwentao@nuc.com / ren031213  (division=ALL)')
-  console.log('  管理员:     mashaokun@nuc.com  / mashaokun (division=JUNIOR)')
-  console.log('  教师:       husitong@tea.com   / husitong (division=JUNIOR)')
 }
-main().catch(e => { console.error(e); process.exit(1) }).finally(() => prisma.$disconnect())
+
+main().catch((e) => { console.error(e); process.exit(1) }).finally(() => prisma.$disconnect())

@@ -5,6 +5,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getRequestDivision } from '@/lib/division'
 import { IntensiveReviewError, reviewIntensiveLesson } from '@/lib/intensive-review'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +20,10 @@ export const POST = apiHandler(async (
     }
     const prisma = await getRequestPrisma()
     const division = getRequestDivision(user, request.nextUrl.searchParams.get('division'))
+    const selectedTerm = await resolveAdminTermScope(prisma, division, request)
+    if (!selectedTerm || selectedTerm.status !== 'ACTIVE') {
+      return NextResponse.json({ error: '历史批次只允许查看，不能审核或结算课程' }, { status: 409 })
+    }
     const { id } = await params
     const body = await request.json() as Record<string, unknown>
     const action = body.action === 'REJECT' ? 'REJECT' : body.action === 'APPROVE' ? 'APPROVE' : null
@@ -29,6 +34,7 @@ export const POST = apiHandler(async (
       prisma,
       reviewId: id,
       division,
+      termId: selectedTerm.id,
       reviewedById: user.id,
       action,
       reviewNote: typeof body.reviewNote === 'string' ? body.reviewNote : null,

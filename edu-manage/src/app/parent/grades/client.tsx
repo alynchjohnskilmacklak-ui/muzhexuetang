@@ -33,7 +33,19 @@ const SUBJECT_COLORS: Record<string, string> = {
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
-export default function ExamClient({ papers: initialPapers, feedbacks = [], parentId }: { papers: Paper[]; feedbacks?: any[]; parentId: string }) {
+type FeedbackHomework = string | { content?: string; title?: string }
+type GradeFeedback = {
+  id: string
+  createdAt: string
+  status: string
+  summary?: string | null
+  knowledgePoints: string[]
+  homework: FeedbackHomework[]
+  imageUrls: string[]
+  teacher?: { name?: string } | null
+}
+
+export default function ExamClient({ papers: initialPapers, feedbacks = [], parentId }: { papers: Paper[]; feedbacks?: GradeFeedback[]; parentId: string }) {
   const isMobile = useIsMobile() ?? false
   const { data } = useSWR('/api/exam-papers?mine=true', fetcher, {
     fallbackData: { papers: initialPapers },
@@ -174,7 +186,7 @@ export default function ExamClient({ papers: initialPapers, feedbacks = [], pare
                 {Array.isArray(item.homework) && item.homework.length > 0 && (
                   <div style={{ marginTop: 8 }}>
                     <Text strong>课后作业：</Text>
-                    {item.homework.map((hw: any, i: number) => <div key={i} style={{ fontSize: 13 }}>{i + 1}. {hw.content || hw.title || ''}</div>)}
+                    {item.homework.map((hw, i: number) => <div key={i} style={{ fontSize: 13 }}>{i + 1}. {typeof hw === 'string' ? hw : hw.content || hw.title || ''}</div>)}
                   </div>
                 )}
                 {item.imageUrls?.length > 0 && (

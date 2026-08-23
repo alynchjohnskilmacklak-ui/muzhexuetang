@@ -4,6 +4,8 @@ import { getCurrentUser } from '@/lib/get-user'
 import { activeEnrollmentWhere, attendanceEligibleLessonWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,16 +23,20 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const todayEnd = new Date(todayStart.getTime() + 86400000)
 
   const division = getRequestDivision(user, searchParams.get('division'))
+  const selectedTerm = user.role === 'admin'
+    ? await resolveAdminTermScope(prisma, division, req)
+    : await getActiveAcademicTerm(prisma, division)
   const where: Record<string, unknown> = {
     lessonDate: { gte: todayStart, lt: todayEnd },
     ...attendanceEligibleLessonWhere,
     ...(user.role === 'admin' ? { division } : {}),
+    group: { termId: selectedTerm?.id || '__NO_SELECTED_TERM__' },
   }
   if (teacherId) {
     where.OR = [
       { teacherId },
-      { teacherId: null, group: { teacherId } },
-      { teacherId: null, group: { teacherAssignments: { some: { teacherId } } } },
+      { teacherId: null, group: { termId: selectedTerm?.id || '__NO_SELECTED_TERM__', teacherId } },
+      { teacherId: null, group: { termId: selectedTerm?.id || '__NO_SELECTED_TERM__', teacherAssignments: { some: { teacherId } } } },
     ]
   }
 
@@ -64,6 +70,22 @@ export const GET = apiHandler(async (req: NextRequest) => {
     },
     orderBy: { startTime: 'asc' },
   })
+
+  const displayedStudentIds = [...new Set(lessons.flatMap((lesson) =>
+    lesson.group.intensiveMode === 'INTENSIVE'
+      ? lesson.lessonStudents.map((snapshot) => snapshot.studentId)
+      : lesson.group.enrollments
+          .filter((enrollment) => enrollment.status === 'ACTIVE' && enrollment.student.status !== 'INACTIVE')
+          .map((enrollment) => enrollment.studentId),
+  ))]
+  const mealDate = new Date(`${selectedDateKey(queryDate)}T00:00:00.000Z`)
+  const mealRecords = displayedStudentIds.length > 0
+    ? await prisma.studentMealAttendance.findMany({
+        where: { studentId: { in: displayedStudentIds }, mealDate },
+        select: { studentId: true },
+      })
+    : []
+  const eatingStudentIds = new Set(mealRecords.map((record) => record.studentId))
 
   const result = lessons.map((lesson) => {
     const displayEnrollments = lesson.group.intensiveMode === 'INTENSIVE'
@@ -100,6 +122,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       enrollmentId: e.id,
       remainHours: e.remainHours,
       status: lesson.attendances.find((a) => a.studentId === e.student.id)?.status || null,
+      eating: eatingStudentIds.has(e.student.id),
     })),
     attendanceCount: lesson.attendances.length,
     totalStudents: displayEnrollments.length,
@@ -107,3 +130,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   return NextResponse.json(result)
 })
+
+function selectedDateKey(value: Date) {
+  return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`
+}

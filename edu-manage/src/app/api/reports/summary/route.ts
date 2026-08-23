@@ -3,6 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,8 +52,11 @@ export const GET = apiHandler(async (request: NextRequest) => {
 
   const { from, to } = parseDateRange(request.nextUrl.searchParams)
   const division = getRequestDivision(user, request.nextUrl.searchParams.get('division'))
-  const studentWhere = { division }
-  const feeWhere = { division }
+  const selectedTerm = await resolveAdminTermScope(prisma, division, request)
+  const termId = selectedTerm?.id || '__NO_SELECTED_TERM__'
+  const studentWhere = { division, termMemberships: { some: { termId } } }
+  const feeWhere = { division, termId }
+  const paperWhere = { termId }
 
   const [
     totalStudents,
@@ -75,22 +79,22 @@ export const GET = apiHandler(async (request: NextRequest) => {
     guideActions,
   ] = await Promise.all([
     prisma.student.count({ where: { status: 'ACTIVE', ...studentWhere } }),
-    prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to } } }),
-    prisma.paperQuestion.count({ where: { mastery: 'MASTERED', paper: { paperDate: { gte: from, lt: to } } } }),
-    prisma.paperQuestion.count({ where: { paper: { paperDate: { gte: from, lt: to } } } }),
+    prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to }, ...paperWhere } }),
+    prisma.paperQuestion.count({ where: { mastery: 'MASTERED', paper: { paperDate: { gte: from, lt: to }, ...paperWhere } } }),
+    prisma.paperQuestion.count({ where: { paper: { paperDate: { gte: from, lt: to }, ...paperWhere } } }),
     prisma.student.groupBy({ by: ['status'], _count: true, where: studentWhere }),
-    prisma.paperQuestion.groupBy({ by: ['mastery'], _count: true, where: { paper: { paperDate: { gte: from } } } }),
-    prisma.paperQuestion.groupBy({ by: ['topic'], _count: true, where: { mastery: 'NEEDS_PRACTICE', paper: { paperDate: { gte: from } } }, orderBy: { _count: { topic: 'desc' } }, take: 6 }),
-    prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to }, isReadByParent: true } }),
-    prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to }, isReadByParent: true } }),
-    prisma.performancePost.count({ where: { createdAt: { gte: from, lt: to }, deletedAt: null } }),
-    prisma.postReaction.count({ where: { post: { createdAt: { gte: from, lt: to }, deletedAt: null } } }),
+    prisma.paperQuestion.groupBy({ by: ['mastery'], _count: true, where: { paper: { paperDate: { gte: from }, ...paperWhere } } }),
+    prisma.paperQuestion.groupBy({ by: ['topic'], _count: true, where: { mastery: 'NEEDS_PRACTICE', paper: { paperDate: { gte: from }, ...paperWhere } }, orderBy: { _count: { topic: 'desc' } }, take: 6 }),
+    prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to }, ...paperWhere } }),
+    prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to }, isReadByParent: true, ...paperWhere } }),
+    prisma.performancePost.count({ where: { termId, createdAt: { gte: from, lt: to }, deletedAt: null } }),
+    prisma.postReaction.count({ where: { post: { termId, createdAt: { gte: from, lt: to }, deletedAt: null } } }),
     prisma.student.count({ where: studentWhere }),
-    prisma.paperComment.count({ where: { createdAt: { gte: from, lt: to }, author: { role: 'parent' } } }),
+    prisma.paperComment.count({ where: { createdAt: { gte: from, lt: to }, author: { role: 'parent' }, paper: { termId } } }),
     prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to } } }),
     prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to }, isReplied: true } }),
-    prisma.attendance.groupBy({ by: ['status'], _count: true, where: { createdAt: { gte: from, lt: to } } }),
-    prisma.makeupRequest.groupBy({ by: ['status'], _count: true, where: { createdAt: { gte: from, lt: to } } }),
+    prisma.attendance.groupBy({ by: ['status'], _count: true, where: { createdAt: { gte: from, lt: to }, lesson: { group: { termId } } } }),
+    prisma.makeupRequest.groupBy({ by: ['status'], _count: true, where: { createdAt: { gte: from, lt: to }, attendance: { lesson: { group: { termId } } } } }),
     prisma.guideViewLog.groupBy({ by: ['action'], _count: true, where: { createdAt: { gte: from, lt: to } } }),
   ])
 

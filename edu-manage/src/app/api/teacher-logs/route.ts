@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminUser, TEACHER_LOG_ACTIONS, todayRange, weekRange } from '@/lib/teacher-portal'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,15 +15,19 @@ function groupBy<T>(arr: T[], key: (item: T) => string): Map<string, T[]> {
   return m
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const { prisma } = await requireAdminUser()
+    const admin = await requireAdminUser()
+    const { prisma } = admin
+    const division = getRequestDivision(admin, req.nextUrl.searchParams.get('division'))
+    const selectedTerm = await resolveAdminTermScope(prisma, division, req)
+    const termId = selectedTerm?.id || '__NO_SELECTED_TERM__'
     const now = new Date()
     const { start: today, end: todayEnd } = todayRange(now)
     const { start: weekStart, end: weekEnd } = weekRange(now)
 
     const teachers = await prisma.teacher.findMany({
-      where: { status: 'ACTIVE' },
+      where: { status: 'ACTIVE', division },
       orderBy: { createdAt: 'asc' },
     })
 
@@ -37,6 +43,7 @@ export async function GET() {
       prisma.classLesson.findMany({
         where: {
           teacherId: { in: teacherIds },
+          group: { termId },
           lessonDate: { gte: today, lt: todayEnd },
           status: 'COMPLETED',
         },
@@ -44,7 +51,7 @@ export async function GET() {
       }),
       prisma.examPaper.groupBy({
         by: ['teacherId'],
-        where: { teacherId: { in: teacherIds }, status: 'DRAFT' },
+        where: { termId, teacherId: { in: teacherIds }, status: 'DRAFT' },
         _count: { id: true },
       }),
       prisma.teacherAlert.groupBy({
@@ -101,10 +108,10 @@ export async function GET() {
     })
 
     const [totalDraftPapers, weeklyPublishedPapers, weeklyPosts, activeStudents, alertCount] = await Promise.all([
-      prisma.examPaper.count({ where: { status: 'DRAFT' } }),
-      prisma.examPaper.findMany({ where: { status: 'PUBLISHED', paperDate: { gte: weekStart, lt: weekEnd } }, select: { studentId: true } }),
-      prisma.performancePost.findMany({ where: { deletedAt: null, createdAt: { gte: weekStart, lt: weekEnd } }, select: { studentId: true } }),
-      prisma.student.count({ where: { status: { not: 'INACTIVE' } } }),
+      prisma.examPaper.count({ where: { termId, status: 'DRAFT' } }),
+      prisma.examPaper.findMany({ where: { termId, status: 'PUBLISHED', paperDate: { gte: weekStart, lt: weekEnd } }, select: { studentId: true } }),
+      prisma.performancePost.findMany({ where: { termId, deletedAt: null, createdAt: { gte: weekStart, lt: weekEnd } }, select: { studentId: true } }),
+      prisma.student.count({ where: { division, status: { not: 'INACTIVE' }, termMemberships: { some: { termId } } } }),
       prisma.teacherAlert.count({ where: { isResolved: false } }),
     ])
 

@@ -1,6 +1,6 @@
-﻿'use client'
+'use client'
 
-import { Card, Descriptions, Empty, Image, Tag, Typography, Button } from 'antd'
+import { Card, Descriptions, Image, Tag, Typography, Button } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { fmtFull } from '@/lib/format-date'
@@ -13,8 +13,18 @@ const MASTERY_LABELS: Record<string, { text: string; color: string }> = {
   NEEDS_REVIEW: { text: '需复习', color: 'orange' },
   NEEDS_PRACTICE: { text: '需练习', color: 'red' },
 }
+type PaperDetail = {
+  title: string
+  subject?: string | null
+  paperDate?: string | null
+  overallComment?: string | null
+  imageUrls: string[]
+  student?: { name?: string } | null
+  teacher?: { name?: string } | null
+  questions: Array<{ topic?: string | null; mastery?: string | null }>
+}
 
-export function PaperDetailClient({ paper }: { paper: any }) {
+export function PaperDetailClient({ paper }: { paper: PaperDetail }) {
   const router = useRouter()
 
   return (
@@ -43,9 +53,9 @@ export function PaperDetailClient({ paper }: { paper: any }) {
           <div style={{ marginBottom: 20 }}>
             <Text strong style={{ display: 'block', marginBottom: 8 }}>知识点掌握情况</Text>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {paper.questions.map((q: any, i: number) => (
-                <Tag key={i} color={MASTERY_LABELS[q.mastery]?.color} style={{ borderRadius: 9999, fontSize: 11 }}>
-                  {q.topic || `第${i + 1}题`}: {MASTERY_LABELS[q.mastery]?.text || q.mastery}
+              {paper.questions.map((q, i: number) => (
+                <Tag key={i} color={MASTERY_LABELS[q.mastery || '']?.color} style={{ borderRadius: 9999, fontSize: 11 }}>
+                  {q.topic || `第${i + 1}题`}: {MASTERY_LABELS[q.mastery || '']?.text || q.mastery}
                 </Tag>
               ))}
             </div>

@@ -6,6 +6,8 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { activeEnrollmentWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { isClassGroupInActiveTerm, resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,14 +37,47 @@ function normalizeTeacherAssignments(body: Record<string, unknown>) {
   }))
 }
 
-export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+export const GET = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
   const prisma = await getRequestPrisma()
 
   const { id } = await params
+  const selectedTerm = user.role === 'admin'
+    ? await resolveAdminTermScope(prisma, user.division, req)
+    : await getActiveAcademicTerm(prisma, user.division)
+  if (!selectedTerm) {
+    return NextResponse.json({ error: '当前没有可查看的运营批次' }, { status: 404 })
+  }
+
+  const accessWhere: Prisma.ClassGroupWhereInput = {
+    id,
+    division: user.division,
+    termId: selectedTerm.id,
+    ...visibleClassGroupWhere,
+  }
+  if (user.role === 'teacher') {
+    if (!user.teacherId) return NextResponse.json({ error: '教师账号未绑定教师档案' }, { status: 403 })
+    accessWhere.OR = [
+      { teacherId: user.teacherId },
+      { teacherAssignments: { some: { teacherId: user.teacherId } } },
+    ]
+  } else if (user.role === 'parent') {
+    accessWhere.enrollments = {
+      some: {
+        status: 'ACTIVE',
+        student: {
+          status: { not: 'ARCHIVED' },
+          OR: [{ parentId: user.id }, { parentUserId: user.id }],
+        },
+      },
+    }
+  } else if (user.role !== 'admin') {
+    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
+
   const group = await prisma.classGroup.findFirst({
-    where: { id, ...visibleClassGroupWhere },
+    where: accessWhere,
     include: {
       course: true,
       teacher: { select: { id: true, name: true, phone: true } },
@@ -51,6 +86,7 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
         orderBy: { createdAt: 'asc' },
       },
       room: true,
+      term: { select: { id: true, name: true, status: true } },
       enrollments: { where: activeEnrollmentWhere, include: { student: true }, orderBy: { enrolledAt: 'asc' } },
       classLessons: {
         orderBy: { lessonDate: 'asc' },
@@ -75,6 +111,9 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const prisma = await getRequestPrisma()
 
   const { id } = await params
+  if (!await isClassGroupInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能修改班级' }, { status: 409 })
+  }
   const body = await req.json()
   const { name, teacherId, roomId, maxStudents, status, note } = body
   const normalizedAssignments = normalizeTeacherAssignments(body)
@@ -236,6 +275,9 @@ export const DELETE = apiHandler(async (_req: NextRequest, { params }: { params:
   const prisma = await getRequestPrisma()
 
   const { id } = await params
+  if (!await isClassGroupInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能删除班级' }, { status: 409 })
+  }
   const group = await prisma.classGroup.findUnique({ where: { id } })
   if (!group) return NextResponse.json({ error: '班级不存在' }, { status: 404 })
 

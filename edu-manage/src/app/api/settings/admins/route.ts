@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { getPasswordPolicyError } from '@/lib/password-policy'
+import { requireSuperAdmin } from '@/lib/get-user'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,8 +39,8 @@ export const GET = apiHandler(async () => {
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {
-  const currentUser = await requireAdmin()
-  if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  // 创建管理员属于提权操作，仅最高权益管理员可执行。
+  const currentUser = await requireSuperAdmin()
   const prisma = await getRequestPrisma()
 
   const body = await req.json().catch(() => ({}))

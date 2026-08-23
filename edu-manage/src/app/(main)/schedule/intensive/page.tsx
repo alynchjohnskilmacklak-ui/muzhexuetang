@@ -22,7 +22,7 @@ import {
 import useSWR from 'swr'
 import { useDivision } from '@/contexts/DivisionContext'
 import { MobileSelect } from '@/components/MobileSelect'
-import { SCHEDULE_PERIODS } from '@/lib/schedule-periods'
+import { HOURLY_PERIODS } from '@/lib/schedule-periods'
 import { getPersonalClassLimit } from '@/lib/schedule-class-type'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -31,16 +31,9 @@ const { Text } = Typography
 const INTENSIVE_COLOR = '#534AB7'
 const SLOT_HEIGHT = 92
 
-const HOURLY_SLOTS = [
-  { id:'h08', start:'08:00', end:'09:00', label:'08:00–09:00' },
-  { id:'h09', start:'09:00', end:'10:00', label:'09:00–10:00' },
-  { id:'h10', start:'10:00', end:'11:00', label:'10:00–11:00' },
-  { id:'h11', start:'11:00', end:'12:00', label:'11:00–12:00' },
-  { id:'h14', start:'14:00', end:'15:00', label:'14:00–15:00' },
-  { id:'h15', start:'15:00', end:'16:00', label:'15:00–16:00' },
-  { id:'h16', start:'16:00', end:'17:00', label:'16:00–17:00' },
-  { id:'h17', start:'17:00', end:'18:00', label:'17:00–18:00' },
-]
+const HOURLY_SLOTS = HOURLY_PERIODS
+  .filter((period) => period.start < '22:00' && !['12:00', '13:00'].includes(period.start))
+  .map((period) => ({ ...period, label: `${period.start}–${period.end}` }))
 
 const TYPE_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
   ONE_ON_ONE:   { label:'一对一',   bg:'#EEEDFE', color:'#3C3489' },
@@ -292,10 +285,11 @@ export default function IntensiveSchedulePage() {
     Object.entries(matrix).forEach(([roomId, periods]) => {
       if (!spots.find(s => s.id === roomId)) return
       Object.entries(periods).forEach(([periodId, lessons]) => {
-        // Map periodId to hour slot
-        const period = SCHEDULE_PERIODS.find(p => p.id === periodId)
-        if (!period) return
-        const hourSlot = HOURLY_SLOTS.find(h => h.start <= period.start && period.end <= h.end)
+        // Daily matrix may contain standard-period ids or hourly ids. Prefer the
+        // lesson's real start time so evening appointments are never dropped.
+        const firstLesson = lessons[0]
+        const hourSlot = HOURLY_SLOTS.find(h => h.id === periodId)
+          || HOURLY_SLOTS.find(h => h.start === firstLesson?.startTime)
         if (hourSlot) {
           if (!g[roomId]) g[roomId] = {}
           if (!g[roomId][hourSlot.id]) g[roomId][hourSlot.id] = []

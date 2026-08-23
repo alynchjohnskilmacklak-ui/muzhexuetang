@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { Button, List, Tag, Typography } from 'antd'
@@ -27,19 +27,31 @@ const TYPE_META: Record<string, { label: string; icon: React.ReactNode; color: s
   PAPER_PUBLISHED: { label: '试卷通知', icon: <FileTextOutlined />, color: '#2476A8', bg: '#EAF5FB' },
   EXAM_PAPER: { label: '试卷通知', icon: <FileTextOutlined />, color: '#2476A8', bg: '#EAF5FB' },
   ATTENDANCE: { label: '考勤通知', icon: <ClockCircleOutlined />, color: '#BA7517', bg: '#FAEEDA' },
+  STUDY_HALL_HOMEWORK: { label: '作业班', icon: <BookOutlined />, color: '#D96F43', bg: '#FFF3EA' },
   SYSTEM: { label: '系统通知', icon: <BellOutlined />, color: '#5A4E3A', bg: '#F5F2EE' },
   INFO: { label: '通知', icon: <BellOutlined />, color: '#5A4E3A', bg: '#F5F2EE' },
   leave: { label: '请假通知', icon: <ClockCircleOutlined />, color: '#BA7517', bg: '#FAEEDA' },
 }
+type ParentNotification = {
+  id: string
+  type: string
+  relatedType?: string | null
+  relatedId?: string | null
+  href?: string | null
+  title: string
+  content?: string | null
+  createdAt: string
+  read: boolean
+}
 
-function getNotificationMeta(n: any) {
-  return TYPE_META[n.relatedType] || TYPE_META[n.type] || TYPE_META.INFO
+function getNotificationMeta(n: ParentNotification) {
+  return TYPE_META[n.relatedType || ''] || TYPE_META[n.type] || TYPE_META.INFO
 }
 
 export function ParentNotificationsClient({
   notifications: initialNotifications, unreadCount: initialUnread,
 }: {
-  notifications: any[]
+  notifications: ParentNotification[]
   unreadCount: number
   userId: string
 }) {
@@ -76,7 +88,7 @@ export function ParentNotificationsClient({
     }
   }
 
-  const handleClick = (n: any) => {
+  const handleClick = (n: ParentNotification) => {
     if (!n.read) markAsRead(n.id)
     if (n.relatedType === 'EXAM_PAPER' && n.relatedId) {
       router.push(`/parent/archive?paperId=${n.relatedId}`)
@@ -107,13 +119,13 @@ export function ParentNotificationsClient({
 
       {notifications.length === 0 ? (
         <ParentCard style={{ minHeight: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <BrandEmpty title="暂无通知" hint="新的课堂反馈、试卷和系统提醒都会出现在这里" icon="🔔" />
+          <BrandEmpty title="还没有通知" hint="新的课堂反馈、晚托作业、试卷和系统提醒会显示在这里，方便你及时了解孩子的学习动态。" />
         </ParentCard>
       ) : (
         <ParentCard style={{ padding: 0 }}>
           <List
             dataSource={notifications}
-            renderItem={(n: any, index: number) => {
+            renderItem={(n, index: number) => {
               const meta = getNotificationMeta(n)
               return (
                 <List.Item

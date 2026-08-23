@@ -4,6 +4,8 @@ import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,12 +15,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   const role = (session.user as { role?: string }).role
   const prisma = await getRequestPrisma()
-  const userId = (session.user as { id?: string }).id
-
   const { searchParams } = new URL(req.url)
   const dateStr = searchParams.get('date') || new Date().toISOString().slice(0, 10)
   const teacherIdParam = searchParams.get('teacherId')
   const classType = searchParams.get('classType')
+  const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
 
   const dayStart = new Date(`${dateStr}T00:00:00`)
   const dayEnd = new Date(`${dateStr}T23:59:59`)
@@ -31,16 +32,26 @@ export const GET = apiHandler(async (req: NextRequest) => {
   // Role-based access control
   if (role === 'admin') {
     if (teacherIdParam) where.teacherId = teacherIdParam
-    where.division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
+    where.division = division
+    const selectedTerm = await resolveAdminTermScope(prisma, division, req)
+    where.group = { termId: selectedTerm?.id || '__NO_SELECTED_TERM__' }
   } else if (role === 'teacher') {
     const teacher = await resolveTeacherForUser(session.user as { id: string; email?: string | null; name?: string | null; role?: string | null }, prisma)
     if (!teacher) return NextResponse.json({ error: '未绑定教师身份' }, { status: 403 })
-    where.teacherId = teacher.id
+    const activeTerm = await getActiveAcademicTerm(prisma, division)
+    where.group = { termId: activeTerm?.id || '__NO_ACTIVE_TERM__' }
+    where.OR = [
+      { teacherId: teacher.id },
+      { teacherId: null, group: { teacherId: teacher.id } },
+      { teacherId: null, group: { teacherAssignments: { some: { teacherId: teacher.id } } } },
+    ]
   } else {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  if (classType) where.group = { course: { type: classType } }
+  if (classType) {
+    where.group = { ...(where.group as Record<string, unknown> || {}), course: { type: classType } }
+  }
 
   const lessons = await prisma.classLesson.findMany({
     where,

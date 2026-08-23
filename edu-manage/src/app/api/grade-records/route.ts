@@ -21,11 +21,34 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '缺少测评ID或成绩数据' }, { status: 400 })
   }
 
+  const assessment = await prisma.assessment.findFirst({
+    where: {
+      id: assessmentId,
+      group: { division: user.division, term: { status: 'ACTIVE' } },
+    },
+    select: {
+      group: {
+        select: {
+          termId: true,
+          enrollments: { where: { status: 'ACTIVE' }, select: { studentId: true } },
+        },
+      },
+    },
+  })
+  if (!assessment?.group.termId) {
+    return NextResponse.json({ error: '测评不属于当前启用批次' }, { status: 409 })
+  }
+  const enrolledStudentIds = new Set(assessment.group.enrollments.map((item) => item.studentId))
+  if (records.some((record) => !enrolledStudentIds.has(record.studentId))) {
+    return NextResponse.json({ error: '成绩中包含不属于该班级当前批次的学员' }, { status: 409 })
+  }
+
   const created = await prisma.$transaction(async (tx) => {
     const results = []
     for (const rec of records) {
       const grade = await tx.gradeRecord.create({
         data: {
+          termId: assessment.group.termId,
           assessmentId,
           studentId: rec.studentId,
           score: rec.score,

@@ -1,7 +1,8 @@
-﻿'use client'
+'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Card, Empty, Select, Tag, Typography, Progress, Spin, Modal, Image, Button, Collapse } from 'antd'
+import NextImage from 'next/image'
+import { Card, Select, Tag, Typography, Progress, Spin, Modal, Image, Button } from 'antd'
 import {
   FileTextOutlined, MessageOutlined, HeartOutlined, TrophyOutlined,
   RiseOutlined, FlagOutlined, BookOutlined, CheckCircleOutlined,
@@ -17,6 +18,7 @@ import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { fmtDate } from '@/lib/format-date'
 import { formatFriendlyTime } from '@/lib/date/relative'
 import type { FeedbackImageVariant } from '@/lib/file-asset-variants'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -41,6 +43,8 @@ const FILTER_CHIPS = [
 ]
 
 type InitialData = { children: { id: string; name: string }[]; activeStudentId: string | null; profile: StudentProfile }
+type TimelineItem = StudentProfile['record']['timeline'][number]
+type FeedbackDetailData = TimelineItem['detail']
 const fetcher = (url: string) => fetch(url).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error || '请求失败'); return d })
 
 function formatTeacherLabel(item?: { teacher?: string; teacherSubject?: string }) {
@@ -57,7 +61,7 @@ function localDateKey(value: Date | string) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function FeedbackDetail({ detail }: { detail?: any }) {
+function FeedbackDetail({ detail }: { detail?: FeedbackDetailData }) {
   if (!detail) return null
   return (
     <div className="parent-growth-feedback-detail">
@@ -84,7 +88,7 @@ function TimelineImageStrip({ images }: { images: TimelineImage[] }) {
   return (
     <div className="parent-growth-history-images">
       {visibleImages.map((image, imageIndex: number) => (
-        <img key={`${image.originalUrl}-${imageIndex}`} src={urls[imageIndex]} alt="课堂记录" />
+        <NextImage key={`${image.originalUrl}-${imageIndex}`} src={urls[imageIndex]} alt="课堂记录" width={48} height={48} unoptimized />
       ))}
       {images.length > 3 && <span>+{images.length - 3}张</span>}
     </div>
@@ -104,7 +108,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   const [showAllTimeline, setShowAllTimeline] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
   const [downloading, setDownloading] = useState(false)
-  const [detailItem, setDetailItem] = useState<any>(null)
+  const [detailItem, setDetailItem] = useState<TimelineItem | null>(null)
   const detailImages: ReturnType<typeof normalizeTimelineImage>[] = Array.isArray(detailItem?.images)
     ? detailItem.images.map(normalizeTimelineImage)
     : []
@@ -130,7 +134,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
     const timeline = profile?.record.timeline || []
     if (!timeline.length) return
 
-    const targetIndex = timeline.findIndex((item: any) => {
+    const targetIndex = timeline.findIndex((item) => {
       if (feedbackId && item.refId === feedbackId) return true
       if (postId && item.refId === postId) return true
       if (focusDate && localDateKey(item.date) === focusDate) return true
@@ -138,7 +142,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
     })
     if (targetIndex < 0) return
 
-    const target = timeline[targetIndex] as any
+    const target = timeline[targetIndex]
     const key = timelineKey(target, targetIndex)
     setTimeFilter('')
     window.setTimeout(() => {
@@ -147,7 +151,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
     }, 80)
   }, [feedbackId, postId, focusDate, profile])
 
-  const handleTimelineClick = (item: any) => {
+  const handleTimelineClick = (item: TimelineItem) => {
     if (item.images?.length) { setDetailItem(item); return }
     if (item.refType === 'feedback' && item.refId) { setDetailItem(item); return }
     if (item.refType === 'paper' && item.refId) { setDetailItem(item); return }
@@ -178,7 +182,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
 
   if (!initial.children.length) {
     return <Card bordered={false} style={{ borderRadius: 14, textAlign: 'center', minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Empty description="暂无绑定学员" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+      <GuidedEmpty title="还没有绑定孩子" description="绑定孩子后，课堂反馈、成绩和成长记录会汇总到这里，方便长期查看变化。" actionLabel="去个人中心核对" onAction={() => router.push('/parent/profile')} />
     </Card>
   }
 
@@ -214,6 +218,13 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
         ? `${profile.identity.name} 本期获得 ${highlights?.praiseCount || 0} 次表扬，继续保持`
         : `${profile.identity.name} 本期出勤 ${attendanceText}，老师正在记录课堂表现`
     : ''
+  const overviewMetrics = profile ? [
+    profile.overview.feedbackCount > 0 ? ['课堂反馈', `${profile.overview.feedbackCount} 条`] : null,
+    profile.overview.subjectCount > 0 ? ['覆盖学科', `${profile.overview.subjectCount} 门`] : null,
+    profile.overview.attendanceRate !== null ? ['本期出勤', `${profile.overview.attendanceRate}%`] : null,
+    profile.overview.approvedIntensiveHours > 0 ? ['个性化授课', `${profile.overview.approvedIntensiveHours.toFixed(2)} h`] : null,
+  ].filter((item): item is string[] => Boolean(item)) : []
+  const hasOverviewData = overviewMetrics.length > 0
 
   return (
     <div style={{ width: '100%', maxWidth: isMobile ? '100%' : 860, margin: '0 auto', padding: '0 4px' }}>
@@ -226,7 +237,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
         </div>
       </div>
       {loadingMask}
-      {!profile && !isLoading && <Card bordered={false} style={{ borderRadius: 14, textAlign: 'center', minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Empty description="该学员暂无档案数据，老师更新学情后将在此展示" image={Empty.PRESENTED_IMAGE_SIMPLE} /></Card>}
+      {!profile && !isLoading && <Card bordered={false} style={{ borderRadius: 14, textAlign: 'center', minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><GuidedEmpty title="还没有成长档案" description="老师更新课堂反馈、成绩和成长记录后会显示在这里，帮助你连续了解孩子的变化。" actionLabel="给老师留言" onAction={() => router.push('/parent/messages')} /></Card>}
 
       {profile && (<>
         <Card bordered={false} className="parent-growth-overview">
@@ -246,23 +257,22 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
           </div>
         </Card>
 
-        <Card bordered={false} className="parent-growth-status">
+        {(hasOverviewData || hasHighlights) && <Card bordered={false} className="parent-growth-status">
           <Text strong className="parent-growth-status-title">{statusSummary}</Text>
-        </Card>
+        </Card>}
 
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
-          {[
-            ['课堂反馈', `${profile.overview.feedbackCount} 条`],
-            ['覆盖学科', `${profile.overview.subjectCount} 门`],
-            ['本期出勤', attendanceText],
-            ['个性化授课', `${profile.overview.approvedIntensiveHours.toFixed(2)} h`],
-          ].map(([label, value]) => (
+        {hasOverviewData ? <div className="parent-growth-metrics" style={{ gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : `repeat(${Math.min(overviewMetrics.length, 4)}, minmax(0, 1fr))` }}>
+          {overviewMetrics.map(([label, value]) => (
             <Card key={label} bordered={false} className="parent-card" styles={{ body: { padding: isMobile ? 12 : 14 } }}>
               <Text type="secondary" style={{ fontSize: 11 }}>{label}</Text>
               <div style={{ marginTop: 4, fontSize: isMobile ? 18 : 22, fontWeight: 800, color: 'var(--color-primary)', overflowWrap: 'anywhere' }}>{value}</div>
             </Card>
           ))}
-        </div>
+        </div> : <section className="parent-growth-empty">
+          <Text strong>本期还没有新的学习记录</Text>
+          <Paragraph>老师完成课堂登记、作业批改或成绩录入后，学习动态会同步显示在这里。可以先查看课程表，了解接下来的课程安排。</Paragraph>
+          <Button onClick={() => router.push('/parent/schedule')}>查看课程表</Button>
+        </section>}
 
         {!!subjectInsights.length && <Card bordered={false} className="parent-growth-latest">
           <div className="parent-growth-section-head"><div><BookOutlined /><Text strong>各科老师本期评价</Text></div></div>
@@ -300,13 +310,10 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
           {highlights.badgesByType.length > 0 && <div className="parent-growth-badges">{highlights.badgesByType.map(item => <Tag color="gold" key={item.type}>{item.type} ×{item.count}</Tag>)}</div>}
         </Card>}
 
-        <Collapse className="parent-growth-more" items={[{
-          key: 'more',
-          label: <span><BookOutlined />展开看更多成长记录</span>,
-          children: <div className="parent-growth-flat-sections">
+        <div className="parent-growth-flat-sections">
             {profile.record.timeline.length > 0 && <section className="parent-growth-history">
               <div className="parent-growth-history-head">
-                <div><Text strong>历史反馈</Text><Text type="secondary">按时间回看孩子的学习变化</Text></div>
+                <div><Text strong>最近动态</Text><Text type="secondary">按时间回看孩子的学习变化</Text></div>
                 <div className="parent-growth-filters" role="group" aria-label="成长记录筛选">
                   {FILTER_CHIPS.map(chip => <button key={chip.key} aria-pressed={timeFilter === chip.key} onClick={() => { setTimeFilter(chip.key); setShowAllTimeline(false) }}>{chip.label}</button>)}
                 </div>
@@ -315,7 +322,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                 const filtered = profile.record.timeline
                   .filter(item => item !== latestTeacherUpdate)
                   .filter(item => !timeFilter || FILTER_CHIPS.find(chip => chip.key === timeFilter)?.types?.includes(item.type))
-                const visible = showAllTimeline ? filtered : filtered.slice(0, isMobile ? 6 : 10)
+                const visible = showAllTimeline ? filtered : filtered.slice(0, 3)
                 return filtered.length > 0 ? <>
                   <div className="parent-growth-history-list">{visible.map((item, index) => {
                     const key = timelineKey(item, index)
@@ -332,7 +339,8 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                     </article>
                   })}</div>
                   {filtered.length > visible.length && <Button type="text" block className="parent-growth-show-more" onClick={() => setShowAllTimeline(true)}>查看全部 {filtered.length} 条记录</Button>}
-                </> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="这个分类暂时还没有记录" />
+                  {showAllTimeline && filtered.length > 3 && <Button type="text" block className="parent-growth-show-more" onClick={() => setShowAllTimeline(false)}>收起记录</Button>}
+                </> : <GuidedEmpty title="这个分类暂时没有记录" description="可以切换到全部记录，查看老师已经发布的其他成长内容。" actionLabel="查看全部记录" onAction={() => setTimeFilter('')} compact />
               })()}
             </section>}
 
@@ -361,8 +369,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
               <Paragraph>{profile.profileCase.teacherSummary.summary}</Paragraph>
               {profile.profileCase.teacherSummary.suggestions && <Paragraph type="secondary">下一步建议：{profile.profileCase.teacherSummary.suggestions}</Paragraph>}
             </section>}
-          </div>,
-        }]} />
+        </div>
 
         {/* Report button */}
         <div className="parent-growth-report-action">
@@ -378,7 +385,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
         {detailItem && (
           <div>
             {detailImages.length > 0 && <Image.PreviewGroup><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>{detailImages.map((image, i: number) => <Image key={`${image.originalUrl}-${i}`} src={signedDetailThumbnails[i]} preview={{ src: signedDetailPreviews[i] }} alt="" style={{ borderRadius: 8, objectFit: 'cover', width: '100%', height: 120 }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='120'%3E%3Crect width='140' height='120' fill='%23f5f2ee'/%3E%3Ctext x='70' y='60' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='12'%3E图片加载失败%3C/text%3E%3C/svg%3E" />)}</div></Image.PreviewGroup>}
-            <Paragraph style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detailItem.sub || detailItem.content}</Paragraph>
+            <Paragraph style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detailItem.sub || detailItem.title}</Paragraph>
             {detailItem.teacher && <Tag style={{ borderRadius: 9999, marginTop: 4 }}>{formatTeacherLabel(detailItem)}</Tag>}
             {detailItem.date && <div style={{ marginTop: 8 }}><Text type="secondary" style={{ fontSize: 11 }}>{formatFriendlyTime(detailItem.date)}</Text></div>}
             <FeedbackDetail detail={detailItem.detail} />

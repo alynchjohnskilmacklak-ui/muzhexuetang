@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import useSWR from 'swr'
-import { Row, Col, Card, Segmented, DatePicker, Statistic, Button, Spin, message } from 'antd'
+import { Row, Col, Card, Segmented, DatePicker, Statistic, Button, message } from 'antd'
 import { DownloadOutlined, TeamOutlined, FileTextOutlined, TrophyOutlined, InteractionOutlined } from '@ant-design/icons'
 import dynamic from 'next/dynamic'
 import { PageLayout } from '@/components/Layout/PageLayout'

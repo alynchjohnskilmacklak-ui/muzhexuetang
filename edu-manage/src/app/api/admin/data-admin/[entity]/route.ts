@@ -9,6 +9,7 @@ import {
 } from '@/lib/data-admin/entities'
 import { createActivityLog } from '@/lib/data-admin/entities-server'
 import { getRequestDivision } from '@/lib/division'
+import { getDynamicModel } from '@/lib/data-admin/dynamic-model'
 
 const ALLOWED_ENTITIES = Object.keys(DATA_ADMIN_ENTITIES)
 
@@ -49,7 +50,6 @@ export async function GET(
   }
 
   if (!includeDeleted) {
-    const softDelete = { field: 'status', deletedValue: 'DELETED' }
     const scMap: Record<EntityKey, { field: string; deletedValue: string } | undefined> = {
       students: { field: 'status', deletedValue: 'INACTIVE' },
       teachers: { field: 'status', deletedValue: 'RESIGNED' },
@@ -82,7 +82,7 @@ export async function GET(
     where['status'] = status
   }
 
-  const prismaModel = (prisma as any)[def.model]
+  const prismaModel = getDynamicModel(prisma, def.model)
   if (!prismaModel) {
     return NextResponse.json({ error: '模型不存在' }, { status: 500 })
   }
@@ -131,7 +131,7 @@ export async function POST(
   const body = await req.json()
   const data = filterEditableFields(entityKey, body)
 
-  const prismaModel = (prisma as any)[def.model]
+  const prismaModel = getDynamicModel(prisma, def.model)
   if (!prismaModel) {
     return NextResponse.json({ error: '模型不存在' }, { status: 500 })
   }

@@ -73,6 +73,7 @@ export async function createIntensiveHistoryRecord(params: {
   prisma: PrismaClient
   operatorId: string
   division: string
+  termId: string
   input: IntensiveHistoryRecordInput
   now?: Date
 }) {
@@ -92,6 +93,7 @@ export async function createIntensiveHistoryRecord(params: {
       where: {
         id: input.groupId,
         division: params.division,
+        termId: params.termId,
         intensiveMode: 'INTENSIVE',
         status: { not: 'ARCHIVED' },
         course: { isActive: true },

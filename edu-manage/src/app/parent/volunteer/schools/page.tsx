@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import NextImage from 'next/image'
 import { Drawer, Input, Modal, Skeleton, Tag, Typography } from 'antd'
 import { BankOutlined, EnvironmentOutlined, HomeOutlined, SearchOutlined, WalletOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -184,7 +185,7 @@ export default function ParentSchoolsPage() {
     <div style={{ width: '100%', maxWidth: '100%', color: C.ink, padding: isMobile ? '0 2px' : 0 }}>
       <header style={{ marginBottom: 14, padding: '14px 16px', borderRadius: 14, background: '#fff6f1', border: '1px solid rgba(232,120,74,.18)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src="/images/logo.jpg" alt="牧哲学堂" style={{ width: 28, height: 28, borderRadius: 7, objectFit: 'cover', flexShrink: 0 }} />
+          <NextImage src="/images/logo.jpg" alt="牧哲学堂" width={28} height={28} style={{ borderRadius: 7, objectFit: 'cover', flexShrink: 0 }} />
           <Title level={5} style={{ margin: 0, color: C.ink, fontSize: isMobile ? 16 : 18 }}>高中学校库 · 新乐可报名一览</Title>
         </div>
       </header>

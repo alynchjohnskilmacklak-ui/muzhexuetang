@@ -11,7 +11,7 @@ export interface DayRange {
  * 返回 dateString 在中国本地时区下的 00:00:00 ~ 次日 00:00:00 区间。
  * dateString 格式: "YYYY-MM-DD"。
  */
-export function getLocalDayRange(dateString: string, timezone = DEFAULT_TIMEZONE): DayRange {
+export function getLocalDayRange(dateString: string, _timezone = DEFAULT_TIMEZONE): DayRange {
   const d = new Date(`${dateString}T00:00:00+08:00`)
   if (isNaN(d.getTime())) throw new Error(`Invalid date string: ${dateString}`)
   const start = new Date(d)

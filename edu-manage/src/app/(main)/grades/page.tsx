@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
+import NextImage from 'next/image'
 import {
   Button, Input, InputNumber, message,
   Popconfirm, Select, Space, Tag, Upload,
@@ -50,7 +51,7 @@ export default function GradesPage() {
   const [filterGrade, setFilterGrade] = useState('')
 
   const { data: studentsData } = useSWR('/api/students?status=ACTIVE&limit=200', fetcher)
-  const students = Array.isArray(studentsData?.students) ? studentsData.students : []
+  const students = useMemo(() => Array.isArray(studentsData?.students) ? studentsData.students : [], [studentsData])
 
   const gradeOptions = useMemo(() => {
     const set = new Set<string>()
@@ -251,12 +252,6 @@ export default function GradesPage() {
     setQuestions((prev) => prev.map((q, i) => i === index ? { ...q, [field]: value } : q))
   }
 
-  const removeQuestion = (index: number) => {
-    setQuestions((prev) => prev.filter((_, i) => i !== index).map((q, i) => ({ ...q, order: i + 1 })))
-  }
-
-  const tagOptions = SUBJECT_TAGS[subject] || []
-
   return (
     <PageLayout title="学习档案" subtitle="试卷管理与题目标注">
       <div style={{
@@ -316,7 +311,7 @@ export default function GradesPage() {
             </div>
           ) : papers.length === 0 ? (
             <div style={{ background: '#FCFBF9', borderRadius: 12, border: '1px dashed #EEE7E1', padding: 24, textAlign: 'center', color: '#98A2B3', fontSize: 13 }}>
-              该学员暂无试卷，点击"新建"开始添加
+              该学员暂无试卷，点击“新建”开始添加
             </div>
           ) : isMobile ? (
             <div style={{ overflowX: 'auto', display: 'flex', gap: 8, paddingBottom: 4 }}>
@@ -402,7 +397,7 @@ export default function GradesPage() {
           }}>
             <div style={{ fontSize: 40 }}>📋</div>
             <div style={{ fontSize: 14, fontWeight: 600 }}>选择左侧试卷进行编辑</div>
-            <div style={{ fontSize: 12 }}>或点击"新建"创建新试卷</div>
+            <div style={{ fontSize: 12 }}>或点击“新建”创建新试卷</div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -457,7 +452,7 @@ export default function GradesPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 10 }}>
                   {imageUrls.map((url, i) => (
                     <div key={i} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', aspectRatio: '3/4', background: '#faf8f5' }}>
-                      <img src={normalizeUploadUrl(url)} alt={`p${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <NextImage src={normalizeUploadUrl(url)} alt={`试卷图片 ${i + 1}`} fill sizes="(max-width: 768px) 50vw, 180px" unoptimized style={{ objectFit: 'cover' }} />
                       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0)', transition: 'background 0.2s' }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.3)')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0)')}

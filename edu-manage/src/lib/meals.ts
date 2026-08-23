@@ -4,6 +4,7 @@ export type MealDetail = {
   studentId: string
   studentName: string
   portion: MealPortion
+  groupName?: string
 }
 
 export function startOfLocalDay(value: Date | string) {
@@ -27,8 +28,9 @@ export function parseMealDetails(value: unknown): MealDetail[] {
     const detail = item as Record<string, unknown>
     const studentId = typeof detail.studentId === 'string' ? detail.studentId : ''
     const studentName = typeof detail.studentName === 'string' ? detail.studentName : ''
+    const groupName = typeof detail.groupName === 'string' ? detail.groupName.trim() : ''
     const portion = detail.portion === 'double' ? 'double' : detail.portion === 'single' ? 'single' : null
-    return studentId && studentName && portion ? [{ studentId, studentName, portion }] : []
+    return studentId && studentName && portion ? [{ studentId, studentName, portion, ...(groupName ? { groupName } : {}) }] : []
   })
 }
 

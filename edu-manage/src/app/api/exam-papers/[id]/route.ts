@@ -46,11 +46,16 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const { id } = await params
   const body = await req.json()
 
-  const existing = await prisma.examPaper.findUnique({ where: { id } })
+  const existing = await prisma.examPaper.findUnique({
+    where: { id },
+    select: { id: true, teacherId: true, student: { select: { parentId: true, parentUserId: true } } },
+  })
   if (!existing) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
 
-  // Parents can only mark as read
+  // Parents can only mark their own child's paper as read
   if (user.role === 'parent') {
+    const isOwnChild = existing.student?.parentUserId === user.id || existing.student?.parentId === user.id
+    if (!isOwnChild) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
     if (body.isReadByParent) {
       const updated = await prisma.examPaper.update({
         where: { id },
@@ -64,6 +69,11 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
 
   if (user.role !== 'admin' && user.role !== 'teacher') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
+
+  // Teachers may only modify their own papers.
+  if (user.role === 'teacher' && existing.teacherId !== user.teacherId) {
+    return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
   }
 
   const updateData: Record<string, unknown> = {}
@@ -103,6 +113,13 @@ export const DELETE = apiHandler(async (_req: NextRequest, { params }: { params:
   const prisma = await getRequestPrisma()
 
   const { id } = await params
+  const existing = await prisma.examPaper.findUnique({ where: { id }, select: { id: true, teacherId: true } })
+  if (!existing) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
+  // Teachers may only delete their own papers.
+  if (user.role === 'teacher' && existing.teacherId !== user.teacherId) {
+    return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
+  }
+
   const paper = await prisma.examPaper.update({
     where: { id },
     data: { status: 'DELETED', updatedAt: new Date() },

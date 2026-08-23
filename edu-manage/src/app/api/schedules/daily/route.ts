@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
-import { findSchedulePeriod, normalizeSchedulePeriods } from '@/lib/schedule-periods'
+import { findSchedulePeriod, HOURLY_PERIODS, normalizeSchedulePeriods } from '@/lib/schedule-periods'
 import { activeEnrollmentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +21,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const dateStr = searchParams.get('date') || new Date().toISOString().slice(0, 10)
   const courseType = searchParams.get('courseType') || ''
   const division = getRequestDivision(user, searchParams.get('division'))
+  const selectedTerm = user.role === 'admin'
+    ? await resolveAdminTermScope(prisma, division, req)
+    : await getActiveAcademicTerm(prisma, division)
 
   const dayStart = new Date(`${dateStr}T00:00:00`)
   const dayEnd = new Date(`${dateStr}T23:59:59`)
@@ -27,11 +32,12 @@ export const GET = apiHandler(async (req: NextRequest) => {
     division,
     lessonDate: { gte: dayStart, lte: dayEnd },
     status: { notIn: ['CANCELLED', 'POSTPONED'] },
+    group: { termId: selectedTerm?.id || '__NO_SELECTED_TERM__' },
   }
   if (courseType === 'GROUP') {
-    where.group = { course: { type: 'GROUP' } }
+    where.group = { ...(where.group as object), course: { type: 'GROUP' } }
   } else if (courseType === 'SMALL') {
-    where.group = { course: { type: { in: ['ONE_ON_ONE', 'SMALL_GROUP'] } } }
+    where.group = { ...(where.group as object), course: { type: { in: ['ONE_ON_ONE', 'SMALL_GROUP'] } } }
   }
 
   const lessons = await prisma.classLesson.findMany({
@@ -53,7 +59,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   for (const lesson of lessons) {
     const roomId = lesson.group?.room?.id || 'unknown'
-    const periodId = findSchedulePeriod(periods, lesson.startTime)?.id || null
+    const periodId = findSchedulePeriod(periods, lesson.startTime)?.id
+      || (courseType === 'SMALL' ? HOURLY_PERIODS.find((period) => period.start === lesson.startTime)?.id : null)
     if (!periodId) continue
 
     if (!matrix[roomId]) matrix[roomId] = {}

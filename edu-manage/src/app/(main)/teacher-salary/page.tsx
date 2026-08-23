@@ -40,6 +40,7 @@ const TYPE_META: Record<string, { color: string; label: string }> = {
   LESSON_PAY: { color: '#1D9E75', label: '课时薪资' },
   LESSON_PAY_ADJUSTMENT: { color: '#C77F00', label: '课时薪资结算调整' },
   FEEDBACK_BONUS: { color: '#E8784A', label: '反馈奖励' },
+  STUDY_HALL_BONUS: { color: '#C6821E', label: '作业登记奖励' },
   manual_adjust: { color: '#534AB7', label: '手动调整' },
 }
 
@@ -154,6 +155,8 @@ function SalaryAdjustmentModal({ teacherId, teacherName, open, onClose, onSaved 
 }
 
 interface SalaryPayload {
+  term: { id: string; name: string; status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED' } | null
+  readOnly: boolean
   teachers: TeacherOption[]
   summary: SalarySummary[]
   transactions: SalaryTransaction[]
@@ -292,6 +295,7 @@ export default function TeacherSalaryAdminPage() {
   const teachers = data?.teachers ?? []
   const summary = data?.summary ?? []
   const transactions = data?.transactions ?? []
+  const readOnly = data?.readOnly ?? false
   const totalAll = summary.reduce((sum, item) => sum + item.total, 0)
   const totalSmallClass = summary.reduce((sum, item) => sum + item.smallClass, 0)
   const totalIntensive = summary.reduce((sum, item) => sum + item.intensive, 0)
@@ -362,7 +366,7 @@ export default function TeacherSalaryAdminPage() {
         <Space size={6}>
           <Button size="small" icon={<EditOutlined />} onClick={() => setConfigDrawer({ open: true, teacherId: row.teacherId, teacherName: row.name })}>配置</Button>
           <Button size="small" icon={<EyeOutlined />} onClick={() => setFeedbackDrawer({ open: true, teacherId: row.teacherId, teacherName: row.name })}>反馈</Button>
-          <Button size="small" icon={<DollarOutlined />} onClick={() => setAdjustmentModal({ open: true, teacherId: row.teacherId, teacherName: row.name })}>调整</Button>
+          <Button size="small" icon={<DollarOutlined />} disabled={readOnly} onClick={() => setAdjustmentModal({ open: true, teacherId: row.teacherId, teacherName: row.name })}>调整</Button>
           <Button size="small" icon={<DownloadOutlined />} loading={exportingTeacherId === row.teacherId} disabled={Boolean(exportingTeacherId) && exportingTeacherId !== row.teacherId} onClick={() => exportTeacherSalary(row.teacherId, row.name)}>导出</Button>
         </Space>
       ),
@@ -401,6 +405,13 @@ export default function TeacherSalaryAdminPage() {
     <div>
       <Title level={4} style={{ marginTop: 0 }}>教师薪资管理</Title>
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
+        <Card size="small" bordered={false} style={{ borderRadius: 14 }}>
+          <Space wrap>
+            <Text strong>{data?.term?.name || '尚未启用运营批次'}</Text>
+            <Tag color={readOnly ? 'default' : 'green'}>{readOnly ? '历史批次 · 只读' : '当前运营批次'}</Tag>
+            <Text type="secondary">工资汇总、流水、反馈次数和导出均按数据总览选择的批次统计。</Text>
+          </Space>
+        </Card>
         <Space wrap>
           <Segmented options={PERIOD_OPTIONS} value={period} onChange={(value) => setPeriod(value as string)} />
           <Select
@@ -458,7 +469,7 @@ export default function TeacherSalaryAdminPage() {
       </Space>
 
       <SalaryConfigDrawer {...configDrawer} onClose={() => setConfigDrawer((prev) => ({ ...prev, open: false }))} onSaved={() => mutate()} />
-      <SalaryAdjustmentModal {...adjustmentModal} onClose={() => setAdjustmentModal((prev) => ({ ...prev, open: false }))} onSaved={() => mutate()} />
+      {!readOnly && <SalaryAdjustmentModal {...adjustmentModal} onClose={() => setAdjustmentModal((prev) => ({ ...prev, open: false }))} onSaved={() => mutate()} />}
       <Modal
         title="删除手动调整"
         open={Boolean(pendingDelete)}

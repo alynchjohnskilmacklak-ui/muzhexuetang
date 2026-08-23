@@ -3,11 +3,16 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { addDays, differenceInDays } from 'date-fns'
 import { apiHandler } from '@/lib/api-handler'
+import { getRequestDivision } from '@/lib/division'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const POST = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
   const prisma = await getRequestPrisma()
+  const division = getRequestDivision(user, null)
+  const activeTerm = await getActiveAcademicTerm(prisma, division)
+  if (!activeTerm) return NextResponse.json({ error: '请先启用一个运营批次，再复制班级' }, { status: 409 })
 
   const { id } = await params
   const body = await req.json()
@@ -41,6 +46,8 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         lessonMinutes: source.lessonMinutes,
         note: source.note,
         status: 'WAITING',
+        termId: activeTerm.id,
+        division,
       },
     })
 

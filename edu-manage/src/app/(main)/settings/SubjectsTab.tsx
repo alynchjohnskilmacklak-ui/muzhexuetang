@@ -2,7 +2,7 @@
 
 import useSWR from 'swr'
 import { Card, Button, Input, Modal, Form, Popconfirm, Tag, Space, message, ColorPicker } from 'antd'
-import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import {
   DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent,

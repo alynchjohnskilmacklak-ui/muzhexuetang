@@ -1,14 +1,15 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { Button, Card, Typography, Spin, Alert, Modal } from 'antd'
+import NextImage from 'next/image'
+import { Button, Card, Typography, Alert, Modal } from 'antd'
 import { WechatOutlined, CheckCircleFilled } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { toast } from 'sonner'
 
 const { Title, Text } = Typography
 
-export function BindWxClient({ bound, userName }: { bound: boolean; userName: string }) {
+export function BindWxClient({ bound }: { bound: boolean; userName: string }) {
   const isMobile = useIsMobile() ?? false
   const [loading, setLoading] = useState(false)
   const [qrcodeUrl, setQrcodeUrl] = useState<string | null>(null)
@@ -136,7 +137,7 @@ export function BindWxClient({ bound, userName }: { bound: boolean; userName: st
             ) : (
               <>
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
-                  <img src={qrcodeUrl} alt="绑定二维码" width={200} height={200} style={{ borderRadius: 8 }} />
+                  <NextImage src={qrcodeUrl} alt="绑定二维码" width={200} height={200} unoptimized style={{ borderRadius: 8 }} />
                 </div>
                 <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 16 }}>
                   使用微信扫描上方二维码，关注公众号即可完成绑定<br />

@@ -169,7 +169,8 @@ async function main() {
         tongZhao: 0,          // 分数线占位，可报名学校后续补真实值；不可报名学校无需
       },
     })
-    existing ? updated++ : created++
+    if (existing) updated++
+    else created++
   }
   console.log(`完成：新增 ${created} 所，更新 ${updated} 所，共 ${XINLE_SCHOOLS.length} 所`)
   console.log(`可报名 ${XINLE_SCHOOLS.filter(s=>s.xinleAccessible).length} 所，不可报名 ${XINLE_SCHOOLS.filter(s=>!s.xinleAccessible).length} 所`)

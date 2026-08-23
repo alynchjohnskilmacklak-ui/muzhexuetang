@@ -4,8 +4,6 @@ import { checkRateLimit } from './rate-limit'
 import { ValidationError } from './api-validate'
 import { AuthError } from './auth/guards'
 
-type Handler = (...args: any[]) => Promise<Response>
-
 /** 不同路径的请求体大小限制 */
 function getBodyLimit(path: string): number {
   if (path.startsWith('/api/materials/upload')) return 210 * 1024 * 1024 // 200MB + overhead
@@ -19,8 +17,8 @@ function getBodyLimit(path: string): number {
  * 包装 API 路由，统一捕获未处理的异常、限流、请求体大小检查。
  * 生产环境只返回通用错误信息，不暴露堆栈或数据库结构。
  */
-export function apiHandler<T extends Handler>(handler: T): T {
-  return (async (...args: Parameters<T>) => {
+export function apiHandler<Args extends unknown[]>(handler: (...args: Args) => Promise<Response>): (...args: Args) => Promise<Response> {
+  return async (...args: Args) => {
     try {
       const req = args[0] as NextRequest | undefined
       if (req?.url) {
@@ -66,5 +64,5 @@ export function apiHandler<T extends Handler>(handler: T): T {
       console.error('[API Error]', req?.url, err)
       return NextResponse.json({ error: message }, { status: 500 })
     }
-  }) as T
+  }
 }

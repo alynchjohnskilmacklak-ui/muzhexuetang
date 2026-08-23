@@ -1,4 +1,4 @@
-import { requireTeacherPage, teacherLessonWhere } from '@/lib/teacher-portal'
+import { requireTeacherPage } from '@/lib/teacher-portal'
 import { getRequestPrisma } from '@/lib/prisma'
 import { startOfLocalDay } from '@/lib/meals'
 import { getEffectiveMealMenuForDate } from '@/lib/meal-template'

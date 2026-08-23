@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import NextImage from 'next/image'
 
 type RankRow = [score: number, count: number, cumulative: number, rankStart: number, rankEnd: number]
 type RankData = { total: number; rows: RankRow[] }
@@ -147,13 +148,13 @@ export default function RankQueryPage() {
         ctx.fillStyle = '#A99'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(String(g), x, H - 8) } })
       ctx.beginPath()
       const sorted = rows.slice().sort((a, b) => a[0] - b[0])
-      sorted.forEach((r, i) => { const x = xFor(r[0]); const y = yFor(r[1]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y) })
+      sorted.forEach((r, i) => { const x = xFor(r[0]); const y = yFor(r[1]); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y) })
       ctx.lineTo(xFor(maxS), H - PAD.b); ctx.lineTo(xFor(minS), H - PAD.b); ctx.closePath()
       const grad = ctx.createLinearGradient(0, PAD.t, 0, H - PAD.b)
       grad.addColorStop(0, 'rgba(232,120,74,.22)'); grad.addColorStop(1, 'rgba(232,120,74,.02)')
       ctx.fillStyle = grad; ctx.fill()
       ctx.beginPath()
-      sorted.forEach((r, i) => { const x = xFor(r[0]); const y = yFor(r[1]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y) })
+      sorted.forEach((r, i) => { const x = xFor(r[0]); const y = yFor(r[1]); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y) })
       ctx.strokeStyle = '#E8784A'; ctx.lineWidth = 2; ctx.stroke()
       const isTopBand = curScore === topBandScore
       const r = isTopBand ? byScore[topBandScore] : byScore[curScore]
@@ -351,7 +352,7 @@ export default function RankQueryPage() {
     <div className="rank-query-page" ref={rootRef}>
       <div className="wrap">
         <div className="top">
-          <img src={LOGO_SRC} alt="牧哲学堂" />
+          <NextImage src={LOGO_SRC} alt="牧哲学堂" width={220} height={64} unoptimized />
           <div className="titles">
             <h1>石家庄中考一分一档 · 位次查询</h1>
             <p>{year}年石家庄17县市区中考成绩位次对照 · 牧哲学堂 MOREJOY</p>

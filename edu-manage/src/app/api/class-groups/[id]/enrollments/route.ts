@@ -6,6 +6,7 @@ import { activeEnrollmentWhere, visibleClassGroupWhere, visibleStudentWhere } fr
 import { roundHours } from '@/lib/hours'
 import { hoursPerLesson } from '@/lib/lesson-units'
 import { apiHandler } from '@/lib/api-handler'
+import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,6 +60,9 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   const prisma = await getRequestPrisma()
 
   const { id } = await params
+  if (!await isClassGroupInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能调整学员名单' }, { status: 409 })
+  }
   const body = await req.json()
   const studentId = typeof body.studentId === 'string' ? body.studentId : ''
   const totalHours = Number(body.totalHours || 0)
@@ -167,6 +171,9 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
   const prisma = await getRequestPrisma()
 
   const { id } = await params
+  if (!await isClassGroupInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能调整学员名单' }, { status: 409 })
+  }
   const { searchParams } = new URL(req.url)
   const enrollmentId = searchParams.get('enrollmentId')
   if (!enrollmentId) return NextResponse.json({ error: '缺少报名记录' }, { status: 400 })

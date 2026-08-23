@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,6 +12,9 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
 
   const prisma = await getRequestPrisma()
   const { id } = await params
+  if (!await isClassGroupInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能调整教师' }, { status: 409 })
+  }
   const body = await req.json().catch(() => ({}))
   const teacherId = typeof body.teacherId === 'string' ? body.teacherId : ''
   const subject = typeof body.subject === 'string' && body.subject.trim() ? body.subject.trim() : ''

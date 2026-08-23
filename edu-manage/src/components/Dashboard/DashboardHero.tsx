@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { Card, Typography } from 'antd'
 import { CalendarOutlined, ClockCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -10,7 +11,13 @@ const { Title, Text } = Typography
 
 const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 
-export function DashboardHero({ metrics }: { metrics: AdminDashboardMetrics }) {
+export function DashboardHero({
+  metrics,
+  toolbar,
+}: {
+  metrics: AdminDashboardMetrics
+  toolbar?: ReactNode
+}) {
   const isMobile = useIsMobile() ?? false
   const now = new Date()
   const dateText = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ${weekDays[now.getDay()]}`
@@ -28,7 +35,7 @@ export function DashboardHero({ metrics }: { metrics: AdminDashboardMetrics }) {
         borderRadius: 18,
         marginBottom: 16,
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, #FFF2E8 0%, #FFF8F2 55%, #F4FFF9 100%)',
+        background: 'var(--color-primary-bg)',
         boxShadow: '0 10px 30px rgba(90, 54, 20, 0.08)',
       }}
       styles={{ body: { padding: isMobile ? 18 : 28 } }}
@@ -42,7 +49,10 @@ export function DashboardHero({ metrics }: { metrics: AdminDashboardMetrics }) {
         }}
       >
         <div>
-          <Text style={{ color: '#8a5c3a', fontWeight: 600 }}>{dateText}</Text>
+          <div className="admin-dashboard-hero__eyebrow">
+            <Text style={{ color: 'var(--color-ink-muted)', fontWeight: 600 }}>{dateText}</Text>
+            {toolbar}
+          </div>
           <Title level={isMobile ? 4 : 2} style={{ margin: '6px 0 8px', color: '#1a1201' }}>
             牧哲学堂 · 数据总览
           </Title>

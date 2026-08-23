@@ -3,6 +3,7 @@ import { getRequestDivision } from '@/lib/division'
 import { writeSalaryExportWorkbook, type SalaryExportRow } from '@/lib/salary-export'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { classifySalaryBucket } from '@/lib/salary-bucket'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,7 +55,9 @@ export async function GET(req: NextRequest) {
     const requestedPeriod = req.nextUrl.searchParams.get('period') || 'month'
     const period = ['week', 'month', 'all'].includes(requestedPeriod) ? requestedPeriod : 'month'
     const division = getRequestDivision(admin, req.nextUrl.searchParams.get('division'))
+    const selectedTerm = await resolveAdminTermScope(prisma, division, req)
     if (!teacherId) return NextResponse.json({ error: '请选择要导出的教师' }, { status: 400 })
+    if (!selectedTerm) return NextResponse.json({ error: '请先在数据总览选择一个运营批次' }, { status: 409 })
 
     const teacher = await prisma.teacher.findFirst({
       where: { id: teacherId, division },
@@ -65,7 +68,7 @@ export async function GET(req: NextRequest) {
     const now = new Date()
     const since = salaryPeriodStart(period, now)
     const transactions = await prisma.teacherSalaryTransaction.findMany({
-      where: { teacherId, createdAt: { gte: since } },
+      where: { teacherId, createdAt: { gte: since }, termId: selectedTerm.id },
       orderBy: [{ lessonDate: 'desc' }, { createdAt: 'desc' }],
     })
 

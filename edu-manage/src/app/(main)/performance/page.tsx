@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Empty, Input, Select, Space, Spin, Tag } from 'antd'
+import { Button, Card, Empty, Input, Select, Space, Tag } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { PageLayout } from '@/components/Layout/PageLayout'

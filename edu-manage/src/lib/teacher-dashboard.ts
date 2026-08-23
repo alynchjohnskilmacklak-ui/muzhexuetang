@@ -5,6 +5,7 @@ import { visibleStudentWhere } from '@/lib/business-visibility'
 import { minutesToHours, roundHours } from '@/lib/hours'
 import { buildLatestFeedbackDateByStudent } from '@/lib/teacher-feedback-freshness'
 import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 function atTime(date: Date, time: string) {
   const [hour, minute] = time.split(':').map(Number)
@@ -44,8 +45,11 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
   const { start: today, end: todayEnd } = todayRange(now)
   const { start: weekStart, end: weekEnd } = weekRange(now)
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  const lessonWhere = teacherLessonWhere(teacherId)
-  const studentWhere = teacherStudentWhere(teacherId)
+  const teacher = await prisma.teacher.findUnique({ where: { id: teacherId }, select: { division: true } })
+  const activeTerm = teacher ? await getActiveAcademicTerm(prisma, teacher.division) : null
+  const termId = activeTerm?.id || '__NO_ACTIVE_TERM__'
+  const lessonWhere = teacherLessonWhere(teacherId, termId)
+  const studentWhere = teacherStudentWhere(teacherId, termId)
 
   const [
     todayLessons,
@@ -114,13 +118,13 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
           select: { status: true },
         },
         performancePosts: {
-          where: { teacherId, deletedAt: null },
+          where: { teacherId, termId, deletedAt: null },
           orderBy: { createdAt: 'desc' },
           take: 1,
           select: { createdAt: true },
         },
         examPapers: {
-          where: { teacherId, status: { not: 'DELETED' } },
+          where: { teacherId, termId, status: { not: 'DELETED' } },
           orderBy: { createdAt: 'desc' },
           take: 3,
           select: {
@@ -133,6 +137,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     prisma.examPaper.findMany({
       where: {
         teacherId,
+        termId,
         status: { not: 'DELETED' },
         paperDate: { gte: weekStart, lt: weekEnd },
         student: visibleStudentWhere,
@@ -143,6 +148,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     prisma.examPaper.findMany({
       where: {
         teacherId,
+        termId,
         status: 'DRAFT',
         student: visibleStudentWhere,
       },
@@ -150,8 +156,8 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       orderBy: { createdAt: 'desc' },
       take: 6,
     }),
-    prisma.paperComment.count({ where: { isRead: false, author: { role: 'parent' }, paper: { teacherId } } }),
-    prisma.postComment.count({ where: { isRead: false, author: { role: 'parent' }, post: { teacherId, deletedAt: null } } }),
+    prisma.paperComment.count({ where: { isRead: false, author: { role: 'parent' }, paper: { teacherId, termId } } }),
+    prisma.postComment.count({ where: { isRead: false, author: { role: 'parent' }, post: { teacherId, termId, deletedAt: null } } }),
     prisma.leaveRequest.findMany({
       where: {
         status: 'pending',
@@ -165,11 +171,11 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       take: 4,
     }),
     prisma.classroomFeedback.findMany({
-      where: { teacherId, status: 'PUBLISHED', createdAt: { gte: today, lt: todayEnd } },
+      where: { teacherId, termId, status: 'PUBLISHED', createdAt: { gte: today, lt: todayEnd } },
       select: { classLessonId: true, feedbackGroupId: true, studentIds: true },
     }),
     prisma.classroomFeedback.findMany({
-      where: { teacherId, status: 'PUBLISHED', createdAt: { gte: weekStart, lt: weekEnd } },
+      where: { teacherId, termId, status: 'PUBLISHED', createdAt: { gte: weekStart, lt: weekEnd } },
       select: {
         classLessonId: true,
         feedbackGroupId: true,
@@ -183,6 +189,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     ? await prisma.classroomFeedback.findMany({
         where: {
           teacherId,
+          termId,
           status: 'PUBLISHED',
           studentIds: { hasSome: students.map((student) => student.id) },
         },

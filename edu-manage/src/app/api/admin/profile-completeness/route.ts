@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { apiHandler } from '@/lib/api-handler'
 import { requireRole } from '@/lib/get-user'
 import { getRequestPrisma } from '@/lib/prisma'
+import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (req: NextRequest) => {
-  await requireRole(['admin'])
+  const user = await requireRole(['admin'])
   const prisma = await getRequestPrisma()
+  const division = getRequestDivision(user, req.nextUrl.searchParams.get('division'))
+  const selectedTerm = await resolveAdminTermScope(prisma, division, req)
+  const termId = selectedTerm?.id || '__NO_SELECTED_TERM__'
 
   const monthsParam = Number(req.nextUrl.searchParams.get('months'))
   const months = Number.isFinite(monthsParam) ? Math.min(24, Math.max(1, Math.round(monthsParam))) : 1
@@ -17,7 +22,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   const [students, gradeRecords, feedbacks, summaries] = await Promise.all([
     prisma.student.findMany({
-      where: { status: { not: 'INACTIVE' } },
+      where: {
+        division,
+        status: { not: 'INACTIVE' },
+        termMemberships: { some: { termId } },
+      },
       select: {
         id: true,
         name: true,
@@ -27,16 +36,20 @@ export const GET = apiHandler(async (req: NextRequest) => {
       orderBy: [{ grade: 'asc' }, { createdAt: 'asc' }],
     }),
     prisma.gradeRecord.findMany({
-      where: { assessment: { assessDate: { gte: from, lte: to } } },
+      where: { termId, assessment: { assessDate: { gte: from, lte: to } } },
       select: { studentId: true },
       distinct: ['studentId'],
     }),
     prisma.classroomFeedback.findMany({
-      where: { status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
+      where: { termId, status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
       select: { studentIds: true },
     }),
     prisma.stageSummary.findMany({
-      where: { status: 'PUBLISHED', periodEnd: { gte: from, lte: to } },
+      where: {
+        status: 'PUBLISHED',
+        periodEnd: { gte: from, lte: to },
+        student: { division, termMemberships: { some: { termId } } },
+      },
       select: { studentId: true },
       distinct: ['studentId'],
     }),

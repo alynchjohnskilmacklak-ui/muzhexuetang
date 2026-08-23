@@ -12,6 +12,7 @@ import {
 import { summarizeParentMessageWorkflow } from '@/lib/parent-message-workflow'
 import { intensiveTeachingTypeLabel } from '@/lib/intensive-class'
 import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,10 +30,6 @@ function roundHours(value: number) {
 
 function hoursBetween(start: Date, end: Date) {
   return Math.max(0, (end.getTime() - start.getTime()) / 3600000)
-}
-
-function formatTime(date: Date) {
-  return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
 function formatTimeAgo(date: Date) {
@@ -71,10 +68,14 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const todayEnd = addDays(today, 1)
   const { searchParams } = new URL(req.url)
   const division = getRequestDivision(user, searchParams.get('division'))
-  const scopedStudentWhere = { ...visibleStudentWhere, division }
-  const scopedGroupWhere = { ...visibleClassGroupWhere, division }
-  const scopedMakeupGroupWhere = { ...makeupEligibleClassGroupWhere, division }
-  const scopedLessonWhere = { division }
+  const selectedTerm = await resolveAdminTermScope(prisma, division, req)
+  const scopedTermId = selectedTerm?.id || '__NO_SELECTED_TERM__'
+  const termStudentWhere = { termMemberships: { some: { termId: scopedTermId } } }
+  const termGroupWhere = { termId: scopedTermId }
+  const scopedStudentWhere = { ...visibleStudentWhere, division, ...termStudentWhere }
+  const scopedGroupWhere = { ...visibleClassGroupWhere, division, ...termGroupWhere }
+  const scopedMakeupGroupWhere = { ...makeupEligibleClassGroupWhere, division, ...termGroupWhere }
+  const scopedLessonWhere = { division, group: { termId: scopedTermId } }
 
   const [
     totalStudents,
@@ -99,8 +100,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     pendingIntensiveAppointments,
     pendingIntensiveReviews,
   ] = await Promise.all([
-    prisma.student.count({ where: { status: 'ACTIVE', division } }),
-    prisma.student.count({ where: { status: 'ACTIVE', createdAt: { lt: monthStart }, division } }),
+    prisma.student.count({ where: { ...scopedStudentWhere, status: 'ACTIVE' } }),
+    prisma.student.count({ where: { ...scopedStudentWhere, status: 'ACTIVE', createdAt: { lt: monthStart } } }),
     prisma.classLesson.findMany({
       where: {
         ...scopedLessonWhere,
@@ -132,6 +133,14 @@ export const GET = apiHandler(async (req: NextRequest) => {
       orderBy: { startTime: 'asc' },
     }),
     prisma.activityLog.findMany({
+      where: selectedTerm
+        ? {
+            createdAt: {
+              gte: startOfDay(selectedTerm.startDate),
+              lt: addDays(startOfDay(selectedTerm.endDate), 1),
+            },
+          }
+        : { id: '__NO_SELECTED_TERM__' },
       take: 6,
       orderBy: { createdAt: 'desc' },
       select: {
@@ -144,8 +153,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
         teacher: { select: { name: true } },
       },
     }),
-    prisma.classGroup.count({ where: { status: 'ACTIVE', course: { isActive: true }, division } }),
-    prisma.classGroup.count({ where: { status: 'WAITING', course: { isActive: true }, division } }),
+    prisma.classGroup.count({ where: { ...scopedGroupWhere, status: 'ACTIVE', course: { isActive: true } } }),
+    prisma.classGroup.count({ where: { ...scopedGroupWhere, status: 'WAITING', course: { isActive: true } } }),
     prisma.enrollment.count({ where: { remainHours: { lte: 5 }, totalHours: { gt: 0 }, ...activeEnrollmentWhere, student: scopedStudentWhere } }),
     prisma.makeupRequest.count({
       where: {
@@ -162,12 +171,12 @@ export const GET = apiHandler(async (req: NextRequest) => {
         lesson: { lessonDate: { gte: monthStart, lt: monthEnd }, group: scopedGroupWhere },
       },
     }),
-    prisma.examPaper.count({ where: { status: 'DRAFT', student: scopedStudentWhere } }),
-    prisma.paperComment.count({ where: { isRead: false, author: { role: 'parent' }, paper: { student: scopedStudentWhere } } }),
-    prisma.postComment.count({ where: { isRead: false, author: { role: 'parent' }, post: { deletedAt: null, student: scopedStudentWhere } } }),
-    prisma.paperQuestion.count({ where: { mastery: 'MASTERED', paper: { paperDate: { gte: monthStart, lt: monthEnd }, student: scopedStudentWhere } } }),
-    prisma.paperQuestion.count({ where: { paper: { paperDate: { gte: monthStart, lt: monthEnd }, student: scopedStudentWhere } } }),
-    prisma.performancePost.count({ where: { createdAt: { gte: today, lt: todayEnd }, deletedAt: null, student: scopedStudentWhere } }),
+    prisma.examPaper.count({ where: { termId: scopedTermId, status: 'DRAFT', student: scopedStudentWhere } }),
+    prisma.paperComment.count({ where: { isRead: false, author: { role: 'parent' }, paper: { termId: scopedTermId, student: scopedStudentWhere } } }),
+    prisma.postComment.count({ where: { isRead: false, author: { role: 'parent' }, post: { termId: scopedTermId, deletedAt: null, student: scopedStudentWhere } } }),
+    prisma.paperQuestion.count({ where: { mastery: 'MASTERED', paper: { termId: scopedTermId, paperDate: { gte: monthStart, lt: monthEnd }, student: scopedStudentWhere } } }),
+    prisma.paperQuestion.count({ where: { paper: { termId: scopedTermId, paperDate: { gte: monthStart, lt: monthEnd }, student: scopedStudentWhere } } }),
+    prisma.performancePost.count({ where: { termId: scopedTermId, createdAt: { gte: today, lt: todayEnd }, deletedAt: null, student: scopedStudentWhere } }),
     prisma.classLesson.findMany({
       where: {
         ...scopedLessonWhere,
@@ -184,7 +193,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       },
     }),
     prisma.parentMessage.findMany({
-      where: { student: { division } },
+      where: { student: scopedStudentWhere },
       select: {
         status: true,
         replies: {

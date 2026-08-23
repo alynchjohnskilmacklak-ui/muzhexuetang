@@ -14,17 +14,35 @@ import { useSignedUrls } from '@/hooks/useSignedUrls'
 const { Title, Text, Paragraph } = Typography
 const { TextArea } = Input
 
+type StageData = {
+  draft?: { summary?: string; suggestions?: string } | null
+  material?: { overview: { attendanceRate?: number | null; masteryRate?: number | null }; summarySeed: string } | null
+}
+type LearningGoal = { id: string; subject: string; goalDesc: string; isAchieved: boolean }
+type Weakness = { id: string; topic: string; mistakeCount: number; suggestion?: string | null }
+type MasteryRecord = { id: string; knowledgePoint: string; level: string }
+type UploadResponse = {
+  file?: { storageKey?: string }
+  url?: string
+  thumbnailUrl?: string
+  previewUrl?: string
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : '操作失败'
+}
+
 const fetcher = (url: string) => fetch(url).then(async r => {
   const data = await r.json()
   if (!r.ok) throw new Error(data.error || '请求失败')
   return data
 })
 
-async function requestJson(url: string, init: RequestInit) {
+async function requestJson<T = unknown>(url: string, init: RequestInit): Promise<T> {
   const res = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json', ...(init.headers || {}) } })
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || '操作失败')
-  return data
+  return data as T
 }
 
 const MASTERY_LEVELS = [
@@ -38,7 +56,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
   const [tab, setTab] = useState('feedback')
 
   // Stage summary
-  const [stageData, setStageData] = useState<any>(null)
+  const [stageData, setStageData] = useState<StageData | null>(null)
   const [summary, setSummary] = useState('')
   const [suggestions, setSuggestions] = useState('')
   const [saving, setSaving] = useState(false)
@@ -47,12 +65,12 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
   const [aiGenerating, setAiGenerating] = useState(false)
 
   // Goals
-  const [goals, setGoals] = useState<any[]>([])
+  const [goals, setGoals] = useState<LearningGoal[]>([])
   const [goalSubject, setGoalSubject] = useState('')
   const [goalDesc, setGoalDesc] = useState('')
 
   // Weaknesses
-  const [weaknesses, setWeaknesses] = useState<any[]>([])
+  const [weaknesses, setWeaknesses] = useState<Weakness[]>([])
   const [weakTopic, setWeakTopic] = useState('')
   const [weakCount, setWeakCount] = useState<number | null>(1)
   const [weakSuggestion, setWeakSuggestion] = useState('')
@@ -61,7 +79,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
   const [kpInput, setKpInput] = useState('')
   const [kpLevel, setKpLevel] = useState('NEEDS_REVIEW')
   const [kpNote, setKpNote] = useState('')
-  const [masteryRecords, setMasteryRecords] = useState<any[]>([])
+  const [masteryRecords, setMasteryRecords] = useState<MasteryRecord[]>([])
 
   // Growth feedback (merged: classroom-feedback + performance)
   const [feedbackText, setFeedbackText] = useState('')
@@ -76,16 +94,16 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
   const [feedbackSaving, setFeedbackSaving] = useState(false)
 
   useEffect(() => {
-    fetcher(`/api/teacher/stage-summary?studentId=${studentId}&months=3`).then(d => {
+    fetcher(`/api/teacher/stage-summary?studentId=${studentId}&months=3`).then((d: StageData) => {
       setStageData(d)
       if (d.draft) {
         setSummary(d.draft.summary || '')
         setSuggestions(d.draft.suggestions || '')
       }
     }).catch(() => {})
-    fetcher(`/api/teacher/learning-goals?studentId=${studentId}`).then(d => setGoals(d.goals || [])).catch(() => {})
-    fetcher(`/api/teacher/weaknesses?studentId=${studentId}`).then(d => setWeaknesses(d.weaknesses || [])).catch(() => {})
-    fetcher(`/api/teacher/mastery?studentId=${studentId}`).then(d => setMasteryRecords(d.records || [])).catch(() => {})
+    fetcher(`/api/teacher/learning-goals?studentId=${studentId}`).then((d: { goals?: LearningGoal[] }) => setGoals(d.goals || [])).catch(() => {})
+    fetcher(`/api/teacher/weaknesses?studentId=${studentId}`).then((d: { weaknesses?: Weakness[] }) => setWeaknesses(d.weaknesses || [])).catch(() => {})
+    fetcher(`/api/teacher/mastery?studentId=${studentId}`).then((d: { records?: MasteryRecord[] }) => setMasteryRecords(d.records || [])).catch(() => {})
   }, [studentId])
 
   async function saveStage() {
@@ -96,14 +114,14 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
         body: JSON.stringify({ studentId, periodStart: new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().slice(0,10), periodEnd: new Date().toISOString().slice(0,10), summary, suggestions }),
       })
       toast.success('草稿已保存')
-    } catch (e: any) { toast.error(e.message) }
+    } catch (e: unknown) { toast.error(errorMessage(e)) }
     finally { setSaving(false) }
   }
 
   async function publishStage() {
     setSaving(true)
     try {
-      const d = await requestJson('/api/teacher/stage-summary', {
+      const d = await requestJson<{ stageSummary: { id: string } }>('/api/teacher/stage-summary', {
         method: 'POST',
         body: JSON.stringify({ studentId, periodStart: new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().slice(0,10), periodEnd: new Date().toISOString().slice(0,10), summary, suggestions }),
       })
@@ -112,7 +130,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
         body: JSON.stringify({ id: d.stageSummary.id, action: 'publish' }),
       })
       toast.success('已发布，家长端将显示本期寄语')
-    } catch (e: any) { toast.error(e.message) }
+    } catch (e: unknown) { toast.error(errorMessage(e)) }
     finally { setSaving(false) }
   }
 
@@ -136,18 +154,18 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
   async function doAiGenerate() {
     setAiGenerating(true)
     try {
-      const res = await requestJson('/api/teacher/ai-feedback', {
+      const res = await requestJson<{ draft?: string }>('/api/teacher/ai-feedback', {
         method: 'POST',
         body: JSON.stringify({ studentId, keywords, kind: 'stage' }),
       })
-      const draft = (res as any).draft
+      const draft = res.draft
       if (draft) {
         setSummary(draft)
         toast.success(`AI 草稿已生成（${draft.length} 字），请核对修改后发布`)
       } else {
         toast.warning('AI 未返回内容，请检查关键词或稍后重试')
       }
-    } catch (e: any) { toast.error(e.message) }
+    } catch (e: unknown) { toast.error(errorMessage(e)) }
     finally { setAiGenerating(false) }
   }
 
@@ -155,24 +173,24 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
     try {
       await requestJson('/api/teacher/learning-goals', { method: 'POST', body: JSON.stringify({ studentId, subject: goalSubject, goalDesc }) })
       toast.success('目标已添加'); setGoalSubject(''); setGoalDesc('')
-      const d = await fetcher(`/api/teacher/learning-goals?studentId=${studentId}`); setGoals(d.goals || [])
-    } catch (e: any) { toast.error(e.message) }
+      const d = await fetcher(`/api/teacher/learning-goals?studentId=${studentId}`) as { goals?: LearningGoal[] }; setGoals(d.goals || [])
+    } catch (e: unknown) { toast.error(errorMessage(e)) }
   }
 
   async function addWeakness() {
     try {
       await requestJson('/api/teacher/weaknesses', { method: 'POST', body: JSON.stringify({ studentId, topic: weakTopic, mistakeCount: weakCount || 1, suggestion: weakSuggestion }) })
       toast.success('薄弱点已添加'); setWeakTopic(''); setWeakCount(1); setWeakSuggestion('')
-      const d = await fetcher(`/api/teacher/weaknesses?studentId=${studentId}`); setWeaknesses(d.weaknesses || [])
-    } catch (e: any) { toast.error(e.message) }
+      const d = await fetcher(`/api/teacher/weaknesses?studentId=${studentId}`) as { weaknesses?: Weakness[] }; setWeaknesses(d.weaknesses || [])
+    } catch (e: unknown) { toast.error(errorMessage(e)) }
   }
 
   async function pushMastery() {
     try {
       await requestJson('/api/teacher/mastery', { method: 'POST', body: JSON.stringify({ studentId, teacherId, knowledgePoint: kpInput, level: kpLevel, note: kpNote || undefined }) })
       toast.success('知识点掌握已推送'); setKpInput(''); setKpNote('')
-      const d = await fetcher(`/api/teacher/mastery?studentId=${studentId}`); setMasteryRecords(d.records || [])
-    } catch (e: any) { toast.error(e.message) }
+      const d = await fetcher(`/api/teacher/mastery?studentId=${studentId}`) as { records?: MasteryRecord[] }; setMasteryRecords(d.records || [])
+    } catch (e: unknown) { toast.error(errorMessage(e)) }
   }
 
   async function submitFeedback() {
@@ -193,7 +211,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
       toast.success('成长反馈已发布，家长会立即收到通知')
       setFeedbackText(''); setFeedbackMood('GOOD'); setFeedbackTags('')
       setHomeworkDone(null); setInClassRating(null); setImageUrls([]); setImageDisplayUrls({})
-    } catch (e: any) { toast.error(e.message) }
+    } catch (e: unknown) { toast.error(errorMessage(e)) }
     finally { setFeedbackSaving(false) }
   }
 
@@ -340,7 +358,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
                 }}
                 onChange={info => {
                   if (info.file.status === 'done') {
-                    const response = info.file.response as any
+                    const response = info.file.response as UploadResponse | undefined
                     const url = response?.file?.storageKey || response?.url
                     if (url) {
                       setImageUrls(previous => [...previous, url])
@@ -382,7 +400,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
           </Card>
           <Card bordered={false} style={{ ...cardStyle, marginTop: 12 }} title="已推送记录">
             {masteryRecords.length === 0 ? <Empty description="暂无记录" image={Empty.PRESENTED_IMAGE_SIMPLE} /> : (
-              <List dataSource={masteryRecords.slice(0, 20)} renderItem={(r: any) => (
+              <List dataSource={masteryRecords.slice(0, 20)} renderItem={(r) => (
                 <List.Item><List.Item.Meta title={r.knowledgePoint}
                   description={<Tag color={r.level === 'MASTERED' ? 'green' : r.level === 'NEEDS_PRACTICE' ? 'red' : 'orange'}>{MASTERY_LEVELS.find(l => l.value === r.level)?.label}</Tag>} /></List.Item>
               )} />
@@ -401,7 +419,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
             <Input placeholder="目标描述" value={goalDesc} onChange={e => setGoalDesc(e.target.value)} style={{ flex: 1 }} />
             <Button type="primary" icon={<PlusOutlined />} onClick={addGoal}>新增</Button>
           </Space>
-          <List style={{ marginTop: 12 }} dataSource={goals} renderItem={(goal: any) => (
+          <List style={{ marginTop: 12 }} dataSource={goals} renderItem={(goal) => (
             <List.Item actions={[
               goal.isAchieved ? <Tag color="green">已达成</Tag> : <Button size="small" onClick={async () => { await requestJson('/api/teacher/learning-goals', { method: 'PATCH', body: JSON.stringify({ id: goal.id, action: 'achieve' }) }); const d = await fetcher(`/api/teacher/learning-goals?studentId=${studentId}`); setGoals(d.goals || []) }}>达成</Button>,
             ]}>{goal.subject}：{goal.goalDesc}</List.Item>
@@ -420,7 +438,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
             <Input placeholder="建议（可选）" value={weakSuggestion} onChange={e => setWeakSuggestion(e.target.value)} />
             <Button type="primary" icon={<PlusOutlined />} onClick={addWeakness}>新增薄弱点</Button>
           </Space>
-          <List style={{ marginTop: 12 }} dataSource={weaknesses} renderItem={(w: any) => (
+          <List style={{ marginTop: 12 }} dataSource={weaknesses} renderItem={(w) => (
             <List.Item><List.Item.Meta title={<Space><Text strong>{w.topic}</Text><Tag color="volcano">错 {w.mistakeCount}</Tag></Space>} description={w.suggestion || '暂无建议'} /></List.Item>
           )} />
         </Card>

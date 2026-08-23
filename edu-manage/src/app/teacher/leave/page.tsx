@@ -57,7 +57,7 @@ export default function TeacherLeavePage() {
     fetcher
   )
 
-  const records = data?.records || []
+  const records = useMemo(() => data?.records || [], [data])
   const pendingCount = useMemo(() => records.filter((record) => record.status === 'pending').length, [records])
 
   const submitAction = async () => {

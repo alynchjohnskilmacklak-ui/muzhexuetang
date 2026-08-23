@@ -68,7 +68,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
           lte: asDatabaseDate(endDate),
         },
       },
-      select: { id: true, mealDate: true, notes: true, updatedAt: true },
+      select: { id: true, mealDate: true, eating: true, source: true, notes: true, updatedAt: true },
       orderBy: { mealDate: 'asc' },
     })
     : []
@@ -80,6 +80,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     records: records.map((record) => ({
       ...record,
       mealDate: record.mealDate.toISOString().slice(0, 10),
+      source: record.source === 'AUTO' ? 'auto' : 'manual',
     })),
   })
 })
@@ -115,20 +116,25 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
   if (!student) return NextResponse.json({ error: '学生不存在或不属于当前学部' }, { status: 404 })
 
   const date = asDatabaseDate(mealDate)
-  if (eating) {
-    await db.studentMealAttendance.upsert({
-      where: { studentId_mealDate: { studentId, mealDate: date } },
-      create: {
-        studentId,
-        mealDate: date,
-        division,
-        recordedBy: session.user.id,
-      },
-      update: { recordedBy: session.user.id, division },
-    })
-  } else {
-    await db.studentMealAttendance.deleteMany({ where: { studentId, mealDate: date } })
-  }
+  await db.studentMealAttendance.upsert({
+    where: { studentId_mealDate: { studentId, mealDate: date } },
+    create: {
+      studentId,
+      mealDate: date,
+      division,
+      recordedBy: session.user.id,
+      eating,
+      source: 'MANUAL',
+      notes: '管理员手动调整',
+    },
+    update: {
+      recordedBy: session.user.id,
+      division,
+      eating,
+      source: 'MANUAL',
+      notes: '管理员手动调整',
+    },
+  })
 
   await db.activityLog.create({
     data: {

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
@@ -20,6 +20,18 @@ interface StudentItem {
   roomName: string
 }
 
+interface NotificationRecord {
+  id: string
+  title: string
+  content: string
+  type: string
+  pushStatus: string
+  attempts: number
+  lastError?: string | null
+  createdAt: string
+  student?: { name?: string } | null
+}
+
 export default function AdminNotificationsPage() {
   const [students, setStudents] = useState<StudentItem[]>([])
   const [grades, setGrades] = useState<string[]>([])
@@ -27,12 +39,12 @@ export default function AdminNotificationsPage() {
   const [gradeFilter, setGradeFilter] = useState('')
   const [searchKeyword, setSearchKeyword] = useState('')
   const [stats, setStats] = useState({ todaySent: 0, totalSent: 0, totalFailed: 0 })
-  const [records, setRecords] = useState<any[]>([])
+  const [records, setRecords] = useState<NotificationRecord[]>([])
   const [totalRecords, setTotalRecords] = useState(0)
   const [sending, setSending] = useState(false)
   const [form] = Form.useForm()
   const [pushType, setPushType] = useState<string>('system')
-  const [detailModal, setDetailModal] = useState<{ open: boolean; record: any | null }>({ open: false, record: null })
+  const [detailModal, setDetailModal] = useState<{ open: boolean; record: NotificationRecord | null }>({ open: false, record: null })
 
   const fetchStudents = useCallback(async () => {
     const res = await fetch('/api/notifications/students')
@@ -324,7 +336,7 @@ export default function AdminNotificationsPage() {
                   },
                   {
                     title: '微信推送', dataIndex: 'pushStatus', key: 'pushStatus', width: 140,
-                    render: (value: string, record: any) => {
+                    render: (value: string, record) => {
                       if (value === 'none') return <span style={{ color: '#62666d' }}>-</span>
                       if (value === 'sent') return <Tag color="success">已推送{record.attempts > 0 ? `(第${record.attempts}次)` : ''}</Tag>
                       if (value === 'failed') return (
@@ -347,7 +359,7 @@ export default function AdminNotificationsPage() {
                   },
                   {
                     title: '操作', key: 'action', width: 120,
-                    render: (_: unknown, record: any) => (
+                    render: (_: unknown, record) => (
                       <Space size={4}>
                         <Button type="link" size="small" onClick={() => setDetailModal({ open: true, record })}>查看</Button>
                         {record.pushStatus === 'failed' && (

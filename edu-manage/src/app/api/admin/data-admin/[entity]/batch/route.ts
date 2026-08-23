@@ -7,6 +7,7 @@ import {
   type EntityKey,
 } from '@/lib/data-admin/entities'
 import { createActivityLog } from '@/lib/data-admin/entities-server'
+import { getDynamicModel } from '@/lib/data-admin/dynamic-model'
 
 const ALLOWED_ACTIONS = ['softDelete', 'restore', 'markRead'] as const
 type BatchAction = typeof ALLOWED_ACTIONS[number]
@@ -74,7 +75,7 @@ export async function POST(
   }
 
   const def = DATA_ADMIN_ENTITIES[entityKey]
-  const prismaModel = (prisma as any)[def.model]
+  const prismaModel = getDynamicModel(prisma, def.model)
   if (!prismaModel) {
     return NextResponse.json({ error: '模型不存在' }, { status: 500 })
   }

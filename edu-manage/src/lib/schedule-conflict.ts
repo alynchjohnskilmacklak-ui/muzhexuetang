@@ -19,6 +19,7 @@ export interface ConflictCheckInput {
   startTime: string
   endTime: string
   excludeLessonId?: string
+  termId?: string
 }
 
 export interface ConflictInfo {
@@ -32,7 +33,7 @@ export interface ConflictInfo {
 
 export async function checkScheduleConflict(input: ConflictCheckInput, prismaClient?: PrismaClient): Promise<ConflictInfo[]> {
   const prisma = prismaClient ?? await getRequestPrisma()
-  const { teacherId, studentId, roomId, date, startTime, endTime, excludeLessonId } = input
+  const { teacherId, studentId, roomId, date, startTime, endTime, excludeLessonId, termId } = input
 
   const { start: dayStart, end: dayEnd } = getLocalDayRange(date)
 
@@ -51,6 +52,7 @@ export async function checkScheduleConflict(input: ConflictCheckInput, prismaCli
     where: {
       ...whereBase,
       teacherId,
+      ...(termId ? { group: { termId } } : {}),
     },
     include: {
       group: { include: { course: { select: { name: true } }, room: { select: { name: true } } } },
@@ -78,7 +80,10 @@ export async function checkScheduleConflict(input: ConflictCheckInput, prismaCli
     const studentLessons = await prisma.classLesson.findMany({
       where: {
         ...whereBase,
-        group: { enrollments: { some: { studentId, status: 'ACTIVE' } } },
+        group: {
+          ...(termId ? { termId } : {}),
+          enrollments: { some: { studentId, status: 'ACTIVE' } },
+        },
       },
       include: {
         group: { include: { course: { select: { name: true } }, room: { select: { name: true } } } },
@@ -107,7 +112,7 @@ export async function checkScheduleConflict(input: ConflictCheckInput, prismaCli
     const roomLessons = await prisma.classLesson.findMany({
       where: {
         ...whereBase,
-        group: { roomId },
+        group: { roomId, ...(termId ? { termId } : {}) },
       },
       include: {
         group: { include: { course: { select: { name: true } }, room: { select: { name: true } } } },

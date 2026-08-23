@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 
 type ResponsiveTableProps<T extends object> = TableProps<T> & {
   mobileEmptyText?: string
+  mobileEmpty?: React.ReactNode
   renderMobileItem: (record: T, index: number) => React.ReactNode
 }
 
@@ -13,6 +14,7 @@ export function ResponsiveTable<T extends object>({
   dataSource,
   renderMobileItem,
   mobileEmptyText = '暂无记录',
+  mobileEmpty,
   scroll,
   ...tableProps
 }: ResponsiveTableProps<T>) {
@@ -21,7 +23,7 @@ export function ResponsiveTable<T extends object>({
 
   if (isMobile) {
     if (!records.length) {
-      return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={mobileEmptyText} />
+      return mobileEmpty ?? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={mobileEmptyText} />
     }
     return (
       <div className="responsive-card-list">

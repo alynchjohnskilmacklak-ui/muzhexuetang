@@ -20,6 +20,7 @@ const TYPE_COLORS: Record<string, { bg: string; text: string; label: string }> =
   ONE_ON_THREE: { bg: '#FBEAF0', text: '#72243E', label: '一对三' },
   SMALL_GROUP: { bg: '#FBEAF0', text: '#72243E', label: '一对三' },
   GROUP: { bg: '#FAEEDA', text: '#633806', label: '班课' },
+  STUDY_HALL: { bg: '#FFF0E8', text: '#A63F18', label: '作业班' },
 }
 
 function getAvatarColor(name: string) {
@@ -64,6 +65,13 @@ type StudentCardProps = {
     membershipLevel?: string
     courseType?: string | null
     enrollments?: StudentEnrollment[]
+    studyHallMemberships?: Array<{
+      id: string
+      remainingDays: number | null
+      totalDays: number | null
+      quotaState: 'UNSET' | 'ACTIVE' | 'LOW' | 'EXPIRED'
+      studyClass: { name: string; scheduleType: 'WEEKDAY_LATE' | 'WEEKEND' }
+    }>
     mainTeacher?: { id: string; name: string } | null
     schedules?: Array<{ schedule: { course?: { id: string; name: string } | null } }>
   }
@@ -135,6 +143,13 @@ export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
         <StatusBadge status={student.status} isOwed={isOwed} />
         <CourseTypeBadge type={student.courseType} />
       </Space>
+
+      {student.studyHallMemberships?.map((membership) => (
+        <div key={membership.id} style={{ fontSize: 11, color: '#667085', margin: '-3px 0 8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {membership.studyClass.scheduleType === 'WEEKEND' ? '周末班' : '晚托'}：{membership.studyClass.name}
+          {' · '}{membership.quotaState === 'UNSET' ? '未设置天数' : membership.quotaState === 'EXPIRED' ? '已到期' : `剩余${membership.remainingDays}/${membership.totalDays}天`}
+        </div>
+      ))}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #EEE7E1', paddingTop: 9 }}>
         <span style={{ color: '#98A2B3', fontSize: 11, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

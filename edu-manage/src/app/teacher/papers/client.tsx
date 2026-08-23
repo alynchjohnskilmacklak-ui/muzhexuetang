@@ -1,21 +1,23 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import useSWR from 'swr'
 import {
-  Button, Card, Empty, Form, Image, Input, Modal, Select, Skeleton, Space,
-  Tag, Typography, Upload, Row, Col, List, Popconfirm,
+  Button, Card, Form, Image, Input, Modal, Select, Skeleton, Space,
+  Tag, Typography, Upload, List,
 } from 'antd'
 import {
-  DeleteOutlined, EyeOutlined, FileImageOutlined,
-  InboxOutlined, PlusOutlined, SendOutlined,
+  EyeOutlined, FileImageOutlined, PlusOutlined, SendOutlined,
 } from '@ant-design/icons'
-import type { UploadFile } from 'antd'
+import type { UploadFile, UploadProps } from 'antd'
 import { toast } from 'sonner'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
 const fetcher = (url: string) => fetch(url).then(r => r.json())
+type Paper = { id: string; title: string; imageUrls: string | string[]; status: string; student?: { name?: string }; subject?: string; paperDate?: string; overallComment?: string }
+type StudentOption = { id: string; name: string }
 
 export function TeacherPapersClient() {
   const [form] = Form.useForm()
@@ -26,9 +28,9 @@ export function TeacherPapersClient() {
   const [previewUrl, setPreviewUrl] = useState('')
   const [expandedPaper, setExpandedPaper] = useState<string | null>(null)
 
-  const { data: papers, mutate } = useSWR('/api/teacher/papers', fetcher, { refreshInterval: 300_000 })
-  const { data: studentsData } = useSWR('/api/teacher/students', fetcher)
-  const students = Array.isArray(studentsData?.students) ? studentsData.students : Array.isArray(studentsData) ? studentsData : []
+  const { data: papers, mutate } = useSWR<Paper[]>('/api/teacher/papers', fetcher, { refreshInterval: 300_000 })
+  const { data: studentsData } = useSWR<{ students?: StudentOption[] } | StudentOption[]>('/api/teacher/students', fetcher)
+  const students = Array.isArray(studentsData) ? studentsData : studentsData?.students || []
 
   const paperList = Array.isArray(papers) ? papers : []
 
@@ -42,16 +44,16 @@ export function TeacherPapersClient() {
     )
   }
 
-  const handleUpload = async (options: any) => {
+  const handleUpload: NonNullable<UploadProps['customRequest']> = async (options) => {
     const formData = new FormData()
     formData.append('file', options.file)
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      options.onSuccess({ url: data.url }, options.file)
-    } catch (e: any) {
-      options.onError(e)
+      options.onSuccess?.({ url: data.url }, options.file)
+    } catch (e) {
+      options.onError?.(e instanceof Error ? e : new Error('上传失败'))
     }
   }
 
@@ -95,7 +97,7 @@ export function TeacherPapersClient() {
       form.resetFields()
       setFileList([])
       mutate()
-    } catch (e: unknown) {
+    } catch {
       toast.error('请至少上传一张图片')
     } finally {
       setSubmitting(false)
@@ -117,14 +119,17 @@ export function TeacherPapersClient() {
 
       {paperList.length === 0 ? (
         <Card bordered={false} style={{ borderRadius: 12, minHeight: 360, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', border: '1px solid #F0DDD2' }}>
-          <Empty description="暂无试卷记录，点击上方按钮新建" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          <GuidedEmpty title="还没有试卷记录" description="上传试卷后可以关联学员并推送给家长，形成连续的学习资料记录。" actionLabel="上传第一份试卷" onAction={() => setModalOpen(true)} />
         </Card>
       ) : (
         <List
           dataSource={paperList}
           grid={{ gutter: 16, xs: 1, sm: 2, lg: 3 }}
-          renderItem={(paper: any) => {
-            const urls = (() => { try { return JSON.parse(paper.imageUrls) } catch { return Array.isArray(paper.imageUrls) ? paper.imageUrls : [] } })()
+          renderItem={(paper) => {
+            const urls: string[] = (() => {
+              if (Array.isArray(paper.imageUrls)) return paper.imageUrls
+              try { return JSON.parse(paper.imageUrls) as string[] } catch { return [] }
+            })()
             const isExpanded = expandedPaper === paper.id
             return (
               <List.Item>
@@ -155,6 +160,7 @@ export function TeacherPapersClient() {
                         <Image
                           key={i}
                           src={url}
+                          alt={`试卷图片 ${i + 1}`}
                           width={isExpanded ? 140 : 60}
                           height={isExpanded ? 100 : 60}
                           style={{ borderRadius: 8, objectFit: 'cover', cursor: 'pointer' }}
@@ -222,7 +228,7 @@ export function TeacherPapersClient() {
             <Select mode="multiple" placeholder="选择学生" showSearch={false} virtual={false}
               getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
               options={
-              students.map((s: any) => ({ label: s.name, value: s.id }))
+              students.map((s) => ({ label: s.name, value: s.id }))
             } />
           </Form.Item>
           <Form.Item name="subject" label="科目">
@@ -260,7 +266,7 @@ export function TeacherPapersClient() {
       </Modal>
 
       <Modal open={previewOpen} footer={null} onCancel={() => setPreviewOpen(false)} width={800}>
-        <Image src={previewUrl} style={{ width: '100%' }} preview={false} />
+        <Image src={previewUrl} alt="试卷图片预览" style={{ width: '100%' }} preview={false} />
       </Modal>
     </div>
   )

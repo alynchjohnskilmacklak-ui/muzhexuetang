@@ -21,7 +21,7 @@ export default function VolunteerAdminPage() {
   const isMobile = useIsMobile() ?? false
   const { data, mutate, isLoading } = useSWR('/api/volunteer', fetcher)
   const { data: consultData, mutate: mutateConsults } = useSWR('/api/volunteer/consultation', fetcher)
-  const steps = Array.isArray(data?.steps) ? data.steps : []
+  const steps = useMemo(() => Array.isArray(data?.steps) ? data.steps : [], [data])
   const documents = Array.isArray(data?.documents) ? data.documents : []
   const consultations = Array.isArray(consultData?.consultations) ? consultData.consultations : []
   const [selectedId, setSelectedId] = useState('')

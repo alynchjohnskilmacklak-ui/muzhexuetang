@@ -10,10 +10,6 @@ const { Text } = Typography
 const roleColors: Record<string, string> = { admin: 'red', teacher: 'blue', parent: 'green' }
 const roleLabels: Record<string, string> = { admin: '管理员', teacher: '教师', parent: '家长' }
 
-interface LogEntry {
-  id: string; user: string; role: string; action: string; detail: string; createdAt: string
-}
-
 export function LogsTab() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)

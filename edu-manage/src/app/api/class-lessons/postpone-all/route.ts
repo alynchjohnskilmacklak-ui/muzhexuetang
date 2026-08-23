@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { attendanceEligibleLessonWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
 import { addDays } from 'date-fns'
 import { apiHandler } from '@/lib/api-handler'
+import { isClassLessonInActiveTerm } from '@/lib/admin-term-scope'
 
 export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
@@ -12,6 +13,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   const body = await req.json()
   const { lessonId, offsetDays } = body
+  if (!lessonId || !await isClassLessonInActiveTerm(prisma, lessonId)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能后移课次' }, { status: 409 })
+  }
 
   const lesson = await prisma.classLesson.findFirst({
     where: { id: lessonId, ...attendanceEligibleLessonWhere },

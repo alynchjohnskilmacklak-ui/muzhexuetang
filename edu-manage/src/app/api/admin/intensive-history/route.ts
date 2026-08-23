@@ -12,6 +12,7 @@ import {
 } from '@/lib/intensive-history'
 import { toIntensiveTeachingType } from '@/lib/intensive-class'
 import { getTeacherIntensiveStudentCount } from '@/lib/teacher-intensive-scheduling'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,9 +32,11 @@ async function requireAdmin(request: NextRequest) {
 export const GET = apiHandler(async (request: NextRequest) => {
   try {
     const { prisma, division } = await requireAdmin(request)
+    const selectedTerm = await resolveAdminTermScope(prisma, division, request)
     const groups = await prisma.classGroup.findMany({
       where: {
         division,
+        termId: selectedTerm?.id || '__NO_SELECTED_TERM__',
         intensiveMode: 'INTENSIVE',
         status: { not: 'ARCHIVED' },
         course: { isActive: true },
@@ -59,6 +62,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
 
     return NextResponse.json({
       division,
+      term: selectedTerm,
       groups: groups.map((group) => {
         const teachingType = toIntensiveTeachingType(group.teachingType) || 'ONE_ON_ONE'
         const teacherMap = new Map<string, { id: string; name: string; subject?: string | null }>()
@@ -110,6 +114,13 @@ export const GET = apiHandler(async (request: NextRequest) => {
 export const POST = apiHandler(async (request: NextRequest) => {
   try {
     const { user, prisma, division } = await requireAdmin(request)
+    const selectedTerm = await resolveAdminTermScope(prisma, division, request)
+    if (!selectedTerm || selectedTerm.status !== 'ACTIVE') {
+      return NextResponse.json(
+        { error: '历史批次只允许查看，请切换到当前运营批次后再补录课程' },
+        { status: 409 },
+      )
+    }
     const body = await request.json() as Record<string, unknown>
     const rawRecords = Array.isArray(body.records) ? body.records : []
     const records = rawRecords
@@ -133,6 +144,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
       prisma,
       operatorId: user.id,
       division,
+      termId: selectedTerm.id,
       input,
     })
     revalidatePath('/schedule/intensive')

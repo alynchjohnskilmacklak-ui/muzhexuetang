@@ -15,7 +15,6 @@
 
 import { writeFile, mkdir, unlink, readFile } from 'fs/promises'
 import { join, extname } from 'path'
-import { createReadStream } from 'fs'
 import crypto from 'crypto'
 
 // ---- types ----
@@ -314,12 +313,12 @@ function getDriver(): StorageDriver {
 
 // ---- public API ----
 
-/** 生成安全的文件名: {prefix}-{timestamp}-{random}.{ext} */
+/** 生成安全的文件名: {prefix}-{timestamp}-{uuid}.{ext} */
 export function safeFilename(originalName: string, prefix = 'file'): string {
   const ext = extname(originalName).toLowerCase().replace(/[^a-z0-9.]/g, '') || '.bin'
   const safeExt = ext.length > 8 ? '.bin' : ext
   const ts = Date.now()
-  const rand = Math.random().toString(36).slice(2, 8)
+  const rand = crypto.randomUUID()
   return `${prefix}-${ts}-${rand}${safeExt}`
 }
 

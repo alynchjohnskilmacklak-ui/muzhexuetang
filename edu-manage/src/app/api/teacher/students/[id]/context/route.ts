@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getRequestPrisma } from '@/lib/prisma'
 import { requireCurrentTeacher, assertTeacherOwnsStudent } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const { id: studentId } = await params
   const { teacher, prisma } = await requireCurrentTeacher()
+  const activeTerm = await getActiveAcademicTerm(prisma, teacher.division)
+  if (!activeTerm) return NextResponse.json({ error: '当前没有已启用的运营批次' }, { status: 409 })
 
-  const student = await assertTeacherOwnsStudent(teacher.id, studentId, prisma)
+  const student = await assertTeacherOwnsStudent(teacher.id, studentId, prisma, activeTerm.id)
   if (!student) return NextResponse.json({ error: '无权访问该学生' }, { status: 403 })
 
   const now = new Date()
@@ -25,38 +27,44 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
       select: { id: true, name: true, grade: true, school: true, remainHours: true, totalHours: true, status: true },
     }),
     prisma.classroomFeedback.findMany({
-      where: { studentIds: { has: studentId }, teacherId: teacher.id, createdAt: { gte: threeMonthsAgo } },
+      where: { studentIds: { has: studentId }, teacherId: teacher.id, termId: activeTerm.id, createdAt: { gte: threeMonthsAgo } },
       select: { id: true, mood: true, summary: true, overallComment: true, imageUrls: true, parentReply: true, createdAt: true },
       orderBy: { createdAt: 'desc' }, take: 3,
     }),
     prisma.masteryRecord.findMany({
-      where: { studentId, createdAt: { gte: threeMonthsAgo } },
+      where: { studentId, createdAt: { gte: activeTerm.startDate, lte: activeTerm.endDate } },
       select: { id: true, knowledgePoint: true, level: true, note: true, createdAt: true },
       orderBy: { createdAt: 'desc' }, take: 5,
     }).catch(() => []),
     prisma.learningGoal.findMany({
-      where: { studentId, isAchieved: false },
+      where: { studentId, isAchieved: false, createdAt: { gte: activeTerm.startDate, lte: activeTerm.endDate } },
       select: { id: true, subject: true, goalDesc: true, deadline: true },
       orderBy: { createdAt: 'desc' }, take: 5,
     }),
     prisma.weaknessRecord.findMany({
-      where: { studentId },
+      where: { studentId, createdAt: { gte: activeTerm.startDate, lte: activeTerm.endDate } },
       select: { id: true, topic: true, mistakeCount: true, suggestion: true },
       orderBy: [{ mistakeCount: 'desc' }, { createdAt: 'desc' }], take: 10,
     }),
     prisma.stageSummary.findFirst({
-      where: { studentId, teacherId: teacher.id, status: 'PUBLISHED' },
+      where: {
+        studentId,
+        teacherId: teacher.id,
+        status: 'PUBLISHED',
+        periodEnd: { gte: activeTerm.startDate },
+        periodStart: { lte: activeTerm.endDate },
+      },
       select: { id: true, summary: true, periodStart: true, periodEnd: true, publishedAt: true },
       orderBy: { periodEnd: 'desc' },
     }),
     prisma.attendance.findMany({
-      where: { studentId, createdAt: { gte: threeMonthsAgo } },
+      where: { studentId, lesson: { group: { termId: activeTerm.id } } },
       select: { status: true },
     }),
     prisma.classLesson.findMany({
       where: {
         status: { not: 'CANCELLED' },
-        group: { enrollments: { some: { studentId, status: 'ACTIVE' } } },
+        group: { termId: activeTerm.id, enrollments: { some: { studentId, status: 'ACTIVE' } } },
         lessonDate: { gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) },
       },
       select: { id: true, lessonDate: true, startTime: true, endTime: true, group: { select: { course: { select: { name: true } } } } },
@@ -75,7 +83,7 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
       id: f.id, mood: f.mood, summary: f.summary, overallComment: f.overallComment,
       imageCount: f.imageUrls.length, parentReplied: !!f.parentReply, createdAt: f.createdAt,
     })),
-    masteryRecords: masteryRecords as any[],
+    masteryRecords,
     goals,
     weaknesses,
     stageSummary: stageSummary ? { id: stageSummary.id, summary: stageSummary.summary, periodStart: stageSummary.periodStart, periodEnd: stageSummary.periodEnd, publishedAt: stageSummary.publishedAt } : null,

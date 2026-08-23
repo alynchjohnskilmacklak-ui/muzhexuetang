@@ -7,6 +7,9 @@ import { assertTeacherOwnsStudent, TEACHER_LOG_ACTIONS } from '@/lib/teacher-por
 import { parentActiveStudentWhere, parentVisiblePerformancePostWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { resolveLearningRecordTermId } from '@/lib/learning-record-term'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,7 +60,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
   }
 
   if (user.role === 'admin') {
-    Object.assign(where, { student: { division } })
+    const term = await resolveAdminTermScope(prisma, division, req)
+    Object.assign(where, { student: { division }, ...(term ? { termId: term.id } : {}) })
   }
 
   if (user.role === 'teacher') {
@@ -68,7 +72,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
       role: user.role,
     }, prisma)
     if (!resolved) return NextResponse.json({ posts: [], total: 0, page, limit })
-    Object.assign(where, { teacherId: resolved.id })
+    const term = await getActiveAcademicTerm(prisma, division)
+    Object.assign(where, { teacherId: resolved.id, ...(term ? { termId: term.id } : {}) })
   }
 
   const [posts, total] = await Promise.all([
@@ -144,9 +149,18 @@ export const POST = apiHandler(async (req: NextRequest) => {
         })
     if (!student) return NextResponse.json({ error: '学员不存在或无权限' }, { status: 404 })
 
+    const termId = await resolveLearningRecordTermId(prisma, {
+      division: getRequestDivision(user),
+      studentId,
+      classLessonId,
+    })
+    if (!termId) {
+      return NextResponse.json({ error: '该学员不在当前启用批次，或所选课次与学员不匹配' }, { status: 409 })
+    }
+
     const post = await prisma.$transaction(async (tx) => {
       const created = await tx.performancePost.create({
-        data: { studentId, teacherId: teacher.id, classLessonId, type, mood, content, images, tags, ratings, visibility },
+        data: { termId, studentId, teacherId: teacher.id, classLessonId, type, mood, content, images, tags, ratings, visibility },
       })
 
       if (badges.length) {

@@ -10,16 +10,15 @@ import { fmtDate, fmtDateTime } from '@/lib/format-date'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { formatRemaining } from '@/lib/lesson-units'
 import type { FeedbackImageVariant } from '@/lib/file-asset-variants'
+import type { getStudentArchive } from '@/lib/student-archive'
 
 const { Title, Text } = Typography
 
-interface ArchiveData {
-  studentBasic: any; courses: any; attendance: any
-  feedbacks: any[]; profile: any; files: any[]; timeline: any[]
-}
+type ArchiveData = NonNullable<Awaited<ReturnType<typeof getStudentArchive>>>
+type CourseEnrollment = ArchiveData['courses']['classGroups'][number]
 
-function enrollmentRemainingText(enrollment: any) {
-  return formatRemaining(Number(enrollment.remainHours || 0), enrollment.courseType || enrollment.group?.course?.type || null, Number(enrollment.lessonMinutes || enrollment.group?.lessonMinutes || 40)).text
+function enrollmentRemainingText(enrollment: CourseEnrollment) {
+  return formatRemaining(Number(enrollment.remainHours || 0), enrollment.courseType || null, Number(enrollment.lessonMinutes || 40)).text
 }
 
 export function ParentArchiveClient({ studentId, studentName }: { studentId: string; studentName: string }) {
@@ -67,7 +66,7 @@ export function ParentArchiveClient({ studentId, studentName }: { studentId: str
               {s.mainTeacher && <span> · 主老师：{s.mainTeacher}</span>}
             </div>
             <div style={{ marginTop: 4 }}>
-              {data.courses.classGroups.slice(0, 2).map((group: any) => (
+              {data.courses.classGroups.slice(0, 2).map((group) => (
                 <Tag key={group.id} color="orange">剩余 {enrollmentRemainingText(group)}</Tag>
               ))}
               {data.courses.classGroups.length > 2 && <Tag>+{data.courses.classGroups.length - 2} 门课程</Tag>}
@@ -109,7 +108,7 @@ function OverviewTab({ data }: { data: ArchiveData }) {
           <Descriptions.Item label="课程余额">
             {data.courses.classGroups.length ? (
               <div style={{ display: 'grid', gap: 4 }}>
-                {data.courses.classGroups.map((group: any) => (
+                {data.courses.classGroups.map((group) => (
                   <span key={group.id}>{group.courseName}：剩余 {enrollmentRemainingText(group)} / 共 {formatRemaining(Number(group.totalHours || 0), group.courseType || null, Number(group.lessonMinutes || 40)).text}</span>
                 ))}
               </div>
@@ -123,7 +122,7 @@ function OverviewTab({ data }: { data: ArchiveData }) {
       <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', marginBottom: 12 }}>
         <Title level={5}>当前课程</Title>
         {c.classGroups.length === 0 ? <Empty description="暂无课程" image={Empty.PRESENTED_IMAGE_SIMPLE} /> : (
-          c.classGroups.map((g: any) => (
+          c.classGroups.map((g) => (
             <Card key={g.id} size="small" bordered={false} style={{ background: '#FFFBF7', borderRadius: 8, marginBottom: 8 }}>
               <Text strong>{g.courseName}</Text>
               <div style={{ fontSize: 12, color: '#7A869A' }}>教师：{g.teacherNames.join('、')}</div>
@@ -136,7 +135,7 @@ function OverviewTab({ data }: { data: ArchiveData }) {
       <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', marginBottom: 12 }}>
         <Title level={5}>近期课程</Title>
         {c.recentLessons.length === 0 ? <Empty description="暂无近期课程" image={Empty.PRESENTED_IMAGE_SIMPLE} /> : (
-          c.recentLessons.slice(0, 5).map((l: any) => (
+          c.recentLessons.slice(0, 5).map((l) => (
             <div key={l.id} style={{ padding: '6px 0', borderBottom: '1px solid #f5f0eb', fontSize: 13 }}>
               <Text>{fmtDate(l.lessonDate)} {l.startTime}-{l.endTime}</Text>
               <Text type="secondary" style={{ marginLeft: 12 }}>{l.courseName} · {l.teacherName}</Text>
@@ -148,9 +147,9 @@ function OverviewTab({ data }: { data: ArchiveData }) {
   )
 }
 
-function FeedbacksTab({ feedbacks }: { feedbacks: any[] }) {
+function FeedbacksTab({ feedbacks }: { feedbacks: ArchiveData['feedbacks'] }) {
   if (!feedbacks?.length) return <Empty description="暂无课堂反馈" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-  return feedbacks.map((f: any) => (
+  return feedbacks.map((f) => (
     <Card key={f.id} bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', marginBottom: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
         <Text strong>{f.teacher?.name || '老师'}</Text>
@@ -186,22 +185,22 @@ function FeedbackImages({ images }: { images: Array<string | FeedbackImageVarian
   return (
     <Image.PreviewGroup><div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
       {normalized.map((image, i) => (
-        <Image key={`${image.originalUrl}-${i}`} src={thumbnails[i]} preview={{ src: previews[i] }} width={80} height={80} style={{ borderRadius: 8, objectFit: 'cover' }}
+        <Image key={`${image.originalUrl}-${i}`} src={thumbnails[i]} preview={{ src: previews[i] }} alt={`课堂照片 ${i + 1}`} width={80} height={80} style={{ borderRadius: 8, objectFit: 'cover' }}
           fallback="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjZjVmMmVlIi8+PHRleHQgeD0iNDAiIHk9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZmlsbD0iIzlhOGU3YSIgZm9udC1zaXplPSIxMCI+5Zu+54mH5Yqg6L295aSx6LSlPC90ZXh0Pjwvc3ZnPg==" />
       ))}
     </div></Image.PreviewGroup>
   )
 }
 
-function TimelineTab({ timeline, profile }: { timeline: any[]; profile: any }) {
+function TimelineTab({ timeline, profile }: { timeline: ArchiveData['timeline']; profile: ArchiveData['profile'] }) {
   const items = timeline || []
   if (!items.length && !profile?.record?.timeline?.length) {
     return <Empty description="暂无成长记录" image={Empty.PRESENTED_IMAGE_SIMPLE} />
   }
-  const all = [...items, ...(profile?.record?.timeline || [])].sort((a: any, b: any) =>
+  const all = [...items, ...(profile?.record?.timeline || [])].sort((a, b) =>
     new Date(b.date).getTime() - new Date(a.date).getTime()
   )
-  return all.slice(0, 40).map((item: any, i: number) => (
+  return all.slice(0, 40).map((item, i: number) => (
     <Card key={i} size="small" bordered={false} style={{ borderRadius: 10, background: '#FFFBF7', marginBottom: 6 }}>
       <div style={{ display: 'flex', gap: 10 }}>
         <div style={{ fontSize: 20 }}>
@@ -209,9 +208,9 @@ function TimelineTab({ timeline, profile }: { timeline: any[]; profile: any }) {
         </div>
         <div style={{ flex: 1 }}>
           <Text strong style={{ fontSize: 13 }}>{item.title}</Text>
-          {item.sub && <div style={{ fontSize: 12, color: '#7A869A' }}>{item.sub}</div>}
-          {item.content && <div style={{ fontSize: 12, color: '#4A5568', marginTop: 2 }}>{item.content}</div>}
-          {item.images?.length > 0 && <FeedbackImages images={item.images} />}
+          {'sub' in item && item.sub && <div style={{ fontSize: 12, color: '#7A869A' }}>{item.sub}</div>}
+          {'content' in item && item.content && <div style={{ fontSize: 12, color: '#4A5568', marginTop: 2 }}>{item.content}</div>}
+          {item.images && item.images.length > 0 && <FeedbackImages images={item.images} />}
           <div style={{ fontSize: 11, color: '#B0B8C1', marginTop: 4 }}>
             {fmtDateTime(item.date)}
             {item.teacher ? ` · ${item.teacher}` : ''}
@@ -222,7 +221,7 @@ function TimelineTab({ timeline, profile }: { timeline: any[]; profile: any }) {
   ))
 }
 
-function GradesTab({ profile }: { profile: any }) {
+function GradesTab({ profile }: { profile: ArchiveData['profile'] }) {
   if (!profile) return <Empty description="暂无成绩数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
   const { study, record, profileCase } = profile
 
@@ -233,7 +232,7 @@ function GradesTab({ profile }: { profile: any }) {
           <Title level={5}>知识掌握</Title>
           <Progress percent={study.mastery?.masteredPct || 0} format={() => `掌握 ${study.mastery?.masteredPct || 0}%`} strokeColor="#E8784A" />
           <div style={{ marginTop: 8 }}>
-            {study.weaknesses?.map((w: any) => (
+            {study.weaknesses?.map((w) => (
               <Tag key={w.topic} color="red" style={{ marginBottom: 4 }}>{w.topic} ×{w.mistakeCount}</Tag>
             ))}
           </div>
@@ -258,11 +257,11 @@ function GradesTab({ profile }: { profile: any }) {
       {record?.trendBySubject?.length > 0 && (
         <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2' }}>
           <Title level={5}>成绩趋势</Title>
-          {record.trendBySubject.map((s: any) => (
+          {record.trendBySubject.map((s) => (
             <div key={s.subject} style={{ marginBottom: 8 }}>
               <Text strong>{s.subject}</Text>
               <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
-                {s.points?.map((p: any, i: number) => (
+                {s.points?.map((p, i: number) => (
                   <div key={i} style={{ textAlign: 'center', fontSize: 11 }}>
                     <div style={{ width: 28, height: 28, borderRadius: 6, background: p.pct >= 80 ? '#E8F5E9' : p.pct >= 60 ? '#FFF3E0' : '#FFEBEE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600 }}>
                       {p.pct}
@@ -279,7 +278,7 @@ function GradesTab({ profile }: { profile: any }) {
   )
 }
 
-function AttendanceTab({ attendance, courses }: { attendance: any; courses: any }) {
+function AttendanceTab({ attendance, courses }: { attendance: ArchiveData['attendance']; courses: ArchiveData['courses'] }) {
   const a = attendance
   return (
     <div>
@@ -305,7 +304,7 @@ function AttendanceTab({ attendance, courses }: { attendance: any; courses: any 
             rowKey="id"
             columns={[
               { title: '日期', dataIndex: 'lessonDate', render: (d: Date) => fmtDate(d) },
-              { title: '时间', render: (_: any, r: any) => `${r.startTime}-${r.endTime}` },
+              { title: '时间', render: (_: unknown, r: { startTime: string; endTime: string }) => `${r.startTime}-${r.endTime}` },
               { title: '课程', dataIndex: 'courseName' },
               {
                 title: '状态', dataIndex: 'status',
@@ -318,7 +317,7 @@ function AttendanceTab({ attendance, courses }: { attendance: any; courses: any 
 
       <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2' }}>
         <Title level={5}>当前课程</Title>
-        {courses.teachers.map((t: any) => (
+        {courses.teachers.map((t) => (
           <Tag key={t.id} color="orange" style={{ marginBottom: 4 }}>{t.name}</Tag>
         ))}
       </Card>
@@ -326,9 +325,9 @@ function AttendanceTab({ attendance, courses }: { attendance: any; courses: any 
   )
 }
 
-function FilesTab({ files }: { files: any[] }) {
+function FilesTab({ files }: { files: ArchiveData['files'] }) {
   if (!files?.length) return <Empty description="暂无文件" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-  return files.map((f: any) => (
+  return files.map((f) => (
     <Card key={f.id} size="small" bordered={false} style={{ borderRadius: 10, background: '#FFFBF7', marginBottom: 6 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>

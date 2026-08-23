@@ -58,11 +58,12 @@ export type FeedbackCreationScope = {
   students: ScopedStudent[]
   feedbackGroupId: string | null
   feedbackCourseType: 'GROUP' | 'ONE_ON_ONE'
+  termId: string | null
 }
 
 type FeedbackImageAccessResult = {
   allowed: boolean
-  reason: 'admin' | 'feedback' | 'unattached-owner' | 'legacy-non-feedback' | 'forbidden'
+  reason: 'admin' | 'feedback' | 'study-hall' | 'unattached-owner' | 'legacy-non-feedback' | 'forbidden'
 }
 
 function normalizeRole(role: string | null | undefined) {
@@ -193,6 +194,7 @@ export async function resolveTeacherFeedbackCreationScope(
   let allowedStudents: ScopedStudent[] = []
   let feedbackGroupId = input.feedbackGroupId || null
   let feedbackCourseType = input.submittedCourseType || 'GROUP'
+  let termId: string | null = null
   let reason: FeedbackCreationScope['reason'] = 'student'
 
   if (input.classLessonId) {
@@ -220,12 +222,13 @@ export async function resolveTeacherFeedbackCreationScope(
       },
     })
     if (!lesson) {
-      return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType }
+      return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType, termId }
     }
     allowedStudents = lesson.group.intensiveMode === 'INTENSIVE'
       ? lesson.lessonStudents.map((row) => row.student)
       : lesson.group.enrollments.map((row) => row.student)
     feedbackGroupId = lesson.groupId
+    termId = lesson.group.termId
     feedbackCourseType = lesson.group.intensiveMode === 'INTENSIVE' || lesson.group.course.type === 'ONE_ON_ONE'
       ? 'ONE_ON_ONE'
       : 'GROUP'
@@ -249,9 +252,10 @@ export async function resolveTeacherFeedbackCreationScope(
       },
     })
     if (!group) {
-      return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType }
+      return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType, termId }
     }
     allowedStudents = group.enrollments.map((row) => row.student)
+    termId = group.termId
     feedbackCourseType = group.intensiveMode === 'INTENSIVE' || group.course.type === 'ONE_ON_ONE'
       ? 'ONE_ON_ONE'
       : 'GROUP'
@@ -285,7 +289,24 @@ export async function resolveTeacherFeedbackCreationScope(
     ? allowedStudents.filter((student) => requestedStudentIds.includes(student.id))
     : []
 
-  return { allowed, reason, students: selected, feedbackGroupId, feedbackCourseType }
+  if (allowed && !termId && selected.length > 0) {
+    const activeGroup = await prisma.classGroup.findFirst({
+      where: {
+        term: { status: 'ACTIVE' },
+        status: { not: 'ARCHIVED' },
+        enrollments: { some: { status: 'ACTIVE', studentId: { in: selected.map((student) => student.id) } } },
+        OR: [
+          { teacherId: input.teacherId },
+          { teacherAssignments: { some: { teacherId: input.teacherId } } },
+        ],
+      },
+      orderBy: { updatedAt: 'desc' },
+      select: { termId: true },
+    })
+    termId = activeGroup?.termId || null
+  }
+
+  return { allowed, reason, students: selected, feedbackGroupId, feedbackCourseType, termId }
 }
 
 export function filterStudentRatingsForStudents(value: unknown, studentIds: string[]) {
@@ -416,9 +437,44 @@ export async function canAccessFeedbackImage(
       classLesson: { select: { teacherId: true } },
     },
   })
+  // 晚托作业沿用教师反馈上传通道，但图片归属保存在作业登记中，
+  // 并不会关联 ClassroomFeedback。这里从业务记录反查授权，既兼容
+  // 已上传的历史图片，也避免把未关联的教师私有图片直接暴露给家长。
+  const studyHallEntries = await prisma.studyHallHomeworkEntry.findMany({
+    where: {
+      OR: [
+        { beforeImageUrls: { hasSome: allCandidates } },
+        { afterImageUrls: { hasSome: allCandidates } },
+        { lessonImageUrls: { hasSome: allCandidates } },
+        { imageUrls: { hasSome: allCandidates } },
+      ],
+    },
+    select: {
+      studentId: true,
+      beforeImageUrls: true,
+      afterImageUrls: true,
+      lessonImageUrls: true,
+      imageUrls: true,
+      classRecord: {
+        select: {
+          recordedById: true,
+          studyClass: {
+            select: {
+              teachers: {
+                where: { active: true },
+                select: { teacherId: true },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
   const parentStudentIds = normalizeRole(actor.role) === 'parent'
     ? await getParentFeedbackStudentIds(prisma, actor.id)
     : []
+  const parentStudentIdSet = new Set(parentStudentIds)
+  const actorRole = normalizeRole(actor.role)
 
   for (const value of uniqueValues) {
     const candidates = assetCandidates.get(value) || imageIdentifierVariants(value)
@@ -433,6 +489,25 @@ export async function canAccessFeedbackImage(
     ))
     if (matchingFeedbacks.some((feedback) => canViewFeedback(actor, feedback, parentStudentIds))) {
       results.set(value, { allowed: true, reason: 'feedback' })
+      continue
+    }
+
+    const matchingStudyHallEntries = studyHallEntries.filter((entry) => (
+      [
+        ...entry.beforeImageUrls,
+        ...entry.afterImageUrls,
+        ...entry.lessonImageUrls,
+        ...entry.imageUrls,
+      ].some((imageUrl) => [...imageIdentifierVariants(imageUrl)].some((candidate) => candidates.has(candidate)))
+    ))
+    const canViewStudyHallImage = matchingStudyHallEntries.some((entry) => {
+      if (actorRole === 'parent') return parentStudentIdSet.has(entry.studentId)
+      if (actorRole !== 'teacher') return false
+      return entry.classRecord.recordedById === actor.id
+        || entry.classRecord.studyClass.teachers.some((teacher) => teacher.teacherId === actor.id)
+    })
+    if (canViewStudyHallImage) {
+      results.set(value, { allowed: true, reason: 'study-hall' })
       continue
     }
 

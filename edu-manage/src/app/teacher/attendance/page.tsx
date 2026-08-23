@@ -3,22 +3,28 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
 import { Button, Card, Empty, InputNumber, List, Space, Tag, Typography } from 'antd'
-import { CheckCircleOutlined, ClockCircleOutlined, EnvironmentOutlined } from '@ant-design/icons'
+import { CheckCircleOutlined, ClockCircleOutlined, CoffeeOutlined, EnvironmentOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatRemaining } from '@/lib/lesson-units'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { StudyHallWorkspace } from '@/components/study-hall/StudyHallWorkspace'
+import dayjs from 'dayjs'
 
 const { Title, Text } = Typography
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-const STATUS_CONFIG: Record<string, { border: string; bg: string; badge: string; text: string; label: string }> = {
-  none:    { border: 'transparent', bg: 'var(--color-background-secondary, #faf8f5)', badge: 'rgba(0,0,0,.06)', text: 'var(--color-text-tertiary, #98A2B3)', label: '未标记' },
-  PRESENT: { border: '#1D9E75', bg: '#E1F5EE', badge: '#1D9E75', text: '#fff', label: '出勤' },
-  LEAVE:   { border: '#BA7517', bg: '#FAEEDA', badge: '#BA7517', text: '#fff', label: '请假' },
-  ABSENT:  { border: '#E24B4A', bg: '#FCEBEB', badge: '#E24B4A', text: '#fff', label: '旷课' },
+const STATUS_CONFIG: Record<AttStatus, { label: string; className: string }> = {
+  PRESENT: { label: '出勤', className: 'is-present' },
+  LEAVE: { label: '请假', className: 'is-leave' },
 }
-const ATT_CYCLE = ['none', 'PRESENT', 'LEAVE', 'ABSENT'] as const
-type AttStatus = 'none' | 'PRESENT' | 'LEAVE' | 'ABSENT'
+type AttStatus = 'PRESENT' | 'LEAVE'
+
+function normalizeAttendanceStatus(value: unknown): AttStatus {
+  return String(value || '').toUpperCase() === 'LEAVE' || String(value || '').toUpperCase() === 'ABSENT'
+    ? 'LEAVE'
+    : 'PRESENT'
+}
 type TeacherLesson = {
   id: string
   groupName?: string
@@ -32,6 +38,7 @@ type TeacherLesson = {
   attendanceCount?: number
   attendanceSubmittedAt?: string | null
   status?: string
+  scheduleKind?: string
 }
 type AttendanceStudent = {
   studentId: string
@@ -41,6 +48,7 @@ type AttendanceStudent = {
   remainHours?: number
   courseType?: string | null
   lessonMinutes?: number
+  eating?: boolean
 }
 type AttendanceLessonDetail = {
   id?: string
@@ -63,6 +71,8 @@ type AttendanceLessonDetail = {
     actualMinutes: number
     reviewNote?: string | null
   } | null
+  isTeacherFirstLessonToday?: boolean
+  isSystemFirstPeriod?: boolean
 }
 
 const STUDENT_COLORS = ['#E8784A','#1D9E75','#534AB7','#D4537E','#BA7517','#185FA5','#27500A','#72243E']
@@ -86,13 +96,35 @@ function attendanceTimeHint(lesson: Record<string, unknown> | undefined) {
 export default function TeacherAttendancePage() {
   const isMobile = useIsMobile() ?? false
   const { data: dashboard, mutate: mutateDashboard } = useSWR('/api/teacher/dashboard', fetcher)
-  const lessons = useMemo(() => (dashboard?.todayLessons || []) as TeacherLesson[], [dashboard?.todayLessons])
+  const todayKey = useMemo(() => dayjs().format('YYYY-MM-DD'), [])
+  const { data: studyHallSchedule } = useSWR(`/api/teacher/schedule?type=STUDY_HALL&startDate=${todayKey}&endDate=${todayKey}`, fetcher)
+  const lessons = useMemo<TeacherLesson[]>(() => {
+    const regular = (dashboard?.todayLessons || []) as TeacherLesson[]
+    const studyHall = ((studyHallSchedule?.lessons || []) as Array<Record<string, unknown>>).map((item) => {
+      const group = item.group as Record<string, unknown> | undefined
+      const course = group?.course as Record<string, unknown> | undefined
+      return {
+        id: String(item.id),
+        groupName: String(group?.name || '作业班'),
+        courseName: String(course?.name || '晚托与作业辅导'),
+        courseType: 'STUDY_HALL',
+        lessonDate: String(item.lessonDate || todayKey),
+        startTime: String(item.startTime || ''),
+        time: `${String(item.startTime || '')}-${String(item.endTime || '')}`,
+        room: '作业班教室',
+        status: String(item.status || 'SCHEDULED'),
+        scheduleKind: 'STUDY_HALL',
+      } satisfies TeacherLesson
+    })
+    return [...regular, ...studyHall].sort((a, b) => String(a.startTime || a.time || '').localeCompare(String(b.startTime || b.time || '')))
+  }, [dashboard?.todayLessons, studyHallSchedule?.lessons, todayKey])
   const [selectedLessonId, setSelectedLessonId] = useState('')
   const [queryReady, setQueryReady] = useState(false)
   const [detailLoading, setDetailLoading] = useState(false)
   const [detailError, setDetailError] = useState('')
   const [students, setStudents] = useState<AttendanceStudent[]>([])
   const [attMap, setAttMap] = useState<Map<string, AttStatus>>(new Map())
+  const [mealStudentIds, setMealStudentIds] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const submittingRef = useRef(false)
   const [lessonDetail, setLessonDetail] = useState<AttendanceLessonDetail | null>(null)
@@ -109,8 +141,6 @@ export default function TeacherAttendancePage() {
     return {
       present: vals.filter(v => v === 'PRESENT').length,
       leave: vals.filter(v => v === 'LEAVE').length,
-      absent: vals.filter(v => v === 'ABSENT').length,
-      unmarked: vals.filter(v => v === 'none').length,
     }
   }, [attMap])
 
@@ -156,6 +186,13 @@ export default function TeacherAttendancePage() {
 
   useEffect(() => {
     if (!selectedLesson?.id) return
+    if (selectedLesson.scheduleKind === 'STUDY_HALL' || selectedLesson.id.startsWith('study-hall:')) {
+      setDetailLoading(false)
+      setDetailError('')
+      setStudents([])
+      setLessonDetail(null)
+      return
+    }
     setDetailLoading(true)
     setDetailError('')
     fetch(`/api/teacher/attendance?lessonId=${selectedLesson.id}`)
@@ -172,8 +209,9 @@ export default function TeacherAttendancePage() {
         setSubmitted(detail?.intensiveReviewStatus === 'PENDING' || detail?.intensiveReviewStatus === 'APPROVED')
         setStudents(list)
         const m = new Map<string, AttStatus>()
-        list.forEach((student) => m.set(student.studentId, (student.status as AttStatus) || 'none'))
+        list.forEach((student) => m.set(student.studentId, normalizeAttendanceStatus(student.status)))
         setAttMap(m)
+        setMealStudentIds(new Set(list.filter((student) => student.eating).map((student) => student.studentId)))
       })
       .catch((error) => {
         const errorText = error instanceof Error ? error.message : '请检查网络连接'
@@ -181,23 +219,25 @@ export default function TeacherAttendancePage() {
         toast.error(`学员列表加载失败：${errorText}`)
       })
       .finally(() => setDetailLoading(false))
-  }, [selectedLesson?.id])
+  }, [selectedLesson?.id, selectedLesson?.scheduleKind])
 
-  const cycleAttendance = (studentId: string) => {
-    setAttMap(prev => {
-      const next = new Map(prev)
-      const current = prev.get(studentId) || 'none'
-      const idx = ATT_CYCLE.indexOf(current)
-      const nextStatus = ATT_CYCLE[(idx + 1) % ATT_CYCLE.length]
-      next.set(studentId, nextStatus)
-      return next
-    })
+  const setAttendance = (studentId: string, status: AttStatus) => {
+    setAttMap((current) => new Map(current).set(studentId, status))
   }
 
   const handleAllPresent = () => {
     const m = new Map(attMap)
     students.forEach(s => m.set(s.studentId, 'PRESENT'))
     setAttMap(m)
+  }
+
+  const toggleMeal = (studentId: string) => {
+    setMealStudentIds((current) => {
+      const next = new Set(current)
+      if (next.has(studentId)) next.delete(studentId)
+      else next.add(studentId)
+      return next
+    })
   }
 
   const submitAttendance = async () => {
@@ -240,7 +280,11 @@ export default function TeacherAttendancePage() {
     setSubmitting(true)
     const res = await fetch('/api/teacher/attendance', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lessonId: selectedLesson.id, records }),
+      body: JSON.stringify({
+        lessonId: selectedLesson.id,
+        records,
+        mealStudentIds: lessonDetail?.isSystemFirstPeriod ? [...mealStudentIds] : undefined,
+      }),
     })
     const payload = await res.json().catch(() => ({}))
     setSubmitting(false)
@@ -257,8 +301,9 @@ export default function TeacherAttendancePage() {
         setActualMinutes(detail?.actualMinutes || detail?.latestReview?.actualMinutes || detail?.plannedMinutes || null)
         setStudents(list)
         const m = new Map<string, AttStatus>()
-        list.forEach((student) => m.set(student.studentId, (student.status as AttStatus) || 'none'))
+        list.forEach((student) => m.set(student.studentId, normalizeAttendanceStatus(student.status)))
         setAttMap(m)
+        setMealStudentIds(new Set(list.filter((student) => student.eating).map((student) => student.studentId)))
       })
       .catch((error) => toast.warning(`考勤已提交，但最新考勤列表刷新失败，请手动刷新页面。原因：${error instanceof Error ? error.message : '未知错误'}`))
     if (payload.pendingReview) {
@@ -271,7 +316,7 @@ export default function TeacherAttendancePage() {
   }
 
   return (
-    <div>
+    <div className="teacher-attendance-page">
       <Title level={4} style={{ marginTop: 0 }}>考勤录入</Title>
 
       <div style={isMobile ? { display: 'flex', flexDirection: 'column', gap: 12 } : { display: 'grid', gridTemplateColumns: '220px minmax(0, 1fr)', gap: 16, alignItems: 'start' }}>
@@ -294,30 +339,17 @@ export default function TeacherAttendancePage() {
                 {grouped.map(g => (
                   <div key={g.label}>
                     <div style={{ fontSize: 11, color: '#98A2B3', marginBottom: 6, fontWeight: 500 }}>{g.label}</div>
-                    <div style={{ display: 'flex', overflowX: 'auto', gap: 8, paddingBottom: 4, WebkitOverflowScrolling: 'touch' }}>
+                    <div className="teacher-attendance-pills">
                       {g.items.map((lesson: TeacherLesson) => {
                         const selected = selectedLesson?.id === lesson.id
                         const done = Number(lesson.attendanceCount || 0) > 0 || lesson.status === 'COMPLETED'
-                        const isOneOnOne = lesson.groupName?.includes('一对一') || lesson.courseType === 'ONE_ON_ONE'
-                        const pillColor = done ? '#1D9E75' : isOneOnOne ? '#534AB7' : '#E8784A'
                         return (
-                          <div key={lesson.id} onClick={() => setSelectedLessonId(lesson.id)} style={{
-                            padding: '7px 14px', borderRadius: 20, fontSize: 13, whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none',
-                            border: `1.5px solid ${selected ? pillColor : '#EEE7E1'}`,
-                            background: selected ? (isOneOnOne ? 'rgba(83,74,183,.08)' : '#FFF3EC') : '#fff',
-                            color: selected ? pillColor : '#1F2329',
-                            fontWeight: selected ? 600 : 400,
-                            flexShrink: 0,
-                          }}>
-                            <div style={{ fontSize: 9, color: pillColor, marginBottom: 2 }}>
-                              {isOneOnOne ? '一对一' : '班课'}
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              {done && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#1D9E75', flexShrink: 0 }} />}
-                              {!done && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#F5A623', flexShrink: 0 }} />}
+                          <button key={lesson.id} type="button" className={`teacher-attendance-pill${selected ? ' is-selected' : ''}`} onClick={() => setSelectedLessonId(lesson.id)}>
+                            <div>
+                              <span className={`teacher-attendance-pill__dot${done ? ' is-done' : ''}`} />
                               {lesson.groupName || lesson.courseName} {lesson.time}
                             </div>
-                          </div>
+                          </button>
                         )
                       })}
                     </div>
@@ -327,21 +359,27 @@ export default function TeacherAttendancePage() {
             )
           })()
         ) : (
-        <Card bordered={false} style={{ borderRadius: 10 }} title={`今日课次 (${lessons.length})`}>
+        <Card bordered={false} className="teacher-attendance-lesson-card" title={`今日课次 (${lessons.length})`}>
           <List
             dataSource={lessons}
-            locale={{ emptyText: '今日暂无课次' }}
+            locale={{
+              emptyText: (
+                <GuidedEmpty
+                  compact
+                  title="今天没有待考勤课次"
+                  description="今天排定的课程会显示在这里，开课后即可登记出勤或请假。"
+                  actionLabel="查看我的课表"
+                  onAction={() => window.location.assign('/teacher/schedule')}
+                />
+              ),
+            }}
             renderItem={(lesson: TeacherLesson) => {
               const selected = selectedLesson?.id === lesson.id
               const done = Boolean(lesson.attendanceSubmittedAt)
                 || Number(lesson.attendanceCount || 0) > 0
                 || lesson.status === 'COMPLETED'
               return (
-                <List.Item onClick={() => setSelectedLessonId(lesson.id)} style={{
-                  cursor: 'pointer', border: selected ? '1px solid #E8784A' : '1px solid #f0e7de',
-                  borderRadius: 8, padding: '8px 9px', marginBottom: 8,
-                  background: selected ? '#FFF8F4' : '#fff',
-                }}>
+                <List.Item onClick={() => setSelectedLessonId(lesson.id)} className={`teacher-attendance-lesson-row${selected ? ' is-selected' : ''}`}>
                   <div style={{ width: '100%' }}>
                     <Text strong style={{ fontSize: 12 }}>{lesson.groupName || lesson.courseName}</Text>
                     <div style={{ fontSize: 10, color: '#8d806f', marginTop: 2 }}>
@@ -351,7 +389,7 @@ export default function TeacherAttendancePage() {
                       <EnvironmentOutlined style={{ fontSize: 9 }} /> {lesson.room || '-'}
                     </div>
                     <div style={{ marginTop: 4 }}>
-                      <Tag color={done ? 'green' : 'orange'} style={{ borderRadius: 9999, fontSize: 9 }}>
+                      <Tag color={done ? 'green' : 'default'} style={{ borderRadius: 9999, fontSize: 9 }}>
                         {done ? '已完成' : '待考勤'}
                       </Tag>
                     </div>
@@ -363,16 +401,16 @@ export default function TeacherAttendancePage() {
           {/* Sticky summary */}
           {lessons.length > 0 && (
             <div style={{ borderTop: '1px solid #f0e7de', paddingTop: 12, fontSize: 11, position: 'sticky', bottom: 0, background: '#fff' }}>
-              今日汇总：<Text style={{ color: '#1D9E75' }}>出勤{summary.present}</Text> / <Text style={{ color: '#BA7517' }}>请假{summary.leave}</Text> / <Text style={{ color: '#E24B4A' }}>旷课{summary.absent}</Text>
+              今日汇总：<Text style={{ color: '#1D9E75' }}>出勤{summary.present}</Text> / <Text style={{ color: '#BA7517' }}>请假{summary.leave}</Text>
             </div>
           )}
         </Card>
         )}
 
         {/* RIGHT: Attendance area */}
-        <Card bordered={false} style={{ borderRadius: 10 }}
+        <Card bordered={false} className="teacher-attendance-main-card"
           title={selectedLesson ? `${selectedLesson.groupName || selectedLesson.courseName} · ${selectedLesson.time}` : '选择课次'}
-          extra={!isMobile && selectedLesson ? (
+          extra={!isMobile && selectedLesson && selectedLesson.scheduleKind !== 'STUDY_HALL' && !selectedLesson.id.startsWith('study-hall:') ? (
             <Space>
               <Tag color="blue" style={{ borderRadius: 9999 }}>{students.length}人</Tag>
               <Button disabled={intensiveSettlementLocked} icon={<CheckCircleOutlined />} onClick={handleAllPresent} style={{ borderColor: '#1D9E75', color: '#1D9E75' }}>一键全勤</Button>
@@ -380,7 +418,21 @@ export default function TeacherAttendancePage() {
               <Button type="primary" disabled={intensiveSettlementLocked} loading={submitting} onClick={submitAttendance} style={{ background: '#E8784A' }}>{submitLabel}</Button>
             </Space>
           ) : null}>
-          {!selectedLesson ? <Empty description="请从左侧选择课次" /> : detailLoading ? (
+          {selectedLesson?.scheduleKind === 'STUDY_HALL' || selectedLesson?.id.startsWith('study-hall:') ? (
+            <StudyHallWorkspace
+              key={selectedLesson.id}
+              admin={false}
+              embedded
+              initialClassId={selectedLesson.id.split(':')[1]}
+              initialDate={selectedLesson.lessonDate || todayKey}
+            />
+          ) : !selectedLesson ? (
+            <GuidedEmpty
+              compact
+              title="请选择一节课"
+              description="选择左侧的今日课次后，这里会显示学员名单和考勤状态。"
+            />
+          ) : detailLoading ? (
             <div style={{ padding: 32, textAlign: 'center', color: 'var(--color-ink-muted)' }}>
               正在加载目标课次…
             </div>
@@ -398,7 +450,7 @@ export default function TeacherAttendancePage() {
               {isMobile && attendanceTimeHint(selectedLesson)}
               {/* Progress bar */}
               {lessonDetail?.intensiveMode === 'INTENSIVE' && (
-                <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 10, background: 'var(--color-background-secondary, #faf8f5)' }}>
+                <div className="teacher-attendance-intensive-card">
                   <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
                     <Text strong style={{ fontSize: 12 }}>实际授课分钟</Text>
                     <InputNumber min={15} max={600} value={actualMinutes} disabled={intensiveSettlementLocked} onChange={(value) => setActualMinutes(value)} addonAfter="分钟" />
@@ -417,14 +469,13 @@ export default function TeacherAttendancePage() {
                   </Text>
                 </div>
               )}
-              <div style={{ 
-                background: 'linear-gradient(135deg, #FFFBF9 0%, #FDFCFB 100%)', 
-                borderRadius: 16, 
-                padding: '14px 18px', 
-                marginBottom: 16, 
-                border: '1px solid #F0EBE5',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-              }}>
+              {lessonDetail?.isSystemFirstPeriod && (
+                <div className="teacher-attendance-meal-note">
+                  <CoffeeOutlined />
+                  <span>这是系统第一课节，请在提交考勤时一并确认每位学员是否就餐。</span>
+                </div>
+              )}
+              <div className="teacher-attendance-progress-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 12 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: '#5a4e3a' }}>签到进度</span>
                   <div style={{ display: 'flex', gap: 14, fontSize: 12 }}>
@@ -436,122 +487,78 @@ export default function TeacherAttendancePage() {
                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#BA7517' }} />
                       <span style={{ color: '#BA7517', fontWeight: 600 }}>{summary.leave}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#E24B4A' }} />
-                      <span style={{ color: '#E24B4A', fontWeight: 600 }}>{summary.absent}</span>
-                    </div>
+                    {lessonDetail?.isSystemFirstPeriod && <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}><CoffeeOutlined style={{ color: 'var(--color-primary)' }} /><span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>{mealStudentIds.size}</span></div>}
                   </div>
                 </div>
-                <div style={{ height: 10, background: 'rgba(0,0,0,.04)', borderRadius: 5, overflow: 'hidden', display: 'flex', gap: 0 }}>
-                  <div style={{ flex: summary.present || 0, background: 'linear-gradient(90deg, #1D9E75, #27D4A0)', transition: 'flex .5s cubic-bezier(0.4, 0, 0.2, 1)' }} />
-                  <div style={{ flex: summary.leave || 0, background: 'linear-gradient(90deg, #BA7517, #F5A623)', transition: 'flex .5s cubic-bezier(0.4, 0, 0.2, 1)' }} />
-                  <div style={{ flex: summary.absent || 0, background: 'linear-gradient(90deg, #E24B4A, #FF6B6B)', transition: 'flex .5s cubic-bezier(0.4, 0, 0.2, 1)' }} />
-                  <div style={{ flex: summary.unmarked || 0, background: '#F0EBE5', transition: 'flex .5s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+                <div className="teacher-attendance-progress-track">
+                  <span className="is-present" style={{ flex: summary.present || 0 }} />
+                  <span className="is-leave" style={{ flex: summary.leave || 0 }} />
                 </div>
               </div>
 
               {/* Student grid */}
               <div className="teacher-attendance-student-grid" style={{ 
                 display: 'grid', 
-                gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, 1fr)', 
+                gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(4, 1fr)', 
                 gap: 12, 
-                paddingBottom: isMobile ? 96 : 0 
+                paddingBottom: isMobile ? 118 : 0,
               }}>
                 {students.map((s) => {
-                  const status: AttStatus = attMap.get(s.studentId) || 'none'
+                  const status: AttStatus = attMap.get(s.studentId) || 'PRESENT'
                   const cfg = STATUS_CONFIG[status]
                   const remaining = remainingText(s)
                   const isLowRemaining = remaining.value <= 5
                   return (
-                    <div key={s.studentId} onClick={() => { if (!intensiveSettlementLocked) cycleAttendance(s.studentId) }} style={{
-                      borderRadius: 9, padding: isMobile ? '10px 6px' : '10px 8px', textAlign: 'center', cursor: intensiveSettlementLocked ? 'not-allowed' : 'pointer', userSelect: 'none',
-                      border: `1.5px solid ${cfg.border}`, background: cfg.bg, transition: 'all .2s',
-                    }}>
-                      <div style={{ width: 36, height: 36, borderRadius: 10, margin: '0 auto 6px',
+                    <div key={s.studentId} className={`teacher-attendance-student-card ${cfg.className}`}>
+                      <span className="teacher-attendance-student-status">{cfg.label}</span>
+                      <div className="teacher-attendance-student-avatar" style={{ width: 36, height: 36, borderRadius: 10, margin: '0 auto 6px',
                         background: getStudentBg(s.studentId), display: 'flex', alignItems: 'center',
                         justifyContent: 'center', fontSize: 14, fontWeight: 500, color: '#fff' }}>
                         {(s.name || '?')[0]}
                       </div>
-                      <div style={{ fontSize: 12, fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                      <div className="teacher-attendance-student-name" style={{ fontSize: 12, fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
                       {lessonDetail?.intensiveMode === 'INTENSIVE' ? (
-                        <div style={{ fontSize: 10, color: 'var(--color-text-tertiary, #98A2B3)' }}>
+                        <div className="teacher-attendance-student-meta" style={{ fontSize: 10, color: 'var(--color-text-tertiary, #98A2B3)' }}>
                           审核后按实际分钟计入
                         </div>
                       ) : (
-                        <div style={{ fontSize: 10, color: isLowRemaining ? '#E24B4A' : 'var(--color-text-tertiary, #98A2B3)' }}>
+                        <div className="teacher-attendance-student-meta" style={{ fontSize: 10, color: isLowRemaining ? '#E24B4A' : 'var(--color-text-tertiary, #98A2B3)' }}>
                           余{remaining.text}{isLowRemaining ? ' ⚠️' : ''}
                         </div>
                       )}
-                      <span style={{ fontSize: 10, fontWeight: 500, marginTop: 4, padding: '2px 6px', borderRadius: 6,
-                        display: 'inline-block', background: cfg.badge, color: status === 'none' ? cfg.text : '#fff' }}>
-                        {cfg.label}
-                      </span>
+                      <div className="teacher-attendance-student-actions">
+                        <button type="button" className={status === 'PRESENT' ? 'is-active is-present' : ''} disabled={intensiveSettlementLocked} onClick={() => setAttendance(s.studentId, 'PRESENT')}>出勤</button>
+                        <button type="button" className={status === 'LEAVE' ? 'is-active is-leave' : ''} disabled={intensiveSettlementLocked} onClick={() => setAttendance(s.studentId, 'LEAVE')}>请假</button>
+                        {lessonDetail?.isSystemFirstPeriod && <button type="button" className={mealStudentIds.has(s.studentId) ? 'is-active is-meal' : ''} disabled={intensiveSettlementLocked} onClick={() => toggleMeal(s.studentId)}><CoffeeOutlined /> 就餐</button>}
+                      </div>
                     </div>
                   )
                 })}
               </div>
 
-              {/* Hint */}
-              <div style={{ background: 'var(--color-background-secondary, #faf8f5)', borderRadius: 8, padding: '8px 12px', marginTop: 12 }}>
-                <Text type="secondary" style={{ fontSize: isMobile ? 11 : 10 }}>
-                  点击学员卡片切换状态：未标记 → 出勤（绿）→ 请假（橙）→ 旷课（红）→ 循环
-                </Text>
-              </div>
-
-              {/* Fixed bottom action bar on mobile */}
-              {isMobile && (
-                <div style={{ 
-                  position: 'fixed', 
-                  bottom: 0, 
-                  left: 0, 
-                  right: 0, 
-                  zIndex: 400,
-                  background: 'rgba(255, 255, 255, 0.98)', 
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '16px 16px 0 0',
-                  borderTop: '1px solid #F0EBE5',
-                  boxShadow: '0 -2px 12px rgba(0,0,0,.06)',
-                  padding: '12px 16px calc(12px + env(safe-area-inset-bottom, 0px))', 
-                  display: 'grid', 
-                  gridTemplateColumns: '1fr 1fr', 
-                  gap: 12 
-                }}>
-                  <Button 
-                    disabled={intensiveSettlementLocked}
-                    icon={<CheckCircleOutlined />} 
-                    onClick={handleAllPresent} 
-                    style={{ 
-                      height: 46, 
-                      borderRadius: 12, 
-                      borderColor: '#1D9E75', 
-                      color: '#1D9E75',
-                      fontWeight: 600,
-                      background: '#fff'
-                    }}>
-                    一键全勤
-                  </Button>
-                  <Button 
-                    type="primary" 
-                    disabled={intensiveSettlementLocked}
-                    loading={submitting} 
-                    onClick={submitAttendance}
-                    style={{ 
-                      height: 46, 
-                      borderRadius: 12, 
-                      background: '#E8784A', 
-                      borderColor: '#E8784A',
-                      fontWeight: 600,
-                      boxShadow: '0 4px 12px rgba(232,120,74,0.2)'
-                    }}>
-                    {submitLabel}
-                  </Button>
-                </div>
-              )}
             </>
           )}
         </Card>
+        {isMobile && selectedLesson && selectedLesson.scheduleKind !== 'STUDY_HALL' && !selectedLesson.id.startsWith('study-hall:') && !detailLoading && !detailError && (
+          <div className="teacher-attendance-bottom-bar">
+            <Button
+              disabled={intensiveSettlementLocked}
+              icon={<CheckCircleOutlined />}
+              onClick={handleAllPresent}
+              className="teacher-attendance-all-present">
+              一键全勤
+            </Button>
+            <Button
+              type="primary"
+              disabled={intensiveSettlementLocked}
+              loading={submitting}
+              onClick={submitAttendance}
+              className="teacher-attendance-submit">
+              {submitLabel}
+            </Button>
+          </div>
+        )}
       </div>
-      <div style={{ height: isMobile ? 96 : 0 }} />
     </div>
   )
 }

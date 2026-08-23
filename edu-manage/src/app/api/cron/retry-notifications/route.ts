@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { PrismaClient } from '@prisma/client'
 import { getPrismaForDivision, isDualDbEnabled, prisma } from '@/lib/prisma'
-import { sendWxMessage, buildFeedbackContent, buildSafeHomeContent } from '@/lib/wxpusher'
+import { sendWxMessage, buildPushPayload } from '@/lib/wxpusher'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,10 +43,7 @@ async function retryForDb(db: PrismaClient, now: number) {
       continue
     }
 
-    const msgContent = n.type === 'wxpusher_safe'
-      ? buildSafeHomeContent(n.student?.name || '')
-      : buildFeedbackContent(n.student?.name || '')
-    const summary = n.type === 'wxpusher_safe' ? '平安回家通知' : '课堂反馈通知'
+    const { content: msgContent, summary } = buildPushPayload(n.type, n.student?.name || '')
 
     const result = await sendWxMessage(wxpusherUid, msgContent, summary)
 

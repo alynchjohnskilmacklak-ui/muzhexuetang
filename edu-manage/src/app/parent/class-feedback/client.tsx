@@ -1,8 +1,8 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Button, Tag, Typography, Modal, Input, Descriptions, Image, Space } from 'antd'
-import { BookOutlined, ClockCircleOutlined, CameraOutlined, MessageOutlined, ArrowRightOutlined, ReloadOutlined } from '@ant-design/icons'
+import { BookOutlined, CameraOutlined, MessageOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { fmtDate, fmtDateTime } from '@/lib/format-date'
 import { formatFriendlyTime } from '@/lib/date/relative'
@@ -14,6 +14,8 @@ import { ParentCard } from '@/components/Parent/ParentCard'
 import { PullToRefresh } from '@/components/PullToRefresh'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { usePausableSWR } from '@/lib/use-pausable-swr'
+import type { FeedbackImageVariant } from '@/lib/file-asset-variants'
+import { groupByRelativeDate } from '@/lib/date/group-relative'
 
 const { Title, Text, Paragraph } = Typography
 const fetcher = (url: string) => fetch(url).then((response) => response.json())
@@ -39,23 +41,71 @@ type FeedbackConversation = {
   replies: FeedbackConversationReply[]
 }
 
-export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedbacks: any[]; highlightedFeedback: any | null }) {
+type HomeworkItem = string | { content?: string; title?: string }
+type FeedbackItem = {
+  id: string
+  createdAt: string
+  status: string
+  notifySent?: boolean
+  parentReadAt?: string | null
+  parentReply?: string | null
+  parentRepliedAt?: string | null
+  adminReply?: string | null
+  lessonContent?: string | null
+  summary?: string | null
+  overallComment?: string | null
+  knowledgePoints: string[]
+  homework: HomeworkItem[]
+  imageUrls: string[]
+  images: FeedbackImageVariant[]
+  studentRating?: unknown
+  teacher?: { id: string; name: string; subjects?: string | null } | null
+  parentMessages?: FeedbackConversation[]
+  classLesson?: {
+    name?: string | null
+    subject?: string | null
+    lessonDate?: string | null
+    startTime?: string | null
+    endTime?: string | null
+    group?: {
+      course?: { name?: string | null; subject?: string | null }
+      room?: { name?: string | null }
+      teacherAssignments?: Array<{ teacherId: string; subject?: string | null }>
+    } | null
+  } | null
+}
+
+const SUBJECT_STYLES: Record<string, { background: string; color: string }> = {
+  数学: { background: 'var(--color-primary-bg)', color: 'var(--color-primary-focus)' },
+  英语: { background: 'var(--color-surface-3)', color: 'var(--color-chart-6)' },
+  物理: { background: 'var(--color-success-bg)', color: 'var(--color-success)' },
+  化学: { background: 'var(--color-surface-3)', color: 'var(--color-warning-text)' },
+}
+
+function feedbackSubject(feedback: FeedbackItem) {
+  const assignedSubject = feedback.classLesson?.group?.teacherAssignments
+    ?.find(assignment => assignment.teacherId === feedback.teacher?.id)?.subject
+  return feedback.classLesson?.subject || assignedSubject || feedback.classLesson?.group?.course?.subject || '综合'
+}
+
+export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedbacks: FeedbackItem[]; highlightedFeedback: FeedbackItem | null }) {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
-  const [detailModal, setDetailModal] = useState<any>(null)
+  const [detailModal, setDetailModal] = useState<FeedbackItem | null>(null)
   const [replyText, setReplyText] = useState('')
   const [replying, setReplying] = useState(false)
   const [imagePreviewOpen, setImagePreviewOpen] = useState(false)
   const [localReply, setLocalReply] = useState<string | null>(null)
   const [conversation, setConversation] = useState<FeedbackConversation | null>(null)
   const [locallyReadIds, setLocallyReadIds] = useState<Set<string>>(() => new Set())
+  const [recentCutoff] = useState(() => new Date(Date.now() - 7 * 86400000))
   const detailImageUrls = Array.isArray(detailModal?.imageUrls) ? detailModal.imageUrls : []
   const detailImages = Array.isArray(detailModal?.images) && detailModal.images.length === detailImageUrls.length
     ? detailModal.images
     : detailImageUrls.map((url: string) => ({ originalUrl: url, previewUrl: url, thumbnailUrl: url }))
-  const { urls: signedDetailThumbnails, error: thumbnailError, refresh: retryThumbnails } = useSignedUrls(detailImages.map((image: any) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
+  const { urls: signedDetailThumbnails, error: thumbnailError, refresh: retryThumbnails } = useSignedUrls(detailImages.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
   const { urls: signedDetailPreviews, error: previewError, refresh: retryPreviews } = useSignedUrls(imagePreviewOpen
-    ? detailImages.map((image: any) => image.previewUrl || image.thumbnailUrl || image.originalUrl)
+    ? detailImages.map((image) => image.previewUrl || image.thumbnailUrl || image.originalUrl)
     : [])
   const { data: liveConversation, mutate: mutateConversation } = usePausableSWR<{ conversation: FeedbackConversation | null }>(
     detailModal?.id ? `/api/feedback/${detailModal.id}/messages` : null,
@@ -63,12 +113,16 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
     { refreshInterval: 5_000, revalidateOnFocus: true, revalidateOnReconnect: true },
   )
   const conversationReplies = Array.isArray(conversation?.replies) ? conversation.replies : []
+  const feedbackGroups = useMemo(
+    () => groupByRelativeDate(feedbacks, feedback => feedback.createdAt, 'today-yesterday-earlier'),
+    [feedbacks],
+  )
 
   useEffect(() => {
     if (liveConversation?.conversation) setConversation(liveConversation.conversation)
   }, [liveConversation])
 
-  const markAsRead = async (feedback: any) => {
+  const markAsRead = async (feedback: FeedbackItem) => {
     if (feedback.parentReadAt || feedback.status !== 'PUBLISHED' || locallyReadIds.has(feedback.id)) return
     setLocallyReadIds(current => new Set(current).add(feedback.id))
     await fetch('/api/feedback', {
@@ -115,7 +169,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
     finally { setReplying(false) }
   }
 
-  const openDetail = (f: any) => {
+  const openDetail = (f: FeedbackItem) => {
     setImagePreviewOpen(false)
     setDetailModal(f)
     setReplyText('')
@@ -136,103 +190,46 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
       </div>
 
       {/* Unread indicator */}
-      {feedbacks.filter(f => !f.notifySent || f.createdAt > new Date(Date.now() - 7 * 86400000)).length > 0 && (
+      {feedbacks.filter(f => !f.notifySent || new Date(f.createdAt) > recentCutoff).length > 0 && (
         <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 10, background: '#FFF3E8', border: '1px solid #FDD5B5', display: 'flex', alignItems: 'center', gap: 8 }}>
           <MessageOutlined style={{ color: '#E8784A' }} />
           <Text style={{ fontSize: 13, color: '#D46B3A' }}>
-            近期有 {feedbacks.filter(f => f.createdAt > new Date(Date.now() - 7 * 86400000)).length} 条新反馈
+            近期有 {feedbacks.filter(f => new Date(f.createdAt) > recentCutoff).length} 条新反馈
           </Text>
         </div>
       )}
 
       {feedbacks.length === 0 ? (
         <ParentCard style={{ minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <BrandEmpty title="暂无课堂反馈" hint="老师发布课堂反馈后，会在这里第一时间展示" icon="💬" actionText="去看课程表" onAction={() => router.push('/parent/schedule')} />
+          <BrandEmpty title="还没有课堂反馈" hint="老师发布的小班课、周末课课堂内容、掌握情况和照片会显示在这里，帮助你看懂孩子每节课的表现。" actionText="看看课程表" onAction={() => router.push('/parent/schedule')} />
         </ParentCard>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 80 }}>
-          {feedbacks.map((f: any, index: number) => (
-            <ParentCard
-              key={f.id}
-              className="stagger-item pressable"
-              style={{ border: `1px solid ${detailModal?.id === f.id ? '#E8784A' : '#EEE7E1'}`, animationDelay: `${Math.min(index, 8) * 40}ms` }}
-              onClick={() => openDetail(f)}
-            >
-              {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
-                <BookOutlined style={{ color: '#534AB7', fontSize: 16 }} />
-                <Text strong style={{ fontSize: 15 }}>{f.teacher?.name || '老师'}</Text>
-                {(() => {
-                  const lessonSubject = f.classLesson?.subject as string | undefined
-                  const assignedSubject = (f.classLesson?.group?.teacherAssignments as any[])
-                    ?.find((a: any) => a.teacherId === f.teacher?.id)?.subject
-                  const subject = lessonSubject || assignedSubject || f.classLesson?.group?.course?.subject
-                  return subject ? (
-                    <Tag style={{ borderRadius: 9999, fontSize: 10, background: '#F0EEFF', color: '#534AB7', border: 'none' }}>
-                      {subject}
-                    </Tag>
-                  ) : null
-                })()}
-                {/* Unread dot for recent feedbacks */}
-                {!f.parentReadAt && f.status === 'PUBLISHED' && !locallyReadIds.has(f.id) && (
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#E24B4A', display: 'inline-block' }} />
-                )}
-                {f.parentReply && (
-                  <Tag color="green" style={{ borderRadius: 9999, fontSize: 10 }}>已回复</Tag>
-                )}
-                <Text type="secondary" style={{ fontSize: 11, marginLeft: 'auto' }}>
-                  {formatFriendlyTime(f.createdAt)}
-                </Text>
-              </div>
-
-              {/* Lesson info */}
-              {f.classLesson?.group?.course && (
-                <div style={{ display: 'flex', gap: 16, marginBottom: 8, fontSize: 12, color: '#7A869A' }}>
-                  <span><BookOutlined style={{ marginRight: 4 }} />{f.classLesson.group.course.name}</span>
-                  {f.classLesson.startTime && (
-                    <span><ClockCircleOutlined style={{ marginRight: 4 }} />{f.classLesson.startTime}-{f.classLesson.endTime}</span>
-                  )}
-                </div>
-              )}
-
-              {f.lessonContent && (
-                <Paragraph ellipsis={{ rows: 2 }}
-                  style={{ fontSize: 13, lineHeight: 1.7, marginBottom: 8, color: '#4B5563' }}>
-                  <Text strong style={{ fontSize: 12 }}>本节课学习内容：</Text>{f.lessonContent}
-                </Paragraph>
-              )}
-
-              {/* Knowledge points */}
-              {f.knowledgePoints?.length > 0 && (
-                <div style={{ marginBottom: 8, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                  {f.knowledgePoints.map((kp: string, i: number) => (
-                    <Tag key={i} style={{ borderRadius: 9999, fontSize: 10 }}>{kp}</Tag>
-                  ))}
-                </div>
-              )}
-
-              {/* Summary preview */}
-              {f.summary && (
-                <Paragraph ellipsis={{ rows: 2 }}
-                  style={{ fontSize: 13, lineHeight: 1.7, marginBottom: 4, color: '#4B5563' }}>
-                  {f.summary}
-                </Paragraph>
-              )}
-
-              {/* Image count badge */}
-              {f.imageUrls?.length > 0 && (
-                <div style={{ marginTop: 6 }}>
-                  <Tag icon={<CameraOutlined />} color="orange" style={{ borderRadius: 9999, fontSize: 11 }}>
-                    {f.imageUrls.length} 张图片
-                  </Tag>
-                </div>
-              )}
-
-              <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ fontSize: 11, color: '#E8784A' }}>查看详情 →</Text>
-              </div>
-            </ParentCard>
-          ))}
+        <div className="parent-feedback-groups">
+          {feedbackGroups.map(group => <section key={group.key} className="parent-feedback-group">
+            <div className="parent-record-divider">{group.label}</div>
+            <div className="parent-feedback-list">{group.items.map((f) => {
+              const subject = feedbackSubject(f)
+              const subjectStyle = SUBJECT_STYLES[subject] || { background: 'var(--color-surface-3)', color: 'var(--color-ink-muted)' }
+              const unread = !f.parentReadAt && f.status === 'PUBLISHED' && !locallyReadIds.has(f.id)
+              const summary = f.summary || f.lessonContent || f.overallComment || '老师已发布本次课堂反馈'
+              return <button type="button" key={f.id} className={`parent-feedback-row${detailModal?.id === f.id ? ' is-active' : ''}`} onClick={() => openDetail(f)}>
+                <span className="parent-feedback-icon" style={subjectStyle}>{subject.slice(0, 1)}</span>
+                <span className="parent-feedback-body">
+                  <span className="parent-feedback-heading">
+                    <strong>{f.teacher?.name || '老师'}</strong>
+                    <span className="parent-feedback-subject" style={subjectStyle}>{subject}</span>
+                    {unread && <span className="parent-feedback-unread" aria-label="未读" />}
+                    <time>{formatFriendlyTime(f.createdAt)}</time>
+                  </span>
+                  <span className="parent-feedback-summary" title={summary}>{summary}</span>
+                </span>
+                <span className="parent-feedback-extras">
+                  {f.imageUrls?.length > 0 && <span><CameraOutlined /> {f.imageUrls.length}</span>}
+                  {f.parentReply && <span><MessageOutlined /> 已回复</span>}
+                </span>
+              </button>
+            })}</div>
+          </section>)}
         </div>
       )}
 
@@ -270,7 +267,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
                     {detailModal.classLesson.group.room?.name || '-'}
                   </Descriptions.Item>
                   <Descriptions.Item label="上课时间">
-                    {fmtDate(detailModal.classLesson.lessonDate)} {detailModal.classLesson.startTime}-{detailModal.classLesson.endTime}
+                    {detailModal.classLesson.lessonDate ? fmtDate(detailModal.classLesson.lessonDate) : '-'} {detailModal.classLesson.startTime}-{detailModal.classLesson.endTime}
                   </Descriptions.Item>
                 </>
               )}
@@ -326,9 +323,9 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
             {detailModal.homework?.length > 0 && (
               <div style={{ background: '#F7F4F0', borderRadius: 10, padding: 14, marginBottom: 14 }}>
                 <Text strong style={{ display: 'block', marginBottom: 6 }}>📚 课后作业</Text>
-                {detailModal.homework.map((hw: any, i: number) => (
+                {detailModal.homework.map((hw, i: number) => (
                   <div key={i} style={{ fontSize: 13, marginBottom: 4, color: '#4B5563' }}>
-                    {i + 1}. {hw.content || hw.title || hw}
+                    {i + 1}. {typeof hw === 'string' ? hw : hw.content || hw.title || ''}
                   </div>
                 ))}
               </div>
@@ -346,7 +343,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
                 )}
                 <Image.PreviewGroup preview={{ onVisibleChange: setImagePreviewOpen }}>
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 8 }}>
-                    {detailImages.map((image: any, i: number) => (
+                    {detailImages.map((image, i: number) => (
                       <Image
                         key={i}
                         src={signedDetailThumbnails[i]}

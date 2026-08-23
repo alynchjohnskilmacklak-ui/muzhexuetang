@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
-import { Avatar, Button, Card, Input, Segmented, Select, Tag, Typography } from 'antd'
+import { Avatar, Button, Card, Input, Segmented, Tag, Typography } from 'antd'
 import { FileTextOutlined, ProfileOutlined, SearchOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatPercent } from '@/lib/format'
@@ -24,7 +24,13 @@ type TeacherStudent = {
   taughtHours?: number | string | null
   attendanceRate?: number | null
   daysSinceLastFeedback?: number | null
-  primaryCourseType?: 'ONE_ON_ONE' | 'SMALL_GROUP' | 'GROUP' | string | null
+  primaryCourseType?: 'ONE_ON_ONE' | 'SMALL_GROUP' | 'GROUP' | 'STUDY_HALL' | string | null
+  studyHallMemberships?: Array<{
+    id: string
+    purchasedDays?: number | null
+    adjustedDays?: number
+    studyClass: { id: string; name: string; scheduleType: 'WEEKDAY_LATE' | 'WEEKEND'; gradeScope?: string[] }
+  }>
   enrollments?: Array<{
     id: string
     remainHours?: number | string | null
@@ -45,6 +51,7 @@ function avatarColor(name: string) {
 }
 
 function getStatusChip(student: TeacherStudent) {
+  if (!student.enrollments?.length && student.studyHallMemberships?.length) return { text: '作业班', color: 'orange' }
   const days = student.daysSinceLastFeedback == null ? 999 : Number(student.daysSinceLastFeedback)
   if (days > 7) return { text: '未反馈', color: '#D4537E' }
   return { text: '已反馈', color: '#1D9E75' }
@@ -55,14 +62,9 @@ export default function TeacherStudentsPage() {
   const isMobile = useIsMobile() ?? false
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState('全部')
-  const [gradeFilter, setGradeFilter] = useState('')
   const { data: rawStudents, isLoading } = useSWR<TeacherStudent[]>('/api/teacher/students', fetcher)
   const students = useMemo(() => rawStudents ?? [], [rawStudents])
 
-  const grades = useMemo(
-    () => Array.from(new Set(students.map((student) => student.grade).filter(Boolean))).map(String),
-    [students],
-  )
   const filters = ['全部', '未反馈', '初一', '初二', '初三']
 
   const filtered = useMemo(() => students.filter((student) => {
@@ -71,20 +73,21 @@ export default function TeacherStudentsPage() {
       student.grade,
       student.school,
       ...(student.enrollments?.map((enrollment) => enrollment.group?.course?.name || '') || []),
+      ...(student.studyHallMemberships?.map((membership) => membership.studyClass.name) || []),
     ].join('')
     const matchSearch = !q.trim() || searchText.includes(q.trim())
     const matchFilter = filter === '全部'
       || (filter === '未反馈' && (student.daysSinceLastFeedback == null ? 999 : Number(student.daysSinceLastFeedback)) > 7)
       || student.grade === filter
-    const matchGrade = !gradeFilter || student.grade === gradeFilter
-    return matchSearch && matchFilter && matchGrade
-  }), [students, q, filter, gradeFilter])
+    return matchSearch && matchFilter
+  }), [students, q, filter])
 
   const groupedStudents = useMemo(() => {
     const oneOnOne = filtered.filter((student) => student.primaryCourseType === 'ONE_ON_ONE')
     const smallGroup = filtered.filter((student) => student.primaryCourseType === 'SMALL_GROUP')
     const group = filtered.filter((student) => student.primaryCourseType === 'GROUP' || !student.primaryCourseType)
-    return { oneOnOne, smallGroup, group }
+    const studyHall = filtered.filter((student) => student.primaryCourseType === 'STUDY_HALL')
+    return { oneOnOne, smallGroup, group, studyHall }
   }, [filtered])
 
   const renderStudentCard = (student: TeacherStudent, index: number) => {
@@ -98,6 +101,8 @@ export default function TeacherStudentsPage() {
           .flatMap((e) => (e.group?.teacherAssignments || []).map((a) => a?.subject).filter(Boolean) as string[]),
       ),
     ].slice(0, 3)
+    const studyHallOnly = !student.enrollments?.length && Boolean(student.studyHallMemberships?.length)
+    const studyHallLabels = (student.studyHallMemberships || []).map((membership) => membership.studyClass.name).slice(0, 2)
 
     return (
       <Card
@@ -112,7 +117,7 @@ export default function TeacherStudentsPage() {
           animationDelay: `${Math.min(index, 8) * 40}ms`,
         }}
         styles={{ body: { padding: isMobile ? 12 : 14 } }}
-        onClick={() => router.push(`/teacher/student/${student.id}`)}
+        onClick={() => router.push(studyHallOnly ? '/teacher/study-hall' : `/teacher/student/${student.id}`)}
       >
         {/* Row 1: Avatar + Name + Grade·Gender + Status Chip */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
@@ -146,6 +151,11 @@ export default function TeacherStudentsPage() {
             ))}
           </div>
         )}
+        {studyHallLabels.length > 0 && (
+          <div style={{ marginBottom: 6, marginLeft: 46, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            {studyHallLabels.map((label) => <Tag color="orange" key={label} style={{ fontSize: 11, margin: 0, lineHeight: '18px' }}>{label}</Tag>)}
+          </div>
+        )}
 
         {/* Row 3: Metrics in one line */}
         <div
@@ -168,7 +178,7 @@ export default function TeacherStudentsPage() {
             <b style={{ color: '#E8784A' }}>{taughtHours.toFixed(1)} 小时</b>
           </span>
           <span>
-            课程 <b>{student.enrollments?.length || 0} 门</b>
+            班级 <b>{(student.enrollments?.length || 0) + (student.studyHallMemberships?.length || 0)} 个</b>
           </span>
         </div>
 
@@ -180,13 +190,13 @@ export default function TeacherStudentsPage() {
             icon={<ProfileOutlined />}
             onClick={(e) => {
               e.stopPropagation()
-              router.push(`/teacher/student/${student.id}`)
+              router.push(studyHallOnly ? '/teacher/study-hall' : `/teacher/student/${student.id}`)
             }}
             style={{ flex: 1, background: '#E8784A', borderColor: '#E8784A' }}
           >
-            工作台
+            {studyHallOnly ? '作业班工作台' : '工作台'}
           </Button>
-          <Button
+          {!studyHallOnly && <Button
             size="small"
             icon={<FileTextOutlined />}
             onClick={(e) => {
@@ -196,7 +206,7 @@ export default function TeacherStudentsPage() {
             style={{ flex: 1 }}
           >
             档案
-          </Button>
+          </Button>}
         </div>
       </Card>
     )
@@ -236,22 +246,7 @@ export default function TeacherStudentsPage() {
           </Text>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: 8,
-            width: isMobile ? '100%' : undefined,
-          }}
-        >
-          <Select
-            placeholder="年级筛选"
-            allowClear
-            value={gradeFilter || undefined}
-            onChange={(value) => setGradeFilter(value || '')}
-            options={grades.map((grade) => ({ label: grade, value: grade }))}
-            style={{ width: isMobile ? '100%' : 132 }}
-          />
+        <div style={{ width: isMobile ? '100%' : undefined }}>
           <Input
             prefix={<SearchOutlined />}
             placeholder="搜索学员、年级、学校或课程"
@@ -264,11 +259,12 @@ export default function TeacherStudentsPage() {
       </div>
 
       <Card
+        className="teacher-student-filter-card"
         bordered={false}
         style={{ borderRadius: 10, marginBottom: 16, overflow: 'hidden' }}
         styles={{ body: { padding: isMobile ? 8 : 12 } }}
       >
-        <div style={{ overflowX: isMobile ? 'auto' : 'visible', paddingBottom: isMobile ? 2 : 0 }}>
+        <div className="teacher-student-filter-chips">
           <Segmented
             value={filter}
             onChange={(value) => setFilter(String(value))}
@@ -287,14 +283,15 @@ export default function TeacherStudentsPage() {
             { key: 'oneOnOne', label: '一对一', color: '#534AB7', students: groupedStudents.oneOnOne },
             { key: 'smallGroup', label: '小组课', color: '#D4537E', students: groupedStudents.smallGroup },
             { key: 'group', label: '精品班课', color: '#E8784A', students: groupedStudents.group },
+            { key: 'studyHall', label: '晚托与作业辅导', color: '#E8784A', students: groupedStudents.studyHall },
           ]
             .filter((group) => group.students.length > 0)
             .map((group) => (
               <div key={group.key}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  <div style={{ width: 4, height: 18, borderRadius: 2, background: group.color }} />
-                  <span style={{ fontWeight: 700, fontSize: 15, color: '#1F2329' }}>{group.label}</span>
-                  <span style={{ fontSize: 12, color: '#98A2B3' }}>{group.students.length} 位学员</span>
+                  <span style={{ width: 8, height: 8, borderRadius: 999, background: group.color }} />
+                  <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--color-ink)' }}>{group.label}</span>
+                  <span style={{ fontSize: 12, color: 'var(--color-ink-subtle)' }}>{group.students.length} 位学员</span>
                 </div>
                 <div
                   style={{

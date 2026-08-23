@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import NextImage from 'next/image'
 import {
   Button, Checkbox, Collapse, Divider, Form, InputNumber, Modal, Select,
   Spin, Switch, Tag, Tooltip, Typography,
@@ -1670,7 +1671,7 @@ function SharePoster({
       </div>
 
       <div style={{ position: 'absolute', left: 54, right: 54, bottom: 96, display: 'flex', alignItems: 'center', gap: 32 }}>
-        <img src={CONSULT_QR_SRC} alt="咨询二维码" width={200} height={200} style={{ width: 200, height: 200, background: '#ffffff', border: '10px solid #ffffff', borderRadius: 18 }} />
+        <NextImage src={CONSULT_QR_SRC} alt="咨询二维码" width={200} height={200} unoptimized style={{ background: '#ffffff', border: '10px solid #ffffff', borderRadius: 18 }} />
         <div style={{ fontSize: 30, fontWeight: 800, color: C.ink, lineHeight: 1.35 }}>
           扫码找牧哲学堂老师，做专业人工解读
         </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import useSWR from 'swr'
 import {
   Alert,
@@ -494,7 +494,7 @@ export function DataAdminClient() {
     return deletedValues.includes(status)
   }
 
-  const columnKeys = useMemo(() => {
+  const columnKeys = (() => {
     if (!records.length || !def) return []
     const first = records[0]
     return Object.keys(first).filter(
@@ -503,9 +503,9 @@ export function DataAdminClient() {
         !def.sensitiveFields.includes(k) &&
         !['password', 'sessionToken'].some((s) => k.toLowerCase().includes(s.toLowerCase())),
     ).slice(0, 8)
-  }, [records, def])
+  })()
 
-  const tableColumns = useMemo(() => {
+  const tableColumns = (() => {
     const displayColumnKeys = isMobile ? columnKeys.slice(0, 3) : columnKeys
     const cols: Record<string, unknown>[] = displayColumnKeys.map((k) => ({
       title: k,
@@ -563,7 +563,7 @@ export function DataAdminClient() {
     })
 
     return cols
-  }, [columnKeys, entityKey, def, restoringId, isDeletedRecord, handleViewDetail, handleEdit, handleRestore, isMobile])
+  })()
 
   const handleExport = async () => {
     try {

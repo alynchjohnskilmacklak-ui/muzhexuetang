@@ -10,7 +10,7 @@ import { useDivision } from '@/contexts/DivisionContext'
 
 const { Text } = Typography
 
-const WEEK_DAYS = ['周一', '周二', '周三', '周四', '周五', '周六']
+const WEEK_DAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
 
 const TEACHER_COLORS = ['#E8784A', '#1D9E75', '#534AB7', '#D4537E', '#BA7517', '#185FA5', '#27500A', '#72243E']
 function getTeacherColor(teacherId: string): string {
@@ -18,9 +18,23 @@ function getTeacherColor(teacherId: string): string {
   const hash = teacherId.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
   return TEACHER_COLORS[Math.abs(hash) % TEACHER_COLORS.length]
 }
-function isAM(startTime: string): boolean { return parseInt(startTime?.split(':')[0] || '0') < 12 }
+function dayPart(startTime: string): 'morning' | 'afternoon' | 'evening' {
+  const hour = parseInt(startTime?.split(':')[0] || '0')
+  return hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening'
+}
 
 const fetcher = (url: string) => fetch(url).then(r => r.ok ? r.json() : Promise.reject('load error'))
+type Lesson = {
+  id: string
+  lessonDate: string
+  startTime: string
+  teacherId?: string | null
+  teacherName?: string | null
+  subject?: string | null
+  teacher?: { id?: string | null; name?: string | null } | null
+  group?: { room?: { id?: string | null } | null; course?: { subject?: string | null; type?: string | null } | null } | null
+}
+type Room = { id: string; name: string; type?: string | null }
 
 export function WeekHeatmapView({
   weekStart, setWeekStart, onCellClick,
@@ -31,44 +45,44 @@ export function WeekHeatmapView({
   const router = useRouter()
   const weekDates = useMemo(() => WEEK_DAYS.map((_, i) => addDays(weekStart, i)), [weekStart])
   const startStr = format(weekStart, 'yyyy-MM-dd')
-  const endStr = format(addDays(weekStart, 5), 'yyyy-MM-dd')
+  const endStr = format(addDays(weekStart, 6), 'yyyy-MM-dd')
 
   // Get GROUP lessons for classrooms
-  const { data: groupData, isLoading: loadingGroup } = useSWR(
+  const { data: groupData, isLoading: loadingGroup } = useSWR<Lesson[]>(
     `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=GROUP&division=${division}`, fetcher, { refreshInterval: 120_000 }
   )
   // Get SMALL lessons for intensive summary
-  const { data: smallGroupData } = useSWR(
+  const { data: smallGroupData } = useSWR<Lesson[]>(
     `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=SMALL_GROUP&division=${division}`, fetcher, { refreshInterval: 120_000 }
   )
-  const { data: oneOnOneData } = useSWR(
+  const { data: oneOnOneData } = useSWR<Lesson[]>(
     `/api/class-lessons?startDate=${startStr}&endDate=${endStr}&courseType=ONE_ON_ONE&division=${division}`, fetcher, { refreshInterval: 120_000 }
   )
-  const { data: roomsData } = useSWR('/api/rooms', fetcher)
+  const { data: roomsData } = useSWR<Room[]>('/api/rooms', fetcher)
 
-  const groupLessons: Record<string, unknown>[] = Array.isArray(groupData) ? groupData : []
-  const smallLessons: Record<string, unknown>[] = [
+  const groupLessons = useMemo<Lesson[]>(() => Array.isArray(groupData) ? groupData : [], [groupData])
+  const smallLessons = useMemo<Lesson[]>(() => [
     ...(Array.isArray(smallGroupData) ? smallGroupData : []),
     ...(Array.isArray(oneOnOneData) ? oneOnOneData : []),
-  ]
-  const allRooms: Record<string, unknown>[] = Array.isArray(roomsData) ? roomsData : []
-  const classrooms = allRooms.filter(r => { const t = (r.type as string) || ''; return !t.includes('一对一') && !t.includes('ONE_ON_ONE') })
+  ], [oneOnOneData, smallGroupData])
+  const allRooms: Room[] = Array.isArray(roomsData) ? roomsData : []
+  const classrooms = allRooms.filter(r => { const t = r.type || ''; return !t.includes('一对一') && !t.includes('ONE_ON_ONE') })
 
   // Build room×day map from GROUP lessons
   const roomDayMap = useMemo(() => {
-    const map: Record<string, Record<string, { teacherId: string; teacherName: string; subject: string; startTime: string; isAM: boolean }[]>> = {}
-    classrooms.forEach(r => { map[r.id as string] = {} })
-    groupLessons.forEach((l: Record<string, unknown>) => {
-      const roomId = (l.group as any)?.room?.id || ''
+    const map: Record<string, Record<string, { teacherId: string; teacherName: string; subject: string; startTime: string; part: 'morning' | 'afternoon' | 'evening' }[]>> = {}
+    classrooms.forEach(r => { map[r.id] = {} })
+    groupLessons.forEach((l) => {
+      const roomId = l.group?.room?.id || ''
       if (!map[roomId]) return
-      const dateKey = format(new Date(l.lessonDate as string), 'yyyy-MM-dd')
+      const dateKey = format(new Date(l.lessonDate), 'yyyy-MM-dd')
       if (!map[roomId][dateKey]) map[roomId][dateKey] = []
       map[roomId][dateKey].push({
-        teacherId: (l.teacher as any)?.id || l.teacherId as string || '',
-        teacherName: (l.teacher as any)?.name || (l.teacherName as string) || '',
-        subject: (l.subject as string) || (l.group as any)?.course?.subject || '',
-        startTime: l.startTime as string,
-        isAM: isAM(l.startTime as string),
+        teacherId: l.teacher?.id || l.teacherId || '',
+        teacherName: l.teacher?.name || l.teacherName || '',
+        subject: l.subject || l.group?.course?.subject || '',
+        startTime: l.startTime,
+        part: dayPart(l.startTime),
       })
     })
     return map
@@ -77,10 +91,10 @@ export function WeekHeatmapView({
   // Build intensive summary per day
   const intensiveByDay = useMemo(() => {
     const map: Record<string, { total: number; types: Record<string, number> }> = {}
-    smallLessons.forEach((l: Record<string, unknown>) => {
-      const dateKey = format(new Date(l.lessonDate as string), 'yyyy-MM-dd')
+    smallLessons.forEach((l) => {
+      const dateKey = format(new Date(l.lessonDate), 'yyyy-MM-dd')
       if (!map[dateKey]) map[dateKey] = { total: 0, types: {} }
-      const type = ((l.group as any)?.course?.type as string) || 'ONE_ON_ONE'
+      const type = l.group?.course?.type || 'ONE_ON_ONE'
       map[dateKey].total++
       map[dateKey].types[type] = (map[dateKey].types[type] || 0) + 1
     })
@@ -89,13 +103,21 @@ export function WeekHeatmapView({
 
   return (
     <div>
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
+        gap: 8, marginBottom: 12, padding: '10px 12px', borderRadius: 10,
+        background: 'var(--color-primary-bg)', border: '1px solid var(--color-hairline)',
+      }}>
+        <Text strong>完整周总览：周一至周日</Text>
+        <Text type="secondary" style={{ fontSize: 12 }}>上午 · 下午 · 晚间（展示至 21:00）</Text>
+      </div>
       {/* Week navigation */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
         <button onClick={() => setWeekStart(addDays(weekStart, -7))}
           style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>←</button>
         <div style={{ padding: '0 16px', height: 34, display: 'flex', alignItems: 'center', background: '#fff',
           border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8, fontSize: 14, fontWeight: 500 }}>
-          {format(weekStart, 'M月d日', { locale: zhCN })} – {format(addDays(weekStart, 5), 'M月d日', { locale: zhCN })}
+          {format(weekStart, 'M月d日', { locale: zhCN })} – {format(addDays(weekStart, 6), 'M月d日', { locale: zhCN })}
         </div>
         <button onClick={() => setWeekStart(addDays(weekStart, 7))}
           style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>→</button>
@@ -109,7 +131,7 @@ export function WeekHeatmapView({
         <Empty description="暂无教室数据" />
       ) : (
         <div style={{ overflowX: 'auto', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: `100px repeat(6, 1fr)`, minWidth: 720 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `100px repeat(7, 1fr)`, minWidth: 840 }}>
             {/* Header */}
             <div style={{ borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', background: '#faf8f5' }} />
             {weekDates.map((date, i) => {
@@ -128,19 +150,20 @@ export function WeekHeatmapView({
 
             {/* Classroom rows */}
             {classrooms.map(room => (
-              <div key={room.id as string} style={{ display: 'contents' }}>
+              <div key={room.id} style={{ display: 'contents' }}>
                 <div style={{ padding: '8px', borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)',
                   background: '#faf8f5', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600 }}>{room.name as string}</div>
+                  <div style={{ fontSize: 11, fontWeight: 600 }}>{room.name}</div>
                   <div style={{ fontSize: 9, color: '#E8784A' }}>精品班课</div>
                 </div>
                 {weekDates.map((date, dayIdx) => {
                   const dateKey = format(date, 'yyyy-MM-dd')
-                  const lessons = roomDayMap[room.id as string]?.[dateKey] || []
-                  const amLessons = lessons.filter(l => l.isAM)
-                  const pmLessons = lessons.filter(l => !l.isAM)
-                  const uniqueAMTeachers = [...new Set(amLessons.map(l => l.teacherId))]
-                  const uniquePMTeachers = [...new Set(pmLessons.map(l => l.teacherId))]
+                  const lessons = roomDayMap[room.id]?.[dateKey] || []
+                  const sections = [
+                    { key: 'morning', label: '上午' },
+                    { key: 'afternoon', label: '下午' },
+                    { key: 'evening', label: '晚上（至21:00）' },
+                  ] as const
                   return (
                     <div key={dayIdx} style={{ padding: 4, minHeight: 80, cursor: 'pointer',
                       borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)',
@@ -151,33 +174,21 @@ export function WeekHeatmapView({
                         </div>
                       ) : (
                         <>
-                          {amLessons.length > 0 && <div style={{ fontSize: 8, color: 'var(--color-text-tertiary, #98A2B3)', marginBottom: 2 }}>上午</div>}
-                          {uniqueAMTeachers.map(tid => {
-                            const l = amLessons.find(x => x.teacherId === tid)
-                            if (!l) return null
-                            const color = getTeacherColor(tid)
-                            return (
-                              <div key={tid} style={{ borderRadius: 3, padding: '2px 5px', marginBottom: 2, background: `${color}15`, display: 'flex', alignItems: 'center', gap: 3 }}>
-                                <div style={{ width: 5, height: 5, borderRadius: '50%', background: color }} />
-                                <span style={{ fontSize: 9, fontWeight: 500, color, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  {l.teacherName}·{l.subject}
-                                </span>
-                              </div>
-                            )
-                          })}
-                          {pmLessons.length > 0 && <div style={{ fontSize: 8, color: 'var(--color-text-tertiary, #98A2B3)', margin: '4px 0 2px' }}>下午</div>}
-                          {uniquePMTeachers.map(tid => {
-                            const l = pmLessons.find(x => x.teacherId === tid)
-                            if (!l) return null
-                            const color = getTeacherColor(tid)
-                            return (
-                              <div key={tid} style={{ borderRadius: 3, padding: '2px 5px', marginBottom: 2, background: `${color}15`, display: 'flex', alignItems: 'center', gap: 3 }}>
-                                <div style={{ width: 5, height: 5, borderRadius: '50%', background: color }} />
-                                <span style={{ fontSize: 9, fontWeight: 500, color, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  {l.teacherName}·{l.subject}
-                                </span>
-                              </div>
-                            )
+                          {sections.map((section) => {
+                            const partLessons = lessons.filter((lesson) => lesson.part === section.key)
+                            const teacherIds = [...new Set(partLessons.map((lesson) => lesson.teacherId))]
+                            if (!partLessons.length) return null
+                            return <div key={section.key}>
+                              <div style={{ fontSize: 8, color: 'var(--color-text-tertiary, #98A2B3)', margin: section.key === 'morning' ? '0 0 2px' : '4px 0 2px' }}>{section.label}</div>
+                              {teacherIds.map((teacherId) => {
+                                const lesson = partLessons.find((item) => item.teacherId === teacherId)!
+                                const color = getTeacherColor(teacherId)
+                                return <div key={teacherId} style={{ borderRadius: 3, padding: '2px 5px', marginBottom: 2, background: `${color}15`, display: 'flex', alignItems: 'center', gap: 3 }}>
+                                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: color }} />
+                                  <span style={{ fontSize: 9, fontWeight: 500, color, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lesson.teacherName}·{lesson.subject}</span>
+                                </div>
+                              })}
+                            </div>
                           })}
                         </>
                       )}
@@ -197,13 +208,13 @@ export function WeekHeatmapView({
               const dateKey = format(date, 'yyyy-MM-dd')
               const summary = intensiveByDay[dateKey]
               // 获取该日的详细课次
-              const dayLessons = smallLessons.filter((l: Record<string, unknown>) =>
-                format(new Date(l.lessonDate as string), 'yyyy-MM-dd') === dateKey
+              const dayLessons = smallLessons.filter((l) =>
+                format(new Date(l.lessonDate), 'yyyy-MM-dd') === dateKey
               )
               const uniqueTeachers = [...new Map(
-                dayLessons.map((l: Record<string, unknown>) => [
-                  (l.teacher as any)?.id || l.teacherId,
-                  { id: (l.teacher as any)?.id || l.teacherId, name: (l.teacher as any)?.name || '', subject: (l.subject as string) || '' }
+                dayLessons.map((l) => [
+                  l.teacher?.id || l.teacherId || '',
+                  { id: l.teacher?.id || l.teacherId || '', name: l.teacher?.name || '', subject: l.subject || '' }
                 ])
               ).values()]
 

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, Tag, Typography, Button, Spin, Empty, Input, Modal, Space, Select, InputNumber, Collapse } from 'antd'
-import { BookOutlined, FlagOutlined, RiseOutlined, RocketOutlined, PlusOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons'
+import { Card, Tag, Typography, Button, Spin, Empty, Input, Space, InputNumber } from 'antd'
+import { FlagOutlined, RiseOutlined, RocketOutlined, PlusOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
@@ -13,16 +13,34 @@ const { Text, Paragraph } = Typography
 const MOOD_LABELS: Record<string, string> = { GREAT: '很棒', GOOD: '良好', OKAY: '平稳', NEEDS_ATTENTION: '需关注' }
 const MASTERY_LABELS: Record<string, { label: string; color: string }> = { MASTERED: { label: '已掌握', color: 'green' }, NEEDS_REVIEW: { label: '需复习', color: 'orange' }, NEEDS_PRACTICE: { label: '薄弱', color: 'red' } }
 
-async function requestJson(url: string, init: RequestInit) {
+type RecentFeedback = { id: string; mood?: string; createdAt: string; overallComment?: string; summary?: string; imageCount: number; parentReplied: boolean }
+type MasteryRecord = { id: string; level: string; knowledgePoint: string }
+type LearningGoal = { id: string; goalDesc: string; subject: string }
+type Weakness = { id: string; topic: string; mistakeCount: number }
+type StudentContext = {
+  basic: { name: string; grade?: string; school?: string; remainHours: number }
+  recentFeedbacks: RecentFeedback[]
+  masteryRecords: MasteryRecord[]
+  goals: LearningGoal[]
+  weaknesses: Weakness[]
+  stageSummary?: { summary: string } | null
+  attendance: { rate: number | null }
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : '操作失败'
+}
+
+async function requestJson<T>(url: string, init: RequestInit): Promise<T> {
   const res = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json', ...(init.headers || {}) } })
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || '操作失败')
-  return data
+  return data as T
 }
 
 export function StudentContextPanel({ studentId }: { studentId: string }) {
   const router = useRouter()
-  const { data, isLoading, mutate } = useSWR(`/api/teacher/students/${studentId}/context`, fetcher)
+  const { data, isLoading, mutate } = useSWR<StudentContext>(`/api/teacher/students/${studentId}/context`, fetcher)
   const [goalSubj, setGoalSubj] = useState('')
   const [goalDesc, setGoalDesc] = useState('')
   const [weakTopic, setWeakTopic] = useState('')
@@ -34,22 +52,22 @@ export function StudentContextPanel({ studentId }: { studentId: string }) {
   if (isLoading) return <div style={{ padding: 20, textAlign: 'center' }}><Spin /></div>
   if (!data) return <Empty description="暂无学生数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
 
-  const { basic, recentFeedbacks, masteryRecords, goals, weaknesses, stageSummary, attendance, todayLessons } = data
+  const { basic, recentFeedbacks, masteryRecords, goals, weaknesses, stageSummary, attendance } = data
 
   const addGoal = async () => {
     if (!goalSubj.trim() || !goalDesc.trim()) { toast.warning('请填写学科和目标'); return }
     try {
-      await requestJson('/api/teacher/learning-goals', { method: 'POST', body: JSON.stringify({ studentId, subject: goalSubj, goalDesc }) })
+      await requestJson<unknown>('/api/teacher/learning-goals', { method: 'POST', body: JSON.stringify({ studentId, subject: goalSubj, goalDesc }) })
       toast.success('目标已添加'); setGoalSubj(''); setGoalDesc(''); mutate()
-    } catch (e: any) { toast.error(e.message) }
+    } catch (e: unknown) { toast.error(errorMessage(e)) }
   }
 
   const addWeakness = async () => {
     if (!weakTopic.trim()) { toast.warning('请填写知识点'); return }
     try {
-      await requestJson('/api/teacher/weaknesses', { method: 'POST', body: JSON.stringify({ studentId, topic: weakTopic, mistakeCount: weakCount || 1 }) })
+      await requestJson<unknown>('/api/teacher/weaknesses', { method: 'POST', body: JSON.stringify({ studentId, topic: weakTopic, mistakeCount: weakCount || 1 }) })
       toast.success('薄弱点已添加'); setWeakTopic(''); setWeakCount(1); mutate()
-    } catch (e: any) { toast.error(e.message) }
+    } catch (e: unknown) { toast.error(errorMessage(e)) }
   }
 
   const saveStage = async (status: string) => {
@@ -57,13 +75,13 @@ export function StudentContextPanel({ studentId }: { studentId: string }) {
     try {
       const start = new Date(); start.setMonth(start.getMonth() - 3)
       const body: Record<string, unknown> = { studentId, periodStart: start.toISOString().slice(0, 10), periodEnd: new Date().toISOString().slice(0, 10), summary: summaryText, suggestions: suggestionsText }
-      const d = await requestJson('/api/teacher/stage-summary', { method: 'POST', body: JSON.stringify(body) })
+      const d = await requestJson<{ stageSummary: { id: string } }>('/api/teacher/stage-summary', { method: 'POST', body: JSON.stringify(body) })
       if (status === 'publish') {
-        await requestJson('/api/teacher/stage-summary', { method: 'PATCH', body: JSON.stringify({ id: d.stageSummary.id, action: 'publish' }) })
+        await requestJson<unknown>('/api/teacher/stage-summary', { method: 'PATCH', body: JSON.stringify({ id: d.stageSummary.id, action: 'publish' }) })
         toast.success('寄语已发布，家长可见')
       } else { toast.success('草稿已保存') }
       setSummaryText(''); setSuggestionsText(''); mutate()
-    } catch (e: any) { toast.error(e.message) }
+    } catch (e: unknown) { toast.error(errorMessage(e)) }
     finally { setSaving(false) }
   }
 
@@ -89,7 +107,7 @@ export function StudentContextPanel({ studentId }: { studentId: string }) {
       {/* Recent feedbacks */}
       <Card size="small" style={{ borderRadius: 10, border: '1px solid #EEE7E1' }}>
         <Text strong style={{ fontSize: 12 }}>最近反馈</Text>
-        {recentFeedbacks?.length > 0 ? recentFeedbacks.map((f: any) => (
+        {recentFeedbacks?.length > 0 ? recentFeedbacks.map((f) => (
           <div key={f.id} style={{ marginTop: 4, padding: '4px 6px', background: '#F9F7FF', borderRadius: 6, fontSize: 11 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <Tag style={{ borderRadius: 9999, fontSize: 9, margin: 0 }}>{f.mood ? MOOD_LABELS[f.mood] || f.mood : '—'}</Tag>
@@ -105,7 +123,7 @@ export function StudentContextPanel({ studentId }: { studentId: string }) {
       {masteryRecords?.length > 0 && (
         <Card size="small" style={{ borderRadius: 10, border: '1px solid #EEE7E1' }}>
           <Text strong style={{ fontSize: 12 }}>知识掌握</Text>
-          {masteryRecords.map((m: any) => (
+          {masteryRecords.map((m) => (
             <div key={m.id} style={{ marginTop: 2, display: 'flex', gap: 4, alignItems: 'center' }}>
               <Tag color={MASTERY_LABELS[m.level]?.color} style={{ borderRadius: 9999, fontSize: 9, margin: 0 }}>{MASTERY_LABELS[m.level]?.label || m.level}</Tag>
               <Text style={{ fontSize: 10 }}>{m.knowledgePoint}</Text>
@@ -117,7 +135,7 @@ export function StudentContextPanel({ studentId }: { studentId: string }) {
       {/* Goals + editor */}
       <Card size="small" style={{ borderRadius: 10, border: '1px solid #EEE7E1' }}>
         <Text strong style={{ fontSize: 12 }}><FlagOutlined /> 学习目标</Text>
-        {goals?.map((g: any) => <div key={g.id} style={{ fontSize: 10, color: '#5a4e3a', marginTop: 1 }}>{g.goalDesc} ({g.subject})</div>)}
+        {goals?.map((g) => <div key={g.id} style={{ fontSize: 10, color: '#5a4e3a', marginTop: 1 }}>{g.goalDesc} ({g.subject})</div>)}
         {(!goals || goals.length === 0) && <Text type="secondary" style={{ fontSize: 10, display: 'block' }}>暂无</Text>}
         <Space.Compact style={{ marginTop: 6, width: '100%' }}>
           <Input size="small" placeholder="学科" value={goalSubj} onChange={e => setGoalSubj(e.target.value)} style={{ width: 60 }} />
@@ -130,7 +148,7 @@ export function StudentContextPanel({ studentId }: { studentId: string }) {
       <Card size="small" style={{ borderRadius: 10, border: '1px solid #EEE7E1' }}>
         <Text strong style={{ fontSize: 12 }}>薄弱点</Text>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 3 }}>
-          {weaknesses?.slice(0, 5).map((w: any) => <Tag key={w.id} color={w.mistakeCount >= 3 ? 'red' : 'orange'} style={{ borderRadius: 9999, fontSize: 9, margin: 0 }}>{w.topic}{w.mistakeCount > 1 ? ` ×${w.mistakeCount}` : ''}</Tag>)}
+          {weaknesses?.slice(0, 5).map((w) => <Tag key={w.id} color={w.mistakeCount >= 3 ? 'red' : 'orange'} style={{ borderRadius: 9999, fontSize: 9, margin: 0 }}>{w.topic}{w.mistakeCount > 1 ? ` ×${w.mistakeCount}` : ''}</Tag>)}
         </div>
         <Space.Compact style={{ marginTop: 6, width: '100%' }}>
           <Input size="small" placeholder="知识点" value={weakTopic} onChange={e => setWeakTopic(e.target.value)} style={{ flex: 1 }} />

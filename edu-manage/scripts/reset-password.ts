@@ -2,10 +2,10 @@
  * 重置指定用户密码（bcrypt 加密）。
  *
  * 用法：
- *   npx tsx scripts/reset-password.ts mashaokun@nuc.com mashaokun
+ *   npx tsx scripts/reset-password.ts <邮箱> <新密码>
  *
  * 或者通过环境变量：
- *   RESET_EMAIL=mashaokun@nuc.com RESET_PASSWORD=mashaokun npx tsx scripts/reset-password.ts
+ *   RESET_EMAIL=xxx RESET_PASSWORD=xxx npx tsx scripts/reset-password.ts
  */
 
 import { PrismaClient } from '@prisma/client'
@@ -23,8 +23,8 @@ async function main() {
     process.exit(1)
   }
 
-  if (!password || password.length < 6) {
-    console.error('密码至少需要 6 位')
+  if (!password || password.length < 10) {
+    console.error('密码至少需要 10 位')
     process.exit(1)
   }
 

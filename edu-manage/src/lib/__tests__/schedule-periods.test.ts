@@ -22,4 +22,13 @@ describe('schedule periods', () => {
     expect(findSchedulePeriod(periods, '08:45')?.id).toBe('winter-1')
     expect(findSchedulePeriod(periods, '09:30')).toBeUndefined()
   })
+
+  it('upgrades only the legacy evening default to 21:00', () => {
+    const periods = normalizeSchedulePeriods([
+      { id: 'ev2', name: '晚间第二', type: 'CLASS', start: '19:40', end: '20:40' },
+      { id: 'custom', name: '自定义晚课', type: 'CLASS', start: '20:40', end: '20:55' },
+    ])
+    expect(periods.find((period) => period.id === 'ev2')?.end).toBe('21:00')
+    expect(periods.find((period) => period.id === 'custom')?.end).toBe('20:55')
+  })
 })

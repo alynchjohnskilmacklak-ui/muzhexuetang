@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import { PrismaClient } from '@prisma/client'
 
 export function getJuniorDatabaseUrl(): string {
@@ -26,8 +26,6 @@ export function isMissingString(value: string | null | undefined): boolean {
 }
 
 export function writeJsonReport(path: string, report: unknown): void {
-  const { mkdirSync, writeFileSync } = require('node:fs') as typeof import('node:fs')
-  const { dirname } = require('node:path') as typeof import('node:path')
   mkdirSync(dirname(path), { recursive: true })
   writeFileSync(path, `${JSON.stringify(report, null, 2)}\n`, 'utf8')
 }

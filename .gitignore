@@ -17,3 +17,13 @@ mu-zhe-smart-edu-video/
 edu-manage-deploy-*/
 edu-manage-deploy-*.sh
 edu-manage-code-review-*.md
+
+# local proxy configs (contain credentials, public repo — do not upload)
+chain-*.yaml
+openai-*.yaml
+
+# temp archives
+edu-manage/*.zip
+
+# unrelated template repo
+awesome/

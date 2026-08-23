@@ -31,7 +31,7 @@ function asArr(v: unknown, limit = 20): string[] {
 function isMissingFeedbackContextColumn(error: unknown) {
   const err = error as { code?: string; meta?: { column?: string }; message?: string }
   const text = `${err?.meta?.column || ''} ${err?.message || ''}`
-  return err?.code === 'P2022' && /feedbackCourseType|feedbackGroupId/.test(text)
+  return err?.code === 'P2022' && /feedbackCourseType|feedbackGroupId|termId/.test(text)
 }
 
 async function createClassroomFeedbackCompat(tx: Prisma.TransactionClient, data: Prisma.ClassroomFeedbackUncheckedCreateInput) {
@@ -42,6 +42,7 @@ async function createClassroomFeedbackCompat(tx: Prisma.TransactionClient, data:
     const legacyData = { ...data }
     delete legacyData.feedbackCourseType
     delete legacyData.feedbackGroupId
+    delete legacyData.termId
     console.warn('[feedback] ClassroomFeedback course context columns missing; creating legacy feedback without course context')
     return tx.classroomFeedback.create({ data: legacyData })
   }
@@ -207,6 +208,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   // Resolve every teacher-controlled relationship from the database. Never
   // trust studentIds, groupId, lessonId or teacherId supplied by the client.
   let resolvedStudentIds = studentIds
+  let feedbackTermId: string | null = null
   let scopedStudents: Array<{ id: string; name: string; parentId: string | null; parentUserId: string | null }> | null = null
   if (isTeacher) {
     const scope = await resolveTeacherFeedbackCreationScope(prisma, {
@@ -229,6 +231,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     resolvedStudentIds = scope.students.map((student) => student.id)
     feedbackGroupId = scope.feedbackGroupId
     feedbackCourseType = scope.feedbackCourseType
+    feedbackTermId = scope.termId
   } else if (classLessonId) {
     const lesson = await prisma.classLesson.findFirst({
       where: { id: classLessonId },
@@ -243,6 +246,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
     resolvedStudentIds = studentIds.length ? studentIds : lessonStudentIds
     feedbackGroupId = lesson.groupId || feedbackGroupId
+    feedbackTermId = lesson.group.termId
     feedbackCourseType = lesson.group.intensiveMode === 'INTENSIVE' || lesson.group.course?.type === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
   }
   if (!resolvedStudentIds.length) {
@@ -255,6 +259,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   const resolvedStudentRatings = filterStudentRatingsForStudents(studentRatings, resolvedStudentIds)
 
+  if (!feedbackTermId && feedbackGroupId) {
+    feedbackTermId = (await prisma.classGroup.findUnique({
+      where: { id: feedbackGroupId },
+      select: { termId: true },
+    }))?.termId || null
+  }
+
   // Get student-parent mapping for notifications
   const studentsData = scopedStudents ?? await prisma.student.findMany({
     where: { id: { in: resolvedStudentIds } },
@@ -263,6 +274,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   const feedback = await prisma.$transaction(async (tx) => {
     const created = await createClassroomFeedbackCompat(tx, {
+        termId: feedbackTermId,
         teacherId,
         classLessonId,
         feedbackCourseType,

@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import * as XLSX from 'xlsx'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,8 +58,10 @@ export const GET = apiHandler(async (
   const { chartKey } = await params
   const { from, to } = parseRange(request.nextUrl.searchParams)
   const division = getRequestDivision(user, request.nextUrl.searchParams.get('division'))
-  const studentWhere = { division }
-  const feeWhere = { division }
+  const selectedTerm = await resolveAdminTermScope(prisma, division, request)
+  const termId = selectedTerm?.id || '__NO_SELECTED_TERM__'
+  const studentWhere = { division, termMemberships: { some: { termId } } }
+  const feeWhere = { division, termId }
 
   switch (chartKey) {
     case 'funnel': {
@@ -70,7 +73,7 @@ export const GET = apiHandler(async (
       return sendXlsx(wb, `学员入学漏斗-${new Date().toISOString().slice(0, 10)}`)
     }
     case 'paper-mastery': {
-      const data = await prisma.paperQuestion.groupBy({ by: ['mastery'], _count: true, where: { paper: { paperDate: { gte: from, lt: to } } } })
+      const data = await prisma.paperQuestion.groupBy({ by: ['mastery'], _count: true, where: { paper: { termId, paperDate: { gte: from, lt: to } } } })
       const labels: Record<string, string> = { MASTERED: '已掌握', NEEDS_REVIEW: '待复习', NEEDS_PRACTICE: '需练习' }
       const rows = data.map((d) => [labels[d.mastery] || d.mastery, d._count])
       const ws = XLSX.utils.aoa_to_sheet([['掌握程度', '题目数'], ...rows])
@@ -92,12 +95,12 @@ export const GET = apiHandler(async (
     }
     case 'parent-engagement': {
       const [published, read, posts, reactions, students, comments, total, replied] = await Promise.all([
-        prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to } } }),
-        prisma.examPaper.count({ where: { status: 'PUBLISHED', paperDate: { gte: from, lt: to }, isReadByParent: true } }),
-        prisma.performancePost.count({ where: { createdAt: { gte: from, lt: to }, deletedAt: null } }),
-        prisma.postReaction.count({ where: { post: { createdAt: { gte: from, lt: to }, deletedAt: null } } }),
+        prisma.examPaper.count({ where: { termId, status: 'PUBLISHED', paperDate: { gte: from, lt: to } } }),
+        prisma.examPaper.count({ where: { termId, status: 'PUBLISHED', paperDate: { gte: from, lt: to }, isReadByParent: true } }),
+        prisma.performancePost.count({ where: { termId, createdAt: { gte: from, lt: to }, deletedAt: null } }),
+        prisma.postReaction.count({ where: { post: { termId, createdAt: { gte: from, lt: to }, deletedAt: null } } }),
         prisma.student.count({ where: studentWhere }),
-        prisma.paperComment.count({ where: { createdAt: { gte: from, lt: to }, author: { role: 'parent' } } }),
+        prisma.paperComment.count({ where: { createdAt: { gte: from, lt: to }, author: { role: 'parent' }, paper: { termId } } }),
         prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to } } }),
         prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to }, isReplied: true } }),
       ])
@@ -130,8 +133,8 @@ export const GET = apiHandler(async (
     }
     case 'attendance': {
       const [attData, mkData] = await Promise.all([
-        prisma.attendance.groupBy({ by: ['status'], _count: true, where: { createdAt: { gte: from, lt: to } } }),
-        prisma.makeupRequest.groupBy({ by: ['status'], _count: true, where: { createdAt: { gte: from, lt: to } } }),
+        prisma.attendance.groupBy({ by: ['status'], _count: true, where: { createdAt: { gte: from, lt: to }, lesson: { group: { termId } } } }),
+        prisma.makeupRequest.groupBy({ by: ['status'], _count: true, where: { createdAt: { gte: from, lt: to }, attendance: { lesson: { group: { termId } } } } }),
       ])
       const find = (arr: { status: string; _count: number }[], s: string) => arr.find((a) => a.status === s)?._count ?? 0
       const attP = find(attData, 'PRESENT'); const attL = find(attData, 'LEAVE'); const attA = find(attData, 'ABSENT')

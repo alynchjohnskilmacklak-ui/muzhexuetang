@@ -1,13 +1,16 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import useSWR from 'swr'
-import { Alert, Badge, Button, Card, Col, Empty, Row, Tag, Typography } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import useSWR, { useSWRConfig } from 'swr'
+import { Alert, Badge, Button, Card, Col, Empty, message, Row, Select, Tag, Typography } from 'antd'
 import {
   BookOutlined,
   CalendarOutlined,
   ClockCircleOutlined,
   ExclamationCircleOutlined,
+  CheckSquareOutlined,
+  CommentOutlined,
+  MessageOutlined,
   RightOutlined,
   TeamOutlined,
   UserOutlined,
@@ -24,9 +27,44 @@ import { DashboardSkeleton } from '@/components/Dashboard/DashboardSkeleton'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
 import { formatHours } from '@/lib/format'
+import { isAdminTermScopedSWRKey } from '@/lib/admin-term-scope-client'
 import type { AdminDashboardData, IntensiveAppointment, TodaySchedule } from '@/types/dashboard'
+import { QuickStartGuide, type QuickStartStep } from '@/components/Common/QuickStartGuide'
 
 const { Text } = Typography
+
+const ADMIN_QUICK_STEPS: QuickStartStep[] = [
+  { title: '先看今日异常', description: '首页会集中显示待考勤、待回复和其他需要及时处理的事项。', actionLabel: '查看考勤', href: '/attendance', icon: <CheckSquareOutlined /> },
+  { title: '维护学员与班级', description: '学员归属、课程建班和作业班安排都从真实管理页面完成。', actionLabel: '打开学员管理', href: '/students', icon: <TeamOutlined /> },
+  { title: '处理家长沟通', description: '及时查看家长留言和课堂互动，避免重要问题长时间无人跟进。', actionLabel: '查看家长留言', href: '/parent-messages', icon: <CommentOutlined /> },
+]
+
+function AdminTodayTodoBar({ data }: { data: AdminDashboardData }) {
+  const router = useRouter()
+  const items = [
+    { label: '今日待考勤', value: data.metrics.todayLessonsPendingAttendance, href: '/attendance', icon: <CheckSquareOutlined /> },
+    { label: '家长留言待回复', value: data.metrics.pendingTeacherReplies, href: '/parent-messages', icon: <CommentOutlined /> },
+    { label: '未读课堂互动', value: data.metrics.unreadComments, href: '/communications', icon: <MessageOutlined /> },
+  ]
+  return <Card className="admin-todo-panel" bordered={false} style={{ marginBottom: 16, borderRadius: 14, border: '1px solid var(--color-hairline)', background: 'var(--color-primary-bg)' }} styles={{ body: { padding: 12 } }}>
+    <div className="admin-todo-panel__layout">
+      <Text className="admin-todo-panel__title" strong>今日待办与异常</Text>
+      <div className="admin-todo-panel__items">
+        {items.map((item) => (
+          <Button
+            className="admin-todo-panel__button"
+            key={item.label}
+            onClick={() => router.push(item.href)}
+            icon={item.icon}
+          >
+            <span className="admin-todo-panel__button-label">{item.label}</span>
+            <strong className="admin-todo-panel__count">{item.value}</strong>
+          </Button>
+        ))}
+      </div>
+    </div>
+  </Card>
+}
 
 const fetcher = async (url: string): Promise<AdminDashboardData> => {
   const response = await fetch(url)
@@ -357,14 +395,64 @@ function MobileDashboard({ data }: { data: AdminDashboardData }) {
 }
 
 export default function DashboardPage() {
+  const router = useRouter()
+  const { mutate: mutateCache } = useSWRConfig()
   const isMobile = useIsMobile() ?? false
   const { division } = useDivision()
-  const { data, error, isLoading } = useSWR(`/api/dashboard?division=${division}`, fetcher, {
+  const { data: termData, mutate: mutateTerms } = useSWR<{ selectedTermId?: string | null; terms: Array<{ id: string; name: string; status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED' }> }>('/api/admin/academic-terms', async (url: string) => {
+    const response = await fetch(url, { cache: 'no-store' })
+    if (!response.ok) throw new Error('运营批次加载失败')
+    return response.json()
+  })
+  const terms = useMemo(() => termData?.terms || [], [termData?.terms])
+  const [selectedTermId, setSelectedTermId] = useState('')
+  const [switchingTermId, setSwitchingTermId] = useState<string | null>(null)
+  useEffect(() => {
+    if (terms.length === 0) return
+    const nextTermId = termData?.selectedTermId
+      || terms.find((term) => term.status === 'ACTIVE')?.id
+      || terms[0].id
+    setSelectedTermId((current) => current === nextTermId ? current : nextTermId)
+  }, [termData?.selectedTermId, terms])
+  const changeTermScope = async (termId: string) => {
+    if (!termId || termId === selectedTermId || switchingTermId) return
+    setSwitchingTermId(termId)
+    try {
+      const response = await fetch('/api/admin/academic-terms/scope', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ termId }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(payload.error || '切换运营批次失败')
+      const persistedTermId = payload.term?.id || termId
+      await mutateCache(isAdminTermScopedSWRKey, undefined, { revalidate: false })
+      const nextDashboardUrl = `/api/dashboard?division=${division}&termId=${encodeURIComponent(persistedTermId)}`
+      const nextDashboardResponse = await fetch(nextDashboardUrl, { cache: 'no-store' })
+      const nextDashboardPayload = await nextDashboardResponse.json().catch(() => ({}))
+      if (!nextDashboardResponse.ok) {
+        throw new Error(nextDashboardPayload.error || '所选批次数据加载失败')
+      }
+      await mutateCache(nextDashboardUrl, nextDashboardPayload, { revalidate: false })
+      await mutateTerms((current) => current ? {
+        ...current,
+        selectedTermId: persistedTermId,
+      } : current, { revalidate: false })
+      setSelectedTermId(persistedTermId)
+      message.success(`已切换到“${payload.term?.name || '所选批次'}”`)
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '切换运营批次失败')
+    } finally {
+      setSwitchingTermId(null)
+    }
+  }
+  const selectedTerm = terms.find((term) => term.id === selectedTermId)
+  const dashboardUrl = `/api/dashboard?division=${division}${selectedTermId ? `&termId=${encodeURIComponent(selectedTermId)}` : ''}`
+  const { data, error, isLoading } = useSWR(dashboardUrl, fetcher, {
     // 教师约课后，管理首页应在较短时间内自动出现动态。
     refreshInterval: 30_000,
     revalidateOnFocus: true,
     dedupingInterval: 10_000,
-    keepPreviousData: true,
   })
 
   if (isLoading) {
@@ -383,29 +471,86 @@ export default function DashboardPage() {
   }
 
   if (isMobile) {
-    return <MobileDashboard data={data} />
+    return (
+      <div>
+        <div style={{ padding: '10px 16px 0', background: '#faf8f5' }}>
+          <Select
+            aria-label="切换运营批次"
+            value={selectedTermId || undefined}
+            placeholder="选择运营批次"
+            onChange={(value) => void changeTermScope(value)}
+            loading={Boolean(switchingTermId)}
+            disabled={Boolean(switchingTermId)}
+            style={{ width: '100%' }}
+            options={terms.map((term) => ({ label: `${term.name}${term.status === 'ACTIVE' ? '（当前）' : term.status === 'ARCHIVED' ? '（归档）' : ''}`, value: term.id }))}
+            getPopupContainer={(trigger) => trigger.parentElement || document.body}
+            virtual={false}
+          />
+          {selectedTerm?.status === 'DRAFT' && (
+            <Alert
+              type="warning"
+              showIcon
+              message="当前批次尚未启用，仅供查看"
+              action={<Button size="small" onClick={() => router.push('/academic-terms')}>去启用</Button>}
+              style={{ marginTop: 10 }}
+            />
+          )}
+          {selectedTerm?.status === 'ARCHIVED' && (
+            <Alert type="info" showIcon message="当前正在查看历史归档数据" style={{ marginTop: 10 }} />
+          )}
+        </div>
+        <div style={{ padding: '12px 12px 0', background: 'var(--color-canvas)', width: '100%', maxWidth: '100%' }}>
+          <QuickStartGuide storageKey={`mz_admin_quick_start_v1_${division}`} title="三步开始管理工作" steps={ADMIN_QUICK_STEPS} />
+          <AdminTodayTodoBar data={data} />
+        </div>
+        <MobileDashboard data={data} />
+      </div>
+    )
   }
 
   return (
     <div style={{ paddingBottom: 24 }}>
-      <DashboardHero metrics={data.metrics} />
+      <DashboardHero
+        metrics={data.metrics}
+        toolbar={(
+          <div className="admin-dashboard-term-switcher">
+            <span className="admin-dashboard-term-switcher__label">运营批次</span>
+            <Select
+              aria-label="切换运营批次"
+              value={selectedTermId || undefined}
+              placeholder="选择运营批次"
+              onChange={(value) => void changeTermScope(value)}
+              loading={Boolean(switchingTermId)}
+              disabled={Boolean(switchingTermId)}
+              style={{ width: 220 }}
+              options={terms.map((term) => ({ label: `${term.name}${term.status === 'ACTIVE' ? '（当前）' : term.status === 'ARCHIVED' ? '（历史归档）' : '（未启用）'}`, value: term.id }))}
+            />
+          </div>
+        )}
+      />
+      {selectedTerm?.status === 'ARCHIVED' && <Alert type="info" showIcon message="正在查看历史归档数据" style={{ marginBottom: 16 }} />}
+      {selectedTerm?.status === 'DRAFT' && (
+        <Alert
+          type="warning"
+          showIcon
+          message="这是尚未启用的批次，目前仅用于查看"
+          description="如需在本批次添加学员、建班、排课和录入业务，请到“学期与批次”点击“启用并进入”。"
+          action={<Button size="small" onClick={() => router.push('/academic-terms')}>去启用</Button>}
+          style={{ marginBottom: 16 }}
+        />
+      )}
+      <AdminTodayTodoBar data={data} />
       <MetricsCards data={data.metrics} />
-      <div style={{ marginTop: 16 }}>
-        <AdminExceptionCenter metrics={data.metrics} />
-      </div>
-
-      <div style={{ marginTop: 16 }}>
-        <IntensiveAppointmentCard items={data.intensiveAppointments} />
-      </div>
-
-      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col xs={24} lg={16}>
+      <div className="admin-dashboard-workspace">
+        <div className="admin-dashboard-workspace__main">
+          <AdminExceptionCenter metrics={data.metrics} />
           <StudentGrowthChart data={data.growthData} />
-        </Col>
-        <Col xs={24} lg={8}>
+        </div>
+        <aside className="admin-dashboard-workspace__aside" aria-label="今日动态与课表">
+          <IntensiveAppointmentCard items={data.intensiveAppointments} />
           <TodayScheduleCard data={data.schedules} />
-        </Col>
-      </Row>
+        </aside>
+      </div>
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={12}>
@@ -415,6 +560,9 @@ export default function DashboardPage() {
           <ActivityLogCard data={data.logs} />
         </Col>
       </Row>
+      <div style={{ marginTop: 16 }}>
+        <QuickStartGuide storageKey={`mz_admin_quick_start_v1_${division}`} title="三步开始管理工作" steps={ADMIN_QUICK_STEPS} />
+      </div>
     </div>
   )
 }

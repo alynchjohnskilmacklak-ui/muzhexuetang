@@ -73,7 +73,8 @@ export function MetricsCards({ data }: { data: AdminDashboardMetrics }) {
               height: '100%',
               position: 'relative',
               overflow: 'hidden',
-              background: `linear-gradient(135deg, #fff 0%, ${card.color}0d 100%)`,
+              background: 'var(--color-surface-1)',
+              border: '1px solid var(--color-hairline)',
               boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
             }}
             styles={{ body: { padding: 18 } }}

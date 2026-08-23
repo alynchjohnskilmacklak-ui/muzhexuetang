@@ -5,8 +5,10 @@ import { Card, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { fmtDate } from '@/lib/format-date'
+import { CalendarOutlined } from '@ant-design/icons'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 
-const { Title, Text } = Typography
+const { Text } = Typography
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六']
 
 type Menu = { id: string; dayOfWeek: number; mainDish: string; sideDish: string | null }
@@ -144,14 +146,19 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
         </Card>
       )}
       {students.length === 0 && todayMenu && (
-        <Card style={{ marginBottom: 14, borderRadius: 14, textAlign: 'center', padding: 20 }}>
-          <Text type="secondary">暂无绑定学员</Text>
-          <div style={{ fontSize: 11, color: '#98A2B3', marginTop: 4 }}>如信息有误，请联系校区老师</div>
+        <Card style={{ marginBottom: 14, borderRadius: 14 }}>
+          <GuidedEmpty
+            compact
+            title="还没有可选餐的孩子"
+            description="绑定学员后，孩子当天的用餐选择会显示在这里；如绑定信息有误，请联系校区老师。"
+            actionLabel="给老师留言"
+            onAction={() => window.location.assign('/parent/messages')}
+          />
         </Card>
       )}
 
       {/* Weekly menu (compact list on mobile) */}
-      <Card title={<span>📅 本周菜单</span>} style={{ borderRadius: 14 }} styles={{ header: { borderBottom: 'none' }, body: { padding: '0 16px 12px' } }}>
+      <Card title={<span><CalendarOutlined style={{ marginRight: 8 }} />本周菜单</span>} style={{ borderRadius: 14 }} styles={{ header: { borderBottom: 'none' }, body: { padding: '0 16px 12px' } }}>
         {WEEKDAYS.map((day, i) => {
           const dow = i + 1
           const menu = menuMap.get(dow)

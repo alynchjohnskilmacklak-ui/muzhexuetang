@@ -3,11 +3,13 @@
 import { useMemo, useState } from 'react'
 import { format, addDays, startOfWeek } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import { Spin, Empty, Select, Typography } from 'antd'
+import { Spin, Empty, Input, Modal, Select, Typography, message } from 'antd'
+import { SwapOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
 import { findSchedulePeriod, PERIOD_HEIGHTS, PERIOD_BG, SchedulePeriod } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
+import { findScheduleMoveConflicts } from '@/lib/schedule-conflicts'
 
 const { Text } = Typography
 
@@ -22,7 +24,7 @@ function getTeacherColor(teacherId: string): string {
   return TEACHER_COLORS[Math.abs(hash) % TEACHER_COLORS.length]
 }
 
-const WEEK_DAYS = ['周一', '周二', '周三', '周四', '周五', '周六']
+const WEEK_DAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
 
 function getWeekDates(weekStart: Date): Date[] {
   return WEEK_DAYS.map((_, i) => addDays(weekStart, i))
@@ -45,6 +47,15 @@ export function TeacherWeekView({
 }) {
   const isTablet = useIsMobile(1025) ?? false
   const [selectedTeacherId, setSelectedTeacherId] = useState<string | undefined>()
+  const [draggingLesson, setDraggingLesson] = useState<Record<string, unknown> | null>(null)
+  const [dragTarget, setDragTarget] = useState<string>()
+  const [conflictTarget, setConflictTarget] = useState<string>()
+  const [moveDialog, setMoveDialog] = useState<{
+    lesson: Record<string, unknown>
+    lessonDate: string
+    periodId: string
+  } | null>(null)
+  const [moveBusy, setMoveBusy] = useState(false)
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
   const { periods } = useSchedulePeriods()
 
@@ -57,7 +68,7 @@ export function TeacherWeekView({
   const weekStartStr = format(weekStart, 'yyyy-MM-dd')
 
   const shouldFetch = !!selectedTeacherId
-  const { data: weekData } = useSWR(
+  const { data: weekData, mutate: mutateWeek } = useSWR(
     shouldFetch ? `/api/schedules/teacher-week?teacherId=${selectedTeacherId}&weekStart=${weekStartStr}` : null,
     fetcher
   )
@@ -91,8 +102,101 @@ export function TeacherWeekView({
   const selectedTeacher = teacherList.find(t => t.id === selectedTeacherId)
   const teacherColor = selectedTeacherId ? getTeacherColor(selectedTeacherId) : '#E8784A'
 
+  const moveLesson = async (lesson: Record<string, unknown>, date: Date, period: SchedulePeriod) => {
+    if (!lesson?.id || period.type !== 'CLASS') return false
+    const lessonId = String(lesson.id)
+    const [startHour, startMinute] = String(lesson.startTime).split(':').map(Number)
+    const [endHour, endMinute] = String(lesson.endTime).split(':').map(Number)
+    const duration = Math.max(1, endHour * 60 + endMinute - (startHour * 60 + startMinute))
+    const [targetHour, targetMinute] = period.start.split(':').map(Number)
+    const endTotal = targetHour * 60 + targetMinute + duration
+    const next = {
+      lessonDate: format(date, 'yyyy-MM-dd'),
+      startTime: period.start,
+      endTime: `${String(Math.floor(endTotal / 60)).padStart(2, '0')}:${String(endTotal % 60).padStart(2, '0')}`,
+    }
+    const targetKey = `${next.lessonDate}:${period.id}`
+    const sourceGroup = lesson.group as Record<string, unknown> | undefined
+    const sourceRoom = sourceGroup?.room as Record<string, unknown> | undefined
+    const localConflicts = findScheduleMoveConflicts(next.startTime, next.endTime, filteredLessons
+      .filter((candidate) => String(candidate.id) !== lessonId && format(new Date(candidate.lessonDate as string), 'yyyy-MM-dd') === next.lessonDate)
+      .map((candidate) => {
+        const candidateGroup = candidate.group as Record<string, unknown> | undefined
+        const candidateRoom = candidateGroup?.room as Record<string, unknown> | undefined
+        return {
+          id: String(candidate.id),
+          startTime: String(candidate.startTime),
+          endTime: String(candidate.endTime),
+          label: String((candidateGroup?.name as string | undefined) || '已有课程'),
+          teacherConflict: true,
+          roomConflict: Boolean(sourceRoom?.id) && sourceRoom?.id === candidateRoom?.id,
+        }
+      }))
+    if (localConflicts.length) {
+      setConflictTarget(targetKey)
+      window.setTimeout(() => setConflictTarget((current) => current === targetKey ? undefined : current), 1800)
+      message.error(`教师时间冲突：${localConflicts[0].label} ${localConflicts[0].startTime}-${localConflicts[0].endTime}，原课表未变`)
+      setDraggingLesson(null)
+      setDragTarget(undefined)
+      return false
+    }
+    const previous = weekData
+    await mutateWeek({
+      ...weekData,
+      lessons: lessons.map((lesson) => String(lesson.id) === lessonId ? { ...lesson, ...next } : lesson),
+    }, false)
+    setDraggingLesson(null)
+    setDragTarget(undefined)
+    try {
+      const response = await fetch(`/api/class-lessons/${lessonId}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(payload.error || '调课失败')
+      message.success('调课已保存')
+      await mutateWeek()
+      return true
+    } catch (error) {
+      await mutateWeek(previous, false)
+      message.error(error instanceof Error ? error.message : '调课失败，已恢复原课表')
+      return false
+    }
+  }
+
+  const openMoveDialog = (lesson: Record<string, unknown>) => {
+    setMoveDialog({
+      lesson,
+      lessonDate: String(lesson.lessonDate).slice(0, 10),
+      periodId: findBestPeriodId(periods, String(lesson.startTime)) || periods.find((period) => period.type === 'CLASS')?.id || '',
+    })
+  }
+
+  const submitMoveDialog = async () => {
+    if (!moveDialog) return
+    const period = periods.find((item) => item.id === moveDialog.periodId)
+    const date = new Date(`${moveDialog.lessonDate}T00:00:00`)
+    if (!period || Number.isNaN(date.getTime())) {
+      message.warning('请选择正确的调课日期和节次')
+      return
+    }
+    setMoveBusy(true)
+    const saved = await moveLesson(moveDialog.lesson, date, period)
+    setMoveBusy(false)
+    if (saved) setMoveDialog(null)
+  }
+
   return (
     <div>
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
+        gap: 8, marginBottom: 12, padding: '10px 12px', borderRadius: 10,
+        background: 'var(--color-primary-bg)', border: '1px solid var(--color-hairline)',
+      }}>
+        <Text strong><SwapOutlined /> 拖拽调课已开启</Text>
+        <Text type="secondary" style={{ fontSize: 12 }}>
+          电脑可直接拖到目标日期和节次；手机请点课次内“调课”。冲突时会自动恢复。
+        </Text>
+      </div>
       {/* Week navigation */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
         <button
@@ -105,7 +209,7 @@ export function TeacherWeekView({
           background: '#fff', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8,
           fontSize: 14, fontWeight: 500,
         }}>
-          {format(weekStart, 'M月d日', { locale: zhCN })} – {format(addDays(weekStart, 5), 'M月d日', { locale: zhCN })}
+          {format(weekStart, 'M月d日', { locale: zhCN })} – {format(addDays(weekStart, 6), 'M月d日', { locale: zhCN })}
         </div>
 
         <button
@@ -142,8 +246,8 @@ export function TeacherWeekView({
         <div style={{ overflowX: 'auto', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8 }}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: isTablet ? `56px repeat(6, minmax(72px, 1fr))` : `72px repeat(6, minmax(88px, 1fr))`,
-            minWidth: isTablet ? 0 : 600,
+            gridTemplateColumns: isTablet ? `56px repeat(7, minmax(72px, 1fr))` : `72px repeat(7, minmax(88px, 1fr))`,
+            minWidth: isTablet ? 620 : 700,
           }}>
             {/* Header */}
             <div style={{ borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)', background: 'var(--color-background-secondary, #faf8f5)' }} />
@@ -198,9 +302,20 @@ export function TeacherWeekView({
                     const dateKey = format(date, 'yyyy-MM-dd')
                     const cellLessons = lessonsByDayPeriod[dateKey]?.[period.id] || []
                     return (
-                      <div key={dayIdx} style={{
+                      <div key={dayIdx}
+                        onDragOver={(event) => { if (period.type === 'CLASS') { event.preventDefault(); setDragTarget(`${dateKey}:${period.id}`) } }}
+                        onDragLeave={() => setDragTarget(undefined)}
+                        onDrop={(event) => {
+                          event.preventDefault()
+                          if (draggingLesson) void moveLesson(draggingLesson, date, period)
+                        }}
+                        style={{
                         height: displayHeight,
-                        background: PERIOD_BG[period.type],
+                        background: conflictTarget === `${dateKey}:${period.id}`
+                          ? 'var(--color-error-bg)'
+                          : dragTarget === `${dateKey}:${period.id}`
+                            ? 'var(--color-success-bg)'
+                            : PERIOD_BG[period.type],
                         borderRight: '0.5px solid var(--color-border, #EEE7E1)',
                         borderBottom: '0.5px solid var(--color-border, #EEE7E1)',
                         padding: period.type === 'CLASS' ? 3 : 0,
@@ -217,7 +332,11 @@ export function TeacherWeekView({
                               return (
                                 <div
                                   key={lesson.id as string}
+                                  draggable
+                                  onDragStart={(event) => { event.dataTransfer.effectAllowed = 'move'; setDraggingLesson(lesson) }}
+                                  onDragEnd={() => { setDraggingLesson(null); setDragTarget(undefined) }}
                                   onClick={() => onLessonClick(lesson)}
+                                  title="按住拖到目标日期和节次进行调课"
                                   style={{
                                     flex: 1, borderRadius: 4, padding: '2px 5px',
                                     background: `${cellColor}15`,
@@ -239,6 +358,17 @@ export function TeacherWeekView({
                                   <div style={{ fontSize: 10, color: cellColor, opacity: .8, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {(lesson.startTime as string)} · {enrollments.length}人
                                   </div>
+                                  <button
+                                    type="button"
+                                    draggable={false}
+                                    onClick={(event) => { event.stopPropagation(); openMoveDialog(lesson) }}
+                                    style={{
+                                      marginTop: 2, padding: 0, border: 0, background: 'transparent',
+                                      color: cellColor, fontSize: 9, fontWeight: 700, cursor: 'pointer', textAlign: 'left',
+                                    }}
+                                  >
+                                    <SwapOutlined /> 调课
+                                  </button>
                                 </div>
                               )
                             })}
@@ -260,6 +390,39 @@ export function TeacherWeekView({
           )}
         </div>
       )}
+      <Modal
+        title="调整课次"
+        open={!!moveDialog}
+        onCancel={() => !moveBusy && setMoveDialog(null)}
+        onOk={() => void submitMoveDialog()}
+        okText="确认调课"
+        cancelText="取消"
+        confirmLoading={moveBusy}
+        destroyOnHidden
+      >
+        <div style={{ display: 'grid', gap: 14, paddingTop: 8 }}>
+          <Text type="secondary">提交前会同时检查教师和教室时间冲突；保存失败会恢复原课表。</Text>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <Text strong>目标日期</Text>
+            <Input
+              type="date"
+              value={moveDialog?.lessonDate || ''}
+              onChange={(event) => setMoveDialog((current) => current ? { ...current, lessonDate: event.target.value } : current)}
+            />
+          </label>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <Text strong>目标节次</Text>
+            <Select
+              value={moveDialog?.periodId}
+              onChange={(periodId) => setMoveDialog((current) => current ? { ...current, periodId } : current)}
+              options={periods.filter((period) => period.type === 'CLASS').map((period) => ({
+                value: period.id,
+                label: `${period.name} ${period.start}-${period.end}`,
+              }))}
+            />
+          </label>
+        </div>
+      </Modal>
     </div>
   )
 }

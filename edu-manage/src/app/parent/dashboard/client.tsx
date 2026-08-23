@@ -1,23 +1,65 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Row, Col, Card, Tag, Typography, Button, Space } from 'antd'
-import { BellOutlined, ClockCircleOutlined, HeartOutlined, TeamOutlined, EnvironmentOutlined, IdcardOutlined, BookOutlined, BulbOutlined, FileTextOutlined, RiseOutlined, StarOutlined } from '@ant-design/icons'
+import { BellOutlined, BookOutlined, BulbOutlined, FileTextOutlined, HeartOutlined, RiseOutlined, SmileOutlined, StarOutlined } from '@ant-design/icons'
+import { Button, Tag, Typography } from 'antd'
 import { format } from 'date-fns'
-import { zhCN } from 'date-fns/locale'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useIsMobile } from '@/hooks/useIsMobile'
+import { fillName, MEMBERSHIP_SERVICE_CARD, MEMBERSHIP_WELCOME, resolveMembership } from '@/constants/membership'
 import { getDailyQuote } from '@/data/daily-quotes'
-import { TodayStatus } from '@/components/Parent/TodayStatus'
-import { WeeklyReport } from '@/components/Parent/WeeklyReport'
-import { fillName, MEMBERSHIP_SERVICE_CARD, MEMBERSHIP_THEME, MEMBERSHIP_WELCOME, resolveMembership } from '@/constants/membership'
-import { useCountUp } from '@/hooks/useCountUp'
 import { MessageWorkflowNotice } from '@/components/MessageWorkflowNotice'
 import { ParentTodayTimeline } from '@/components/Parent/ParentTodayTimeline'
 import { ParentUsageGuide } from '@/components/Parent/ParentUsageGuide'
+import { WeeklyReport } from '@/components/Parent/WeeklyReport'
 import { buildParentTodayTimeline } from '@/lib/dashboard-workflows'
+import type { getParentDashboardData } from '@/lib/parent-dashboard'
 
-const { Title, Text } = Typography
+const { Text } = Typography
+
+type JsonValue<T> = T extends Date
+  ? string
+  : T extends readonly (infer Item)[]
+    ? JsonValue<Item>[]
+    : T extends object
+      ? { [Key in keyof T]: JsonValue<T[Key]> }
+      : T
+type DashboardData = JsonValue<Awaited<ReturnType<typeof getParentDashboardData>>>
+type LegacySchedule = {
+  id: string
+  title: string
+  startTime: string
+  endTime: string
+  teacherName?: string | null
+  roomName?: string | null
+  studentIds?: string[]
+  studentNames?: string[]
+  attendanceSubmittedAt?: string | null
+}
+type DashboardProps = Omit<DashboardData, 'todaySchedules'> & { todaySchedules: LegacySchedule[] }
+type DashboardNotification = DashboardProps['notifications'][number]
+
+const MOOD_COLORS: Record<string, { bg: string; color: string; label: string }> = {
+  GREAT: { bg: 'var(--color-success-bg)', color: 'var(--color-success)', label: '棒' },
+  GOOD: { bg: '#EEEDFE', color: 'var(--color-brand-secure)', label: '好' },
+  OKAY: { bg: '#FAEEDA', color: 'var(--color-warning-text)', label: '一般' },
+  NEEDS_ATTENTION: { bg: '#FCEBEB', color: 'var(--color-error)', label: '关注' },
+}
+
+const NOTIFICATION_META: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
+  EXAM_PAPER: { icon: <FileTextOutlined />, color: '#185FA5', bg: '#eaf1f9' },
+  PAPER_PUBLISHED: { icon: <FileTextOutlined />, color: '#185FA5', bg: '#eaf1f9' },
+  CLASSROOM_FEEDBACK: { icon: <BookOutlined />, color: 'var(--color-brand-secure)', bg: '#f0eeff' },
+  PARENT_MESSAGE: { icon: <BellOutlined />, color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
+  PARENT_MESSAGE_REPLY: { icon: <BellOutlined />, color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
+  PERFORMANCE_FEEDBACK: { icon: <StarOutlined />, color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
+  SYSTEM: { icon: <BellOutlined />, color: 'var(--color-ink-muted)', bg: 'var(--color-surface-3)' },
+}
+
+const MEMBERSHIP_HERO_THEME = {
+  NORMAL: { background: 'var(--color-primary)', badgeBg: 'rgba(255,255,255,.22)', statBg: 'rgba(255,255,255,.14)', quoteBg: 'rgba(255,255,255,.14)' },
+  VIP: { background: '#C96D3E', badgeBg: 'rgba(255,255,255,.24)', statBg: 'rgba(255,255,255,.16)', quoteBg: 'rgba(255,255,255,.16)' },
+  SVIP: { background: '#123C35', badgeBg: 'rgba(255,255,255,.16)', statBg: 'rgba(255,255,255,.12)', quoteBg: 'rgba(255,255,255,.12)' },
+} as const
 
 function todayKey() {
   return format(new Date(), 'yyyy-MM-dd')
@@ -33,110 +75,45 @@ function hasShownToday(key: string) {
   }
 }
 
-const MOOD_COLORS: Record<string, { bg: string; color: string; label: string }> = {
-  GREAT: { bg: '#E1F5EE', color: '#1D9E75', label: '棒' },
-  GOOD: { bg: '#EEEDFE', color: '#534AB7', label: '好' },
-  OKAY: { bg: '#FAEEDA', color: '#BA7517', label: '一般' },
-  NEEDS_ATTENTION: { bg: '#FCEBEB', color: '#E24B4A', label: '关注' },
-}
-
-const NOTIFICATION_META: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
-  EXAM_PAPER: { label: '试卷', icon: <FileTextOutlined />, color: '#185FA5', bg: '#eaf1f9' },
-  PAPER_PUBLISHED: { label: '试卷', icon: <FileTextOutlined />, color: '#185FA5', bg: '#eaf1f9' },
-  CLASSROOM_FEEDBACK: { label: '反馈', icon: <BookOutlined />, color: '#8892f0', bg: '#f0eeff' },
-  PARENT_MESSAGE: { label: '留言', icon: <BellOutlined />, color: '#E8784A', bg: '#fff3ec' },
-  PARENT_MESSAGE_REPLY: { label: '新回复', icon: <BellOutlined />, color: '#E8784A', bg: '#fff3ec' },
-  PERFORMANCE_FEEDBACK: { label: '表现', icon: <StarOutlined />, color: '#E8784A', bg: '#fff3ec' },
-  ATTENDANCE: { label: '考勤', icon: <ClockCircleOutlined />, color: '#C77F00', bg: '#fdf4e3' },
-  SYSTEM: { label: '通知', icon: <BellOutlined />, color: '#5a4e3a', bg: '#f5f2ee' },
-}
-
-const MEMBERSHIP_HERO_THEME = {
-  NORMAL: {
-    gradient: 'linear-gradient(145deg, #E8784A 0%, #F59A68 100%)',
-    shadow: '0 10px 30px rgba(232,120,74,0.15)',
-    badgeBg: 'rgba(255,255,255,0.25)',
-    statBg: 'rgba(255,255,255,0.18)',
-    statBorder: 'rgba(255,255,255,0.2)',
-    quoteBg: 'rgba(255,255,255,0.15)',
-  },
-  VIP: {
-    gradient: 'linear-gradient(145deg, #F0875B 0%, #F7A66F 48%, #F8C49A 100%)',
-    shadow: '0 12px 34px rgba(240,135,91,0.24)',
-    badgeBg: 'rgba(255,255,255,0.28)',
-    statBg: 'rgba(255,255,255,0.2)',
-    statBorder: 'rgba(255,255,255,0.26)',
-    quoteBg: 'rgba(255,255,255,0.18)',
-  },
-  SVIP: {
-    gradient: 'linear-gradient(145deg, #123C35 0%, #1F5A4D 58%, #C9A45C 145%)',
-    shadow: '0 14px 38px rgba(18,60,53,0.30)',
-    badgeBg: 'rgba(255,255,255,0.16)',
-    statBg: 'rgba(255,255,255,0.13)',
-    statBorder: 'rgba(201,164,92,0.28)',
-    quoteBg: 'rgba(255,255,255,0.12)',
-  },
-} as const
-
-function notificationMeta(n: any) {
-  return NOTIFICATION_META[n.relatedType] || NOTIFICATION_META[n.type] || NOTIFICATION_META.SYSTEM
-}
-
-function getLessonStatus(l: { startTime: string; endTime: string; attendanceSubmittedAt?: string | null }): { text: string; color: string } {
-  // Teacher has submitted attendance → finished
-  if (l.attendanceSubmittedAt) return { text: '已结束', color: 'default' }
-
+function lessonStatus(lesson: { startTimeRaw?: string | null; endTimeRaw?: string | null; attendanceSubmittedAt?: string | null }) {
+  if (lesson.attendanceSubmittedAt) return '已结束'
+  if (!lesson.startTimeRaw || !lesson.endTimeRaw) return '待老师确认'
   const now = Date.now()
-  const start = new Date(l.startTime).getTime()
-  const end = new Date(l.endTime).getTime()
-  if (now < start) return { text: '待上课', color: 'blue' }
-  if (now >= start && now <= end) return { text: '上课中', color: 'processing' }
-
-  // Past end time but no attendance submitted → waiting
-  return { text: '待老师确认', color: 'orange' }
+  const start = new Date(lesson.startTimeRaw).getTime()
+  const end = new Date(lesson.endTimeRaw).getTime()
+  if (now < start) return '待上课'
+  if (now <= end) return '上课中'
+  return '待老师确认'
 }
 
 export function ParentDashboardClient({
   parentUserId,
-  students, studentTeachers, todaySchedules, todayClassLessons,
-  notifications, latestPost, latestClassroomFeedback,
-  monthMoods, monthClassroomFeedbacks, attendanceRate, badgeCount,
-  studentStats = {}, todayAttendances = [], todayFeedbacks = [], todayFeedbackCount = 0, todayPaperCount = 0, todayMeal = null,
-}: {
-  parentUserId?: string
-  students: any[]
-  studentTeachers: Record<string, string[]>
-  todaySchedules: any[]
-  todayClassLessons: any[]
-  notifications: any[]
-  latestPost: any
-  latestClassroomFeedback: any
-  monthMoods: any[]
-  monthClassroomFeedbacks: any[]
-  attendanceRate: number
-  badgeCount: number
-  studentStats?: Record<string, { attendanceRate: number; badgeCount: number; todayFeedbackCount: number; todayPaperCount: number }>
-  todayAttendances?: any[]
-  todayFeedbacks?: any[]
-  todayFeedbackCount?: number
-  todayPaperCount?: number
-  todayMeal?: any
-}) {
-  const isMobileRaw = useIsMobile()
-  const isMobile = isMobileRaw ?? false
+  students,
+  studentTeachers,
+  todaySchedules,
+  todayClassLessons,
+  notifications,
+  latestPost,
+  latestClassroomFeedback,
+  monthMoods,
+  monthClassroomFeedbacks,
+  attendanceRate,
+  studentStats = {},
+  todayAttendances = [],
+  todayFeedbacks = [],
+}: DashboardProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const today = new Date()
-  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
   const dailyQuote = getDailyQuote()
   const childIdFromUrl = searchParams.get('childId') || ''
   const [activeChildId, setActiveChildId] = useState(childIdFromUrl || students[0]?.id || '')
   const [welcomeMounted, setWelcomeMounted] = useState(false)
   const [welcomeVisible, setWelcomeVisible] = useState(false)
-  const [deferredSectionsReady, setDeferredSectionsReady] = useState(false)
+  const [weeklyReady, setWeeklyReady] = useState(false)
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDeferredSectionsReady(true), 2_600)
+    const timer = window.setTimeout(() => setWeeklyReady(true), 1_400)
     return () => window.clearTimeout(timer)
   }, [])
 
@@ -146,23 +123,20 @@ export function ParentDashboardClient({
   }, [activeChildId, childIdFromUrl, students])
 
   const activeStudent = useMemo(
-    () => students.find((student: any) => student.id === activeChildId) || students[0],
-    [activeChildId, students]
+    () => students.find(student => student.id === activeChildId) || students[0],
+    [activeChildId, students],
   )
   const membershipLevel = resolveMembership(activeStudent?.membershipLevel)
-  const membershipTheme = MEMBERSHIP_THEME[membershipLevel]
   const heroTheme = MEMBERSHIP_HERO_THEME[membershipLevel]
 
   useEffect(() => {
     if (!activeStudent?.id) return
-    const welcomeOwnerId = parentUserId || activeStudent.id
-    const storageKey = `mz_welcome_${welcomeOwnerId}_${todayKey()}`
+    const storageKey = `mz_welcome_${parentUserId || activeStudent.id}_${todayKey()}`
     if (hasShownToday(storageKey)) return
     setWelcomeMounted(true)
-    setWelcomeVisible(false)
     const showTimer = window.setTimeout(() => setWelcomeVisible(true), 30)
-    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 1800)
-    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 2200)
+    const fadeTimer = window.setTimeout(() => setWelcomeVisible(false), 1_800)
+    const unmountTimer = window.setTimeout(() => setWelcomeMounted(false), 2_200)
     return () => {
       window.clearTimeout(showTimer)
       window.clearTimeout(fadeTimer)
@@ -170,757 +144,138 @@ export function ParentDashboardClient({
     }
   }, [activeStudent?.id, parentUserId])
 
-  const selectChild = (childId: string) => {
-    setActiveChildId(childId)
-    const url = new URL(window.location.href)
-    url.searchParams.set('childId', childId)
-    window.history.replaceState(window.history.state, '', url)
-  }
-
-  // Build mood map
-  const moodMap: Record<number, { mood: string; ids: string[] }> = {}
-  monthMoods.forEach((m: any) => {
-    const day = new Date(m.createdAt).getDate()
-    if (!moodMap[day]) moodMap[day] = { mood: m.mood, ids: [] }
-    moodMap[day].ids.push(m.id)
-  })
-  monthClassroomFeedbacks.forEach((f: any) => {
-    const day = new Date(f.createdAt).getDate()
-    if (!moodMap[day]) moodMap[day] = { mood: 'GOOD', ids: [] }
-    moodMap[day].ids.push(f.id)
-  })
-
-  // Collect all teacher names across all students
-  const allTeacherNames = new Set<string>()
-  Object.values(studentTeachers).forEach(names => names.forEach(n => allTeacherNames.add(n)))
-  const activeTeacherNames = activeStudent?.id ? (studentTeachers[activeStudent.id] || []) : [...allTeacherNames]
-  const teacherDisplay = activeTeacherNames.length > 0 ? activeTeacherNames.join('、') : '待分配'
+  const activeTeacherNames = activeStudent?.id ? studentTeachers[activeStudent.id] || [] : []
+  const teacherDisplay = activeTeacherNames.length ? activeTeacherNames.join('、') : '待分配'
   const activeStats = activeChildId ? studentStats[activeChildId] : null
   const activeAttendanceRate = activeStats?.attendanceRate ?? attendanceRate
-  const activeBadgeCount = activeStats?.badgeCount ?? badgeCount
-  const activeTodayFeedbackCount = activeStats?.todayFeedbackCount ?? todayFeedbackCount
-  const activeTodayPaperCount = activeStats?.todayPaperCount ?? todayPaperCount
 
-  // Merge schedule + classlesson into unified today list
-  // studentNames are already filtered to only current parent's children
   const rawTodayLessons = [
-    ...todaySchedules.map((s: any) => ({
-      id: s.id,
-      title: s.title,
-      startTime: s.startTime ? new Date(s.startTime).toTimeString().slice(0, 5) : '',
-      endTime: s.endTime ? new Date(s.endTime).toTimeString().slice(0, 5) : '',
-      teacherName: s.teacherName,
-      roomName: s.roomName,
-      studentIds: s.studentIds || [],
-      studentNames: s.studentNames || [],
-      startTimeRaw: s.startTime,
-      endTimeRaw: s.endTime,
-      attendanceSubmittedAt: s.attendanceSubmittedAt,
+    ...todaySchedules.map(schedule => ({
+      id: schedule.id,
+      title: schedule.title,
+      startTime: schedule.startTime ? new Date(schedule.startTime).toTimeString().slice(0, 5) : '',
+      endTime: schedule.endTime ? new Date(schedule.endTime).toTimeString().slice(0, 5) : '',
+      teacherName: schedule.teacherName,
+      roomName: schedule.roomName,
+      studentIds: schedule.studentIds || [],
+      studentNames: schedule.studentNames || [],
+      startTimeRaw: schedule.startTime,
+      endTimeRaw: schedule.endTime,
+      attendanceSubmittedAt: schedule.attendanceSubmittedAt,
     })),
-    ...todayClassLessons.map((l: any) => ({
-      id: l.id,
-      title: l.title,
-      startTime: l.startTime || '',
-      endTime: l.endTime || '',
-      teacherName: l.teacherName,
-      roomName: l.roomName,
-      studentIds: l.studentIds || [],
-      studentNames: l.studentNames || [],
-      startTimeRaw: l.startTimeRaw,
-      endTimeRaw: l.endTimeRaw,
-      attendanceSubmittedAt: l.attendanceSubmittedAt,
+    ...todayClassLessons.map(lesson => ({
+      id: lesson.id,
+      title: lesson.title,
+      startTime: lesson.startTime || '',
+      endTime: lesson.endTime || '',
+      teacherName: lesson.teacherName,
+      roomName: lesson.roomName,
+      studentIds: lesson.studentIds || [],
+      studentNames: lesson.studentNames || [],
+      startTimeRaw: lesson.startTimeRaw,
+      endTimeRaw: lesson.endTimeRaw,
+      attendanceSubmittedAt: lesson.attendanceSubmittedAt,
     })),
-  ].sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
-  const todayLessons = rawTodayLessons.filter((lesson) => (
-    students.length <= 1 || !activeChildId || lesson.studentIds.includes(activeChildId)
-  ))
+  ].sort((a, b) => a.startTime.localeCompare(b.startTime))
+  const todayLessons = rawTodayLessons.filter(lesson => students.length <= 1 || !activeChildId || lesson.studentIds.includes(activeChildId))
   const activeNotifications = students.length <= 1 || !activeChildId
     ? notifications
-    : notifications.filter((notification: any) => !notification.studentId || notification.studentId === activeChildId)
-  const animatedLessonCount = useCountUp(todayLessons.length)
-  const animatedAttendanceRate = useCountUp(Number(activeAttendanceRate) || 0)
-  const animatedBadgeCount = useCountUp(activeBadgeCount)
-  const animatedUnreadCount = useCountUp(activeNotifications.filter((notification: any) => !notification.read).length)
-  const activeLatestPost = students.length <= 1 || !activeChildId || latestPost?.student?.id === activeChildId
-    ? latestPost
-    : null
-  const activeLatestClassroomFeedback = students.length <= 1 || !activeChildId || latestClassroomFeedback?.studentIds?.includes?.(activeChildId)
-    ? latestClassroomFeedback
-    : null
-  const activeTodayAttendances = students.length <= 1 || !activeChildId
-    ? todayAttendances
-    : todayAttendances.filter((attendance: any) => attendance.studentId === activeChildId)
+    : notifications.filter(notification => !notification.studentId || notification.studentId === activeChildId)
   const activeTodayFeedbacks = students.length <= 1 || !activeChildId
     ? todayFeedbacks
-    : todayFeedbacks.filter((feedback: any) => feedback.studentIds?.includes(activeChildId))
-  const todayTimeline = buildParentTodayTimeline({
-    lessons: todayLessons,
-    feedbacks: activeTodayFeedbacks,
-    notifications: activeNotifications,
-    now: today,
+    : todayFeedbacks.filter(feedback => feedback.studentIds?.includes(activeChildId))
+  const unreadCount = activeNotifications.filter(notification => !notification.read).length
+  const timeline = buildParentTodayTimeline({ lessons: todayLessons, feedbacks: activeTodayFeedbacks, notifications: activeNotifications, now: today })
+  const activeLesson = todayLessons.find(lesson => lessonStatus(lesson) === '上课中')
+  const pendingLesson = todayLessons.find(lesson => lessonStatus(lesson) === '待老师确认')
+  const nextLesson = todayLessons.find(lesson => lessonStatus(lesson) === '待上课')
+  const todayStatus = !todayLessons.length ? '今日暂无课程' : activeLesson ? '上课中' : pendingLesson ? '待老师确认' : nextLesson ? '待上课' : '今日课程已完成'
+  const activeTodayAttendances = students.length <= 1 || !activeChildId
+    ? todayAttendances
+    : todayAttendances.filter(attendance => attendance.studentId === activeChildId)
+  const latestTimes = [latestPost?.createdAt, latestClassroomFeedback?.createdAt, activeNotifications[0]?.createdAt, ...activeTodayAttendances.map(item => item.createdAt)]
+    .filter((value): value is string => Boolean(value)).map(value => new Date(value).getTime())
+  const latestUpdate = latestTimes.length ? new Date(Math.max(...latestTimes)).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : '暂无更新'
+
+  const moodMap: Record<number, { mood: string; ids: string[] }> = {}
+  monthMoods.forEach(mood => {
+    const day = new Date(mood.createdAt).getDate()
+    if (!moodMap[day]) moodMap[day] = { mood: mood.mood, ids: [] }
+    moodMap[day].ids.push(mood.id)
   })
-  const completedAttendanceCount = todayLessons.filter((lesson) => lesson.attendanceSubmittedAt).length
-  const pendingConfirmCount = todayLessons.filter((lesson) => getLessonStatus(lesson).text === '待老师确认').length
-  const activeLesson = todayLessons.find((lesson) => getLessonStatus(lesson).text === '上课中')
-  const nextLesson = todayLessons.find((lesson) => getLessonStatus(lesson).text === '待上课')
-  const todayStatus = !todayLessons.length
-    ? '今日暂无课程'
-    : activeLesson
-      ? '上课中'
-      : pendingConfirmCount > 0
-        ? '待老师确认'
-        : nextLesson
-          ? '待上课'
-          : completedAttendanceCount === todayLessons.length
-            ? '今日课程已完成'
-            : '待老师确认'
-  const latestTimes = [
-    activeLatestPost?.createdAt,
-    activeLatestClassroomFeedback?.createdAt,
-    activeNotifications[0]?.createdAt,
-    ...activeTodayAttendances.map((attendance: any) => attendance.createdAt),
-  ].filter(Boolean).map((value) => new Date(value).getTime())
-  const latestUpdate = latestTimes.length ? new Date(Math.max(...latestTimes)).toLocaleString('zh-CN') : '暂无更新'
-  const todayTeachers = [...new Set(todayLessons.map((lesson) => lesson.teacherName).filter(Boolean))]
-  const todayRooms = [...new Set(todayLessons.map((lesson) => lesson.roomName).filter(Boolean))]
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  monthClassroomFeedbacks.forEach(feedback => {
+    const day = new Date(feedback.createdAt).getDate()
+    if (!moodMap[day]) moodMap[day] = { mood: 'GOOD', ids: [] }
+    moodMap[day].ids.push(feedback.id)
+  })
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
+  const emptyDays = (new Date(today.getFullYear(), today.getMonth(), 1).getDay() || 7) - 1
 
-  const heroStudentName = activeStudent?.name?.trim() || '牧哲学堂同学'
-  const welcomeName = activeStudent?.name?.trim() || '牧哲学堂'
+  const activeLatestPost = students.length <= 1 || !activeChildId || latestPost?.studentId === activeChildId ? latestPost : null
+  const activeLatestClassroomFeedback = students.length <= 1 || !activeChildId || latestClassroomFeedback?.studentIds?.includes?.(activeChildId) ? latestClassroomFeedback : null
+  const feedbackItems: Array<{ type: string; teacherName: string; studentName: string; content: string; date: Date; mood?: string; id: string }> = []
+  if (activeLatestPost) feedbackItems.push({ type: '表现反馈', teacherName: activeLatestPost.teacher?.name || '老师', studentName: activeLatestPost.student?.name || '', content: activeLatestPost.content, date: new Date(activeLatestPost.createdAt), mood: activeLatestPost.mood, id: activeLatestPost.id })
+  if (activeLatestClassroomFeedback) feedbackItems.push({ type: '课堂反馈', teacherName: activeLatestClassroomFeedback.teacher?.name || '老师', studentName: '', content: activeLatestClassroomFeedback.overallComment || activeLatestClassroomFeedback.summary || activeLatestClassroomFeedback.lessonContent || '课堂反馈已更新', date: new Date(activeLatestClassroomFeedback.createdAt), id: activeLatestClassroomFeedback.id })
+  feedbackItems.sort((a, b) => b.date.getTime() - a.date.getTime())
+  const latestFeedback = feedbackItems[0] || null
 
+  const selectStudent = (studentId: string) => {
+    setActiveChildId(studentId)
+    const params = new URLSearchParams(window.location.search)
+    params.set('childId', studentId)
+    window.history.replaceState({}, '', `?${params.toString()}`)
+  }
   const goCalendarDay = (day: number) => {
-    const d = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    router.push(`/parent/archive?date=${d}`)
+    const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    router.push(`/parent/archive?date=${date}`)
   }
-
-  const openNotification = (n: any) => {
-    if (n.relatedType === 'EXAM_PAPER' && n.relatedId) {
-      router.push(`/parent/archive?paperId=${n.relatedId}`)
-      return
-    }
-    router.push(n.href || `/parent/notifications/${n.id}`)
+  const openNotification = (notification: DashboardNotification) => {
+    if (notification.relatedType === 'EXAM_PAPER' && notification.relatedId) return router.push(`/parent/archive?paperId=${notification.relatedId}`)
+    router.push(notification.href || `/parent/notifications/${notification.id}`)
   }
-
-  // Latest feedback
-  const latestFeedbackItems: { type: string; teacherName: string; studentName: string; content: string; date: Date; mood?: string; id: string }[] = []
-  if (activeLatestPost) {
-    latestFeedbackItems.push({
-      type: '表现反馈',
-      teacherName: activeLatestPost.teacher?.name || '老师',
-      studentName: activeLatestPost.student?.name || '',
-      content: activeLatestPost.content,
-      date: new Date(activeLatestPost.createdAt),
-      mood: activeLatestPost.mood,
-      id: activeLatestPost.id,
-    })
-  }
-  if (activeLatestClassroomFeedback) {
-    latestFeedbackItems.push({
-      type: '课堂反馈',
-      teacherName: activeLatestClassroomFeedback.teacher?.name || '老师',
-      studentName: '',
-      content: activeLatestClassroomFeedback.overallComment
-        || activeLatestClassroomFeedback.summary
-        || activeLatestClassroomFeedback.lessonContent
-        || '课堂反馈已更新',
-      date: new Date(activeLatestClassroomFeedback.createdAt),
-      id: activeLatestClassroomFeedback.id,
-    })
-  }
-  latestFeedbackItems.sort((a, b) => b.date.getTime() - a.date.getTime())
-  const latestFeedback = latestFeedbackItems[0] || null
 
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
-        <MessageWorkflowNotice audience="parent" deferMs={1_400} />
-      </div>
+    <div className="parent-dashboard-home">
+      <MessageWorkflowNotice audience="parent" deferMs={1_400} />
       <ParentUsageGuide parentUserId={parentUserId} />
-      {welcomeMounted && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: isMobile ? 18 : 24, pointerEvents: 'none',
-          background: welcomeVisible ? 'rgba(18,60,53,.10)' : 'rgba(18,60,53,0)',
-          backdropFilter: !isMobile && welcomeVisible ? 'blur(4px)' : 'none',
-          WebkitBackdropFilter: !isMobile && welcomeVisible ? 'blur(4px)' : 'none',
-          transition: 'background .45s ease, backdrop-filter .45s ease',
-        }}>
-          <div style={{
-            width: 'min(88vw, 430px)', borderRadius: 26,
-            padding: isMobile ? '24px 22px' : '28px 30px',
-            background: membershipLevel === 'SVIP'
-              ? 'linear-gradient(145deg, #F8F3E7 0%, #FFFDF7 100%)'
-              : membershipTheme.bg,
-            border: `1.5px solid ${membershipTheme.border}`,
-            color: membershipTheme.text,
-            boxShadow: membershipLevel === 'SVIP'
-              ? '0 26px 80px rgba(18,60,53,.30)'
-              : membershipLevel === 'VIP'
-                ? '0 26px 80px rgba(240,135,91,.26)'
-                : '0 24px 70px rgba(62,142,110,.20)',
-            opacity: welcomeVisible ? 1 : 0,
-            transform: welcomeVisible ? 'translateY(0) scale(1)' : 'translateY(18px) scale(.92)',
-            transition: 'opacity .45s ease, transform .58s cubic-bezier(.2,.9,.2,1)',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{
-              position: 'absolute', right: -24, top: -28, width: 90, height: 90,
-              borderRadius: '50%',
-              background: membershipLevel === 'SVIP' ? 'rgba(201,164,92,.18)' : 'rgba(240,135,91,.13)',
-            }} />
-            <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-              <div style={{
-                width: 42, height: 42, borderRadius: 16, flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 20, fontWeight: 900, color: '#fff',
-                background: membershipLevel === 'SVIP'
-                  ? 'linear-gradient(145deg, #123C35 0%, #C9A45C 150%)'
-                  : membershipLevel === 'VIP'
-                    ? 'linear-gradient(145deg, #F0875B 0%, #F8B27F 100%)'
-                    : 'linear-gradient(145deg, #3E8E6E 0%, #7ABF9A 100%)',
-                boxShadow: membershipLevel === 'SVIP'
-                  ? '0 10px 24px rgba(18,60,53,.25)'
-                  : '0 10px 24px rgba(240,135,91,.18)',
-              }}>
-                {membershipLevel === 'SVIP' ? '尊' : membershipLevel === 'VIP' ? 'V' : '牧'}
-              </div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{
-                  fontSize: isMobile ? 17 : 18, fontWeight: 900, lineHeight: 1.55,
-                  color: membershipTheme.accent, letterSpacing: .2, overflowWrap: 'anywhere',
-                }}>
-                  {fillName(MEMBERSHIP_WELCOME[membershipLevel].title, welcomeName)}
-                </div>
-                <div style={{ marginTop: 10, fontSize: 14, lineHeight: 1.9, color: membershipTheme.text, fontWeight: 500 }}>
-                  {MEMBERSHIP_WELCOME[membershipLevel].body}
-                </div>
-                <div style={{
-                  marginTop: 14, fontSize: 12,
-                  color: membershipLevel === 'SVIP' ? '#8A6A2E' : membershipTheme.accent,
-                  fontWeight: 700,
-                }}>
-                  牧哲学堂 · 把每一个孩子，当成自己的孩子来教
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Sticky child switcher */}
-      {students.length > 1 && (
-        <div style={{
-          display: 'flex', gap: 10,
-          overflowX: 'auto', padding: isMobile ? '10px 12px' : '4px 0',
-          position: 'sticky', top: 0, zIndex: 100,
-          background: isMobile ? '#fff' : 'transparent',
-          borderBottom: isMobile ? '1px solid rgba(0,0,0,0.05)' : 'none',
-          marginBottom: isMobile ? 16 : 16,
-          marginLeft: isMobile ? -12 : 0,
-          marginRight: isMobile ? -12 : 0,
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',
-        }}>
-          {students.map((student: any) => {
-            const isActive = student.id === activeChildId
-            return (
-              <button
-                key={student.id}
-                onClick={() => {
-                  setActiveChildId(student.id)
-                  const params = new URLSearchParams(window.location.search)
-                  params.set('childId', student.id)
-                  window.history.replaceState({}, '', `?${params.toString()}`)
-                }}
-                style={{
-                  flexShrink: 0, padding: '7px 18px', borderRadius: 22, fontSize: 13,
-                  border: `1.5px solid ${isActive ? '#E8784A' : '#EEE7E1'}`,
-                  background: isActive ? 'linear-gradient(135deg, rgba(232,120,74,0.12) 0%, rgba(232,120,74,0.05) 100%)' : '#fff',
-                  color: isActive ? '#E8784A' : '#5a4e3a',
-                  fontWeight: isActive ? 700 : 500,
-                  cursor: 'pointer', whiteSpace: 'nowrap',
-                  boxShadow: isActive ? '0 4px 12px rgba(232,120,74,0.1)' : 'none',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                }}
-              >
-                {student.name}{student.grade ? ` · ${student.grade}` : ''}
-              </button>
-            )
-          })}
-        </div>
-      )}
+      {welcomeMounted && <div className={`parent-dashboard-welcome${welcomeVisible ? ' is-visible' : ''}`}><div><strong>{fillName(MEMBERSHIP_WELCOME[membershipLevel].title, activeStudent?.name || '牧哲学堂')}</strong><span>{MEMBERSHIP_WELCOME[membershipLevel].body}</span><small>牧哲学堂 · 把每一个孩子，当成自己的孩子来教</small></div></div>}
 
-      {/* Hero Card */}
-      <div style={{
-        background: heroTheme.gradient,
-        borderRadius: 24, padding: isMobile ? '20px 18px' : '28px 32px', marginBottom: 20,
-        position: 'relative', overflow: 'hidden', maxWidth: '100%',
-        boxShadow: heroTheme.shadow,
-      }}>
-        {/* Decorative background elements */}
-        <div style={{
-          position: 'absolute',
-          right: -20,
-          bottom: -20,
-          fontSize: 160,
-          opacity: 0.1,
-          userSelect: 'none',
-          filter: 'blur(1px)',
-        }}>
-          {'*'}
-        </div>
-        <div style={{
-          position: 'absolute',
-          left: '40%',
-          top: -30,
-          fontSize: 100,
-          opacity: 0.05,
-          userSelect: 'none',
-          transform: 'rotate(15deg)',
-        }}>
-          {'+'}
-        </div>
+      {students.length > 1 && <div className="parent-child-switcher">{students.map(student => <button type="button" key={student.id} className={student.id === activeChildId ? 'is-active' : ''} onClick={() => selectStudent(student.id)}>{student.name}{student.grade ? ` · ${student.grade}` : ''}</button>)}</div>}
 
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <Row gutter={[isMobile ? 12 : 24, 16]} align="middle" justify="space-between">
-            <Col flex="auto">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-                <div style={{
-                  width: 64, height: 64, borderRadius: 20, 
-                  background: heroTheme.badgeBg,
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255,255,255,0.4)', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                  fontSize: 28, fontWeight: 700, color: '#fff',
-                  flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                }}>
-                  {heroStudentName[0]}
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: -0.5, overflowWrap: 'anywhere' }}>
-                    {heroStudentName}
-                  </div>
-                  <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4, fontWeight: 500 }}>
-                    {activeStudent?.grade ? <span style={{ marginRight: 8 }}>{activeStudent.grade}</span> : ''}
-                    <span style={{ opacity: 0.8 }}>负责老师：</span>
-                    {teacherDisplay}
-                  </div>
-                </div>
-              </div>
+      <section className="parent-dashboard-hero" style={{ background: heroTheme.background }}>
+        <div className="parent-dashboard-hero__identity"><div style={{ background: heroTheme.badgeBg }}>{(activeStudent?.name || '牧')[0]}</div><span><strong>{activeStudent?.name || '牧哲学堂同学'}</strong><small>{activeStudent?.grade || '未填写年级'} · 负责老师 {teacherDisplay}</small></span></div>
+        <div className="parent-dashboard-hero__quote" style={{ background: heroTheme.quoteBg }}><BulbOutlined />「{dailyQuote.text}」</div>
+        <div className="parent-dashboard-hero__stats">{[
+          { value: todayLessons.length, label: '今日课次' },
+          { value: `${Number(activeAttendanceRate) || 0}%`, label: '本月出勤' },
+          { value: unreadCount, label: '待处理通知' },
+        ].map(item => <div key={item.label} style={{ background: heroTheme.statBg }}><strong>{item.value}</strong><span>{item.label}</span></div>)}</div>
+        <div className="parent-dashboard-hero__status"><span>今日状态：<strong>{todayStatus}</strong></span><span>更新于 {latestUpdate}</span></div>
+        {activeStudent?.id && <Button icon={<RiseOutlined />} onClick={() => router.push(`/parent/students/${activeStudent.id}/growth-report`)}>查看成长档案</Button>}
+      </section>
 
-              <div style={{
-                background: heroTheme.quoteBg, backdropFilter: 'blur(8px)',
-                borderRadius: 14, padding: '12px 18px', display: 'inline-flex',
-                alignItems: 'center', gap: 8, border: '1px solid rgba(255,255,255,0.1)'
-              }}>
-                <BulbOutlined style={{ color: '#fff', fontSize: 16 }} />
-                <Text style={{ color: '#fff', fontSize: 14, fontWeight: 500, letterSpacing: 0.5 }}>
-                  「每一个孩子都有花期，我们静待花开。」
-                </Text>
-              </div>
+      <ParentTodayTimeline events={timeline} studentName={activeStudent?.name || '孩子'} />
 
-              {activeStudent?.id && (
-                <div style={{ marginTop: 14 }}>
-                  <Button
-                    icon={<RiseOutlined />}
-                    onClick={() => router.push(`/parent/students/${activeStudent.id}/growth-report`)}
-                    style={{
-                      minHeight: 42,
-                      width: isMobile ? '100%' : 'auto',
-                      borderColor: 'rgba(255,255,255,.65)',
-                      background: 'rgba(255,255,255,.16)',
-                      color: '#fff',
-                      fontWeight: 700,
-                    }}
-                  >
-                    查看成长档案
-                  </Button>
-                </div>
-              )}
-            </Col>
+      {(membershipLevel === 'VIP' || membershipLevel === 'SVIP') && (() => { const service = MEMBERSHIP_SERVICE_CARD[membershipLevel]; return <section className="parent-dashboard-section parent-membership-service"><h2>{service.title}</h2><p>{service.body}</p><p>{service.hotlineLabel}：<strong>{service.hotline}</strong></p><small>{service.footer}</small></section> })()}
 
-            {!isMobile && (
-              <Col>
-                <div style={{ textAlign: 'right', color: '#fff' }}>
-                  <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>{format(today, 'EEEE', { locale: zhCN })}</div>
-                  <div style={{ fontSize: 18, fontWeight: 700 }}>{format(today, 'M月d日')}</div>
-                </div>
-              </Col>
-            )}
-          </Row>
+      {weeklyReady && <WeeklyReport activeChildId={activeChildId} />}
 
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12, marginTop: 24 }}>
-            {[
-              { val: animatedLessonCount, label: '今日课次', icon: <ClockCircleOutlined /> },
-              { val: animatedAttendanceRate, unit: '%', label: '本月出勤率', icon: <IdcardOutlined /> },
-              { val: animatedBadgeCount, label: '已获徽章', icon: <StarOutlined />, special: true },
-              { val: animatedUnreadCount, label: '待处理通知', icon: <BellOutlined /> },
-            ].map(({ val, unit, label, icon, special }) => (
-              <div key={label} style={{
-                background: heroTheme.statBg,
-                backdropFilter: 'blur(12px)',
-                borderRadius: 18, padding: '16px 14px', 
-                border: `1px solid ${heroTheme.statBorder}`,
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
-              }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {special && <span style={{ fontSize: 16 }}>🌟</span>}
-                  {val}{unit}
-                </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{label}</div>
-              </div>
-            ))}
-          </div>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, padding: '0 4px' }}>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', opacity: 0.6 }} />
-              今日状态：<strong style={{ color: '#fff' }}>{todayStatus}</strong>
-            </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>
-              更新于 {latestUpdate.split(' ')[1] || latestUpdate}
-            </div>
-          </div>
-        </div>
-      </div>
+      <section className="parent-dashboard-section" aria-labelledby="parent-mood-title">
+        <div className="parent-dashboard-section__head"><h2 id="parent-mood-title"><SmileOutlined /> 本月情绪日历</h2></div>
+        <div className="parent-mood-grid">{['一', '二', '三', '四', '五', '六', '日'].map(day => <div key={day} className="is-heading">{day}</div>)}{Array.from({ length: emptyDays }, (_, index) => <div key={`empty-${index}`} />)}{Array.from({ length: daysInMonth }, (_, index) => index + 1).map(day => { const mood = moodMap[day]; const colors = mood ? MOOD_COLORS[mood.mood] : null; return <button type="button" key={day} disabled={!mood} className={day === today.getDate() ? 'is-today' : ''} style={{ background: colors?.bg, color: colors?.color }} onClick={() => goCalendarDay(day)}>{day}</button> })}</div>
+        <div className="parent-mood-legend">{Object.entries(MOOD_COLORS).map(([key, colors]) => <span key={key}><i style={{ background: colors.bg }} />{colors.label}</span>)}<span><i />无记录</span></div>
+      </section>
 
-      <ParentTodayTimeline
-        events={todayTimeline}
-        studentName={activeStudent?.name || '孩子'}
-      />
+      <section className="parent-dashboard-section" aria-labelledby="parent-latest-feedback-title">
+        <div className="parent-dashboard-section__head"><h2 id="parent-latest-feedback-title">老师最新关注</h2>{latestFeedback && <button type="button" onClick={() => router.push('/parent/archive')}>查看全部</button>}</div>
+        {latestFeedback ? <button type="button" className="parent-latest-feedback" onClick={() => router.push(`/parent/archive?feedbackId=${latestFeedback.id}`)}><span>{latestFeedback.type === '课堂反馈' ? <BookOutlined /> : <HeartOutlined />}</span><div><div><strong>{latestFeedback.teacherName}</strong><Tag>{latestFeedback.type}</Tag><small>{latestFeedback.date.toLocaleString('zh-CN')}</small></div>{latestFeedback.studentName && <small>学员：{latestFeedback.studentName}</small>}<p>{latestFeedback.content}</p></div></button> : <Text type="secondary">暂无反馈，老师会在课后更新学习情况。</Text>}
+      </section>
 
-      {(membershipLevel === 'VIP' || membershipLevel === 'SVIP') && (() => {
-        const service = MEMBERSHIP_SERVICE_CARD[membershipLevel]
-        return (
-          <div style={{
-            marginBottom: 20, padding: isMobile ? '16px' : '18px 20px', borderRadius: 14,
-            background: membershipLevel === 'SVIP'
-              ? 'linear-gradient(135deg, #F8F3E7 0%, #FFFDF7 100%)'
-              : '#FFF7F1',
-            border: `1px solid ${membershipLevel === 'SVIP' ? '#C9A45C' : '#F2B58F'}`,
-            color: membershipTheme.text,
-            boxShadow: membershipLevel === 'SVIP'
-              ? '0 12px 32px rgba(18,60,53,.12)'
-              : '0 10px 28px rgba(240,135,91,.12)',
-          }}>
-            <div style={{
-              display: 'flex', alignItems: 'flex-start', gap: 7,
-              color: membershipLevel === 'SVIP' ? '#123C35' : '#C96D3E',
-              fontSize: 15, fontWeight: 700, lineHeight: 1.6,
-            }}>
-              {membershipLevel === 'SVIP' && <span style={{ color: membershipTheme.gold }}>★</span>}
-              {service.title}
-            </div>
-            <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.75 }}>{service.body}</div>
-            <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.8 }}>
-              {service.hotlineLabel}：<strong style={{ color: membershipTheme.accent, fontWeight: 800, overflowWrap: 'anywhere' }}>{service.hotline}</strong>
-            </div>
-            <div style={{ marginTop: 8, fontSize: 12, lineHeight: 1.7 }}>{service.footer}</div>
-          </div>
-        )
-      })()}
-
-      {deferredSectionsReady && (
-        <>
-          <TodayStatus activeChildId={students.length > 1 ? activeChildId : undefined} />
-          <WeeklyReport activeChildId={activeChildId} />
-        </>
-      )}
-
-      <div style={{
-        margin: '16px 0',
-        padding: '16px 20px',
-        borderRadius: 12,
-        background: 'linear-gradient(135deg, rgba(232,117,69,.12) 0%, rgba(232,145,69,.06) 100%)',
-        border: '1px solid rgba(232,117,69,.2)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <span style={{
-          position: 'absolute',
-          top: -8,
-          left: 12,
-          fontSize: 60,
-          color: 'rgba(232,117,69,.15)',
-          fontFamily: 'Georgia, serif',
-          lineHeight: 1,
-          userSelect: 'none',
-        }}>
-          &quot;
-        </span>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, paddingLeft: 8 }}>
-          <BulbOutlined style={{ color: '#E87545', fontSize: 18, marginTop: 2, flexShrink: 0 }} />
-          <div>
-            <Text style={{ fontSize: 14, lineHeight: 1.9, color: '#7a4a2a', fontStyle: 'italic', display: 'block' }}>
-              {dailyQuote.text}
-            </Text>
-            <Text style={{ fontSize: 11, color: '#c4895a', display: 'block', marginTop: 8 }}>
-              ——{dailyQuote.source} · 每日语录第 {dailyQuote.index} 条 · {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })}
-            </Text>
-          </div>
-        </div>
-      </div>
-
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col xs={24} lg={12}>
-          <Card
-            bordered={false}
-            className="parent-card"
-            style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', height: '100%' }}
-            title={<span style={{ fontSize: 15, fontWeight: 600 }}>今日在校状态</span>}
-            extra={<Tag color={todayStatus === '待老师确认' ? 'orange' : todayStatus === '上课中' ? 'processing' : todayStatus.includes('完成') ? 'green' : 'blue'}>{todayStatus}</Tag>}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', gap: 10, marginBottom: 12 }}>
-              {[
-                ['今日课程', `${todayLessons.length}节`],
-                ['已完成考勤', `${completedAttendanceCount}节`],
-                ['待老师确认', `${pendingConfirmCount}节`],
-                ['负责老师', todayTeachers.join('、') || '暂未分配'],
-                ['今日教室', todayRooms.join('、') || '暂未分配'],
-                ['课时扣除', activeTodayAttendances.length ? '已记录' : '待确认'],
-              ].map(([label, value]) => (
-                <div key={label} style={{ background: '#FFFBF7', borderRadius: 10, padding: 10, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, color: '#9A8E7A' }}>{label}</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#1F2933', marginTop: 4, wordBreak: 'break-word' }}>{value}</div>
-                </div>
-              ))}
-            </div>
-            {!todayLessons.length && (
-              <Text type="secondary" style={{ fontSize: 12 }}>今日暂无课程，可以查看学习资料、课堂反馈或成长动态。</Text>
-            )}
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card
-            bordered={false}
-            className="parent-card"
-            style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', height: '100%' }}
-            title={<span style={{ fontSize: 15, fontWeight: 600 }}>今日成长简报</span>}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-              {[
-                { label: '课程', value: `${todayLessons.length}节`, href: '/parent/schedule', emoji: '📅' },
-                { label: '考勤', value: `${completedAttendanceCount}节`, href: '/parent/attendance', emoji: '✅' },
-                { label: '反馈', value: `${activeTodayFeedbackCount}条`, href: '/parent/class-feedback', emoji: '💬' },
-                { label: '试卷/资料', value: `${activeTodayPaperCount}份`, href: '/parent/archive', emoji: '📋' },
-                { label: '通知', value: `${activeNotifications.filter((n: any) => new Date(n.createdAt).toDateString() === today.toDateString()).length}条`, href: '/parent/notifications', emoji: '🔔' },
-                { label: '就餐', value: todayMeal ? '已发布' : '未发布', href: '/parent/meals', emoji: '🍱' },
-              ].map(({ label, value, href, emoji }) => (
-                <button
-                  key={label}
-                  onClick={() => router.push(href)}
-                  style={{
-                    background: '#FAF8F5', borderRadius: 10, padding: '10px 6px',
-                    textAlign: 'center', border: '1px solid transparent', cursor: 'pointer',
-                    transition: 'all 0.15s', WebkitTapHighlightColor: 'transparent',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.border = '1px solid #E8784A40')}
-                  onMouseLeave={e => (e.currentTarget.style.border = '1px solid transparent')}
-                >
-                  <div style={{ fontSize: 14, marginBottom: 2 }}>{emoji}</div>
-                  <div style={{ color: '#E8784A', fontWeight: 800, fontSize: 16 }}>{value}</div>
-                  <div style={{ color: '#9A8E7A', fontSize: 11 }}>{label}</div>
-                </button>
-              ))}
-            </div>
-          </Card>
-        </Col>
-        <Col xs={24}>
-          <Card bordered={false} className="parent-card" style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2' }} title={<span style={{ fontSize: 15, fontWeight: 600 }}>今日就餐</span>}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: isMobile ? 'flex-start' : 'center', flexDirection: isMobile ? 'column' : 'row' }}>
-              <div>
-                <Text strong>{todayMeal ? `${todayMeal.mainDish}${todayMeal.sideDish ? ` · ${todayMeal.sideDish}` : ''}` : '今日菜单暂未发布，老师会及时更新。'}</Text>
-                <div style={{ color: '#8D806F', fontSize: 12, marginTop: 4 }}>每日餐食均会留样，如有问题请及时联系负责人。</div>
-              </div>
-              <Button style={{ minHeight: 40 }} onClick={() => router.push('/parent/meals')}>查看就餐安排</Button>
-            </div>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* 2x2 Card Grid */}
-      <Row gutter={[16, 16]}>
-        {/* Today's Lessons */}
-        <Col xs={24} lg={12}>
-          <Card
-            bordered={false}
-            style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', height: '100%' }}
-            title={<span style={{ fontSize: 15, fontWeight: 600 }}>📅 今日课次</span>}
-          >
-            {todayLessons.length === 0 ? (
-              <Text type="secondary" style={{ display: 'block', padding: '24px 0', textAlign: 'center' }}>今日暂无课程，孩子在校好好休息吧 ☀️</Text>
-            ) : (
-              <div style={{ maxHeight: 320, overflowY: 'auto' }}>
-                {todayLessons.map((l: any, i: number) => {
-                  const status = getLessonStatus(l)
-                  return (
-                    <div key={i} style={{
-                      padding: '12px', marginBottom: 8, borderRadius: 10,
-                      background: '#FFFBF7', border: '1px solid #FBF0EA',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <Text strong style={{ fontSize: 13, color: '#1F2933' }}>{l.title}</Text>
-                        <Tag color={status.color} style={{ borderRadius: 9999, fontSize: 10 }}>{status.text}</Tag>
-                      </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', marginTop: 6, fontSize: 11, color: '#7A869A' }}>
-                        <span><ClockCircleOutlined style={{ marginRight: 3 }} />{l.startTime}-{l.endTime}</span>
-                        <span><TeamOutlined style={{ marginRight: 3 }} />{l.teacherName || '暂未分配'}</span>
-                        <span><EnvironmentOutlined style={{ marginRight: 3 }} />{l.roomName || '暂未分配'}</span>
-                        {l.studentNames?.length > 0 && (
-                          <span><IdcardOutlined style={{ marginRight: 3 }} />{l.studentNames.join('、')}</span>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </Card>
-        </Col>
-
-        {/* Latest Notifications */}
-        <Col xs={24} lg={12}>
-          <Card
-            bordered={false}
-            style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', height: '100%' }}
-            title={<span style={{ fontSize: 15, fontWeight: 600 }}>待办与通知</span>}
-            extra={<a onClick={() => router.push('/parent/notifications')} style={{ fontSize: 12, color: '#E8784A' }}>查看全部 →</a>}
-          >
-            {activeNotifications.length === 0 ? (
-              <Text type="secondary" style={{ display: 'block', padding: '24px 0', textAlign: 'center' }}>暂无通知</Text>
-            ) : (
-              activeNotifications.slice(0, 3).map((n: any) => {
-                const meta = notificationMeta(n)
-                return (
-                <div key={n.id} style={{
-                  padding: isMobile ? '9px 0' : '10px 0', borderBottom: '1px solid #FBF0EA',
-                  display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer',
-                }} onClick={() => openNotification(n)}>
-                  <div style={{
-                    width: 32, height: 32, borderRadius: 10, flexShrink: 0,
-                    background: n.read ? '#f5f5f5' : meta.bg,
-                    color: n.read ? '#98A2B3' : meta.color,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {meta.icon}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-                      <Text strong style={{ fontSize: 12, color: n.read ? '#7A869A' : '#1F2933' }} ellipsis>{n.title}</Text>
-                      {!n.read && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E8784A', marginTop: 5, flexShrink: 0 }} />}
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', marginTop: 3, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 10, color: '#98A2B3' }}>
-                        {new Date(n.createdAt).toLocaleString('zh-CN')}
-                      </span>
-                      <span style={{ fontSize: 11, color: '#E8784A', fontWeight: 600 }}>查看详情</span>
-                    </div>
-                  </div>
-                </div>
-                )
-              })
-            )}
-          </Card>
-        </Col>
-
-        {/* Monthly Mood Calendar */}
-        <Col xs={24} lg={12}>
-          <Card
-            bordered={false}
-            style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2' }}
-            title={<span style={{ fontSize: 15, fontWeight: 600 }}>😊 本月情绪日历</span>}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
-              {['一', '二', '三', '四', '五', '六', '日'].map(d => (
-                <div key={d} style={{ textAlign: 'center', fontSize: 10, color: '#98A2B3', padding: '2px 0' }}>{d}</div>
-              ))}
-              {Array.from({ length: new Date(today.getFullYear(), today.getMonth(), 1).getDay() || 7 }, (_, i) => i).slice(0, (new Date(today.getFullYear(), today.getMonth(), 1).getDay() || 7) - 1).map(i => (
-                <div key={`empty-${i}`} />
-              ))}
-              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
-                const moodData = moodMap[day]
-                const mc = moodData ? MOOD_COLORS[moodData.mood] : null
-                const isToday = day === today.getDate()
-                const hasFeedback = !!moodData
-                return (
-                  <div key={day} style={{
-                    height: 30, borderRadius: 6, display: 'grid', placeItems: 'center',
-                    background: mc ? mc.bg : '#f8f8f8',
-                    color: mc ? mc.color : '#ccc',
-                    border: isToday ? '2px solid #E8784A' : '1px solid transparent',
-                    fontSize: 11, fontWeight: mc ? 500 : 400,
-                    cursor: hasFeedback ? 'pointer' : 'default',
-                  }} onClick={() => hasFeedback && goCalendarDay(day)}>{day}</div>
-                )
-              })}
-            </div>
-            <div style={{ display: 'flex', gap: 14, marginTop: 10, fontSize: 10, flexWrap: 'wrap' }}>
-              {Object.entries(MOOD_COLORS).map(([key, c]) => (
-                <span key={key} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: 3, background: c.bg }} />
-                  <span style={{ color: c.color }}>{c.label}</span>
-                </span>
-              ))}
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ width: 10, height: 10, borderRadius: 3, background: '#f0f0f0' }} />
-                <span style={{ color: '#ccc' }}>无</span>
-              </span>
-            </div>
-            <Text type="secondary" style={{ fontSize: 10, display: 'block', marginTop: 8, textAlign: 'center' }}>
-              点击有颜色的日期查看当天反馈
-            </Text>
-          </Card>
-        </Col>
-
-        {/* Latest Teacher Feedback */}
-        <Col xs={24} lg={12}>
-          <Card
-            bordered={false}
-            style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', height: '100%' }}
-            title={<span style={{ fontSize: 15, fontWeight: 600 }}>老师最新关注</span>}
-            extra={latestFeedback && <a onClick={() => router.push('/parent/archive')} style={{ fontSize: 12, color: '#E8784A' }}>查看全部 →</a>}
-          >
-            {latestFeedback ? (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  {latestFeedback.type === '课堂反馈' ? (
-                    <BookOutlined style={{ color: '#534AB7' }} />
-                  ) : (
-                    <HeartOutlined style={{ color: '#E8784A' }} />
-                  )}
-                  <Text strong style={{ fontSize: 13 }}>{latestFeedback.teacherName}</Text>
-                  <Tag style={{ borderRadius: 9999, fontSize: 10 }}>{latestFeedback.type}</Tag>
-                  <Text type="secondary" style={{ fontSize: 11 }}>
-                    {new Date(latestFeedback.date).toLocaleString('zh-CN')}
-                  </Text>
-                </div>
-                {latestFeedback.studentName && (
-                  <Text style={{ fontSize: 12, color: '#5a4e3a' }}>学员：{latestFeedback.studentName}</Text>
-                )}
-                <div style={{ marginTop: 4 }}>
-                  <Text style={{ fontSize: 13, lineHeight: 1.7 }}>{latestFeedback.content}</Text>
-                </div>
-                {latestFeedback.mood && (
-                  <Tag color={MOOD_COLORS[latestFeedback.mood]?.color} style={{ marginTop: 8, borderRadius: 9999 }}>
-                    {MOOD_COLORS[latestFeedback.mood]?.label || latestFeedback.mood}
-                  </Tag>
-                )}
-                <div style={{ marginTop: 10 }}>
-                  <a onClick={() => router.push(`/parent/archive?feedbackId=${latestFeedback.id}`)} style={{ fontSize: 12, color: '#E8784A' }}>
-                    查看详情 →
-                  </a>
-                </div>
-              </div>
-            ) : (
-              <Text type="secondary" style={{ display: 'block', padding: '24px 0', textAlign: 'center' }}>
-                暂无反馈，老师会在课后更新学习情况。
-              </Text>
-            )}
-          </Card>
-        </Col>
-      </Row>
+      <section className="parent-dashboard-section" aria-labelledby="parent-notifications-title">
+        <div className="parent-dashboard-section__head"><h2 id="parent-notifications-title">待办与通知</h2><button type="button" onClick={() => router.push('/parent/notifications')}>查看全部</button></div>
+        {activeNotifications.length ? <div className="parent-notice-list">{activeNotifications.slice(0, 3).map(notification => { const meta = NOTIFICATION_META[notification.relatedType || ''] || NOTIFICATION_META[notification.type] || NOTIFICATION_META.SYSTEM; return <button type="button" key={notification.id} onClick={() => openNotification(notification)}><span style={{ color: notification.read ? 'var(--color-ink-subtle)' : meta.color, background: notification.read ? 'var(--color-surface-3)' : meta.bg }}>{meta.icon}</span><div><strong>{notification.title}</strong><small>{new Date(notification.createdAt).toLocaleString('zh-CN')}</small></div>{!notification.read && <i />}</button> })}</div> : <Text type="secondary">暂无通知</Text>}
+      </section>
     </div>
   )
 }

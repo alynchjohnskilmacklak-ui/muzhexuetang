@@ -17,10 +17,16 @@ import {
 import { Button, Drawer, Modal, Progress, Typography } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { QuickStartGuide, type QuickStartStep } from '@/components/Common/QuickStartGuide'
 
 const { Text, Title } = Typography
 const GUIDE_VERSION = 'v2'
 const QUICK_PATHS = ['/parent/schedule', '/parent/class-feedback', '/parent/messages'] as const
+const PARENT_QUICK_STEPS: QuickStartStep[] = [
+  { title: '先看课程表', description: '确认孩子今天和近期的上课时间、老师与教室。', actionLabel: '打开课程表', href: '/parent/schedule', icon: <CalendarOutlined /> },
+  { title: '再看课堂反馈', description: '老师发布的小班课、周末课课堂内容、掌握情况和照片都会集中在这里。', actionLabel: '查看课堂反馈', href: '/parent/class-feedback', icon: <BookOutlined /> },
+  { title: '有问题就留言', description: '从真实页面给老师留言，并在同一处继续查看回复。', actionLabel: '给老师留言', href: '/parent/messages', icon: <CommentOutlined /> },
+]
 
 const GUIDE_STEPS = [
   {
@@ -131,15 +137,7 @@ export function ParentUsageGuide({ parentUserId }: { parentUserId?: string }) {
   )
 
   useEffect(() => {
-    let hasCompleted = false
-    try {
-      hasCompleted = window.localStorage.getItem(storageKey(parentUserId)) === 'completed'
-    } catch {
-      // Private browsing may disable storage; the manual guide still works.
-    }
-
     let prefetchIdleId: number | null = null
-    let guideIdleId: number | null = null
     const idleWindow = window as typeof window & {
       requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number
       cancelIdleCallback?: (handle: number) => void
@@ -152,20 +150,9 @@ export function ParentUsageGuide({ parentUserId }: { parentUserId?: string }) {
         prefetch()
       }
     }, 1_600)
-    const guideTimer = window.setTimeout(() => {
-      if (hasCompleted) return
-      if (idleWindow.requestIdleCallback) {
-        guideIdleId = idleWindow.requestIdleCallback(() => setOpen(true), { timeout: 4_000 })
-      } else {
-        setOpen(true)
-      }
-    }, 4_800)
-
     return () => {
       window.clearTimeout(prefetchTimer)
-      window.clearTimeout(guideTimer)
       if (prefetchIdleId !== null) idleWindow.cancelIdleCallback?.(prefetchIdleId)
-      if (guideIdleId !== null) idleWindow.cancelIdleCallback?.(guideIdleId)
     }
   }, [parentUserId, router])
 
@@ -290,6 +277,7 @@ export function ParentUsageGuide({ parentUserId }: { parentUserId?: string }) {
 
   return (
     <>
+      <QuickStartGuide storageKey={storageKey(parentUserId)} title="三步熟悉家长端" steps={PARENT_QUICK_STEPS} />
       <section style={{
         padding: isMobile ? 14 : 16,
         marginBottom: 16,

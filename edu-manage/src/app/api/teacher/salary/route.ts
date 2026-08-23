@@ -16,9 +16,18 @@ export const GET = apiHandler(async (req: NextRequest) => {
     const { teacher, prisma } = await requireCurrentTeacher()
     const period = req.nextUrl.searchParams.get('period') || 'month'
     const since = salaryPeriodStart(period)
+    const activeTerm = await prisma.academicTerm.findFirst({
+      where: { division: teacher.division, status: 'ACTIVE' },
+      orderBy: { startDate: 'desc' },
+      select: { id: true, name: true },
+    })
 
     const transactions = await prisma.teacherSalaryTransaction.findMany({
-      where: { teacherId: teacher.id, createdAt: { gte: since } },
+      where: {
+        teacherId: teacher.id,
+        createdAt: { gte: since },
+        termId: activeTerm?.id || '__NO_ACTIVE_TERM__',
+      },
       orderBy: { createdAt: 'desc' },
     })
 
@@ -61,9 +70,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
     const lessonPayTypes = new Set(['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT'])
     const totalLesson = transactions.filter((item) => lessonPayTypes.has(item.type)).reduce((sum, item) => sum + item.amount, 0)
-    const totalFeedback = transactions.filter((item) => item.type === 'FEEDBACK_BONUS').reduce((sum, item) => sum + item.amount, 0)
+    const rewardTypes = new Set(['FEEDBACK_BONUS', 'STUDY_HALL_BONUS'])
+    const totalFeedback = transactions.filter((item) => rewardTypes.has(item.type)).reduce((sum, item) => sum + item.amount, 0)
     const totalAdjustment = transactions
-      .filter((item) => !lessonPayTypes.has(item.type) && item.type !== 'FEEDBACK_BONUS')
+      .filter((item) => !lessonPayTypes.has(item.type) && !rewardTypes.has(item.type))
       .reduce((sum, item) => sum + item.amount, 0)
     const total = transactions.reduce((sum, item) => sum + item.amount, 0)
     const totalSmallClass = transactions
@@ -76,12 +86,14 @@ export const GET = apiHandler(async (req: NextRequest) => {
       if (type === 'LESSON_PAY') return '课时费'
       if (type === 'LESSON_PAY_ADJUSTMENT') return '课时费结算调整'
       if (type === 'FEEDBACK_BONUS') return '反馈奖励'
+      if (type === 'STUDY_HALL_BONUS') return '作业登记奖励'
       if (type === 'manual_adjust') return '薪资调整'
       return '其他调整'
     }
 
     return NextResponse.json({
       period,
+      term: activeTerm,
       total: Number(total.toFixed(2)),
       totalSmallClass: Number(totalSmallClass.toFixed(2)),
       totalIntensive: Number(totalIntensive.toFixed(2)),

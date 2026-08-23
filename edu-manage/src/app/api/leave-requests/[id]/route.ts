@@ -8,12 +8,12 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const prisma = await getRequestPrisma()
   const { id } = await params
   const session = await auth()
-  if (!session?.user || !['admin', 'teacher'].includes((session.user as any).role)) {
+  if (!session?.user || !['admin', 'teacher'].includes(session.user.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
   const userId = (session.user as { id: string }).id
 
-  const role = (session.user as any).role
+  const role = session.user.role
   const body = await req.json()
   const { status, replyNote } = body as { status: 'approved' | 'rejected'; replyNote?: string }
 

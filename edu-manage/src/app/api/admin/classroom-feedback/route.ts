@@ -4,8 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { triggerFeedbackBonus } from '@/lib/teacher-salary'
-import { divisionWhere } from '@/lib/division'
+import { divisionWhere, getRequestDivision } from '@/lib/division'
 import { normalizeLessonContent } from '@/lib/classroom-feedback/access'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 import { apiHandler } from '@/lib/api-handler'
 
@@ -13,12 +14,18 @@ export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   try {
-    const { prisma } = await requireAdminUser()
+    const admin = await requireAdminUser()
+    const { prisma } = admin
     const sp = req.nextUrl.searchParams
     const teacherId = sp.get('teacherId') || undefined
     const date = sp.get('date') || new Date().toISOString().slice(0, 10)
     const all = sp.get('all') === '1'
-    const division = sp.get('division')
+    const division = getRequestDivision(admin, sp.get('division'))
+    const selectedTerm = await resolveAdminTermScope(prisma, division, req)
+    const termGroupIds = selectedTerm ? (await prisma.classGroup.findMany({
+      where: { termId: selectedTerm.id },
+      select: { id: true },
+    })).map((group) => group.id) : []
     const limit = Math.min(200, Math.max(1, Number(sp.get('limit') || 100)))
 
     const dayStart = new Date(`${date}T00:00:00`)
@@ -28,7 +35,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
       where: {
         ...(teacherId ? { teacherId } : {}),
         ...(all ? {} : { createdAt: { gte: dayStart, lt: dayEnd } }),
-        ...(division && division !== 'ALL' ? { OR: [{ classLesson: { division } }, { classLessonId: null }] } : {}),
+        OR: selectedTerm ? [
+          { termId: selectedTerm.id },
+          { classLesson: { group: { termId: selectedTerm.id } } },
+          { feedbackGroupId: { in: termGroupIds } },
+        ] : [
+          { id: '__NO_SELECTED_TERM__' },
+        ],
       },
       include: {
         teacher: { select: { id: true, name: true } },
@@ -47,6 +60,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
         lessonDate: { gte: dayStart, lt: dayEnd },
         status: { not: 'CANCELLED' },
         ...divisionWhere(division),
+        group: { termId: selectedTerm?.id || '__NO_SELECTED_TERM__' },
       },
       include: {
         teacher: { select: { id: true, name: true } },
@@ -85,6 +99,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
     return NextResponse.json({
       date,
+      term: selectedTerm,
       feedbacks: feedbacks.map((feedback) => ({
         id: feedback.id,
         studentName: feedback.studentIds
@@ -138,7 +153,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (!teacherId) return NextResponse.json({ error: '缺少 teacherId' }, { status: 400 })
     if (!Array.isArray(studentIds) || !studentIds.length) return NextResponse.json({ error: '请选择学员' }, { status: 400 })
 
-    const teacher = await prisma.teacher.findUnique({ where: { id: teacherId }, select: { id: true, name: true } })
+    const teacher = await prisma.teacher.findUnique({ where: { id: teacherId }, select: { id: true, name: true, division: true } })
     if (!teacher) return NextResponse.json({ error: '教师不存在' }, { status: 404 })
 
     const studentsData = await prisma.student.findMany({
@@ -146,9 +161,20 @@ export const POST = apiHandler(async (req: NextRequest) => {
       select: { id: true, name: true, parentId: true, parentUserId: true },
     })
 
+    const lessonScope = classLessonId ? await prisma.classLesson.findUnique({
+      where: { id: classLessonId },
+      select: { group: { select: { termId: true } } },
+    }) : null
+    const feedbackTermId = lessonScope?.group.termId || (await prisma.academicTerm.findFirst({
+      where: { division: teacher.division, status: 'ACTIVE' },
+      orderBy: { startDate: 'desc' },
+      select: { id: true },
+    }))?.id || null
+
     const feedback = await prisma.$transaction(async (tx) => {
       const created = await tx.classroomFeedback.create({
         data: {
+          termId: feedbackTermId,
           teacherId,
           classLessonId: classLessonId || null,
           source,

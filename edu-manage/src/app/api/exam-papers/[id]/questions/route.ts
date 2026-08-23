@@ -14,6 +14,13 @@ export const PUT = apiHandler(async (req: NextRequest, { params }: { params: Pro
   const prisma = await getRequestPrisma()
 
   const { id } = await params
+  const existing = await prisma.examPaper.findUnique({ where: { id }, select: { id: true, teacherId: true } })
+  if (!existing) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
+  // Teachers may only edit questions of their own papers.
+  if (user.role === 'teacher' && existing.teacherId !== user.teacherId) {
+    return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
+  }
+
   const body = await req.json()
   const questions = Array.isArray(body.questions) ? body.questions : []
 

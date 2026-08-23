@@ -8,20 +8,27 @@ import { Avatar, Badge, Button, Dropdown, Form, Input, Layout, Menu, Modal, Spin
 import useSWR from 'swr'
 import {
   CalendarOutlined,
+  AppstoreOutlined,
   CheckSquareOutlined,
   CoffeeOutlined,
   DashboardOutlined,
   DollarOutlined,
   ExperimentOutlined,
   FileImageOutlined,
+  FileTextOutlined,
   FolderOutlined,
   GiftOutlined,
   LockOutlined,
   LogoutOutlined,
+  HomeOutlined,
+  MenuOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MessageFilled,
   MessageOutlined,
+  ExclamationCircleOutlined,
+  QuestionCircleOutlined,
+  ReadOutlined,
   ScheduleOutlined,
   TeamOutlined,
   UserOutlined,
@@ -52,11 +59,13 @@ type NavItem = Omit<MobileNavItem, 'children'> & {
 
 const navItems: NavItem[] = [
   { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
+  { key: '/teacher/services', icon: <AppstoreOutlined />, label: '业务总览' },
   { key: 'teaching-group', icon: <CalendarOutlined />, label: '教学工作', children: [
     { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '我的课表' },
     { key: '/teacher/intensive', icon: <ScheduleOutlined />, label: '个性化课程' },
     { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
-    { key: '/teacher/feedback', icon: <MessageOutlined />, label: '成长反馈', badgeKey: 'unpublished' },
+    { key: '/teacher/feedback', icon: <MessageOutlined />, label: '我的反馈', badgeKey: 'unpublished' },
+    { key: '/teacher/study-hall', icon: <ReadOutlined />, label: '作业班工作台' },
   ] },
   { key: 'service-group', icon: <MessageOutlined />, label: '沟通与服务', children: [
     { key: '/teacher/messages', icon: <MessageOutlined />, label: '家长留言', badgeKey: 'unreadMessages' },
@@ -158,7 +167,14 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     .sort((a, b) => b.key.length - a.key.length)[0]?.key || '/teacher/dashboard'
   const defaultOpenKeys = navItems.filter(item => item.children?.some(child => child.key === selectedKey)).map(item => item.key)
   const mobileNavItems = withBadges(navItems, data)
-  const todoTotal = (data?.badges?.unsubmitted || 0) + (data?.badges?.unpublished || 0)
+  const bottomTabs: MobileNavItem[] = [
+    { key: '/teacher/dashboard', icon: <HomeOutlined />, label: '首页' },
+    { key: '/teacher/students', icon: <TeamOutlined />, label: '我的学员' },
+    { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤', badge: data?.badges?.unsubmitted },
+    { key: '/teacher/feedback', icon: <FileTextOutlined />, label: '反馈', badge: data?.badges?.unpublished },
+    { key: '__more', icon: <MenuOutlined />, label: '更多' },
+  ]
+  const todoTotal = (data?.badges?.unsubmitted || 0) + (data?.badges?.unpublished || 0) + (data?.badges?.unreadMessages || 0)
 
   const handleChangePwd = async (values: { oldPassword: string; newPassword: string }) => {
     setPwdSubmitting(true)
@@ -197,17 +213,20 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   if (isMobile) {
     return (
       <MobileLayout
-        mode="drawer"
+        mode="tabs"
         navItems={mobileNavItems}
+        bottomTabs={bottomTabs}
+        moreItems={mobileNavItems}
         title="牧哲学堂 教师"
-        drawerHeaderExtra={todoTotal > 0 ? (
-          <div style={{ fontSize: 12, color: '#E8784A', background: 'rgba(232,120,74,.08)',
-            borderRadius: 8, padding: '8px 12px', border: '1px solid rgba(232,120,74,.15)' }}>
-            ⚠️ 待办：{data?.badges?.unsubmitted ? `${data.badges.unsubmitted}节考勤未提交` : ''}
-            {data?.badges?.unsubmitted && data?.badges?.unpublished ? '，' : ''}
-            {data?.badges?.unpublished ? `${data.badges.unpublished}条反馈未发布` : ''}
+        drawerHeaderExtra={(
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {todoTotal > 0 && <div style={{ fontSize: 12, color: 'var(--color-ink-muted)', background: 'var(--color-primary-bg)', borderRadius: 8, padding: '8px 12px', border: '1px solid var(--color-hairline)' }}>
+              <ExclamationCircleOutlined style={{ color: 'var(--color-primary)', marginRight: 6 }} />
+              今日待办：{data?.badges?.unsubmitted || 0}节考勤，{data?.badges?.unpublished || 0}条反馈，{data?.badges?.unreadMessages || 0}条留言
+            </div>}
+            <Button size="small" icon={<QuestionCircleOutlined />} onClick={() => router.push('/teacher/dashboard?guide=1')}>使用帮助</Button>
           </div>
-        ) : undefined}
+        )}
       >
         {children}
       </MobileLayout>
@@ -243,11 +262,11 @@ export function TeacherLayout({ children, initialData }: { children: React.React
           borderBottom: '1px solid #F0DDD2',
         }}>
           <Link href="/teacher/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Image src="/images/logo.jpg" alt="" width={28} height={28} style={{ borderRadius: 6, objectFit: 'contain' }} unoptimized />
+            <Image src="/images/logo.jpg" alt="牧哲学堂" width={28} height={28} style={{ borderRadius: 6, objectFit: 'contain' }} unoptimized />
             {!collapsed && <span style={{ fontSize: 14, fontWeight: 700, color: '#E87545', whiteSpace: 'nowrap' }}>牧哲学堂 · 教师端</span>}
           </Link>
-          <Tooltip title={collapsed ? '展开导航' : '收起导航'}>
-            <button onClick={() => setCollapsed(!collapsed)} style={{
+          <Tooltip title={collapsed ? '展开导航' : '收起导航'} trigger={['hover', 'focus']}>
+            <button type="button" aria-label={collapsed ? '展开导航' : '收起导航'} onClick={() => setCollapsed(!collapsed)} style={{
               width: 32,
               height: 32,
               borderRadius: 8,
@@ -290,18 +309,20 @@ export function TeacherLayout({ children, initialData }: { children: React.React
           background: '#fff',
           gap: 16,
         }}>
+          <Tooltip title="使用帮助" trigger={['hover', 'focus']}><Button type="text" icon={<QuestionCircleOutlined />} onClick={() => router.push('/teacher/dashboard?guide=1')} aria-label="打开使用帮助" /></Tooltip>
           {data ? (
             <Dropdown menu={{ items: [
+              { key: 'help', icon: <QuestionCircleOutlined />, label: '使用帮助', onClick: () => router.push('/teacher/dashboard?guide=1') },
               { key: 'change-pwd', icon: <LockOutlined />, label: '修改密码', onClick: () => setChangingPwd(true) },
               { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: () => {
                 clearSensitiveBrowserStorage()
                 return signOut({ callbackUrl: `${window.location.origin}/login` })
               } },
-            ] }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            ] }} trigger={['click']}>
+              <button type="button" aria-label="打开用户菜单" style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: 0, border: 0, background: 'transparent' }}>
                 <Avatar size={28} icon={<UserOutlined />} src={normalizeUploadUrl(data.teacher.avatar) || undefined} />
                 <span style={{ fontSize: 13, color: '#1a1201', whiteSpace: 'nowrap' }}>{data.teacher.name}</span>
-              </div>
+              </button>
             </Dropdown>
           ) : <Spin size="small" />}
         </Header>

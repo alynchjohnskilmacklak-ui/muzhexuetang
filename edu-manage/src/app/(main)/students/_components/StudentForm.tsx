@@ -1,8 +1,8 @@
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space } from 'antd'
-import { UserOutlined, PhoneOutlined, BookOutlined } from '@ant-design/icons'
+import { Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, Typography } from 'antd'
+import { UserOutlined, PhoneOutlined, BookOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
 import { MEMBERSHIP_OPTIONS } from '@/constants/membership'
@@ -18,6 +18,8 @@ const STATUS_OPTIONS = [
 const SOURCE_OPTIONS = ['朋友介绍', '网络搜索', '自然到访', '转介绍', '线下活动', '其他']
 
 type Teacher = { id: string; name: string; subjects: string }
+type StudyClass = { id: string; name: string; scheduleType: 'WEEKDAY_LATE' | 'WEEKEND'; gradeScope?: string[]; status: string }
+const { Text } = Typography
 
 export function StudentForm({
   open, onClose, initialData, mode = 'create',
@@ -31,6 +33,7 @@ export function StudentForm({
   const [current, setCurrent] = useState(0)
   const [loading, setLoading] = useState(false)
   const [teachers, setTeachers] = useState<Teacher[]>([])
+  const [studyClasses, setStudyClasses] = useState<StudyClass[]>([])
   const isMobile = useIsMobile() ?? false
   const { division } = useDivision()
 
@@ -42,6 +45,12 @@ export function StudentForm({
           ...initialData,
           birthYear: initialData.birthYear ? String(initialData.birthYear) : undefined,
           membershipLevel: initialData.membershipLevel || 'NORMAL',
+          studyHallMemberships: Array.isArray(initialData.studyHallMemberships)
+            ? initialData.studyHallMemberships.map((item) => {
+                const membership = item as { classId?: string; purchasedDays?: number | null }
+                return { classId: membership.classId, purchasedDays: membership.purchasedDays }
+              })
+            : [],
         })
       } else {
         form.resetFields()
@@ -51,8 +60,11 @@ export function StudentForm({
       fetch('/api/teachers?limit=50').then(r => r.json()).then(d => {
         setTeachers(Array.isArray(d) ? d : (d.teachers || []))
       }).catch((error) => { console.warn('教师列表加载失败', error) })
+      fetch('/api/study-hall').then(r => r.json()).then(d => {
+        setStudyClasses(Array.isArray(d.classes) ? d.classes.filter((item: StudyClass) => item.status === 'ACTIVE') : [])
+      }).catch((error) => { console.warn('作业班列表加载失败', error) })
     }
-  }, [open, initialData, form])
+  }, [open, initialData, form, division])
 
   // Only validate fields visible on the current step
   const stepFields: Record<number, string[]> = {
@@ -76,7 +88,7 @@ export function StudentForm({
   const handleFinish = async () => {
     // Final validate: only check name is filled
     try {
-      await form.validateFields(['name'])
+      await form.validateFields()
     } catch {
       return
     }
@@ -119,7 +131,7 @@ export function StudentForm({
   const steps = [
     { title: '基本信息', icon: <UserOutlined /> },
     { title: '联系信息', icon: <PhoneOutlined /> },
-    { title: '课程绑定', icon: <BookOutlined /> },
+    { title: '课程与作业班', icon: <BookOutlined /> },
   ]
 
   const footer = (
@@ -221,7 +233,7 @@ export function StudentForm({
           </Row>
         )}
 
-        {/* Step 3: 课程绑定 */}
+        {/* Step 3: 课程与作业班 */}
         {current === 2 && (
           <Row gutter={16}>
             <Col span={12}>
@@ -246,6 +258,17 @@ export function StudentForm({
               <Form.Item name="membershipLevel" label="会员等级">
                 <Select options={MEMBERSHIP_OPTIONS} />
               </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.List name="studyHallMemberships">{(fields, { add, remove }) => <Space direction="vertical" style={{ width: '100%' }}>
+                <div><Text strong>作业班报名</Text><br /><Text type="secondary">选择实际班级并填写购买天数；到勤一天扣一天。</Text></div>
+                {fields.map((field) => <Row key={field.key} gutter={8} align="middle">
+                  <Col xs={14} sm={16}><Form.Item {...field} name={[field.name, 'classId']} rules={[{ required: true, message: '请选择作业班' }]}><Select showSearch optionFilterProp="label" placeholder="选择晚托或周末班" options={studyClasses.map((item) => ({ value: item.id, label: `${item.name} · ${item.scheduleType === 'WEEKEND' ? '周末班' : '晚托'} · ${item.gradeScope?.join('、') || '不限年级'}` }))} /></Form.Item></Col>
+                  <Col xs={8} sm={6}><Form.Item {...field} name={[field.name, 'purchasedDays']} rules={[{ required: true, message: '填写天数' }]}><InputNumber min={1} max={366} precision={0} addonAfter="天" placeholder="天数" style={{ width: '100%' }} /></Form.Item></Col>
+                  <Col xs={2}><Button type="text" danger icon={<MinusCircleOutlined />} onClick={() => remove(field.name)} aria-label="移除作业班" /></Col>
+                </Row>)}
+                <Button icon={<PlusOutlined />} onClick={() => add({ purchasedDays: 10 })}>添加作业班</Button>
+              </Space>}</Form.List>
             </Col>
           </Row>
         )}

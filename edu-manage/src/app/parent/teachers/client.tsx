@@ -1,26 +1,27 @@
-﻿'use client'
+'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import NextImage from 'next/image'
-import { Image as AntImage, Tag, Typography } from 'antd'
+import { Image as AntImage, Input, Tag, Typography } from 'antd'
+import { SearchOutlined, StarFilled, TeamOutlined } from '@ant-design/icons'
 import { normalizeUploadUrl } from '@/lib/upload-url'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
-import { ParentCard, SectionHeader } from '@/components/Parent/ParentCard'
+import { ResponsiveDialog } from '@/components/Common/ResponsiveDialog'
 import { resolveTier, TIER_THEME } from '@/constants/teacher-tier'
 
 const { Title, Text, Paragraph } = Typography
 
 const SUBJECT_STYLES: Record<string, { bg: string; color: string }> = {
-  '数学': { bg: '#FAEEDA', color: '#854F0B' },
-  '物理': { bg: '#E1F5EE', color: '#085041' },
-  '化学': { bg: '#EEEDFE', color: '#3C3489' },
-  '英语': { bg: '#E6F1FB', color: '#185FA5' },
-  '语文': { bg: '#FBEAF0', color: '#72243E' },
-  '历史': { bg: '#FAF0E6', color: '#633806' },
-  '生物': { bg: '#EAF3DE', color: '#27500A' },
-  '政治': { bg: '#F5E8F5', color: '#6B2B6B' },
+  数学: { bg: '#FAEEDA', color: '#854F0B' },
+  物理: { bg: '#E1F5EE', color: '#085041' },
+  化学: { bg: '#EEEDFE', color: '#3C3489' },
+  英语: { bg: '#E6F1FB', color: '#185FA5' },
+  语文: { bg: '#FBEAF0', color: '#72243E' },
+  历史: { bg: '#FAF0E6', color: '#633806' },
+  生物: { bg: '#EAF3DE', color: '#27500A' },
+  政治: { bg: '#F5E8F5', color: '#6B2B6B' },
 }
-const DEFAULT_STYLE = { bg: '#FCFBF9', color: '#5a4e3a' }
+const DEFAULT_STYLE = { bg: 'var(--color-surface-3)', color: 'var(--color-ink-muted)' }
 
 interface TeacherInfo {
   id: string; name: string; gender: string | null; avatar: string | null
@@ -32,135 +33,108 @@ interface TeacherInfo {
   studyMaterials?: Array<{ id: string; title: string; grade: string; subject: string; fileType: string; createdAt: string }>
 }
 
-const PHOTO_W = 112
-const PHOTO_H = 140
+function teacherSubjects(teacher: TeacherInfo) {
+  return teacher.subjects?.split(',').map(subject => subject.trim()).filter(Boolean) || []
+}
 
-function TeacherRow({ teacher, index }: { teacher: TeacherInfo; index: number }) {
-  const [imgFailed, setImgFailed] = useState(false)
-  const [previewOpen, setPreviewOpen] = useState(false)
-  const subjects = teacher.subjects ? teacher.subjects.split(',').map(s => s.trim()).filter(Boolean) : []
-  const firstSubject = subjects[0] || ''
-  const style = SUBJECT_STYLES[firstSubject] || DEFAULT_STYLE
-  const titleParts = [teacher.education, teacher.university, teacher.major].filter(Boolean)
-  const showAvatar = teacher.avatar && !imgFailed
+function TeacherGridCard({ teacher, onSelect }: { teacher: TeacherInfo; onSelect: () => void }) {
+  const [imageFailed, setImageFailed] = useState(false)
+  const subjects = teacherSubjects(teacher)
+  const firstStyle = SUBJECT_STYLES[subjects[0]] || DEFAULT_STYLE
   const tier = resolveTier(teacher.tierLevel)
   const tierTheme = TIER_THEME[tier]
 
-  return (
-    <div className="stagger-item" style={{
-      display: 'flex', gap: 20, padding: '20px 0',
-      borderBottom: '1px solid #F3EDE7',
-      alignItems: 'flex-start', animationDelay: `${Math.min(index, 8) * 40}ms`,
-    }}>
-      {/* Photo area */}
-      <div style={{ position: 'relative', width: PHOTO_W, height: PHOTO_H, flexShrink: 0, borderRadius: 12, overflow: 'hidden', background: '#f8f8f8', border: '1px solid #F0DDD2' }}>
-        {showAvatar ? (
-          <>
-            <NextImage
-              fill
-              src={normalizeUploadUrl(teacher.avatar)}
-              alt={teacher.name}
-              sizes="(max-width: 768px) 40vw, 200px"
-              style={{ objectFit: 'cover', objectPosition: 'center top', cursor: 'zoom-in' }}
-              onClick={() => setPreviewOpen(true)}
-              onError={() => setImgFailed(true)}
-            />
-            <AntImage
-              src={normalizeUploadUrl(teacher.avatar)}
-              alt={teacher.name}
-              style={{ display: 'none' }}
-              preview={{ visible: previewOpen, onVisibleChange: setPreviewOpen }}
-            />
-          </>
-        ) : (
-          <div style={{
-            width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 36, fontWeight: 700, color: style.color, background: style.bg,
-          }}>
-            {teacher.name[0]}
-          </div>
-        )}
-      </div>
-
-      {/* Info area */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
-          <Text strong style={{ fontSize: 18, color: '#1F2329' }}>{teacher.name}</Text>
-          <Tag color={teacher.employmentType === 'FULL_TIME' ? 'blue' : 'orange'} style={{ borderRadius: 9999, fontSize: 11 }}>
-            {teacher.employmentType === 'FULL_TIME' ? '全职' : '兼职'}
-          </Tag>
-          <span style={{ background: tierTheme.bg, color: tierTheme.accent, border: `1px solid ${tierTheme.border}`, borderRadius: 999, fontSize: 10, padding: '1px 7px', whiteSpace: 'nowrap' }}>
-            {tier === 'SENIOR' && <span style={{ color: tierTheme.gold, marginRight: 3 }}>★</span>}
-            {tierTheme.label}
-          </span>
-          {teacher.currentUnit && (
-            <Text type="secondary" style={{ fontSize: 12 }}>{teacher.currentUnit}</Text>
-          )}
-        </div>
-
-        {/* Education line */}
-        {titleParts.length > 0 && (
-          <div style={{ fontSize: 13, color: '#667085', marginBottom: 6 }}>
-            {titleParts.join(' · ')}
-            {teacher.graduationYear && <span>（{teacher.graduationYear}届）</span>}
-          </div>
-        )}
-
-        {/* Subject tags */}
-        {subjects.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
-            {subjects.map(s => {
-              const ss = SUBJECT_STYLES[s] || DEFAULT_STYLE
-              return <span key={s} style={{ fontSize: 12, padding: '2px 10px', borderRadius: 999, background: ss.bg, color: ss.color, fontWeight: 600 }}>{s}</span>
-            })}
-          </div>
-        )}
-
-        {/* Bio */}
-        {teacher.bio && (
-          <Paragraph type="secondary" ellipsis={{ rows: 2 }} style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 0, color: '#6B7280' }}>
-            {teacher.bio}
-          </Paragraph>
-        )}
-
-        {teacher.studyMaterials?.length ? (
-          <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 10, background: '#FCFBF9', border: '1px solid #F3EDE7' }}>
-            <Text strong style={{ display: 'block', fontSize: 13, marginBottom: 6 }}>公开学习资料</Text>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {teacher.studyMaterials.map((material) => (
-                <Tag key={material.id} color="blue" style={{ margin: 0, maxWidth: '100%' }}>
-                  {material.grade} · {material.subject} · {material.title}
-                </Tag>
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </div>
-    </div>
-  )
+  return <button type="button" className="parent-teacher-card" onClick={onSelect}>
+    <span className="parent-teacher-avatar" style={{ background: firstStyle.bg, color: firstStyle.color }}>
+      {teacher.avatar && !imageFailed
+        ? <NextImage fill src={normalizeUploadUrl(teacher.avatar)} alt={teacher.name} sizes="(max-width: 768px) 38vw, 180px" onError={() => setImageFailed(true)} />
+        : teacher.name.slice(0, 1)}
+    </span>
+    <span className="parent-teacher-name">
+      <strong>{teacher.name}</strong>
+      {tier === 'SENIOR' && <StarFilled aria-label="资深教师" style={{ color: tierTheme.gold }} />}
+    </span>
+    <span className="parent-teacher-education">{[teacher.education, teacher.university].filter(Boolean).join(' · ') || (teacher.currentUnit || '牧哲学堂教师')}</span>
+    <span className="parent-teacher-subjects">
+      {subjects.slice(0, 3).map(subject => {
+        const style = SUBJECT_STYLES[subject] || DEFAULT_STYLE
+        return <span key={subject} style={{ background: style.bg, color: style.color }}>{subject}</span>
+      })}
+    </span>
+  </button>
 }
 
 export function ParentTeachersClient({ teachers }: { teachers: TeacherInfo[] }) {
-  return (
-    <div>
-      <div style={{ marginBottom: 20 }}>
-        <Title level={4} style={{ marginBottom: 4 }}>教师信息</Title>
-        <Text type="secondary" style={{ fontSize: 13 }}>
-          牧哲学堂教师团队，共 {teachers.length} 位在岗教师
-        </Text>
+  const [query, setQuery] = useState('')
+  const [subject, setSubject] = useState('')
+  const [selectedTeacher, setSelectedTeacher] = useState<TeacherInfo | null>(null)
+  const allSubjects = useMemo(() => [...new Set(teachers.flatMap(teacherSubjects))], [teachers])
+  const filteredTeachers = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase()
+    return teachers.filter(teacher => {
+      const matchesName = !normalizedQuery || teacher.name.toLowerCase().includes(normalizedQuery)
+      const matchesSubject = !subject || teacherSubjects(teacher).includes(subject)
+      return matchesName && matchesSubject
+    })
+  }, [teachers, query, subject])
+
+  const selectedSubjects = selectedTeacher ? teacherSubjects(selectedTeacher) : []
+  const selectedTier = selectedTeacher ? resolveTier(selectedTeacher.tierLevel) : null
+  const selectedTierTheme = selectedTier ? TIER_THEME[selectedTier] : null
+
+  return <div className="parent-teachers-page">
+    <header className="parent-page-heading">
+      <Title level={4}>教师团队</Title>
+      <Text type="secondary">牧哲学堂共 {teachers.length} 位在岗教师</Text>
+    </header>
+
+    {teachers.length === 0 ? <div className="parent-teachers-empty">
+      <BrandEmpty title="暂无在岗教师信息" icon={<TeamOutlined />} />
+    </div> : <>
+      <Input allowClear value={query} onChange={event => setQuery(event.target.value)} prefix={<SearchOutlined />} placeholder="搜索老师姓名" className="parent-teacher-search" />
+      <div className="parent-teacher-chips" role="group" aria-label="按学科筛选">
+        <button type="button" aria-pressed={!subject} onClick={() => setSubject('')}>全部</button>
+        {allSubjects.map(item => <button type="button" key={item} aria-pressed={subject === item} onClick={() => setSubject(item)}>{item}</button>)}
       </div>
 
-      <SectionHeader title="教师团队" count={`${teachers.length} 位`} />
+      <div className="parent-teacher-results-head"><Text strong>全部教师</Text><Text type="secondary">{filteredTeachers.length} 位</Text></div>
+      {filteredTeachers.length > 0 ? <div className="parent-teacher-grid">
+        {filteredTeachers.map(teacher => <TeacherGridCard key={teacher.id} teacher={teacher} onSelect={() => setSelectedTeacher(teacher)} />)}
+      </div> : <div className="parent-teachers-empty"><BrandEmpty title="没有找到符合条件的老师" hint="可以更换姓名或学科筛选条件。" /></div>}
+    </>}
 
-      {teachers.length === 0 ? (
-        <ParentCard style={{ minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <BrandEmpty title="暂无在岗教师信息" icon="👩‍🏫" />
-        </ParentCard>
-      ) : (
-        <ParentCard style={{ padding: '0 24px' }}>
-          {teachers.map((teacher, index) => <TeacherRow key={teacher.id} teacher={teacher} index={index} />)}
-        </ParentCard>
-      )}
-    </div>
-  )
+    <ResponsiveDialog open={Boolean(selectedTeacher)} onClose={() => setSelectedTeacher(null)} title={selectedTeacher?.name || '教师详情'} width={620} mobileHeight="88dvh" footer={null}>
+      {selectedTeacher && <div className="parent-teacher-detail">
+        <div className="parent-teacher-detail-head">
+          {selectedTeacher.avatar
+            ? <AntImage src={normalizeUploadUrl(selectedTeacher.avatar)} alt={selectedTeacher.name} width={96} height={120} style={{ objectFit: 'cover', borderRadius: 12 }} />
+            : <span className="parent-teacher-detail-fallback">{selectedTeacher.name.slice(0, 1)}</span>}
+          <div>
+            <Title level={4}>{selectedTeacher.name}</Title>
+            <div className="parent-teacher-detail-tags">
+              <Tag>{selectedTeacher.employmentType === 'FULL_TIME' ? '全职' : '兼职'}</Tag>
+              {selectedTierTheme && <Tag style={{ color: selectedTierTheme.accent, background: selectedTierTheme.bg, borderColor: selectedTierTheme.border }}>{selectedTierTheme.label}</Tag>}
+            </div>
+            <Text type="secondary">{[selectedTeacher.education, selectedTeacher.university, selectedTeacher.major].filter(Boolean).join(' · ') || '教师资料待完善'}</Text>
+            {selectedTeacher.graduationYear && <Text type="secondary">（{selectedTeacher.graduationYear} 届）</Text>}
+          </div>
+        </div>
+        {selectedSubjects.length > 0 && <div className="parent-teacher-detail-subjects">{selectedSubjects.map(item => {
+          const style = SUBJECT_STYLES[item] || DEFAULT_STYLE
+          return <span key={item} style={{ background: style.bg, color: style.color }}>{item}</span>
+        })}</div>}
+        <div className="parent-teacher-detail-metrics">
+          <div><strong>{selectedTeacher.studentCount}</strong><span>服务学员</span></div>
+          <div><strong>{selectedTeacher.classGroupCount}</strong><span>授课班级</span></div>
+          <div><strong>{selectedTeacher.ratingCount ? selectedTeacher.rating.toFixed(1) : '暂无'}</strong><span>家长评分</span></div>
+        </div>
+        {selectedTeacher.currentUnit && <Paragraph><Text strong>当前单位：</Text>{selectedTeacher.currentUnit}</Paragraph>}
+        {selectedTeacher.bio && <Paragraph className="parent-teacher-detail-bio">{selectedTeacher.bio}</Paragraph>}
+        {!!selectedTeacher.studyMaterials?.length && <section className="parent-teacher-materials">
+          <Text strong>公开学习资料</Text>
+          {selectedTeacher.studyMaterials.map(material => <div key={material.id}><span>{material.title}</span><small>{material.grade} · {material.subject} · {material.fileType}</small></div>)}
+        </section>}
+      </div>}
+    </ResponsiveDialog>
+  </div>
 }

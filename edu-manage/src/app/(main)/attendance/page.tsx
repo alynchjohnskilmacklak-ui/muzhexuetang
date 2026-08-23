@@ -2,19 +2,22 @@
 
 import { useState, useMemo } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Drawer, Modal, Select, Space, Empty, Tag, Typography, message, Input, InputNumber } from 'antd'
+import { Button, Card, Drawer, Modal, Select, Space, Tag, Typography, message, Input, InputNumber } from 'antd'
 import { CheckCircleOutlined, TeamOutlined, EnvironmentOutlined, ClockCircleOutlined, UserOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { format } from 'date-fns'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
+import { isFirstTeachingPeriod } from '@/lib/schedule-periods'
 
 const { Text } = Typography
 
 const fetcher = (url: string) => fetch(url).then(r => { if (!r.ok) throw new Error('加载失败'); return r.json() })
 
-type AttStatus = 'present' | 'leave' | 'absent' | 'late'
+type AttStatus = 'present' | 'leave'
 
 const CLASS_TYPE_LABELS: Record<string, string> = {
   ONE_ON_ONE: '一对一',
@@ -46,14 +49,12 @@ function formatTime(iso: string): string {
 
 function toLocalStatus(status: unknown): AttStatus {
   const value = String(status || '').toUpperCase()
-  if (value === 'LEAVE') return 'leave'
-  if (value === 'ABSENT') return 'absent'
+  if (value === 'LEAVE' || value === 'ABSENT') return 'leave'
   return 'present'
 }
 
 function toApiStatus(status: AttStatus) {
   if (status === 'leave') return 'LEAVE'
-  if (status === 'absent') return 'ABSENT'
   return 'PRESENT'
 }
 
@@ -65,6 +66,7 @@ function buildTimeIso(date: string, time: unknown) {
 export default function AttendancePage() {
   const isMobile = useIsMobile() ?? false
   const { division } = useDivision()
+  const { periods } = useSchedulePeriods(division)
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [filterTeacherId, setFilterTeacherId] = useState('')
   const [filterType, setFilterType] = useState('')
@@ -75,6 +77,7 @@ export default function AttendancePage() {
 
   const [selectedSchedule, setSelectedSchedule] = useState<Record<string, unknown> | null>(null)
   const [attMap, setAttMap] = useState<Map<string, AttStatus>>(new Map())
+  const [mealStudentIds, setMealStudentIds] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const [attendanceDrawerOpen, setAttendanceDrawerOpen] = useState(false)
   const [actualMinutes, setActualMinutes] = useState<number | null>(null)
@@ -84,7 +87,7 @@ export default function AttendancePage() {
   const [adjusting, setAdjusting] = useState(false)
 
   const teacherList: Record<string, unknown>[] = Array.isArray(teachersData?.teachers) ? teachersData.teachers : Array.isArray(teachersData) ? teachersData : []
-  const schedules: Record<string, unknown>[] = Array.isArray(lessonsRaw) ? lessonsRaw.map((lesson: Record<string, unknown>) => {
+  const rawSchedules: Record<string, unknown>[] = Array.isArray(lessonsRaw) ? lessonsRaw.map((lesson: Record<string, unknown>) => {
     const group = lesson.group as Record<string, unknown> | undefined
     const students: Record<string, unknown>[] = (Array.isArray(lesson.students) ? lesson.students as Record<string, unknown>[] : []).map((student) => ({
       ...student,
@@ -102,6 +105,7 @@ export default function AttendancePage() {
       startTime: buildTimeIso(lessonDate, lesson.startTime),
       endTime: buildTimeIso(lessonDate, lesson.endTime),
       teacherName: group?.teacherName || '-',
+      teacherId: group?.teacherId || '',
       roomName: group?.roomName || '未分配',
       studentCount: lesson.totalStudents || students.length,
       attendanceStatus: Number(lesson.attendanceCount || 0) > 0 ? 'done' : 'pending',
@@ -117,6 +121,10 @@ export default function AttendancePage() {
       })),
     }
   }) : []
+  const schedules: Record<string, unknown>[] = rawSchedules.map((schedule) => ({
+    ...schedule,
+    isTeacherFirstLessonToday: isFirstTeachingPeriod(periods, formatTime(String(schedule.startTime || ''))),
+  }))
   const allSchedules = filterType ? schedules.filter((schedule) => schedule.classType === filterType) : schedules
 
   const groupedSchedules = useMemo(() => {
@@ -149,6 +157,9 @@ export default function AttendancePage() {
       newMap.set(stu.studentId as string, (existing?.status as AttStatus) || 'present')
     })
     setAttMap(newMap)
+    setMealStudentIds(new Set(
+      students.filter((student) => Boolean(student.eating)).map((student) => String(student.studentId)),
+    ))
     setActualMinutes(Number(schedule.actualMinutes || schedule.plannedMinutes || 0) || null)
     if (isMobile) {
       setAttendanceDrawerOpen(true)
@@ -166,14 +177,21 @@ export default function AttendancePage() {
     setAttMap(prev => { const next = new Map(prev); next.set(studentId, status); return next })
   }
 
+  const toggleMeal = (studentId: string) => {
+    setMealStudentIds((current) => {
+      const next = new Set(current)
+      if (next.has(studentId)) next.delete(studentId)
+      else next.add(studentId)
+      return next
+    })
+  }
+
   const summary = useMemo(() => {
-    if (!attMap.size) return { present: 0, leave: 0, absent: 0, late: 0 }
+    if (!attMap.size) return { present: 0, leave: 0 }
     const vals = [...attMap.values()]
     return {
       present: vals.filter(s => s === 'present').length,
       leave: vals.filter(s => s === 'leave').length,
-      absent: vals.filter(s => s === 'absent').length,
-      late: vals.filter(s => s === 'late').length,
     }
   }, [attMap])
 
@@ -196,7 +214,11 @@ export default function AttendancePage() {
       const res = await fetch('/api/admin/attendance/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lessonId, records }),
+        body: JSON.stringify({
+          lessonId,
+          records,
+          mealStudentIds: selectedSchedule.isTeacherFirstLessonToday ? [...mealStudentIds] : undefined,
+        }),
       })
       if (!res.ok) throw new Error((await res.json()).error || '提交失败')
       message.success(`考勤提交成功，共 ${records.length} 人`)
@@ -249,8 +271,6 @@ export default function AttendancePage() {
     const colors: Record<AttStatus, { bg: string; color: string; label: string }> = {
       present: { bg: 'rgba(39,166,68,0.12)', color: '#27a644', label: '出勤' },
       leave: { bg: 'rgba(245,166,35,0.12)', color: '#f5a623', label: '请假' },
-      absent: { bg: 'rgba(224,62,45,0.12)', color: '#e03e2d', label: '旷课' },
-      late: { bg: 'rgba(100,100,220,0.12)', color: '#6464dc', label: '迟到' },
     }
     const c = colors[target]
     return {
@@ -288,7 +308,7 @@ export default function AttendancePage() {
         <CardSkeleton rows={3} />
       ) : allSchedules.length === 0 ? (
         <Card bordered={false} style={{ borderRadius: 8, minHeight: 300, display: 'grid', placeItems: 'center', background: '#ffffff', border: '1px solid #EEE7E1' }}>
-          <Empty description="该日期暂无课程" />
+          <GuidedEmpty title={filterType ? '当前班型没有课程' : '这一天没有课程'} description={filterType ? '可以清除班型筛选，查看当天其他需要考勤的课程。' : '当天排课后会显示在这里，便于统一完成学员考勤。'} actionLabel={filterType ? '清除筛选' : '查看课程管理'} onAction={() => filterType ? setFilterType('') : window.location.assign('/courses')} />
         </Card>
       ) : (
         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 16, minHeight: 'calc(100vh - 300px)' }}>
@@ -351,7 +371,7 @@ export default function AttendancePage() {
           <div style={{ flex: 1 }}>
             {!selectedSchedule ? (
               <Card bordered={false} style={{ borderRadius: 10, minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff', border: '1px solid #EEE7E1' }}>
-                <Empty description="请从左侧选择课程开始考勤" />
+                <GuidedEmpty title="选择一节课程开始考勤" description="选择左侧课程后，这里会显示学员名单和出勤状态，避免登记到错误课次。" compact />
               </Card>
             ) : (() => {
               const students = (selectedSchedule.students as Array<Record<string, unknown>>) || []
@@ -403,6 +423,10 @@ export default function AttendancePage() {
                     </Card>
                   )}
 
+                  {Boolean(selectedSchedule.isTeacherFirstLessonToday) && (
+                    <div className="attendance-meal-banner">这是该教师当天首节课，可同时登记学生是否就餐；未勾选表示不就餐。</div>
+                  )}
+
                   <div style={{ maxHeight: isMobile ? 'none' : 'calc(100vh - 500px)', overflowY: 'auto' }}>
                     {students.map((s: Record<string, unknown>) => {
                       const status = attMap.get(s.studentId as string) || 'present'
@@ -420,14 +444,21 @@ export default function AttendancePage() {
                               <div style={{ fontSize: 13, color: '#1F2329' }}>{s.studentName as string}</div>
                             </div>
                             <Space size={4}>
-                              {(['present', 'leave', 'absent', 'late'] as AttStatus[]).map(t => (
+                              {(['present', 'leave'] as AttStatus[]).map(t => (
                                 <button key={t}
                                   disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}
                                   onClick={() => setStudentStatus(s.studentId as string, t)}
                                   style={statusBtnStyle(status === t, t)}>
-                                  {t === 'present' ? '出勤' : t === 'leave' ? '请假' : t === 'absent' ? '旷课' : '迟到'}
+                                  {t === 'present' ? '出勤' : '请假'}
                                 </button>
                               ))}
+                              {Boolean(selectedSchedule.isTeacherFirstLessonToday) && (
+                                <button
+                                  type="button"
+                                  className={`attendance-meal-toggle ${mealStudentIds.has(String(s.studentId)) ? 'is-active' : ''}`}
+                                  onClick={() => toggleMeal(String(s.studentId))}
+                                >就餐</button>
+                              )}
                             </Space>
                           </div>
                         </Card>
@@ -440,8 +471,7 @@ export default function AttendancePage() {
                       <Space size={20}>
                         <span style={{ fontSize: 13, color: '#27a644' }}>出勤 {summary.present}</span>
                         <span style={{ fontSize: 13, color: '#f5a623' }}>请假 {summary.leave}</span>
-                        <span style={{ fontSize: 13, color: '#e03e2d' }}>旷课 {summary.absent}</span>
-                        <span style={{ fontSize: 13, color: '#6464dc' }}>迟到 {summary.late}</span>
+                        {Boolean(selectedSchedule.isTeacherFirstLessonToday) && <span style={{ fontSize: 13, color: '#E8784A' }}>就餐 {mealStudentIds.size}</span>}
                       </Space>
                       <Button type="primary" loading={submitting} onClick={handleSubmit}
                         disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}
@@ -521,6 +551,10 @@ export default function AttendancePage() {
                   </div>
                 )}
 
+                {Boolean(selectedSchedule.isTeacherFirstLessonToday) && (
+                  <div className="attendance-meal-banner">这是该教师当天首节课，可同时登记学生是否就餐；未勾选表示不就餐。</div>
+                )}
+
                 {/* 学生列表 */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
                   {students.map((s: Record<string, unknown>) => {
@@ -528,8 +562,6 @@ export default function AttendancePage() {
                     const statusColors = {
                       present: { bg: 'rgba(39,166,68,0.1)', color: '#27a644', label: '出勤' },
                       leave:   { bg: 'rgba(245,166,35,0.1)', color: '#f5a623', label: '请假' },
-                      absent:  { bg: 'rgba(224,62,45,0.1)',  color: '#e03e2d', label: '旷课' },
-                      late:    { bg: 'rgba(100,100,220,0.1)', color: '#6464dc', label: '迟到' },
                     } as const
                     
                     return (
@@ -550,8 +582,8 @@ export default function AttendancePage() {
                           <span style={{ fontSize: 15, fontWeight: 600, color: '#1F2329' }}>{s.studentName as string}</span>
                         </div>
                         
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-                          {(['present', 'leave', 'absent', 'late'] as AttStatus[]).map(t => {
+                        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${selectedSchedule.isTeacherFirstLessonToday ? 3 : 2}, 1fr)`, gap: 8 }}>
+                          {(['present', 'leave'] as AttStatus[]).map(t => {
                             const active = status === t
                             const c = statusColors[t]
                             return (
@@ -573,6 +605,13 @@ export default function AttendancePage() {
                               </button>
                             )
                           })}
+                          {Boolean(selectedSchedule.isTeacherFirstLessonToday) && (
+                            <button
+                              type="button"
+                              className={`attendance-meal-toggle ${mealStudentIds.has(String(s.studentId)) ? 'is-active' : ''}`}
+                              onClick={() => toggleMeal(String(s.studentId))}
+                            >就餐</button>
+                          )}
                         </div>
                       </div>
                     )
@@ -600,10 +639,12 @@ export default function AttendancePage() {
                         <div style={{ fontSize: 16, fontWeight: 700, color: '#f5a623' }}>{summary.leave}</div>
                         <div style={{ fontSize: 10, color: '#98A2B3' }}>请假</div>
                       </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 16, fontWeight: 700, color: '#e03e2d' }}>{summary.absent}</div>
-                        <div style={{ fontSize: 10, color: '#98A2B3' }}>旷课</div>
-                      </div>
+                      {Boolean(selectedSchedule.isTeacherFirstLessonToday) && (
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: 16, fontWeight: 700, color: '#E8784A' }}>{mealStudentIds.size}</div>
+                          <div style={{ fontSize: 10, color: '#98A2B3' }}>就餐</div>
+                        </div>
+                      )}
                     </div>
                     <Button type="primary" loading={submitting} size="large"
                       disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}

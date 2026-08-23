@@ -33,7 +33,10 @@ export function MobileRoomView({
   const { data: daily, isLoading } = useSWR(`/api/schedules/daily?date=${dateStr}&division=${division}`, fetcher, { refreshInterval: 180_000 })
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
 
-  const matrix = (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown>[]>>
+  const matrix = useMemo(
+    () => (daily?.matrix || {}) as Record<string, Record<string, Record<string, unknown>[]>>,
+    [daily],
+  )
   const allRooms: Record<string, unknown>[] = Array.isArray(roomsData) ? roomsData : []
   const rooms = allRooms.filter(r => {
     const t = (r.type as string || '').toLowerCase()

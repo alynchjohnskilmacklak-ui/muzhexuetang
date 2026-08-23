@@ -326,9 +326,9 @@ async function fetchFeedbacks(prisma: PrismaClient, studentId: string, viewer: A
   }))
 }
 
-async function fetchFiles(prisma: PrismaClient, studentId: string, viewer: ArchiveViewer) {
+async function fetchFiles(prisma: PrismaClient, studentId: string, _viewer: ArchiveViewer) {
   try {
-    const files = await (prisma as unknown as Record<string, unknown>).fileAsset ? (prisma as unknown as { fileAsset: { findMany: Function } }).fileAsset.findMany({
+    const files = await (prisma as unknown as Record<string, unknown>).fileAsset ? (prisma as unknown as { fileAsset: { findMany: (args: Record<string, unknown>) => Promise<Array<Record<string, unknown>>> } }).fileAsset.findMany({
       where: { studentId, deletedAt: null },
       orderBy: { createdAt: 'desc' as const }, take: 50,
       select: { id: true, filename: true, url: true, mimeType: true, ownerType: true, size: true, createdAt: true },

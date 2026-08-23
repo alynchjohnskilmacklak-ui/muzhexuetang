@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Carousel, Col, Drawer, Empty, Form, Input, Modal, Row, Select, Spin, Tag, Upload } from 'antd'
+import { Button, Card, Carousel, Col, Drawer, Form, Input, Modal, Row, Select, Spin, Tag, Upload } from 'antd'
 import { DownloadOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, SendOutlined, WarningOutlined } from '@ant-design/icons'
 import { Image as AntImage } from 'antd'
 import { PageLayout } from '@/components/Layout/PageLayout'
@@ -12,6 +12,8 @@ import { useDivision } from '@/contexts/DivisionContext'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import Image from 'next/image'
+import { AdminTeachingRecordSwitcher } from '@/components/study-hall/AdminTeachingRecordSwitcher'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 
 const fetcher = (url: string) => fetch(url).then((res) => { if (!res.ok) throw new Error('加载失败'); return res.json() })
 type AdminFeedback = {
@@ -382,6 +384,7 @@ export default function ClassroomFeedbackAdminPage() {
         </div>
       }
     >
+      <AdminTeachingRecordSwitcher />
       <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
         <Col xs={12} sm={8} md={6}>
           <Card bordered={false} style={{ borderRadius: 10, background: 'linear-gradient(135deg,#fff3ec,#fff)', border: '1px solid #EEE7E1' }}>
@@ -474,8 +477,8 @@ export default function ClassroomFeedbackAdminPage() {
         <CardSkeleton rows={3} />
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 0', background: '#fff', borderRadius: 12, border: '1px solid #EEE7E1' }}>
-          <img src="/images/empty-box.png" alt="" style={{ width: 120, opacity: 0.5, marginBottom: 16 }} />
-          <Empty description={viewAll ? '暂无反馈记录' : `${date} 暂无课堂反馈`} />
+          <Image src="/images/empty-box.png" alt="" width={120} height={120} style={{ opacity: 0.5, marginBottom: 16, objectFit: 'contain' }} />
+          <GuidedEmpty title={viewAll ? '还没有课堂反馈记录' : `${date}没有课堂反馈`} description={viewAll ? '教师发布的课堂内容、评价和照片会显示在这里，便于教务检查反馈是否完整。' : '可以查看全部日期，确认是否已有其他课堂反馈。'} actionLabel={viewAll ? '查看课程管理' : '查看全部反馈'} onAction={() => viewAll ? window.location.assign('/courses') : setViewAll(true)} />
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

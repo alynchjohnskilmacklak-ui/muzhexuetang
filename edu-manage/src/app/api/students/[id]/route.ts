@@ -6,6 +6,10 @@ import { resolveTeacherForUser } from '@/lib/performance'
 import { revalidatePath } from 'next/cache'
 import { apiHandler } from '@/lib/api-handler'
 import { calculateApprovedIntensiveHours, calculateTaughtHours } from '@/lib/student-taught-hours'
+import type { Prisma } from '@prisma/client'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { parseDateKey } from '@/lib/study-hall/domain'
+import { todayLocal } from '@/lib/date/local-day'
 
 export const dynamic = 'force-dynamic'
 
@@ -124,27 +128,63 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
 
   const { id } = await params
   const body = await req.json()
+  const existingStudent = await prisma.student.findUnique({ where: { id }, select: { id: true, division: true, grade: true } })
+  if (!existingStudent) return NextResponse.json({ error: '学员不存在' }, { status: 404 })
+  const selectedTerm = await resolveAdminTermScope(prisma, existingStudent.division, req)
+  if (!selectedTerm || selectedTerm.status !== 'ACTIVE') return NextResponse.json({ error: '请切换到当前有效运营期后再编辑学员' }, { status: 409 })
+  const requestedStudyHallMemberships = (Array.isArray(body.studyHallMemberships) ? body.studyHallMemberships : []).map((raw: unknown) => {
+    const item = raw as { classId?: unknown; purchasedDays?: unknown }
+    return { classId: typeof item.classId === 'string' ? item.classId : '', purchasedDays: Number(item.purchasedDays) }
+  })
+  if (requestedStudyHallMemberships.some((item: { classId: string; purchasedDays: number }) => !item.classId || !Number.isInteger(item.purchasedDays) || item.purchasedDays <= 0 || item.purchasedDays > 366)) return NextResponse.json({ error: '作业班或购买天数填写不正确' }, { status: 400 })
+  if (new Set(requestedStudyHallMemberships.map((item: { classId: string }) => item.classId)).size !== requestedStudyHallMemberships.length) return NextResponse.json({ error: '不能重复选择同一个作业班' }, { status: 400 })
+  const requestedClasses = requestedStudyHallMemberships.length ? await prisma.studyHallClass.findMany({
+    where: { id: { in: requestedStudyHallMemberships.map((item: { classId: string }) => item.classId) }, termId: selectedTerm.id, division: existingStudent.division, status: 'ACTIVE' },
+    select: { id: true, scheduleType: true, gradeScope: true },
+  }) : []
+  if (requestedClasses.length !== requestedStudyHallMemberships.length) return NextResponse.json({ error: '所选作业班无效或不属于当前运营期' }, { status: 409 })
+  if (new Set(requestedClasses.map((item) => item.scheduleType)).size !== requestedClasses.length) return NextResponse.json({ error: '同一学员在一个运营期最多参加一个晚托班和一个周末班' }, { status: 409 })
+  const effectiveGrade = typeof body.grade === 'string' ? body.grade.trim() : existingStudent.grade || ''
+  if (effectiveGrade && requestedClasses.some((item) => item.gradeScope.length && !item.gradeScope.includes(effectiveGrade))) return NextResponse.json({ error: '学员年级与所选作业班的适用年级不一致' }, { status: 409 })
 
-  const student = await prisma.student.update({
-    where: { id },
-    data: {
-      name: body.name,
-      gender: body.gender,
-      birthYear: body.birthYear ? parseInt(body.birthYear) : undefined,
-      grade: body.grade,
-      school: body.school,
-      phone: body.phone,
-      email: body.email,
-      parentName: body.parentName,
-      parentPhone: body.parentPhone,
-      source: body.source,
-      notes: body.notes,
-      tags: body.tags ? JSON.stringify(body.tags) : undefined,
-      mainTeacherId: body.mainTeacherId,
-      remainHours: body.remainHours,
-      status: body.status,
-      membershipLevel: body.membershipLevel ?? undefined,
-    },
+  // 字段白名单 + 基础校验，防止 mass-assignment 写入任意字段。
+  const data: Prisma.StudentUncheckedUpdateInput = {}
+  if (typeof body.name === 'string') data.name = body.name
+  if (typeof body.gender === 'string') data.gender = body.gender
+  if (body.birthYear !== undefined && body.birthYear !== null && body.birthYear !== '') {
+    const birthYear = Number(body.birthYear)
+    if (!Number.isFinite(birthYear)) return NextResponse.json({ error: '出生年份必须为数字' }, { status: 400 })
+    data.birthYear = birthYear
+  }
+  if (typeof body.grade === 'string') data.grade = body.grade
+  if (typeof body.school === 'string') data.school = body.school
+  if (typeof body.phone === 'string') data.phone = body.phone
+  if (typeof body.email === 'string') data.email = body.email
+  if (typeof body.parentName === 'string') data.parentName = body.parentName
+  if (typeof body.parentPhone === 'string') data.parentPhone = body.parentPhone
+  if (typeof body.source === 'string') data.source = body.source
+  if (typeof body.notes === 'string') data.notes = body.notes
+  if (body.tags !== undefined) data.tags = JSON.stringify(body.tags)
+  if (body.mainTeacherId === null || typeof body.mainTeacherId === 'string') data.mainTeacherId = body.mainTeacherId
+  if (body.remainHours !== undefined && body.remainHours !== '') {
+    const remainHours = Number(body.remainHours)
+    if (!Number.isFinite(remainHours)) return NextResponse.json({ error: '剩余课时必须为数字' }, { status: 400 })
+    data.remainHours = remainHours
+  }
+  if (typeof body.status === 'string') data.status = body.status
+  if (typeof body.membershipLevel === 'string') data.membershipLevel = body.membershipLevel
+
+  const student = await prisma.$transaction(async (tx) => {
+    const updated = await tx.student.update({ where: { id }, data })
+    const currentMemberships = await tx.studyHallClassStudent.findMany({ where: { studentId: id, studyClass: { termId: selectedTerm.id } } })
+    const requestedIds = requestedStudyHallMemberships.map((item: { classId: string }) => item.classId)
+    await tx.studyHallClassStudent.updateMany({ where: { studentId: id, status: 'ACTIVE', studyClass: { termId: selectedTerm.id }, classId: { notIn: requestedIds } }, data: { status: 'LEFT', leftAt: parseDateKey(todayLocal()) } })
+    for (const request of requestedStudyHallMemberships as Array<{ classId: string; purchasedDays: number }>) {
+      const membership = currentMemberships.find((item) => item.classId === request.classId)
+      if (!membership) await tx.studyHallClassStudent.create({ data: { classId: request.classId, studentId: id, purchasedDays: request.purchasedDays, joinedAt: parseDateKey(todayLocal()) } })
+      else await tx.studyHallClassStudent.update({ where: { id: membership.id }, data: { status: 'ACTIVE', leftAt: null, purchasedDays: request.purchasedDays } })
+    }
+    return updated
   })
 
   revalidatePath('/dashboard')

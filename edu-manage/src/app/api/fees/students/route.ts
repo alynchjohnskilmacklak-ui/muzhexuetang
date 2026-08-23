@@ -2,16 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { getPrismaForDivision, getRequestPrisma, isDualDbEnabled } from '@/lib/prisma'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
 type Division = 'JUNIOR' | 'SENIOR'
 
-async function findStudents(division: Division, q: string, limit: number) {
+async function findStudents(req: NextRequest, division: Division, q: string, limit: number) {
   const db = isDualDbEnabled() ? getPrismaForDivision(division) : await getRequestPrisma()
+  const term = await resolveAdminTermScope(db, division, req)
   return db.student.findMany({
     where: {
       status: { not: 'ARCHIVED' },
+      termMemberships: { some: { termId: term?.id || '__NO_SELECTED_TERM__', status: 'ACTIVE' } },
       ...(q ? {
         OR: [
           { name: { contains: q } },
@@ -39,10 +42,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   const students = division === 'all' && isDualDbEnabled()
     ? (await Promise.all([
-      findStudents('JUNIOR', q, limit),
-      findStudents('SENIOR', q, limit),
+      findStudents(req, 'JUNIOR', q, limit),
+      findStudents(req, 'SENIOR', q, limit),
     ])).flat().slice(0, limit)
-    : await findStudents(division === 'SENIOR' ? 'SENIOR' : 'JUNIOR', q, limit)
+    : await findStudents(req, division === 'SENIOR' ? 'SENIOR' : 'JUNIOR', q, limit)
 
   return NextResponse.json({ students })
 })

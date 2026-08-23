@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Row, Col, Input, Select, Button, Space, Empty, Spin, Card, Statistic } from 'antd'
+import { Row, Col, Input, Select, Button, Space, Empty, Spin, Card, Statistic, Alert } from 'antd'
 import { PlusOutlined, SearchOutlined, TeamOutlined, TrophyOutlined, ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { TeacherCard } from './_components/TeacherCard'
@@ -17,6 +17,12 @@ type Teacher = {
   _count?: { students: number; schedules: number }
 }
 
+type TermScope = {
+  id: string
+  name: string
+  status: 'DRAFT' | 'ACTIVE' | 'ARCHIVED'
+}
+
 export default function TeachersPage() {
   const isMobile = useIsMobile() ?? false
   const [teachers, setTeachers] = useState<Teacher[]>([])
@@ -28,6 +34,7 @@ export default function TeachersPage() {
   const [editData, setEditData] = useState<Record<string, unknown> | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null)
   const [stats, setStats] = useState({ total: 0, fullTime: 0, partTime: 0, avgRating: 0 })
+  const [term, setTerm] = useState<TermScope | null>(null)
 
   const fetchTeachers = useCallback(async () => {
     setLoading(true)
@@ -42,6 +49,7 @@ export default function TeachersPage() {
         fetch('/api/teachers/stats').then(r => r.json()),
       ])
       setTeachers(tRes.teachers || [])
+      setTerm(tRes.term || null)
       setStats(sRes)
     } catch { /* ignore */ } finally { setLoading(false) }
   }, [search, filterType, filterSubject])
@@ -59,9 +67,18 @@ export default function TeachersPage() {
 
   return (
     <PageLayout title="教师管理" subtitle="管理教师档案、排课与考核" actions={actions}>
+      <Alert
+        showIcon
+        type={term?.status === 'ARCHIVED' ? 'info' : 'success'}
+        message={term ? `当前数据范围：${term.name}` : '尚未选择运营批次'}
+        description={term?.status === 'ARCHIVED'
+          ? '正在查看历史批次。教师档案永久保留；教师卡片中的学员数、课次和授课数据仅统计该历史批次。'
+          : '教师档案为全局资料，不会因换期开班而重复创建；教师卡片中的学员数、课次和授课数据跟随当前运营批次。'}
+        style={{ marginBottom: 20 }}
+      />
       <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
         <Col xs={12} sm={6}><Card bordered style={{ borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
-          <Statistic title="在职教师" value={stats.total} prefix={<TeamOutlined style={{ color: '#27a644' }} />} valueStyle={{ color: '#1F2329' }} />
+          <Statistic title="在职教师档案" value={stats.total} prefix={<TeamOutlined style={{ color: '#27a644' }} />} valueStyle={{ color: '#1F2329' }} />
         </Card></Col>
         <Col xs={12} sm={6}><Card bordered style={{ borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
           <Statistic title="全职 / 兼职" value={`${stats.fullTime} / ${stats.partTime}`} prefix={<ClockCircleOutlined style={{ color: '#E8784A' }} />} valueStyle={{ color: '#1F2329', fontSize: 20 }} />

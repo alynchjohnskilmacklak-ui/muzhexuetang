@@ -10,7 +10,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const prisma = await getRequestPrisma()
   const userId = (session.user as { id: string }).id
 
-  const { studentId, scheduleId, reason, leaveDate } = await req.json() as {
+  const { studentId, scheduleId: _scheduleId, reason, leaveDate } = await req.json() as {
     studentId: string
     scheduleId?: string
     reason: string

@@ -11,7 +11,6 @@ import {
   DatePicker,
   Drawer,
   Dropdown,
-  Empty,
   Input,
   InputNumber,
   Modal,
@@ -30,6 +29,7 @@ import {
   CheckOutlined,
   ClockCircleOutlined,
   CopyOutlined,
+  DeleteOutlined,
   EnvironmentOutlined,
   MoreOutlined,
   PlusOutlined,
@@ -45,6 +45,8 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { CLASS_PERIODS_ONLY, HOURLY_PERIODS, SchedulePeriod } from '@/lib/schedule-periods'
 import { useDivision } from '@/contexts/DivisionContext'
 import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { SafeFormModal } from '@/components/Common/SafeFormModal'
 
 type CourseType = 'GROUP' | 'ONE_ON_ONE' | 'SMALL_GROUP'
 type ScheduleTemplateRow = {
@@ -117,15 +119,11 @@ function countScheduledLessons(template: unknown) {
 }
 
 function buildScheduleTemplate(type: CourseType, periods: SchedulePeriod[] = CLASS_PERIODS_ONLY): ScheduleTemplateRow[] {
-  if (type !== 'GROUP') return []
-  return periods.filter(period => period.type === 'CLASS').map(p => ({
-    periodId: p.id,
-    periodName: p.name,
-    startTime: p.start,
-    endTime: p.end,
-    teacherId: '',
-    subject: '',
-  }))
+  void type
+  void periods
+  // A new class starts without placeholder rows. Administrators add only the
+  // blocks that actually meet, which keeps evening and weekend classes concise.
+  return []
 }
 
 export default function CoursesPage() {
@@ -136,6 +134,7 @@ export default function CoursesPage() {
   const { data: teachers } = useSWR('/api/teachers?status=ACTIVE', fetcher)
   const { data: rooms } = useSWR('/api/rooms', fetcher)
   const { data: dashboard, mutate: mutateDashboard } = useSWR(`/api/dashboard?division=${division}`, fetcher)
+  const { data: academicTermData } = useSWR('/api/admin/academic-terms', fetcher)
   const { periods } = useSchedulePeriods(division)
   const classPeriods = useMemo(() => periods.filter(period => period.type === 'CLASS'), [periods])
 
@@ -147,6 +146,7 @@ export default function CoursesPage() {
   const [createStep, setCreateStep] = useState(0)
   const [createLoading, setCreateLoading] = useState(false)
   const [createData, setCreateData] = useState<Record<string, unknown>>({})
+  const [createInitialData, setCreateInitialData] = useState('{}')
   const [copyOpen, setCopyOpen] = useState(false)
   const [copySource, setCopySource] = useState('')
   const [copyStartDate, setCopyStartDate] = useState('')
@@ -175,6 +175,11 @@ export default function CoursesPage() {
   })
   const teacherList = Array.isArray(teachers?.teachers) ? teachers.teachers : Array.isArray(teachers) ? teachers : []
   const roomList = Array.isArray(rooms) ? rooms : []
+  const academicTerms = Array.isArray(academicTermData?.terms) ? academicTermData.terms : []
+  const activeAcademicTerm = academicTerms.find((term: Record<string, unknown>) => term.status === 'ACTIVE')
+  const selectedAcademicTerm = academicTerms.find((term: Record<string, unknown>) => term.id === academicTermData?.selectedTermId)
+    || activeAcademicTerm
+  const isHistoricalTerm = Boolean(selectedAcademicTerm && selectedAcademicTerm.status !== 'ACTIVE')
   const { data: drawerLessons } = useSWR(drawerGroupId ? `/api/class-groups/${drawerGroupId}/lessons` : null, fetcher)
   const drawerLessonList = useMemo(() => {
     const lessons = Array.isArray(drawerLessons) ? drawerLessons as Record<string, unknown>[] : []
@@ -232,7 +237,7 @@ export default function CoursesPage() {
     setCreateLoading(false)
     const initialType: CourseType = courseTab === 'SMALL' ? 'ONE_ON_ONE' : 'GROUP'
     const isHourly = initialType !== 'GROUP'
-    setCreateData({
+    const initialData: Record<string, unknown> = {
       type: initialType,
       intensiveMode: courseTab === 'SMALL' ? 'INTENSIVE' : 'NORMAL',
       teachingType: courseTab === 'SMALL' ? 'ONE_ON_ONE' : undefined,
@@ -245,10 +250,20 @@ export default function CoursesPage() {
       recurringDays: courseTab === 'SMALL' ? [] : ['MON', 'WED', 'FRI'],
       maxStudents: initialType === 'ONE_ON_ONE' ? 1 : 20,
       teacherAssignments: [{ teacherId: '', subject: '' }],
+      termId: selectedAcademicTerm?.id,
       scheduleSlots: [] as string[],
       scheduleTemplate: buildScheduleTemplate(initialType, classPeriods),
-    })
+    }
+    setCreateInitialData(JSON.stringify(initialData))
+    setCreateData(initialData)
     setCreateOpen(true)
+  }
+
+  const closeCreate = () => {
+    setCreateOpen(false)
+    setCreateLoading(false)
+    setCreateStep(0)
+    setCreateData({})
   }
 
   const resolveCreateScheduleTemplate = (templateOverride?: Record<string, unknown>[]) => {
@@ -312,6 +327,11 @@ export default function CoursesPage() {
     if (createStep === 0) {
       if (!createData.courseId && !createData.courseName) {
         toast.error('请选择已有课程，或填写课程名称')
+        return
+      }
+      const selectedCourseName = String(createData.courseName || courseList.find((item: Record<string, unknown>) => item.id === createData.courseId)?.name || '')
+      if (/晚托|托管|作业班/.test(selectedCourseName)) {
+        toast.error('晚托和作业班请在“作业班管理”中新建，这里只建立计课时的普通课程')
         return
       }
     }
@@ -419,6 +439,7 @@ export default function CoursesPage() {
         division: createData.division || division,
         intensiveMode: isIntensiveCreate ? 'INTENSIVE' : 'NORMAL',
         teachingType: isIntensiveCreate ? createData.teachingType : undefined,
+        termId: createData.termId || undefined,
       }
 
       const groupRes = await fetch('/api/class-groups', {
@@ -712,14 +733,21 @@ export default function CoursesPage() {
       subtitle="课程设置、班级创建、课表生成和课次调整"
       actions={
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, auto)', gap: 8, width: isMobile ? '100%' : 'auto' }}>
-          <Button block={isMobile} icon={<CalendarOutlined />} onClick={() => { setAddDayDate(dayjs().format('YYYY-MM-DD')); setAddDayOpen(true) }}>调整上课日</Button>
-          <Button block={isMobile} icon={<CopyOutlined />} onClick={() => setCopyOpen(true)}>批量复制</Button>
-          <Button block={isMobile} type="primary" icon={<PlusOutlined />} onClick={openCreate} style={{ background: '#e8784a', gridColumn: isMobile ? '1 / -1' : undefined }}>
+          <Button block={isMobile} disabled={isHistoricalTerm} icon={<CalendarOutlined />} onClick={() => { setAddDayDate(dayjs().format('YYYY-MM-DD')); setAddDayOpen(true) }}>调整上课日</Button>
+          <Button block={isMobile} disabled={isHistoricalTerm} icon={<CopyOutlined />} onClick={() => setCopyOpen(true)}>批量复制</Button>
+          <Button block={isMobile} disabled={isHistoricalTerm} type="primary" icon={<PlusOutlined />} onClick={openCreate} style={{ background: '#e8784a', gridColumn: isMobile ? '1 / -1' : undefined }}>
             新建班级
           </Button>
         </div>
       }
     >
+      <Alert
+        showIcon
+        type={isHistoricalTerm ? 'info' : 'success'}
+        message={`${selectedAcademicTerm?.name || '尚未启用运营批次'}${isHistoricalTerm ? '（历史只读）' : '（当前运营）'}`}
+        description={isHistoricalTerm ? '当前展示历史课程、班级和课表；为避免串期，新增、调整、复制、开班和删除已停用。' : '本页课程、班级、排课和课次均归属于当前运营批次。'}
+        style={{ marginBottom: 16 }}
+      />
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         {[
           { label: '进行中班级', value: stats.activeGroups, color: '#27a644' },
@@ -794,9 +822,7 @@ export default function CoursesPage() {
         <CardSkeleton rows={3} />
       ) : filteredGroups.length === 0 ? (
         <Card bordered={false} style={{ borderRadius: 8, minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Empty description="暂无班级数据">
-            <Button type="primary" onClick={openCreate} style={{ background: '#e8784a' }}>创建第一个班级</Button>
-          </Empty>
+          <GuidedEmpty title={filterType || filterGrade || filterStatus ? '没有符合条件的班级' : isHistoricalTerm ? '这个历史批次没有班级记录' : '还没有班级'} description={filterType || filterGrade || filterStatus ? '可以清除班型、年级或状态筛选，查看当前运营批次的全部班级。' : isHistoricalTerm ? '历史批次只用于查看，请切换到当前运营批次后再建班。' : '创建班级后可以分配老师和学员，并继续生成课表。'} actionLabel={filterType || filterGrade || filterStatus ? '清除筛选' : isHistoricalTerm ? undefined : '创建第一个班级'} actionIcon={!filterType && !filterGrade && !filterStatus && !isHistoricalTerm ? <PlusOutlined /> : undefined} onAction={filterType || filterGrade || filterStatus ? () => { setFilterType(''); setFilterGrade(''); setFilterStatus('') } : isHistoricalTerm ? undefined : openCreate} />
         </Card>
       ) : (
         <Row gutter={[16, 16]}>
@@ -866,16 +892,17 @@ export default function CoursesPage() {
                   <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
                     <Button size="small" icon={<CalendarOutlined />} onClick={(e) => { e.stopPropagation(); setDrawerGroupId(group.id as string); setDrawerOpen(true) }}>课表</Button>
                     {group.status === 'WAITING' && (
-                      <Button size="small" icon={<ReloadOutlined />} loading={regeneratingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleRegenerateLessons(group.id as string) }}>重新生成</Button>
+                      <Button size="small" disabled={isHistoricalTerm} icon={<ReloadOutlined />} loading={regeneratingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleRegenerateLessons(group.id as string) }}>重新生成</Button>
                     )}
                     <Button size="small" icon={<TeamOutlined />} onClick={(e) => { e.stopPropagation(); router.push(`/courses/${group.id}`) }}>管理</Button>
-                    <Button size="small" danger loading={deletingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group.id as string, group.name as string) }}>删除</Button>
+                    <Button size="small" danger disabled={isHistoricalTerm} loading={deletingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group.id as string, group.name as string) }}>删除</Button>
                   </div>
 
                   {group.status === 'WAITING' && (
                     <Button
                       block
                       type="primary"
+                      disabled={isHistoricalTerm}
                       loading={startingGroupId === group.id}
                       onClick={() => handleStartGroup(group.id as string)}
                       style={{ marginTop: 14, background: '#27a644', borderColor: '#27a644' }}
@@ -890,18 +917,16 @@ export default function CoursesPage() {
         </Row>
       )}
 
-      <Modal
+      <SafeFormModal
         title="新建班级"
         open={createOpen}
-        onCancel={() => {
-          setCreateOpen(false)
-          setCreateLoading(false)
-        }}
+        onClose={closeCreate}
+        dirty={createOpen && JSON.stringify(createData) !== createInitialData}
+        confirmLoading={createLoading}
         footer={null}
-        width={isMobile ? '100%' : 760}
-        style={isMobile ? { top: 0, margin: 0, padding: 0, maxWidth: '100vw' } : undefined}
-        styles={isMobile ? { body: { padding: '12px 16px', minHeight: 'calc(100dvh - 56px)', overflowY: 'auto' } } : undefined}
-        destroyOnClose
+        width={760}
+        mobileFullHeight
+        bodyStyle={{ padding: isMobile ? '12px 16px' : undefined, minHeight: isMobile ? 0 : undefined, overflowY: 'auto' }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 20 }}>
           {([
@@ -947,6 +972,14 @@ export default function CoursesPage() {
 
         {createStep === 0 && (
           <Space direction="vertical" size={14} style={{ width: '100%' }}>
+            {courseTab === 'GROUP' && <Alert
+              type="info"
+              showIcon
+              message="晚托、托管与作业辅导请使用“作业班管理”"
+              description={<span>这里的新建班级会生成正式课次、课时与工资；周末学科班可以继续在这里创建，并在最后一步只添加实际上课时段。</span>}
+              action={<Button size="small" onClick={() => router.push('/study-hall')}>去作业班管理</Button>}
+              style={{ borderRadius: 10 }}
+            />}
             <MobileSelect
               allowClear
               placeholder="可选：从已有课程继承"
@@ -1179,7 +1212,10 @@ export default function CoursesPage() {
                 </Button>
               </div>
             </div>
-            <Select allowClear placeholder="教室" style={{ width: '100%' }} value={(createData.roomId as string) || undefined} onChange={(value) => setCreateData((prev) => ({ ...prev, roomId: value }))} options={roomList.map((room: Record<string, unknown>) => ({ label: `${room.name} / ${room.capacity || 0}人`, value: room.id as string }))} />
+            <Row gutter={[12, 10]}>
+              <Col xs={24} sm={12}><Select allowClear placeholder="所属学期（建议选择）" style={{ width: '100%' }} value={(createData.termId as string) || undefined} onChange={(value) => setCreateData((prev) => ({ ...prev, termId: value }))} options={academicTerms.filter((term: Record<string, unknown>) => term.status !== 'ARCHIVED').map((term: Record<string, unknown>) => ({ label: `${term.name}${term.status === 'ACTIVE' ? ' · 当前' : ''}`, value: term.id as string }))} /></Col>
+              <Col xs={24} sm={12}><Select allowClear placeholder="教室" style={{ width: '100%' }} value={(createData.roomId as string) || undefined} onChange={(value) => setCreateData((prev) => ({ ...prev, roomId: value }))} options={roomList.map((room: Record<string, unknown>) => ({ label: `${room.name} / ${room.capacity || 0}人`, value: room.id as string }))} /></Col>
+            </Row>
             <Row gutter={[12, 10]}>
               <Col xs={24} sm={createData.intensiveMode === 'INTENSIVE' ? 12 : 8}>
                 <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 4 }}>开班日期</div>
@@ -1227,6 +1263,21 @@ export default function CoursesPage() {
           const validAssignments = ((createData.teacherAssignments as Record<string, unknown>[]) || [])
             .filter(assignment => assignment.teacherId && assignment.subject)
           const scheduledCount = countScheduledLessons(createData.scheduleTemplate)
+          const addGroupPeriod = (label: string, startTime: string, endTime: string) => {
+            const current = Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : []
+            const assignment = validAssignments[0]
+            setCreateData((previous) => ({
+              ...previous,
+              scheduleTemplate: [...current, {
+                periodId: `custom-${Date.now()}-${current.length}`,
+                periodName: label,
+                startTime,
+                endTime,
+                teacherId: assignment?.teacherId || '',
+                subject: assignment?.subject || '',
+              }],
+            }))
+          }
 
           if (createData.intensiveMode === 'INTENSIVE') {
             const teachingTypeLabel = createData.teachingType === 'ONE_ON_TWO'
@@ -1316,7 +1367,7 @@ export default function CoursesPage() {
             {/* Daily schedule template */}
             <div>
               <div style={{ color: '#98A2B3', marginBottom: 10, fontSize: 13 }}>
-                {isHourly ? '每天上课时间段（可多选）' : '每日节次安排（空节次不会排课）'}
+                {isHourly ? '每天上课时间段（可多选）' : '每日实际上课时段（未添加的时间默认空闲）'}
               </div>
               {isHourly ? (
                 <div>
@@ -1373,13 +1424,20 @@ export default function CoursesPage() {
                 </div>
               ) : (
                 <Space direction="vertical" size={6} style={{ width: '100%' }}>
+                  <Space wrap size={[8, 8]} style={{ marginBottom: 6 }}>
+                    <Button size="small" icon={<PlusOutlined />} onClick={() => addGroupPeriod('上午时段', '08:30', '12:00')}>上午半天</Button>
+                    <Button size="small" icon={<PlusOutlined />} onClick={() => addGroupPeriod('下午时段', '14:00', '18:00')}>下午半天</Button>
+                    <Button size="small" icon={<PlusOutlined />} onClick={() => addGroupPeriod('晚间时段', '18:30', '20:30')}>晚间 2 小时</Button>
+                    <Button size="small" type="primary" ghost icon={<PlusOutlined />} onClick={() => addGroupPeriod(`时段${scheduledCount + 1}`, '09:00', '10:30')}>自定义时段</Button>
+                  </Space>
+                  {scheduledCount === 0 && <Alert type="info" showIcon message="请添加实际上课时段" description="周末班最多 4 小时可直接设置起止时间；特殊日期如需延长，创建后可调整单次课次，不需要补满全天空余时段。" />}
                   {(Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : []).map((row, index) => {
                     const assignments = (Array.isArray(createData.teacherAssignments) ? createData.teacherAssignments as Record<string, unknown>[] : [])
                     const filled = !!(row.teacherId && row.subject)
                     return (
                       <div key={index} style={{
                         display: 'grid',
-                        gridTemplateColumns: isMobile ? '52px minmax(0, 1fr)' : '58px 190px minmax(0, 1fr)',
+                        gridTemplateColumns: isMobile ? '72px minmax(0, 1fr) auto' : '90px 190px minmax(0, 1fr) auto',
                         alignItems: 'center',
                         gap: 8,
                         padding: '8px 10px',
@@ -1433,6 +1491,17 @@ export default function CoursesPage() {
                             value: `${a.teacherId}::${a.subject}`,
                           }))}
                         />
+                        <Button
+                          danger
+                          type="text"
+                          size="small"
+                          icon={<DeleteOutlined />}
+                          aria-label={`删除${row.periodName as string}`}
+                          onClick={() => setCreateData((previous) => ({
+                            ...previous,
+                            scheduleTemplate: (Array.isArray(previous.scheduleTemplate) ? previous.scheduleTemplate as Record<string, unknown>[] : []).filter((_, rowIndex) => rowIndex !== index),
+                          }))}
+                        />
                         {!!(row.teacherId && row.startTime && row.endTime) &&
                           slotConflicts[`${row.teacherId}::${row.startTime}-${row.endTime}`] && (
                           <span style={{ fontSize: 11, color: '#E24B4A', gridColumn: '1 / -1' }}>
@@ -1469,7 +1538,7 @@ export default function CoursesPage() {
           </Space>
           )
         })()}
-      </Modal>
+      </SafeFormModal>
 
       <Modal title="批量复制班次" open={copyOpen} onCancel={() => setCopyOpen(false)} onOk={handleCopy} confirmLoading={copyLoading} okText="确认复制">
         <Space direction="vertical" style={{ width: '100%' }}>
@@ -1482,7 +1551,7 @@ export default function CoursesPage() {
       <Drawer title="课次管理" open={drawerOpen} onClose={() => setDrawerOpen(false)} width={isMobile ? '100%' : 420}>
         {drawerLessons ? (
           <Space direction="vertical" style={{ width: '100%' }}>
-            {drawerLessonList.length === 0 && <Empty description="暂无待处理课次" image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+            {drawerLessonList.length === 0 && <GuidedEmpty title="没有待处理课次" description="需要调整或补充的课次会显示在这里，当前班级暂时无需处理。" compact />}
             {drawerLessonList.map((lesson: Record<string, unknown>) => {
               const isCompleted = lesson.status === 'COMPLETED'
               const isCancelled = lesson.status === 'CANCELLED'

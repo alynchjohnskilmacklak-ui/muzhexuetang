@@ -5,6 +5,7 @@ import { ClassFeedbackClient } from './client'
 import { parentLinkedStudentWhere, visibleClassroomFeedbackWhere, visibleTeacherWhere } from '@/lib/business-visibility'
 import { resolveFeedbackImageVariants, variantsForFeedback } from '@/lib/file-asset-variants'
 import { redactFeedbackForParent } from '@/lib/classroom-feedback/access'
+import { LearningRecordSwitcher } from '@/components/Parent/LearningRecordSwitcher'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,8 +83,11 @@ export default async function ClassFeedbackPage({ searchParams }: { searchParams
     images: variantsForFeedback(feedback.imageUrls, imageVariantMap),
   })
 
-  return <ClassFeedbackClient
-    feedbacks={JSON.parse(JSON.stringify(parentFeedbacks.map(withImages)))}
-    highlightedFeedback={parentHighlightedFeedback ? JSON.parse(JSON.stringify(withImages(parentHighlightedFeedback))) : null}
-  />
+  return <div>
+    <LearningRecordSwitcher />
+    <ClassFeedbackClient
+      feedbacks={JSON.parse(JSON.stringify(parentFeedbacks.map(withImages)))}
+      highlightedFeedback={parentHighlightedFeedback ? JSON.parse(JSON.stringify(withImages(parentHighlightedFeedback))) : null}
+    />
+  </div>
 }

@@ -30,12 +30,9 @@ export function ParentTodayTimeline({
   return (
     <section
       aria-labelledby="parent-today-timeline-title"
+      className="parent-dashboard-section"
       style={{
-        marginBottom: 16,
-        padding: isMobile ? 16 : 20,
-        borderRadius: 14,
-        border: '1px solid var(--color-hairline)',
-        background: 'var(--color-surface-1)',
+        marginBottom: isMobile ? 12 : 16,
       }}
     >
       <div style={{
@@ -48,7 +45,7 @@ export function ParentTodayTimeline({
         <div>
           <h2
             id="parent-today-timeline-title"
-            style={{ margin: 0, color: 'var(--color-ink)', fontSize: isMobile ? 17 : 18 }}
+            style={{ margin: 0, color: 'var(--color-ink)', fontSize: isMobile ? 14.5 : 16, fontWeight: 600 }}
           >
             {studentName}的今日动态
           </h2>

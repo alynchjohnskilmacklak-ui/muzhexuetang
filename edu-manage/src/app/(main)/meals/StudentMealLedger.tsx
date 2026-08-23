@@ -37,7 +37,13 @@ type MealLedgerPayload = {
   period: { startDate: string; endDate: string }
   students: StudentOption[]
   student: StudentOption | null
-  records: Array<{ id: string; mealDate: string; notes?: string | null }>
+  records: Array<{
+    id: string
+    mealDate: string
+    eating: boolean
+    source: 'auto' | 'manual'
+    notes?: string | null
+  }>
 }
 
 const fetcher = async (url: string): Promise<MealLedgerPayload> => {
@@ -55,6 +61,7 @@ export function StudentMealLedger() {
   const isMobile = useIsMobile() ?? false
   const [studentId, setStudentId] = useState('')
   const [savingDate, setSavingDate] = useState('')
+  const [confirmingDate, setConfirmingDate] = useState('')
   const [exporting, setExporting] = useState(false)
   const reportRef = useRef<HTMLDivElement>(null)
   const endpoint = `/api/admin/meal-attendance${studentId ? `?studentId=${encodeURIComponent(studentId)}` : ''}`
@@ -67,19 +74,32 @@ export function StudentMealLedger() {
   }, [data?.students, studentId])
 
   const periodDates = useMemo(() => getMealPeriodDates(), [])
+  const recordMap = useMemo(
+    () => new Map((data?.records || []).map((record) => [record.mealDate, record])),
+    [data?.records],
+  )
   const eatingDates = useMemo(
-    () => new Set((data?.records || []).map((record) => record.mealDate)),
+    () => new Set((data?.records || []).filter((record) => record.eating).map((record) => record.mealDate)),
     [data?.records],
   )
   const teachingDays = getSummerTeachingDayCount()
 
   const toggleMeal = async (date: string) => {
     if (!studentId || savingDate) return
-    const wasEating = eatingDates.has(date)
+    const currentRecord = recordMap.get(date)
+    const wasEating = currentRecord?.eating === true
     setSavingDate(date)
-    const optimisticRecords = wasEating
-      ? (data?.records || []).filter((record) => record.mealDate !== date)
-      : [...(data?.records || []), { id: `optimistic-${date}`, mealDate: date }]
+    setConfirmingDate('')
+    const optimisticRecord = {
+      id: currentRecord?.id || `optimistic-${date}`,
+      mealDate: date,
+      eating: !wasEating,
+      source: 'manual' as const,
+      notes: '管理员手动调整',
+    }
+    const optimisticRecords = currentRecord
+      ? (data?.records || []).map((record) => record.mealDate === date ? optimisticRecord : record)
+      : [...(data?.records || []), optimisticRecord]
     await mutate(data ? { ...data, records: optimisticRecords } : data, false)
     try {
       const response = await fetch('/api/admin/meal-attendance', {
@@ -133,42 +153,45 @@ export function StudentMealLedger() {
       {periodDates.map((item) => {
         const checked = eatingDates.has(item.date)
         return (
-          <button
+          <div
             key={item.date}
-            type="button"
-            disabled={!item.isTeachingDay || !student || savingDate === item.date}
-            onClick={() => toggleMeal(item.date)}
-            aria-pressed={checked}
-            style={{
-              minWidth: 0,
-              minHeight: isMobile ? 82 : 92,
-              borderRadius: 10,
-              border: checked
-                ? '1px solid var(--color-primary, #E8784A)'
-                : '1px solid var(--color-border, rgba(0,0,0,.06))',
-              background: !item.isTeachingDay
-                ? 'var(--color-surface-soft, #F3F0EB)'
-                : checked ? 'rgba(232,120,74,.10)' : '#fff',
-              color: 'var(--color-text, #1a1201)',
-              padding: isMobile ? '8px 5px' : 10,
-              cursor: item.isTeachingDay && student ? 'pointer' : 'default',
-              opacity: savingDate === item.date ? 0.55 : 1,
+            role="button"
+            tabIndex={item.isTeachingDay && student ? 0 : -1}
+            aria-disabled={!item.isTeachingDay || !student || savingDate === item.date}
+            onClick={() => item.isTeachingDay && student && !savingDate && setConfirmingDate(item.date)}
+            onKeyDown={(event) => {
+              if ((event.key === 'Enter' || event.key === ' ') && item.isTeachingDay && student && !savingDate) {
+                event.preventDefault()
+                setConfirmingDate(item.date)
+              }
             }}
+            aria-pressed={checked}
+            className={`meal-ledger-cell ${!item.isTeachingDay ? 'is-rest' : ''} ${recordMap.get(item.date)?.source === 'auto' ? 'is-auto' : ''} ${recordMap.get(item.date)?.source === 'manual' ? 'is-manual' : ''} ${confirmingDate === item.date ? 'is-confirming' : ''}`}
           >
-            <div style={{ fontSize: 12, color: 'var(--color-text-secondary, #7A6F61)' }}>{weekdayLabel(item.date)}</div>
-            <div style={{ fontWeight: 700, fontSize: isMobile ? 15 : 17, margin: '4px 0' }}>
-              {dayjs(item.date).format('M月D日')}
-            </div>
-            {!item.isTeachingDay ? (
-              <Tag bordered={false} style={{ margin: 0 }}>休息</Tag>
-            ) : checked ? (
-              <span style={{ color: 'var(--color-primary, #E8784A)', fontSize: 12, fontWeight: 600 }}>
-                <CheckCircleFilled /> 已就餐
+            {confirmingDate === item.date ? (
+              <span className="meal-ledger-confirm" onClick={(event) => event.stopPropagation()}>
+                <strong>确认标记为{checked ? '不就餐' : '已就餐'}？</strong>
+                <span>
+                  <button type="button" onClick={() => setConfirmingDate('')}>取消</button>
+                  <button type="button" className="is-confirm" onClick={() => toggleMeal(item.date)}>确认</button>
+                </span>
               </span>
             ) : (
-              <span style={{ color: 'var(--color-text-secondary, #7A6F61)', fontSize: 12 }}>点击登记</span>
+              <>
+                <span className="meal-ledger-weekday">{weekdayLabel(item.date)}</span>
+                <strong className="meal-ledger-date">{dayjs(item.date).format('M月D日')}</strong>
+                {!item.isTeachingDay ? (
+                  <Tag bordered={false} style={{ margin: 0 }}>休息</Tag>
+                ) : checked ? (
+                  <span className="meal-ledger-state"><CheckCircleFilled /> 已就餐</span>
+                ) : (
+                  <span className="meal-ledger-empty">{recordMap.has(item.date) ? '已标记不就餐' : '点击登记'}</span>
+                )}
+                {recordMap.get(item.date)?.source === 'auto' && <small>教师上报</small>}
+                {recordMap.get(item.date)?.source === 'manual' && <small>手动调整</small>}
+              </>
             )}
-          </button>
+          </div>
         )
       })}
     </div>
@@ -218,6 +241,11 @@ export function StudentMealLedger() {
             <Card size="small"><Statistic title="已登记就餐" value={eatingDates.size} suffix="次" prefix={<CoffeeOutlined />} /></Card>
           </div>
           <Card title="7月9日—8月8日就餐记录" styles={{ body: { padding: isMobile ? 10 : 16 } }}>
+            <div className="meal-ledger-legend">
+              <span><i className="is-auto" />教师上报</span>
+              <span><i className="is-manual" />手动调整</span>
+              <Text type="secondary">首次点击只进入确认态，不会立即修改</Text>
+            </div>
             {calendar}
           </Card>
         </>

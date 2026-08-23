@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
-import { sendWxMessage, buildFeedbackContent, buildSafeHomeContent } from '@/lib/wxpusher'
+import { sendWxMessage, buildFeedbackContent, buildSafeHomeContent, buildPushPayload } from '@/lib/wxpusher'
 import { visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
-  if (!session?.user || (session.user as any).role !== 'admin') {
+  if (!session?.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
  
@@ -36,7 +36,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
 export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
-  if (!session?.user || !['admin', 'teacher'].includes((session.user as any).role)) {
+  if (!session?.user || !['admin', 'teacher'].includes(session.user.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
   const prisma = await getRequestPrisma()
@@ -57,6 +57,32 @@ export const POST = apiHandler(async (req: NextRequest) => {
     include: { parent: { select: { id: true, wxpusherUid: true } } },
   })
   if (!student) return NextResponse.json({ error: '学员不存在' }, { status: 404 })
+
+  // 教师只能向自己授课的学生家长推送通知，防止越权/钓鱼。
+  const actorRole = (session.user as { role?: string }).role
+  if (actorRole === 'teacher') {
+    const teacherId = (session.user as { teacherId?: string | null }).teacherId
+    if (!teacherId) return NextResponse.json({ error: '无权限' }, { status: 403 })
+    const teaches = await prisma.student.findFirst({
+      where: {
+        id: studentId,
+        enrollments: {
+          some: {
+            status: 'ACTIVE',
+            group: {
+              status: { not: 'ARCHIVED' },
+              OR: [
+                { teacherId },
+                { teacherAssignments: { some: { teacherId } } },
+              ],
+            },
+          },
+        },
+      },
+      select: { id: true },
+    })
+    if (!teaches) return NextResponse.json({ error: '无权向该学员家长发送通知' }, { status: 403 })
+  }
 
   const parentUserId = student.parent?.id || student.parentId || student.parentUserId
   const wxpusherUid = student.parent?.wxpusherUid
@@ -92,10 +118,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (!wxpusherUid) {
       pushStatus = 'no_bind'
     } else {
-      const msgContent = type === 'wxpusher_feedback'
-        ? buildFeedbackContent(student.name)
-        : buildSafeHomeContent(student.name)
-      const summary = type === 'wxpusher_feedback' ? '课堂反馈通知' : '平安回家通知'
+      const { content: msgContent, summary } = buildPushPayload(type, student.name)
       const result = await sendWxMessage(wxpusherUid, msgContent, summary)
       if (result.success) {
         pushStatus = 'sent'

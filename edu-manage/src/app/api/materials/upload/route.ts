@@ -5,7 +5,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { MaterialSource } from '@prisma/client'
 import { normalizeMaterialAudience, normalizeMaterialStatus } from '@/lib/material-visibility'
 import { apiHandler } from '@/lib/api-handler'
-import { uploadBuffer, safeFilename, isOssEnabled, StorageConfigurationError } from '@/lib/storage'
+import { uploadBuffer, isOssEnabled, StorageConfigurationError } from '@/lib/storage'
 
 export const dynamic = 'force-dynamic'
 
@@ -119,7 +119,7 @@ export const PUT = apiHandler(async (req: NextRequest) => {
   if (!userId) return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const body = await req.json()
-  const { key, fileName, fileSize, contentType, title, grade, subject, description, audience: audienceRaw, status: statusRaw, tags: tagsStr, isPinned } = body as Record<string, unknown>
+  const { key, fileName, fileSize, title, grade, subject, description, audience: audienceRaw, status: statusRaw, tags: tagsStr, isPinned } = body as Record<string, unknown>
 
   if (!key || !fileName || !fileSize || !title || !grade || !subject) {
     return NextResponse.json({ error: '参数缺失' }, { status: 400 })

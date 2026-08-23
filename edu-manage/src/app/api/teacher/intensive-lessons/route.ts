@@ -4,6 +4,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { getLocalDayRange, localDateKey } from '@/lib/date/local-day'
 import { checkScheduleConflict, type ConflictInfo } from '@/lib/schedule-conflict'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 import {
   calculatePlannedMinutes,
   canTeacherEditIntensiveLesson,
@@ -24,8 +25,10 @@ const courseScopeKey = (groupId: string, subject: string) => `${groupId}:${subje
 
 export const GET = apiHandler(async () => {
   const { user, teacher, prisma } = await requireCurrentTeacher()
+  const activeTerm = await getActiveAcademicTerm(prisma, teacher.division)
   const groups = await prisma.classGroup.findMany({
     where: {
+      termId: activeTerm?.id || '__NO_ACTIVE_TERM__',
       intensiveMode: 'INTENSIVE',
       status: { not: 'ARCHIVED' },
       course: { isActive: true },
@@ -249,6 +252,10 @@ export const GET = apiHandler(async () => {
 
 export const POST = apiHandler(async (request: NextRequest) => {
   const { user, teacher, prisma } = await requireCurrentTeacher()
+  const activeTerm = await getActiveAcademicTerm(prisma, teacher.division)
+  if (!activeTerm) {
+    return NextResponse.json({ error: '当前没有启用的运营批次，请联系管理员' }, { status: 409 })
+  }
   const body = await request.json()
   const groupId = typeof body.groupId === 'string' ? body.groupId : ''
   const subject = typeof body.subject === 'string' ? body.subject.trim() : ''
@@ -261,6 +268,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
   const group = await prisma.classGroup.findFirst({
     where: {
       id: groupId,
+      termId: activeTerm.id,
       intensiveMode: 'INTENSIVE',
       status: { not: 'ARCHIVED' },
       course: { isActive: true },
@@ -324,6 +332,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
       date: lessonDate,
       startTime,
       endTime,
+      termId: group.termId || undefined,
     }, prisma)
     for (const conflict of current) {
       if (!conflicts.some((item) => item.type === conflict.type && item.lessonId === conflict.lessonId)) {

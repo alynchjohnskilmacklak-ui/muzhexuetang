@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { roundHours } from '@/lib/hours'
 import { hoursPerLesson } from '@/lib/lesson-units'
 import { apiHandler } from '@/lib/api-handler'
+import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +17,9 @@ export const POST = apiHandler(async (
   const prisma = await getRequestPrisma()
 
   const { id } = await params
+  if (!await isClassGroupInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能校准课时' }, { status: 409 })
+  }
 
   const group = await prisma.classGroup.findUnique({
     where: { id },

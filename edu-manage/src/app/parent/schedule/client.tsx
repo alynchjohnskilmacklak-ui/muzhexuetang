@@ -26,6 +26,26 @@ import {
 const { Title, Text } = Typography
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
 
+type ScheduleStudent = { id: string; name: string; enrollments?: ScheduleEnrollment[] }
+type ScheduleEnrollment = { id: string; group?: ScheduleGroup | null }
+type ScheduleGroup = {
+  id?: string; name?: string; intensiveMode?: string | null; teachingType?: string | null
+  room?: { name?: string | null } | null
+  course?: { name?: string | null; subject?: string | null } | null
+  teacher?: { id?: string; name?: string | null } | null
+  teacherAssignments?: Array<{ teacherId?: string; subject?: string | null }>
+  enrollments?: Array<{ student?: { id?: string; name?: string | null } | null }>
+}
+type ScheduleLesson = {
+  id: string; lessonDate: string | Date; startTime: string; endTime: string; subject?: string | null
+  attendanceSubmittedAt?: string | null; actualMinutes?: number | null; intensiveReviewStatus?: string | null
+  teacher?: { id?: string; name?: string | null } | null; group?: ScheduleGroup | null
+  lessonStudents?: Array<{ studentId: string; student?: { name?: string | null } | null }>
+  attendances?: Array<{ studentId: string; status?: string | null; actualMinutes?: number | null }>
+  classroomFeedbacks?: Array<{ id: string; studentIds?: string[] }>
+  intensiveReviews?: Array<{ status?: string | null; actualMinutes?: number | null }>
+}
+
 const SUBJECT_COLORS: Record<string, string> = {
   '语文': '#D4537E', '数学': '#E8784A', '英语': '#185FA5',
   '物理': '#1D9E75', '化学': '#534AB7', '生物': '#27500A',
@@ -38,18 +58,18 @@ function getSubjectColor(subject: string): string {
   return '#E8784A'
 }
 
-function getLessonSubject(lesson: any): string {
+function getLessonSubject(lesson: ScheduleLesson): string {
   const teacherId = lesson.teacher?.id || lesson.group?.teacher?.id
-  const assignedSubject = lesson.group?.teacherAssignments?.find((assignment: any) => assignment.teacherId === teacherId)?.subject
+  const assignedSubject = lesson.group?.teacherAssignments?.find((assignment) => assignment.teacherId === teacherId)?.subject
   return assignedSubject || lesson.subject || lesson.group?.course?.subject || ''
 }
 
-function lessonDateTime(lesson: any, time: string) {
+function lessonDateTime(lesson: ScheduleLesson, time: string) {
   const dateText = new Date(lesson.lessonDate).toISOString().slice(0, 10)
   return new Date(`${dateText}T${time}:00`)
 }
 
-function getLessonStatus(lesson: any): { text: string; color: string; deducted: string } {
+function getLessonStatus(lesson: ScheduleLesson): { text: string; color: string; deducted: string } {
   if (lesson.attendanceSubmittedAt) return { text: '已结束', color: 'green', deducted: '已确认' }
   const now = new Date()
   const start = lessonDateTime(lesson, lesson.startTime)
@@ -66,9 +86,9 @@ export function ParentScheduleClient({
   intensiveSummary,
   periods,
 }: {
-  students: any[]
-  lessons: any[]
-  historyLessons: any[]
+  students: ScheduleStudent[]
+  lessons: ScheduleLesson[]
+  historyLessons: ScheduleLesson[]
   intensiveSummary: Array<{
     studentId: string
     groupId: string
@@ -82,11 +102,14 @@ export function ParentScheduleClient({
   const isMobile = useIsMobile() ?? false
   const isTablet = useIsMobile(1025) ?? false
   const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || '')
+  const [today] = useState(() => new Date())
 
-  const today = new Date()
-  const monday = new Date(today)
-  monday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1))
-  monday.setHours(0, 0, 0, 0)
+  const [monday] = useState(() => {
+    const value = new Date(today)
+    value.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1))
+    value.setHours(0, 0, 0, 0)
+    return value
+  })
 
   const weekDates = useMemo(() => WEEKDAYS.map((_, i) => {
     const d = new Date(monday); d.setDate(monday.getDate() + i); return d
@@ -95,17 +118,17 @@ export function ParentScheduleClient({
   // Filter lessons for selected child
   const childLessons = useMemo(() => lessons.filter(l =>
     l.group?.intensiveMode === 'INTENSIVE'
-      ? l.lessonStudents?.some((item: any) => item.studentId === selectedStudentId)
-      : l.group?.enrollments?.some((e: any) => e.student?.id === selectedStudentId)
+      ? l.lessonStudents?.some((item) => item.studentId === selectedStudentId)
+      : l.group?.enrollments?.some((enrollment) => enrollment.student?.id === selectedStudentId)
   ), [lessons, selectedStudentId])
 
   // Build day × period grid
   const grid = useMemo(() => {
-    const map: Record<string, any[]> = {}
+    const map: Record<string, ScheduleLesson[]> = {}
     for (let d = 0; d < 7; d++) {
       for (const p of periods) map[`${d}-${p.id}`] = []
     }
-    childLessons.forEach((l: any) => {
+    childLessons.forEach((l) => {
       const ld = new Date(l.lessonDate)
       const dayIdx = (ld.getDay() + 6) % 7
       const period = findSchedulePeriod(periods, l.startTime)
@@ -115,10 +138,10 @@ export function ParentScheduleClient({
   }, [childLessons, periods])
 
   const selectedStudent = students.find(s => s.id === selectedStudentId)
-  const intensiveEnrollments = selectedStudent?.enrollments || []
+  const intensiveEnrollments = useMemo(() => selectedStudent?.enrollments || [], [selectedStudent?.enrollments])
   const childHistoryLessons = useMemo(() => (
     historyLessons.filter((lesson) => (
-      lesson.lessonStudents?.some((item: any) => item.studentId === selectedStudentId)
+      lesson.lessonStudents?.some((item) => item.studentId === selectedStudentId)
     ))
   ), [historyLessons, selectedStudentId])
   const intensiveStatsByGroup = useMemo(() => {
@@ -137,8 +160,8 @@ export function ParentScheduleClient({
     String(a.lessonDate).localeCompare(String(b.lessonDate)) || String(a.startTime).localeCompare(String(b.startTime))
   ), [childLessons])
   const mobileLessonGroups = useMemo(() => {
-    const groups: Array<{ key: string; date: Date; lessons: any[] }> = []
-    mobileLessons.forEach((lesson: any) => {
+    const groups: Array<{ key: string; date: Date; lessons: ScheduleLesson[] }> = []
+    mobileLessons.forEach((lesson) => {
       const date = new Date(lesson.lessonDate)
       const key = date.toDateString()
       const current = groups[groups.length - 1]
@@ -165,15 +188,15 @@ export function ParentScheduleClient({
           <Text type="secondary" style={{ fontSize: 12 }}>本周课程安排</Text>
         </div>
         <Select value={selectedStudentId || undefined} style={{ width: 180 }} getPopupContainer={(trigger) => trigger.parentElement ?? document.body} onChange={v => setSelectedStudentId(v)}
-          options={students.map((s: any) => ({ label: s.name, value: s.id }))} />
+          options={students.map((student) => ({ label: student.name, value: student.id }))} />
       </div>
 
       {intensiveEnrollments.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 10, marginBottom: 16 }}>
-          {intensiveEnrollments.map((enrollment: any) => (
+          {intensiveEnrollments.map((enrollment) => (
             <ParentCard key={enrollment.id} style={{ padding: 14, width: '100%', maxWidth: '100%' }}>
               {(() => {
-                const stats = intensiveStatsByGroup.get(enrollment.group?.id) || {
+                const stats = intensiveStatsByGroup.get(enrollment.group?.id || '') || {
                   approvedHours: 0,
                   pendingCount: 0,
                   bookedCount: 0,
@@ -233,12 +256,12 @@ export function ParentScheduleClient({
                   </span>
                   {expanded ? <DownOutlined style={{ color: '#E8784A' }} /> : <RightOutlined style={{ color: '#E8784A' }} />}
                 </button>
-                {expanded && group.lessons.map((lesson: any, lessonIndex: number) => {
+                {expanded && group.lessons.map((lesson, lessonIndex) => {
                   const status = getLessonStatus(lesson)
                   const statusBorder = { '已结束': '#1D9E75', '上课中': '#E8784A', '待上课': '#6B9FD8', '待老师确认': '#F0A24A' }[status.text] || '#EEE7E1'
                   const studentNames = lesson.group?.intensiveMode === 'INTENSIVE'
-                    ? lesson.lessonStudents?.map((item: any) => item.student?.name).filter(Boolean).join('、') || selectedStudent?.name || '-'
-                    : lesson.group?.enrollments?.map((e: any) => e.student?.name).filter(Boolean).join('、') || selectedStudent?.name || '-'
+                    ? lesson.lessonStudents?.map((item) => item.student?.name).filter(Boolean).join('、') || selectedStudent?.name || '-'
+                    : lesson.group?.enrollments?.map((enrollment) => enrollment.student?.name).filter(Boolean).join('、') || selectedStudent?.name || '-'
                   return (
                     <ParentCard key={lesson.id} className="stagger-item" style={{ padding: 14, borderLeft: `3px solid ${statusBorder}`, animationDelay: `${Math.min(lessonIndex, 8) * 40}ms` }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
@@ -288,7 +311,7 @@ export function ParentScheduleClient({
                     const hasItem = items.length > 0 && period.type === 'CLASS'
                     return (
                       <div key={dayIdx} style={{ minHeight: h, borderRight: '0.5px solid #EEE7E1', borderBottom: '0.5px solid #EEE7E1', padding: 3, background: PERIOD_BG[period.type] }}>
-                        {hasItem ? items.map((l: any) => {
+                        {hasItem ? items.map((l) => {
                           const subject = getLessonSubject(l)
                           const color = getSubjectColor(subject)
                           const status = getLessonStatus(l)
@@ -341,10 +364,10 @@ export function ParentScheduleClient({
             </ParentCard>
           ) : (
             <div style={{ display: 'grid', gap: 10 }}>
-              {childHistoryLessons.slice(0, 10).map((lesson: any) => {
-                const attendance = lesson.attendances?.find((item: any) => item.studentId === selectedStudentId)
+              {childHistoryLessons.slice(0, 10).map((lesson) => {
+                const attendance = lesson.attendances?.find((item) => item.studentId === selectedStudentId)
                 const review = lesson.intensiveReviews?.[0]
-                const feedback = lesson.classroomFeedbacks?.find((item: any) => item.studentIds?.includes(selectedStudentId))
+                const feedback = lesson.classroomFeedbacks?.find((item) => item.studentIds?.includes(selectedStudentId))
                 const reviewStatus = lesson.intensiveReviewStatus || review?.status
                 const statusMeta = reviewStatus === 'APPROVED'
                   ? { label: '已审核', color: 'green' }
@@ -353,7 +376,7 @@ export function ParentScheduleClient({
                     : { label: '待管理员审核', color: 'orange' }
                 const minutes = Number(attendance?.actualMinutes || lesson.actualMinutes || review?.actualMinutes || 0)
                 const approvedTeachingHours = reviewStatus === 'APPROVED'
-                  ? calculateIntensiveDeductHours(attendance?.status, minutes)
+                  ? calculateIntensiveDeductHours(attendance?.status || '', minutes)
                   : 0
                 return (
                   <ParentCard

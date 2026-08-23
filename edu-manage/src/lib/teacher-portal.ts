@@ -92,7 +92,12 @@ export async function requireAdminUser() {
   return Object.assign(user, { user })
 }
 
-export async function assertTeacherOwnsStudent(teacherId: string, studentId: string, prismaClient?: PrismaClient) {
+export async function assertTeacherOwnsStudent(
+  teacherId: string,
+  studentId: string,
+  prismaClient?: PrismaClient,
+  termId?: string,
+) {
   const prisma = prismaClient ?? await getRequestPrisma()
   const student = await prisma.student.findFirst({
     where: {
@@ -103,6 +108,7 @@ export async function assertTeacherOwnsStudent(teacherId: string, studentId: str
           status: 'ACTIVE',
           group: {
             ...visibleClassGroupWhere,
+            ...(termId ? { termId } : {}),
             OR: [
               { teacherId },
               { teacherAssignments: { some: { teacherId } } },
@@ -132,11 +138,12 @@ export function weekRange(now = new Date()) {
   return { start, end }
 }
 
-export function teacherLessonWhere(teacherId: string): Prisma.ClassLessonWhereInput {
+export function teacherLessonWhere(teacherId: string, termId?: string): Prisma.ClassLessonWhereInput {
   return {
     ...visibleClassLessonWhere,
     group: {
       ...visibleClassGroupWhere,
+      ...(termId ? { termId } : {}),
     },
     OR: [
       { teacherId },
@@ -146,20 +153,37 @@ export function teacherLessonWhere(teacherId: string): Prisma.ClassLessonWhereIn
   }
 }
 
-export function teacherStudentWhere(teacherId: string): Prisma.StudentWhereInput {
+export function teacherStudentWhere(teacherId: string, termId?: string): Prisma.StudentWhereInput {
   return {
     ...visibleStudentWhere,
-    enrollments: {
-      some: {
-        status: 'ACTIVE',
-        group: {
-          ...visibleClassGroupWhere,
-          OR: [
-            { teacherId },
-            { teacherAssignments: { some: { teacherId } } },
-          ],
+    OR: [
+      {
+        enrollments: {
+          some: {
+            status: 'ACTIVE',
+            group: {
+              ...visibleClassGroupWhere,
+              ...(termId ? { termId } : {}),
+              OR: [
+                { teacherId },
+                { teacherAssignments: { some: { teacherId } } },
+              ],
+            },
+          },
         },
       },
-    },
+      {
+        studyHallClasses: {
+          some: {
+            status: 'ACTIVE',
+            studyClass: {
+              status: 'ACTIVE',
+              ...(termId ? { termId } : {}),
+              teachers: { some: { teacherId, active: true } },
+            },
+          },
+        },
+      },
+    ],
   }
 }

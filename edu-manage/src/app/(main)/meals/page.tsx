@@ -1,12 +1,11 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import * as XLSX from 'xlsx'
 import {
-  Button, Card, Col, DatePicker, Form, Input, Modal, Row, Statistic, Switch,
+  Alert, Button, Card, Col, DatePicker, Form, Input, Modal, Row, Statistic, Switch,
   Table, Tabs, Tag, Typography, message,
 } from 'antd'
-import { DownloadOutlined, EditOutlined } from '@ant-design/icons'
+import { DownOutlined, DownloadOutlined, EditOutlined, ReloadOutlined, UpOutlined } from '@ant-design/icons'
 import dayjs, { Dayjs } from 'dayjs'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { StudentMealLedger } from './StudentMealLedger'
@@ -33,14 +32,16 @@ type MealReport = {
   totalCount: number
   riceSingle: number
   riceDouble: number
-  details: Array<{ studentId: string; studentName: string; portion: 'single' | 'double' }>
+  details: Array<{ studentId: string; studentName: string; portion: 'single' | 'double'; groupName?: string }>
 }
+
+type TeacherSummary = { id?: string; name?: string; groupName?: string }
 
 type MealSummary = {
   totalCount: number
   singleCount: number
   doubleCount: number
-  unreportedTeachers: unknown[]
+  unreportedTeachers: TeacherSummary[]
   parentStats?: {
     eating: number
     notEating: number
@@ -62,6 +63,12 @@ export default function MealsPage() {
   const [summary, setSummary] = useState<MealSummary>({ totalCount: 0, singleCount: 0, doubleCount: 0, unreportedTeachers: [] })
   const [templateEditing, setTemplateEditing] = useState<{ weekday: number; template?: MealTemplate } | null>(null)
   const [saving, setSaving] = useState(false)
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
+  const [showUnreported, setShowUnreported] = useState(false)
+  const [activeTab, setActiveTab] = useState('student-ledger')
+  const [refreshingToday, setRefreshingToday] = useState(false)
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Dayjs | null>(null)
+  const [refreshError, setRefreshError] = useState('')
   const [templateForm] = Form.useForm()
   const today = dayjs().format('YYYY-MM-DD')
 
@@ -72,14 +79,27 @@ export default function MealsPage() {
   }, [])
 
   const fetchToday = useCallback(async () => {
-    const [reportRes, summaryRes] = await Promise.all([
-      fetch(`/api/meals/report?date=${today}`),
-      fetch(`/api/meals/summary?date=${today}`),
-    ])
-    const reportData = await reportRes.json()
-    const summaryData = await summaryRes.json()
-    setReports(reportData.reports || [])
-    setSummary(summaryData || {})
+    setRefreshingToday(true)
+    try {
+      const cacheBuster = Date.now()
+      const [reportRes, summaryRes] = await Promise.all([
+        fetch(`/api/meals/report?date=${today}&_=${cacheBuster}`, { cache: 'no-store' }),
+        fetch(`/api/meals/summary?date=${today}&_=${cacheBuster}`, { cache: 'no-store' }),
+      ])
+      const reportData = await reportRes.json().catch(() => ({}))
+      const summaryData = await summaryRes.json().catch(() => ({}))
+      if (!reportRes.ok || !summaryRes.ok) {
+        throw new Error(reportData.error || summaryData.error || '就餐记录刷新失败')
+      }
+      setReports(reportData.reports || [])
+      setSummary(summaryData || {})
+      setLastRefreshedAt(dayjs())
+      setRefreshError('')
+    } catch (error) {
+      setRefreshError(error instanceof Error ? error.message : '就餐记录刷新失败')
+    } finally {
+      setRefreshingToday(false)
+    }
   }, [today])
 
   const fetchHistory = useCallback(async () => {
@@ -90,10 +110,47 @@ export default function MealsPage() {
   }, [historyWeek])
 
   useEffect(() => { fetchTemplates() }, [fetchTemplates])
-  useEffect(() => { fetchToday() }, [fetchToday])
+  useEffect(() => {
+    void fetchToday()
+    const timer = window.setInterval(() => void fetchToday(), 15000)
+    const refreshOnVisible = () => { if (document.visibilityState === 'visible') void fetchToday() }
+    const refreshOnReturn = () => void fetchToday()
+    document.addEventListener('visibilitychange', refreshOnVisible)
+    window.addEventListener('focus', refreshOnReturn)
+    window.addEventListener('pageshow', refreshOnReturn)
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', refreshOnVisible)
+      window.removeEventListener('focus', refreshOnReturn)
+      window.removeEventListener('pageshow', refreshOnReturn)
+    }
+  }, [fetchToday])
   useEffect(() => { fetchHistory() }, [fetchHistory])
 
   const templateMap = useMemo(() => new Map(templates.map((template) => [template.weekday, template])), [templates])
+
+  const groupedMealDetails = useMemo(() => {
+    const groups = new Map<string, Array<MealReport['details'][number] & { teacherName: string; submittedAt: string }>>()
+    const seen = new Set<string>()
+    reports.forEach((report) => {
+      report.details?.forEach((detail) => {
+        const groupName = detail.groupName?.trim() || `${report.teacher.name}上报`
+        const key = `${groupName}:${detail.studentId}`
+        if (seen.has(key)) return
+        seen.add(key)
+        groups.set(groupName, [
+          ...(groups.get(groupName) || []),
+          { ...detail, groupName, teacherName: report.teacher.name, submittedAt: report.submittedAt },
+        ])
+      })
+    })
+    return [...groups.entries()].map(([groupName, details]) => ({ groupName, details }))
+  }, [reports])
+
+  const groupedTotal = useMemo(
+    () => groupedMealDetails.reduce((sum, group) => sum + group.details.length, 0),
+    [groupedMealDetails],
+  )
 
   const openTemplateEditor = (weekday: number, template?: MealTemplate) => {
     setTemplateEditing({ weekday, template })
@@ -126,22 +183,27 @@ export default function MealsPage() {
   }
 
   const exportToday = () => {
-    const summaryRows = reports.map((report) => ({
-      教师: report.teacher.name,
-      就餐人数: report.totalCount,
-      单份人数: report.riceSingle,
-      双份人数: report.riceDouble,
-      上报时间: dayjs(report.submittedAt).format('YYYY-MM-DD HH:mm'),
-    }))
-    const detailRows = reports.flatMap((report) => (report.details || []).map((detail) => ({
-      学员: detail.studentName,
-      教师: report.teacher.name,
-      份数: detail.portion === 'double' ? '双份' : '单份',
-    })))
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(summaryRows), '汇总')
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(detailRows), '明细')
-    XLSX.writeFile(workbook, `就餐汇总-${today}.xlsx`)
+    const csvCell = (value: string | number) => `"${String(value).replaceAll('"', '""')}"`
+    const rows = [
+      ['班级', '学员姓名', '份数', '教师', '上报时间'],
+      ...groupedMealDetails.flatMap((group) => group.details.map((detail) => [
+        group.groupName,
+        detail.studentName,
+        detail.portion === 'double' ? '双份' : '单份',
+        detail.teacherName,
+        dayjs(detail.submittedAt).format('YYYY-MM-DD HH:mm'),
+      ])),
+      ['合计', '', groupedTotal, '', ''],
+    ]
+    const blob = new Blob([`\uFEFF${rows.map((row) => row.map(csvCell).join(',')).join('\r\n')}`], {
+      type: 'text/csv;charset=utf-8',
+    })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `就餐汇总-${today}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
   }
 
   const reportColumns = [
@@ -154,7 +216,13 @@ export default function MealsPage() {
   return (
     <div>
       <Title level={4} style={{ marginTop: 0 }}>就餐管理</Title>
-      <Tabs items={[
+      <Tabs
+        activeKey={activeTab}
+        onChange={(key) => {
+          setActiveTab(key)
+          if (key === 'reports') void fetchToday()
+        }}
+        items={[
         {
           key: 'student-ledger',
           label: '学生就餐台账',
@@ -224,19 +292,39 @@ export default function MealsPage() {
           label: '教师上报',
           children: (
             <>
-              <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>今日 {today}</Text>
-              <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
-                {[
-                  ['总就餐人数', summary.totalCount || 0],
-                  ['单份', summary.singleCount || 0],
-                  ['双份', summary.doubleCount || 0],
-                  ['未上报教师', summary.unreportedTeachers?.length || 0],
-                ].map(([title, value]) => (
-                  <Col xs={12} md={6} key={String(title)}>
-                    <Card><Statistic title={title} value={value as number} suffix={title === '未上报教师' ? '位' : '人'} /></Card>
-                  </Col>
-                ))}
-              </Row>
+              <div style={{
+                display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
+                gap: 8, marginBottom: 12, padding: '10px 12px', borderRadius: 10,
+                background: 'var(--color-primary-bg)', border: '1px solid var(--color-hairline)',
+              }}>
+                <div>
+                  <Text strong style={{ display: 'block' }}>今日 {today} · 自动刷新已开启</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    每15秒刷新，重新进入页面也会立即刷新
+                    {lastRefreshedAt ? ` · 上次 ${lastRefreshedAt.format('HH:mm:ss')}` : ''}
+                  </Text>
+                </div>
+                <Button
+                  icon={<ReloadOutlined />}
+                  loading={refreshingToday}
+                  onClick={() => void fetchToday()}
+                >
+                  立即刷新
+                </Button>
+              </div>
+              {refreshError && (
+                <Alert
+                  type="error"
+                  showIcon
+                  message="教师就餐记录刷新失败"
+                  description={refreshError}
+                  style={{ marginBottom: 12 }}
+                />
+              )}
+              <div className="meal-report-stat-grid">
+                <Card className="meal-report-stat-card"><Statistic title="总就餐人数" value={summary.totalCount || groupedTotal} suffix="人" /></Card>
+                <Card className="meal-report-stat-card"><Statistic title="未上报教师" value={summary.unreportedTeachers?.length || 0} suffix="位" /></Card>
+              </div>
               {summary?.parentStats && (
                 <Card title="家长自主选餐" style={{ marginTop: 12, marginBottom: 16, borderRadius: 10 }}>
                   <Row gutter={16}>
@@ -252,19 +340,59 @@ export default function MealsPage() {
                   </Row>
                 </Card>
               )}
-              <Table
-                rowKey="id"
-                dataSource={reports}
-                columns={reportColumns}
-                pagination={false}
-                scroll={isMobile ? { x: 520 } : undefined}
-                expandable={{
-                  expandedRowRender: (report) => (
-                    <Text>{(report.details || []).map((detail) => `${detail.studentName}（${detail.portion === 'double' ? '双份' : '单份'}）`).join('、') || '无明细'}</Text>
-                  ),
-                }}
-              />
-              <Button icon={<DownloadOutlined />} style={{ marginTop: 16 }} onClick={exportToday}>导出今日汇总</Button>
+              <div className="meal-report-section-heading">
+                <div>
+                  <Text strong>按班级分组</Text>
+                  <Text type="secondary"> 展开查看具体学员与份数</Text>
+                </div>
+              </div>
+              <div className="meal-report-group-list">
+                {groupedMealDetails.map((group) => {
+                  const expanded = expandedGroups.has(group.groupName)
+                  return (
+                    <section className="meal-report-class-group" key={group.groupName}>
+                      <button
+                        type="button"
+                        className="meal-report-class-trigger"
+                        aria-expanded={expanded}
+                        onClick={() => setExpandedGroups((current) => {
+                          const next = new Set(current)
+                          if (next.has(group.groupName)) next.delete(group.groupName)
+                          else next.add(group.groupName)
+                          return next
+                        })}
+                      >
+                        <span><strong>{group.groupName}</strong><small>{group.details.length} 人就餐</small></span>
+                        {expanded ? <UpOutlined /> : <DownOutlined />}
+                      </button>
+                      {expanded && (
+                        <div className="meal-report-class-details">
+                          {group.details.map((detail) => (
+                            <div key={`${group.groupName}-${detail.studentId}`}>
+                              <span>{detail.studentName}</span>
+                              <span>{detail.portion === 'double' ? '双份' : '单份'} · {detail.teacherName}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  )
+                })}
+                {!groupedMealDetails.length && <Card><Text type="secondary">今日暂无教师上报明细</Text></Card>}
+              </div>
+              <div className="meal-report-total-row"><span>今日总计</span><strong>{groupedTotal} 人</strong></div>
+              <button type="button" className="meal-report-unreported" onClick={() => setShowUnreported((value) => !value)}>
+                <span>还有 {summary.unreportedTeachers?.length || 0} 位教师未上报</span>
+                {showUnreported ? <UpOutlined /> : <DownOutlined />}
+              </button>
+              {showUnreported && !!summary.unreportedTeachers?.length && (
+                <div className="meal-report-unreported-list">
+                  {summary.unreportedTeachers.map((teacher, index) => (
+                    <Tag key={teacher.id || `${teacher.name}-${index}`}>{teacher.name || '未命名教师'}{teacher.groupName ? ` · ${teacher.groupName}` : ''}</Tag>
+                  ))}
+                </div>
+              )}
+              <Button className="meal-report-export" type="primary" icon={<DownloadOutlined />} onClick={exportToday}>导出 CSV</Button>
             </>
           ),
         },

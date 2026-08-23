@@ -3,29 +3,49 @@ import { differenceInDays } from 'date-fns'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 import { calculateApprovedIntensiveHours, calculateTaughtHours } from '@/lib/student-taught-hours'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async () => {
-    const { teacher, prisma } = await requireCurrentTeacher()
+    const { user, teacher, prisma } = await requireCurrentTeacher()
+    const activeTerm = await getActiveAcademicTerm(prisma, teacher.division)
+    if (!activeTerm) return NextResponse.json([])
     const now = new Date()
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
     const students = await prisma.student.findMany({
       where: {
         status: { not: 'INACTIVE' },
-        enrollments: {
-          some: {
-            status: 'ACTIVE',
-            group: {
-              status: { not: 'ARCHIVED' },
-              course: { isActive: true },
-              OR: [
-                { teacherId: teacher.id },
-                { teacherAssignments: { some: { teacherId: teacher.id } } },
-              ],
+        OR: [
+          {
+            enrollments: {
+              some: {
+                status: 'ACTIVE',
+                group: {
+                  termId: activeTerm.id,
+                  status: { not: 'ARCHIVED' },
+                  course: { isActive: true },
+                  OR: [
+                    { teacherId: teacher.id },
+                    { teacherAssignments: { some: { teacherId: teacher.id } } },
+                  ],
+                },
+              },
             },
           },
-        },
+          {
+            studyHallClasses: {
+              some: {
+                status: 'ACTIVE',
+                studyClass: {
+                  termId: activeTerm.id,
+                  status: 'ACTIVE',
+                  teachers: { some: { teacherId: user.id, active: true } },
+                },
+              },
+            },
+          },
+        ],
       },
       select: {
         id: true,
@@ -37,6 +57,7 @@ export const GET = apiHandler(async () => {
           where: {
             status: 'ACTIVE',
             group: {
+              termId: activeTerm.id,
               status: { not: 'ARCHIVED' },
               course: { isActive: true },
               OR: [
@@ -69,8 +90,30 @@ export const GET = apiHandler(async () => {
             },
           },
         },
+        studyHallClasses: {
+          where: {
+            status: 'ACTIVE',
+            studyClass: {
+              termId: activeTerm.id,
+              status: 'ACTIVE',
+              teachers: { some: { teacherId: user.id, active: true } },
+            },
+          },
+          select: {
+            id: true,
+            purchasedDays: true,
+            adjustedDays: true,
+            studyClass: { select: { id: true, name: true, scheduleType: true, gradeScope: true } },
+          },
+        },
         attendances: {
-          where: { createdAt: { gte: monthStart }, lesson: { OR: [{ teacherId: teacher.id }, { group: { teacherId: teacher.id } }, { group: { teacherAssignments: { some: { teacherId: teacher.id } } } }] } },
+          where: {
+            createdAt: { gte: monthStart },
+            lesson: {
+              group: { termId: activeTerm.id },
+              OR: [{ teacherId: teacher.id }, { group: { teacherId: teacher.id } }, { group: { teacherAssignments: { some: { teacherId: teacher.id } } } }],
+            },
+          },
           select: { status: true },
         },
       },
@@ -80,6 +123,7 @@ export const GET = apiHandler(async () => {
     const lastFeedbacks = await prisma.classroomFeedback.findMany({
       where: {
         teacherId: teacher.id,
+        termId: activeTerm.id,
         status: 'PUBLISHED',
         studentIds: { isEmpty: false },
       },
@@ -93,6 +137,7 @@ export const GET = apiHandler(async () => {
             lesson: {
               intensiveReviewStatus: 'APPROVED',
               group: {
+                termId: activeTerm.id,
                 intensiveMode: 'INTENSIVE',
                 status: { not: 'ARCHIVED' },
                 course: { isActive: true },
@@ -147,11 +192,16 @@ export const GET = apiHandler(async () => {
       const attendanceTotal = student.attendances.length
       const present = student.attendances.filter((attendance) => attendance.status === 'PRESENT').length
       const lastFeedback = lastFeedbackMap.get(student.id) || null
+      const activeStudyHallMemberships = student.studyHallClasses
       const primaryCourseType = activeEnrollments.some((enrollment) => enrollment.group?.course?.type === 'ONE_ON_ONE')
         ? 'ONE_ON_ONE'
         : activeEnrollments.some((enrollment) => enrollment.group?.course?.type === 'SMALL_GROUP')
           ? 'SMALL_GROUP'
-          : 'GROUP'
+          : activeEnrollments.length
+            ? 'GROUP'
+            : activeStudyHallMemberships.length
+              ? 'STUDY_HALL'
+              : 'GROUP'
       return {
         id: student.id,
         name: student.name,
@@ -178,6 +228,12 @@ export const GET = apiHandler(async () => {
               subject: assignment.subject,
             })),
           } : null,
+        })),
+        studyHallMemberships: activeStudyHallMemberships.map((membership) => ({
+          id: membership.id,
+          purchasedDays: membership.purchasedDays,
+          adjustedDays: membership.adjustedDays,
+          studyClass: membership.studyClass,
         })),
         remainHours,
         totalHours,

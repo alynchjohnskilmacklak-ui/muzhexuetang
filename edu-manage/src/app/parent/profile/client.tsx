@@ -11,12 +11,14 @@ import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 
 const { Title, Text } = Typography
+type ParentUser = { name: string; role: string; email: string; createdAt: string }
+type StudentInfo = { id: string; name: string; grade?: string | null; school?: string | null; teachers: string[] }
 
 export function ParentProfileClient({
   user, studentInfo,
 }: {
-  user: any
-  studentInfo: any[]
+  user: ParentUser
+  studentInfo: StudentInfo[]
 }) {
   const router = useRouter()
   const [changingPwd, setChangingPwd] = useState(false)

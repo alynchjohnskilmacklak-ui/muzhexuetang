@@ -5,6 +5,8 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { hasTimeOverlap } from '@/lib/schedule-conflict'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,6 +39,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const prisma = await getRequestPrisma()
+  const division = getRequestDivision(user, req.nextUrl.searchParams.get('division'))
+  const selectedTerm = await resolveAdminTermScope(prisma, division, req)
+  if (!selectedTerm || selectedTerm.status !== 'ACTIVE') {
+    return NextResponse.json({ error: '历史批次只允许查看，请切换到当前运营批次后再复制课程' }, { status: 409 })
+  }
   const body = await req.json().catch(() => ({}))
   const fridayDate = typeof body.fridayDate === 'string' && body.fridayDate.trim() ? body.fridayDate.trim() : ''
   const targetDivision = typeof body.division === 'string' && body.division ? body.division : undefined
@@ -75,6 +82,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     lessonDate: { gte: fridayDayStart, lte: fridayDayEnd },
     status: { not: 'CANCELLED' },
     group: {
+      termId: selectedTerm.id,
       status: { not: 'ARCHIVED' },
       course: { isActive: true },
     },
@@ -148,6 +156,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     where: {
       lessonDate: { gte: saturdayDayStart, lte: saturdayDayEnd },
       status: { not: 'CANCELLED' },
+      group: { termId: selectedTerm.id },
     },
     select: { groupId: true, startTime: true, endTime: true, id: true },
   })
@@ -215,7 +224,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         where: {
           lessonDate: { gte: saturdayDayStart, lte: saturdayDayEnd },
           status: { not: 'CANCELLED' },
-          group: { roomId: item.roomId },
+          group: { roomId: item.roomId, termId: selectedTerm.id },
         },
         include: { group: { include: { room: { select: { name: true } } } }, teacher: { select: { name: true } } },
       })

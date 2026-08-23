@@ -24,6 +24,9 @@ export const SCHEDULE_PERIODS: SchedulePeriod[] = [
   { id:'pm3',  name:'下午第三', type:'CLASS' as const,     start:'15:50', end:'16:30' },
   { id:'bk4',  name:'课间',     type:'BREAK' as const,     start:'16:30', end:'16:40' },
   { id:'pm4',  name:'下午第四', type:'CLASS' as const,     start:'16:40', end:'17:20' },
+  { id:'ev1',  name:'晚间第一', type:'CLASS' as const,     start:'18:30', end:'19:30' },
+  { id:'evbk', name:'晚间课间', type:'BREAK' as const,     start:'19:30', end:'19:40' },
+  { id:'ev2',  name:'晚间第二', type:'CLASS' as const,     start:'19:40', end:'21:00' },
 ]
 
 export const PERIOD_HEIGHTS: Record<PeriodType, number> = {
@@ -52,7 +55,11 @@ export function normalizeSchedulePeriods(value: unknown): SchedulePeriod[] {
     const row = item as Record<string, unknown>
     const type = row.type as PeriodType
     const start = typeof row.start === 'string' ? row.start : ''
-    const end = typeof row.end === 'string' ? row.end : ''
+    const rawEnd = typeof row.end === 'string' ? row.end : ''
+    // Upgrade the exact legacy evening default while preserving genuinely
+    // customized periods. Older databases stored 19:40-20:40, which made the
+    // weekly overview stop before the institution's 21:00 closing time.
+    const end = row.id === 'ev2' && start === '19:40' && rawEnd === '20:40' ? '21:00' : rawEnd
     if (!VALID_TYPES.has(type) || !TIME_RE.test(start) || !TIME_RE.test(end) || start >= end) return []
     return [{
       id: typeof row.id === 'string' && row.id.trim() ? row.id.trim() : `period-${index + 1}`,
@@ -62,13 +69,37 @@ export function normalizeSchedulePeriods(value: unknown): SchedulePeriod[] {
       end,
     }]
   })
-  return periods.length ? periods.sort((a, b) => a.start.localeCompare(b.start)) : SCHEDULE_PERIODS.map(period => ({ ...period }))
+  if (!periods.length) return SCHEDULE_PERIODS.map(period => ({ ...period }))
+
+  // Older installations saved the original daytime-only defaults in the database.
+  // Append the standard evening rows once so room matrices do not silently hide
+  // late-care and evening lessons after an upgrade. Fully custom evening settings
+  // remain untouched.
+  const hasEveningClass = periods.some(period => period.type === 'CLASS' && period.start >= '18:00')
+  const legacyDaytimeDefaults = SCHEDULE_PERIODS
+    .filter(period => !period.id.startsWith('ev'))
+    .every(defaultPeriod => periods.some(period => period.id === defaultPeriod.id && period.start === defaultPeriod.start && period.end === defaultPeriod.end))
+  const normalized = hasEveningClass || !legacyDaytimeDefaults
+    ? periods
+    : [...periods, ...SCHEDULE_PERIODS.filter(period => period.id.startsWith('ev'))]
+  return normalized.sort((a, b) => a.start.localeCompare(b.start))
 }
 
 export function findSchedulePeriod(periods: SchedulePeriod[], startTime: string): SchedulePeriod | undefined {
   const exact = periods.find(period => period.type === 'CLASS' && period.start === startTime)
   if (exact) return exact
   return periods.find(period => period.type === 'CLASS' && period.start <= startTime && startTime < period.end)
+}
+
+/**
+ * Whether a lesson belongs to the system's first configured teaching period.
+ * Meal reporting follows the institution period number, not the teacher's
+ * earliest lesson of the day.
+ */
+export function isFirstTeachingPeriod(periods: SchedulePeriod[], startTime: string): boolean {
+  const firstClassPeriod = periods.find((period) => period.type === 'CLASS')
+  if (!firstClassPeriod) return false
+  return findSchedulePeriod(periods, startTime)?.id === firstClassPeriod.id
 }
 
 // One-on-one / small-group hourly periods (60min blocks, 08:00-24:00)

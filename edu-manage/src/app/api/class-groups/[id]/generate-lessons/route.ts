@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { visibleClassGroupWhere } from '@/lib/business-visibility'
 import { addDays, format } from 'date-fns'
 import { apiHandler } from '@/lib/api-handler'
+import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
 
 const WEEK_DAYS = new Set(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'])
 
@@ -35,6 +36,9 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   const prisma = await getRequestPrisma()
 
   const { id } = await params
+  if (!await isClassGroupInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能重新生成课表' }, { status: 409 })
+  }
   const body = await req.json()
   const { startDate, recurringDays, totalLessons, lessonStartTime, lessonMinutes, totalDays } = body
   const scheduleTemplate = normalizeTemplate(body.scheduleTemplate)

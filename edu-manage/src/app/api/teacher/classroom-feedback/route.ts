@@ -96,6 +96,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const feedback = await prisma.$transaction(async (tx) => {
       const created = await tx.classroomFeedback.create({
         data: {
+          termId: scope.termId,
           teacherId: teacher.id,
           classLessonId,
           feedbackGroupId,

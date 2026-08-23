@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import useSWR from 'swr'
-import { Button, Image as AntImage, Input, Modal, Progress, Upload, Tag, Card, Select, Empty } from 'antd'
+import { Alert, Button, Image as AntImage, Input, Modal, Progress, Upload, Tag, Card, Select } from 'antd'
 import type { TextAreaRef } from 'antd/es/input/TextArea'
 import { BookOutlined, CheckCircleOutlined, DeleteOutlined, DownOutlined, ExclamationCircleOutlined, LikeOutlined, MinusCircleOutlined, PlusOutlined, ReloadOutlined, SendOutlined, SearchOutlined, ThunderboltOutlined, UpOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
@@ -12,6 +12,8 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { MOODS, QUICK_TAGS, QUICK_KPS, BADGES } from '@/components/FeedbackCard'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { MobileSelect } from '@/components/MobileSelect'
 import {
   hasMeaningfulFeedbackContent,
   hasRequiredLessonContent,
@@ -106,6 +108,31 @@ type ImageUploadTask = {
   progress: number
   error?: string
   compressed?: boolean
+}
+type FeedbackStudent = { id: string; name: string; grade?: string | null; todayFeedback?: boolean }
+type FeedbackGroup = {
+  id: string
+  name: string
+  courseName?: string
+  courseType?: string | null
+  subject?: string | null
+  studentCount?: number
+  course?: { type?: string | null }
+  students: FeedbackStudent[]
+}
+type FeedbackContext = {
+  groups: FeedbackGroup[]
+  lessons: Array<{ id: string; groupId: string; studentIds?: string[] }>
+  contextState?: string
+  contextMessage?: string
+}
+type StageData = {
+  draft?: { summary?: string; suggestions?: string } | null
+  material?: { summarySeed?: string } | null
+}
+
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback
 }
 
 function createUploadLimiter(maxConcurrent: number) {
@@ -218,7 +245,7 @@ function FeedbackPageInner() {
   const [bonusPreview, setBonusPreview] = useState<BonusPreview | null>(null)
   const [bonusLoading, setBonusLoading] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
-  const [lastSubmitAt, setLastSubmitAt] = useState(0)
+  const submitCooldownRef = useRef(false)
   const [draftLoaded, setDraftLoaded] = useState(false)
   const lessonContentRef = useRef<TextAreaRef>(null)
   const structuredClassroomRecord = useMemo(
@@ -253,7 +280,7 @@ function FeedbackPageInner() {
 
   // Stage summary (only when 1 student selected)
   const [stageExpanded, setStageExpanded] = useState(false)
-  const [stageData, setStageData] = useState<any>(null)
+  const [stageData, setStageData] = useState<StageData | null>(null)
   const [stageSummaryText, setStageSummaryText] = useState('')
   const [stageSuggestions, setStageSuggestions] = useState('')
 
@@ -302,12 +329,12 @@ function FeedbackPageInner() {
     return () => window.clearTimeout(timer)
   }, [draftKey, draftLoaded, groupId, homework, kps, lessonContent, overallComment, selectedStudentIds, summary, tags, teacherRemark])
   // Data
-  const { data: ctx } = useSWR('/api/teacher/feedback-context', fetcher)
-  const groups: any[] = ctx?.groups || []
+  const { data: ctx } = useSWR<FeedbackContext>('/api/teacher/feedback-context', fetcher)
+  const groups = ctx?.groups || []
 
   useEffect(() => {
     if (!requestedLessonId || !ctx?.lessons?.length) return
-    const lesson = ctx.lessons.find((item: any) => item.id === requestedLessonId)
+    const lesson = ctx.lessons.find((item) => item.id === requestedLessonId)
     if (!lesson) return
     setGroupId(lesson.groupId)
     if (Array.isArray(lesson.studentIds) && lesson.studentIds.length) {
@@ -317,21 +344,19 @@ function FeedbackPageInner() {
 
 
   // Selected group
-  const selectedGroup = groups.find((g: any) => g.id === groupId)
-  const groupStudents: any[] = selectedGroup?.students || []
+  const selectedGroup = groups.find((g) => g.id === groupId)
+  const groupStudents = selectedGroup?.students || []
 
   // Filtered students
   const filteredStudents = studentSearch
-    ? groupStudents.filter((s: any) => s.name.includes(studentSearch))
+    ? groupStudents.filter((s) => s.name.includes(studentSearch))
     : groupStudents
 
-  const feedbackCourseBucket = useMemo<FeedbackCourseBucket>(() => {
-    return toFeedbackCourseBucket(selectedGroup?.courseType || selectedGroup?.course?.type)
-  }, [selectedGroup?.courseType, selectedGroup?.course?.type])
+  const feedbackCourseBucket: FeedbackCourseBucket = toFeedbackCourseBucket(selectedGroup?.courseType || selectedGroup?.course?.type)
   const feedbackSceneLabel = feedbackCourseBucket === 'ONE_ON_ONE' ? '一对一反馈' : '小班反馈'
   const feedbackRateLabel = feedbackCourseBucket === 'ONE_ON_ONE' ? '1元/人' : '0.5元/人'
   const selectedStudentNames = selectedStudentIds
-    .map((id) => groupStudents.find((student: any) => student.id === id)?.name)
+    .map((id) => groupStudents.find((student) => student.id === id)?.name)
     .filter(Boolean) as string[]
 
   useEffect(() => {
@@ -360,7 +385,7 @@ function FeedbackPageInner() {
 
   // ── Stage summary load when single student selected ──
   const stageStudentId = selectedStudentIds.length === 1 ? selectedStudentIds[0] : null
-  const { data: stageDataRaw } = useSWR(
+  const { data: stageDataRaw } = useSWR<StageData>(
     stageStudentId ? `/api/teacher/stage-summary?studentId=${stageStudentId}&months=3` : null,
     fetcher,
   )
@@ -399,7 +424,7 @@ function FeedbackPageInner() {
     }
   }
   const selectAll = () => {
-    const selectedIds = filteredStudents.slice(0, MAX_STUDENTS_PER_FEEDBACK).map((s: any) => s.id)
+    const selectedIds = filteredStudents.slice(0, MAX_STUDENTS_PER_FEEDBACK).map((s) => s.id)
     if (filteredStudents.length > MAX_STUDENTS_PER_FEEDBACK) {
       toast('一次最多反馈3名学生，已自动选择前3名', { duration: 3000 })
     }
@@ -493,7 +518,7 @@ function FeedbackPageInner() {
   }
 
   const submit = async (status: 'DRAFT' | 'PUBLISHED') => {
-    if (saving || (status === 'PUBLISHED' && Date.now() - lastSubmitAt < 3000)) return
+    if (saving || (status === 'PUBLISHED' && submitCooldownRef.current)) return
     if (uploadingCount > 0) {
       toast.warning(`还有 ${uploadingCount} 张图片正在上传，请上传完成后再发布`)
       return
@@ -527,7 +552,7 @@ function FeedbackPageInner() {
     if (status === 'PUBLISHED' && hasIndividualComments && individualComments.length !== targetStudents.length) {
       const missingNames = targetStudents
         .filter((studentId) => !perStudentComments[studentId]?.trim())
-        .map((studentId) => groupStudents.find((student: any) => student.id === studentId)?.name || '未命名学生')
+        .map((studentId) => groupStudents.find((student) => student.id === studentId)?.name || '未命名学生')
       toast.warning(`请先补全${missingNames.join('、')}的专属评语`)
       return
     }
@@ -555,7 +580,7 @@ function FeedbackPageInner() {
       const individualBonuses: BonusResult[] = []
       if (useIndividualComments) {
         for (const [index, item] of individualComments.entries()) {
-          const studentName = groupStudents.find((student: any) => student.id === item.studentId)?.name || '该学生'
+          const studentName = groupStudents.find((student) => student.id === item.studentId)?.name || '该学生'
           const fbRes = await fetch('/api/teacher/classroom-feedback', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -648,7 +673,8 @@ function FeedbackPageInner() {
           ? `已分别发布给 ${individualComments.length} 名学生家长`
           : stagePublished ? `已发布给家长，本期寄语已同步，${bonusMsg}` : `已发布给家长，${bonusMsg}`
         toast.success(msg, { duration: 5000 })
-        setLastSubmitAt(Date.now())
+        submitCooldownRef.current = true
+        window.setTimeout(() => { submitCooldownRef.current = false }, 3000)
         setSubmitDone(true); setTimeout(() => setSubmitDone(false), 3000)
         setSelectedStudentIds([]); setGroupId('')
         setMood('GOOD'); setTags([]); setKps([]); setBadge('')
@@ -673,13 +699,13 @@ function FeedbackPageInner() {
     }
     setAiGenerating(true)
     try {
-      const roster = groupStudents.map((s: any) => ({ id: s.id, name: s.name }))
+      const roster = groupStudents.map((s) => ({ id: s.id, name: s.name }))
       const selectedStudents = selectedStudentIds.map((id) => {
-        const fromGroup = groupStudents.find((s: any) => s.id === id)
+        const fromGroup = groupStudents.find((s) => s.id === id)
         return fromGroup ? { id: fromGroup.id, name: fromGroup.name } : { id, name: null }
       })
       const studentPerfPayload = selectedStudentIds.map((id) => {
-        const fromGroup = groupStudents.find((s: any) => s.id === id)
+        const fromGroup = groupStudents.find((s) => s.id === id)
         return { id, name: fromGroup?.name || '', level: studentPerf[id] || 'GREAT' }
       })
       const options = {
@@ -704,7 +730,7 @@ function FeedbackPageInner() {
           performanceTags,
           masteryLevel: MASTERY_OPTIONS.find((option) => option.value === masteryLevel)?.label || masteryLevel,
           teacherRemark: teacherRemark.trim(),
-          grade: selectedStudentIds.map((id) => groupStudents.find((student: any) => student.id === id)?.grade).filter(Boolean).join('、'),
+          grade: selectedStudentIds.map((id) => groupStudents.find((student) => student.id === id)?.grade).filter(Boolean).join('、'),
           subject: selectedGroup?.subject,
           course: selectedGroup?.courseName,
           stageMaterial: stageData?.material?.summarySeed?.slice(0, 600) || '',
@@ -755,7 +781,7 @@ function FeedbackPageInner() {
       } else {
         toast.success('AI 已生成反馈建议，请核对后选择采用方式', { duration: 3000 })
       }
-    } catch (e: any) { toast.error(e.message || 'AI 生成失败') }
+    } catch (e: unknown) { toast.error(errorMessage(e, 'AI 生成失败')) }
     finally { setAiGenerating(false) }
   }
   const stageAiGenerate = async (target: 'summary' | 'suggestion') => {
@@ -763,7 +789,7 @@ function FeedbackPageInner() {
     setAiGenerating(true)
     const hint = target === 'summary' ? '帮我生成教师寄语' : '帮我写下一步建议'
     try {
-      const roster = groupStudents.map((s: any) => ({ id: s.id, name: s.name }))
+      const roster = groupStudents.map((s) => ({ id: s.id, name: s.name }))
       const res = await fetch('/api/teacher/ai-feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -771,7 +797,7 @@ function FeedbackPageInner() {
           note: hint,
           roster,
           selectedStudentIds: [stageStudentId],
-          selectedStudents: groupStudents.filter((s: any) => s.id === stageStudentId).map((s: any) => ({ id: s.id, name: s.name })),
+          selectedStudents: groupStudents.filter((s) => s.id === stageStudentId).map((s) => ({ id: s.id, name: s.name })),
           stageMaterial: stageData?.material?.summarySeed?.slice(0, 600) || '',
           options: { moods: [], tags: [], knowledgePoints: [] },
           selected: {},
@@ -791,7 +817,7 @@ function FeedbackPageInner() {
       } else {
         toast.warning('AI 未返回对应内容，请再试一次')
       }
-    } catch (e: any) { toast.error(e.message || 'AI 生成失败') }
+    } catch (e: unknown) { toast.error(errorMessage(e, 'AI 生成失败')) }
     finally { setAiGenerating(false) }
   }
 
@@ -805,32 +831,32 @@ function FeedbackPageInner() {
       if (!(await confirmModal('当前已有手写内容，是否覆盖？'))) return
     }
 
-    const useIf = (current: string, next?: string) => {
+    const mergeByMode = (current: string, next?: string) => {
       if (mode === 'append') return appendText(current, next)
       if (mode === 'empty') return current.trim() ? current : (next || '')
       return next !== undefined ? next : current
     }
 
-    if (aiSuggestion.mood && MOODS.some((m: any) => m.value === aiSuggestion.mood)) setMood(aiSuggestion.mood)
+    if (aiSuggestion.mood && MOODS.some((m) => m.value === aiSuggestion.mood)) setMood(aiSuggestion.mood)
     const aiStudentComments = aiSuggestion.perStudentComments || []
     if (aiSuggestion.overallComment?.trim() || aiStudentComments.some((item) => item.comment?.trim())) {
       setCommentExpanded(true)
     }
     if (aiStudentComments.length === 1) {
-      setOverallComment((prev) => useIf(prev, aiStudentComments[0].comment || aiSuggestion.overallComment))
+      setOverallComment((prev) => mergeByMode(prev, aiStudentComments[0].comment || aiSuggestion.overallComment))
       setPerStudentComments({})
     } else {
-      setOverallComment((prev) => useIf(prev, aiSuggestion.overallComment))
+      setOverallComment((prev) => mergeByMode(prev, aiSuggestion.overallComment))
       if (aiStudentComments.length > 1) {
         setPerStudentComments((prev) => Object.fromEntries(aiStudentComments.map((item) => [
           item.studentId,
-          useIf(prev[item.studentId] || '', item.comment),
+          mergeByMode(prev[item.studentId] || '', item.comment),
         ])))
       }
     }
-    setSummary((prev) => useIf(prev, aiSuggestion.suggestion || aiSuggestion.summary))
-    setStageSummaryText((prev) => useIf(prev, aiSuggestion.stageSummaryText))
-    setStageSuggestions((prev) => useIf(prev, aiSuggestion.stageSuggestions))
+    setSummary((prev) => mergeByMode(prev, aiSuggestion.suggestion || aiSuggestion.summary))
+    setStageSummaryText((prev) => mergeByMode(prev, aiSuggestion.stageSummaryText))
+    setStageSuggestions((prev) => mergeByMode(prev, aiSuggestion.stageSuggestions))
     setTags((prev) => mode === 'all' ? mergeUnique([], aiSuggestion.tags || []) : mergeUnique(prev, aiSuggestion.tags || []))
     setKps((prev) => mode === 'all' ? mergeUnique([], aiSuggestion.knowledgePoints || []) : mergeUnique(prev, aiSuggestion.knowledgePoints || []))
     setHomework((prev) => mode === 'all' ? mergeUnique([], aiSuggestion.homework || []) : mergeUnique(prev, aiSuggestion.homework || []))
@@ -956,6 +982,7 @@ function FeedbackPageInner() {
       <Card
         id="lesson-content"
         size="small"
+        className="teacher-feedback-step-card teacher-feedback-content-card"
         style={{
           borderRadius: 14,
           border: '1px solid rgba(232,120,74,.24)',
@@ -974,6 +1001,7 @@ function FeedbackPageInner() {
           </div>
         </div>
         <Input.TextArea
+          className="teacher-feedback-paste-input"
           ref={lessonContentRef}
           value={lessonContent}
           onChange={(event) => {
@@ -1069,7 +1097,7 @@ function FeedbackPageInner() {
             <Button size="small" type="text" onClick={ignoreAiSuggestion}>忽略</Button>
           </div>
           <div style={{ display: 'grid', gap: 8, fontSize: 12, color: '#5a4e3a', lineHeight: 1.7 }}>
-            {aiSuggestion.mood && <div><strong>课堂状态：</strong>{MOODS.find((m: any) => m.value === aiSuggestion.mood)?.label || aiSuggestion.mood}</div>}
+            {aiSuggestion.mood && <div><strong>课堂状态：</strong>{MOODS.find((m) => m.value === aiSuggestion.mood)?.label || aiSuggestion.mood}</div>}
             {aiSuggestion.overallComment && <div><strong>评语：</strong>{aiSuggestion.overallComment}</div>}
             {!!aiSuggestion.perStudentComments?.length && <div><strong>逐人评语：</strong>已为 {aiSuggestion.perStudentComments.length} 名学生分别生成</div>}
             {(aiSuggestion.suggestion || aiSuggestion.summary) && <div><strong>下一步建议：</strong>{aiSuggestion.suggestion || aiSuggestion.summary}</div>}
@@ -1087,7 +1115,7 @@ function FeedbackPageInner() {
         </Card>
       )}
       {/* Mood */}
-      <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
+      <Card size="small" className="teacher-feedback-step-card">
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
           课堂状态{aiPrefillMark('mood')}
         </div>
@@ -1114,7 +1142,7 @@ function FeedbackPageInner() {
       </Card>
 
       {/* Comment */}
-      <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
+      <Card size="small" className="teacher-feedback-step-card">
         <button
           type="button"
           aria-expanded={commentExpanded}
@@ -1160,7 +1188,7 @@ function FeedbackPageInner() {
             {selectedStudentIds.length > 1 && Object.keys(perStudentComments).length > 1 ? (
               <div style={{ display: 'grid', gap: 10 }}>
                 {selectedStudentIds.filter((id) => perStudentComments[id] !== undefined).map((studentId) => {
-                  const studentName = groupStudents.find((student: any) => student.id === studentId)?.name || '学生'
+                  const studentName = groupStudents.find((student) => student.id === studentId)?.name || '学生'
                   return (
                     <div key={studentId} style={{ padding: 10, borderRadius: 10, background: '#FFF8F4', border: '1px solid rgba(232,120,74,.18)' }}>
                       <div style={{ fontSize: 12, fontWeight: 700, color: '#5a4e3a', marginBottom: 6 }}>{studentName}</div>
@@ -1217,6 +1245,7 @@ function FeedbackPageInner() {
 
       <Card
         size="small"
+        className="teacher-feedback-step-card"
         style={{ borderRadius: 12, border: '1px solid var(--color-hairline)', background: 'var(--color-surface-2)' }}
         styles={{ body: { padding: isMobile ? 12 : 14 } }}
       >
@@ -1240,7 +1269,7 @@ function FeedbackPageInner() {
           }}
         >
           <span className="teacher-feedback-more-copy">
-            <span style={{ display: 'block', fontSize: 13, fontWeight: 800 }}>更多记录（可选）</span>
+            <span style={{ display: 'block', fontSize: 13, fontWeight: 800 }}>手动分开填写（可选）</span>
             <span style={{ display: 'block', color: 'var(--color-ink-subtle)', fontSize: 11, marginTop: 2 }}>
               表现标签、知识点、作业、徽章和本期寄语
             </span>
@@ -1252,7 +1281,7 @@ function FeedbackPageInner() {
       {moreExpanded && (
         <>
       {/* Tags + KP */}
-      <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
+      <Card size="small" className="teacher-feedback-step-card">
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
           表现标签{aiPrefillMark('tags')}
         </div>
@@ -1282,7 +1311,7 @@ function FeedbackPageInner() {
       </Card>
 
       {/* Homework */}
-      <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
+      <Card size="small" className="teacher-feedback-step-card">
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
           作业布置{aiPrefillMark('homework')}{aiPrefillMark('suggestion')}
         </div>
@@ -1301,7 +1330,7 @@ function FeedbackPageInner() {
       </Card>
 
       {/* Badge — collapsible */}
-      <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
+      <Card size="small" className="teacher-feedback-step-card">
         <div style={{ fontSize: 13, fontWeight: 700, display: 'flex', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => setBadgeOpen(!badgeOpen)}>
           <span>闪光徽章 {badge ? `· ${badge}` : '(可选)'}</span>
           <span style={{ color: '#98A2B3' }}>{badgeOpen ? '收起' : '展开'}</span>
@@ -1322,7 +1351,7 @@ function FeedbackPageInner() {
       )}
 
       {/* Upload — high-frequency and always visible */}
-      <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
+      <Card size="small" className="teacher-feedback-step-card">
         <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>
           课堂资料 {imageUrls.length ? `(${imageUrls.length})` : '(可选)'}
         </div>
@@ -1518,7 +1547,7 @@ function FeedbackPageInner() {
             </div>
           )}
           <div style={{ fontSize: 16, fontWeight: 800 }}>{selectedStudentNames.join('、') || '已选学员'}</div>
-          <div><Tag color="orange">{MOODS.find((m: any) => m.value === mood)?.label || mood}</Tag>{tags.map(tag => <Tag key={tag}>{tag}</Tag>)}</div>
+          <div><Tag color="orange">{MOODS.find((m) => m.value === mood)?.label || mood}</Tag>{tags.map(tag => <Tag key={tag}>{tag}</Tag>)}</div>
           {resolvedStructuredRecord.lessonContent && <div><strong>本节课学习内容</strong><div style={{ marginTop: 4, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{resolvedStructuredRecord.lessonContent}</div></div>}
           {(resolvedStructuredRecord.mastery || summary) && <div><strong>孩子掌握情况</strong><div style={{ marginTop: 4, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{joinDistinctText(resolvedStructuredRecord.mastery, summary)}</div></div>}
           {(resolvedStructuredRecord.feedback || overallComment) && <div><strong>课堂反馈</strong><div style={{ marginTop: 4, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{joinDistinctText(resolvedStructuredRecord.feedback, overallComment)}</div></div>}
@@ -1534,14 +1563,23 @@ function FeedbackPageInner() {
 
   return (
     <div className="teacher-feedback-workspace" style={isMobile ? {} : { display: 'grid', gridTemplateColumns: '340px minmax(0, 1fr)', gap: 20, alignItems: 'start' }}>
+      {ctx?.contextState === 'NO_ACTIVE_TERM' && (
+        <Alert
+          type="warning"
+          showIcon
+          message="尚未启用当前运营期"
+          description={ctx.contextMessage}
+          style={{ gridColumn: '1 / -1' }}
+        />
+      )}
       {/* LEFT: class picker + AI + student selection (desktop) */}
       {!isMobile && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, position: 'sticky', top: 12, maxHeight: '100vh', overflowY: 'auto' }}>
           <Card size="small" style={{ borderRadius: 12, border: '1px solid #EEE7E1' }}>
             <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>选择班级</div>
-            <Select size="small" value={groupId || undefined} onChange={(v: string) => { setGroupId(v); setSelectedStudentIds([]); setStudentPerf({}) }}
-              allowClear placeholder="全部班级" style={{ width: '100%' }}
-              options={groups.map((g: any) => ({ label: `${g.courseName} (${g.studentCount}人)`, value: g.id }))} />
+            <MobileSelect size="small" value={groupId || undefined} onChange={(v: string) => { setGroupId(v); setSelectedStudentIds([]); setStudentPerf({}) }}
+              allowClear placeholder="选择班级" style={{ width: '100%' }} listHeight={320}
+              options={groups.map((g) => ({ label: `${g.name || g.courseName} · ${g.subject || '未填学科'} · ${g.studentCount}人`, value: g.id }))} />
             {!groupId && groups.length === 0 && <div style={{ fontSize: 12, color: '#98A2B3', marginTop: 6 }}>暂无班级数据</div>}
           </Card>
 
@@ -1566,10 +1604,10 @@ function FeedbackPageInner() {
               {selectedStudentIds.length > 0 && (
                 <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                   {selectedStudentIds.map((id) => {
-                    const s = groupStudents.find((gs: any) => gs.id === id)
+                    const s = groupStudents.find((gs) => gs.id === id)
                     return s ? (
                       <Tag key={id} closable color="orange" style={{ borderRadius: 9999, fontSize: 11, margin: 0, display: 'inline-flex', alignItems: 'center', gap: 5 }}
-                        onClose={(e: any) => { e.preventDefault(); toggleStudent(id) }}>{s.name}{renderStudentPerfButton(id)}</Tag>
+                        onClose={(e) => { e.preventDefault(); toggleStudent(id) }}>{s.name}{renderStudentPerfButton(id)}</Tag>
                     ) : null
                   })}
                 </div>
@@ -1582,19 +1620,16 @@ function FeedbackPageInner() {
                     <Button size="small" onClick={clearAll} style={{ fontSize: 11 }}>清空</Button>
                   </div>
                   {filteredStudents.length === 0 ? (
-                    <Empty
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      description={
-                        <div style={{ lineHeight: 1.7 }}>
-                          <div>该班级暂无学员</div>
-                          <div style={{ fontSize: 12, color: '#999' }}>可能尚未排课、学员未入班，或学部选择有误</div>
-                          <div style={{ fontSize: 12, color: '#999' }}>请到「学员管理」确认入班，或切换上方学部/班级</div>
-                        </div>
-                      }
+                    <GuidedEmpty
+                      compact
+                      title={studentSearch ? '没有符合搜索条件的学员' : '这个班级还没有学员'}
+                      description={studentSearch ? '换一个姓名关键词，或清除搜索后查看班级全部学员。' : '学员加入班级后会显示在这里，选择学员即可填写本次反馈。'}
+                      actionLabel={studentSearch ? '清除搜索' : '查看我的课表'}
+                      onAction={() => studentSearch ? setStudentSearch('') : window.location.assign('/teacher/schedule')}
                     />
                   ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                      {filteredStudents.map((s: any) => {
+                      {filteredStudents.map((s) => {
                         const selected = selectedStudentIds.includes(s.id)
                         const feedbacked = Boolean(s.todayFeedback || todayFeedbackByScope[`${groupId}:${s.id}`])
                         return (
@@ -1635,14 +1670,14 @@ function FeedbackPageInner() {
           <>
 
 
-            <Card size="small" style={{ borderRadius: 14, border: '1px solid #EEE7E1' }}>
+            <Card size="small" className="teacher-feedback-step-card">
               <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 12 }}>① 选择课程</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: '#5a4e3a', marginBottom: 6 }}>班级 / 课程</div>
-                  <Select value={groupId || undefined} onChange={(v: string) => { setGroupId(v); setSelectedStudentIds([]); setStudentPerf({}); setStudentsExpanded(false) }}
-                    allowClear placeholder="选择班级 / 课程" style={{ width: '100%' }}
-                    options={groups.map((g: any) => ({ label: `${g.courseName} (${g.studentCount}人)`, value: g.id }))} />
+                  <MobileSelect value={groupId || undefined} onChange={(v: string) => { setGroupId(v); setSelectedStudentIds([]); setStudentPerf({}); setStudentsExpanded(false) }}
+                    allowClear placeholder="选择班级、学科或学生" style={{ width: '100%' }} listHeight={260}
+                    options={groups.map((g) => ({ label: `${g.name || g.courseName} · ${g.subject || '未填学科'} · ${g.studentCount}人`, value: g.id }))} />
                 </div>
                 {groupId && (
                   <div style={{ borderRadius: 10, padding: '9px 10px', background: '#FFF6F1', border: '1px solid rgba(232,120,74,.18)', color: '#B85B32', fontSize: 12, fontWeight: 700 }}>
@@ -1656,7 +1691,7 @@ function FeedbackPageInner() {
             </Card>
 
             {groupId && (
-              <Card size="small" style={{ borderRadius: 14, border: '1px solid #EEE7E1' }}>
+              <Card size="small" className="teacher-feedback-step-card">
                 <div
                   style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', gap: 8 }}
                   onClick={() => setStudentsExpanded(!studentsExpanded)}
@@ -1672,10 +1707,10 @@ function FeedbackPageInner() {
                 {selectedStudentIds.length > 0 && (
                   <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {selectedStudentIds.map((id) => {
-                      const s = groupStudents.find((gs: any) => gs.id === id)
+                      const s = groupStudents.find((gs) => gs.id === id)
                       return s ? (
                         <Tag key={id} closable color="orange" style={{ borderRadius: 9999, fontSize: 12, margin: 0, padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: 5 }}
-                          onClose={(e: any) => { e.preventDefault(); toggleStudent(id) }}>{s.name}{renderStudentPerfButton(id)}</Tag>
+                          onClose={(e) => { e.preventDefault(); toggleStudent(id) }}>{s.name}{renderStudentPerfButton(id)}</Tag>
                       ) : null
                     })}
                   </div>
@@ -1688,19 +1723,16 @@ function FeedbackPageInner() {
                       <Button onClick={clearAll}>清空</Button>
                     </div>
                     {filteredStudents.length === 0 ? (
-                      <Empty
-                        image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        description={
-                          <div style={{ lineHeight: 1.7 }}>
-                            <div>该班级暂无学员</div>
-                            <div style={{ fontSize: 12, color: '#999' }}>可能尚未排课、学员未入班，或学部选择有误</div>
-                            <div style={{ fontSize: 12, color: '#999' }}>请到「学员管理」确认入班，或切换上方学部/班级</div>
-                          </div>
-                        }
+                      <GuidedEmpty
+                        compact
+                        title={studentSearch ? '没有符合搜索条件的学员' : '这个班级还没有学员'}
+                        description={studentSearch ? '换一个姓名关键词，或清除搜索后查看班级全部学员。' : '学员加入班级后会显示在这里，选择学员即可填写本次反馈。'}
+                        actionLabel={studentSearch ? '清除搜索' : '查看我的课表'}
+                        onAction={() => studentSearch ? setStudentSearch('') : window.location.assign('/teacher/schedule')}
                       />
                     ) : (
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                        {filteredStudents.map((s: any) => {
+                        {filteredStudents.map((s) => {
                           const selected = selectedStudentIds.includes(s.id)
                           const feedbacked = Boolean(s.todayFeedback || todayFeedbackByScope[`${groupId}:${s.id}`])
                           return (
@@ -1743,16 +1775,26 @@ function FeedbackPageInner() {
   )
 }
 
-export default function TeacherFeedbackPage() {
+function TeacherRecordPageContent() {
   return (
     <div className="teacher-feedback-page" style={{ padding: '0 0 32px' }}>
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#1F2329' }}>课堂反馈</h2>
-        <div style={{ fontSize: 13, color: '#98A2B3', marginTop: 4 }}>发布后家长实时收到通知，系统按课程类型自动计算反馈奖励</div>
+      <div style={{ marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--color-ink, #1a1201)' }}>课堂成长反馈</h2>
+          <div style={{ fontSize: 13, color: 'var(--color-ink-subtle, #9a8e7a)', marginTop: 4 }}>
+            课堂、周末班和晚托统一从这里记录；先选择对应班级，再填写学生当次表现并上传照片。
+          </div>
+        </div>
       </div>
-      <Suspense fallback={<CardSkeleton rows={3} />}>
-        <FeedbackPageInner />
-      </Suspense>
+      <FeedbackPageInner />
     </div>
+  )
+}
+
+export default function TeacherFeedbackPage() {
+  return (
+    <Suspense fallback={<CardSkeleton rows={3} />}>
+      <TeacherRecordPageContent />
+    </Suspense>
   )
 }

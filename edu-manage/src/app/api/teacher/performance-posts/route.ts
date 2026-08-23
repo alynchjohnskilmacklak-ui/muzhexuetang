@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 import { MOOD_META } from '@/lib/performance'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
 type OwnedStudent = NonNullable<Awaited<ReturnType<typeof assertTeacherOwnsStudent>>>
 
-function normalizeIds(body: any) {
+function normalizeIds(body: { studentIds?: unknown; studentId?: unknown }) {
   if (Array.isArray(body.studentIds)) {
     return Array.from(new Set(body.studentIds.filter((item: unknown): item is string => typeof item === 'string' && item.length > 0)))
   }
@@ -16,8 +17,9 @@ function normalizeIds(body: any) {
 
 export const GET = apiHandler(async () => {
     const { teacher, prisma } = await requireCurrentTeacher()
+    const activeTerm = await getActiveAcademicTerm(prisma, teacher.division)
     const posts = await prisma.performancePost.findMany({
-      where: { teacherId: teacher.id, deletedAt: null },
+      where: { teacherId: teacher.id, termId: activeTerm?.id || '__NO_ACTIVE_TERM__', deletedAt: null },
       include: {
         student: { select: { id: true, name: true, grade: true } },
         comments: { include: { author: { select: { name: true, role: true } } }, orderBy: { createdAt: 'desc' } },
@@ -30,6 +32,8 @@ export const GET = apiHandler(async () => {
 
 export const POST = apiHandler(async (request: NextRequest) => {
     const { user, teacher, prisma } = await requireCurrentTeacher()
+    const activeTerm = await getActiveAcademicTerm(prisma, teacher.division)
+    if (!activeTerm) return NextResponse.json({ error: '请先启用运营批次再记录表现' }, { status: 409 })
     const body = await request.json()
     const studentIds = normalizeIds(body)
     const content = typeof body.content === 'string' ? body.content.trim() : ''
@@ -43,7 +47,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
 
     const ownedStudents: OwnedStudent[] = []
     for (const studentId of studentIds) {
-      const student = await assertTeacherOwnsStudent(teacher.id, studentId)
+      const student = await assertTeacherOwnsStudent(teacher.id, studentId, prisma, activeTerm.id)
       if (!student) return NextResponse.json({ error: '包含无权操作的学员' }, { status: 403 })
       ownedStudents.push(student)
     }
@@ -53,6 +57,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
       for (const student of ownedStudents) {
         const post = await tx.performancePost.create({
           data: {
+            termId: activeTerm.id,
             studentId: student.id,
             teacherId: teacher.id,
             type: typeof body.type === 'string' ? body.type : 'DAILY',

@@ -3,6 +3,7 @@
 import { Card, Typography, Button, Space, Tag } from 'antd'
 import { EditOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
+import NextImage from 'next/image'
 
 import { SUBJECT_COLORS } from '@/constants/subjects'
 import { normalizeUploadUrl } from '@/lib/upload-url'
@@ -39,9 +40,9 @@ export function TeacherCard({ teacher, onEdit, onDelete }: {
   return (
     <Card bordered style={{ borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
-        <div style={{ width: 76, height: 96, borderRadius: 10, backgroundColor: getAvatarColor(teacher.name), overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 20, fontWeight: 700, flexShrink: 0, border: '1px solid #23252a' }}>
+        <div style={{ width: 76, height: 96, position: 'relative', borderRadius: 10, backgroundColor: getAvatarColor(teacher.name), overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 20, fontWeight: 700, flexShrink: 0, border: '1px solid #23252a' }}>
           {teacher.avatar ? (
-            <img src={normalizeUploadUrl(teacher.avatar)} alt={teacher.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+            <NextImage src={normalizeUploadUrl(teacher.avatar)} alt={teacher.name} fill sizes="76px" unoptimized style={{ objectFit: 'cover', objectPosition: 'center top' }} />
           ) : initials}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>

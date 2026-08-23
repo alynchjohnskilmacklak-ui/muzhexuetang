@@ -8,7 +8,6 @@ export function useSessionPing({ initialDelay = 0 }: { initialDelay?: number } =
   const router = useRouter()
 
   useEffect(() => {
-    let timer: ReturnType<typeof setInterval>
     let lastAccessCheck = 0
 
     const ping = async (forceAccessCheck = false) => {
@@ -41,7 +40,7 @@ export function useSessionPing({ initialDelay = 0 }: { initialDelay?: number } =
     }
 
     let initialTimer: ReturnType<typeof setTimeout> | null = null
-    timer = setInterval(() => void ping(), PING_INTERVAL)
+    const timer = setInterval(() => void ping(), PING_INTERVAL)
     if (initialDelay > 0) {
       initialTimer = setTimeout(() => void ping(true), initialDelay)
     } else {

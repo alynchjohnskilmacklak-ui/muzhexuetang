@@ -1,12 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Empty, Modal, Select, Skeleton, Space, Tag, Typography } from 'antd'
+import NextImage from 'next/image'
+import { Button, Modal, Select, Skeleton, Space, Tag, Typography } from 'antd'
 import { DownloadOutlined, ExportOutlined, EyeOutlined, FileTextOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { GRADE_SUBJECTS, GRADES, SUBJECT_COLORS } from '@/data/subjects'
 import { fmtDate } from '@/lib/format-date'
 import { materialFileLabel } from '@/lib/material-format'
+import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { useRouter } from 'next/navigation'
 
 const { Title, Text } = Typography
 
@@ -72,6 +75,7 @@ function getFileStyle(material: Pick<Material, 'fileType' | 'fileName'>) {
 }
 
 export default function ParentMaterialsPage() {
+  const router = useRouter()
   const [selectedGrade, setSelectedGrade] = useState<string>(COPY.defaultGrade)
   const [selectedSubject, setSelectedSubject] = useState<string>('')
   const [materials, setMaterials] = useState<Material[]>([])
@@ -153,7 +157,7 @@ export default function ParentMaterialsPage() {
         </div>
       ) : materials.length === 0 ? (
         <div className="materials-empty">
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={COPY.empty} />
+          <GuidedEmpty title={selectedSubject ? '当前科目还没有资料' : '还没有学习资料'} description={selectedSubject ? '老师上传的对应科目讲义会显示在这里，可以先查看全部科目或课堂反馈。' : '老师准备的讲义和练习会显示在这里，帮助孩子课后复习。'} actionLabel={selectedSubject ? '查看全部科目' : '看看课堂反馈'} onAction={() => selectedSubject ? setSelectedSubject('') : router.push('/parent/class-feedback')} />
         </div>
       ) : (
         <div className="materials-list">
@@ -200,7 +204,7 @@ export default function ParentMaterialsPage() {
         {previewUrl && previewType === 'word' && <iframe src={previewUrl} style={{ width: '100%', height: '85vh', border: 'none' }} title={COPY.wordPreview} />}
         {previewUrl && previewType === 'image' && (
           <div style={{ textAlign: 'center', padding: 16, background: '#f0f0f0' }}>
-            <img src={previewUrl} alt={previewTitle} style={{ maxWidth: '100%', maxHeight: '82vh', objectFit: 'contain' }} onContextMenu={(event) => event.preventDefault()} draggable={false} />
+            <NextImage src={previewUrl} alt={previewTitle} width={1200} height={800} unoptimized style={{ width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: '82vh', objectFit: 'contain' }} onContextMenu={(event) => event.preventDefault()} draggable={false} />
           </div>
         )}
         <div style={{ padding: '8px 16px', backgroundColor: '#fff8f6', borderTop: '1px solid rgba(0,0,0,.06)', textAlign: 'center' }}>

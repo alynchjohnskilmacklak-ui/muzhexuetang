@@ -6,6 +6,8 @@ import { calculateAttendanceDeductHours } from '@/lib/attendance-hours'
 import { triggerLessonPay } from '@/lib/teacher-salary'
 import { resolveIntensiveActualMinutes } from '@/lib/intensive-class'
 import { createIntensiveLessonPayInTransaction } from '@/lib/intensive-settlement'
+import { isClassLessonInActiveTerm } from '@/lib/admin-term-scope'
+import { syncAutomaticMealAttendance } from '@/lib/meal-attendance-sync'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,13 +26,17 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
   const prisma = await getRequestPrisma()
 
-  const { lessonId, records } = await req.json() as {
+  const { lessonId, records, mealStudentIds } = await req.json() as {
     lessonId?: string
     records?: { studentId?: string; status?: string; actualMinutes?: number }[]
+    mealStudentIds?: string[]
   }
 
   if (!lessonId || !Array.isArray(records) || records.length === 0) {
     return NextResponse.json({ error: '缺少 lessonId 或考勤记录' }, { status: 400 })
+  }
+  if (!await isClassLessonInActiveTerm(prisma, lessonId)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能补交或修改考勤' }, { status: 409 })
   }
 
   const lesson = await prisma.classLesson.findFirst({
@@ -39,17 +45,40 @@ export const POST = apiHandler(async (req: NextRequest) => {
       group: {
         include: {
           course: true,
+          teacher: { select: { id: true, name: true } },
           enrollments: {
             where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
           },
         },
       },
       lessonStudents: { select: { studentId: true } },
+      teacher: { select: { id: true, name: true } },
     },
   })
 
   if (!lesson) {
     return NextResponse.json({ error: '课次不存在或已取消' }, { status: 404 })
+  }
+
+  const teacherId = lesson.teacherId || lesson.group.teacherId
+  const firstTeacherLesson = Array.isArray(mealStudentIds)
+    ? await prisma.classLesson.findFirst({
+        where: {
+          lessonDate: lesson.lessonDate,
+          status: { not: 'CANCELLED' },
+          division: lesson.division,
+          OR: [
+            { teacherId },
+            { teacherId: null, group: { teacherId } },
+            { teacherId: null, group: { teacherAssignments: { some: { teacherId } } } },
+          ],
+        },
+        select: { id: true },
+        orderBy: [{ startTime: 'asc' }, { id: 'asc' }],
+      })
+    : null
+  if (Array.isArray(mealStudentIds) && firstTeacherLesson?.id !== lesson.id) {
+    return NextResponse.json({ error: '就餐只能随该教师当天首节课登记' }, { status: 400 })
   }
 
   const [lessonHour, lessonMinute = 0] = (lesson.startTime || '00:00').split(':').map(Number)
@@ -86,6 +115,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   )
   let processedCount = 0
   let deductedCount = 0
+  let mealCount = 0
   const now = new Date()
   const intensiveActualMinutes = isIntensive
     ? resolveIntensiveActualMinutes(
@@ -160,6 +190,27 @@ export const POST = apiHandler(async (req: NextRequest) => {
         }
       }
     }
+    if (Array.isArray(mealStudentIds)) {
+      const eligibleStudentIds = validRecords
+        .map((record) => record.studentId)
+        .filter((studentId): studentId is string => typeof studentId === 'string')
+      const selectedMealIds = [...new Set(mealStudentIds)].filter((studentId) => eligibleStudentIds.includes(studentId))
+      const mealDate = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T00:00:00.000Z`)
+      await syncAutomaticMealAttendance(tx, {
+        eligibleStudentIds,
+        eatingStudentIds: selectedMealIds,
+        mealDate,
+        division: lesson.division,
+        recordedBy: user.id,
+        groupId: lesson.group.id,
+        groupName: lesson.group.name,
+        lessonId: lesson.id,
+        teacherId: teacherId || lesson.group.teacher.id,
+        teacherName: lesson.teacher?.name || lesson.group.teacher.name,
+        notes: '考勤首节课同步上报',
+      })
+      mealCount = selectedMealIds.length
+    }
     await tx.classLesson.update({
       where: { id: lessonId },
       data: {
@@ -225,5 +276,5 @@ export const POST = apiHandler(async (req: NextRequest) => {
     await triggerLessonPay(lessonId)
   }
 
-  return NextResponse.json({ success: true, count: processedCount })
+  return NextResponse.json({ success: true, count: processedCount, mealCount })
 })

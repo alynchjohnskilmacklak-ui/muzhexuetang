@@ -2,8 +2,8 @@
 
 import useSWR from 'swr'
 import { useParams } from 'next/navigation'
-import { Card, Descriptions, Tag, Timeline, Statistic, Row, Col, List, Button, message, Typography } from 'antd'
-import { ClockCircleOutlined, CheckCircleOutlined, FileTextOutlined, StarOutlined, LoginOutlined } from '@ant-design/icons'
+import { Card, Tag, Timeline, Statistic, Row, Col, List, Button, message, Typography } from 'antd'
+import { CheckCircleOutlined, FileTextOutlined, StarOutlined, LoginOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 
 const { Text } = Typography
@@ -20,10 +20,18 @@ const ACTION_LABELS: Record<string, string> = {
   PERFORMANCE_POST: '表现反馈', TEACHER_LOGIN: '登录', COMMENT_REPLY: '回复留言',
   MAKEUP_ARRANGE: '安排补课',
 }
+type TeacherAlert = { id: string; type: string; message: string; createdAt: string; isResolved: boolean }
+type TeacherLog = { id: string; action: string; createdAt: string; detail?: string | null }
+type TeacherLogDetail = {
+  teacher?: { name?: string; subjects?: string }
+  stats?: { totalLogs?: number; attendanceRate?: number; papersPublished?: number; performancePosts?: number; commentReplyRate?: number }
+  alerts?: TeacherAlert[]
+  logs?: TeacherLog[]
+}
 
 export default function TeacherLogDetailPage() {
   const { teacherId } = useParams()
-  const { data, isLoading } = useSWR(`/api/teacher-logs/${teacherId}?period=month`, fetcher)
+  const { data, isLoading } = useSWR<TeacherLogDetail>(`/api/teacher-logs/${teacherId}?period=month`, fetcher)
 
   const handleResolve = async (alertId: string) => {
     await fetch('/api/teacher-logs/alerts', {
@@ -44,13 +52,13 @@ export default function TeacherLogDetailPage() {
         <Col xs={12} lg={4}><Card bordered={false}><Statistic title="试卷推送" value={data.stats?.papersPublished || 0} prefix={<FileTextOutlined style={{ color: '#E8784A' }} />} /></Card></Col>
         <Col xs={12} lg={4}><Card bordered={false}><Statistic title="表现反馈" value={data.stats?.performancePosts || 0} prefix={<StarOutlined style={{ color: '#8892f0' }} />} /></Card></Col>
         <Col xs={12} lg={4}><Card bordered={false}><Statistic title="留言回复率" value={data.stats?.commentReplyRate || 0} suffix="%" prefix={<LoginOutlined style={{ color: '#185FA5' }} />} /></Card></Col>
-        <Col xs={12} lg={4}><Card bordered={false}><Statistic title="未处理预警" value={data.alerts?.filter((a: any) => !a.isResolved).length || 0} valueStyle={{ color: '#D4537E' }} /></Card></Col>
+        <Col xs={12} lg={4}><Card bordered={false}><Statistic title="未处理预警" value={data.alerts?.filter((a) => !a.isResolved).length || 0} valueStyle={{ color: '#D4537E' }} /></Card></Col>
       </Row>
 
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={14}>
           <Card bordered={false} title="操作时间线" style={{ borderRadius: 10 }}>
-            <Timeline items={(data.logs || []).slice(0, 50).map((l: any) => ({
+            <Timeline items={(data.logs || []).slice(0, 50).map((l) => ({
               color: ACTION_COLORS[l.action] || '#ccc',
               children: (
                 <div>
@@ -67,8 +75,8 @@ export default function TeacherLogDetailPage() {
         <Col xs={24} lg={10}>
           <Card bordered={false} title="预警记录" style={{ borderRadius: 10 }}>
             <List dataSource={data.alerts || []}
-              renderItem={(a: any) => (
-                <List.Item actions={!a.isResolved ? [<Button size="small" type="link" onClick={() => handleResolve(a.id)}>已处理</Button>] : undefined}>
+              renderItem={(a) => (
+                <List.Item actions={!a.isResolved ? [<Button key="resolve" size="small" type="link" onClick={() => handleResolve(a.id)}>已处理</Button>] : undefined}>
                   <div>
                     <Tag color={a.isResolved ? 'default' : 'red'}>{a.type}</Tag>
                     <Text>{a.message}</Text>

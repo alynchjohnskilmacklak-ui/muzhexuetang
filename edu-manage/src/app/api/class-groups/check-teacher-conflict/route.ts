@@ -11,7 +11,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
   const prisma = await getRequestPrisma()
 
-  const { teacherId, date, startTime, endTime, division } = await req.json()
+  const { teacherId, date, startTime, endTime, division: _division } = await req.json()
 
   if (!teacherId || !date || !startTime || !endTime) {
     return NextResponse.json({ conflict: false })

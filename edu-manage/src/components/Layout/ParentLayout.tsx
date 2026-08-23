@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Avatar, Badge, Dropdown, Layout, Menu, Space, Tooltip } from 'antd'
 import {
   BankOutlined,
+  AppstoreOutlined,
   BarChartOutlined,
   BellOutlined,
   BookOutlined,
@@ -18,6 +19,7 @@ import {
   HomeOutlined,
   IdcardOutlined,
   LogoutOutlined,
+  MenuOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MessageFilled,
@@ -64,7 +66,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   const { data: unreadData, mutate: mutateUnread } = useSWR(
     backgroundReady ? '/api/parent/unread-counts' : null,
     fetcher,
-    { refreshInterval: 120_000, revalidateOnFocus: true, revalidateOnReconnect: true },
+    { refreshInterval: 5_000, revalidateOnFocus: true, revalidateOnReconnect: true },
   )
   useKickListener()
   useSessionPing({ initialDelay: 6_000 })
@@ -92,6 +94,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     papers: Number(unreadData?.papers || 0),
     posts: Number(unreadData?.posts || 0),
     notifications: Number(unreadData?.notifications || 0),
+    studyHallHomework: Number(unreadData?.studyHallHomework || 0),
     feedbacks: Number(unreadData?.feedbacks || 0),
     messages: Number(msgUnreadData?.count || 0),
   }
@@ -113,10 +116,12 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
 
   const navItems: MobileNavItem[] = [
     { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
-    { key: 'growth-group', icon: <HomeOutlined />, label: '学习与成长', children: [
+    { key: '/parent/services', icon: <AppstoreOutlined />, label: '业务总览' },
+    { key: 'growth-group', icon: <HomeOutlined />, label: '孩子学习', children: [
       { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课程表' },
-      { key: '/parent/class-feedback', icon: <BookOutlined />, label: '成长反馈', badge: unread.feedbacks },
-      { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长主页', badge: unread.papers + unread.posts },
+      { key: '/parent/class-feedback', icon: <BookOutlined />, label: '课堂反馈', badge: unread.feedbacks },
+      { key: '/parent/study-hall', icon: <ReadOutlined />, label: '晚托作业', badge: unread.studyHallHomework },
+      { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长档案', badge: unread.papers + unread.posts },
       { key: '/parent/teachers', icon: <TeamOutlined />, label: '教师信息' },
     ] },
     { key: 'volunteer-group', icon: <BankOutlined />, label: '中考志愿', children: [
@@ -133,7 +138,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
       { key: '/parent/leave', icon: <CalendarOutlined />, label: '请假' },
       { key: '/parent/hour-records', icon: <ClockCircleOutlined />, label: '课时明细' },
     ] },
-    { key: 'resource-group', icon: <ReadOutlined />, label: '学习资源', children: [
+    { key: 'resource-group', icon: <ReadOutlined />, label: '学习工具', children: [
       { key: '/parent/materials', icon: <ReadOutlined />, label: '学习资料' },
       { key: '/parent/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
       { key: '/parent/ai', icon: <MessageFilled />, label: 'AI 助手' },
@@ -146,6 +151,13 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   ]
 
   const leafItems = flattenNavItems(navItems)
+  const bottomTabs: MobileNavItem[] = [
+    { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
+    { key: '/parent/class-feedback', icon: <BookOutlined />, label: '课堂反馈', badge: unread.feedbacks },
+    { key: '/parent/study-hall', icon: <ReadOutlined />, label: '晚托作业', badge: unread.studyHallHomework },
+    { key: '/parent/notifications', icon: <BellOutlined />, label: '通知', badge: unread.notifications },
+    { key: '__more', icon: <MenuOutlined />, label: '更多' },
+  ]
   const currentKey = resolveActiveKey(pathname, leafItems, '/parent/dashboard')
   const defaultOpenKeys = navItems.filter(item => item.children?.some(child => child.key === currentKey)).map(item => item.key)
 
@@ -174,9 +186,12 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   if (isMobile) {
     return (
       <MobileLayout
-        mode="drawer"
+        mode="tabs"
         navItems={navItems}
+        bottomTabs={bottomTabs}
+        moreItems={navItems}
         title="牧哲学堂 家长"
+        menuLabel="全部功能"
         drawerHeaderExtra={totalUnread > 0 ? (
           <button onClick={markAllRead} style={{
             width: '100%', padding: '10px 14px', borderRadius: 10,

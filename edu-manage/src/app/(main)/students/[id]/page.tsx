@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { type ReactNode, useState } from 'react'
 import useSWR from 'swr'
@@ -43,7 +43,13 @@ function enrollmentBalanceLines(enrollments: EnrollmentLine[] | undefined, fallb
   })
 }
 
-function attendanceDeductedText(record: any) {
+type AttendanceDeductionRecord = {
+  hoursDeducted?: number | null
+  lesson?: { group?: EnrollmentLine['group'] } | null
+  enrollment?: { group?: EnrollmentLine['group'] } | null
+}
+
+function attendanceDeductedText(record: AttendanceDeductionRecord) {
   const group = record.lesson?.group || record.enrollment?.group
   return formatDeducted(Number(record.hoursDeducted || 0), group?.course?.type || null, Number(group?.lessonMinutes || 40))
 }
@@ -302,7 +308,7 @@ export default function StudentDetailPage() {
               dataSource={student.attendances || []}
               columns={[
                 { title: '状态', dataIndex: 'status', render: (value: string) => <Tag>{value}</Tag> },
-                { title: '扣课时', key: 'hoursDeducted', render: (_: unknown, record: any) => attendanceDeductedText(record) },
+                { title: '扣课时', key: 'hoursDeducted', render: (_: unknown, record: AttendanceDeductionRecord) => attendanceDeductedText(record) },
                 { title: '日期', dataIndex: 'createdAt', render: (value: string) => new Date(value).toLocaleDateString('zh-CN') },
               ]}
             />

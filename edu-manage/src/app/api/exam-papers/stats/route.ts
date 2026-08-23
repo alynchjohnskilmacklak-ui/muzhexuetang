@@ -3,6 +3,8 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,10 +16,12 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
 
   const prisma = await getRequestPrisma()
-  const now = new Date()
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
   const division = getRequestDivision(user, req.nextUrl.searchParams.get('division'))
-  const paperStudentWhere = { student: { division } }
+  const term = user.role === 'admin'
+    ? await resolveAdminTermScope(prisma, division, req)
+    : await getActiveAcademicTerm(prisma, division)
+  const termId = term?.id || '__NO_TERM__'
+  const paperStudentWhere = { termId, student: { division } }
 
   const [
     totalPapers,
@@ -42,7 +46,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     }),
     prisma.weaknessRecord.groupBy({
       by: ['topic'],
-      where: { student: { division } },
+      where: { student: { division }, paper: { termId } },
       _count: { topic: true },
       orderBy: { _count: { topic: 'desc' } },
       take: 10,

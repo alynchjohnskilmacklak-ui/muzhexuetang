@@ -1,7 +1,5 @@
 'use client'
 
-const CHART_COLORS = ['#E8784A', '#1D9E75', '#8892f0', '#f5a623', '#D4537E', '#185FA5']
-
 export function buildFunnelOption(data: { status: string; count: number }[]) {
   const funnelColors = ['#8892f0', '#E8784A', '#1D9E75', '#f5a623', '#D4537E']
   return {

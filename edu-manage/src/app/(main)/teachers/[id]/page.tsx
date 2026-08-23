@@ -32,7 +32,7 @@ export default function TeacherDetailPage() {
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={12} lg={6}><Metric title="负责学员" value={teacher._count?.students || 0} /></Col>
         <Col xs={12} lg={6}><Metric title="排课数" value={teacher._count?.schedules || 0} /></Col>
-        <Col xs={12} lg={6}><Metric title="月课时" value={teacher.monthlyHours || 0} /></Col>
+        <Col xs={12} lg={6}><Metric title="本批次已授课时" value={teacher.termTaughtHours || 0} /></Col>
         <Col xs={12} lg={6}><Metric title="评分" value={teacher.rating || 0} /></Col>
       </Row>
 

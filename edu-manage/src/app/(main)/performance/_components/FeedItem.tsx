@@ -1,6 +1,5 @@
 ﻿'use client'
 
-import Image from 'next/image'
 import { Avatar, Button, Card, Image as AntImage, Popconfirm, Rate, Space, Tag } from 'antd'
 import { DeleteOutlined, UserOutlined } from '@ant-design/icons'
 

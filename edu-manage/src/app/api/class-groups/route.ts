@@ -4,6 +4,8 @@ import { getCurrentUser } from '@/lib/get-user'
 import { activeEnrollmentWhere, activeCourseWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,6 +59,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const division = getRequestDivision(user, searchParams.get('division'))
 
   const where: Record<string, unknown> = { course: activeCourseWhere, division }
+  const selectedTerm = user.role === 'admin'
+    ? await resolveAdminTermScope(prisma, division, req)
+    : await getActiveAcademicTerm(prisma, division)
+  where.termId = selectedTerm?.id || '__NO_SELECTED_TERM__'
   if (status) {
     where.status = status
   } else {
@@ -76,7 +82,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
   } else if (user.role === 'parent') {
     where.enrollments = {
       some: {
-        student: { parentUserId: user.id, status: { not: 'ARCHIVED' } },
+        student: {
+          OR: [
+            { parentUserId: user.id },
+            { parentId: user.id },
+          ],
+          status: { not: 'ARCHIVED' },
+        },
         status: 'ACTIVE',
       },
     }
@@ -84,6 +96,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   // admin: no extra restriction (can see all in own division)
 
   const includeAll = {
+    term: { select: { id: true, name: true, kind: true, status: true } },
     course: { select: { id: true, name: true, subject: true, type: true, grade: true, color: true, lessonMinutes: true } },
     teacher: { select: { id: true, name: true, phone: true } },
     teacherAssignments: { include: { teacher: { select: { id: true, name: true, phone: true, subjects: true } } }, orderBy: { createdAt: 'asc' as const } },
@@ -98,6 +111,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     },
   }
   const includeSimple = {
+    term: { select: { id: true, name: true, kind: true, status: true } },
     course: { select: { id: true, name: true, subject: true, type: true, grade: true, color: true, lessonMinutes: true } },
     teacher: { select: { id: true, name: true } },
     teacherAssignments: { include: { teacher: { select: { id: true, name: true, subjects: true } } }, orderBy: { createdAt: 'asc' as const } },
@@ -127,7 +141,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const prisma = await getRequestPrisma()
   const body = await req.json()
   const division = getRequestDivision(user, body.division)
-  const { name, courseId, teacherId, teacherIds, roomId, startDate, maxStudents, recurringDays, lessonStartTime, lessonMinutes, totalLessons, note } = body
+  const { name, courseId, teacherId, roomId, startDate, maxStudents, recurringDays, lessonStartTime, lessonMinutes, totalLessons, note } = body
+  const requestedTermId = typeof body.termId === 'string' && body.termId ? body.termId : null
   const normalizedRecurringDays = normalizeRecurringDays(recurringDays)
   const normalizedAssignments = normalizeTeacherAssignments(body)
   const primaryTeacherId = typeof teacherId === 'string' && teacherId ? teacherId : normalizedAssignments[0]?.teacherId
@@ -148,10 +163,26 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '普通班课必须设置上课时间和至少一个上课日' }, { status: 400 })
   }
 
+  const term = await prisma.academicTerm.findFirst({
+    where: requestedTermId
+      ? { id: requestedTermId, division, status: 'ACTIVE' }
+      : { division, status: 'ACTIVE' },
+    orderBy: { startDate: 'desc' },
+    select: { id: true, status: true },
+  })
+  if (!term) {
+    return NextResponse.json({
+      error: requestedTermId
+        ? '所属运营期不存在、已归档或不属于当前学部'
+        : '请先在“运营批次”进入一个当前工作区，再创建班级',
+    }, { status: 400 })
+  }
+  const termId = term.id
+
   const group = await prisma.$transaction(async (tx) => {
     const g = await tx.classGroup.create({
       data: {
-        name, courseId, teacherId: primaryTeacherId, roomId: roomId || null,
+        name, courseId, teacherId: primaryTeacherId, roomId: roomId || null, termId,
         maxStudents: intensiveMode && teachingType
           ? INTENSIVE_STUDENT_LIMIT[teachingType]
           : maxStudents || 20,
