@@ -28,6 +28,8 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // 预构建发布模式：产出 .next/standalone 可独立运行目录（服务器免 npm install / build）
+  output: 'standalone',
   distDir: process.env.NEXT_DIST_DIR || '.next',
   outputFileTracingRoot: process.cwd(),
   poweredByHeader: false,

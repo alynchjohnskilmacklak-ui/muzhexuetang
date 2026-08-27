@@ -14,95 +14,81 @@
 
 ---
 
-## 一、本地打包
+## 一、本机一键构建（Docker Linux 预构建）
 
-在 Windows 项目目录下执行（PowerShell 或 Git Bash）：
+> 前置条件：Docker Desktop 已启动且引擎就绪（Linux 容器 + WSL 2 后端，内存 ≥4GB）。
+> 构建全程在 Docker 的 Linux x64 Node 22 环境中完成，与服务器 Ubuntu 环境一致，
+> 不会把 Windows 的 `.next` / `node_modules` 上传服务器。
 
-```bash
-cd D:\01牧哲学堂上课安排\01牧哲学堂上课安排\coding\edu-manage
+在 Windows 项目目录下执行：
 
-# 清理旧包
-rm -f ../edu-manage-20260526.tar
+```powershell
+cd "D:\01muzhexuetang\muzhexuetang\coding\edu-manage"
 
-# 打包（只包含必要源码文件）
-mkdir -p deploy-tmp
-cp -r src prisma public scripts deploy-tmp/
-cp package.json package-lock.json next.config.ts tsconfig.json postcss.config.mjs eslint.config.mjs AGENTS.md deploy-tmp/
-tar -cf "../edu-manage-20260526.tar" -C deploy-tmp .
-rm -rf deploy-tmp
-
-# 查看包大小（应该是 14MB 左右）
-ls -lh ../edu-manage-20260526.tar
+powershell -ExecutionPolicy Bypass -File scripts\build-linux-release.ps1
 ```
+
+自动执行：
+
+```text
+Windows 项目源码
+    ↓
+Docker Linux Node 22（node:22-bookworm-slim，glibc 与 Ubuntu 兼容）
+    ↓
+npm ci（Linux 原生依赖：Prisma / Sharp 等）
+    ↓
+Prisma generate
+    ↓
+Next.js production build（standalone 输出）
+    ↓
+组装 .next/standalone + public + prisma 迁移工具链
+    ↓
+生成 release\edu-manage-runtime-日期.tar.gz（内含 Linux node_modules，服务器零安装）
+```
+
+可选参数：
+
+| 参数 | 说明 |
+|------|------|
+| `-Registry https://registry.npmmirror.com` | npm 镜像加速（国内网络推荐） |
+| `-NoCache` | 不使用 Docker 构建缓存（脚本或依赖异常时用） |
 
 ---
 
 ## 二、上传到服务器
 
-1. 打开阿里云控制台 → ECS 实例 → 远程连接 → **Workbench**
-2. 左侧菜单点击「文件传输」
-3. 将本地 `edu-manage-20260526.tar` 拖拽到服务器 `/tmp/` 目录
+```powershell
+scp ".\release\edu-manage-runtime-20260827-1530.tar.gz" root@112.124.67.56:/tmp/
+```
+
+或用阿里云控制台 → ECS → 远程连接 → **Workbench** → 文件传输，拖拽到 `/tmp/`。
 
 ---
 
-## 三、服务器部署命令
+## 三、服务器部署（免安装、免构建）
 
-SSH 连接服务器后，**逐条执行**：
+SSH 连接服务器，只需一条命令：
 
 ```bash
-# 1. 停止服务
-pm2 stop edu-manage
-
-# 2. 进入目录
 cd /opt/edu-manage
-
-# 3. 备份 .env（必须！tar 会覆盖）
-cp .env /tmp/edu-manage.env.bak
-
-# 4. 解压新代码
-tar -xf /tmp/edu-manage-20260526.tar
-
-# 5. 恢复 .env
-cp /tmp/edu-manage.env.bak .env
-
-# 6. 切换到 PostgreSQL schema
-cp prisma/schema.pg.prisma prisma/schema.prisma
-
-# 7. 安装依赖
-npm install
-
-# 8. 生成 Prisma 客户端
-npx prisma generate
-
-# 9. 生产迁移（新增表/字段时必执行）
-# 双库环境必须使用 migrate:all；单独 prisma migrate deploy 只会更新一个库。
-npm run migrate:all
-
-# 10. 导入种子数据（有新学校数据时执行）
-npx tsx scripts/seed-schools.ts
-
-# 11. 构建项目（约 60 秒）
-npm run build
-
-# 12. 启动服务
-pm2 start edu-manage --update-env
-
-# 13. 保存 PM2 配置
-pm2 save
-
-# 14. 查看日志确认正常
-pm2 logs edu-manage --lines 20
+bash scripts/deploy-prebuilt-tar.sh /tmp/edu-manage-runtime-20260827-1530.tar.gz
 ```
 
----
+脚本自动完成：
 
-## 四、一键部署（可选）
-
-所有步骤合并为一条命令：
-
-```bash
-pm2 stop edu-manage && cd /opt/edu-manage && cp .env /tmp/edu-manage.env.bak && tar -xf /tmp/edu-manage-20260526.tar && cp /tmp/edu-manage.env.bak .env && cp prisma/schema.pg.prisma prisma/schema.prisma && npm install && npm run migrate:all && npx tsx scripts/seed-schools.ts && npm run build && pm2 start edu-manage --update-env && pm2 save && pm2 logs edu-manage --lines 5
+```text
+1. 备份 .env
+2. 备份数据库（pg_dump，双库自动处理）
+3. 备份上传文件（public/uploads 与独立 UPLOAD_DIR）
+4. 停止旧 PM2 进程 → 清理旧运行产物
+5. 解压预构建程序（Linux x64 standalone）
+6. 恢复 .env 与上传文件
+7. Prisma 数据库迁移（migrate-all，双库）
+8. 重启 PM2（node --env-file=.env server.js）
+9. 健康检查（curl /login，失败自动打印日志）
 ```
+
+**不再执行**：`npm install` / `npm run build` / `npx prisma generate`，2核4G 服务器 1~2 分钟即可完成部署。
 
 ---
 
@@ -127,15 +113,15 @@ netstat -tlnp | grep 3000
 
 | 错误信息 | 原因 | 解决 |
 |---------|------|------|
-| `Could not find a production build in '.next'` | 构建失败或 .next 被删 | 执行 `npm run build` |
-| `Property 'highSchoolInfo' does not exist` | Prisma 客户端未更新 | 执行 `npx prisma generate` |
-| 种子数据报 `highSchoolInfo` 表不存在 | 未执行生产迁移 | 执行 `npm run migrate:all` |
-| 构建卡住超过 3 分钟 | 内存不足或 .next 损坏 | `rm -rf .next && npm run build` |
-| 登录后跳转失败 | `.env` 被覆盖 | 检查 `AUTH_URL` 和 `AUTH_SECRET` |
-| Prisma 报 `url` 字段错误 | 全局 Prisma 版本不兼容 | 必须用 `npx prisma` 而非全局 `prisma` |
-| PM2 不停重启刷屏 | .next 损坏 | `pm2 stop edu-manage` → 重新构建 |
-| `tar` 解压后文件不全 | 上传中断 | 确认包大小 14MB，重新上传再解压 |
-| `npm install` 报错 | node_modules 残留 | `rm -rf node_modules && npm install` |
+| `Could not find a production build in '.next'` | 服务器 `.next` 被误删或不完整 | 重新上传预构建包并执行部署脚本（本机无需重新构建时直接再传一次） |
+| `Property 'xxx' does not exist` | Prisma 客户端版本不符 | 本机重新执行预构建（`prisma generate` 已内置于 Docker 构建）后重新部署 |
+| 种子数据报表不存在 | 未执行生产迁移 | 部署脚本已自动执行 `migrate-all`；可手动再跑 `bash scripts/migrate-all.sh` |
+| 部署脚本健康检查失败 | 迁移未完成或 .env 异常 | 查看 `pm2 logs edu-manage --lines 50` |
+| 登录后跳转失败 | `.env` 未恢复 | 检查 `NEXTAUTH_URL` 和 `NEXTAUTH_SECRET`（部署脚本自动备份/恢复 .env） |
+| PM2 不停重启刷屏 | standalone 产物损坏 | 本机重新执行 `build-linux-release.ps1` 再部署 |
+| 上传的 tar 包解压后文件不全 | 上传中断 | 确认包完整（本地 `ls -lh` 对照大小），重新上传再部署 |
+| 构建时 npm ci 太慢 | 国内网络访问官方 registry 慢 | `build-linux-release.ps1 -Registry https://registry.npmmirror.com` |
+| `prisma migrate` 报错 | 数据库连接或迁移冲突 | 双库环境必须用 `migrate-all`（部署脚本已内置），单独 `migrate deploy` 只更新一个库 |
 
 ---
 
@@ -157,14 +143,22 @@ netstat -tlnp | grep 3000
     ```
     确保两个分部数据库结构与生产代码完全一致。双库环境必须用 `npm run migrate:all`，单独的 `prisma migrate deploy` 只会更新一个库。
 
-3.  **清理旧产物**：
-    如果部署后页面未更新或报错，尝试清理 `.next` 目录并重新构建：
-    ```bash
-    pm2 stop edu-manage
-    rm -rf .next
-    npm run build
-    pm2 start edu-manage --update-env
+3.  **产物异常处理**：
+    如果部署后页面未更新或报错，说明预构建产物与预期不符，重新执行本机预构建并重新部署：
+    ```powershell
+    powershell -ExecutionPolicy Bypass -File scripts\build-linux-release.ps1
     ```
+    （服务器端不要手工删 `.next` / 重跑 build，产物一律来自 Docker 预构建）
+
+4.  **安全**：构建产物**不包含 `.env`**（构建脚本已排除），服务器密钥只存在于服务器本地的 `.env`，由部署脚本自动备份/恢复。
+
+## 七·补、常见问题（预构建模式）
+
+| 问题 | 解决 |
+|------|------|
+| 构建时 `prisma generate` 报 `ECONNRESET` | 国内网络访问引擎服务器不稳定，自动重试；仍失败则稍后重跑脚本 |
+| 构建时 `npm ci` 报网络错误 | 用镜像重跑：`build-linux-release.ps1 -Registry https://registry.npmmirror.com` |
+| `npm ci` 报 `package.json and package-lock.json are not in sync` | 本地先执行 `npm install`（自动补全 lockfile）后重新构建 |
 
 ## 八、环境变量检查清单
 
@@ -183,18 +177,13 @@ WXPUSHER_APP_TOKEN    → 微信推送 Token
 
 ---
 
-## 八、紧急回滚
+## 九、紧急回滚
 
-如果新版本有问题，用旧 tar 包恢复：
+如果新版本有问题，用上一版预构建包回滚（同样免安装、免构建）：
 
 ```bash
-pm2 stop edu-manage
 cd /opt/edu-manage
-
-# 用上一个备份的 tar 包恢复
-tar -xf /tmp/edu-manage-BACKUP.tar
-cp /tmp/edu-manage.env.bak .env
-
-npm install && npx prisma generate
-npm run build && pm2 start edu-manage --update-env
+bash scripts/deploy-prebuilt-tar.sh /tmp/edu-manage-runtime-上一版.tar.gz
 ```
+
+数据库如需回滚，用 `scripts/backup-db.sh` 生成的 `/data/backups/edu-manage/*.dump` 恢复。
