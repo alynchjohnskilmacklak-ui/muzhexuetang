@@ -17,7 +17,6 @@ import {
   FileImageOutlined,
   FileTextOutlined,
   FolderOutlined,
-  GiftOutlined,
   LockOutlined,
   LogoutOutlined,
   HomeOutlined,
@@ -29,26 +28,26 @@ import {
   ExclamationCircleOutlined,
   QuestionCircleOutlined,
   ReadOutlined,
-  ScheduleOutlined,
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons'
 import { signOut } from 'next-auth/react'
 import { toast } from 'sonner'
-import { normalizeUploadUrl } from '@/lib/upload-url'
+import { normalizeAvatarUrl } from '@/lib/upload-url'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
 import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 import { MobileLayout, type MobileNavItem } from './MobileLayout'
+import { resolveTier, TIER_APP } from '@/constants/teacher-tier'
 
 const { Sider, Content, Header } = Layout
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 interface TeacherData {
-  teacher: { id: string; name: string; avatar?: string | null }
+  teacher: { id: string; name: string; avatar?: string | null; tierLevel?: string | null }
   badges: { unsubmitted: number; unpublished: number; unread: number; unreadMessages: number }
 }
 
@@ -59,29 +58,27 @@ type NavItem = Omit<MobileNavItem, 'children'> & {
 
 const navItems: NavItem[] = [
   { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
-  { key: '/teacher/services', icon: <AppstoreOutlined />, label: '业务总览' },
   { key: 'teaching-group', icon: <CalendarOutlined />, label: '教学工作', children: [
-    { key: '/teacher/schedule', icon: <CalendarOutlined />, label: '我的课表' },
-    { key: '/teacher/intensive', icon: <ScheduleOutlined />, label: '个性化课程' },
+    { key: '/teacher/teaching-schedule', icon: <CalendarOutlined />, label: '我的课表' },
+    { key: '/teacher/lesson-previews', icon: <FileTextOutlined />, label: '讲义预告' },
     { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
     { key: '/teacher/feedback', icon: <MessageOutlined />, label: '我的反馈', badgeKey: 'unpublished' },
     { key: '/teacher/study-hall', icon: <ReadOutlined />, label: '作业班工作台' },
   ] },
-  { key: 'service-group', icon: <MessageOutlined />, label: '沟通与服务', children: [
+  { key: 'student-group', icon: <TeamOutlined />, label: '学员与沟通', children: [
+    { key: '/teacher/students', icon: <TeamOutlined />, label: '我的学员' },
     { key: '/teacher/messages', icon: <MessageOutlined />, label: '家长留言', badgeKey: 'unreadMessages' },
     { key: '/teacher/leave', icon: <CalendarOutlined />, label: '请假审批' },
-    { key: '/teacher/meals', icon: <CoffeeOutlined />, label: '就餐上报' },
   ] },
-  { key: 'student-group', icon: <TeamOutlined />, label: '学员与资源', children: [
-    { key: '/teacher/students', icon: <TeamOutlined />, label: '我的学员' },
+  { key: 'resource-group', icon: <FolderOutlined />, label: '教学资源', children: [
     { key: '/teacher/papers', icon: <FileImageOutlined />, label: '试卷上传' },
     { key: '/teacher/materials', icon: <FolderOutlined />, label: '学习资料' },
-  ] },
-  { key: 'tools-group', icon: <ExperimentOutlined />, label: '个人与工具', children: [
-    { key: '/teacher/benefits', icon: <GiftOutlined />, label: '我的福利' },
-    { key: '/teacher/salary', icon: <DollarOutlined />, label: '我的薪资' },
     { key: '/teacher/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
     { key: '/teacher/ai', icon: <MessageFilled />, label: 'AI 助手' },
+  ] },
+  { key: 'account-group', icon: <AppstoreOutlined />, label: '服务与个人', children: [
+    { key: '/teacher/meals', icon: <CoffeeOutlined />, label: '就餐上报' },
+    { key: '/teacher/compensation', icon: <DollarOutlined />, label: '薪酬福利' },
   ] },
 ]
 
@@ -133,7 +130,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   })
 
   const { data: msgUnreadData } = useSWR(backgroundReady ? '/api/messages/unread-count' : null, fetcher, {
-    refreshInterval: 5_000,
+    refreshInterval: 30_000,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
   })
@@ -161,6 +158,8 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     } : current)
   }, [msgUnreadData])
 
+  const appTier = data?.teacher ? resolveTier(data.teacher.tierLevel) : 'NEW'
+  const appTheme = TIER_APP[appTier]
   const leafItems = useMemo(() => flattenNavItems(navItems), [])
   const selectedKey = leafItems
     .filter(item => pathname === item.key || pathname.startsWith(`${item.key}/`))
@@ -169,7 +168,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   const mobileNavItems = withBadges(navItems, data)
   const bottomTabs: MobileNavItem[] = [
     { key: '/teacher/dashboard', icon: <HomeOutlined />, label: '首页' },
-    { key: '/teacher/students', icon: <TeamOutlined />, label: '我的学员' },
+    { key: '/teacher/teaching-schedule', icon: <CalendarOutlined />, label: '课表' },
     { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤', badge: data?.badges?.unsubmitted },
     { key: '/teacher/feedback', icon: <FileTextOutlined />, label: '反馈', badge: data?.badges?.unpublished },
     { key: '__more', icon: <MenuOutlined />, label: '更多' },
@@ -208,7 +207,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     })),
   }))
 
-  if (isMobile === null) return null
+  if (isMobile === null) return <div aria-hidden="true" style={{ minHeight: '100dvh', background: appTheme.mainBg }} />
 
   if (isMobile) {
     return (
@@ -217,11 +216,16 @@ export function TeacherLayout({ children, initialData }: { children: React.React
         navItems={mobileNavItems}
         bottomTabs={bottomTabs}
         moreItems={mobileNavItems}
-        title="牧哲学堂 教师"
+        title="牧哲学堂"
+        roleLabel="教师端"
+        menuLabel="菜单"
+        accentColor="var(--color-role-teacher)"
+        accentBackground="var(--color-role-teacher-bg)"
+        headerTheme={{ bg: appTheme.headerBg, fg: appTheme.headerFg, border: appTheme.headerBorder, mainBg: appTheme.mainBg, dark: appTheme.dark }}
         drawerHeaderExtra={(
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {todoTotal > 0 && <div style={{ fontSize: 12, color: 'var(--color-ink-muted)', background: 'var(--color-primary-bg)', borderRadius: 8, padding: '8px 12px', border: '1px solid var(--color-hairline)' }}>
-              <ExclamationCircleOutlined style={{ color: 'var(--color-primary)', marginRight: 6 }} />
+            {todoTotal > 0 && <div style={{ fontSize: 12, color: 'var(--color-ink-muted)', background: 'var(--color-role-teacher-bg)', borderRadius: 8, padding: '8px 12px', border: '1px solid var(--color-hairline)' }}>
+              <ExclamationCircleOutlined style={{ color: 'var(--color-role-teacher)', marginRight: 6 }} />
               今日待办：{data?.badges?.unsubmitted || 0}节考勤，{data?.badges?.unpublished || 0}条反馈，{data?.badges?.unreadMessages || 0}条留言
             </div>}
             <Button size="small" icon={<QuestionCircleOutlined />} onClick={() => router.push('/teacher/dashboard?guide=1')}>使用帮助</Button>
@@ -234,7 +238,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
   }
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', background: appTheme.mainBg }}>
       <Sider
         collapsible
         collapsed={collapsed}
@@ -242,9 +246,10 @@ export function TeacherLayout({ children, initialData }: { children: React.React
         trigger={null}
         width={220}
         collapsedWidth={72}
+        className={`teacher-theme--${appTier.toLowerCase()}`}
         style={{
-          background: '#FFFBF7',
-          borderRight: '1px solid #F0DDD2',
+          background: appTheme.siderBg,
+          borderRight: `1px solid ${appTheme.siderBorder}`,
           position: 'fixed',
           left: 0,
           top: 0,
@@ -257,23 +262,23 @@ export function TeacherLayout({ children, initialData }: { children: React.React
           height: 56,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: collapsed ? '0 12px' : '0 12px 0 20px',
-          borderBottom: '1px solid #F0DDD2',
+          justifyContent: collapsed ? 'center' : 'space-between',
+          padding: collapsed ? 0 : '0 12px 0 20px',
+          borderBottom: '1px solid var(--color-hairline)',
         }}>
-          <Link href="/teacher/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {!collapsed && <Link href="/teacher/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Image src="/images/logo.jpg" alt="牧哲学堂" width={28} height={28} style={{ borderRadius: 6, objectFit: 'contain' }} unoptimized />
-            {!collapsed && <span style={{ fontSize: 14, fontWeight: 700, color: '#E87545', whiteSpace: 'nowrap' }}>牧哲学堂 · 教师端</span>}
-          </Link>
+            <span style={{ fontSize: 14, fontWeight: 700, color: appTheme.siderFg, whiteSpace: 'nowrap' }}>牧哲学堂 <small style={{ color: appTheme.siderFg, opacity: .78, fontSize: 11 }}>教师端</small></span>
+          </Link>}
           <Tooltip title={collapsed ? '展开导航' : '收起导航'} trigger={['hover', 'focus']}>
             <button type="button" aria-label={collapsed ? '展开导航' : '收起导航'} onClick={() => setCollapsed(!collapsed)} style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              border: '1px solid rgba(232,120,74,.2)',
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              border: '1px solid var(--color-hairline-strong)',
               cursor: 'pointer',
-              background: 'rgba(232,120,74,.08)',
-              color: '#E8784A',
+              background: 'var(--color-role-teacher-bg)',
+              color: 'var(--color-role-teacher)',
               fontSize: 14,
               display: 'flex',
               alignItems: 'center',
@@ -286,30 +291,31 @@ export function TeacherLayout({ children, initialData }: { children: React.React
         </div>
 
         <Menu
+          className="role-navigation role-navigation--teacher"
           mode="inline"
           selectedKeys={[selectedKey]}
           defaultOpenKeys={defaultOpenKeys}
           items={menuItems}
           onClick={({ key }) => router.push(key)}
-          style={{ borderInlineEnd: 'none', background: 'transparent', marginTop: 8, fontSize: 14 }}
+          style={{ borderInlineEnd: 'none', background: 'transparent', marginTop: 8, fontSize: 14, color: appTheme.siderFg }}
         />
       </Sider>
 
-      <Layout style={{ marginLeft: collapsed ? 72 : 220, transition: 'margin-left 0.2s', background: '#faf8f5' }}>
+      <Layout style={{ marginLeft: collapsed ? 72 : 220, background: '#faf8f5' }}>
         <Header style={{
           padding: '0 24px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-end',
-          borderBottom: '1px solid #EEE7E1',
+          justifyContent: 'space-between',
+          borderBottom: `1px solid ${appTheme.headerBorder}`,
           height: 56,
           position: 'sticky',
           top: 0,
           zIndex: 97,
-          background: '#fff',
+          background: appTheme.headerBg,
           gap: 16,
         }}>
-          <Tooltip title="使用帮助" trigger={['hover', 'focus']}><Button type="text" icon={<QuestionCircleOutlined />} onClick={() => router.push('/teacher/dashboard?guide=1')} aria-label="打开使用帮助" /></Tooltip>
+          <span style={{ color: appTheme.headerFg, fontSize: 13, fontWeight: 600, opacity: .92 }}>教师工作台</span>
           {data ? (
             <Dropdown menu={{ items: [
               { key: 'help', icon: <QuestionCircleOutlined />, label: '使用帮助', onClick: () => router.push('/teacher/dashboard?guide=1') },
@@ -320,13 +326,16 @@ export function TeacherLayout({ children, initialData }: { children: React.React
               } },
             ] }} trigger={['click']}>
               <button type="button" aria-label="打开用户菜单" style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: 0, border: 0, background: 'transparent' }}>
-                <Avatar size={28} icon={<UserOutlined />} src={normalizeUploadUrl(data.teacher.avatar) || undefined} />
-                <span style={{ fontSize: 13, color: '#1a1201', whiteSpace: 'nowrap' }}>{data.teacher.name}</span>
+                <Avatar size={30} src={normalizeAvatarUrl(data.teacher.avatar) || ((data.teacher as {gender?:string}).gender === 'F' || (data.teacher as {gender?:string}).gender === '女' ? '/avatars/teacher-female.png' : '/avatars/teacher-male.png')} icon={<UserOutlined />} style={{ backgroundColor: 'var(--color-role-teacher)', objectFit: 'cover' }} />
+                <span style={{ fontSize: 13, color: appTheme.headerFg, whiteSpace: 'nowrap' }}>{data.teacher.name}</span>
               </button>
             </Dropdown>
           ) : <Spin size="small" />}
         </Header>
-        <Content style={{ padding: 24, maxWidth: 1280, margin: '0 auto', width: '100%' }}>
+        <Content
+          className={appTheme.dark ? 'teacher-main--dark' : 'teacher-main--light'}
+          style={{ padding: 24, maxWidth: 1280, margin: '0 auto', width: '100%', background: appTheme.mainBg }}
+        >
           {children}
         </Content>
       </Layout>
@@ -354,7 +363,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
               },
             },
           ]}>
-            <Input.Password placeholder={`至少${PASSWORD_MIN_LENGTH}位，包含字母和数字`} style={{ borderRadius: 8 }} />
+            <Input.Password placeholder={`至少${PASSWORD_MIN_LENGTH}位，包含英文字母`} style={{ borderRadius: 8 }} />
           </Form.Item>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <Button onClick={() => { setChangingPwd(false); pwdForm.resetFields() }}>取消</Button>

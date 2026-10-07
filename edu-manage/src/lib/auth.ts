@@ -130,6 +130,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         })
 
         emitKick(u.id as string, sessionMark)
+
+        // 教师登录时查 gender 和 avatar 存进 token
+        if ((u.role as string) === 'teacher' || (u.role as string) === 'admin') {
+          try {
+            const userDivision = (u.division as string) === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+            const userDb = getPrismaForDivision(userDivision)
+            const teacher = await userDb.teacher.findFirst({
+              where: { OR: [{ user: { id: u.id as string } }, { email: u.email as string }] },
+              select: { gender: true, avatar: true },
+            })
+            if (teacher) {
+              t.teacherGender = teacher.gender
+              t.teacherAvatar = teacher.avatar
+            }
+          } catch { /* ignore */ }
+        }
       }
       return token
     },
@@ -142,6 +158,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         u.teacherId        = t.teacherId ?? null
         u.sessionMark      = t.sessionMark
         u.division         = t.division ?? 'JUNIOR'
+        u.gender           = t.teacherGender ?? null
+        u.avatar           = t.teacherAvatar ?? null
       }
       return session
     },

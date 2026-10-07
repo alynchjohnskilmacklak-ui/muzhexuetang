@@ -1,14 +1,16 @@
-﻿'use client'
+'use client'
 
 import { Button, Space, Tooltip, Typography } from 'antd'
-import { DeleteOutlined, EditOutlined, EyeOutlined, ProfileOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
+import { StudentAvatar } from '@/components/Common/StudentAvatar'
 
 import { StatusBadge } from './StatusBadge'
 import { MEMBERSHIP_THEME, resolveMembership } from '@/constants/membership'
 import {
   hasLowPrepaidHours,
   hasOutstandingPrepaidBalance,
+  hasOverdueFees,
 } from '@/lib/student-billing-status'
 
 const { Text } = Typography
@@ -34,6 +36,13 @@ function CourseTypeBadge({ type }: { type?: string | null }) {
       {config.label}
     </span>
   )
+}
+
+type StudentFee = {
+  id: string
+  status?: string | null
+  dueDate?: string | null
+  amount?: number | null
 }
 
 type StudentEnrollment = {
@@ -64,6 +73,7 @@ type StudentCardProps = {
     source?: string | null
     membershipLevel?: string
     courseType?: string | null
+    fees?: StudentFee[]
     enrollments?: StudentEnrollment[]
     studyHallMemberships?: Array<{
       id: string
@@ -82,32 +92,44 @@ type StudentCardProps = {
 export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
   const router = useRouter()
   const isLowHours = student.status === 'ACTIVE' && hasLowPrepaidHours(student.enrollments)
-  const isOwed = student.status === 'ACTIVE' && hasOutstandingPrepaidBalance(student.enrollments)
+  // 欠费只看“有逾期未缴费用”，与课时数字无关；接口未返回 fees 时回退旧逻辑
+  const isOwed = student.status === 'ACTIVE'
+    && (Array.isArray(student.fees)
+      ? hasOverdueFees(student.fees)
+      : hasOutstandingPrepaidBalance(student.enrollments))
   const bgColor = getAvatarColor(student.name)
   const membershipLevel = resolveMembership(student.membershipLevel)
   const membershipTheme = MEMBERSHIP_THEME[membershipLevel]
   const hasMembershipBadge = membershipLevel === 'VIP' || membershipLevel === 'SVIP'
+  const isSvipCard = membershipLevel === 'SVIP'
+  const isVipCard = membershipLevel === 'VIP'
+  const cardBg = isSvipCard ? '#0E2E2A' : isVipCard ? '#FFF7F1' : '#ffffff'
+  const cardBorder = isSvipCard ? '#C9A45C' : isVipCard ? '#F2B58F' : '#EEE7E1'
+  const cardMainText = isSvipCard ? '#F6E9C8' : isVipCard ? '#7A4A28' : '#1F2329'
+  const cardSubText = isSvipCard ? 'rgba(246,233,200,.72)' : isVipCard ? '#B08150' : '#98A2B3'
+  const cardAccentText = isSvipCard ? '#F6E9C8' : '#E8784A'
+  // 操作按钮颜色：SVIP 金 / VIP 橙 / 普通深灰，默认常显
+  const actionColor = isSvipCard ? '#F6E9C8' : isVipCard ? '#B94F25' : '#4A5568'
 
   return (
     <div
       style={{
         position: 'relative',
-        border: '1px solid #EEE7E1',
+        border: `1px solid ${cardBorder}`,
         borderRadius: 8,
-        background: '#ffffff',
+        background: cardBg,
         padding: 12,
         minHeight: 128,
-        transition: 'border-color 0.2s, background 0.2s',
+        boxShadow: isSvipCard ? '0 0 14px rgba(201,164,92,.18)' : 'none',
+        transition: 'border-color 0.2s, background 0.2s, box-shadow 0.2s',
       }}
       onMouseEnter={(event) => {
-        event.currentTarget.style.borderColor = '#E8784A'
-        const actions = event.currentTarget.querySelector('.student-actions') as HTMLElement | null
-        if (actions) actions.style.opacity = '1'
+        event.currentTarget.style.borderColor = isSvipCard ? '#D6B56A' : '#E8784A'
+        if (isSvipCard) event.currentTarget.style.boxShadow = '0 0 22px rgba(201,164,92,.38)'
       }}
       onMouseLeave={(event) => {
-        event.currentTarget.style.borderColor = '#EEE7E1'
-        const actions = event.currentTarget.querySelector('.student-actions') as HTMLElement | null
-        if (actions) actions.style.opacity = '0'
+        event.currentTarget.style.borderColor = cardBorder
+        if (isSvipCard) event.currentTarget.style.boxShadow = '0 0 14px rgba(201,164,92,.18)'
       }}
     >
       {hasMembershipBadge && (
@@ -120,20 +142,18 @@ export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
       )}
 
       <div style={{ display: 'flex', gap: 9, alignItems: 'center', marginBottom: 10 }}>
-        <div style={{ width: 30, height: 30, borderRadius: 8, background: bgColor, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 700, flexShrink: 0 }}>
-          {student.name.charAt(0)}
-        </div>
+        <StudentAvatar gender={student.gender} name={student.name} size={30} rounded={false} />
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Text strong style={{ color: '#1F2329', fontSize: 13, lineHeight: 1.25 }}>{student.name}</Text>
+            <Text strong style={{ color: cardMainText, fontSize: 13, lineHeight: 1.25 }}>{student.name}</Text>
             {hasMembershipBadge && (
-              <span style={{ background: membershipTheme.bg, color: membershipTheme.accent, border: `1px solid ${membershipTheme.border}`, borderRadius: 999, fontSize: 10, padding: '1px 7px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
-                {membershipLevel === 'SVIP' && <span style={{ color: membershipTheme.gold, marginRight: 3 }}>★</span>}
+              <span style={{ background: isSvipCard ? 'linear-gradient(135deg,#C9A45C,#A8873D)' : membershipTheme.bg, color: isSvipCard ? '#fff' : membershipTheme.accent, border: `1px solid ${isSvipCard ? '#D6B56A' : membershipTheme.border}`, borderRadius: 999, fontSize: 10, fontWeight: 700, padding: '1px 7px', lineHeight: 1.4, whiteSpace: 'nowrap' }}>
+                {membershipLevel === 'SVIP' && <span style={{ marginRight: 3 }}>★</span>}
                 {membershipTheme.badge}
               </span>
             )}
           </div>
-          <Text style={{ color: '#98A2B3', fontSize: 11, display: 'block', maxWidth: 180, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <Text style={{ color: cardSubText, fontSize: 11, display: 'block', maxWidth: 180, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {[student.grade || '未设年级', student.school].filter(Boolean).join(' · ')}
           </Text>
         </div>
@@ -145,25 +165,22 @@ export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
       </Space>
 
       {student.studyHallMemberships?.map((membership) => (
-        <div key={membership.id} style={{ fontSize: 11, color: '#667085', margin: '-3px 0 8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div key={membership.id} style={{ fontSize: 11, color: cardSubText, margin: '-3px 0 8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {membership.studyClass.scheduleType === 'WEEKEND' ? '周末班' : '晚托'}：{membership.studyClass.name}
           {' · '}{membership.quotaState === 'UNSET' ? '未设置天数' : membership.quotaState === 'EXPIRED' ? '已到期' : `剩余${membership.remainingDays}/${membership.totalDays}天`}
         </div>
       ))}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #EEE7E1', paddingTop: 9 }}>
-        <span style={{ color: '#98A2B3', fontSize: 11, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          已上 <strong style={{ color: '#E8784A', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{Number(student.taughtHours || 0).toFixed(1)} 小时</strong>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: isSvipCard ? '1px solid rgba(201,164,92,.30)' : '1px solid #EEE7E1', paddingTop: 9 }}>
+        <span style={{ color: cardSubText, fontSize: 11, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          已上 <strong style={{ color: cardAccentText, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{Number(student.taughtHours || 0).toFixed(1)} 小时</strong>
         </span>
-        <Space className="student-actions" size={2} style={{ opacity: 0, transition: 'opacity 0.2s' }}>
-          <Tooltip title="查看">
-            <Button type="text" size="small" icon={<EyeOutlined />} style={{ color: '#98A2B3' }} onClick={() => router.push(`/students/${student.id}`)} />
-          </Tooltip>
-          <Tooltip title="学情档案">
-            <Button type="text" size="small" icon={<ProfileOutlined />} style={{ color: '#98A2B3' }} onClick={() => router.push(`/student-archive/${student.id}`)} />
+        <Space className="student-actions" size={2} style={{ opacity: 1 }}>
+          <Tooltip title="查看资料与学情">
+            <Button type="text" size="small" icon={<EyeOutlined />} style={{ color: actionColor, transition: 'color .15s' }} onClick={() => router.push(`/students/${student.id}`)} />
           </Tooltip>
           <Tooltip title="编辑">
-            <Button type="text" size="small" icon={<EditOutlined />} style={{ color: '#98A2B3' }} onClick={() => onEdit(student)} />
+            <Button type="text" size="small" icon={<EditOutlined />} style={{ color: actionColor, transition: 'color .15s' }} onClick={() => onEdit(student)} />
           </Tooltip>
           <Tooltip title="离校">
             <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => onDelete(student)} />

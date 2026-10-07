@@ -7,6 +7,7 @@ import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
+import { getDefaultTeacherAvatar } from '@/lib/default-avatar'
 
 const TAB_BAR_HEIGHT = 60
 
@@ -30,6 +31,15 @@ export function MobileLayout({
   showBottomTabs,
   drawerHeaderExtra,
   menuLabel = '功能菜单',
+  roleLabel,
+  accentColor = 'var(--color-primary)',
+  accentBackground = 'var(--color-primary-bg)',
+  tabBackground,
+  tabBorderTop,
+  tabInactiveColor,
+  tabActiveColor,
+  pageTheme = 'normal',
+  headerTheme,
 }: {
   children: React.ReactNode
   navItems: MobileNavItem[]
@@ -40,9 +50,28 @@ export function MobileLayout({
   showBottomTabs?: boolean
   drawerHeaderExtra?: React.ReactNode
   menuLabel?: string
+  roleLabel?: string
+  accentColor?: string
+  accentBackground?: string
+  tabBackground?: string
+  tabBorderTop?: string
+  tabActiveColor?: string
+  tabInactiveColor?: string
+  pageTheme?: 'normal' | 'vip' | 'svip'
+  headerTheme?: { bg: string; fg: string; border: string; mainBg?: string; dark?: boolean }
 }) {
   const [open, setOpen] = useState(false)
   const { data: session } = useSession()
+  const userRole = (session?.user as { role?: string })?.role
+  const userGender = (session?.user as { gender?: string })?.gender
+  const userId = (session?.user as { id?: string })?.id
+  const userAvatar = (session?.user as { avatar?: string })?.avatar
+  const defaultAvatarSrc = userAvatar
+    ? userAvatar
+    : getDefaultTeacherAvatar(userRole === 'teacher' || userRole === 'admin' ? userGender : null, userRole === 'teacher' || userRole === 'admin' ? userId : null)
+  const effectiveTabBackground = tabBackground ?? (headerTheme?.dark ? 'rgba(14,46,42,.98)' : '#ffffff')
+  const effectiveTabBorderTop = tabBorderTop ?? (headerTheme?.dark ? '1px solid rgba(201,164,92,.30)' : '1px solid rgba(0,0,0,.06)')
+  const effectiveTabInactive = tabInactiveColor ?? (headerTheme?.dark ? 'rgba(246,233,200,.78)' : 'var(--color-ink-subtle)')
   const pathname = usePathname()
 
   const hasBottomTabs = showBottomTabs ?? mode === 'tabs'
@@ -69,22 +98,23 @@ export function MobileLayout({
   )
 
   return (
-    <div id="mobile-root" style={{ minHeight: '100dvh', backgroundColor: '#faf8f5', maxWidth: '100vw', overflowX: 'hidden' }}>
+    <div id="mobile-root" className={pageTheme !== 'normal' ? 'parent-page--' + pageTheme : undefined} style={{ minHeight: '100dvh', backgroundColor: 'var(--color-canvas)', width: '100%', maxWidth: '100vw', overflowX: 'clip', overflowY: 'visible' }}>
       {/* ---- Top Header ---- */}
       <header className="mobile-app-header" style={{
         position: 'fixed',
         inset: '0 0 auto',
         zIndex: 300,
         paddingTop: 'env(safe-area-inset-top, 0px)',
-        backgroundColor: '#ffffff',
-        borderBottom: '1px solid rgba(0,0,0,.06)',
+        background: headerTheme?.bg ?? (pageTheme === 'svip' ? '#123C35' : pageTheme === 'vip' ? '#FFF3EA' : '#ffffff'),
+        borderBottom: headerTheme?.border ?? (pageTheme === 'svip' ? '1px solid rgba(201,164,92,.35)' : '1px solid rgba(0,0,0,.06)'),
       }}>
         <div className="mobile-app-header__bar" style={{
           height: 56,
-          display: 'grid',
-          gridTemplateColumns: '104px minmax(0, 1fr) 104px',
+          color: headerTheme?.fg ?? (pageTheme === 'svip' ? '#F6E9C8' : undefined),
+          position: 'relative',
+          display: 'flex',
           alignItems: 'center',
-          gap: 6,
+          justifyContent: 'space-between',
           padding: '0 12px',
           maxWidth: '100vw',
         }}>
@@ -96,42 +126,55 @@ export function MobileLayout({
             className="mobile-menu-trigger"
             style={{
               width: 'fit-content',
-              minWidth: 84,
+              minWidth: 76,
               height: 44,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 7,
               padding: '0 10px',
-              background: 'var(--color-primary-bg)',
-              border: '1px solid rgba(232,120,74,.18)',
+              background: accentBackground,
+              border: '1px solid var(--color-hairline-strong)',
               borderRadius: 10,
               cursor: 'pointer',
-              color: 'var(--color-primary-focus)',
+              color: accentColor,
               fontSize: 13,
               fontWeight: 700,
               whiteSpace: 'nowrap',
-              justifySelf: 'start',
+              position: 'relative',
+              zIndex: 1,
             }}
           >
             <MenuOutlined style={{ fontSize: 18 }} />
             <span>{menuLabel}</span>
           </button>
 
-          <span style={{
-            fontSize: 16,
-            fontWeight: 700,
-            color: '#E8784A',
-            letterSpacing: 0,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+          <div className="mobile-brand-lockup" style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
             minWidth: 0,
-            flex: 1,
-            textAlign: 'center',
+            maxWidth: 'calc(100% - 160px)',
+            lineHeight: 1,
+            pointerEvents: 'none',
           }}>
-            {title}
-          </span>
+            <span className="mobile-brand-title" style={{
+              fontSize: pageTheme === 'svip' || headerTheme ? 17 : 16,
+              fontWeight: pageTheme === 'svip' || headerTheme ? 800 : 760,
+              letterSpacing: pageTheme === 'svip' || headerTheme ? '0.02em' : '-0.02em',
+              color: headerTheme?.fg ?? (pageTheme === 'svip' ? '#F6E9C8' : 'var(--color-ink)'),
+              textShadow: pageTheme === 'svip' || headerTheme ? '0 1px 3px rgba(0,0,0,.35)' : undefined,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{title}</span>
+            {roleLabel && <span className="mobile-brand-role" style={{ flexShrink: 0, padding: '3px 5px', borderRadius: 5, color: accentColor, background: accentBackground, fontSize: 10, fontWeight: 750, whiteSpace: 'nowrap' }}>{roleLabel}</span>}
+          </div>
 
           <Dropdown menu={userMenu} placement="bottomRight" trigger={['click']}>
             <button type="button" aria-label="打开用户菜单" style={{
@@ -145,9 +188,10 @@ export function MobileLayout({
               borderRadius: 20,
               border: 0,
               background: 'transparent',
-              justifySelf: 'end',
+              position: 'relative',
+              zIndex: 1,
             }}>
-              <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: '#E8784A', flexShrink: 0 }} />
+              <Avatar size={32} src={defaultAvatarSrc} icon={<UserOutlined />} style={{ flexShrink: 0, objectFit: 'cover' }} />
             </button>
           </Dropdown>
         </div>
@@ -181,8 +225,8 @@ export function MobileLayout({
           borderBottom: '1px solid rgba(0,0,0,.06)',
           backgroundColor: '#faf8f5',
         }}>
-          <span style={{ fontSize: 17, fontWeight: 700, color: '#E8784A' }}>
-            {mode === 'tabs' ? '更多功能' : `${menuLabel}导航`}
+          <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-ink)' }}>
+            {roleLabel ? `${roleLabel} · 功能导航` : mode === 'tabs' ? '更多功能' : `${menuLabel}导航`}
           </span>
           <button
             type="button"
@@ -206,14 +250,14 @@ export function MobileLayout({
 
         {/* User profile */}
         <div style={{
-          padding: '18px 16px',
+          padding: '14px 16px',
           display: 'flex',
           alignItems: 'center',
           gap: 12,
           borderBottom: '1px solid rgba(0,0,0,.05)',
           backgroundColor: '#faf8f5',
         }}>
-          <Avatar size={42} icon={<UserOutlined />} style={{ backgroundColor: '#E8784A', flexShrink: 0 }} />
+          <Avatar size={40} src={defaultAvatarSrc} icon={<UserOutlined />} style={{ flexShrink: 0, objectFit: 'cover' }} />
           <div style={{ minWidth: 0 }}>
             <div style={{
               fontSize: 15,
@@ -255,10 +299,10 @@ export function MobileLayout({
                     type="button"
                     onClick={() => setExpandedGroupKeys(keys => expanded ? keys.filter(key => key !== item.key) : [...keys, item.key])}
                     style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 14px',
-                      borderRadius: 12, cursor: 'pointer', backgroundColor: active ? 'rgba(232,120,74,.06)' : 'transparent',
-                      color: active ? '#E8784A' : '#5a4e3a', fontSize: 15, fontWeight: active ? 600 : 500,
-                      border: 0, textAlign: 'left', minHeight: 50,
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '11px 12px',
+                      borderRadius: 10, cursor: 'pointer', backgroundColor: active ? accentBackground : 'transparent',
+                      color: active ? accentColor : 'var(--color-ink-muted)', fontSize: 14, fontWeight: active ? 700 : 600,
+                      border: 0, textAlign: 'left', minHeight: 46,
                     }}
                   >
                     <span style={{ fontSize: 19, flexShrink: 0, width: 24, textAlign: 'center' }}>{item.icon}</span>
@@ -274,11 +318,11 @@ export function MobileLayout({
                         prefetch={true}
                         onClick={() => setOpen(false)}
                         style={{
-                          width: '100%', display: 'flex', alignItems: 'center', gap: 14,
-                          padding: '12px 14px 12px 30px', borderRadius: 12, marginBottom: 2,
-                          backgroundColor: childActive ? 'rgba(232,120,74,.1)' : 'transparent',
-                          color: childActive ? '#E8784A' : '#5a4e3a', fontSize: 14,
-                          fontWeight: childActive ? 600 : 400, minHeight: 46, textDecoration: 'none',
+                          width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                          padding: '10px 12px 10px 28px', borderRadius: 10, marginBottom: 1,
+                          backgroundColor: childActive ? accentBackground : 'transparent',
+                          color: childActive ? accentColor : 'var(--color-ink-muted)', fontSize: 14,
+                          fontWeight: childActive ? 650 : 400, minHeight: 44, textDecoration: 'none',
                         }}
                       >
                         <span style={{ fontSize: 17, flexShrink: 0, width: 24, textAlign: 'center' }}>{child.icon}</span>
@@ -302,19 +346,19 @@ export function MobileLayout({
                   width: '100%',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 14,
-                  padding: '14px 14px',
-                  borderRadius: 12,
+                  gap: 12,
+                  padding: '11px 12px',
+                  borderRadius: 10,
                   marginBottom: 4,
                   cursor: 'pointer',
-                  backgroundColor: active ? 'rgba(232,120,74,.1)' : 'transparent',
-                  color: active ? '#E8784A' : '#5a4e3a',
-                  fontSize: 15,
-                  fontWeight: active ? 600 : 400,
+                  backgroundColor: active ? accentBackground : 'transparent',
+                  color: active ? accentColor : 'var(--color-ink-muted)',
+                  fontSize: 14,
+                  fontWeight: active ? 700 : 500,
                   border: 0,
                   textAlign: 'left' as const,
                   transition: 'background-color .15s ease, color .15s ease',
-                  minHeight: 50,
+                  minHeight: 46,
                   textDecoration: 'none',
                 }}
               >
@@ -369,15 +413,17 @@ export function MobileLayout({
 
       {/* ---- Main Content ---- */}
       <main
-        className="mobile-page-content"
+        className={headerTheme?.dark ? 'mobile-page-content teacher-main--dark' : 'mobile-page-content'}
         style={{
+          background: headerTheme?.mainBg || '#f5f7fa',
           paddingTop: 'calc(56px + env(safe-area-inset-top, 0px) + 2px)',
           paddingBottom: hasBottomTabs
             ? `calc(${TAB_BAR_HEIGHT + 26}px + max(env(safe-area-inset-bottom, 0px), 8px))`
             : 'calc(24px + max(env(safe-area-inset-bottom, 0px), 8px))',
           minHeight: '100dvh',
           maxWidth: '100vw',
-          overflowX: 'hidden',
+          overflowX: 'clip',
+          overflowY: 'visible',
           paddingLeft: 12,
           paddingRight: 12,
         }}
@@ -394,8 +440,8 @@ export function MobileLayout({
           paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 4px)',
           minHeight: 'calc(56px + env(safe-area-inset-bottom, 0px))',
           display: 'flex',
-          background: '#ffffff',
-          borderTop: '1px solid rgba(0,0,0,.06)',
+          background: effectiveTabBackground,
+          borderTop: effectiveTabBorderTop,
         }}>
           {tabs.map(item => {
             const active = item.key !== '__more' && isActive(item.key)
@@ -403,8 +449,8 @@ export function MobileLayout({
               flex: 1,
               minWidth: 0,
               border: 0,
-              background: active ? 'rgba(232,120,74,.06)' : 'transparent',
-              color: active ? '#E8784A' : '#9a8e7a',
+              background: 'transparent',
+              color: active ? (tabActiveColor ?? (headerTheme?.dark ? '#F6E9C8' : accentColor)) : effectiveTabInactive,
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
@@ -415,8 +461,9 @@ export function MobileLayout({
               fontWeight: active ? 600 : 400,
               lineHeight: 1.2,
               padding: '7px 4px 5px',
-              borderRadius: 10,
-              margin: '4px 3px',
+              borderRadius: 0,
+              margin: 0,
+              borderTop: `2px solid ${active ? (tabActiveColor ?? (headerTheme?.dark ? '#F6E9C8' : accentColor)) : 'transparent'}`,
               transition: 'color .15s ease, background-color .15s ease',
               height: TAB_BAR_HEIGHT,
               maxHeight: TAB_BAR_HEIGHT,
@@ -426,7 +473,7 @@ export function MobileLayout({
                 <span style={{
                   fontSize: 20,
                   lineHeight: 1,
-                  color: active ? '#E8784A' : '#9a8e7a',
+                  color: active ? (tabActiveColor ?? (headerTheme?.dark ? '#F6E9C8' : accentColor)) : effectiveTabInactive,
                   transition: 'color .15s ease',
                 }}>
                   {item.icon}

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonWhere, todayRange } from '@/lib/teacher-portal'
+import { requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonScopeWhere, todayRange } from '@/lib/teacher-portal'
 import { calculateAttendanceDeductHours, shouldCreateMakeupRequest } from '@/lib/attendance-hours'
-import { triggerLessonPay } from '@/lib/teacher-salary'
+import { createLessonPayInTransaction } from '@/lib/teacher-salary'
+import { postAttendanceHours } from '@/lib/attendance-hour-posting'
+import { normalizeAttendanceRecordStatus } from '@/lib/attendance-status'
 import { resolveIntensiveActualMinutes } from '@/lib/intensive-class'
 import {
   IntensiveReviewError,
@@ -13,19 +15,19 @@ import {
 import { canSubmitIntensiveAttendance } from '@/lib/teacher-intensive-scheduling'
 import { syncAutomaticMealAttendance } from '@/lib/meal-attendance-sync'
 import { isFirstTeachingPeriod, normalizeSchedulePeriods } from '@/lib/schedule-periods'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
+import { hasAttendingStudent } from '@/lib/attendance-submission'
 
 import { apiHandler } from '@/lib/api-handler'
 
 export const dynamic = 'force-dynamic'
-
-const VALID_STATUS = new Set(['PRESENT', 'LEAVE', 'ABSENT', 'MAKEUP'])
 
 export const GET = apiHandler(async (request: NextRequest) => {
   try {
     const { teacher, prisma } = await requireCurrentTeacher()
     const { start: today, end: todayEnd } = todayRange()
     const lessonId = request.nextUrl.searchParams.get('lessonId')
-    const lessonWhere = teacherLessonWhere(teacher.id)
+    const lessonWhere = await teacherLessonScopeWhere(prisma, teacher.id)
 
     if (lessonId) {
       const lesson = await prisma.classLesson.findFirst({
@@ -37,7 +39,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
               room: true,
               teacher: { select: { id: true, name: true } },
               teacherAssignments: { include: { teacher: { select: { id: true, name: true, subjects: true } } } },
-              enrollments: { where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } }, include: { student: true } },
+              enrollments: { where: { status: 'ACTIVE', deletedAt: null, student: { status: { not: 'INACTIVE' } } }, include: { student: true } },
             },
           },
           attendances: true,
@@ -49,11 +51,14 @@ export const GET = apiHandler(async (request: NextRequest) => {
         },
       })
       if (!lesson) return NextResponse.json({ error: '不可操作此课次' }, { status: 403 })
-      const displayEnrollments = lesson.group.intensiveMode === 'INTENSIVE'
-        ? lesson.lessonStudents
-            .map((snapshot) => lesson.group.enrollments.find((enrollment) => enrollment.student.id === snapshot.studentId))
-            .filter((enrollment): enrollment is NonNullable<typeof enrollment> => Boolean(enrollment))
-        : lesson.group.enrollments
+      const lessonSubject = lesson.subject || lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject
+      const rosterStudentIds = new Set(resolveSubjectLessonStudentIds(
+        lesson.lessonStudents.map((item) => item.studentId),
+        lesson.group.enrollments.map((enrollment) => ({ studentId: enrollment.student.id, subjects: enrollment.subjects })),
+        lessonSubject,
+        lesson.lessonDate,
+      ))
+      const displayEnrollments = lesson.group.enrollments.filter((enrollment) => rosterStudentIds.has(enrollment.student.id))
       const scheduleConfig = await prisma.systemConfig.findUnique({
         where: { id: 'singleton' },
         select: { schedulePeriods: true },
@@ -85,7 +90,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
           latestReview: lesson.intensiveReviews[0] || null,
           intensiveMode: lesson.group.intensiveMode,
           teachingType: lesson.group.teachingType,
-          subject: lesson.subject || lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject,
+          subject: lessonSubject,
           room: lesson.group.room?.name,
           status: lesson.status,
           hoursDeducted: !!lesson.hoursDeductedAt,
@@ -98,7 +103,9 @@ export const GET = apiHandler(async (request: NextRequest) => {
           studentId: enrollment.student.id,
           enrollmentId: enrollment.id,
           name: enrollment.student.name,
+          gender: enrollment.student.gender,
           grade: enrollment.student.grade,
+          membershipLevel: enrollment.student.membershipLevel || 'NORMAL',
           remainHours: enrollment.remainHours,
           courseType: lesson.group.course.type,
           lessonMinutes: lesson.group.lessonMinutes,
@@ -117,10 +124,11 @@ export const GET = apiHandler(async (request: NextRequest) => {
             room: true,
             teacher: { select: { id: true, name: true } },
             teacherAssignments: { include: { teacher: { select: { id: true, name: true, subjects: true } } } },
-            enrollments: { where: { status: 'ACTIVE' }, select: { id: true } },
+            enrollments: { where: { status: 'ACTIVE', deletedAt: null }, select: { id: true, studentId: true, subjects: true } },
           },
         },
         attendances: { select: { id: true, status: true, studentId: true } },
+        lessonStudents: { select: { studentId: true } },
       },
       orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
     })
@@ -136,7 +144,12 @@ export const GET = apiHandler(async (request: NextRequest) => {
       subject: lesson.subject || lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject,
       room: lesson.group.room?.name || '-',
       status: lesson.status,
-      studentCount: lesson.group.enrollments.length,
+      studentCount: resolveSubjectLessonStudentIds(
+        lesson.lessonStudents.map((item) => item.studentId),
+        lesson.group.enrollments,
+        lesson.subject || lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject,
+        lesson.lessonDate,
+      ).length,
       attendanceCount: lesson.attendances.length,
       allPresent: lesson.attendances.length > 0 && lesson.attendances.every((attendance) => attendance.status === 'PRESENT'),
       hoursDeducted: !!lesson.hoursDeductedAt,
@@ -155,7 +168,10 @@ export const POST = apiHandler(async (request: NextRequest) => {
     const mealStudentIds: string[] | null = Array.isArray(body.mealStudentIds)
       ? body.mealStudentIds.filter((value: unknown): value is string => typeof value === 'string')
       : null
-    if (!lessonId || !records.length) return NextResponse.json({ error: '无效数据' }, { status: 400 })
+    if (!lessonId) return NextResponse.json({ error: '缺少课次编号' }, { status: 400 })
+    if (!records.length) {
+      return NextResponse.json({ error: '本节课暂无有效学员，请先核对班级报名学科与课次名单' }, { status: 400 })
+    }
 
     const session = await auth()
     if (!session?.user) return NextResponse.json({ error: '无权限' }, { status: 401 })
@@ -183,12 +199,20 @@ export const POST = apiHandler(async (request: NextRequest) => {
       prisma = result.prisma
       user = { id: result.user.id }
       teacher = { id: result.teacher.id, name: result.teacher.name }
-      lessonWhere = { id: lessonId, ...teacherLessonWhere(teacher.id) }
+      lessonWhere = { id: lessonId, ...await teacherLessonScopeWhere(prisma, teacher.id) }
     }
 
     const lesson = await prisma.classLesson.findFirst({
       where: lessonWhere,
-      include: { group: { include: { course: true } }, lessonStudents: { select: { studentId: true } } },
+      include: {
+        group: {
+          include: {
+            course: true,
+            enrollments: { where: { status: 'ACTIVE', deletedAt: null, student: { status: { not: 'INACTIVE' } } }, select: { id: true, studentId: true, subjects: true, student: { select: { id: true, name: true, gender: true, grade: true, membershipLevel: true } } } },
+          },
+        },
+        lessonStudents: { select: { studentId: true } },
+      },
     })
     if (!lesson) return NextResponse.json({ error: '不可操作' }, { status: 403 })
 
@@ -235,7 +259,22 @@ export const POST = apiHandler(async (request: NextRequest) => {
     if (isIntensive && lesson.settlementStatus !== 'UNSETTLED') {
       return NextResponse.json({ error: '该突击班课次已经结算，如需修改实际分钟请联系管理员走结算调整流程' }, { status: 409 })
     }
-    const snapshotStudentIds = new Set(lesson.lessonStudents.map((item) => item.studentId))
+    const lessonSubject = lesson.subject || lesson.group.course.subject
+    const snapshotStudentIds = new Set(resolveSubjectLessonStudentIds(
+      lesson.lessonStudents.map((item) => item.studentId),
+      lesson.group.enrollments,
+      lessonSubject,
+      lesson.lessonDate,
+    ))
+    const eligibleStudentIds = snapshotStudentIds
+    const eligibleRecords = records.filter((record: { studentId?: unknown }) =>
+      typeof record.studentId === 'string' && eligibleStudentIds.has(record.studentId))
+    if (eligibleRecords.length === 0) {
+      return NextResponse.json({ error: '本节课没有已报读该学科的有效学员，请先核对报名学科与课次名单' }, { status: 400 })
+    }
+    if (!hasAttendingStudent(eligibleRecords)) {
+      return NextResponse.json({ error: '本次课没有实际出勤学员，不能提交已上课考勤；请联系管理员取消或调整课次' }, { status: 400 })
+    }
     const intensiveActualMinutes = isIntensive
       ? resolveIntensiveActualMinutes(
           lesson.plannedMinutes || group.lessonMinutes,
@@ -308,8 +347,8 @@ export const POST = apiHandler(async (request: NextRequest) => {
       // Use upsert instead of delete+create to avoid losing data
       for (const rec of records) {
         const studentId = typeof rec.studentId === 'string' ? rec.studentId : ''
-        if (isIntensive && !snapshotStudentIds.has(studentId)) continue
-        const status = VALID_STATUS.has(rec.status) ? rec.status as keyof typeof counts : 'PRESENT'
+        if (!eligibleStudentIds.has(studentId)) continue
+        const status = normalizeAttendanceRecordStatus(rec.status)
         const enrollment = await tx.enrollment.findFirst({
           where: {
             studentId,
@@ -352,30 +391,18 @@ export const POST = apiHandler(async (request: NextRequest) => {
           })
           if (hoursDeducted > 0) {
             if (!attendance.hoursDeducted || attendance.hoursDeducted <= 0) {
-              const safeDeduct = Math.min(hoursDeducted, enrollment.remainHours)
-              if (safeDeduct <= 0) continue
+              const posting = await postAttendanceHours(tx, {
+                attendanceId: attendance.id,
+                enrollmentId: enrollment.id,
+                enrollmentTotalHours: Number(enrollment.totalHours || 0),
+                studentId,
+                lessonId,
+                groupName: group.name,
+                operatorId: user.id,
+                hours: hoursDeducted,
+              })
+              if (!posting.posted) continue
               deductedCount += 1
-              await tx.attendance.update({
-                where: { id: attendance.id },
-                data: { hoursDeducted: safeDeduct },
-              })
-              await tx.enrollment.update({
-                where: { id: enrollment.id },
-                data: { usedHours: { increment: safeDeduct }, remainHours: { decrement: safeDeduct } },
-              })
-              await tx.hourTransaction.create({
-                data: {
-                  studentId,
-                  enrollmentId: enrollment.id,
-                  lessonId,
-                  amount: -safeDeduct,
-                  beforeHours: enrollment.remainHours,
-                  afterHours: enrollment.remainHours - safeDeduct,
-                  type: 'ATTENDANCE_DEDUCT',
-                  reason: `${group.name} 考勤扣课时`,
-                  operatorId: user.id,
-                },
-              })
             }
           }
           if (needsMakeup) {
@@ -402,6 +429,9 @@ export const POST = apiHandler(async (request: NextRequest) => {
 
       if (processedCount === 0) {
         throw new Error('NO_VALID_ATTENDANCE_RECORDS')
+      }
+      if (counts.PRESENT === 0) {
+        throw new Error('NO_ATTENDING_STUDENTS')
       }
 
       if (isSystemFirstPeriod && mealStudentIds !== null) {
@@ -457,12 +487,12 @@ export const POST = apiHandler(async (request: NextRequest) => {
         },
       })
 
-    })
+      if (!isIntensive) {
+        const lessonPay = await createLessonPayInTransaction(tx, lessonId)
+        if (!lessonPay.success) throw new Error(lessonPay.error || 'LESSON_PAY_FAILED')
+      }
 
-    // 在 transaction 提交成功后触发薪资发放，与考勤事务解耦（幂等，不会重复）
-    if (!isIntensive && !alreadyDeducted) {
-      await triggerLessonPay(lessonId)
-    }
+    })
 
     const msg = alreadyDeducted
       ? `考勤已更新（未重复扣课时）：出勤${counts.PRESENT}/请假${counts.LEAVE}/旷课${counts.ABSENT}`
@@ -490,9 +520,14 @@ export const POST = apiHandler(async (request: NextRequest) => {
     if (error instanceof Error && error.message === 'NO_VALID_ATTENDANCE_RECORDS') {
       return NextResponse.json({ error: '没有有效考勤记录，请检查学生是否仍在班级中' }, { status: 400 })
     }
+    if (error instanceof Error && error.message === 'NO_ATTENDING_STUDENTS') {
+      return NextResponse.json({ error: '本次课没有实际出勤学员，不能提交已上课考勤；请联系管理员取消或调整课次' }, { status: 400 })
+    }
     if (error instanceof Error && error.message === 'INTENSIVE_SETTLEMENT_LOCKED') {
       return NextResponse.json({ error: '该突击班课次已被结算，请刷新后通过结算调整流程修改' }, { status: 409 })
     }
-    return NextResponse.json({ error: error instanceof Error ? error.message : '提交失败' }, { status: 500 })
+    // 未知错误：记录日志后交给 api-handler 统一处理（生产环境不向客户端暴露内部错误细节）
+    console.error('[teacher/attendance] 考勤提交未知错误', error)
+    throw error
   }
 })

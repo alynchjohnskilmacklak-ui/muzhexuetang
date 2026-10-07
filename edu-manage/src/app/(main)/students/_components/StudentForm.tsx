@@ -19,6 +19,7 @@ const SOURCE_OPTIONS = ['朋友介绍', '网络搜索', '自然到访', '转介�
 
 type Teacher = { id: string; name: string; subjects: string }
 type StudyClass = { id: string; name: string; scheduleType: 'WEEKDAY_LATE' | 'WEEKEND'; gradeScope?: string[]; status: string }
+type ParentOption = { id: string; name: string; email: string; students: Array<{ id: string; name: string; grade: string | null; birthYear: number | null }> }
 const { Text } = Typography
 
 export function StudentForm({
@@ -34,6 +35,11 @@ export function StudentForm({
   const [loading, setLoading] = useState(false)
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [studyClasses, setStudyClasses] = useState<StudyClass[]>([])
+  const [parentAccounts, setParentAccounts] = useState<ParentOption[]>([])
+  const selectedParentId = Form.useWatch('existingParentUserId', form)
+  const selectedGender = Form.useWatch('gender', form)
+  const selectedName = Form.useWatch('name', form)
+  const knownChildren = parentAccounts.find((parent) => parent.id === selectedParentId)?.students || []
   const isMobile = useIsMobile() ?? false
   const { division } = useDivision()
 
@@ -63,8 +69,11 @@ export function StudentForm({
       fetch('/api/study-hall').then(r => r.json()).then(d => {
         setStudyClasses(Array.isArray(d.classes) ? d.classes.filter((item: StudyClass) => item.status === 'ACTIVE') : [])
       }).catch((error) => { console.warn('作业班列表加载失败', error) })
+      if (mode === 'create') fetch('/api/settings/parent-accounts?options=1').then(r => r.json()).then(d => {
+        setParentAccounts(Array.isArray(d.accounts) ? d.accounts : [])
+      }).catch((error) => { console.warn('家长账号选项加载失败', error) })
     }
-  }, [open, initialData, form, division])
+  }, [open, initialData, form, division, mode])
 
   // Only validate fields visible on the current step
   const stepFields: Record<number, string[]> = {
@@ -121,8 +130,10 @@ export function StudentForm({
 
       message.success(mode === 'edit' ? '学员信息已更新' : '学员添加成功')
       onClose()
-    } catch {
-      message.error('提交失败')
+    } catch (err) {
+      console.error('[StudentForm] 提交学员失败', err)
+      const isNetwork = err instanceof TypeError
+      message.error(isNetwork ? '网络异常，请检查网络后重试' : '提交失败，请稍后重试')
     } finally {
       setLoading(false)
     }
@@ -180,6 +191,18 @@ export function StudentForm({
               </Form.Item>
             </Col>
             <Col span={12}>
+              <Form.Item label="头像预览">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <img
+                    src={selectedGender === '女' ? '/avatars/student-female.png' : '/avatars/student-male.png'}
+                    alt="头像预览"
+                    style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover', border: '1px solid #f0e7de' }}
+                  />
+                  <span style={{ fontSize: 12, color: '#9a8e7a' }}>{selectedGender === '女' ? '女生默认头像' : selectedGender === '男' ? '男生默认头像' : '选性别后自动分配'}</span>
+                </div>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
               <Form.Item name="birthYear" label="出生年份">
                 <Input placeholder="如 2015" />
               </Form.Item>
@@ -230,6 +253,32 @@ export function StudentForm({
                 <Input type="tel" inputMode="numeric" placeholder="选填" />
               </Form.Item>
             </Col>
+            {mode === 'create' && <Col span={24}>
+              <Form.Item name="existingParentUserId" label="绑定已有家长账号" extra="家里已有孩子在读时，直接选择同一账号。不选则按家长手机号匹配；无法安全识别时会提示确认。">
+                <Select
+                  showSearch
+                  allowClear
+                  placeholder="搜索家长姓名或登录邮箱（选填）"
+                  optionFilterProp="label"
+                  options={parentAccounts.map((parent) => ({ value: parent.id, label: `${parent.name}（${parent.email}）` }))}
+                  getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                  listHeight={240}
+                  virtual={!isMobile}
+                />
+              </Form.Item>
+            </Col>}
+            {mode === 'create' && selectedParentId && knownChildren.length > 0 && <Col span={24}>
+              <Form.Item name="reuseExistingStudentId" label="沿用已有学员档案（跨运营批次）" extra="如果是已有孩子进入新批次，选原档案，历史记录将保留；如果是家中另一名孩子，保持不选。">
+                <Select
+                  allowClear
+                  placeholder="新孩子请保持不选"
+                  options={knownChildren.map((child) => ({ value: child.id, label: `${child.name}${child.grade ? ` · ${child.grade}` : ''}${child.birthYear ? ` · ${child.birthYear}年生` : ''}${knownChildren.filter((other) => other.name === child.name).length > 1 ? ` · 档案${child.id.slice(-4)}` : ''}` }))}
+                  getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                  listHeight={240}
+                  virtual={!isMobile}
+                />
+              </Form.Item>
+            </Col>}
           </Row>
         )}
 
