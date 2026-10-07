@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@prisma/client'
-import { randomUUID } from 'crypto'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { activeEnrollmentWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { isClassGroupInActiveTerm, resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { softDeleteEntity } from '@/lib/data-correction/trash'
 
 export const dynamic = 'force-dynamic'
 
@@ -96,13 +96,25 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     },
   })
   if (!group) return NextResponse.json({ error: '班级不存在' }, { status: 404 })
+
+  // 报名记录是学科选择的唯一事实来源。空数组仅用于兼容迁移前的全学科报名。
+  const groupSubjects = [...new Set([
+    group.course.subject,
+    ...group.teacherAssignments.map((assignment) => assignment.subject),
+    ...group.classLessons.map((lesson) => lesson.subject),
+  ].filter((subject): subject is string => Boolean(subject)))]
+  const enrollmentsWithSubjects = group.enrollments.map((e) => ({
+    ...e,
+    subjects: e.subjects.length ? e.subjects : groupSubjects,
+  }))
+
   revalidatePath('/parent/dashboard')
   revalidatePath('/parent/schedule')
   revalidatePath('/parent/grades')
   revalidatePath('/parent/performance')
   revalidatePath('/parent/teachers')
 
-  return NextResponse.json(group)
+  return NextResponse.json({ ...group, enrollments: enrollmentsWithSubjects })
 })
 
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
@@ -146,7 +158,17 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
         select: { id: true, name: true },
       })
       const affectedLessons = await tx.classLesson.updateMany({
-        where: { groupId: id, status: { notIn: ['COMPLETED', 'CANCELLED'] } },
+        where: {
+          groupId: id,
+          status: { notIn: ['COMPLETED', 'CANCELLED'] },
+          teacherId: previous.teacherId,
+          OR: [
+            { subject: null },
+            ...(normalizedAssignments.find((assignment) => assignment.teacherId === primaryTeacherId)?.subject
+              ? [{ subject: normalizedAssignments.find((assignment) => assignment.teacherId === primaryTeacherId)!.subject }]
+              : []),
+          ],
+        },
         data: { teacherId: primaryTeacherId },
       })
       const activeEnrollments = await tx.enrollment.findMany({
@@ -259,6 +281,20 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
             role: index === 0 ? 'PRIMARY' : 'SUBJECT',
           })), skipDuplicates: true,
         })
+        // Keep existing future lessons aligned with the subject-teacher map.
+        // A primary-teacher edit must never overwrite colleagues' subjects.
+        for (const assignment of normalizedAssignments) {
+          if (!assignment.subject) continue
+          await tx.classLesson.updateMany({
+            where: {
+              groupId: id,
+              subject: assignment.subject,
+              status: { notIn: ['COMPLETED', 'CANCELLED'] },
+              deletedAt: null,
+            },
+            data: { teacherId: assignment.teacherId },
+          })
+        }
       }
       await tx.activityLog.create({ data: { userId: user.id, action: '编辑班级', detail: updated.name } })
     }
@@ -281,122 +317,11 @@ export const DELETE = apiHandler(async (_req: NextRequest, { params }: { params:
   const group = await prisma.classGroup.findUnique({ where: { id } })
   if (!group) return NextResponse.json({ error: '班级不存在' }, { status: 404 })
 
-  const deleted = await prisma.$transaction(async (tx) => {
-    const snapshot = await tx.classGroup.findUnique({
-      where: { id },
-      include: {
-        course: true,
-        teacher: true,
-        teacherAssignments: { include: { teacher: true } },
-        room: true,
-        enrollments: { include: { student: true, attendances: true } },
-        classLessons: { include: { teacher: true, attendances: { include: { makeupRequest: true } } } },
-        assessments: { include: { gradeRecords: { include: { student: true, dimensions: true, highlights: true } } } },
-      },
-    })
-
-    if (!snapshot) throw new Error('CLASS_GROUP_NOT_FOUND')
-
-    const lessonIds = snapshot.classLessons.map((lesson) => lesson.id)
-    const enrollmentIds = snapshot.enrollments.map((enrollment) => enrollment.id)
-    const assessmentIds = snapshot.assessments.map((assessment) => assessment.id)
-    const gradeIds = snapshot.assessments.flatMap((assessment) => assessment.gradeRecords.map((record) => record.id))
-    const attendanceWhere = [
-      lessonIds.length ? { lessonId: { in: lessonIds } } : null,
-      enrollmentIds.length ? { enrollmentId: { in: enrollmentIds } } : null,
-    ].filter(Boolean) as Prisma.AttendanceWhereInput[]
-    const attendanceIds = attendanceWhere.length
-      ? await tx.attendance.findMany({ where: { OR: attendanceWhere }, select: { id: true } })
-      : []
-    const attendanceIdList = attendanceIds.map((attendance) => attendance.id)
-
-    const backupPayload = {
-      deletedAt: new Date().toISOString(),
-      deletedBy: { id: user.id, name: user.name, role: user.role },
-      entity: snapshot,
-    }
-
-    await tx.$executeRaw`
-      INSERT INTO "DeletedRecord" ("id", "entityType", "entityId", "entityName", "payload", "deletedById", "reason")
-      VALUES (
-        ${randomUUID()},
-        ${'ClassGroup'},
-        ${snapshot.id},
-        ${snapshot.name},
-        ${Prisma.sql`CAST(${JSON.stringify(backupPayload)} AS JSONB)`},
-        ${user.id},
-        ${'delete_from_course_management'}
-      )
-    `
-
-    if (attendanceIdList.length) await tx.makeupRequest.deleteMany({ where: { attendanceId: { in: attendanceIdList } } })
-    if (gradeIds.length) {
-      await tx.dimensionScore.deleteMany({ where: { gradeId: { in: gradeIds } } })
-      await tx.classHighlight.deleteMany({ where: { gradeId: { in: gradeIds } } })
-      await tx.gradeRecord.deleteMany({ where: { id: { in: gradeIds } } })
-    }
-    if (assessmentIds.length) await tx.assessment.deleteMany({ where: { id: { in: assessmentIds } } })
-    await tx.classHighlight.deleteMany({ where: { groupId: id } })
-    if (lessonIds.length) {
-      await tx.postComment.deleteMany({ where: { post: { classLessonId: { in: lessonIds } } } })
-      await tx.postReaction.deleteMany({ where: { post: { classLessonId: { in: lessonIds } } } })
-      await tx.postBadge.deleteMany({ where: { post: { classLessonId: { in: lessonIds } } } })
-      await tx.performancePost.deleteMany({ where: { classLessonId: { in: lessonIds } } })
-      await tx.paperComment.deleteMany({ where: { paper: { classLessonId: { in: lessonIds } } } })
-      await tx.paperReaction.deleteMany({ where: { paper: { classLessonId: { in: lessonIds } } } })
-      await tx.paperQuestion.deleteMany({ where: { paper: { classLessonId: { in: lessonIds } } } })
-      await tx.weaknessRecord.deleteMany({ where: { paper: { classLessonId: { in: lessonIds } } } })
-      await tx.examPaper.deleteMany({ where: { classLessonId: { in: lessonIds } } })
-      await tx.classroomFeedback.deleteMany({ where: { classLessonId: { in: lessonIds } } })
-    }
-    if (attendanceIdList.length) await tx.attendance.deleteMany({ where: { id: { in: attendanceIdList } } })
-    if (lessonIds.length) await tx.classLesson.deleteMany({ where: { id: { in: lessonIds } } })
-    if (enrollmentIds.length) await tx.enrollment.deleteMany({ where: { id: { in: enrollmentIds } } })
-    await tx.classGroupTeacher.deleteMany({ where: { groupId: id } })
-    await tx.classGroup.delete({ where: { id } })
-
-    const affectedStudentIds = [...new Set(snapshot.enrollments.map((enrollment) => enrollment.studentId))]
-    for (const studentId of affectedStudentIds) {
-      const activeClassCount = await tx.enrollment.count({
-        where: {
-          studentId,
-          status: 'ACTIVE',
-          group: { status: { not: 'ARCHIVED' }, course: { isActive: true } },
-        },
-      })
-      if (activeClassCount === 0) {
-        await tx.student.update({
-          where: { id: studentId },
-          data: { status: 'TRIAL', remainHours: 0, totalHours: 0, mainTeacherId: null },
-        })
-      }
-    }
-
-    const remainingGroups = await tx.classGroup.count({
-      where: { courseId: snapshot.courseId, status: { not: 'ARCHIVED' } },
-    })
-    const remainingSchedules = await tx.schedule.count({
-      where: { courseId: snapshot.courseId, status: { not: 'cancelled' } },
-    })
-    if (remainingGroups === 0 && remainingSchedules === 0) {
-      await tx.course.update({
-        where: { id: snapshot.courseId },
-        data: { isActive: false },
-      })
-    }
-
-    await tx.activityLog.create({
-      data: { userId: user.id, action: '删除班级', detail: `${group.name}，已备份后硬删除` },
-    })
-
-    return { id: snapshot.id, name: snapshot.name }
-  })
-
+  const deleted = await softDeleteEntity(prisma, 'ClassGroup', id, user, 'delete_from_course_management')
   revalidatePath('/parent/dashboard')
   revalidatePath('/parent/schedule')
   revalidatePath('/parent/grades')
   revalidatePath('/parent/performance')
   revalidatePath('/parent/teachers')
-
   return NextResponse.json({ success: true, deleted })
 })

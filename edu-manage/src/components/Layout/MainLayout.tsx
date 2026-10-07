@@ -36,7 +36,15 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
 
   if (isMobile) {
     return (
-      <MobileLayout mode="drawer" navItems={visibleNavItems} title="牧哲学堂 管理">
+      <MobileLayout
+        mode="drawer"
+        navItems={visibleNavItems}
+        title="牧哲学堂"
+        roleLabel="管理端"
+        menuLabel="菜单"
+        accentColor="var(--color-role-admin)"
+        accentBackground="var(--color-role-admin-bg)"
+      >
         {children}
       </MobileLayout>
     )
@@ -47,9 +55,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
       <Suspense fallback={<div style={{ width: 72, height: '100vh', position: 'fixed', left: 0, top: 0, background: '#fff', borderRight: '1px solid rgba(0,0,0,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Spin /></div>}>
         <Sidebar collapsed={collapsed} onCollapse={setCollapsed} />
       </Suspense>
-      <Layout style={{ marginLeft: collapsed ? 72 : 220, transition: 'margin-left 0.2s' }}>
+      <Layout style={{ marginLeft: collapsed ? 72 : 220, transition: 'margin-left 0.2s', background: 'var(--color-canvas)' }}>
         <TopNav />
-        <Content style={{ padding: 24, minHeight: 'calc(100vh - 64px)' }}>
+        <Content style={{ padding: 24, minHeight: 'calc(100vh - 56px)' }}>
           {children}
         </Content>
       </Layout>

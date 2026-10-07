@@ -2,9 +2,33 @@ import { NextRequest, NextResponse } from 'next/server'
 import { apiHandler } from '@/lib/api-handler'
 import { requireCurrentTeacher, assertTeacherOwnsStudent } from '@/lib/teacher-portal'
 import { getStudentProfile } from '@/lib/student-profile'
-import { callDeepSeek, AIProviderError } from '@/lib/ai/client'
+import { callDeepSeek, callDoubao, AIProviderError } from '@/lib/ai/client'
+import { getKnowledgePointOptions } from '@/lib/classroom-feedback/subject-knowledge-points'
+import { articleSections } from '@/lib/classroom-feedback/ai-article'
+import { findSimilarComments } from '@/lib/classroom-feedback/comment-similarity'
 
 export const dynamic = 'force-dynamic'
+
+// AI 提供方路由：服务器配置了豆包（火山方舟 ARK_API_KEY）则优先用豆包生成，
+// 豆包未配置或调用失败时自动回退 DeepSeek，保证老师侧始终有反馈可用。
+async function callPrimaryAI(params: {
+  system: string
+  user: string
+  maxTokens?: number
+  temperature?: number
+  jsonMode?: boolean
+}): Promise<string> {
+  const doubaoKey = process.env.ARK_API_KEY || process.env.DOUBAO_API_KEY || ''
+  const useDoubao = doubaoKey !== '' && !doubaoKey.includes('你的') && !doubaoKey.includes('填入')
+  if (useDoubao) {
+    try {
+      return await callDoubao(params)
+    } catch (error) {
+      console.warn('[AI-Feedback] 豆包调用失败，自动回退 DeepSeek：', error instanceof Error ? error.message : error)
+    }
+  }
+  return callDeepSeek(params)
+}
 
 const aiRateBucket = new Map<string, { count: number; resetAt: number }>()
 
@@ -80,18 +104,17 @@ function ensureStructuredFeedback(value: string, context: {
   teacherRemark: string
 }) {
   const text = value.trim()
-  const labels = ['课堂表现', '知识掌握', '存在问题', '后续建议']
+  const labels = ['本节课学习内容', '课堂反馈', '孩子掌握情况']
   if (labels.every((label) => text.includes(`${label}：`) || text.includes(`${label}:`))) {
     return text
-      .replace(/(?:^|\s*)(课堂表现|知识掌握|存在问题|后续建议)\s*[:：]\s*/g, (_match, label: string) => `${label}：\n`)
+      .replace(/(?:^|\s*)(本节课学习内容|课堂反馈|孩子掌握情况)\s*[:：]\s*/g, (_match, label: string) => `${label}：\n`)
       .replace(/\n{3,}/g, '\n\n')
       .trim()
   }
   return [
-    `课堂表现：\n${text || context.performanceTags.join('、') || '课堂表现按老师记录如实反馈。'}`,
-    `知识掌握：\n${context.masteryLevel || '知识掌握情况需结合当堂练习继续观察。'}`,
-    `存在问题：\n${context.teacherRemark || '本次未记录明显问题。'}`,
-    '后续建议：\n建议结合本节内容及时复习，并按要求完成课后练习。',
+    `本节课学习内容：\n${text || '本次未记录具体授课知识点，请老师补充。'}`,
+    `课堂反馈：\n${context.teacherRemark || context.performanceTags.join('、') || '本次没有记录具体课堂观察。'}`,
+    `孩子掌握情况：\n${context.masteryLevel || '尚无足够信息判断掌握情况，请结合练习结果继续观察。'}`,
   ].join('\n\n')
 }
 
@@ -146,31 +169,12 @@ function buildFallbackSuggestion(note: string): string {
 }
 
 function buildFallbackComment(note: string, studentNames: string[]): string {
-  const names = studentNames.length ? studentNames : ['孩子']
-  const subject = names.length === 1 ? `${names[0]}同学` : `${names.join('、')}几位同学`
+  const subject = studentNames.length === 1 ? `${studentNames[0]}同学` : '本组学生'
   const cleanNote = note.replace(/帮我补齐|写得自然|补齐评语|生成反馈/g, '').trim().slice(0, 100)
-  const performance = /走神|专注|不认真|需要提醒/.test(note)
-    ? '课堂中有时需要老师提醒，但提醒后能够重新跟上学习节奏'
-    : /积极|主动|回答|认真|听讲|练习|思考/.test(note)
-      ? `能够主动参与课堂，${cleanNote || '听讲和练习状态较为投入'}`
-      : `能够跟随课堂节奏完成主要学习任务${cleanNote ? `，老师记录到：${cleanNote}` : ''}`
-  const mastery = /不会|困难|需要加强|薄弱|不熟练/.test(note)
-    ? '相关知识目前处在巩固阶段，需要通过针对性练习继续加深理解'
-    : /掌握|理解|学会|不错|正确/.test(note)
-      ? '对本节核心内容已有较好的理解，能够尝试运用到课堂练习中'
-      : '能够理解当堂主要内容，后续还需要通过练习检验掌握是否稳定'
-  const problem = /作业/.test(note)
-    ? '当前需要重点关注作业完成质量和课后落实情况'
-    : /审题|粗心|不仔细/.test(note)
-      ? '做题时还需要放慢审题速度，减少因遗漏条件造成的失误'
-      : /计算|准确率/.test(note)
-        ? '计算步骤和检查习惯仍有提升空间'
-        : '暂未发现明显知识障碍，下一步重点是让课堂状态保持稳定'
   return [
-    `课堂表现：\n${subject}，${performance}。`,
-    `知识掌握：\n${mastery}。`,
-    `存在问题：\n${problem}。`,
-    `后续建议：\n${buildFallbackSuggestion(note)}`,
+    `本节课学习内容：\n${cleanNote || '本次没有记录具体授课内容，请老师补充。'}`,
+    `课堂反馈：\n${subject}本次尚未记录可核实的个人课堂表现，请老师补充观察。`,
+    '孩子掌握情况：\n目前缺少练习或课堂观察依据，暂不判断掌握程度。',
   ].join('\n\n')
 }
 
@@ -197,18 +201,25 @@ function appendUniqueQuote(comment: string, index: number, usedQuotes: Set<strin
 function normalizeStudentComment(params: {
   comment: string
   studentName: string
-  allStudentNames: string[]
   note: string
   index: number
   usedQuotes: Set<string>
+  appendQuote: boolean
 }): string {
-  const { studentName, allStudentNames, note, index, usedQuotes } = params
+  const { studentName, note, index, usedQuotes, appendQuote } = params
   let comment = params.comment.trim() || buildFallbackComment(note, [studentName])
-  for (const otherName of allStudentNames) {
-    if (otherName !== studentName && otherName) comment = comment.replaceAll(otherName, studentName)
+  // 清理模型自造的泛指称呼（孩子同学 / 孩子 / 这位同学 / 该同学 / 小朋友等），
+  // 统一替换成勾选学生的真实姓名，避免出现“郝学文同学孩子同学……”的叠称呼。
+  const genericPrefix = /^(孩子(?:同学)?|这位同学|该同学|该生|宝贝(?:同学)?|小朋友|小同学|同学)\s*[，,：:、.\s]+/
+  comment = comment.replace(genericPrefix, `${studentName}同学，`)
+  // 若清理后仍不含姓名（例如直接以“能够主动参与课堂……”开头），则在最前补姓名。
+  if (!comment.includes(studentName)) {
+    comment = comment.includes('课堂反馈：')
+      ? comment.replace('课堂反馈：', `课堂反馈：\n${studentName}同学，`)
+      : `${studentName}同学，${comment}`
   }
-  if (!comment.includes(studentName)) comment = `${studentName}同学${comment}`
-  return appendUniqueQuote(comment.slice(0, 350), index, usedQuotes).slice(0, 400)
+  const trimmed = comment.slice(0, 460)
+  return (appendQuote ? appendUniqueQuote(trimmed, index, usedQuotes) : trimmed).slice(0, 500)
 }
 
 function buildPerStudentComments(
@@ -216,6 +227,7 @@ function buildPerStudentComments(
   resolved: ReturnType<typeof resolveStudentsFromContext>,
   source: unknown,
   fallbackOverallComment = '',
+  appendQuote = false,
 ): PerStudentComment[] {
   const parsedItems = Array.isArray(source) ? source : []
   const byStudentId = new Map<string, string>()
@@ -232,17 +244,17 @@ function buildPerStudentComments(
     const studentName = resolved.matchedNames[index] || '孩子'
     const modelComment = byStudentId.get(studentId)
       || (resolved.matchedIds.length === 1 ? fallbackOverallComment : '')
-      || buildFallbackComment(note, [studentName])
+      || buildFallbackComment('暂无该生的具体课堂细节记录，请老师补充后再发布。', [studentName])
     return {
       studentId,
       studentName,
       comment: normalizeStudentComment({
         comment: modelComment,
         studentName,
-        allStudentNames: resolved.matchedNames,
         note,
         index,
         usedQuotes,
+        appendQuote,
       }),
     }
   })
@@ -317,11 +329,13 @@ function buildFallbackResponse(opts: {
   kpOptions: string[]
   tagOptions?: string[]
   raw?: string
+  appendQuote?: boolean
 }) {
-  const { note, intent, resolved, kpOptions, tagOptions = [], raw } = opts
+  const { note, intent, resolved, kpOptions, tagOptions = [], raw, appendQuote = false } = opts
   const rawComment = raw ? cleanRawText(raw) : ''
   const comment = rawComment || buildFallbackComment(note, resolved.matchedNames)
   const suggestion = buildFallbackSuggestion(note)
+  const perStudentComments = buildPerStudentComments(note, resolved, [], rawComment, appendQuote)
   return {
     intent,
     studentIds: resolved.matchedIds,
@@ -330,7 +344,8 @@ function buildFallbackResponse(opts: {
     needsManualStudentSelection: resolved.needsManual,
     mood: inferMoodFromNote(note),
     overallComment: intent === 'suggestion' ? '' : comment.slice(0, 400),
-    perStudentComments: buildPerStudentComments(note, resolved, [], rawComment),
+    perStudentComments,
+    similarityWarnings: findSimilarComments(perStudentComments.map((item) => ({ ...item, comment: articleSections(item.comment)?.[1] || item.comment })), 0.55),
     tags: inferTagsFromNote(note, tagOptions),
     knowledgePoints: inferKnowledgePointsFromNote(note, kpOptions),
     homework: inferHomeworkFromNote(note),
@@ -365,6 +380,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     course?: string
     stageMaterial?: string
     groupId?: string; courseType?: string
+    appendQuote?: boolean
     currentForm?: { mood?: string; overallComment?: string; tags?: string[]; knowledgePoints?: string[]; homework?: string[]; summary?: string; suggestion?: string; stageSummaryText?: string; stageSuggestions?: string }
   }
 
@@ -388,7 +404,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const options = body.options || {}
     const moods = Array.isArray(options.moods) ? options.moods : []
     const tagOptions = Array.isArray(options.tags) ? options.tags : []
-    const kpOptions = Array.isArray(options.knowledgePoints) ? options.knowledgePoints : []
+    const kpOptions = [...new Set([
+      ...getKnowledgePointOptions(body.subject, body.grade),
+      ...(Array.isArray(options.knowledgePoints) ? options.knowledgePoints : []),
+    ])]
     const detectedIntent = detectIntent(note)
     const currentForm = body.currentForm || {}
     const stageMaterial = typeof body.stageMaterial === 'string' ? body.stageMaterial : ''
@@ -413,23 +432,34 @@ export const POST = apiHandler(async (req: NextRequest) => {
       : '【已确认学生】无。若能从班级名单和老师描述中唯一识别学生，请匹配；不能唯一识别时仍然生成反馈内容，并标记需要老师手动选择学生。'
 
     const sys = [
-      '你是牧哲学堂（课外辅导机构）的资深班主任，正在替任课老师给家长写当天的课堂反馈。你的任务是把老师随手记的一句话，扩写成家长愿意读、读得懂、读完知道怎么配合的反馈。',
+      '你是牧哲学堂（课外辅导机构）的资深班主任兼任课老师，正在替任课老师给家长写当天的课堂反馈。你的任务是把老师随手记的一句话，扩写成一篇家长愿意读、读得懂、读完知道孩子今天学了什么、学得怎么样、回家怎么配合的反馈文章。',
       '',
-      '口吻要求：',
-      '- 像老师放学后当面跟家长说话：具体、平实、有温度，不打官腔。',
-      '- 先说今天课堂上看到的具体表现（基于老师输入，不编造），再客观点出需要注意的地方（委婉但不回避，家长有知情权），最后给一条家长在家能配合做的具体事。',
-      "- 严禁：'该生''该同学''表现良好''总体不错'这类套话；严禁堆砌空洞夸奖；严禁编造分数、名次、考试和老师没提到的事件。",
-      "- 称呼用'姓名+同学'。每段评语 120~220 字，必须依次包含“课堂表现、知识掌握、存在问题、后续建议”四部分；可使用这四个短标签，但不要写空洞套话，结尾不要加名言（系统自动补充）。",
-      '- 如果老师输入里既有表扬又有问题，两者都要写进去，问题放在表扬之后、建议之前。',
+      '整体风格：',
+      '- 像老师放学后当面跟家长聊孩子：具体、平实、有温度、有细节，不打官腔，不喊口号。整段话要读起来像一篇文章而不是几条干巴巴的结论。',
+      "- 禁止：'该生''该同学''表现良好''总体不错'这类套话；禁止堆砌空洞夸奖；禁止编造分数、名次、考试和老师没提到的事件。",
+      `- 称呼用'姓名+同学'。每份反馈按“本节课学习内容、课堂反馈、孩子掌握情况”三段展开；有足够老师记录时可写200~400字，记录少时宁可简短也不编造。${body.appendQuote ? '结尾可以保留系统添加的学习寄语。' : '结尾不要加名言或学习寄语。'}`,
+      '',
+      '知识点扩写（最重要的加分项）：',
+      '- 老师输入里明确提到的知识点写进“本节课学习内容”，用1~3句向家长解释概念或方法。不要据此推断学生个人掌握情况，也不要声称已核实具体教材页码。',
+      '- 知识点讲解要像老师给家长做科普，让没学过这门课的家长也听得懂；可以展开概念、方法、常见题型和易错点，但严禁讲错内容，拿不准的术语宁可不提。',
+      '- 如果老师输入里没有明确知识点，只概述已记录的授课主题；不要凭空添加教学环节。',
+      '',
+      '课堂表现与上课情况：',
+      '- “课堂反馈”段只结合老师输入里确实记录的个人细节。没有个人观察时如实说明，绝不虚构答题、听讲、练习或状态变化。',
+      '- 知识点可客观解释；课堂发生的事实只能来自老师输入。不同学生的观察不可互相挪用。',
+      '',
+      '学生与档位：',
       '- 如果【已确认学生】不为空，直接围绕这些学生写，老师输入没提名字也不要拒绝。',
-      '- overallComment 和每个 perStudentComments.comment 都必须严格按以下四段输出，每个标题单独一行且顺序固定：课堂表现：、知识掌握：、存在问题：、后续建议：。禁止输出一段式评语。',
       '- 为每个已确认学生单独写反馈，只出现该学生本人姓名；即使表现档位相同，不同学生也必须根据各自输入调整切入点、问题和建议，不能复制同一模板。',
-      '- 你会收到每个学生的表现档位（积极 / 一般 / 需提升）。必须为每个学生单独写四段反馈，基调随档位不同：',
-      '  - 积极：具体表扬其课堂表现，并给予更高期待；',
-      '  - 一般：客观描述当堂状态，并给出一个明确的小改进点；',
+      '- 称呼铁律：每份评语正文的第一处称呼必须使用该学生的真实姓名加“同学”（例如“王小明同学”），全篇只出现该学生姓名；严禁使用“孩子”“孩子同学”“这位同学”“该同学”“宝贝”“小朋友”等泛指称呼，也严禁在姓名后重复出现“同学孩子”之类的叠词。',
+      '- 你会收到每个学生的表现档位（积极 / 一般 / 需提升），每份反馈的基调和细节随档位不同：',
+      '  - 积极：具体说出好在哪（结合知识点和课堂细节），并给一个“再进一步”的方向；',
+      '  - 一般：客观描述当堂状态，指出一个明确的小改进点；',
       '  - 需提升：委婉但不回避地点出问题，并给家长一条可在家配合的具体建议。',
-      '- 严禁给不同学生写雷同或模板化内容，每段的切入点、措辞、举例都要不同。称呼用“姓名+同学”。不编造分数、名次等老师未提供的信息。',
+      '- 如果老师输入里既有表扬又有问题，两者都要写进去，问题放在表扬之后、建议之前。',
+      '- 严禁给不同学生写雷同或模板化内容，每段的切入点、措辞、举例都要不同。',
       '- 必须结合【学科】调整观察重点：数学关注运算准确性、步骤规范和解题思路；英语关注词汇、语法、阅读与表达；物理关注模型理解、公式应用、实验现象和推理过程；其他学科围绕该学科真实学习任务展开。不得把其他学科的术语套入当前反馈。',
+      '- overallComment 和每个 perStudentComments.comment 都必须严格按以下三段输出，每个标题单独一行且顺序固定：本节课学习内容：、课堂反馈：、孩子掌握情况：。结论与老师记录一致，不能凭档位编具体事件。',
       '- mood、tags、knowledgePoints 只能从提供的可选项里选；提到作业才填 homework。',
       '只输出 JSON，不要 Markdown，不要任何解释。',
     ].join('\n')
@@ -452,15 +482,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
       `【当前表单】状态=${currentForm.mood || '未选'}；已有评语=${currentForm.overallComment || '空'}；已有建议=${currentForm.suggestion || currentForm.summary || '空'}；已有寄语=${currentForm.stageSummaryText || '空'}`,
       stageMaterial ? `【阶段素材】${stageMaterial.slice(0, 800)}` : '',
       '【返回 JSON】',
-      '{"intent":"classroom|stage|suggestion|mixed","mood":"GREAT|GOOD|OKAY|NEEDS_ATTENTION","overallComment":"包含课堂表现、知识掌握、存在问题、后续建议四部分的完整反馈","perStudentComments":[{"studentId":"已确认学生id","studentName":"已确认学生姓名","comment":"该学生专属的四部分反馈"}],"tags":["从可选标签中选"],"knowledgePoints":["从可选知识点中选"],"homework":["作业内容"],"summary":"","suggestion":"下一步建议","stageSummaryText":"阶段寄语","stageSuggestions":"阶段建议"}',
+      '{"intent":"classroom|stage|suggestion|mixed","mood":"GREAT|GOOD|OKAY|NEEDS_ATTENTION","overallComment":"包含本节课学习内容、课堂反馈、孩子掌握情况三部分的反馈","perStudentComments":[{"studentId":"已确认学生id","studentName":"已确认学生姓名","comment":"该学生专属的三部分反馈"}],"tags":["从可选标签中选"],"knowledgePoints":["从可选知识点中选"],"homework":["作业内容"],"summary":"","suggestion":"下一步建议","stageSummaryText":"阶段寄语","stageSuggestions":"阶段建议"}',
     ].filter(Boolean).join('\n')
 
     try {
       const n = Math.max(resolved.matchedIds.length, 1)
-      const maxTokens = Math.min(500 + n * 220, 1500)
-      const raw = await callDeepSeek({ system: sys, user, maxTokens, temperature: 0.5, jsonMode: true })
+      const maxTokens = Math.min(700 + n * 280, 2400)
+      const raw = await callPrimaryAI({ system: sys, user, maxTokens, temperature: 0.5, jsonMode: true })
       const parsed = parseAIJson(raw)
-      if (!parsed) return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, tagOptions, raw }))
+      if (!parsed) return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, tagOptions, raw, appendQuote: body.appendQuote }))
 
       const validMoods = moods.map((m) => m.value)
       const matchTag = (tag: string) => tagOptions.find((option) => option === tag || option.includes(tag) || tag.includes(option))
@@ -470,7 +500,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       const parsedOverallComment = typeof parsed.overallComment === 'string'
         ? ensureStructuredFeedback(parsed.overallComment, structureContext)
         : ''
-      const perStudentComments = buildPerStudentComments(note, resolved, parsed.perStudentComments, parsedOverallComment)
+      const perStudentComments = buildPerStudentComments(note, resolved, parsed.perStudentComments, parsedOverallComment, body.appendQuote)
         .map((item) => ({ ...item, comment: ensureStructuredFeedback(item.comment, structureContext) }))
       const result = {
         intent: typeof parsed.intent === 'string' ? parsed.intent : detectedIntent,
@@ -481,6 +511,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         mood: validMoods.includes(parsedMood) ? parsedMood : inferMoodFromNote(note),
         overallComment: parsedOverallComment,
         perStudentComments,
+        similarityWarnings: findSimilarComments(perStudentComments.map((item) => ({ ...item, comment: articleSections(item.comment)?.[1] || item.comment })), 0.55),
         tags: stringArray(parsed.tags).map(matchTag).filter((tag): tag is string => !!tag).slice(0, 4),
         knowledgePoints: stringArray(parsed.knowledgePoints).map(matchKnowledgePoint).filter((knowledgePoint): knowledgePoint is string => !!knowledgePoint).slice(0, 4),
         homework: stringArray(parsed.homework),
@@ -494,10 +525,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
         result.overallComment || result.perStudentComments.length || result.suggestion || result.summary || result.stageSummaryText || result.stageSuggestions ||
         result.tags.length || result.knowledgePoints.length || result.homework.length
       )
-      return NextResponse.json(hasContent ? result : buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, tagOptions, raw }))
+      return NextResponse.json(hasContent ? result : buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, tagOptions, raw, appendQuote: body.appendQuote }))
     } catch (error) {
       console.error('[ai-feedback smart]', error)
-      return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, tagOptions }))
+      return NextResponse.json(buildFallbackResponse({ note, intent: detectedIntent, resolved, kpOptions, tagOptions, appendQuote: body.appendQuote }))
     }
   }
 

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
-import { requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
+import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { triggerFeedbackBonus } from '@/lib/teacher-salary'
 import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestPrisma } from '@/lib/prisma'
-import { resolveUserForTeacher } from '@/lib/teacher-account-binding'
 import type { Prisma } from '@prisma/client'
+import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
+import { createParentFeedbackMessage } from '@/lib/feedback-conversation'
 import {
   canViewFeedback,
   filterStudentRatingsForStudents,
@@ -19,6 +20,7 @@ import {
   redactFeedbackForParent,
   resolveTeacherFeedbackCreationScope,
 } from '@/lib/classroom-feedback/access'
+import { createClassroomFeedbackWithSideEffects } from '@/lib/classroom-feedback/create'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,26 +28,6 @@ function asArr(v: unknown, limit = 20): string[] {
   return Array.isArray(v)
     ? v.filter((x): x is string => typeof x === 'string' && x.trim() !== '').slice(0, limit)
     : []
-}
-
-function isMissingFeedbackContextColumn(error: unknown) {
-  const err = error as { code?: string; meta?: { column?: string }; message?: string }
-  const text = `${err?.meta?.column || ''} ${err?.message || ''}`
-  return err?.code === 'P2022' && /feedbackCourseType|feedbackGroupId|termId/.test(text)
-}
-
-async function createClassroomFeedbackCompat(tx: Prisma.TransactionClient, data: Prisma.ClassroomFeedbackUncheckedCreateInput) {
-  try {
-    return await tx.classroomFeedback.create({ data })
-  } catch (error) {
-    if (!isMissingFeedbackContextColumn(error)) throw error
-    const legacyData = { ...data }
-    delete legacyData.feedbackCourseType
-    delete legacyData.feedbackGroupId
-    delete legacyData.termId
-    console.warn('[feedback] ClassroomFeedback course context columns missing; creating legacy feedback without course context')
-    return tx.classroomFeedback.create({ data: legacyData })
-  }
 }
 
 // GET: list feedbacks scoped to the current role.
@@ -163,11 +145,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const studentIds = asArr(body.studentIds)
   const lessonContent = normalizeLessonContent(body.lessonContent)
   const knowledgePoints = asArr(body.knowledgePoints, 10)
+  const knowledgeCard = parseStoredKnowledgeCard(body.knowledgeCard)
   const imageUrls = asArr(body.imageUrls, 9)
   const tags = asArr(body.tags, 15)
   const homework = Array.isArray(body.homework) ? body.homework : []
   const summary = typeof body.summary === 'string' ? body.summary.trim().slice(0, 500) : ''
-  const overallComment = typeof body.overallComment === 'string' ? body.overallComment.trim().slice(0, 400) : ''
+  const overallComment = typeof body.overallComment === 'string' ? body.overallComment.trim().slice(0, 1400) : ''
   const mood = ['GREAT', 'GOOD', 'OKAY', 'NEEDS_ATTENTION'].includes(body.mood) ? body.mood : 'GOOD'
   const badge = typeof body.badge === 'string' ? body.badge.trim().slice(0, 30) : ''
   const studentRatings = body.studentRatings && typeof body.studentRatings === 'object' ? body.studentRatings : {}
@@ -218,6 +201,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       requestedStudentIds: studentIds,
       expandClassTarget: false,
       submittedCourseType,
+      requestedSubject: typeof body.subject === 'string' ? body.subject : null,
     })
     if (!scope.allowed) {
       const message = scope.reason === 'group'
@@ -273,7 +257,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
   })
 
   const feedback = await prisma.$transaction(async (tx) => {
-    const created = await createClassroomFeedbackCompat(tx, {
+    return createClassroomFeedbackWithSideEffects(tx, {
+      data: {
         termId: feedbackTermId,
         teacherId,
         classLessonId,
@@ -284,6 +269,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         studentIds: resolvedStudentIds,
         lessonContent: lessonContent || null,
         knowledgePoints,
+        knowledgeCard: knowledgeCard as Prisma.InputJsonValue || undefined,
         summary: summary || null,
         overallComment: overallComment || null,
         homework,
@@ -294,40 +280,18 @@ export const POST = apiHandler(async (req: NextRequest) => {
         studentRatings: resolvedStudentRatings as Prisma.InputJsonValue,
         status,
         notifySent: status === 'PUBLISHED',
-      })
-
-    if (status === 'PUBLISHED') {
-      for (const student of studentsData) {
-        const parentUserId = student.parentId || student.parentUserId
-        if (!parentUserId) continue
-        await tx.notification.create({
-          data: {
-            userId: parentUserId,
-            type: 'CLASSROOM_FEEDBACK',
-            title: `${teacherName}老师发布了成长反馈`,
-            content: `${student.name}: ${overallComment || lessonContent || summary || knowledgePoints.join('、') || badge || '课堂反馈已更新'}`.slice(0, 80),
-            link: '/parent/class-feedback',
-            relatedType: 'CLASSROOM_FEEDBACK',
-            relatedId: created.id,
-            href: `/parent/class-feedback/${created.id}`,
-          },
-        })
-      }
-    }
-
-    await tx.activityLog.create({
-      data: {
-        userId: user.id,
-        teacherId,
-        action: status === 'PUBLISHED' ? TEACHER_LOG_ACTIONS.CLASSROOM_FEEDBACK_PUBLISH : TEACHER_LOG_ACTIONS.CLASSROOM_FEEDBACK_DRAFT,
-        detail: `${resolvedStudentIds.length}名学员 · ${knowledgePoints.join('/') || overallComment || lessonContent || '成长反馈'}`,
-        entityType: 'ClassroomFeedback',
-        entityId: created.id,
-        metadata: { status, source: isAdmin ? 'admin' : 'teacher', studentCount: resolvedStudentIds.length, feedbackCourseType, feedbackGroupId },
       },
+      actorUserId: user.id,
+      teacherName,
+      students: studentsData,
+      knowledgePoints,
+      imageUrls,
+      status,
+      source: isAdmin ? 'admin' : 'teacher',
+      detailFallback: '成长反馈',
+      notificationLabel: '成长反馈',
+      notificationContent: overallComment || lessonContent || summary || knowledgePoints.join('、') || badge || '课堂反馈已更新',
     })
-
-    return created
   })
 
   let bonus: Awaited<ReturnType<typeof triggerFeedbackBonus>> | null = null
@@ -346,7 +310,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
 // PATCH: parent reply or admin reply
 export const PATCH = apiHandler(async (req: NextRequest) => {
   const session = await auth()
-  const user = session?.user as { id: string; role: string; teacherId?: string | null } | undefined
+  const user = session?.user as { id: string; role: string; name?: string | null; teacherId?: string | null } | undefined
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
 
 
@@ -367,13 +331,33 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
     if (linkedCount === 0) return NextResponse.json({ error: '无权操作此反馈' }, { status: 403 })
 
     if (parentReply !== undefined) {
-      await prisma.classroomFeedback.update({
-        where: { id },
-        data: {
-          parentReply: String(parentReply).slice(0, 300) || null,
-          parentRepliedAt: parentReply ? new Date() : null,
-        },
-      })
+      const content = String(parentReply).trim().slice(0, 300)
+      if (content) {
+        try {
+          await createParentFeedbackMessage({
+            prisma,
+            feedbackId: id,
+            parentId: user.id,
+            parentName: user.name || '家长',
+            content,
+          })
+        } catch (error) {
+          if (error instanceof Error && error.message === 'FEEDBACK_NOT_FOUND') {
+            return NextResponse.json({ error: '反馈不存在' }, { status: 404 })
+          }
+          if (error instanceof Error && error.message === 'FEEDBACK_PARENT_FORBIDDEN') {
+            return NextResponse.json({ error: '无权操作此反馈' }, { status: 403 })
+          }
+          throw error
+        }
+      } else {
+        // Empty legacy replies only clear the compatibility projection. Message
+        // history is append-only and remains available in the conversation.
+        await prisma.classroomFeedback.update({
+          where: { id },
+          data: { parentReply: null, parentRepliedAt: null },
+        })
+      }
     }
 
     if (markRead === true && !feedback.parentReadAt) {
@@ -383,34 +367,6 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
       })
     }
 
-    // Notify teacher of parent reply
-    if (parentReply) {
-      const fb = await prisma.classroomFeedback.findUnique({
-        where: { id },
-        select: { teacherId: true, studentIds: true },
-      })
-      if (fb?.teacherId) {
-        const teacherUser = await resolveUserForTeacher(prisma, fb.teacherId)
-        if (teacherUser) {
-          const student = await prisma.student.findFirst({
-            where: { id: { in: fb.studentIds }, parentUserId: user.id },
-            select: { name: true },
-          })
-          await prisma.notification.create({
-            data: {
-              userId: teacherUser.id,
-              type: 'CLASSROOM_FEEDBACK',
-              title: '家长回复了课堂反馈',
-              content: `${student?.name || '家长'} 回复了你发布的课堂反馈`,
-              link: '/teacher/feedback',
-              relatedType: 'CLASSROOM_FEEDBACK',
-              relatedId: id,
-              href: `/teacher/feedback?feedbackId=${id}`,
-            },
-          })
-        }
-      }
-    }
   } else if ((user.role === 'admin' || user.role === 'teacher') && adminReply !== undefined) {
     const feedback = await prisma.classroomFeedback.findUnique({
       where: { id },

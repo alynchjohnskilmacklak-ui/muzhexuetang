@@ -43,7 +43,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
     },
     include: {
       student: { select: { id: true, name: true, parentId: true, parentUserId: true } },
-      schedule: { select: { id: true, startTime: true, course: { select: { name: true } } } },
+      lesson: { select: { id: true, lessonDate: true, startTime: true, group: { select: { course: { select: { name: true } } } } } },
     },
   })
 

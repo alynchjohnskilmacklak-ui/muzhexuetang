@@ -50,6 +50,18 @@ describe('login session restoration', () => {
     expect(mocks.userFindUnique).not.toHaveBeenCalled()
   })
 
+  it('shows the expiry message page instead of redirecting a legacy parent session', async () => {
+    mocks.auth.mockResolvedValue({
+      user: { id: 'legacy-parent', role: 'parent', division: 'JUNIOR', sessionMark: 'parent-mark' },
+    })
+    mocks.userFindUnique.mockResolvedValue({ currentSessionToken: 'parent-mark', status: 'active' })
+
+    const response = await proxy(new NextRequest('https://muzhexuetang.xyz/login?error=PARENT_TERM_EXPIRED'))
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('x-middleware-next')).toBe('1')
+  })
+
   it('allows a signed-out user to open the password reset page', async () => {
     mocks.auth.mockResolvedValue(null)
 
@@ -57,6 +69,20 @@ describe('login session restoration', () => {
 
     expect(response.status).toBe(200)
     expect(response.headers.get('x-middleware-next')).toBe('1')
+    expect(mocks.userFindUnique).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['signed-out', null],
+    ['parent', { user: { id: 'parent-user', role: 'parent', division: 'JUNIOR', sessionMark: 'parent-mark' } }],
+  ])('serves the PDF worker as a static asset for %s requests', async (_label, session) => {
+    mocks.auth.mockResolvedValue(session)
+
+    const response = await proxy(new NextRequest('https://muzhexuetang.xyz/pdf.worker.min.mjs'))
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('x-middleware-next')).toBe('1')
+    expect(response.headers.get('location')).toBeNull()
     expect(mocks.userFindUnique).not.toHaveBeenCalled()
   })
 

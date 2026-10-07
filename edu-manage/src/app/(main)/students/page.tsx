@@ -1,11 +1,11 @@
 ﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button, Card, Input, Modal, Select, Space, Spin, Typography, message } from 'antd'
+import { Alert, Button, Card, Input, Modal, Select, Space, Spin, Typography, message } from 'antd'
 import { ImportOutlined, PlusOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons'
 import { StudentCard } from './_components/StudentCard'
 import { StudentForm } from './_components/StudentForm'
-import { ImportModal } from './_components/ImportModal'
+import dynamic from 'next/dynamic'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
@@ -14,6 +14,11 @@ import useSWR, { useSWRConfig } from 'swr'
 import { useRouter } from 'next/navigation'
 import { isAdminTermScopedSWRKey } from '@/lib/admin-term-scope-client'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+
+const ImportModal = dynamic(
+  () => import('./_components/ImportModal').then((module) => module.ImportModal),
+  { ssr: false },
+)
 
 const { Text } = Typography
 
@@ -55,6 +60,12 @@ type Student = {
   taughtHours: number
   source?: string | null
   courseType?: string | null
+  fees?: Array<{
+    id: string
+    status?: string | null
+    dueDate?: string | null
+    amount?: number | null
+  }>
   enrollments?: Array<{
     id: string
     remainHours?: number | null
@@ -131,6 +142,8 @@ export default function StudentsPage() {
   const [editData, setEditData] = useState<Record<string, unknown> | null>(null)
   const [importOpen, setImportOpen] = useState(false)
   const [deleting, setDeleting] = useState<Record<string, unknown> | null>(null)
+  const [deleteImpact, setDeleteImpact] = useState<{ enrollments?: number; attendances?: number; papers?: number; feedbacks?: number; parentAccount?: number } | null>(null)
+  const [deletePreviewLoading, setDeletePreviewLoading] = useState(false)
 
   useEffect(() => {
     const query = readQuery()
@@ -244,13 +257,26 @@ export default function StudentsPage() {
 
   const handleEdit = (student: Record<string, unknown>) => { setEditData(student); setFormOpen(true) }
   const handleFormClose = () => { setFormOpen(false); setEditData(null); fetchStudents() }
+  const handleDeleteClick = async (student: Record<string, unknown>) => {
+    setDeleting(student)
+    setDeleteImpact(null)
+    setDeletePreviewLoading(true)
+    try {
+      const response = await fetch(`/api/admin/trash/preview?type=Student&id=${encodeURIComponent(String(student.id))}`)
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error || '无法加载影响范围')
+      setDeleteImpact(payload.data.impact)
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '无法加载影响范围')
+    } finally { setDeletePreviewLoading(false) }
+  }
 
   const handleDeleteConfirm = async () => {
     if (!deleting) return
     try {
       const res = await fetch(`/api/students/${deleting.id}`, { method: 'DELETE' })
       if (res.ok) {
-        message.success(`「${deleting.name}」已离校，默认列表不再显示`)
+        message.success(`「${deleting.name}」已移入回收站`)
         fetchStudents()
       } else {
         const err = await res.json().catch(() => null)
@@ -454,7 +480,7 @@ export default function StudentsPage() {
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
                     {students.map((student) => (
-                      <StudentCard key={student.id} student={student} onEdit={handleEdit} onDelete={(item) => setDeleting(item)} />
+                      <StudentCard key={student.id} student={student} onEdit={handleEdit} onDelete={handleDeleteClick} />
                     ))}
                   </div>
                 </section>
@@ -465,12 +491,23 @@ export default function StudentsPage() {
       </div>
 
       <StudentForm open={formOpen} onClose={handleFormClose} initialData={editData} mode={editData ? 'edit' : 'create'} />
-      <ImportModal open={importOpen} onClose={() => { setImportOpen(false); fetchStudents() }} />
+      {importOpen && <ImportModal open onClose={() => { setImportOpen(false); fetchStudents() }} />}
 
-      <Modal title="确认离校操作" open={!!deleting} onCancel={() => setDeleting(null)} onOk={handleDeleteConfirm}
-        okText="确认离校" cancelText="取消" okButtonProps={{ danger: true }}>
-        <p>确认将 <strong style={{ color: '#e03e2d' }}>{deleting?.name as string}</strong> 标记为离校？</p>
-        <Text style={{ color: '#98A2B3', fontSize: 13 }}>此操作将同时<b>停用关联家长账号</b>，家长将无法登录系统。数据不会丢失，状态可后续修改。</Text>
+      <Modal title="删除学员" open={!!deleting} onCancel={() => setDeleting(null)} onOk={handleDeleteConfirm}
+        okText="确认删除并移入回收站" cancelText="取消" okButtonProps={{ danger: true, disabled: deletePreviewLoading || !deleteImpact }}>
+        <Space direction="vertical" size={14} style={{ width: '100%' }}>
+          <Text>确认删除 <Text strong>{deleting?.name as string}</Text>？</Text>
+          <Card size="small" loading={deletePreviewLoading} className="impact-list" styles={{ body: { background: 'var(--color-surface-3)' } }}>
+            {deleteImpact && <Space direction="vertical" size={6}>
+              <Text strong>这次删除将一并影响</Text>
+              <Text>班级归属：{deleteImpact.enrollments || 0} 个</Text>
+              <Text>考勤记录：{deleteImpact.attendances || 0} 条</Text>
+              <Text>试卷与反馈：{(deleteImpact.papers || 0) + (deleteImpact.feedbacks || 0)} 条</Text>
+              <Text>家长账号：{deleteImpact.parentAccount ? '暂停登录，恢复学员时一并恢复' : '无关联账号'}</Text>
+            </Space>}
+          </Card>
+          <Alert className="modal-note" type="info" showIcon message="学员档案会进入回收站，30 天内可恢复；关联的班级归属会同步退出。" />
+        </Space>
       </Modal>
     </PageLayout>
   )

@@ -168,11 +168,11 @@ export function TeacherPapersClient() {
                         />
                       ))}
                       {!isExpanded && urls.length > 3 && (
-                        <div onClick={() => setExpandedPaper(paper.id)} style={{
+                        <button type="button" aria-label={`展开其余 ${urls.length - 3} 张试卷图片`} onClick={() => setExpandedPaper(paper.id)} style={{
                           width: 60, height: 60, borderRadius: 8, background: '#f5f5f5',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          cursor: 'pointer', fontSize: 12, color: '#98A2B3',
-                        }}>+{urls.length - 3}</div>
+                          cursor: 'pointer', fontSize: 12, color: '#98A2B3', border: 0,
+                        }}>+{urls.length - 3}</button>
                       )}
                     </div>
                   )}

@@ -9,6 +9,7 @@ import { normalizeWritableDivision } from '@/lib/division'
 import { intensiveStudentCountError, toIntensiveTeachingType } from '@/lib/intensive-class'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getRequestDivision } from '@/lib/division'
+import { Prisma } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -84,26 +85,30 @@ export const POST = apiHandler(async (req: NextRequest) => {
       }
     }
 
-    // Pre-transaction conflict check against ClassLesson
-    const allConflicts: Array<{ type: string; lessonId: string; courseName: string; timeRange: string; roomName?: string }> = []
-    for (const sid of dedupedStudentIds.length > 0 ? dedupedStudentIds : [teacherId /* placeholder for studentless check */]) {
-      const isStudentCheck = dedupedStudentIds.includes(sid)
-      const conflicts = await checkScheduleConflict({
-        teacherId,
-        studentId: isStudentCheck ? sid : undefined,
-        roomId: intensiveTeachingType ? undefined : roomId || undefined,
-        date: startDate,
-        startTime: startTimeVal,
-        endTime: endTimeVal,
-        termId: selectedTerm.id,
-      })
-      for (const c of conflicts) {
-        if (!allConflicts.some(e => e.lessonId === c.lessonId && e.type === c.type)) {
-          allConflicts.push(c)
+    const collectConflicts = async (client?: Parameters<typeof checkScheduleConflict>[1]) => {
+      const found: Array<{ type: string; lessonId: string; courseName: string; timeRange: string; roomName?: string }> = []
+      for (const sid of dedupedStudentIds.length > 0 ? dedupedStudentIds : [teacherId /* placeholder for studentless check */]) {
+        const isStudentCheck = dedupedStudentIds.includes(sid)
+        const conflicts = await checkScheduleConflict({
+          teacherId,
+          studentId: isStudentCheck ? sid : undefined,
+          roomId: intensiveTeachingType ? undefined : roomId || undefined,
+          date: startDate,
+          startTime: startTimeVal,
+          endTime: endTimeVal,
+          termId: selectedTerm.id,
+        }, client)
+        for (const conflict of conflicts) {
+          if (!found.some(existing => existing.lessonId === conflict.lessonId && existing.type === conflict.type)) {
+            found.push(conflict)
+          }
         }
       }
+      return found
     }
 
+    // Fast feedback before entering the serializable write transaction.
+    const allConflicts = await collectConflicts()
     if (allConflicts.length > 0) {
       const details = allConflicts.map(c => {
         const typeMap: Record<string, string> = { teacher: '教师冲突', room: '教室冲突', student: '学生冲突' }
@@ -119,8 +124,19 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const lessonMinutes = calcLessonMinutes(startTimeVal, endTimeVal)
     const lessonDate = new Date(`${startDate}T00:00:00`)
 
-    const result = await prisma.$transaction(async (tx) => {
-      // Verify course + teacher exist
+    const createSchedule = () => prisma.$transaction(async (tx) => {
+      // Repeat the conflict check in the same serializable transaction as the
+      // write. Concurrent schedulers will force one transaction to retry.
+      const transactionConflicts = await collectConflicts(tx)
+      if (transactionConflicts.length > 0) {
+        const typeMap: Record<string, string> = { teacher: '教师冲突', room: '教室冲突', student: '学生冲突' }
+        const details = transactionConflicts.map(conflict =>
+          `${typeMap[conflict.type] || conflict.type}：${conflict.courseName} (${conflict.timeRange})${conflict.roomName ? ` @${conflict.roomName}` : ''}`
+        )
+        throw { status: 409, message: `排课冲突：${details.join('；')}`, conflicts: transactionConflicts }
+      }
+
+      // Validate the course and teacher again inside the write transaction.
       const course = await tx.course.findFirst({
         where: { id: courseId, isActive: true },
         select: { id: true, name: true, division: true },
@@ -130,11 +146,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
       if (lessonDivision !== getRequestDivision(session.user as Record<string, unknown>, requestedDivision)) {
         throw { status: 400, message: '课程学部与当前运营批次不一致' }
       }
-      const teacher = await tx.teacher.findUnique({
-        where: { id: teacherId },
+      const teacher = await tx.teacher.findFirst({
+        where: { id: teacherId, division: lessonDivision, status: 'ACTIVE' },
         select: { id: true, name: true },
       })
-      if (!teacher) throw { status: 400, message: '教师不存在' }
+      if (!teacher) throw { status: 400, message: '请选择当前学部的在职教师' }
 
       // 使用已有 ClassGroup 或创建新班级（不再用"临时"前缀污染班级列表）
       const groupName = body.groupName || `${course.name}·${teacher.name}·${startDate}`
@@ -233,7 +249,19 @@ export const POST = apiHandler(async (req: NextRequest) => {
       }
 
       return lesson
-    })
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
+
+    let result: Awaited<ReturnType<typeof createSchedule>> | undefined
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        result = await createSchedule()
+        break
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034' && attempt < 2) continue
+        throw error
+      }
+    }
+    if (!result) throw new Error('SCHEDULE_TRANSACTION_RETRY_EXHAUSTED')
 
     revalidatePath('/schedule')
     revalidatePath('/teacher/schedule')

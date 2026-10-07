@@ -155,9 +155,9 @@ function LessonCard({ lesson, onClick }: { lesson: Record<string, unknown>; onCl
   const courseType = (lesson.courseType as string) || 'GROUP'
   const color = getCourseColor(courseType)
   return (
-    <div onClick={(e) => { e.stopPropagation(); onClick() }} style={{
+    <button type="button" onClick={(e) => { e.stopPropagation(); onClick() }} style={{
       width: '100%', flex: 1, minHeight: 34, borderRadius: 6, padding: '3px 6px',
-      background: `${color}12`, borderLeft: `4px solid ${color}`, cursor: 'pointer',
+      background: `${color}12`, border: 0, borderLeft: `4px solid ${color}`, cursor: 'pointer', textAlign: 'left', color: 'inherit', font: 'inherit',
       display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden',
     }}>
       <div style={{ fontSize: 11, fontWeight: 600, color, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -170,19 +170,19 @@ function LessonCard({ lesson, onClick }: { lesson: Record<string, unknown>; onCl
           {TYPE_LABELS[courseType] || courseType}
         </div>
       )}
-    </div>
+    </button>
   )
 }
 
 function EmptyCell({ onClick }: { onClick: () => void }) {
   const [hover, setHover] = useState(false)
   return (
-    <div style={{
+    <button type="button" aria-label="在当前教室和时段安排课程" style={{
       width: '100%', height: '100%', minHeight: 72, display: 'flex', alignItems: 'center', justifyContent: 'center',
       borderRadius: 6, background: hover ? 'rgba(232,120,74,.06)' : 'transparent',
-      border: hover ? '1px dashed rgba(232,120,74,.3)' : 'none', transition: 'all .15s', cursor: 'pointer',
+      color: 'inherit', font: 'inherit', border: hover ? '1px dashed rgba(232,120,74,.3)' : 'none', transition: 'all .15s', cursor: 'pointer',
     }} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onClick={onClick}>
       {hover && <span style={{ fontSize: 11, color: '#E8784A' }}>+ 安排课程</span>}
-    </div>
+    </button>
   )
 }

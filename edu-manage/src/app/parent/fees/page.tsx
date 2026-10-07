@@ -19,7 +19,7 @@ export default async function ParentFeesPage({ searchParams }: { searchParams?: 
     : parentActiveStudentWhere(userId)
 
   const fees = await db.fee.findMany({
-    where: { student: studentWhere, OR: [{ courseId: null }, { course: { isActive: true } }] },
+    where: { deletedAt: null, student: studentWhere, OR: [{ courseId: null }, { course: { isActive: true } }] },
     include: { student: true, course: true },
     orderBy: { createdAt: 'desc' },
   })

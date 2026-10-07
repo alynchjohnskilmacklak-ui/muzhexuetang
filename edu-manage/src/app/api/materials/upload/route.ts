@@ -5,26 +5,21 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { MaterialSource } from '@prisma/client'
 import { normalizeMaterialAudience, normalizeMaterialStatus } from '@/lib/material-visibility'
 import { apiHandler } from '@/lib/api-handler'
-import { uploadBuffer, isOssEnabled, StorageConfigurationError } from '@/lib/storage'
+import {
+  getStoredObjectMetadata,
+  isOssEnabled,
+  readStoredPrefix,
+  StorageConfigurationError,
+  uploadBuffer,
+} from '@/lib/storage'
+import { detectMaterialFileType, hasValidMaterialFileSignature, isAllowedMaterialExtension } from '@/lib/material-file'
 
 export const dynamic = 'force-dynamic'
-
-const ALLOWED_EXTS = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.zip', '.rar', '.7z']
-
-function detectFileType(ext: string) {
-  if (ext === '.pdf') return 'pdf'
-  if ('.doc.docx'.includes(ext)) return 'word'
-  if ('.xls.xlsx'.includes(ext)) return 'excel'
-  if ('.ppt.pptx'.includes(ext)) return 'ppt'
-  if ('.zip.rar.7z'.includes(ext)) return 'archive'
-  if ('.jpg.jpeg.png.gif.webp'.includes(ext)) return 'image'
-  return 'other'
-}
 
 function requireAdmin(session: { user?: { role?: string; id?: string } } | null): string | null {
   const role = (session?.user as { role?: string } | undefined)?.role
   const id = (session?.user as { id?: string } | undefined)?.id
-  if (!session?.user || (role !== 'admin' && role !== 'teacher')) return null
+  if (!session?.user || role !== 'admin') return null
   return id || null
 }
 
@@ -61,7 +56,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   const ext = path.extname(file.name).toLowerCase()
-  if (!ALLOWED_EXTS.includes(ext)) {
+  if (!isAllowedMaterialExtension(ext)) {
     return NextResponse.json({ error: '仅支持 PDF、Word、Excel、PPT、图片和压缩包格式' }, { status: 400 })
   }
 
@@ -71,10 +66,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: `文件大小不能超过 ${limitMB}MB` }, { status: 400 })
   }
 
+  const buffer = Buffer.from(await file.arrayBuffer())
+  if (!hasValidMaterialFileSignature(buffer, ext)) {
+    return NextResponse.json({ error: '文件内容与扩展名不匹配，请检查文件后重试' }, { status: 400 })
+  }
+
   const prisma = await getRequestPrisma()
   let result
   try {
-    result = await uploadBuffer(Buffer.from(await file.arrayBuffer()), {
+    result = await uploadBuffer(buffer, {
       originalName: file.name,
       mimeType: file.type,
       prefix: 'materials',
@@ -97,7 +97,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       fileUrl: result.storageKey,
       fileName: file.name,
       fileSize: file.size,
-      fileType: detectFileType(ext),
+      fileType: detectMaterialFileType(ext),
       storageDriver: result.storageDriver,
       description: description || null,
       uploadedBy: userId,
@@ -126,12 +126,36 @@ export const PUT = apiHandler(async (req: NextRequest) => {
   }
 
   const ext = path.extname(String(fileName)).toLowerCase()
-  if (!ALLOWED_EXTS.includes(ext)) {
+  if (!isAllowedMaterialExtension(ext)) {
     return NextResponse.json({ error: '仅支持 PDF、Word、Excel、PPT、图片和压缩包格式' }, { status: 400 })
   }
 
-  if (typeof fileSize !== 'number' || fileSize > 200 * 1024 * 1024) {
+  if (typeof fileSize !== 'number' || !Number.isSafeInteger(fileSize) || fileSize <= 0 || fileSize > 200 * 1024 * 1024) {
     return NextResponse.json({ error: '文件大小不能超过 200MB' }, { status: 400 })
+  }
+
+  const storageKey = String(key)
+  const keyExt = path.extname(storageKey).toLowerCase()
+  if (!/^materials\/material-\d+-[0-9a-f-]+\.[a-z0-9]+$/i.test(storageKey) || keyExt !== ext) {
+    return NextResponse.json({ error: '上传对象路径无效，请重新选择文件上传' }, { status: 400 })
+  }
+
+  try {
+    const [metadata, prefix] = await Promise.all([
+      getStoredObjectMetadata(storageKey, 'aliyun-oss'),
+      readStoredPrefix(storageKey, 16, 'aliyun-oss'),
+    ])
+    if (metadata.size !== fileSize || metadata.size <= 0 || metadata.size > 200 * 1024 * 1024) {
+      return NextResponse.json({ error: 'OSS 文件大小校验失败，请重新上传' }, { status: 400 })
+    }
+    if (!hasValidMaterialFileSignature(prefix, ext)) {
+      return NextResponse.json({ error: '文件内容与扩展名不匹配，请检查文件后重试' }, { status: 400 })
+    }
+  } catch (error) {
+    if (error instanceof StorageConfigurationError) {
+      return NextResponse.json({ error: error.message, code: error.code }, { status: error.status })
+    }
+    throw error
   }
 
   const prisma = await getRequestPrisma()
@@ -140,10 +164,10 @@ export const PUT = apiHandler(async (req: NextRequest) => {
       title: String(title),
       grade: String(grade),
       subject: String(subject),
-      fileUrl: String(key),
+      fileUrl: storageKey,
       fileName: String(fileName),
       fileSize: fileSize as number,
-      fileType: detectFileType(ext),
+      fileType: detectMaterialFileType(ext),
       storageDriver: 'aliyun-oss',
       description: description ? String(description) : null,
       uploadedBy: userId,

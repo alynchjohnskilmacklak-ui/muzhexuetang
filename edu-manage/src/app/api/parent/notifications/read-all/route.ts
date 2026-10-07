@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { notificationReadData, unreadNotificationWhere } from '@/lib/notification-read-state'
 
 export const PATCH = apiHandler(async () => {
   const session = await auth()
@@ -12,8 +13,8 @@ export const PATCH = apiHandler(async () => {
   const userId = (session.user as { id: string }).id
 
   await prisma.notification.updateMany({
-    where: { userId, readAt: null, ...visibleNotificationWhere },
-    data: { readAt: new Date(), read: true },
+    where: { userId, ...unreadNotificationWhere, ...visibleNotificationWhere },
+    data: notificationReadData(),
   })
   return NextResponse.json({ success: true })
 })

@@ -3,6 +3,8 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { parentLinkedStudentWhere, parentVisibleExamPaperWhere, parentVisiblePerformancePostWhere, visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { summarizeParentMessageWorkflow } from '@/lib/parent-message-workflow'
+import { unreadNotificationWhere } from '@/lib/notification-read-state'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,7 +23,7 @@ export const GET = apiHandler(async () => {
     })
   ).map(student => student.id)
 
-  const [papers, posts, notifications, feedbacks, studyHallHomework] = await Promise.all([
+  const [papers, posts, notifications, feedbacks, studyHallHomework, messageRows] = await Promise.all([
     prisma.examPaper.count({
       where: {
         ...parentVisibleExamPaperWhere(user.id),
@@ -36,7 +38,7 @@ export const GET = apiHandler(async () => {
       },
     }),
     prisma.notification.count({
-      where: { userId: user.id, read: false, ...visibleNotificationWhere },
+      where: { userId: user.id, ...unreadNotificationWhere, ...visibleNotificationWhere },
     }),
     prisma.classroomFeedback.count({
       where: {
@@ -48,14 +50,30 @@ export const GET = apiHandler(async () => {
     prisma.notification.count({
       where: {
         userId: user.id,
-        read: false,
+        ...unreadNotificationWhere,
         relatedType: 'STUDY_HALL_HOMEWORK',
         ...visibleNotificationWhere,
       },
     }),
+    prisma.parentMessage.findMany({
+      where: { parentId: user.id },
+      select: {
+        status: true,
+        replies: {
+          select: {
+            role: true,
+            createdAt: true,
+            isReadByParent: true,
+            isReadByTeacher: true,
+          },
+        },
+      },
+    }),
   ])
 
-  return NextResponse.json({ papers, posts, notifications, feedbacks, studyHallHomework }, {
+  const messages = summarizeParentMessageWorkflow(messageRows).unreadForParent
+
+  return NextResponse.json({ papers, posts, notifications, feedbacks, studyHallHomework, messages }, {
     headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
   })
 })

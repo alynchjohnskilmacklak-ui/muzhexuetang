@@ -11,6 +11,7 @@ import {
 import { createActivityLog, createDeletedRecord } from '@/lib/data-admin/entities-server'
 import { getDynamicModel } from '@/lib/data-admin/dynamic-model'
 import type { Prisma } from '@prisma/client'
+import { softDeleteEntity, type TrashEntityType } from '@/lib/data-correction/trash'
 
 const ALLOWED_ENTITIES = Object.keys(DATA_ADMIN_ENTITIES)
 
@@ -159,6 +160,15 @@ export async function DELETE(
       return NextResponse.json({ error: '记录不存在' }, { status: 404 })
     }
 
+    const trashTypeByEntity: Partial<Record<EntityKey, TrashEntityType>> = {
+      students: 'Student', 'class-groups': 'ClassGroup', 'class-lessons': 'ClassLesson', 'exam-papers': 'ExamPaper', materials: 'StudyMaterial',
+    }
+    const trashType = trashTypeByEntity[entityKey]
+    if (trashType) {
+      const deleted = await softDeleteEntity(prisma, trashType, id, { id: session.user.id, name: session.user.name }, reason)
+      return NextResponse.json({ success: true, message: '已移入回收站', deleted })
+    }
+
     const softConfig = getSoftDeleteConfig(entityKey)
 
     if (softConfig) {
@@ -255,79 +265,108 @@ export async function PATCH(
     if (!studentId || amount === undefined || amount === null) {
       return NextResponse.json({ error: '缺少必要参数' }, { status: 400 })
     }
-    if (typeof amount !== 'number' || amount === 0) {
+    if (typeof amount !== 'number' || !Number.isFinite(amount) || amount === 0) {
       return NextResponse.json({ error: '课时数无效' }, { status: 400 })
     }
 
     try {
-      // Get current state
-      const student = await prisma.student.findUnique({ where: { id: studentId } })
-      if (!student) {
-        return NextResponse.json({ error: '学员不存在' }, { status: 404 })
-      }
+      const result = await prisma.$transaction(async (tx) => {
+        const student = await tx.student.findFirst({ where: { id: studentId, deletedAt: null } })
+        if (!student) throw new Error('STUDENT_NOT_FOUND')
 
-      const beforeStudentHours = student.remainHours || 0
-      // Update student hours
-      await prisma.student.update({
-        where: { id: studentId },
-        data: {
-          remainHours: { increment: amount },
-          totalHours: { increment: amount },
-        },
-      })
+        let beforeHours = Number(student.remainHours || 0)
+        let afterHours = beforeHours
 
-      const afterStudent = await prisma.student.findUnique({ where: { id: studentId } })
+        if (enrollmentId) {
+          const enrollment = await tx.enrollment.findFirst({
+            where: { id: enrollmentId, studentId, deletedAt: null },
+            select: { id: true, remainHours: true, totalHours: true },
+          })
+          if (!enrollment) throw new Error('ENROLLMENT_NOT_OWNED')
+          beforeHours = Number(enrollment.remainHours || 0)
 
-      // Update enrollment if specified
-      let beforeEnrollmentHours: number | null = null
-      let afterEnrollmentHours: number | null = null
-
-      if (enrollmentId) {
-        const enrollment = await prisma.enrollment.findUnique({ where: { id: enrollmentId } })
-        if (enrollment) {
-          beforeEnrollmentHours = enrollment.remainHours
-          await prisma.enrollment.update({
-            where: { id: enrollmentId },
+          const updated = await tx.enrollment.updateMany({
+            where: {
+              id: enrollmentId,
+              studentId,
+              deletedAt: null,
+              ...(amount < 0 ? {
+                remainHours: { gte: Math.abs(amount) },
+                totalHours: { gte: Math.abs(amount) },
+              } : {}),
+            },
             data: {
               remainHours: { increment: amount },
               totalHours: { increment: amount },
             },
           })
-          const afterEnrollment = await prisma.enrollment.findUnique({ where: { id: enrollmentId } })
-          afterEnrollmentHours = afterEnrollment?.remainHours ?? null
-          await syncStudentHours(prisma, enrollment.studentId)
+          if (updated.count !== 1) throw new Error('INSUFFICIENT_HOURS')
+          const afterEnrollment = await tx.enrollment.findUniqueOrThrow({ where: { id: enrollmentId } })
+          afterHours = Number(afterEnrollment.remainHours || 0)
+          await syncStudentHours(tx, studentId)
+        } else {
+          const updated = await tx.student.updateMany({
+            where: {
+              id: studentId,
+              deletedAt: null,
+              ...(amount < 0 ? {
+                remainHours: { gte: Math.abs(amount) },
+                totalHours: { gte: Math.abs(amount) },
+              } : {}),
+            },
+            data: {
+              remainHours: { increment: amount },
+              totalHours: { increment: amount },
+            },
+          })
+          if (updated.count !== 1) throw new Error('INSUFFICIENT_HOURS')
+          const afterStudent = await tx.student.findUniqueOrThrow({ where: { id: studentId } })
+          afterHours = Number(afterStudent.remainHours || 0)
         }
-      }
 
-      // Create hour transaction
-      const hourType = amount > 0 ? 'ADMIN_ADD' : 'ADMIN_DEDUCT'
-      await prisma.hourTransaction.create({
-        data: {
-          studentId,
-          enrollmentId: enrollmentId || null,
-          amount,
-          beforeHours: beforeEnrollmentHours ?? beforeStudentHours,
-          afterHours: afterEnrollmentHours ?? (afterStudent?.remainHours ?? beforeStudentHours + amount),
-          type: hourType,
-          reason: adjustmentReason || '管理员手动调整',
-          operatorId: session.user.id,
-        },
-      })
-
-      await createActivityLog(session.user.id, 'HOUR_ADJUSTMENT', 'Student', studentId, {
-        studentId,
-        enrollmentId: enrollmentId || null,
-        amount,
-        beforeStudentHours,
-        afterStudentHours: afterStudent?.remainHours,
-        reason: adjustmentReason || '管理员手动调整',
+        const reason = typeof adjustmentReason === 'string' && adjustmentReason.trim()
+          ? adjustmentReason.trim()
+          : '管理员手动调整'
+        await tx.hourTransaction.create({
+          data: {
+            studentId,
+            enrollmentId: enrollmentId || null,
+            amount,
+            beforeHours,
+            afterHours,
+            type: amount > 0 ? 'ADMIN_ADD' : 'ADMIN_DEDUCT',
+            reason,
+            operatorId: session.user.id,
+          },
+        })
+        await tx.activityLog.create({
+          data: {
+            userId: session.user.id,
+            action: 'HOUR_ADJUSTMENT',
+            entityType: 'Student',
+            entityId: studentId,
+            detail: `${student.name} 课时 ${beforeHours} → ${afterHours}`,
+            metadata: { studentId, enrollmentId: enrollmentId || null, amount, beforeHours, afterHours, reason },
+          },
+        })
+        return { beforeHours, afterHours }
       })
 
       return NextResponse.json({
         success: true,
         message: `课时已${amount > 0 ? '增加' : '减少'}${Math.abs(amount)}`,
+        ...result,
       })
     } catch (error) {
+      if (error instanceof Error && error.message === 'STUDENT_NOT_FOUND') {
+        return NextResponse.json({ error: '学员不存在' }, { status: 404 })
+      }
+      if (error instanceof Error && error.message === 'ENROLLMENT_NOT_OWNED') {
+        return NextResponse.json({ error: '报名记录不存在或不属于该学员' }, { status: 400 })
+      }
+      if (error instanceof Error && error.message === 'INSUFFICIENT_HOURS') {
+        return NextResponse.json({ error: '课时余额不足，不能扣为负数' }, { status: 409 })
+      }
       console.error('data-admin PATCH hour-adjustment error:', error)
       return NextResponse.json({ error: '课时调整失败' }, { status: 500 })
     }

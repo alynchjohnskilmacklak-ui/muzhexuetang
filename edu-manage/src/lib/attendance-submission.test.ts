@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
+import { hasAttendingStudent, hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
 
 describe('hasSubmittedLessonAttendance', () => {
   it('uses attendanceSubmittedAt as the canonical marker', () => {
@@ -41,5 +41,15 @@ describe('hasSubmittedLessonAttendance', () => {
       attendances: [],
       expectedStudentIds: ['student-a'],
     })).toBe(false)
+  })
+})
+
+describe('hasAttendingStudent', () => {
+  it('requires an explicit actual attendance, including legacy late status', () => {
+    expect(hasAttendingStudent([{ status: 'PRESENT' }, { status: 'LEAVE' }])).toBe(true)
+    expect(hasAttendingStudent([{ status: 'LATE' }])).toBe(true)
+    expect(hasAttendingStudent([{ status: 'LEAVE' }, { status: 'ABSENT' }])).toBe(false)
+    expect(hasAttendingStudent([{ status: 'MAKEUP' }, { status: 'invalid' }])).toBe(false)
+    expect(hasAttendingStudent([])).toBe(false)
   })
 })

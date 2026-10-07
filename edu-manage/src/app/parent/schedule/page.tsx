@@ -10,6 +10,7 @@ import {
 } from '@/lib/business-visibility'
 import { normalizeSchedulePeriods } from '@/lib/schedule-periods'
 import { calculateIntensiveDeductHours } from '@/lib/intensive-class'
+import { localDateColumnValue, todayLocal } from '@/lib/date/local-day'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +19,7 @@ function localDateKey(value: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
-export default async function ParentSchedulePage() {
+export default async function ParentSchedulePage({ searchParams }: { searchParams?: Promise<{ week?: string }> }) {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
@@ -53,26 +54,51 @@ export default async function ParentSchedulePage() {
     },
   }), db.systemConfig.findUnique({ where: { id: 'singleton' }, select: { schedulePeriods: true } })])
 
-  const today = new Date()
-  const monday = new Date(today)
-  monday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1))
-  monday.setHours(0, 0, 0, 0)
-  const sunday = new Date(monday)
-  sunday.setDate(monday.getDate() + 6)
-  sunday.setHours(23, 59, 59, 999)
+  const today = new Date(`${todayLocal()}T00:00:00.000Z`)
+  const requestedWeek = (await searchParams)?.week
+  const parsedWeek = typeof requestedWeek === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(requestedWeek)
+    ? new Date(`${requestedWeek}T00:00:00.000Z`)
+    : null
+  const selectedDay = parsedWeek && !Number.isNaN(parsedWeek.getTime())
+    && parsedWeek.toISOString().slice(0, 10) === requestedWeek
+    && Math.abs(parsedWeek.getTime() - today.getTime()) <= 366 * 86400000
+    ? parsedWeek : today
+  const mondayCalendar = new Date(selectedDay)
+  mondayCalendar.setUTCDate(selectedDay.getUTCDate() - (selectedDay.getUTCDay() === 0 ? 6 : selectedDay.getUTCDay() - 1))
+  const mondayKey = mondayCalendar.toISOString().slice(0, 10)
+  const nextMondayCalendar = new Date(mondayCalendar)
+  nextMondayCalendar.setUTCDate(mondayCalendar.getUTCDate() + 7)
+  const monday = localDateColumnValue(mondayKey)
+  const nextMonday = localDateColumnValue(nextMondayCalendar.toISOString().slice(0, 10))
 
   const lessons = await db.classLesson.findMany({
     where: {
       ...parentVisibleLessonWhere(userId),
-      lessonDate: { gte: monday, lte: sunday },
+      lessonDate: { gte: monday, lt: nextMonday },
     },
     include: {
+      _count: { select: { lessonStudents: true } },
       group: { include: { course: true, teacher: { select: { id: true, name: true } }, teacherAssignments: { select: { teacherId: true, subject: true } }, room: true, enrollments: { where: parentActiveEnrollmentWhere(userId), include: { student: true } } } },
       teacher: { select: { id: true, name: true } },
       lessonStudents: {
         where: { student: parentLinkedStudentWhere(userId) },
         include: { student: { select: { id: true, name: true } } },
       },
+    },
+    orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
+  })
+
+  const cancelledLessons = await db.classLesson.findMany({
+    where: {
+      deletedAt: null,
+      status: 'CANCELLED',
+      lessonDate: { gte: monday, lt: nextMonday },
+      group: { deletedAt: null, status: { not: 'ARCHIVED' }, enrollments: { some: parentActiveEnrollmentWhere(userId) } },
+    },
+    include: {
+      _count: { select: { lessonStudents: true } },
+      group: { include: { course: true, enrollments: { where: parentActiveEnrollmentWhere(userId), include: { student: true } } } },
+      lessonStudents: { where: { student: parentLinkedStudentWhere(userId) }, select: { studentId: true } },
     },
     orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
   })
@@ -85,7 +111,7 @@ export default async function ParentSchedulePage() {
         status: { not: 'ARCHIVED' },
         enrollments: { some: parentActiveEnrollmentWhere(userId) },
       },
-      lessonDate: { lte: sunday },
+      lessonDate: { lt: nextMonday },
       OR: [
         { attendanceSubmittedAt: { not: null } },
         { intensiveReviewStatus: { in: ['PENDING', 'APPROVED', 'REJECTED'] } },
@@ -251,6 +277,8 @@ export default async function ParentSchedulePage() {
     <ParentScheduleClient
       students={JSON.parse(JSON.stringify(students))}
       lessons={JSON.parse(JSON.stringify(lessons))}
+      cancelledLessons={JSON.parse(JSON.stringify(cancelledLessons))}
+      weekStart={mondayKey}
       historyLessons={JSON.parse(JSON.stringify(safeHistoryLessons))}
       intensiveSummary={[...summaryMap.values()]}
       periods={normalizeSchedulePeriods(config?.schedulePeriods)}

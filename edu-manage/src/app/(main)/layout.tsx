@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { MainLayout } from '@/components/Layout/MainLayout'
+import { AIFloatingLauncher } from '@/components/AI/AIFloatingLauncher'
 import { DivisionProvider } from '@/contexts/DivisionContext'
 
 export default async function MainLayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -12,6 +13,7 @@ export default async function MainLayoutWrapper({ children }: { children: React.
   return (
     <DivisionProvider>
       <MainLayout>{children}</MainLayout>
+      <AIFloatingLauncher />
     </DivisionProvider>
   )
 }

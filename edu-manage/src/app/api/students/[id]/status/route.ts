@@ -35,7 +35,6 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
         where: { studentId: id, status: 'ACTIVE' },
         data: { status: 'WITHDRAWN', remainHours: 0 },
       })
-      await tx.scheduleStudent.deleteMany({ where: { studentId: id } })
       await tx.performancePost.updateMany({
         where: { studentId: id, deletedAt: null },
         data: { deletedAt: new Date(), isReadByParent: true },

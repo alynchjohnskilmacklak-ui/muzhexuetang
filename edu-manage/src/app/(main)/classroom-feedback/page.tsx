@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Carousel, Col, Drawer, Form, Input, Modal, Row, Select, Spin, Tag, Upload } from 'antd'
-import { DownloadOutlined, PlusOutlined, ReloadOutlined, SearchOutlined, SendOutlined, WarningOutlined } from '@ant-design/icons'
+import { Alert, Avatar, Badge, Button, Card, Carousel, Drawer, Form, Input, List, Modal, Segmented, Select, Spin, Tag, Tooltip, Typography, Upload } from 'antd'
+import { CalendarOutlined, CheckCircleOutlined, DownloadOutlined, HistoryOutlined, InboxOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, RightOutlined, SearchOutlined, SendOutlined, TeamOutlined, WarningOutlined } from '@ant-design/icons'
 import { Image as AntImage } from 'antd'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -11,9 +11,11 @@ import { toast } from 'sonner'
 import { useDivision } from '@/contexts/DivisionContext'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
-import Image from 'next/image'
+import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
+import { KnowledgePointDetail } from '@/components/Feedback/KnowledgePointDetail'
 import { AdminTeachingRecordSwitcher } from '@/components/study-hall/AdminTeachingRecordSwitcher'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import styles from './classroom-feedback.module.css'
 
 const fetcher = (url: string) => fetch(url).then((res) => { if (!res.ok) throw new Error('加载失败'); return res.json() })
 type AdminFeedback = {
@@ -47,6 +49,7 @@ type AdminFeedbackDetail = {
   lessonContent: string | null
   summary: string | null
   knowledgePoints: string[]
+  knowledgeCard?: unknown
   homework: unknown
   tags: string[]
   badge: string | null
@@ -101,7 +104,7 @@ function FeedbackImage({ src, size, onClick }: { src: string; size: number; onCl
     >
       {!loaded && !failed && <Spin size="small" style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center' }} />}
       {failed ? <span style={{ fontSize: 10, color: '#9A8E7A' }}>加载失败</span> : (
-        <Image src={src} alt="课堂资料" fill sizes={`${size}px`} loading="lazy" unoptimized style={{ objectFit: 'cover', opacity: loaded ? 1 : 0, transition: 'opacity .2s ease' }} onLoad={() => setLoaded(true)} onError={() => setFailed(true)} />
+        <AntImage src={src} alt="课堂资料" width={size} height={size} preview={false} loading="lazy" style={{ objectFit: 'cover', opacity: loaded ? 1 : 0, transition: 'opacity .2s ease' }} onLoad={() => setLoaded(true)} onError={() => setFailed(true)} />
       )}
     </button>
   )
@@ -132,12 +135,12 @@ function FeedbackImageViewer({ images, initialIndex, onClose }: { images: AdminF
         {images.map((image, index) => (
           <div key={`${image.originalUrl}-${index}`}>
             <div style={{ position: 'relative', width: '100%', height: 'min(70vh, 720px)', minHeight: 280, background: '#1A1201' }}>
-              <Image
+              <AntImage
                 src={signedPreviews[index]}
                 alt={`课堂资料 ${index + 1}`}
-                fill
-                sizes="(max-width: 768px) 100vw, 960px"
-                unoptimized
+                width="100%"
+                height="min(70vh, 720px)"
+                preview={false}
                 style={{ objectFit: 'contain' }}
               />
             </div>
@@ -155,35 +158,49 @@ function FeedbackImageViewer({ images, initialIndex, onClose }: { images: AdminF
 
 function FeedbackItemCard({ item, onOpen }: { item: AdminFeedback; onOpen: (item: AdminFeedback) => void }) {
   return (
-    <Card className="pressable" onClick={() => onOpen(item)} bordered={false} style={{ borderRadius: 10, border: '1px solid #EEE7E1', background: '#fff', cursor: 'pointer' }} styles={{ body: { padding: '12px 14px' } }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, flexWrap: 'wrap', gap: 4 }}>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 14, color: '#1F2329' }}>{item.studentName}</div>
-          <div style={{ marginTop: 3, fontSize: 12, color: '#667085' }}>{item.teacherName} · {item.subject}</div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Tag color={item.status === 'PUBLISHED' ? 'green' : 'orange'} style={{ borderRadius: 9999, fontSize: 10, margin: 0 }}>
-            {item.status === 'PUBLISHED' ? '已发布' : '草稿'}
-          </Tag>
-          {item.hasImage && <Tag style={{ borderRadius: 9999, fontSize: 10, margin: 0 }}>有图片</Tag>}
-          <span style={{ fontSize: 11, color: '#C4BAB0' }}>
-            {formatFeedbackTime(item.date)}
-          </span>
-        </div>
-      </div>
-      {item.lessonContent && (
-        <div style={{ color: '#5A4E3A', fontSize: 12, lineHeight: 1.6, marginBottom: item.tags.length ? 8 : 0 }}>
-          <strong>授课内容：</strong>{item.lessonContent}
-        </div>
-      )}
-      {item.tags.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          {item.tags.map((tag) => (
-            <Tag key={tag} style={{ borderRadius: 9999, margin: 0, background: '#FFF3EC', color: '#E8784A', border: 'none' }}>{tag}</Tag>
-          ))}
-        </div>
-      )}
-    </Card>
+    <List.Item
+      className={styles.feedbackItem}
+      role="button"
+      tabIndex={0}
+      aria-label={`查看${item.studentName}的课堂反馈`}
+      onClick={() => onOpen(item)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onOpen(item)
+        }
+      }}
+      actions={[
+        <div className={styles.feedbackActions} key="status">
+          <Tooltip title={item.hasImage ? '含课堂资料图片' : '无课堂资料图片'}>
+            {item.hasImage ? <PictureOutlined aria-label="含图片" style={{ color: 'var(--color-primary)' }} /> : <span />}
+          </Tooltip>
+          <Badge status={item.status === 'PUBLISHED' ? 'success' : 'warning'} text={item.status === 'PUBLISHED' ? '已发布' : '草稿'} />
+          <RightOutlined aria-hidden style={{ color: 'var(--color-ink-subtle)', fontSize: 11 }} />
+        </div>,
+      ]}
+    >
+      <List.Item.Meta
+        avatar={<Avatar style={{ background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontWeight: 700 }}>{item.studentName.slice(0, 1)}</Avatar>}
+        title={
+          <div className={styles.feedbackTitle}>
+            <span>{item.studentName}</span>
+            <span className={styles.feedbackMeta}>{item.teacherName} · {item.subject}</span>
+          </div>
+        }
+        description={
+          <div>
+            <div className={styles.feedbackMeta}>{formatFeedbackTime(item.date)}</div>
+            {item.lessonContent && <Typography.Paragraph ellipsis={{ rows: 2 }} className={styles.feedbackExcerpt}>授课内容：{item.lessonContent}</Typography.Paragraph>}
+            {item.tags.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
+                {item.tags.map((tag) => <Tag key={tag} bordered={false} color="orange" style={{ margin: 0 }}>{tag}</Tag>)}
+              </div>
+            )}
+          </div>
+        }
+      />
+    </List.Item>
   )
 }
 
@@ -385,25 +402,43 @@ export default function ClassroomFeedbackAdminPage() {
       }
     >
       <AdminTeachingRecordSwitcher />
-      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
-        <Col xs={12} sm={8} md={6}>
-          <Card bordered={false} style={{ borderRadius: 10, background: 'linear-gradient(135deg,#fff3ec,#fff)', border: '1px solid #EEE7E1' }}>
-            <div style={{ fontSize: 11, color: '#98A2B3', marginBottom: 4 }}>今日已反馈</div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: '#1D9E75' }}>{feedbacks.length}</div>
-          </Card>
-        </Col>
-        {!viewAll && (
-          <Col xs={12} sm={8} md={6}>
-            <Card bordered={false} style={{ borderRadius: 10, background: 'linear-gradient(135deg,#fff7ed,#fff)', border: '1px solid #FED7AA' }}>
-              <div style={{ fontSize: 11, color: '#98A2B3', marginBottom: 4 }}>未反馈老师</div>
-              <div style={{ fontSize: 26, fontWeight: 800, color: noFeedback.length > 0 ? '#E87545' : '#1D9E75' }}>{noFeedback.length}</div>
-            </Card>
-          </Col>
-        )}
-      </Row>
+      <Card bordered={false} className={styles.overview} styles={{ body: { padding: 0 } }}>
+        <div className={styles.overviewBody}>
+          <div className={styles.overviewMetric}>
+            <div className={styles.metricIcon}><CheckCircleOutlined /></div>
+            <div>
+              <div className={styles.metricValue}>{feedbacks.length}</div>
+              <div className={styles.metricLabel}>{viewAll ? '历史反馈' : '当日已反馈'}</div>
+            </div>
+          </div>
+          {!viewAll && (
+            <>
+              <div className={styles.overviewDivider} />
+              <div className={styles.overviewMetric}>
+                <div className={styles.metricIcon}><TeamOutlined /></div>
+                <div>
+                  <div className={styles.metricValue}>{noFeedback.length}</div>
+                  <div className={styles.metricLabel}>尚未提交的教师</div>
+                </div>
+              </div>
+            </>
+          )}
+          <div className={styles.overviewHint}>
+            {viewAll ? `当前共显示 ${filtered.length} 条反馈` : noFeedback.length > 0 ? '可直接点击下方教师或课次快速补发' : '今日教学反馈已全部提交'}
+          </div>
+        </div>
+      </Card>
 
-      <Card bordered={false} style={{ borderRadius: 10, border: '1px solid #EEE7E1', marginBottom: 16 }}>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+      <Card bordered={false} className={styles.filterBar} styles={{ body: { padding: 0 } }}>
+        <div className={styles.filterBody}>
+          <Segmented
+            value={viewAll ? 'history' : 'daily'}
+            onChange={(value) => setViewAll(value === 'history')}
+            options={[
+              { label: '按日查看', value: 'daily', icon: <CalendarOutlined /> },
+              { label: '全部历史', value: 'history', icon: <HistoryOutlined /> },
+            ]}
+          />
           <Input type="date" value={date} onChange={(event) => setDate(event.target.value)} style={{ width: 150 }} disabled={viewAll} />
           <Select
             allowClear
@@ -423,49 +458,33 @@ export default function ClassroomFeedbackAdminPage() {
             value={q}
             onChange={(event) => setQ(event.target.value)}
             allowClear
-            style={{ width: isMobile ? '100%' : 280 }}
+            className={styles.searchInput}
           />
-          <Button
-            onClick={() => setViewAll((value) => !value)}
-          >
-            {viewAll ? '恢复按日查看' : '查看全部历史'}
-          </Button>
         </div>
       </Card>
 
       {!viewAll && noFeedback.length > 0 && (
         <Card
           bordered={false}
-          style={{ borderRadius: 10, border: '1.5px solid #FED7AA', background: '#FFFBF5', marginBottom: 16 }}
-          title={<span style={{ color: '#D97706', fontSize: 14, fontWeight: 600 }}><WarningOutlined /> 今日尚未提交反馈</span>}
+          style={{ borderRadius: 14, border: '1px solid var(--color-hairline)', background: 'var(--color-primary-bg)', marginBottom: 16 }}
+          title={<span style={{ color: 'var(--color-ink)', fontSize: 14, fontWeight: 600 }}><WarningOutlined style={{ color: 'var(--color-warning)' }} /> 今日尚未提交反馈</span>}
         >
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {noFeedback.map((teacher) => (
-              <Tag 
-                key={teacher.id} 
-                color="orange" 
-                style={{ borderRadius: 9999, cursor: 'pointer', padding: '2px 10px' }}
-                onClick={() => openCompose(teacher.id)}
-              >
-                {teacher.name}
-              </Tag>
+              <Button key={teacher.id} size="small" icon={<PlusOutlined />} onClick={() => openCompose(teacher.id)}>
+                {teacher.name}补发
+              </Button>
             ))}
           </div>
           {missingLessons.length > 0 && (
-            <div style={{ marginTop: 12, borderTop: '1px dashed #FED7AA', paddingTop: 12 }}>
-              <div style={{ fontSize: 12, color: '#9A8E7A', marginBottom: 8 }}>待补发的课次：</div>
+            <div style={{ marginTop: 12, borderTop: '1px solid var(--color-hairline)', paddingTop: 12 }}>
+              <div style={{ fontSize: 12, color: 'var(--color-ink-muted)', marginBottom: 8 }}>待补发的课次</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {missingLessons.map(lesson => (
-                  <Tag 
-                    key={lesson.id} 
-                    style={{ borderRadius: 6, cursor: 'pointer', padding: '4px 8px', background: '#fff' }}
-                    onClick={() => openCompose(undefined, lesson.id)}
-                  >
-                    <span style={{ color: '#E8784A', fontWeight: 600 }}>{lesson.groupName}</span>
-                    <span style={{ margin: '0 4px', color: '#ccc' }}>|</span>
-                    <span style={{ color: '#5a4e3a' }}>{lesson.teacherName}</span>
-                    <span style={{ marginLeft: 6, color: '#98A2B3', fontSize: 11 }}>{lesson.time}</span>
-                  </Tag>
+                  <Button key={lesson.id} size="small" onClick={() => openCompose(undefined, lesson.id)}>
+                    <strong>{lesson.groupName}</strong>
+                    <span style={{ color: 'var(--color-ink-muted)' }}>{lesson.teacherName} · {lesson.time}</span>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -476,14 +495,16 @@ export default function ClassroomFeedbackAdminPage() {
       {isLoading ? (
         <CardSkeleton rows={3} />
       ) : filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', background: '#fff', borderRadius: 12, border: '1px solid #EEE7E1' }}>
-          <Image src="/images/empty-box.png" alt="" width={120} height={120} style={{ opacity: 0.5, marginBottom: 16, objectFit: 'contain' }} />
+        <div className={styles.emptyState}>
+          <InboxOutlined aria-hidden style={{ fontSize: 72, color: 'var(--color-ink-muted)', opacity: 0.35, marginBottom: 16 }} />
           <GuidedEmpty title={viewAll ? '还没有课堂反馈记录' : `${date}没有课堂反馈`} description={viewAll ? '教师发布的课堂内容、评价和照片会显示在这里，便于教务检查反馈是否完整。' : '可以查看全部日期，确认是否已有其他课堂反馈。'} actionLabel={viewAll ? '查看课程管理' : '查看全部反馈'} onAction={() => viewAll ? window.location.assign('/courses') : setViewAll(true)} />
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {filtered.map(item => <FeedbackItemCard key={item.id} item={item} onOpen={openDetail} />)}
-        </div>
+        <List
+          className={styles.feedbackList}
+          dataSource={filtered}
+          renderItem={(item) => <FeedbackItemCard key={item.id} item={item} onOpen={openDetail} />}
+        />
       )}
 
       {/* Read-only feedback detail and admin reply */}
@@ -508,23 +529,31 @@ export default function ClassroomFeedbackAdminPage() {
         {detailLoading ? <div style={{ display: 'grid', placeItems: 'center', minHeight: 240 }}><Spin size="large" /></div> : detailFeedback && (() => {
           const students = Array.isArray(detailFeedback.students) ? detailFeedback.students : []
           const points = Array.isArray(detailFeedback.knowledgePoints) ? detailFeedback.knowledgePoints : []
+          const knowledgeCard = parseStoredKnowledgeCard(detailFeedback.knowledgeCard)
           const homework = formatHomework(detailFeedback.homework)
           const images = detailImages
           const performanceTags = Array.isArray(detailFeedback.tags) ? detailFeedback.tags : []
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{ padding: '12px 14px', borderRadius: 10, background: '#FAF8F5', border: '1px solid #EEE7E1' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-                  <strong style={{ color: '#1A1201' }}>{detailFeedback.teacher.name}</strong>
-                  <span style={{ color: '#9A8E7A', fontSize: 12 }}>{formatFeedbackTime(detailFeedback.date)}</span>
-                </div>
-                <div style={{ marginTop: 4, color: '#5A4E3A', fontSize: 13 }}>
-                  {detailFeedback.className || '未关联班级'} · {detailFeedback.course || detailFeedback.subject || '课程未填写'}
+              <div className={styles.detailHeader}>
+                <Avatar size={40} style={{ background: 'var(--color-primary)', fontWeight: 700 }}>{detailFeedback.teacher.name.slice(0, 1)}</Avatar>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+                    <strong style={{ color: 'var(--color-ink)' }}>{detailFeedback.teacher.name}</strong>
+                    <Badge status={detailFeedback.status === 'PUBLISHED' ? 'success' : 'warning'} text={detailFeedback.status === 'PUBLISHED' ? '已发布' : '草稿'} />
+                  </div>
+                  <div style={{ marginTop: 3, color: 'var(--color-ink-muted)', fontSize: 13 }}>
+                    {detailFeedback.className || '未关联班级'} · {detailFeedback.course || detailFeedback.subject || '课程未填写'}
+                  </div>
+                  <div style={{ marginTop: 3, color: 'var(--color-ink-subtle)', fontSize: 12 }}>{formatFeedbackTime(detailFeedback.date)}</div>
                 </div>
               </div>
 
               {students.length > 0 && <DetailSection label="学员"><div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{students.map((student) => <Tag key={student.id} style={{ borderRadius: 9999, margin: 0 }}>{student.name}{student.grade ? ` · ${student.grade}` : ''}{student.studentRating ? ` · ${String(student.studentRating)}` : ''}</Tag>)}</div></DetailSection>}
               {points.length > 0 && <DetailSection label="知识点"><div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>{points.map((point) => <Tag key={point} style={{ borderRadius: 9999, margin: 0, background: '#FFF3EC', color: '#E8784A', border: 'none' }}>{point}</Tag>)}</div></DetailSection>}
+              {knowledgeCard && (
+                <div style={{ marginTop: 2 }}><KnowledgePointDetail card={knowledgeCard} audience="parent" defaultOpen /></div>
+              )}
               {(detailFeedback.mood || performanceTags.length > 0 || detailFeedback.badge) && (
                 <DetailSection label="课堂表现">
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -541,7 +570,7 @@ export default function ClassroomFeedbackAdminPage() {
               {images.length > 0 && (
                 <DetailSection label="课堂资料（点击预览）">
                   {detailImageError && (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10, padding: '9px 10px', borderRadius: 10, background: '#FFF4DE', color: '#8A5B00', fontSize: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10, padding: '9px 10px', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-ink)', fontSize: 12 }}>
                       <span>图片签名暂时失败，反馈文字仍可正常查看。</span>
                       <Button size="small" icon={<ReloadOutlined />} onClick={retryDetailImages}>重新加载</Button>
                     </div>
@@ -553,12 +582,12 @@ export default function ClassroomFeedbackAdminPage() {
               )}
 
               {detailFeedback.parentReply && (
-                <div style={{ padding: '10px 12px', borderRadius: 8, background: '#EAF7F1', border: '1px solid #B6E2D2', color: '#176C53', lineHeight: 1.7 }}>
+                <div style={{ padding: '10px 12px', borderRadius: 8, background: 'var(--color-success-bg)', border: '1px solid var(--color-hairline)', color: 'var(--color-ink)', lineHeight: 1.7 }}>
                   <strong>家长回复：</strong>{detailFeedback.parentReply}
                 </div>
               )}
               {detailFeedback.adminReply && (
-                <div style={{ padding: '10px 12px', borderRadius: 8, background: '#FFF3EC', border: '1px solid #FFD9BF', color: '#B85D32', lineHeight: 1.7 }}>
+                <div style={{ padding: '10px 12px', borderRadius: 8, background: 'var(--color-primary-bg)', border: '1px solid var(--color-hairline)', color: 'var(--color-ink)', lineHeight: 1.7 }}>
                   <strong>管理员已回复：</strong>{detailFeedback.adminReply}
                 </div>
               )}
@@ -609,9 +638,13 @@ export default function ClassroomFeedbackAdminPage() {
         }
         styles={{ body: { paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))' } }}
       >
-        <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 12, padding: '6px 10px', background: '#FFF3EC', borderRadius: 6, border: '1px solid #FFD9BF' }}>
-          管理端代发反馈标记为 source=admin，不计入教师薪资奖励
-        </div>
+        <Alert
+          type="info"
+          showIcon
+          message="管理端代发不计入教师反馈奖励"
+          description="发布后家长看到的内容与教师发布一致，系统会保留管理员代发标记。"
+          style={{ marginBottom: 16 }}
+        />
         <Form form={composeForm} layout="vertical" size="middle">
           <Form.Item name="lessonId" label="选择关联课次（可选）">
             <Select

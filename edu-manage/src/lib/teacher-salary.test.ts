@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it, vi } from 'vitest'
 import {
   calcLessonPay,
+  createLessonPayInTransaction,
   DEFAULT_GROUP_RATE_JUNIOR,
   DEFAULT_GROUP_RATE_SENIOR,
   DEFAULT_ONE_ON_ONE_RATES,
@@ -106,6 +107,71 @@ function createFeedbackRewardHarness(specs: FeedbackSpec[]) {
 }
 
 describe('teacher salary calculations', () => {
+  it('locks the lesson and writes the database idempotency key in the same transaction', async () => {
+    const tx: any = {
+      $queryRaw: vi.fn(async () => [{ id: 'lesson-1' }]),
+      classLesson: {
+        findUnique: vi.fn(async () => ({
+          id: 'lesson-1', teacherId: 'teacher-1', status: 'COMPLETED', actualMinutes: 60,
+          intensiveReviewStatus: null,
+          lessonDate: new Date('2026-08-23T00:00:00+08:00'),
+          attendances: [{ status: 'PRESENT' }],
+          group: {
+            teacherId: 'teacher-1', name: '初二数学班', lessonMinutes: 60, intensiveMode: 'STANDARD', termId: 'term-1',
+            course: { type: 'GROUP', grade: '初二', name: '数学' },
+          },
+        })),
+      },
+      teacherSalaryConfig: { findUnique: vi.fn(async () => null) },
+      teacherSalaryTransaction: {
+        findUnique: vi.fn(async () => null),
+        create: vi.fn(async ({ data }: any) => ({ id: 'salary-1', ...data })),
+      },
+      activityLog: { create: vi.fn(async () => ({ id: 'log-1' })) },
+    }
+
+    const result = await createLessonPayInTransaction(tx, 'lesson-1')
+
+    expect(result).toEqual({ success: true })
+    expect(tx.$queryRaw).toHaveBeenCalledOnce()
+    expect(tx.teacherSalaryTransaction.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ lessonId: 'lesson-1', lessonPayKey: 'lesson-1', type: 'LESSON_PAY' }),
+    }))
+  })
+
+  it('does not create lesson pay when every student is absent or on leave', async () => {
+    const tx: any = {
+      $queryRaw: vi.fn(async () => [{ id: 'lesson-1' }]),
+      classLesson: {
+        findUnique: vi.fn(async () => ({
+          id: 'lesson-1', teacherId: 'teacher-1',
+          attendances: [{ status: 'LEAVE' }, { status: 'ABSENT' }],
+          group: { teacherId: 'teacher-1', intensiveMode: 'STANDARD' },
+        })),
+      },
+      teacherSalaryTransaction: {
+        findUnique: vi.fn(async () => null),
+        create: vi.fn(),
+      },
+    }
+
+    expect(await createLessonPayInTransaction(tx, 'lesson-1')).toEqual({
+      success: false,
+      error: '本次课没有实际出勤学员，不能计入课时工资',
+    })
+    expect(tx.teacherSalaryTransaction.create).not.toHaveBeenCalled()
+  })
+
+  it('ships a fail-closed migration for existing duplicate lesson pay rows', () => {
+    const migration = readFileSync(
+      new URL('../../prisma/migrations/20260823183000_harden_lesson_pay_idempotency/migration.sql', import.meta.url),
+      'utf8',
+    )
+    expect(migration).toContain('HAVING COUNT(*) > 1')
+    expect(migration).toContain('RAISE EXCEPTION')
+    expect(migration).toContain('"TeacherSalaryTransaction_lessonPayKey_key"')
+  })
+
   it('normalizes common grade names', () => {
     expect(normalizeGrade('初中三年级')).toBe('初三')
     expect(normalizeGrade('高二上')).toBe('高二')

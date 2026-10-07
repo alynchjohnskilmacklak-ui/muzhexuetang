@@ -10,6 +10,14 @@ cd "$PROJECT_DIR"
 
 KNOWN_STAGE_MIGRATION="20260619000000_add_stage_summary"
 
+run_prisma() {
+  if [ -n "${PRISMA_CLI:-}" ]; then
+    "$PRISMA_CLI" "$@"
+  else
+    npx --no-install prisma "$@"
+  fi
+}
+
 load_env() {
   local key="$1"
   local val="${!key:-}"
@@ -68,12 +76,13 @@ resolve_known_stage_failure() {
   fi
 
   echo "[migrate] $label: StageSummary table already exists; marking $KNOWN_STAGE_MIGRATION as applied"
-  DATABASE_URL="$url" npx prisma migrate resolve --applied "$KNOWN_STAGE_MIGRATION"
+  DATABASE_URL="$url" run_prisma migrate resolve --applied "$KNOWN_STAGE_MIGRATION"
 }
 
 ensure_feedback_columns() {
   local label="$1"
   local url="$2"
+  local pg_url="${url%%\?*}"
 
   if ! command -v psql >/dev/null 2>&1; then
     echo "[migrate] $label: psql not found; cannot verify feedback columns" >&2
@@ -81,7 +90,7 @@ ensure_feedback_columns() {
   fi
 
   echo "[migrate] $label: ensure ClassroomFeedback course context columns"
-  psql "$url" -v ON_ERROR_STOP=1 <<'SQL'
+  psql "$pg_url" -v ON_ERROR_STOP=1 <<'SQL'
 ALTER TABLE "ClassroomFeedback" ADD COLUMN IF NOT EXISTS "feedbackCourseType" TEXT;
 ALTER TABLE "ClassroomFeedback" ADD COLUMN IF NOT EXISTS "feedbackGroupId" TEXT;
 CREATE INDEX IF NOT EXISTS "ClassroomFeedback_feedbackGroupId_idx" ON "ClassroomFeedback"("feedbackGroupId");
@@ -112,7 +121,7 @@ deploy_one() {
     echo "[migrate] $label: psql preflight unavailable; automatic recovery disabled" >&2
   fi
 
-  DATABASE_URL="$url" npx prisma migrate deploy
+  DATABASE_URL="$url" run_prisma migrate deploy
   ensure_feedback_columns "$label" "$url"
   echo "[migrate] === $label done ==="
 }
@@ -129,6 +138,10 @@ else
   deploy_one "DATABASE_URL" "$LEGACY_URL"
 fi
 
-echo "[migrate] generate Prisma Client"
-npx prisma generate
+if [ "${SKIP_PRISMA_GENERATE:-0}" = "1" ]; then
+  echo "[migrate] skip Prisma Client generation (prebuilt runtime already contains it)"
+else
+  echo "[migrate] generate Prisma Client"
+  run_prisma generate
+fi
 echo "[migrate] all done"

@@ -11,6 +11,12 @@ import {
   isScheduledDate, isoWeekday, parseDateKey,
 } from '@/lib/study-hall/domain'
 import { canRecordStudyHallClass } from '@/lib/study-hall/access'
+import {
+  COMPLETED_ATTENDANCE_STATUSES,
+  STUDY_HALL_REWARD,
+  createStudyHallAttendanceReward,
+  createStudyHallHomeworkReward,
+} from '@/lib/study-hall/rewards'
 
 export const dynamic = 'force-dynamic'
 
@@ -208,17 +214,20 @@ export const PATCH = apiHandler(async (request: NextRequest) => {
   const studentId = typeof body.studentId === 'string' ? body.studentId : ''
   const sessionId = typeof body.sessionId === 'string' && body.sessionId ? body.sessionId : null
   const studyDate = typeof body.studyDate === 'string' ? body.studyDate : ''
+  const operation = body.operation === 'ATTENDANCE' || body.operation === 'HOMEWORK' ? body.operation : 'COMBINED'
+  const updatesAttendance = operation !== 'HOMEWORK'
+  const updatesHomework = operation !== 'ATTENDANCE'
   let recordDate: Date
   try { recordDate = parseDateKey(studyDate) } catch (error) { return NextResponse.json({ error: (error as Error).message }, { status: 400 }) }
   const studyClass = await user.prisma.studyHallClass.findFirst({ where: { id: classId, division: user.division }, include: {
     term: { select: { status: true, startDate: true, endDate: true } }, teachers: { where: { active: true }, select: { teacherId: true } },
-    students: { where: { studentId }, include: { student: { select: { id: true, name: true, parentId: true, parentUserId: true, parent: { select: { wxpusherUid: true } } } } } },
+    students: { where: { status: 'ACTIVE' }, include: { student: { select: { id: true, name: true, parentId: true, parentUserId: true, parent: { select: { wxpusherUid: true } } } } } },
     sessions: { where: { active: true } },
   } })
   if (!studyClass) return NextResponse.json({ error: '作业班不存在' }, { status: 404 })
   if (!canRecordStudyHallClass(user, { division: studyClass.division, status: studyClass.status, termStatus: studyClass.term.status, activeTeacherIds: studyClass.teachers.map((item) => item.teacherId) })) return NextResponse.json({ error: '只能登记分配给自己的有效作业班' }, { status: 403 })
-  const member = studyClass.students[0]
-  if (!member || member.status !== 'ACTIVE' || recordDate < member.joinedAt || (member.leftAt && recordDate > member.leftAt)) return NextResponse.json({ error: '该学员在所选日期不属于此班' }, { status: 409 })
+  const member = studyClass.students.find((item) => item.studentId === studentId)
+  if (!member || recordDate < member.joinedAt || (member.leftAt && recordDate > member.leftAt)) return NextResponse.json({ error: '该学员在所选日期不属于此班' }, { status: 409 })
   if (recordDate < studyClass.term.startDate || recordDate > studyClass.term.endDate || !isScheduledDate(studyDate, studyClass.weekdays)) return NextResponse.json({ error: '所选日期不是该班的可登记日期' }, { status: 409 })
   const closure = await user.prisma.studyHallClosure.findFirst({ where: { termId: studyClass.termId, division: studyClass.division, startDate: { lte: recordDate }, endDate: { gte: recordDate }, OR: [{ classId: null }, { classId }] }, select: { reason: true } })
   if (closure) return NextResponse.json({ error: `当天已设置放假：${closure.reason}，不需要登记，也不会扣天数` }, { status: 409 })
@@ -253,61 +262,98 @@ export const PATCH = apiHandler(async (request: NextRequest) => {
   })
   const checkedInDates = new Set(checkedInRows.map((item) => dateKey(item.classRecord.studyDate)))
   const balanceBefore = calculatePurchasedDayBalance(member.purchasedDays, member.adjustedDays, checkedInDates)
-  if (consumesDay && !checkedInDates.has(studyDate) && balanceBefore.remainingDays !== null && balanceBefore.remainingDays <= 0) {
+  if (updatesAttendance && consumesDay && !checkedInDates.has(studyDate) && balanceBefore.remainingDays !== null && balanceBefore.remainingDays <= 0) {
     return NextResponse.json({ error: '该学员购买天数已用完，请先续费或调整天数后再登记到勤' }, { status: 409 })
   }
   const result = await user.prisma.$transaction(async (tx) => {
     const classRecord = await tx.studyHallClassRecord.upsert({ where: { classId_studyDate: { classId, studyDate: recordDate } }, create: { classId, studyDate: recordDate, recordedById: user.id }, update: { recordedById: user.id } })
     const previous = await tx.studyHallHomeworkEntry.findUnique({ where: { classRecordId_studentId_attendanceKey: { classRecordId: classRecord.id, studentId, attendanceKey: entryKey } }, select: { checkInAt: true, checkOutAt: true } })
+    const homeworkData = { homeworkStatus, homeworkItems, teacherComment: cleanText(body.teacherComment, 500), contentType, beforeImageUrls, afterImageUrls, lessonImageUrls, imageUrls }
+    const attendanceData = { attendanceStatus, checkedIn, checkInAt: checkedIn ? previous?.checkInAt || now : null, checkOutAt: checkedOut && checkedIn ? previous?.checkOutAt || now : null }
     const entry = await tx.studyHallHomeworkEntry.upsert({
       where: { classRecordId_studentId_attendanceKey: { classRecordId: classRecord.id, studentId, attendanceKey: entryKey } },
-      create: { classRecordId: classRecord.id, studentId, sessionId, attendanceKey: entryKey, homeworkStatus, homeworkItems, teacherComment: cleanText(body.teacherComment, 500), contentType, beforeImageUrls, afterImageUrls, lessonImageUrls, imageUrls, attendanceStatus, checkedIn, checkInAt: checkedIn ? now : null, checkOutAt: checkedOut && checkedIn ? now : null },
+      create: { classRecordId: classRecord.id, studentId, sessionId, attendanceKey: entryKey, ...(updatesHomework ? homeworkData : {}), ...(updatesAttendance ? attendanceData : {}) },
       update: {
-        homeworkStatus, homeworkItems, teacherComment: cleanText(body.teacherComment, 500), contentType, beforeImageUrls, afterImageUrls, lessonImageUrls, imageUrls,
-        attendanceStatus, checkedIn,
-        checkInAt: checkedIn ? previous?.checkInAt || now : null,
-        checkOutAt: checkedOut && checkedIn ? previous?.checkOutAt || now : null,
+        ...(updatesHomework ? homeworkData : {}),
+        ...(updatesAttendance ? attendanceData : {}),
       },
     })
     let notification = null
-    let reward = { amount: 0, alreadyAwarded: false }
-    if (salaryTeacherId && homeworkStatus !== 'NOT_RECORDED') {
-      const existingReward = await tx.teacherSalaryTransaction.findUnique({
-        where: { feedbackId_type: { feedbackId: entry.id, type: 'STUDY_HALL_BONUS' } },
-        select: { id: true },
+    let reward = { amount: 0, homeworkAmount: 0, attendanceAmount: 0, alreadyAwarded: false }
+    if (salaryTeacherId && updatesHomework && homeworkStatus !== 'NOT_RECORDED') {
+      const homeworkAwarded = await createStudyHallHomeworkReward(tx, {
+        teacherId: salaryTeacherId,
+        termId: studyClass.termId,
+        entryId: entry.id,
+        className: studyClass.name,
+        studentName: member.student.name,
+        lessonDate: recordDate,
       })
-      await tx.teacherSalaryTransaction.upsert({
-        where: { feedbackId_type: { feedbackId: entry.id, type: 'STUDY_HALL_BONUS' } },
-        update: {},
-        create: {
-          teacherId: salaryTeacherId,
-          termId: studyClass.termId,
-          type: 'STUDY_HALL_BONUS',
-          amount: 0.5,
-          feedbackId: entry.id,
-          lessonDate: recordDate,
-          description: `[小班课] 作业班登记奖励：${studyClass.name} · ${member.student.name}，0.50元/人`,
-        },
-      })
-      reward = { amount: existingReward ? 0 : 0.5, alreadyAwarded: Boolean(existingReward) }
+      reward = { ...reward, amount: homeworkAwarded ? STUDY_HALL_REWARD.homeworkEntry : 0, homeworkAmount: homeworkAwarded ? STUDY_HALL_REWARD.homeworkEntry : 0, alreadyAwarded: !homeworkAwarded }
     }
     if (parentUserId) {
-      const title = `${member.student.name}的${studyClass.scheduleType === 'WEEKEND' ? '周末作业班' : '晚托'}作业已更新`
-      const content = `${studyDate}${session ? ` ${session.label}` : ''}：${homeworkItems.join('；') || (contentType === 'LESSON' ? '老师已更新今日讲解内容' : '老师已更新作业与到勤情况')}`.slice(0, 180)
+      const title = updatesHomework
+        ? `${member.student.name}的${studyClass.scheduleType === 'WEEKEND' ? '周末作业班' : '晚托'}作业已更新`
+        : `${member.student.name}的晚托考勤已更新`
+      const attendanceLabel = attendanceStatus === 'PRESENT' ? '正常到勤' : attendanceStatus === 'PERSONAL_LEAVE' ? '个人请假' : attendanceStatus === 'ABSENT' ? '无故缺勤' : '暂未登记'
+      const content = `${studyDate}${session ? ` ${session.label}` : ''}：${updatesHomework ? homeworkItems.join('；') || (contentType === 'LESSON' ? '老师已更新今日讲解内容' : '老师已更新作业情况') : attendanceLabel}`.slice(0, 180)
       const old = await tx.notification.findFirst({ where: { userId: parentUserId, relatedType: 'STUDY_HALL_HOMEWORK', relatedId: entry.id, status: 'ACTIVE' }, select: { id: true } })
       const data = { title, content, type: 'STUDY_HALL_HOMEWORK', href: `/parent/study-hall?date=${studyDate}&entryId=${entry.id}`, link: '/parent/study-hall', studentId, senderId: user.id, read: false, readAt: null, pushStatus: parentAccount?.wxpusherUid ? 'pending' : 'none', pushError: null }
       notification = old ? await tx.notification.update({ where: { id: old.id }, data }) : await tx.notification.create({ data: { userId: parentUserId, relatedType: 'STUDY_HALL_HOMEWORK', relatedId: entry.id, ...data } })
     }
     return { entry, notification, reward }
   })
-  if (consumesDay) checkedInDates.add(studyDate)
-  else {
+  if (updatesAttendance && consumesDay) checkedInDates.add(studyDate)
+  else if (updatesAttendance) {
     const otherCheckedIn = await user.prisma.studyHallHomeworkEntry.count({
       where: { studentId, OR: [{ checkedIn: true }, { attendanceStatus: { in: ['PERSONAL_LEAVE', 'ABSENT'] } }], classRecord: { classId, studyDate: recordDate } },
     })
     if (!otherCheckedIn) checkedInDates.delete(studyDate)
   }
   const balance = calculatePurchasedDayBalance(member.purchasedDays, member.adjustedDays, checkedInDates)
+  if (salaryTeacherId && updatesAttendance) {
+    // Recheck after the save transaction commits. In concurrent submissions,
+    // the last committer can now observe every completed attendance row.
+    const classRecord = await user.prisma.studyHallClassRecord.findUnique({
+      where: { classId_studyDate: { classId, studyDate: recordDate } },
+      select: { id: true },
+    })
+    const expectedAttendanceKeys = studyClass.scheduleType === 'WEEKEND'
+      ? studyClass.sessions.filter((item) => item.weekday === isoWeekday(studyDate)).map((item) => attendanceKey(item.id))
+      : ['DAY']
+    const expectedStudentIds = studyClass.students
+      .filter((item) => recordDate >= item.joinedAt && (!item.leftAt || recordDate <= item.leftAt))
+      .map((item) => item.studentId)
+    const completedAttendance = classRecord && expectedAttendanceKeys.length && expectedStudentIds.length
+      ? await user.prisma.studyHallHomeworkEntry.count({
+          where: {
+            classRecordId: classRecord.id,
+            studentId: { in: expectedStudentIds },
+            attendanceKey: { in: expectedAttendanceKeys },
+            attendanceStatus: { in: [...COMPLETED_ATTENDANCE_STATUSES] },
+          },
+        })
+      : 0
+    if (completedAttendance === expectedAttendanceKeys.length * expectedStudentIds.length && completedAttendance > 0) {
+      // Business choice A1: present, leave and absent all count as a completed
+      // attendance action. Rewards are append-only; later edits do not claw back.
+      const attendanceAwarded = await createStudyHallAttendanceReward(user.prisma, {
+        teacherId: salaryTeacherId,
+        termId: studyClass.termId,
+        classId,
+        className: studyClass.name,
+        studyDate,
+        lessonDate: recordDate,
+      })
+      const attendanceAmount = attendanceAwarded ? STUDY_HALL_REWARD.fullAttendance : 0
+      result.reward = {
+        ...result.reward,
+        amount: result.reward.amount + attendanceAmount,
+        attendanceAmount,
+        alreadyAwarded: result.reward.alreadyAwarded || !attendanceAwarded,
+      }
+    }
+  }
   const wxUid = parentAccount?.wxpusherUid
   if (result.notification && wxUid) {
     const push = await sendWxMessage(wxUid, `【牧哲学堂】${result.notification.content}。请登录家长端查看照片和老师说明。`, '作业班更新通知')

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { UserOutlined, CheckCircleOutlined, WarningOutlined, CloseCircleOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { ResponsiveTable } from '@/components/Layout/ResponsiveTable'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const { Text } = Typography
 
@@ -42,7 +43,8 @@ type TeacherLogsData = {
 
 export default function TeacherLogsPage() {
   const router = useRouter()
-  const { data, isLoading } = useSWR<TeacherLogsData>('/api/teacher-logs', fetcher, { refreshInterval: 120_000 })
+  const { division } = useDivision()
+  const { data, isLoading } = useSWR<TeacherLogsData>(`/api/teacher-logs?division=${division}`, fetcher, { refreshInterval: 120_000 })
 
   const columns = [
     { title: '教师', dataIndex: 'teacherName', key: 'teacherName', render: (name: string) => (

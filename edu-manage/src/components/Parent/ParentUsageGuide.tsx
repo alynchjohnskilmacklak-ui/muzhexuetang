@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   BellOutlined,
   BookOutlined,
@@ -10,24 +10,14 @@ import {
   CommentOutlined,
   FileTextOutlined,
   IdcardOutlined,
-  LoadingOutlined,
-  QuestionCircleOutlined,
   RightOutlined,
 } from '@ant-design/icons'
 import { Button, Drawer, Modal, Progress, Typography } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { QuickStartGuide, type QuickStartStep } from '@/components/Common/QuickStartGuide'
 
 const { Text, Title } = Typography
 const GUIDE_VERSION = 'v2'
-const QUICK_PATHS = ['/parent/schedule', '/parent/class-feedback', '/parent/messages'] as const
-const PARENT_QUICK_STEPS: QuickStartStep[] = [
-  { title: '先看课程表', description: '确认孩子今天和近期的上课时间、老师与教室。', actionLabel: '打开课程表', href: '/parent/schedule', icon: <CalendarOutlined /> },
-  { title: '再看课堂反馈', description: '老师发布的小班课、周末课课堂内容、掌握情况和照片都会集中在这里。', actionLabel: '查看课堂反馈', href: '/parent/class-feedback', icon: <BookOutlined /> },
-  { title: '有问题就留言', description: '从真实页面给老师留言，并在同一处继续查看回复。', actionLabel: '给老师留言', href: '/parent/messages', icon: <CommentOutlined /> },
-]
-
 const GUIDE_STEPS = [
   {
     section: '每日先看',
@@ -123,7 +113,7 @@ function storageKey(parentUserId?: string) {
   return `mz_parent_usage_guide_${GUIDE_VERSION}_${parentUserId || 'device'}`
 }
 
-export function ParentUsageGuide({ parentUserId }: { parentUserId?: string }) {
+export function ParentUsageGuideDrawerExtra({ parentUserId }: { parentUserId?: string }) {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const [open, setOpen] = useState(false)
@@ -135,26 +125,6 @@ export function ParentUsageGuide({ parentUserId }: { parentUserId?: string }) {
     () => Math.round(((activeStep + 1) / GUIDE_STEPS.length) * 100),
     [activeStep],
   )
-
-  useEffect(() => {
-    let prefetchIdleId: number | null = null
-    const idleWindow = window as typeof window & {
-      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number
-      cancelIdleCallback?: (handle: number) => void
-    }
-    const prefetchTimer = window.setTimeout(() => {
-      const prefetch = () => QUICK_PATHS.forEach((path) => router.prefetch(path))
-      if (idleWindow.requestIdleCallback) {
-        prefetchIdleId = idleWindow.requestIdleCallback(prefetch, { timeout: 3_000 })
-      } else {
-        prefetch()
-      }
-    }, 1_600)
-    return () => {
-      window.clearTimeout(prefetchTimer)
-      if (prefetchIdleId !== null) idleWindow.cancelIdleCallback?.(prefetchIdleId)
-    }
-  }, [parentUserId, router])
 
   const rememberCompletion = () => {
     try {
@@ -277,84 +247,16 @@ export function ParentUsageGuide({ parentUserId }: { parentUserId?: string }) {
 
   return (
     <>
-      <QuickStartGuide storageKey={storageKey(parentUserId)} title="三步熟悉家长端" steps={PARENT_QUICK_STEPS} />
-      <section style={{
-        padding: isMobile ? 14 : 16,
-        marginBottom: 16,
-        borderRadius: 14,
-        background: 'var(--color-surface-1)',
-        border: '1px solid var(--color-hairline)',
-        boxShadow: '0 8px 24px rgba(26,18,1,.04)',
-      }} aria-label="家长端使用指南">
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-          <div style={{
-            width: 38,
-            height: 38,
-            borderRadius: 12,
-            flexShrink: 0,
-            display: 'grid',
-            placeItems: 'center',
-            color: 'var(--color-primary)',
-            background: 'var(--color-primary-bg)',
-            fontSize: 18,
-          }}>
-            <QuestionCircleOutlined />
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 650, color: 'var(--color-ink)', fontSize: 15 }}>家长端使用帮助</div>
-            <div style={{ marginTop: 3, color: 'var(--color-ink-muted)', fontSize: 13, lineHeight: 1.6 }}>
-              详细说明课表、反馈、成长记录、留言、课时和通知分别在哪里查看。
-            </div>
-          </div>
-          <Button
-            size={isMobile ? 'small' : 'middle'}
-            onClick={() => {
-              setActiveStep(0)
-              setOpen(true)
-            }}
-            style={{ flexShrink: 0 }}
-          >
-            使用指南
-          </Button>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginTop: 12 }}>
-          {[
-            { label: '看课表', path: '/parent/schedule', icon: <CalendarOutlined /> },
-            { label: '看反馈', path: '/parent/class-feedback', icon: <BookOutlined /> },
-            { label: '去留言', path: '/parent/messages', icon: <CommentOutlined /> },
-          ].map((item) => (
-            <button
-              key={item.path}
-              type="button"
-              disabled={navigatingTo !== null}
-              onClick={() => navigateTo(item.path)}
-              style={{
-                minWidth: 0,
-                minHeight: 42,
-                borderRadius: 10,
-                border: '1px solid var(--color-hairline)',
-                background: 'var(--color-canvas)',
-                color: 'var(--color-ink-muted)',
-                cursor: navigatingTo ? 'wait' : 'pointer',
-                opacity: navigatingTo && navigatingTo !== item.path ? .55 : 1,
-                fontSize: 13,
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-              }}
-              aria-label={`打开${item.label}`}
-            >
-              {navigatingTo === item.path ? <LoadingOutlined spin /> : item.icon}
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {navigatingTo === item.path ? '正在打开' : item.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
+      <Button
+        block
+        onClick={() => {
+          setActiveStep(0)
+          setOpen(true)
+        }}
+        style={{ minHeight: 44, fontWeight: 650 }}
+      >
+        使用指南
+      </Button>
 
       {open && (isMobile ? (
         <Drawer

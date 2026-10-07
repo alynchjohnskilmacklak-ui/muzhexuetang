@@ -10,6 +10,7 @@ import type { Prisma } from '@prisma/client'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { parseDateKey } from '@/lib/study-hall/domain'
 import { todayLocal } from '@/lib/date/local-day'
+import { softDeleteEntity } from '@/lib/data-correction/trash'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,13 +25,21 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     include: {
       mainTeacher: true,
       parent: { select: { id: true, name: true, email: true, role: true, status: true, wxpusherUid: true } },
-      schedules: { include: { schedule: { include: { course: { select: { id: true, name: true, teacherId: true } }, teacher: { select: { id: true, name: true } } } } } },
       enrollments: {
         where: {
           status: 'ACTIVE',
           group: { status: { not: 'ARCHIVED' }, course: { isActive: true } },
         },
-        include: { group: { include: { course: true, teacherAssignments: { include: { teacher: { select: { id: true, name: true } } } } } } },
+        include: {
+          group: {
+            include: {
+              course: true,
+              // 班级学科集合（该班所有课次的学科去重），供前端按学科勾选/修改
+              classLessons: { where: { status: { not: 'CANCELLED' as const } }, select: { subject: true } },
+              teacherAssignments: { include: { teacher: { select: { id: true, name: true } } } },
+            },
+          },
+        },
         orderBy: { enrolledAt: 'desc' },
       },
       attendances: {
@@ -76,6 +85,24 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     && enrollment.group?.status !== 'ARCHIVED'
     && enrollment.group?.course?.isActive !== false
   ))
+
+  // 报名记录是唯一学科事实来源；未来课次尚未排出时也应显示已报学科。
+  // 旧记录的空数组代表全学科，按班级学科集合展示。
+  const enrollmentsWithSubjects = activeEnrollments.map((enrollment) => {
+    const groupSubjects = [...new Set([
+      enrollment.group?.course?.subject,
+      ...(enrollment.group?.teacherAssignments || []).map((assignment) => assignment.subject),
+      ...(enrollment.group?.classLessons || []).map((lesson) => lesson.subject),
+    ].filter((subject): subject is string => Boolean(subject)))]
+    return {
+      ...enrollment,
+      subjects: enrollment.subjects.length ? enrollment.subjects : groupSubjects,
+      group: {
+        ...enrollment.group,
+        subjects: groupSubjects,
+      },
+    }
+  })
   const approvedIntensiveAttendances = await prisma.attendance.findMany({
     where: {
       studentId: student.id,
@@ -96,6 +123,45 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     activeEnrollments,
     calculateApprovedIntensiveHours(approvedIntensiveAttendances),
   )
+  // 同父母孩子：admin 视角返回该家长账号下所有学员（供「同父母孩子」关联模块使用）
+  let family: Array<{
+    id: string
+    name: string
+    grade: string | null
+    status: string
+    totalHours: number
+    remainHours: number
+    isCurrent: boolean
+    enrollments: Array<{ id: string; group: { name: string | null } | null }>
+  }> = []
+  if (user.role === 'admin' || user.role === 'SUPER_ADMIN') {
+    const parentUserId = student.parentUserId || student.parentId || null
+    if (parentUserId) {
+      const familyRows = await prisma.student.findMany({
+        where: { parentUserId, deletedAt: null },
+        select: {
+          id: true, name: true, grade: true, status: true, totalHours: true, remainHours: true,
+          enrollments: {
+            where: { status: 'ACTIVE', deletedAt: null },
+            select: { id: true, group: { select: { name: true } } },
+            take: 3,
+          },
+        },
+        orderBy: [{ createdAt: 'asc' }],
+      })
+      family = familyRows.map((row) => ({
+        ...row,
+        totalHours: Number(row.totalHours || 0),
+        remainHours: Number(row.remainHours || 0),
+        isCurrent: row.id === student.id,
+        enrollments: row.enrollments.map((enrollment) => ({
+          id: enrollment.id,
+          group: enrollment.group ? { name: enrollment.group.name } : null,
+        })),
+      }))
+    }
+  }
+
   const visibleStudent = user.role === 'teacher'
     ? {
         ...student,
@@ -112,10 +178,11 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
 
   return NextResponse.json({
     ...visibleStudent,
-    enrollments: activeEnrollments,
+    enrollments: enrollmentsWithSubjects,
     remainHours,
     totalHours,
     taughtHours,
+    family: user.role === 'admin' || user.role === 'SUPER_ADMIN' ? family : undefined,
   })
 })
 
@@ -212,44 +279,12 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     })
     if (!student) return NextResponse.json({ error: '学员不存在' }, { status: 404 })
 
-    // Deactivate student
-    await prisma.student.update({
-      where: { id },
-      data: { status: 'INACTIVE', leftAt: new Date(), mainTeacherId: null },
-    })
-
-    await prisma.enrollment.updateMany({
-      where: { studentId: id, status: 'ACTIVE' },
-      data: { status: 'WITHDRAWN' },
-    })
-
-    await prisma.scheduleStudent.deleteMany({ where: { studentId: id } })
-
-    // If has linked parent user, disable the parent account
-    if (student.parentUserId) {
-      await prisma.user.update({
-        where: { id: student.parentUserId },
-        data: { status: 'disabled' },
-      })
-    }
-
     const userId = (session.user as { id?: string }).id
-    if (userId) {
-      await prisma.activityLog.create({
-        data: {
-          userId,
-          action: '离校处理',
-          detail: `${student.name} ${student.parentUserId ? '，家长账号已停用' : ''}`,
-        },
-      })
-    } else {
-      console.error('[students:delete] session user id missing; skipped activity log')
-    }
-
+    if (!userId) return NextResponse.json({ error: '登录信息不完整' }, { status: 401 })
+    const deleted = await softDeleteEntity(prisma, 'Student', id, { id: userId, name: session.user.name || undefined }, 'delete_from_student_management')
     revalidatePath('/dashboard')
     revalidatePath('/students')
-
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, deleted })
   } catch (error) {
     console.error('[students:delete] failed', error)
     return NextResponse.json({ error: '离校处理失败，请查看服务器日志' }, { status: 500 })

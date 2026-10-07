@@ -65,7 +65,7 @@ export default async function ParentLeavePage() {
     where: { student: { parentId: userId } },
     include: {
       student: { select: { name: true } },
-      schedule: { include: { course: { select: { name: true } } } },
+      lesson: { include: { group: { include: { course: { select: { name: true } } } } } },
     },
     orderBy: { createdAt: 'desc' },
     take: 50,
@@ -89,7 +89,7 @@ export default async function ParentLeavePage() {
       leaveRequests={leaveRequests.map(lr => ({
         id: lr.id,
         studentName: lr.student.name,
-        courseName: lr.schedule?.course?.name || '未指定课程',
+        courseName: lr.lesson?.group.course.name || '未指定课程',
         leaveDate: lr.leaveDate.toISOString(),
         reason: lr.reason,
         status: lr.status,

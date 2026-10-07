@@ -5,9 +5,9 @@ import { Card, Button, Input, Modal, Form, Popconfirm, Tag, Space, message, Colo
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import {
-  DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent,
+  DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent,
 } from '@dnd-kit/core'
-import { SortableContext, useSortable, horizontalListSortingStrategy } from '@dnd-kit/sortable'
+import { SortableContext, useSortable, horizontalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -42,7 +42,10 @@ export function SubjectsTab() {
   const [editing, setEditing] = useState<SubjectItem | null>(null)
   const [form] = Form.useForm()
 
-  const sensors = useSensors(useSensor(PointerSensor))
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
 
   const handleSubmit = async (values: { name: string; color?: string; textColor?: string }) => {
     if (editing) {

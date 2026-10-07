@@ -8,22 +8,15 @@ import { fmtDateTime } from '@/lib/format-date'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import type { FeedbackImageVariant } from '@/lib/file-asset-variants'
+import { getParentFeedbackSections } from '@/lib/classroom-feedback/parent-feedback-content'
+import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
+import { KnowledgePointDetail } from '@/components/Feedback/KnowledgePointDetail'
 
 const { Title, Text, Paragraph } = Typography
 
-function subjectOfTeacher(subjects?: string | null) {
-  return (subjects || '').split(/[，,、\s]+/).filter(Boolean)[0] || ''
-}
-
-function parentMasteryLabel(value: unknown) {
-  const raw = value && typeof value === 'object' && 'rating' in value
-    ? (value as { rating?: unknown }).rating
-    : value
-  if (typeof raw !== 'string') return ''
-  return ({ GREAT: '掌握良好', OKAY: '基本掌握', NEEDS_IMPROVEMENT: '需要加强' } as Record<string, string>)[raw] || raw
-}
 type HomeworkItem = string | { title?: string; content?: string }
 type FeedbackDetail = {
+  resolvedSubject?: string
   id: string
   status: string
   parentReadAt?: string | null
@@ -33,9 +26,12 @@ type FeedbackDetail = {
   overallComment?: string | null
   studentRating?: unknown
   knowledgePoints: string[]
+  knowledgeCard?: unknown
+  tags?: string[]
   homework: HomeworkItem[]
   imageUrls: string[]
   images: FeedbackImageVariant[]
+  signedThumbnails?: Record<string, string>
   teacher?: { name?: string; subjects?: string | null } | null
   classLesson?: { startTime?: string | null; endTime?: string | null; group?: { course?: { name?: string }; room?: { name?: string } | null } | null } | null
 }
@@ -48,10 +44,18 @@ export function FeedbackDetailClient({ feedback }: { feedback: FeedbackDetail })
   const images = Array.isArray(feedback.images) && feedback.images.length === imageUrls.length
     ? feedback.images
     : imageUrls.map((url: string) => ({ originalUrl: url, previewUrl: url, thumbnailUrl: url }))
-  const { urls: signedThumbnails, error: thumbnailError, refresh: retryThumbnails } = useSignedUrls(images.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
+  const { urls: signedThumbnails, error: thumbnailError, refresh: retryThumbnails } = useSignedUrls(images.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl), feedback.signedThumbnails)
   const { urls: signedPreviews, error: previewError, refresh: retryPreviews } = useSignedUrls(imagePreviewOpen
     ? images.map((image) => image.previewUrl || image.thumbnailUrl || image.originalUrl)
     : [])
+  // 只保留"课堂反馈"正文卡；"本节课学习内容/孩子掌握情况"已并入正文（见 parent-feedback-content），不再单独成卡
+  const sections = getParentFeedbackSections(feedback)
+    .filter((section) => !['知识点', '课堂标签', '本节课学习内容', '孩子掌握情况'].includes(section.label))
+  const knowledgeCard = parseStoredKnowledgeCard(feedback.knowledgeCard)
+  const sectionItems = (content: string) => content
+    .split(/\n+|[；;]/)
+    .map((item) => item.replace(/^[-•\d.、\s]+/, '').trim())
+    .filter(Boolean)
 
   useEffect(() => {
     if (feedback.parentReadAt || feedback.status !== 'PUBLISHED') return
@@ -81,7 +85,7 @@ export function FeedbackDetailClient({ feedback }: { feedback: FeedbackDetail })
         </div>
 
         <Descriptions column={isMobile ? 1 : 2} size="small" style={{ marginBottom: 20 }}>
-          <Descriptions.Item label="老师">{feedback.teacher?.name || '-'}{subjectOfTeacher(feedback.teacher?.subjects) ? ` · ${subjectOfTeacher(feedback.teacher?.subjects)}` : ''}</Descriptions.Item>
+          <Descriptions.Item label="老师">{feedback.teacher?.name || '-'} · {feedback.resolvedSubject || '课堂反馈'}</Descriptions.Item>
           <Descriptions.Item label="时间">
             {fmtDateTime(feedback.createdAt)}
           </Descriptions.Item>
@@ -103,68 +107,21 @@ export function FeedbackDetailClient({ feedback }: { feedback: FeedbackDetail })
           )}
         </Descriptions>
 
-        {feedback.lessonContent && (
-          <div style={{ background: '#FFFBF7', borderRadius: 10, padding: 16, marginBottom: 16 }}>
-            <Text strong style={{ display: 'block', marginBottom: 8 }}>本节课学习内容</Text>
-            <Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
-              {feedback.lessonContent}
-            </Paragraph>
-          </div>
-        )}
-
-        {/* Knowledge points */}
+        {/* Put the high-signal learning tags before media and long-form comments. */}
         {feedback.knowledgePoints?.length > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <Text strong style={{ display: 'block', marginBottom: 8 }}>知识点</Text>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          <div style={{ background: '#FFF8F4', borderRadius: 14, padding: 16, marginBottom: 16, border: '1px solid #F0DDD2' }}>
+            <Text strong style={{ display: 'block', marginBottom: 10 }}>本节知识点</Text>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {feedback.knowledgePoints.map((kp: string, i: number) => (
-                <Tag key={i} style={{ borderRadius: 9999, fontSize: 12 }}>{kp}</Tag>
+                <Tag color="orange" key={i} style={{ borderRadius: 9999, fontSize: 12, margin: 0 }}>{kp}</Tag>
               ))}
             </div>
           </div>
         )}
 
-        {/* Summary */}
-        {(feedback.summary || parentMasteryLabel(feedback.studentRating)) && (
-          <div style={{ background: '#FFFBF7', borderRadius: 10, padding: 16, marginBottom: 16 }}>
-            <Text strong style={{ display: 'block', marginBottom: 8 }}>孩子掌握情况</Text>
-            <Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
-              {feedback.summary || parentMasteryLabel(feedback.studentRating)}
-            </Paragraph>
-          </div>
-        )}
-
-        {feedback.overallComment && (
-          <div style={{ background: '#F5F2EE', borderRadius: 10, padding: 16, marginBottom: 16 }}>
-            <Text strong style={{ display: 'block', marginBottom: 8 }}>课堂反馈</Text>
-            <Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
-              {feedback.overallComment}
-            </Paragraph>
-          </div>
-        )}
-
-        {/* Homework */}
-        {feedback.homework?.length > 0 && (
-          <div style={{ background: '#F5F3FF', borderRadius: 10, padding: 16, marginBottom: 16 }}>
-            <Text strong style={{ display: 'block', marginBottom: 8 }}>作业 / 复习任务</Text>
-            {feedback.homework.map((hw, i: number) => (
-              <div key={i} style={{ fontSize: 13, marginBottom: 4, color: '#4B5563' }}>
-                {typeof hw === 'string' ? hw : hw.title || hw.content || `作业 ${i + 1}`}
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div style={{ background: '#F7F4F0', borderRadius: 10, padding: 16, marginBottom: 16 }}>
-          <Text strong style={{ display: 'block', marginBottom: 8 }}>家长配合建议</Text>
-          <Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563' }}>
-            根据老师反馈，建议家长课后关注孩子当天知识点复习和作业完成情况。如孩子对某个知识点仍有疑问，可在下次课前提醒老师重点回顾。
-          </Paragraph>
-        </div>
-
         {/* Images */}
         {imageUrls.length > 0 && (
-          <div>
+          <div style={{ marginBottom: 16 }}>
             <Text strong style={{ display: 'block', marginBottom: 12 }}>课堂资料</Text>
             {(thumbnailError || previewError) && (
               <div style={{
@@ -200,6 +157,32 @@ export function FeedbackDetailClient({ feedback }: { feedback: FeedbackDetail })
               </div>
             </Image.PreviewGroup>
           </div>
+        )}
+
+        <div style={{ display: 'grid', gap: 12 }}>
+          {sections.map((section) => {
+            // "课堂反馈"为完整文章（含换行段落），整段展示；其余短卡按条目拆分
+            const isLongForm = section.label === '课堂反馈'
+            const items = isLongForm ? [] : sectionItems(section.content)
+            return (
+              <section key={section.label} style={{ background: '#FFFBF7', borderRadius: 14, padding: 16, border: '1px solid #F0DDD2' }}>
+                <Text strong style={{ display: 'block', marginBottom: 8 }}>{section.label}</Text>
+                {isLongForm || items.length <= 1 ? (
+                  <Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
+                    {section.content}
+                  </Paragraph>
+                ) : (
+                  <ul style={{ margin: 0, paddingLeft: 20, color: '#4B5563', fontSize: 14, lineHeight: 1.8 }}>
+                    {items.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                )}
+              </section>
+            )
+          })}
+        </div>
+
+        {knowledgeCard && (
+          <div style={{ marginTop: 12 }}><KnowledgePointDetail card={knowledgeCard} audience="parent" defaultOpen /></div>
         )}
       </Card>
     </div>

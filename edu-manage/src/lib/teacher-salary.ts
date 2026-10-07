@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/nextjs'
 import { getRequestPrisma } from '@/lib/prisma'
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { INTENSIVE_FEEDBACK_RATE, shouldGenerateIntensiveLessonPay } from '@/lib/intensive-class'
+import { hasAttendingStudent } from '@/lib/attendance-submission'
 import { getLocalDayRange, localDateColumnValue, localDateKey } from '@/lib/date/local-day'
 
 function isUniqueConstraintError(error: unknown): error is { code: 'P2002' } {
@@ -121,70 +122,85 @@ export function calcLessonPay(opts: {
   return Number((ratePerHour * lessonMinutes / 60).toFixed(4))
 }
 
+type LessonPayResult = { success: boolean; skipped?: boolean; error?: string }
+
+/** Create lesson pay inside the caller's transaction. */
+export async function createLessonPayInTransaction(
+  tx: Prisma.TransactionClient,
+  lessonId: string,
+): Promise<LessonPayResult> {
+  // Serialize every settlement attempt for the same lesson. The unique
+  // lessonPayKey remains the final database-level guard.
+  await tx.$queryRaw`SELECT "id" FROM "ClassLesson" WHERE "id" = ${lessonId} FOR UPDATE`
+
+  const lesson = await tx.classLesson.findUnique({
+      where: { id: lessonId },
+      include: { group: { include: { course: true } }, attendances: { select: { status: true } } },
+  })
+  const teacherId = lesson?.teacherId || lesson?.group.teacherId
+  if (!lesson || !teacherId) return { success: false, error: '课次或教师不存在' }
+
+  const existing = await tx.teacherSalaryTransaction.findUnique({
+    where: { lessonPayKey: lessonId },
+    select: { id: true },
+  })
+  if (existing) return { success: true, skipped: true }
+
+  if (!hasAttendingStudent(lesson.attendances)) {
+    return { success: false, error: '本次课没有实际出勤学员，不能计入课时工资' }
+  }
+
+  const isIntensive = lesson.group.intensiveMode === 'INTENSIVE'
+  if (isIntensive && (
+    lesson.status !== 'COMPLETED'
+    || lesson.intensiveReviewStatus !== 'APPROVED'
+    || !shouldGenerateIntensiveLessonPay(lesson.attendances.map((attendance) => attendance.status), lesson.actualMinutes)
+  )) {
+    return { success: true, skipped: true }
+  }
+
+  const cfg = await getTeacherSalaryConfig(teacherId, tx)
+  const grade = inferGrade(lesson.group.course.grade, lesson.group.name, lesson.group.course.name)
+  const salaryMinutes = isIntensive ? Number(lesson.actualMinutes || 0) : lesson.group.lessonMinutes
+  const amount = calcLessonPay({
+    courseType: isIntensive ? 'ONE_ON_ONE' : lesson.group.course.type, grade,
+    lessonMinutes: salaryMinutes,
+    groupRateJunior: cfg.groupRateJunior, groupRateSenior: cfg.groupRateSenior,
+    oneOnOneRates: cfg.oneOnOneRates,
+  })
+
+  const rateLabel = isIntensive || lesson.group.course.type === 'ONE_ON_ONE'
+    ? `${cfg.oneOnOneRates[grade || ''] ?? 25}元/小时`
+    : `${isSeniorGrade(grade) ? cfg.groupRateSenior : cfg.groupRateJunior}元/小时`
+
+  const salaryTx = await tx.teacherSalaryTransaction.create({
+    data: {
+      teacherId, type: 'LESSON_PAY', amount, lessonId, lessonPayKey: lessonId,
+      termId: lesson.group.termId,
+      lessonDate: lesson.lessonDate,
+      description: `${lesson.group.name}（${salaryMinutes}分钟 x ${rateLabel}）`,
+    },
+  })
+  await tx.activityLog.create({
+    data: {
+      teacherId,
+      action: 'SALARY_LESSON_PAY',
+      entityType: 'TeacherSalaryTransaction',
+      entityId: salaryTx.id,
+      detail: `课时费 ¥${amount}：${lesson.group.name}`,
+      metadata: { lessonId, amount, lessonDate: lesson.lessonDate, courseType: lesson.group.course.type, intensiveMode: lesson.group.intensiveMode, actualMinutes: lesson.actualMinutes },
+    },
+  })
+  return { success: true }
+}
+
 export async function triggerLessonPay(
   lessonId: string,
   prismaClient?: PrismaClient,
-): Promise<{ success: boolean; skipped?: boolean; error?: string }> {
+): Promise<LessonPayResult> {
   try {
     const prisma = prismaClient ?? await getRequestPrisma()
-    const lesson = await prisma.classLesson.findUnique({
-      where: { id: lessonId },
-      include: { group: { include: { course: true } }, attendances: { select: { status: true } } },
-    })
-    const teacherId = lesson?.teacherId || lesson?.group.teacherId
-    if (!lesson || !teacherId) return { success: false, error: '课次或教师不存在' }
-
-    const result = await prisma.$transaction(async (tx) => {
-      const existing = await tx.teacherSalaryTransaction.findFirst({
-        where: { lessonId, type: 'LESSON_PAY' },
-        select: { id: true },
-      })
-      if (existing) return { success: true }
-
-      const isIntensive = lesson.group.intensiveMode === 'INTENSIVE'
-      if (isIntensive && (
-        lesson.status !== 'COMPLETED'
-        || lesson.intensiveReviewStatus !== 'APPROVED'
-        || !shouldGenerateIntensiveLessonPay(lesson.attendances.map((attendance) => attendance.status), lesson.actualMinutes)
-      )) {
-        return { success: true, skipped: true }
-      }
-
-      const cfg = await getTeacherSalaryConfig(teacherId, tx)
-      const grade = inferGrade(lesson.group.course.grade, lesson.group.name, lesson.group.course.name)
-      const salaryMinutes = isIntensive ? Number(lesson.actualMinutes || 0) : lesson.group.lessonMinutes
-      const amount = calcLessonPay({
-        courseType: isIntensive ? 'ONE_ON_ONE' : lesson.group.course.type, grade,
-        lessonMinutes: salaryMinutes,
-        groupRateJunior: cfg.groupRateJunior, groupRateSenior: cfg.groupRateSenior,
-        oneOnOneRates: cfg.oneOnOneRates,
-      })
-
-      const rateLabel = isIntensive || lesson.group.course.type === 'ONE_ON_ONE'
-        ? `${cfg.oneOnOneRates[grade || ''] ?? 25}元/小时`
-        : `${isSeniorGrade(grade) ? cfg.groupRateSenior : cfg.groupRateJunior}元/小时`
-
-      const salaryTx = await tx.teacherSalaryTransaction.create({
-        data: {
-          teacherId, type: 'LESSON_PAY', amount, lessonId,
-          termId: lesson.group.termId,
-          lessonDate: lesson.lessonDate,
-          description: `${lesson.group.name}（${salaryMinutes}分钟 x ${rateLabel}）`,
-        },
-      })
-      await tx.activityLog.create({
-        data: {
-          teacherId,
-          action: 'SALARY_LESSON_PAY',
-          entityType: 'TeacherSalaryTransaction',
-          entityId: salaryTx.id,
-          detail: `课时费 ¥${amount}：${lesson.group.name}`,
-          metadata: { lessonId, amount, lessonDate: lesson.lessonDate, courseType: lesson.group.course.type, intensiveMode: lesson.group.intensiveMode, actualMinutes: lesson.actualMinutes },
-        },
-      })
-      return { success: true }
-    })
-    return result
+    return await prisma.$transaction((tx) => createLessonPayInTransaction(tx, lessonId))
   } catch (err) {
     if (isUniqueConstraintError(err)) {
       console.warn('[salary] triggerLessonPay: concurrent duplicate skipped', lessonId)
@@ -479,6 +495,7 @@ export async function getFeedbackBonusPreview(opts: {
       where: {
         teacherId: opts.teacherId,
         type: 'FEEDBACK_BONUS',
+        deletedAt: null,
         createdAt: { gte: rewardDayRange.start, lt: rewardDayRange.end },
       },
       select: { feedbackId: true },
@@ -580,18 +597,6 @@ export async function triggerFeedbackBonus(feedbackId: string, prismaClient?: Pr
       excludeFeedbackId: feedbackId,
       rewardAt: feedback.createdAt,
       prismaClient: prisma,
-    })
-
-    console.log('[FeedbackBonus] resolved', {
-      feedbackId,
-      teacherId,
-      lessonId: feedback.classLessonId,
-      currentBucket: preview.courseBucket,
-      subjectKey: preview.subjectKey,
-      rate: preview.rate,
-      allStudentIds: feedback.studentIds,
-      eligibleIds: preview.eligibleStudentIds,
-      duplicateIds: preview.duplicateStudentIds,
     })
 
     if (preview.eligibleCount === 0) {

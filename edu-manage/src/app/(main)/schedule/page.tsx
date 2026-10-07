@@ -1,26 +1,31 @@
 'use client'
 
-import { Suspense, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Card, Spin, message } from 'antd'
+import { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import dynamic from 'next/dynamic'
+import { Card, Input, Modal, Spin, message } from 'antd'
 import { format, startOfWeek } from 'date-fns'
 import { PageLayout } from '@/components/Layout/PageLayout'
-import { RoomMatrixView } from './RoomMatrixView'
-import { TeacherWeekView } from './TeacherWeekView'
-import { WeekHeatmapView } from './WeekHeatmapView'
-import { MobileRoomView } from './MobileRoomView'
-import { OneOnOneModal } from './OneOnOneModal'
-import { ScheduleDetailPanel } from './_components/ScheduleDetailPanel'
-import { ScheduleFormModal } from './_components/ScheduleFormModal'
-import { SchedulePeriodSettingsModal } from './_components/SchedulePeriodSettingsModal'
-import { CopyFridayToSaturdayModal } from './_components/CopyFridayToSaturdayModal'
+import { ClassMatrixView } from './ClassMatrixView'
 import { SchedulePeriod } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
 import { useDivision } from '@/contexts/DivisionContext'
 import { useSWRConfig } from 'swr'
 
+const RoomMatrixView = dynamic(() => import('./RoomMatrixView').then((module) => module.RoomMatrixView))
+const TeacherWeekView = dynamic(() => import('./TeacherWeekView').then((module) => module.TeacherWeekView))
+const WeekHeatmapView = dynamic(() => import('./WeekHeatmapView').then((module) => module.WeekHeatmapView))
+const MobileRoomView = dynamic(() => import('./MobileRoomView').then((module) => module.MobileRoomView))
+const OneOnOneModal = dynamic(() => import('./OneOnOneModal').then((module) => module.OneOnOneModal))
+const ScheduleDetailPanel = dynamic(() => import('./_components/ScheduleDetailPanel').then((module) => module.ScheduleDetailPanel))
+const ScheduleFormModal = dynamic(() => import('./_components/ScheduleFormModal').then((module) => module.ScheduleFormModal))
+const SchedulePeriodSettingsModal = dynamic(() => import('./_components/SchedulePeriodSettingsModal').then((module) => module.SchedulePeriodSettingsModal))
+const CopyFridayToSaturdayModal = dynamic(() => import('./_components/CopyFridayToSaturdayModal').then((module) => module.CopyFridayToSaturdayModal))
+const ManualLessonModal = dynamic(() => import('./_components/ManualLessonModal').then((module) => module.ManualLessonModal))
+
 const VIEW_TABS = [
+  { key: 'class-matrix', label: '班级课表' },
   { key: 'room-matrix', label: '教室矩阵' },
   { key: 'teacher-week', label: '教师课表' },
   { key: 'week-heatmap', label: '周总览' },
@@ -35,15 +40,23 @@ export default function SchedulePage() {
 }
 
 function SchedulePageInner() {
-  const router = useRouter()
   const searchParamsHook = useSearchParams()
   const isMobile = useIsMobile() ?? false
   const { division } = useDivision()
   const { mutate: mutateSWR } = useSWRConfig()
   const requestedView = searchParamsHook.get('view')
-  const urlView = requestedView || (isMobile ? 'teacher-week' : 'room-matrix')
+  const urlView = VIEW_TABS.some((tab) => tab.key === requestedView) ? requestedView! : 'class-matrix'
 
   const [viewMode, setViewMode] = useState(urlView)
+  useEffect(() => setViewMode(urlView), [urlView])
+  const switchView = (nextView: string) => {
+    setViewMode(nextView)
+    const params = new URLSearchParams(searchParamsHook.toString())
+    if (nextView === 'class-matrix') params.delete('view')
+    else params.set('view', nextView)
+    const query = params.toString()
+    window.history.pushState(null, '', query ? `/schedule?${query}` : '/schedule')
+  }
   const [oneOnOneOpen, setOneOnOneOpen] = useState(false)
   const [oneOnOneDate] = useState(format(new Date(), 'yyyy-MM-dd'))
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -54,10 +67,14 @@ function SchedulePageInner() {
   const [scheduleFormOpen, setScheduleFormOpen] = useState(false)
   const [periodSettingsOpen, setPeriodSettingsOpen] = useState(false)
   const [copyFridayOpen, setCopyFridayOpen] = useState(false)
+  const [manualLessonOpen, setManualLessonOpen] = useState(false)
+  const [cancelLessonId, setCancelLessonId] = useState('')
+  const [cancelReason, setCancelReason] = useState('')
+  const [cancelling, setCancelling] = useState(false)
   const { periods, mutate: mutatePeriods } = useSchedulePeriods(division)
 
   const handleRoomCellClick = (_room: Record<string, unknown>, _period: SchedulePeriod) => {
-    setScheduleFormOpen(true)
+    setManualLessonOpen(true)
   }
 
   const handleLessonClick = (lesson: Record<string, unknown>) => {
@@ -74,7 +91,7 @@ function SchedulePageInner() {
 
   const handleHeatmapCellClick = (date: Date) => {
     setSelectedDate(date)
-    setViewMode('room-matrix')
+    switchView('class-matrix')
   }
 
   const saveLesson = async () => {
@@ -90,6 +107,7 @@ function SchedulePageInner() {
       if (!res.ok) throw new Error(payload.error || '保存失败')
       message.success('课次已更新')
       setSelectedLesson(null)
+      mutateSWR(key => typeof key === 'string' && (key.startsWith('/api/schedules/') || key.startsWith('/api/class-lessons/')))
     } catch (error) {
       message.error(error instanceof Error ? error.message : '保存失败')
     } finally {
@@ -98,26 +116,45 @@ function SchedulePageInner() {
   }
 
   const cancelLesson = async (id: string) => {
+    setCancelLessonId(id)
+    setCancelReason('')
+  }
+
+  const confirmCancelLesson = async () => {
+    if (cancelReason.trim().length < 2) {
+      message.warning('请填写停课原因')
+      return
+    }
+    setCancelling(true)
     try {
-      const res = await fetch(`/api/schedules/${id}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('取消失败')
-      message.success('已取消该课程')
+      const res = await fetch(`/api/class-lessons/${cancelLessonId}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'CANCELLED', cancelReason: cancelReason.trim() }),
+      })
+      const payload = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(payload.error || '取消失败')
+      message.success(payload.notifiedParents > 0
+        ? `本次课已取消，已通知 ${payload.notifiedParents} 位家长`
+        : '本次课已取消，课表已更新')
       setSelectedLesson(null)
-    } catch {
-      message.error('取消失败')
+      setCancelLessonId('')
+      mutateSWR(key => typeof key === 'string' && (key.startsWith('/api/schedules/') || key.startsWith('/api/class-lessons/')))
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '取消失败')
+    } finally {
+      setCancelling(false)
     }
   }
 
   return (
-    <PageLayout title="排课系统" subtitle="教室矩阵 · 教师课表 · 周总览">
+    <PageLayout title="排课系统" subtitle="班级课表 · 教室矩阵 · 教师课表 · 周总览">
       <Card bordered={false} style={{ marginBottom: 12, borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }} styles={{ body: { padding: '8px 14px' } }}>
         <div className="mobile-scroll-x" style={{ display: 'flex', gap: 4, flexWrap: isMobile ? 'nowrap' : 'wrap', overflowX: isMobile ? 'auto' : undefined }}>
           {VIEW_TABS.map(tab => (
             <button
               key={tab.key}
               onClick={() => {
-                setViewMode(tab.key)
-                router.push(tab.key === 'room-matrix' ? '/schedule' : `/schedule?view=${tab.key}`)
+                switchView(tab.key)
               }}
               style={{
                 padding: isMobile ? '6px 10px' : '6px 18px',
@@ -136,7 +173,7 @@ function SchedulePageInner() {
               {tab.label}
             </button>
           ))}
-          <button onClick={() => setScheduleFormOpen(true)} style={{
+          <button onClick={() => setManualLessonOpen(true)} style={{
             marginLeft: isMobile ? 0 : 'auto',
             padding: '7px 18px',
             borderRadius: 6,
@@ -149,13 +186,19 @@ function SchedulePageInner() {
             whiteSpace: 'nowrap',
             flexShrink: 0,
           }}>
-            + 新建排课
+            + 临时加课
+          </button>
+          <button onClick={() => setScheduleFormOpen(true)} style={{
+            padding: '7px 14px', borderRadius: 6, background: 'var(--color-surface-1)', color: 'var(--color-text)',
+            border: '1px solid var(--color-border)', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+          }}>
+              新建课次
           </button>
           <button onClick={() => setCopyFridayOpen(true)} style={{
             padding: '7px 14px', borderRadius: 6, background: '#fff', color: '#1D9E75',
             border: '1px solid #1D9E75', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
           }}>
-            周六照常上课
+            周五复制到周六
           </button>
           <button onClick={() => setPeriodSettingsOpen(true)} style={{
             padding: '7px 14px', borderRadius: 6, background: '#fff', color: '#5a4e3a',
@@ -167,23 +210,25 @@ function SchedulePageInner() {
       </Card>
 
       <div style={{ maxWidth: '100%' }}>
-        {viewMode === 'room-matrix' && isMobile ? (
+        {viewMode === 'class-matrix' ? (
+          <ClassMatrixView selectedDate={selectedDate} setSelectedDate={setSelectedDate} onLessonClick={handleLessonClick} />
+        ) : viewMode === 'room-matrix' && isMobile ? (
           <MobileRoomView selectedDate={selectedDate} setSelectedDate={setSelectedDate}
-            onNewCourseClick={() => setScheduleFormOpen(true)} onLessonClick={handleLessonClick} />
+            onNewCourseClick={() => setManualLessonOpen(true)} onLessonClick={handleLessonClick} />
         ) : viewMode === 'room-matrix' ? (
           <div style={{ overflowX: 'auto' }}>
             <RoomMatrixView selectedDate={selectedDate} setSelectedDate={setSelectedDate}
               onCellClick={handleRoomCellClick} onLessonClick={handleLessonClick}
-              onNewCourseClick={() => setScheduleFormOpen(true)} />
+              onNewCourseClick={() => setManualLessonOpen(true)} />
           </div>
         ) : viewMode === 'teacher-week' ? (
           <TeacherWeekView onLessonClick={handleLessonClick} />
-        ) : (
+        ) : viewMode === 'week-heatmap' ? (
           <WeekHeatmapView weekStart={weekStart} setWeekStart={setWeekStart} onCellClick={handleHeatmapCellClick} />
-        )}
+        ) : null}
       </div>
 
-      <ScheduleDetailPanel
+      {selectedLesson && <ScheduleDetailPanel
         selectedLesson={selectedLesson}
         editLesson={editLesson}
         setEditLesson={setEditLesson}
@@ -191,13 +236,33 @@ function SchedulePageInner() {
         onClose={() => setSelectedLesson(null)}
         onSave={saveLesson}
         onCancel={cancelLesson}
-      />
+      />}
 
-      <ScheduleFormModal open={scheduleFormOpen} onClose={() => setScheduleFormOpen(false)} onSuccess={() => {}} />
+      {scheduleFormOpen && <ScheduleFormModal open={scheduleFormOpen} onClose={() => setScheduleFormOpen(false)} onSuccess={() => mutateSWR(key => typeof key === 'string' && (key.startsWith('/api/schedules/') || key.startsWith('/api/class-lessons/')))} />}
+      {manualLessonOpen && (
+        <ManualLessonModal
+          initialDate={format(selectedDate, 'yyyy-MM-dd')}
+          onClose={() => setManualLessonOpen(false)}
+          onSuccess={() => mutateSWR(key => typeof key === 'string' && (key.startsWith('/api/schedules/') || key.startsWith('/api/class-lessons/') || key.startsWith('/api/class-groups')))}
+        />
+      )}
 
-      <OneOnOneModal open={oneOnOneOpen} onClose={() => setOneOnOneOpen(false)}
-        defaultDate={oneOnOneDate} onSuccess={() => setOneOnOneOpen(false)} />
-      <SchedulePeriodSettingsModal
+      <Modal
+        title="取消本次课"
+        open={Boolean(cancelLessonId)}
+        onCancel={() => setCancelLessonId('')}
+        onOk={confirmCancelLesson}
+        confirmLoading={cancelling}
+        okText="确认取消"
+        okButtonProps={{ danger: true }}
+      >
+        <p>仅能取消尚未开始、未产生考勤或结算的课次。取消后保留课次记录，并通知相关家长。</p>
+        <Input.TextArea aria-label="停课原因" placeholder="请输入停课原因，例如：国庆假期调整" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} maxLength={200} showCount rows={3} />
+      </Modal>
+
+      {oneOnOneOpen && <OneOnOneModal open={oneOnOneOpen} onClose={() => setOneOnOneOpen(false)}
+        defaultDate={oneOnOneDate} onSuccess={() => setOneOnOneOpen(false)} />}
+      {periodSettingsOpen && <SchedulePeriodSettingsModal
         open={periodSettingsOpen}
         periods={periods}
         onClose={() => setPeriodSettingsOpen(false)}
@@ -205,15 +270,15 @@ function SchedulePageInner() {
           mutatePeriods()
           mutateSWR(key => typeof key === 'string' && key.startsWith('/api/schedules/'))
         }}
-      />
+      />}
 
-      <CopyFridayToSaturdayModal
+      {copyFridayOpen && <CopyFridayToSaturdayModal
         open={copyFridayOpen}
         onClose={() => setCopyFridayOpen(false)}
         onSuccess={() => {
           mutateSWR(key => typeof key === 'string' && (key.startsWith('/api/schedules/') || key.startsWith('/api/class-lessons/')))
         }}
-      />
+      />}
     </PageLayout>
   )
 }

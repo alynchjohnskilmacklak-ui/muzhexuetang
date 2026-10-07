@@ -7,6 +7,8 @@ import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { getLocalDayRange } from '@/lib/date/local-day'
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,13 +27,22 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ? await resolveAdminTermScope(prisma, division, req)
     : await getActiveAcademicTerm(prisma, division)
 
-  const dayStart = new Date(`${dateStr}T00:00:00`)
-  const dayEnd = new Date(`${dateStr}T23:59:59`)
+  let dayStart: Date
+  let dayEnd: Date
+  try {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) throw new Error('invalid date')
+    const range = getLocalDayRange(dateStr)
+    dayStart = range.start
+    dayEnd = range.end
+  } catch {
+    return NextResponse.json({ error: '日期格式不正确' }, { status: 400 })
+  }
 
   const where: Record<string, unknown> = {
     division,
-    lessonDate: { gte: dayStart, lte: dayEnd },
+    lessonDate: { gte: dayStart, lt: dayEnd },
     status: { notIn: ['CANCELLED', 'POSTPONED'] },
+    deletedAt: null,
     group: { termId: selectedTerm?.id || '__NO_SELECTED_TERM__' },
   }
   if (courseType === 'GROUP') {
@@ -48,7 +59,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
         include: {
           course: { select: { id: true, name: true, subject: true, grade: true, type: true } },
           room: { select: { id: true, name: true, capacity: true, type: true } },
-          enrollments: { where: activeEnrollmentWhere, select: { id: true } },
+          teacher: { select: { id: true, name: true } },
+          teacherAssignments: { select: { teacherId: true, subject: true, teacher: { select: { name: true } } } },
+          enrollments: { where: activeEnrollmentWhere, select: { studentId: true, subjects: true } },
         },
       },
     },
@@ -56,9 +69,30 @@ export const GET = apiHandler(async (req: NextRequest) => {
   })
 
   const matrix: Record<string, Record<string, Record<string, unknown>[]>> = {}
+  const dailyLessons: Record<string, unknown>[] = []
 
   for (const lesson of lessons) {
     const roomId = lesson.group?.room?.id || 'unknown'
+    const item = {
+      id: lesson.id,
+      lessonId: lesson.id,
+      lessonDate: lesson.lessonDate,
+      status: lesson.status,
+      teacher: lesson.teacher,
+      group: lesson.group,
+      groupId: lesson.groupId,
+      roomName: lesson.group?.room?.name || '未安排教室',
+      teacherName: lesson.teacher?.name || '未分配',
+      teacherId: lesson.teacherId,
+      courseName: lesson.group?.course?.name || '',
+      subject: lesson.subject || lesson.group?.course?.subject || '',
+      grade: lesson.group?.course?.grade || '',
+      courseType: lesson.group?.teachingType || lesson.group?.course?.type || 'GROUP',
+      headcount: lesson.group?.enrollments?.filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, lesson.subject || lesson.group.course.subject)).length || 0,
+      startTime: lesson.startTime,
+      endTime: lesson.endTime,
+    }
+    dailyLessons.push(item)
     const periodId = findSchedulePeriod(periods, lesson.startTime)?.id
       || (courseType === 'SMALL' ? HOURLY_PERIODS.find((period) => period.start === lesson.startTime)?.id : null)
     if (!periodId) continue
@@ -66,18 +100,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     if (!matrix[roomId]) matrix[roomId] = {}
     if (!matrix[roomId][periodId]) matrix[roomId][periodId] = []
 
-    matrix[roomId][periodId].push({
-      lessonId: lesson.id,
-      teacherName: lesson.teacher?.name || '未分配',
-      teacherId: lesson.teacherId,
-      courseName: lesson.group?.course?.name || '',
-      subject: lesson.subject || lesson.group?.course?.subject || '',
-      grade: lesson.group?.course?.grade || '',
-      courseType: lesson.group?.teachingType || lesson.group?.course?.type || 'GROUP',
-      headcount: lesson.group?.enrollments?.length || 0,
-      startTime: lesson.startTime,
-    })
+    matrix[roomId][periodId].push(item)
   }
 
-  return NextResponse.json({ date: dateStr, matrix, periods })
+  return NextResponse.json({ date: dateStr, lessons: dailyLessons, matrix, periods })
 })

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
-import { getTeacherBusy } from '@/lib/teacher-busy'
+import { checkTeacherConflict } from '@/lib/teacher-conflict'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,11 +19,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
     .slice(0, 200)
   if (!items.length) return NextResponse.json({ results: [] })
 
-  // Use unified busy check (ClassLesson + Schedule)
+  // ClassLesson is the single source of truth for teacher occupancy.
   const results = await Promise.all(items.map(async it => {
-    const busy = await getTeacherBusy(prisma, it.teacherId, it.date, it.startTime, it.endTime)
-    if (busy) return { key: it.key, conflict: true, conflictDetail: `${busy.label} ${busy.start}-${busy.end}` }
-    return { key: it.key, conflict: false }
+    const result = await checkTeacherConflict(prisma, it)
+    return { key: it.key, ...result }
   }))
   return NextResponse.json({ results })
 })

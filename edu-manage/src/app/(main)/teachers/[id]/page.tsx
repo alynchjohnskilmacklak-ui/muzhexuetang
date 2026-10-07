@@ -27,7 +27,10 @@ export default function TeacherDetailPage() {
     <PageLayout
       title={teacher.name}
       subtitle={`${teacher.employmentType === 'FULL_TIME' ? '全职' : '兼职'} · ${teacher.phone || '未填写电话'}`}
-      actions={<Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/teachers')}>返回教师管理</Button>}
+      actions={<Space wrap>
+        <Button onClick={() => router.push(`/teacher-logs/${params.id}`)}>查看行为日志</Button>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/teachers')}>返回教师管理</Button>
+      </Space>}
     >
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={12} lg={6}><Metric title="负责学员" value={teacher._count?.students || 0} /></Col>

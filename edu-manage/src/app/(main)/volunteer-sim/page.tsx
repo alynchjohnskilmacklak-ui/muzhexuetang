@@ -1176,13 +1176,17 @@ export default function VolunteerSimPage() {
               {TAG_OPTIONS.map(t => {
                 const cfg = t === '全部' ? null : SCORE_TAG_CONFIG[t]
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={t}
+                    aria-pressed={filterTag === t}
                     onClick={() => setFilterTag(t)}
                     style={{
                       padding: '6px 14px',
+                      minHeight: 44,
                       borderRadius: 20,
                       cursor: 'pointer',
+                      font: 'inherit',
                       fontSize: 13,
                       fontWeight: filterTag === t ? 600 : 400,
                       background: filterTag === t
@@ -1197,7 +1201,7 @@ export default function VolunteerSimPage() {
                     <span style={{ marginLeft: 6, fontSize: 11, color: C.inkSubtle }}>
                       {tagCounts[t] ?? 0}
                     </span>
-                  </div>
+                  </button>
                 )
               })}
             </div>
@@ -1836,34 +1840,48 @@ function SlotItem({
               {school.tongZhao}分{lineRank !== null ? ` · 约第${lineRank.toLocaleString()}名` : ''}
             </div>
           </div>
-          <CloseOutlined style={{ color: C.inkSubtle, fontSize: 12, cursor: 'pointer' }} onClick={onRemove} />
+          <button
+            type="button"
+            aria-label={`移除${school.name}`}
+            onClick={onRemove}
+            style={{ width: 44, height: 44, margin: '-8px -10px -8px 0', border: 0, background: 'transparent', color: C.inkSubtle, cursor: 'pointer', display: 'grid', placeItems: 'center' }}
+          >
+            <CloseOutlined style={{ fontSize: 12 }} />
+          </button>
         </div>
         <div style={{ marginTop: 6, display: 'flex', gap: 4 }}>
           <Text style={{ fontSize: 10, color: C.primary }}>{segmentLabel}志愿{numeral}</Text>
           {swapping ? (
-            <div style={{ display: 'flex', gap: 2 }}>
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
               {allSlots.map((_, i) => (
-                <div
+                <button
+                  type="button"
                   key={i}
+                  disabled={i === index}
+                  aria-label={`与第${i + 1}志愿交换位置`}
                   onClick={() => { onSwap(i); setSwapping(false) }}
                   style={{
-                    width: 16, height: 16, borderRadius: 3,
+                    width: 44, height: 44, borderRadius: 8,
                     background: i === index ? C.primary : C.surface1,
                     border: `1px solid ${C.hairline}`,
                     cursor: i === index ? 'default' : 'pointer',
-                    fontSize: 9, textAlign: 'center', lineHeight: '14px',
+                    fontSize: 12, textAlign: 'center',
                     color: C.inkSubtle,
                   }}
                 >
                   {i + 1}
-                </div>
+                </button>
               ))}
             </div>
           ) : (
-            <SwapOutlined
-              style={{ fontSize: 10, color: C.inkSubtle, cursor: 'pointer', marginLeft: 4 }}
-              onClick={() => setSwapping(!swapping)}
-            />
+            <button
+              type="button"
+              aria-label={`调整${school.name}的志愿顺序`}
+              onClick={() => setSwapping(true)}
+              style={{ width: 44, height: 44, margin: '-14px 0', border: 0, background: 'transparent', color: C.inkSubtle, cursor: 'pointer', display: 'grid', placeItems: 'center' }}
+            >
+              <SwapOutlined style={{ fontSize: 12 }} />
+            </button>
           )}
         </div>
       </div>
@@ -1981,6 +1999,9 @@ function TieredSchoolList({
                 return (
                   <div
                     key={school.schoolId}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`查看${school.name}详情`}
                     style={{
                       background: school.accessible ? cfg.bg : C.surface3,
                       border: `1px solid ${cfg.border}`,
@@ -1991,6 +2012,13 @@ function TieredSchoolList({
                       transition: 'border-color .15s, background .15s',
                     }}
                     onClick={() => onDetail(school)}
+                    onKeyDown={(event) => {
+                      if (event.target !== event.currentTarget) return
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        onDetail(school)
+                      }
+                    }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
@@ -2111,19 +2139,20 @@ function DesktopFilterSidebar({
       <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
         {TAG_OPTIONS.map(t => {
           return (
-            <div key={t} onClick={() => setFilterTag(t)} style={{
+            <button type="button" key={t} aria-pressed={filterTag === t} onClick={() => setFilterTag(t)} style={{
+              width: '100%', border: 0, textAlign: 'left', font: 'inherit',
               padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               background: filterTag === t ? C.primaryBg : 'transparent',
               color: filterTag === t ? C.primary : C.inkMuted,
               fontWeight: filterTag === t ? 600 : 400,
-              transition: 'background .15s', minHeight: 36,
+              transition: 'background .15s', minHeight: 44,
             }}>
               <span>{t}</span>
               <span style={{ fontSize: 11, color: C.inkSubtle, minWidth: 18, textAlign: 'right' }}>
                 {tagCounts[t] ?? 0}
               </span>
-            </div>
+            </button>
           )
         })}
       </div>
@@ -2133,14 +2162,15 @@ function DesktopFilterSidebar({
       <Text strong style={{ color: C.ink, fontSize: 13 }}>学校类型</Text>
       <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
         {TYPE_OPTIONS.map(t => (
-          <div key={t} onClick={() => setFilterType(t)} style={{
+          <button type="button" key={t} aria-pressed={filterType === t} onClick={() => setFilterType(t)} style={{
+            width: '100%', border: 0, textAlign: 'left', font: 'inherit',
             padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
             background: filterType === t ? C.primaryBg : 'transparent',
             color: filterType === t ? C.primary : C.inkMuted,
-            fontWeight: filterType === t ? 600 : 400, minHeight: 36,
+            fontWeight: filterType === t ? 600 : 400, minHeight: 44,
           }}>
             {t}
-          </div>
+          </button>
         ))}
       </div>
 
@@ -2148,23 +2178,25 @@ function DesktopFilterSidebar({
 
       <Text strong style={{ color: C.ink, fontSize: 13 }}>地区</Text>
       <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div onClick={() => setFilterLocation('全部')} style={{
+        <button type="button" aria-pressed={filterLocation === '全部'} onClick={() => setFilterLocation('全部')} style={{
+          width: '100%', border: 0, textAlign: 'left', font: 'inherit',
           padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
           background: filterLocation === '全部' ? C.primaryBg : 'transparent',
           color: filterLocation === '全部' ? C.primary : C.inkMuted,
-          fontWeight: filterLocation === '全部' ? 600 : 400, minHeight: 36,
+          fontWeight: filterLocation === '全部' ? 600 : 400, minHeight: 44,
         }}>
           全部
-        </div>
+        </button>
         {locations.map(l => (
-          <div key={l} onClick={() => setFilterLocation(l)} style={{
+          <button type="button" key={l} aria-pressed={filterLocation === l} onClick={() => setFilterLocation(l)} style={{
+            width: '100%', border: 0, textAlign: 'left', font: 'inherit',
             padding: '7px 10px', borderRadius: 8, cursor: 'pointer', fontSize: 13,
             background: filterLocation === l ? C.primaryBg : 'transparent',
             color: filterLocation === l ? C.primary : C.inkMuted,
-            fontWeight: filterLocation === l ? 600 : 400, minHeight: 36,
+            fontWeight: filterLocation === l ? 600 : 400, minHeight: 44,
           }}>
             {l}
-          </div>
+          </button>
         ))}
       </div>
 
@@ -2204,18 +2236,18 @@ function MobileFilterBar({
         {TAG_OPTIONS.map(t => {
           const cfg = t === '全部' ? null : SCORE_TAG_CONFIG[t]
           return (
-            <div key={t} onClick={() => setFilterTag(t)} style={{
+            <button type="button" key={t} aria-pressed={filterTag === t} onClick={() => setFilterTag(t)} style={{
               padding: '6px 12px', borderRadius: 20, cursor: 'pointer',
               fontSize: 12, fontWeight: filterTag === t ? 600 : 400,
               whiteSpace: 'nowrap', flexShrink: 0,
               background: filterTag === t ? (cfg?.bg ?? C.primaryBg) : C.surface3,
               border: `1px solid ${filterTag === t ? (cfg?.border ?? C.hairlineStrong) : C.hairline}`,
               color: filterTag === t ? (cfg?.color ?? C.primary) : C.inkMuted,
-              minHeight: 32, display: 'flex', alignItems: 'center', gap: 4,
+              minHeight: 44, display: 'flex', alignItems: 'center', gap: 4, font: 'inherit',
             }}>
               {t}
               <span style={{ fontSize: 10, color: C.inkSubtle }}>{tagCounts[t] ?? 0}</span>
-            </div>
+            </button>
           )
         })}
       </div>

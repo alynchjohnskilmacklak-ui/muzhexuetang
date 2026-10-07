@@ -1,13 +1,15 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { assertDangerAuth } from '@/lib/danger-guard'
+import { isSuperAdminEmail } from '@/lib/super-admin'
 
 export const dynamic = 'force-dynamic'
 
-export const POST = apiHandler(async () => {
-  const user = await getCurrentUser()
-  if (!user || user.role !== 'admin') return NextResponse.json({ error: '仅管理员可操作' }, { status: 403 })
+export const POST = apiHandler(async (req: NextRequest) => {
+  const body = await req.json().catch(() => ({}))
+  const dangerAuth = await assertDangerAuth(body, '永久删除所有废弃数据')
   const prisma = await getRequestPrisma()
 
   const results: Record<string, number> = {}
@@ -37,13 +39,8 @@ export const POST = apiHandler(async () => {
   }
   results.archivedGroups = archivedGroups.length
 
-  // 2. 硬删除 CANCELLED 排课
-  const cancelledSchedules = await prisma.schedule.findMany({ where: { status: 'cancelled' }, select: { id: true } })
-  if (cancelledSchedules.length > 0) {
-    await prisma.scheduleStudent.deleteMany({ where: { schedule: { status: 'cancelled' } } })
-    await prisma.schedule.deleteMany({ where: { status: 'cancelled' } })
-  }
-  results.cancelledSchedules = cancelledSchedules.length
+  // Compatibility field retained for the existing settings response.
+  results.cancelledSchedules = 0
 
   // 3. 硬删除 CANCELLED 课次
   const cancelledLessons = await prisma.classLesson.findMany({ where: { status: 'CANCELLED' }, select: { id: true } })
@@ -101,7 +98,6 @@ export const POST = apiHandler(async () => {
       await tx.dimensionScore.deleteMany({ where: { grade: { studentId: s.id } } })
       await tx.gradeRecord.deleteMany({ where: { studentId: s.id } })
       await tx.enrollment.deleteMany({ where: { studentId: s.id } })
-      await tx.scheduleStudent.deleteMany({ where: { studentId: s.id } })
       await tx.learningGoal.deleteMany({ where: { studentId: s.id } })
       await tx.weaknessRecord.deleteMany({ where: { studentId: s.id } })
       await tx.fee.deleteMany({ where: { studentId: s.id } })
@@ -148,7 +144,7 @@ export const POST = apiHandler(async () => {
   results.cleanedOldLogs = oldLogs
 
   await prisma.activityLog.create({
-    data: { userId: user.id, action: 'SYSTEM_CLEANUP', detail: `永久删除数据: 班级${results.archivedGroups} 排课${results.cancelledSchedules} 课次${results.cancelledLessons} 试卷${results.deletedPapers} 教师${results.resignedTeachers} 学员${results.inactiveStudents}` },
+    data: { userId: dangerAuth.userId, action: 'SYSTEM_CLEANUP', detail: `永久删除数据: 班级${results.archivedGroups} 排课${results.cancelledSchedules} 课次${results.cancelledLessons} 试卷${results.deletedPapers} 教师${results.resignedTeachers} 学员${results.inactiveStudents}` },
   })
 
   return NextResponse.json({ success: true, results })
@@ -160,9 +156,8 @@ export const GET = apiHandler(async () => {
 
 
   const prisma = await getRequestPrisma()
-  const [archivedGroups, cancelledSchedules, cancelledLessons, deletedPapers, resignedTeachers, inactiveStudents, withdrawnEnrollments, oldLogs, oldRecords] = await Promise.all([
+  const [archivedGroups, cancelledLessons, deletedPapers, resignedTeachers, inactiveStudents, withdrawnEnrollments, oldLogs, oldRecords] = await Promise.all([
     prisma.classGroup.count({ where: { status: 'ARCHIVED' } }),
-    prisma.schedule.count({ where: { status: 'cancelled' } }),
     prisma.classLesson.count({ where: { status: 'CANCELLED' } }),
     prisma.examPaper.count({ where: { status: 'DELETED' } }),
     prisma.teacher.count({ where: { status: 'RESIGNED' } }),
@@ -173,9 +168,10 @@ export const GET = apiHandler(async () => {
   ])
 
   return NextResponse.json({
-    archivedGroups, cancelledSchedules, cancelledLessons, deletedPapers,
+    archivedGroups, cancelledSchedules: 0, cancelledLessons, deletedPapers,
     resignedTeachers, inactiveStudents, withdrawnEnrollments,
     oldActivityLogs: oldLogs, deletedRecords: oldRecords,
-    totalSoftDeleted: archivedGroups + cancelledSchedules + cancelledLessons + deletedPapers + resignedTeachers + inactiveStudents + withdrawnEnrollments,
+    canCleanup: isSuperAdminEmail(user.email),
+    totalSoftDeleted: archivedGroups + cancelledLessons + deletedPapers + resignedTeachers + inactiveStudents + withdrawnEnrollments,
   })
 })

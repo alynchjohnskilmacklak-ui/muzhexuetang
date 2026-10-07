@@ -6,6 +6,7 @@ import { CalendarOutlined, ClockCircleOutlined, ExclamationCircleOutlined } from
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatHours } from '@/lib/format'
 import type { AdminDashboardMetrics } from '@/types/dashboard'
+import { WeatherHeroStrip } from '@/components/Common/WeatherHeroStrip'
 
 const { Title, Text } = Typography
 
@@ -102,6 +103,7 @@ export function DashboardHero({
           ))}
         </div>
       </div>
+      <WeatherHeroStrip audience="admin" variant="light" />
     </Card>
   )
 }

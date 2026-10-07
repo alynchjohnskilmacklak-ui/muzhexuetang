@@ -11,13 +11,13 @@ const SIGNED_URL_CACHE_TTL = 50 * 60 * 1000
 type CachedSignedUrl = { url: string; expiresAt: number }
 const signedUrlCache = new Map<string, CachedSignedUrl>()
 
-export function useSignedUrls(keys: string[] | undefined) {
+export function useSignedUrls(keys: string[] | undefined, initialUrls?: Record<string, string>) {
   const stableKeys = useMemo(
     () => Array.isArray(keys) ? keys.filter((key): key is string => typeof key === 'string' && key.length > 0) : [],
     [keys],
   )
   const requestKey = useMemo(() => JSON.stringify(stableKeys), [stableKeys])
-  const [urlMap, setUrlMap] = useState<Record<string, string>>({})
+  const [urlMap, setUrlMap] = useState<Record<string, string>>(() => initialUrls || {})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
   const [refreshToken, setRefreshToken] = useState(0)
@@ -40,6 +40,11 @@ export function useSignedUrls(keys: string[] | undefined) {
     for (const key of uniqueKeys) {
       if (key.startsWith('blob:') || key.startsWith('data:')) {
         cachedMap[key] = key
+        continue
+      }
+      if (refreshToken === 0 && initialUrls?.[key]) {
+        cachedMap[key] = initialUrls[key]
+        signedUrlCache.set(key, { url: initialUrls[key], expiresAt: now + SIGNED_URL_CACHE_TTL })
         continue
       }
       const cached = signedUrlCache.get(key)
@@ -93,7 +98,7 @@ export function useSignedUrls(keys: string[] | undefined) {
     return () => {
       cancelled = true
     }
-  }, [requestKey, refreshToken])
+  }, [requestKey, refreshToken, initialUrls])
 
   const urls = useMemo(
     () => stableKeys.map((key) => urlMap[key] || (loading ? LOADING_IMAGE : protectedUploadFallback(key))),

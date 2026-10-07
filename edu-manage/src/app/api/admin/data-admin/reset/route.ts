@@ -6,6 +6,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { requireSuperAdmin } from '@/lib/get-user'
 import { createActivityLog } from '@/lib/data-admin/entities-server'
 import { deleteFile } from '@/lib/storage'
+import { executeCleanup, isCleanupCategory } from '@/lib/data-correction/cleanup'
 
 export const dynamic = 'force-dynamic'
 
@@ -234,6 +235,31 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const divisions: Division[] =
     division === 'BOTH' ? ['JUNIOR', 'SENIOR'] : [division as Division]
 
+  // New correction flow: rows are marked with one recoverable cleanup batch.
+  {
+    const results: Record<string, Record<string, number>> = {}
+    let total = 0
+    for (const div of divisions) {
+      const result = await executeCleanup(
+        getPrismaForDivision(div),
+        selectedCats.filter(isCleanupCategory),
+        {
+          division: div,
+          termId: typeof body.termId === 'string' && body.termId ? body.termId : undefined,
+          dateFrom: typeof body.dateFrom === 'string' && body.dateFrom ? body.dateFrom : undefined,
+          dateTo: typeof body.dateTo === 'string' && body.dateTo ? body.dateTo : undefined,
+          classId: typeof body.classId === 'string' && body.classId ? body.classId : undefined,
+          studentId: typeof body.studentId === 'string' && body.studentId ? body.studentId : undefined,
+        },
+        auth.userId,
+      )
+      results[div] = result.results
+      total += result.total
+    }
+    await createActivityLog(auth.userId, 'DATA_RESET_SOFT_DELETE', 'System', 'reset', { divisions, categories: selectedCats, results, total })
+    return NextResponse.json({ success: true, results, total, recoverable: true })
+  }
+
   const results: Record<string, Record<string, number>> = {}
   let totalFilesDeleted = 0
 
@@ -248,8 +274,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
       const { count, fileKeys } = await handler.run(divPrisma, div)
       results[div][catKey] = count
 
-      if (fileKeys && fileKeys.length > 0) {
-        for (const key of fileKeys) {
+      if (fileKeys?.length) {
+        for (const key of fileKeys || []) {
           try {
             await deleteFile(key)
             totalFilesDeleted++

@@ -320,6 +320,7 @@ export default function AdminNotificationsPage() {
               <Table
                 dataSource={records}
                 rowKey="id"
+                scroll={{ x: 'max-content' }}
                 pagination={{ total: totalRecords, pageSize: 20, onChange: (page) => fetchRecords(page) }}
                 columns={[
                   { title: '学员', dataIndex: ['student', 'name'], key: 'student', width: 80 },

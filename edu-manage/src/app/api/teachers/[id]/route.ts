@@ -146,6 +146,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params
   const body = await req.json()
 
+  if (typeof body.bio === 'string' && body.bio.length > 500) {
+    return NextResponse.json({ error: '个人介绍最多填写500字', field: 'bio' }, { status: 400 })
+  }
+
   try {
     const teacher = await prisma.teacher.update({
       where: { id },
@@ -192,7 +196,7 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
 
   const teacher = await prisma.teacher.findUnique({
     where: { id },
-    include: { _count: { select: { courses: true, schedules: true } } },
+    include: { _count: { select: { courses: true, classLessons: true } } },
   })
   if (!teacher) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
@@ -227,7 +231,6 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
       await tx.teacher.update({ where: { id }, data: { status: 'RESIGNED' } })
       await tx.student.updateMany({ where: { mainTeacherId: id }, data: { mainTeacherId: transferTo } })
       await tx.course.updateMany({ where: { teacherId: id }, data: { teacherId: transferTo } })
-      await tx.schedule.updateMany({ where: { teacherId: id, status: { not: 'cancelled' } }, data: { teacherId: transferTo } })
       await tx.classGroupTeacher.updateMany({ where: { teacherId: id }, data: { teacherId: transferTo } })
       await tx.classGroup.updateMany({ where: { teacherId: id, status: { not: 'ARCHIVED' } }, data: { teacherId: transferTo } })
       await tx.classLesson.updateMany({ where: { teacherId: id, status: { notIn: ['COMPLETED', 'CANCELLED'] } }, data: { teacherId: transferTo } })
@@ -254,7 +257,7 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
     return NextResponse.json({
       success: true,
       transferTo: replacement.name,
-      impact: { courses: teacher._count.courses, students: effective.students.length, schedules: teacher._count.schedules },
+      impact: { courses: teacher._count.courses, students: effective.students.length, schedules: teacher._count.classLessons },
     })
   }
 
@@ -262,7 +265,6 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
     await tx.teacher.update({ where: { id }, data: { status: 'RESIGNED' } })
     await tx.student.updateMany({ where: { mainTeacherId: id }, data: { mainTeacherId: null } })
     await tx.course.updateMany({ where: { teacherId: id }, data: { isActive: false } })
-    await tx.schedule.updateMany({ where: { teacherId: id, status: { not: 'cancelled' } }, data: { status: 'cancelled' } })
     await tx.classGroupTeacher.deleteMany({ where: { teacherId: id } })
     await tx.classGroup.updateMany({ where: { teacherId: id, status: { not: 'ARCHIVED' } }, data: { status: 'ARCHIVED' } })
     await tx.classLesson.updateMany({ where: { teacherId: id, status: { notIn: ['COMPLETED', 'CANCELLED'] } }, data: { teacherId: null } })
@@ -281,7 +283,7 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
       data: {
         userId,
         action: '教师离职',
-        detail: `${teacher.name}，已释放 ${effective.students.length} 名有效学员、停用 ${teacher._count.courses} 门课程、取消 ${teacher._count.schedules} 条排课`,
+        detail: `${teacher.name}，已释放 ${effective.students.length} 名有效学员、停用 ${teacher._count.courses} 门课程、处理 ${teacher._count.classLessons} 条课次`,
       },
     })
   }
@@ -297,6 +299,6 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
 
   return NextResponse.json({
     success: true,
-    impact: { courses: teacher._count.courses, students: effective.students.length, schedules: teacher._count.schedules },
+    impact: { courses: teacher._count.courses, students: effective.students.length, schedules: teacher._count.classLessons },
   })
 })

@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client'
 
 export const visibleStudentWhere = {
   status: { not: 'INACTIVE' },
+  deletedAt: null,
 } satisfies Prisma.StudentWhereInput
 
 export const visibleTeacherWhere = {
@@ -10,12 +11,14 @@ export const visibleTeacherWhere = {
 
 export const visibleCourseWhere = {
   isActive: true,
+  deletedAt: null,
 } satisfies Prisma.CourseWhereInput
 
 export const activeCourseWhere = visibleCourseWhere
 
 export const visibleClassGroupWhere = {
   status: { not: 'ARCHIVED' },
+  deletedAt: null,
   course: visibleCourseWhere,
 } satisfies Prisma.ClassGroupWhereInput
 
@@ -34,28 +37,29 @@ export const makeupEligibleClassGroupWhere = {
 
 export const visibleClassLessonWhere = {
   status: { notIn: ['CANCELLED', 'POSTPONED'] },
+  deletedAt: null,
   group: visibleClassGroupWhere,
 } satisfies Prisma.ClassLessonWhereInput
 
 export const attendanceEligibleLessonWhere = {
   status: { notIn: ['CANCELLED', 'POSTPONED'] },
+  deletedAt: null,
   group: visibleClassGroupWhere,
 } satisfies Prisma.ClassLessonWhereInput
 
-export const visibleScheduleWhere = {
-  status: { not: 'cancelled' },
-} satisfies Prisma.ScheduleWhereInput
-
 export const visibleExamPaperWhere = {
   status: 'PUBLISHED',
+  deletedAt: null,
 } satisfies Prisma.ExamPaperWhereInput
 
 export const visibleTeacherExamPaperWhere = {
   status: { not: 'DELETED' },
+  deletedAt: null,
 } satisfies Prisma.ExamPaperWhereInput
 
 export const visibleClassroomFeedbackWhere = {
   status: 'PUBLISHED',
+  deletedAt: null,
 } satisfies Prisma.ClassroomFeedbackWhereInput
 
 export const visiblePerformancePostWhere = {
@@ -64,10 +68,12 @@ export const visiblePerformancePostWhere = {
 
 export const visibleNotificationWhere = {
   status: 'ACTIVE',
+  deletedAt: null,
 } satisfies Prisma.NotificationWhereInput
 
 export const activeEnrollmentWhere = {
   status: 'ACTIVE',
+  deletedAt: null,
   student: visibleStudentWhere,
   group: visibleClassGroupWhere,
 } satisfies Prisma.EnrollmentWhereInput
@@ -79,12 +85,13 @@ export function parentLinkedStudentWhere(parentId: string): Prisma.StudentWhereI
   return {
     OR: [{ parentId }, { parentUserId: parentId }],
     status: { not: 'INACTIVE' },
+    deletedAt: null,
   }
 }
 
 /**
  * Filter for active students belonging to a parent.
- * Note: This model (Student) does NOT have a 'deletedAt' field.
+ * Deleted students are excluded from all parent business views.
  */
 export function parentActiveStudentWhere(parentId: string): Prisma.StudentWhereInput {
   return {
@@ -135,7 +142,7 @@ export function parentVisiblePerformancePostWhere(parentId: string): Prisma.Perf
 
 /**
  * ExamPaper filter for parents.
- * Note: This model (ExamPaper) does NOT have a 'deletedAt' field.
+ * Deleted papers are excluded from all parent business views.
  */
 export function parentVisibleExamPaperWhere(parentId: string): Prisma.ExamPaperWhereInput {
   return {

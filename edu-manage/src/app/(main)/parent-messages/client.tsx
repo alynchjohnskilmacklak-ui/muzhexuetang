@@ -15,7 +15,11 @@ import { SUBJECT_COLORS } from '@/constants/subjects'
 
 const { Text, Title } = Typography
 const { TextArea } = Input
-const fetcher = (url: string) => fetch(url).then(r => r.json())
+const fetcher = async (url: string) => {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`加载失败（${response.status}）`)
+  return response.json()
+}
 
 const ADMIN = '#534AB7'
 const PARENT = '#E8784A'
@@ -104,8 +108,11 @@ function ConversationItem({ msg, onClick, active }: { msg: Message; onClick: () 
   const last = msg.replies[msg.replies.length - 1]
   const sc = msg.subject ? SUBJECT_COLORS[msg.subject] : null
   return (
-    <div onClick={onClick} style={{
+    <button type="button" aria-pressed={active} onClick={onClick} style={{
+      display: 'block', width: '100%', textAlign: 'left', color: 'inherit', font: 'inherit',
       background: active ? '#F4F3FE' : '#fff',
+      borderTop: 0,
+      borderRight: 0,
       borderLeft: active ? `3px solid ${ADMIN}` : '3px solid transparent',
       borderBottom: '1px solid rgba(0,0,0,.05)',
       padding: '12px 14px', cursor: 'pointer', transition: 'background .15s',
@@ -150,7 +157,7 @@ function ConversationItem({ msg, onClick, active }: { msg: Message; onClick: () 
         </span>
       </div>
       {last && <Text type="secondary" style={{ fontSize: 12, marginTop: 4, display: 'block' }} ellipsis>{last.authorName}：{last.content}</Text>}
-    </div>
+    </button>
   )
 }
 
@@ -262,10 +269,20 @@ export function AdminMessagesClient() {
   const active = allMessages.find(m => m.id === activeId) || null
 
   useEffect(() => {
-    if (active) setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
-  }, [active?.replies.length, active])
+    if (!activeId) return
+    const timer = window.setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+    return () => window.clearTimeout(timer)
+  }, [activeId, active?.replies.length])
 
-  const handleSelect = async (id: string) => { setActiveId(id); await fetch(`/api/messages/${id}`); mutate() }
+  const handleSelect = async (id: string) => {
+    setActiveId(id)
+    const response = await fetch(`/api/messages/${id}`)
+    if (!response.ok) {
+      toast.error('会话状态更新失败，请稍后重试')
+      return
+    }
+    mutate()
+  }
 
   const handleReply = async () => {
     if (!activeId || !replyText.trim()) return

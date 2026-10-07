@@ -7,7 +7,8 @@ import { UserOutlined, BookOutlined, IdcardOutlined, UploadOutlined } from '@ant
 import type { UploadProps } from 'antd'
 import dayjs from 'dayjs'
 import { ALL_SUBJECTS } from '@/constants/subjects'
-import { normalizeUploadUrl } from '@/lib/upload-url'
+import { normalizeAvatarUrl } from '@/lib/upload-url'
+import { femaleDefaultAvatar } from '@/lib/teacher-avatars'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { TIER_OPTIONS } from '@/constants/teacher-tier'
 
@@ -22,6 +23,7 @@ export function TeacherForm({
   const [submitError, setSubmitError] = useState<{ message: string; field?: string } | null>(null)
   const [photoOptions, setPhotoOptions] = useState<{ label: string; value: string }[]>([])
   const avatar = Form.useWatch('avatar', form)
+  const gender = Form.useWatch('gender', form)
   const isMobile = useIsMobile() ?? false
 
   useEffect(() => {
@@ -135,10 +137,12 @@ export function TeacherForm({
       try {
         const formData = new FormData()
         formData.append('file', file as File)
+        formData.append('uploadType', 'avatar')
         const res = await fetch('/api/upload', { method: 'POST', body: formData })
         const payload = await res.json().catch(() => ({}))
         if (!res.ok) throw new Error(payload.error || '上传失败')
-        form.setFieldValue('avatar', payload.url)
+        const storageKey = payload.file?.storageKey as string | undefined
+        form.setFieldValue('avatar', storageKey ? `/api/uploads/${encodeURIComponent(storageKey)}` : payload.url)
         message.success('照片已上传')
         onSuccess?.(payload)
       } catch (error) {
@@ -201,7 +205,8 @@ export function TeacherForm({
               <Form.Item name="avatar" label="教师照片">
                 <Space align="start" size={16} style={{ width: '100%' }}>
                   <div style={{ width: 104, height: 132, position: 'relative', borderRadius: 10, overflow: 'hidden', border: '1px solid #30333a', background: '#0f1011', display: 'grid', placeItems: 'center', color: '#8a8f98' }}>
-                    {avatar ? <NextImage src={normalizeUploadUrl(avatar)} alt="教师照片" fill sizes="104px" unoptimized style={{ objectFit: 'cover', objectPosition: 'center top' }} /> : '暂无照片'}
+                    {avatar ? <NextImage src={normalizeAvatarUrl(avatar)} alt="教师照片" fill sizes="104px" unoptimized style={{ objectFit: 'cover', objectPosition: 'center top' }} /> :
+                      <img src={gender === '男' ? '/avatars/teacher-male.png' : femaleDefaultAvatar('')} alt="默认头像" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   </div>
                   <Space direction="vertical" style={{ flex: 1 }}>
                     <Select
@@ -243,7 +248,7 @@ export function TeacherForm({
           <Row gutter={16}>
             <Col span={24}><Form.Item name="subjects" label="授课科目" rules={[{ required: true, message: '至少选择一个科目' }]}><Select mode="multiple" placeholder="选择授课科目" options={ALL_SUBJECTS.map(subject => ({ label: subject, value: subject }))} /></Form.Item></Col>
             <Col span={12}><Form.Item name="monthlyHours" label="月课时目标"><InputNumber min={0} style={{ width: '100%' }} placeholder="40" /></Form.Item></Col>
-            <Col span={24}><Form.Item name="bio" label="个人介绍"><Input.TextArea rows={3} placeholder="展示给家长看的教师亮点、教学风格或经历，200字以内" maxLength={200} showCount /></Form.Item></Col>
+            <Col span={24}><Form.Item name="bio" label="个人介绍"><Input.TextArea rows={6} placeholder="写明授课方向、教学方法与学生可获得的具体帮助，500字以内" maxLength={500} showCount /></Form.Item></Col>
           </Row>
         )}
       </Form>

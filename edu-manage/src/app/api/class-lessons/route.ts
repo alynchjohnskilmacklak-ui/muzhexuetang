@@ -28,7 +28,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ? await resolveAdminTermScope(prisma, division, req)
     : await getActiveAcademicTerm(prisma, division)
 
-  const where: Record<string, unknown> = { status: { not: 'CANCELLED' }, division }
+  const where: Record<string, unknown> = { status: { not: 'CANCELLED' }, division, deletedAt: null }
 
   if (startDate) {
     where.lessonDate = { ...(where.lessonDate as object), gte: getLocalDayRange(startDate).start }
@@ -58,7 +58,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   } else if (user.role === 'parent') {
     const studentIds = (
       await prisma.student.findMany({
-        where: { parentUserId: user.id, status: { not: 'ARCHIVED' } },
+        where: { parentUserId: user.id, status: { not: 'ARCHIVED' }, deletedAt: null },
         select: { id: true },
       })
     ).map(s => s.id)
@@ -87,7 +87,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (roomId) groupWhere.roomId = roomId
   if (courseType) groupWhere.course = { ...(groupWhere.course as object), type: courseType }
   if (intensiveMode === 'INTENSIVE') groupWhere.intensiveMode = 'INTENSIVE'
-  where.group = { ...(where.group as object), ...groupWhere }
+  where.group = { ...(where.group as object), ...groupWhere, deletedAt: null }
 
   const lessons = await prisma.classLesson.findMany({
     where,

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { LessonStatus } from '@prisma/client'
-import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
+import { requireCurrentTeacher, teacherLessonScopeWhere } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +21,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
     const lessons = await prisma.classLesson.findMany({
       where: {
-        ...teacherLessonWhere(teacher.id),
+        ...await teacherLessonScopeWhere(prisma, teacher.id),
         lessonDate: { gte: start, lte: end },
         ...(status ? { status: status as LessonStatus } : { status: { not: 'CANCELLED' as const } }),
       },
@@ -37,31 +38,42 @@ export const GET = apiHandler(async (req: NextRequest) => {
           },
         },
         attendances: true,
+        lessonStudents: { select: { studentId: true } },
       },
       orderBy: [{ lessonDate: 'desc' }, { startTime: 'asc' }],
     })
 
-    return NextResponse.json(lessons.map((lesson) => ({
-      id: lesson.id,
-      lessonDate: lesson.lessonDate,
-      startTime: lesson.startTime,
-      endTime: lesson.endTime,
-      status: lesson.status,
-      subject: lesson.subject || lesson.group.teacherAssignments[0]?.subject || lesson.group.course.subject,
-      groupName: lesson.group.name,
-      courseName: lesson.group.course.name,
-      courseType: lesson.group.course.type,
-      room: lesson.group.room?.name || '-',
-      studentCount: lesson.group.enrollments.length,
-      attendanceCount: lesson.attendances.length,
-      oneOnOneStudentName: lesson.group.course.type === 'ONE_ON_ONE'
-        ? lesson.group.enrollments[0]?.student?.name || ''
-        : '',
-      students: lesson.group.enrollments.map((enrollment) => ({
-        enrollmentId: enrollment.id,
-        ...enrollment.student,
-        remainHours: enrollment.remainHours,
-        totalHours: enrollment.totalHours,
-      })),
-    })))
+    return NextResponse.json(lessons.map((lesson) => {
+      const lessonSubject = lesson.subject || lesson.group.teacherAssignments[0]?.subject || lesson.group.course.subject
+      const rosterStudentIds = new Set(resolveSubjectLessonStudentIds(
+        lesson.lessonStudents.map((item) => item.studentId),
+        lesson.group.enrollments.map((enrollment) => ({ studentId: enrollment.student.id, subjects: enrollment.subjects })),
+        lessonSubject,
+        lesson.lessonDate,
+      ))
+      const rosterEnrollments = lesson.group.enrollments.filter((enrollment) => rosterStudentIds.has(enrollment.student.id))
+      return {
+        id: lesson.id,
+        lessonDate: lesson.lessonDate,
+        startTime: lesson.startTime,
+        endTime: lesson.endTime,
+        status: lesson.status,
+        subject: lessonSubject,
+        groupName: lesson.group.name,
+        courseName: lesson.group.course.name,
+        courseType: lesson.group.course.type,
+        room: lesson.group.room?.name || '-',
+        studentCount: rosterEnrollments.length,
+        attendanceCount: lesson.attendances.length,
+        oneOnOneStudentName: lesson.group.course.type === 'ONE_ON_ONE'
+          ? rosterEnrollments[0]?.student?.name || ''
+          : '',
+        students: rosterEnrollments.map((enrollment) => ({
+          enrollmentId: enrollment.id,
+          ...enrollment.student,
+          remainHours: enrollment.remainHours,
+          totalHours: enrollment.totalHours,
+        })),
+      }
+    }))
 })

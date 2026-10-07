@@ -8,8 +8,15 @@ import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatRemaining } from '@/lib/lesson-units'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { StudentAvatar } from '@/components/Common/StudentAvatar'
 import { StudyHallWorkspace } from '@/components/study-hall/StudyHallWorkspace'
 import dayjs from 'dayjs'
+import {
+  resolveAttendanceSubmissionStatus,
+  toAttendanceDisplayStatus,
+  type AttendanceDisplayStatus,
+  type AttendanceRecordStatus,
+} from '@/lib/attendance-status'
 
 const { Title, Text } = Typography
 const fetcher = (url: string) => fetch(url).then(res => res.json())
@@ -18,13 +25,7 @@ const STATUS_CONFIG: Record<AttStatus, { label: string; className: string }> = {
   PRESENT: { label: '出勤', className: 'is-present' },
   LEAVE: { label: '请假', className: 'is-leave' },
 }
-type AttStatus = 'PRESENT' | 'LEAVE'
-
-function normalizeAttendanceStatus(value: unknown): AttStatus {
-  return String(value || '').toUpperCase() === 'LEAVE' || String(value || '').toUpperCase() === 'ABSENT'
-    ? 'LEAVE'
-    : 'PRESENT'
-}
+type AttStatus = AttendanceDisplayStatus
 type TeacherLesson = {
   id: string
   groupName?: string
@@ -43,8 +44,11 @@ type TeacherLesson = {
 type AttendanceStudent = {
   studentId: string
   enrollmentId?: string
-  status?: AttStatus
+  status?: AttendanceRecordStatus
   name?: string
+  gender?: string | null
+  photoUrl?: string | null
+  membershipLevel?: string | null
   remainHours?: number
   courseType?: string | null
   lessonMinutes?: number
@@ -124,6 +128,7 @@ export default function TeacherAttendancePage() {
   const [detailError, setDetailError] = useState('')
   const [students, setStudents] = useState<AttendanceStudent[]>([])
   const [attMap, setAttMap] = useState<Map<string, AttStatus>>(new Map())
+  const [changedStudentIds, setChangedStudentIds] = useState<Set<string>>(new Set())
   const [mealStudentIds, setMealStudentIds] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const submittingRef = useRef(false)
@@ -209,8 +214,9 @@ export default function TeacherAttendancePage() {
         setSubmitted(detail?.intensiveReviewStatus === 'PENDING' || detail?.intensiveReviewStatus === 'APPROVED')
         setStudents(list)
         const m = new Map<string, AttStatus>()
-        list.forEach((student) => m.set(student.studentId, normalizeAttendanceStatus(student.status)))
+        list.forEach((student) => m.set(student.studentId, toAttendanceDisplayStatus(student.status)))
         setAttMap(m)
+        setChangedStudentIds(new Set())
         setMealStudentIds(new Set(list.filter((student) => student.eating).map((student) => student.studentId)))
       })
       .catch((error) => {
@@ -223,12 +229,14 @@ export default function TeacherAttendancePage() {
 
   const setAttendance = (studentId: string, status: AttStatus) => {
     setAttMap((current) => new Map(current).set(studentId, status))
+    setChangedStudentIds((current) => new Set(current).add(studentId))
   }
 
   const handleAllPresent = () => {
     const m = new Map(attMap)
     students.forEach(s => m.set(s.studentId, 'PRESENT'))
     setAttMap(m)
+    setChangedStudentIds(new Set(students.map((student) => student.studentId)))
   }
 
   const toggleMeal = (studentId: string) => {
@@ -267,13 +275,18 @@ export default function TeacherAttendancePage() {
       const lessonStart = new Date(`${dateStr}T${startTime}:00`)
       const earliestAllowed = new Date(lessonStart.getTime() - 30 * 60 * 1000)
       if (new Date() < earliestAllowed) {
+        submittingRef.current = false
         toast.warning(`未到考勤时间，课程 ${startTime} 开始，最早 30 分钟前可提交考勤`)
         return
       }
     }
     const records = students.map(s => ({
       studentId: s.studentId, enrollmentId: s.enrollmentId,
-      status: attMap.get(s.studentId) || 'PRESENT',
+      status: resolveAttendanceSubmissionStatus({
+        displayedStatus: attMap.get(s.studentId) || 'PRESENT',
+        originalStatus: s.status,
+        changed: changedStudentIds.has(s.studentId),
+      }),
       actualMinutes: lessonDetail?.intensiveMode === 'INTENSIVE' ? actualMinutes : undefined,
       note: '',
     }))
@@ -301,8 +314,9 @@ export default function TeacherAttendancePage() {
         setActualMinutes(detail?.actualMinutes || detail?.latestReview?.actualMinutes || detail?.plannedMinutes || null)
         setStudents(list)
         const m = new Map<string, AttStatus>()
-        list.forEach((student) => m.set(student.studentId, normalizeAttendanceStatus(student.status)))
+        list.forEach((student) => m.set(student.studentId, toAttendanceDisplayStatus(student.status)))
         setAttMap(m)
+        setChangedStudentIds(new Set())
         setMealStudentIds(new Set(list.filter((student) => student.eating).map((student) => student.studentId)))
       })
       .catch((error) => toast.warning(`考勤已提交，但最新考勤列表刷新失败，请手动刷新页面。原因：${error instanceof Error ? error.message : '未知错误'}`))
@@ -496,11 +510,11 @@ export default function TeacherAttendancePage() {
                 </div>
               </div>
 
-              {/* Student grid */}
-              <div className="teacher-attendance-student-grid" style={{ 
-                display: 'grid', 
-                gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(4, 1fr)', 
-                gap: 12, 
+              {/* Student list */}
+              <div className="teacher-attendance-student-grid" style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
                 paddingBottom: isMobile ? 118 : 0,
               }}>
                 {students.map((s) => {
@@ -508,28 +522,73 @@ export default function TeacherAttendancePage() {
                   const cfg = STATUS_CONFIG[status]
                   const remaining = remainingText(s)
                   const isLowRemaining = remaining.value <= 5
+                  const isSvip = s.membershipLevel === 'SVIP'
+                  const isVip = s.membershipLevel === 'VIP'
+                  const isLeave = status === 'LEAVE'
                   return (
-                    <div key={s.studentId} className={`teacher-attendance-student-card ${cfg.className}`}>
-                      <span className="teacher-attendance-student-status">{cfg.label}</span>
-                      <div className="teacher-attendance-student-avatar" style={{ width: 36, height: 36, borderRadius: 10, margin: '0 auto 6px',
-                        background: getStudentBg(s.studentId), display: 'flex', alignItems: 'center',
-                        justifyContent: 'center', fontSize: 14, fontWeight: 500, color: '#fff' }}>
-                        {(s.name || '?')[0]}
+                    <div key={s.studentId}
+                      className={`teacher-attendance-student-card ${cfg.className}${isLeave ? ' is-leave-card' : ''}`}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '12px 14px', borderRadius: 12,
+                        background: '#fff',
+                        border: `1.5px solid ${isLeave ? '#e5e0d8' : status === 'PRESENT' ? '#1D9E7533' : '#f0e7de'}`,
+                        opacity: isLeave ? 0.75 : 1,
+                      }}>
+                      {/* Avatar */}
+                      <StudentAvatar photoUrl={s.photoUrl} gender={s.gender} name={s.name} size={40} />
+                      {/* Name + meta */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                          <span style={{ fontSize: 14, fontWeight: 600, color: '#1a1201', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
+                          {isSvip && <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 99, color: '#A8873D', background: '#FBF3DE' }}>SVIP</span>}
+                          {isVip && !isSvip && <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 99, color: '#D4622A', background: '#FFF1E8' }}>VIP</span>}
+                        </div>
+                        <div style={{ fontSize: 11, color: isLowRemaining ? '#E24B4A' : '#9a8e7a' }}>
+                          {lessonDetail?.intensiveMode === 'INTENSIVE' ? '审核后按实际分钟计入' : `余${remaining.text}${isLowRemaining ? ' ⚠️' : ''}`}
+                        </div>
                       </div>
-                      <div className="teacher-attendance-student-name" style={{ fontSize: 12, fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
-                      {lessonDetail?.intensiveMode === 'INTENSIVE' ? (
-                        <div className="teacher-attendance-student-meta" style={{ fontSize: 10, color: 'var(--color-text-tertiary, #98A2B3)' }}>
-                          审核后按实际分钟计入
-                        </div>
-                      ) : (
-                        <div className="teacher-attendance-student-meta" style={{ fontSize: 10, color: isLowRemaining ? '#E24B4A' : 'var(--color-text-tertiary, #98A2B3)' }}>
-                          余{remaining.text}{isLowRemaining ? ' ⚠️' : ''}
-                        </div>
-                      )}
-                      <div className="teacher-attendance-student-actions">
-                        <button type="button" className={status === 'PRESENT' ? 'is-active is-present' : ''} disabled={intensiveSettlementLocked} onClick={() => setAttendance(s.studentId, 'PRESENT')}>出勤</button>
-                        <button type="button" className={status === 'LEAVE' ? 'is-active is-leave' : ''} disabled={intensiveSettlementLocked} onClick={() => setAttendance(s.studentId, 'LEAVE')}>请假</button>
-                        {lessonDetail?.isSystemFirstPeriod && <button type="button" className={mealStudentIds.has(s.studentId) ? 'is-active is-meal' : ''} disabled={intensiveSettlementLocked} onClick={() => toggleMeal(s.studentId)}><CoffeeOutlined /> 就餐</button>}
+                      {/* Buttons */}
+                      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                        <button type="button"
+                          className={status === 'PRESENT' ? 'is-active is-present' : ''}
+                          disabled={intensiveSettlementLocked}
+                          onClick={() => setAttendance(s.studentId, 'PRESENT')}
+                          style={{
+                            minWidth: 52, minHeight: 36, borderRadius: 8, border: '1px solid',
+                            borderColor: status === 'PRESENT' ? '#1D9E75' : '#e5e0d8',
+                            background: status === 'PRESENT' ? '#1D9E75' : '#fff',
+                            color: status === 'PRESENT' ? '#fff' : '#6b5d48',
+                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                          }}>出勤</button>
+                        <button type="button"
+                          className={status === 'LEAVE' ? 'is-active is-leave' : ''}
+                          disabled={intensiveSettlementLocked}
+                          onClick={() => {
+                            setAttendance(s.studentId, 'LEAVE')
+                            if (!isLeave) toast.info(`${s.name} 已请假，自动排除就餐和反馈`)
+                          }}
+                          style={{
+                            minWidth: 52, minHeight: 36, borderRadius: 8, border: '1px solid',
+                            borderColor: status === 'LEAVE' ? '#BA7517' : '#e5e0d8',
+                            background: status === 'LEAVE' ? '#BA7517' : '#fff',
+                            color: status === 'LEAVE' ? '#fff' : '#6b5d48',
+                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                          }}>请假</button>
+                        {lessonDetail?.isSystemFirstPeriod && (
+                          <button type="button"
+                            className={mealStudentIds.has(s.studentId) ? 'is-active is-meal' : ''}
+                            disabled={intensiveSettlementLocked || isLeave}
+                            onClick={() => toggleMeal(s.studentId)}
+                            style={{
+                              minWidth: 44, minHeight: 36, borderRadius: 8, border: '1px solid',
+                              borderColor: mealStudentIds.has(s.studentId) ? '#9A4622' : '#e5e0d8',
+                              background: mealStudentIds.has(s.studentId) ? '#9A4622' : '#fff',
+                              color: mealStudentIds.has(s.studentId) ? '#fff' : '#6b5d48',
+                              fontSize: 12, fontWeight: 600, cursor: isLeave ? 'not-allowed' : 'pointer',
+                              opacity: isLeave ? 0.4 : 1,
+                            }}>🍚</button>
+                        )}
                       </div>
                     </div>
                   )

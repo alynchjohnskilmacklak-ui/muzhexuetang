@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { notificationReadData } from '@/lib/notification-read-state'
 
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const prisma = await getRequestPrisma()
@@ -18,7 +19,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
 
   await prisma.notification.update({
     where: { id },
-    data: { readAt: new Date(), read: true },
+    data: notificationReadData(),
   })
   return NextResponse.json({ success: true })
 })

@@ -1,4 +1,5 @@
 import type { FeedbackArchiveItem, FeedbackArchiveResult } from './archive'
+import type { AdminLearningReport } from '@/lib/student-growth/admin-report'
 import {
   getParentFeedbackSections,
   parentRatingLabel,
@@ -51,6 +52,54 @@ export type ParentFeedbackPdfResult = {
 export type ParentFeedbackPdfOptions = {
   onPageRendered?: (dataUrl: string, pageNumber: number) => void
   imageLoader?: (request: ParentPdfImageRequest) => Promise<LoadedFeedbackImage>
+  learningReport?: AdminLearningReport
+}
+
+export function getAdminLearningReportSections(report: AdminLearningReport) {
+  const gender = ({ MALE: '男', FEMALE: '女' } as Record<string, string>)[report.student.gender?.toUpperCase() || ''] || '未填写'
+  return [
+    {
+      title: '学生信息与课程',
+      lines: [
+        `姓名：${report.student.name}    年级：${report.student.grade || '未填写'}    性别：${gender}`,
+        `学校：${report.student.school || '未填写'}    主教师：${report.student.mainTeacher || '未分配'}`,
+        `家长：${report.student.parentName || '未填写'}    在读课程：${report.student.courses.join('、') || '暂无在读课程'}`,
+      ],
+    },
+    {
+      title: '本期学习概况',
+      lines: [
+        `统计时间：${report.period.from} 至 ${report.period.to}`,
+        `出勤率：${report.overview.attendanceRate === null ? '暂无考勤' : `${report.overview.attendanceRate}%`}    课堂反馈：${report.overview.feedbackCount} 条    涉及学科：${report.overview.subjectCount} 门`,
+        `档案登记课时：${report.overview.totalHours} 小时    作业完成率：${report.overview.homeworkDoneRate === null ? '暂无记录' : `${report.overview.homeworkDoneRate}%`}`,
+        report.mastery.total ? `试卷知识点掌握：已掌握 ${report.mastery.masteredPct}%、需复习 ${report.mastery.reviewPct}%、薄弱 ${report.mastery.weakPct}%` : '试卷知识点掌握：暂无题目记录',
+      ],
+    },
+    {
+      title: '本期成绩记录',
+      lines: report.grades.length
+        ? report.grades.map((grade) => `${grade.date}  ${grade.subject}  ${grade.assessment}：${grade.score}/${grade.fullScore} 分（得分率 ${grade.percentage}%）`)
+        : ['本期暂无成绩记录'],
+    },
+    {
+      title: '当前学习目标与薄弱点',
+      lines: [
+        ...(report.goals.length ? report.goals.map((goal) => `${goal.subject}：${goal.text}（${goal.achieved ? '已达成' : '进行中'}）`) : ['暂无学习目标']),
+        ...(report.weaknesses.length ? report.weaknesses.map((item) => `需关注：${item.topic}（记录 ${item.mistakeCount} 次）${item.suggestion ? `；建议：${item.suggestion}` : ''}`) : ['暂无薄弱点记录']),
+      ],
+    },
+    {
+      title: '本期教师阶段小结',
+      lines: report.teacherSummaries.length
+        ? report.teacherSummaries.flatMap((summary) => [
+            `${summary.teacher || '任课教师'} · ${summary.period}`,
+            summary.text,
+            ...(summary.suggestions ? [`后续建议：${summary.suggestions}`] : []),
+            '',
+          ])
+        : ['本期暂无已发布的阶段小结'],
+    },
+  ]
 }
 
 function subjectRank(subject: string) {
@@ -142,7 +191,7 @@ function fitText(context: CanvasRenderingContext2D, value: string, maxWidth: num
   return result ? `${result}…` : ''
 }
 
-function drawCover(context: CanvasRenderingContext2D, archive: FeedbackArchiveResult, learningDays: number) {
+function drawCover(context: CanvasRenderingContext2D, archive: FeedbackArchiveResult, learningDays: number, report?: AdminLearningReport) {
   context.fillStyle = COLORS.canvas
   context.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT)
   context.fillStyle = COLORS.primary
@@ -160,10 +209,10 @@ function drawCover(context: CanvasRenderingContext2D, archive: FeedbackArchiveRe
   context.fillStyle = COLORS.ink
   context.font = '700 64px "Noto Sans SC", "Microsoft YaHei", sans-serif'
   context.fillText(`${archive.student.name}的`, 82, 330)
-  context.fillText('课堂学习反馈', 82, 415)
+  context.fillText(report ? '完整学情报告' : '课堂学习反馈', 82, 415)
   context.fillStyle = COLORS.muted
   context.font = '400 30px "Noto Sans SC", "Microsoft YaHei", sans-serif'
-  context.fillText('按日期整理每一科老师的真实课堂反馈。', 82, 486)
+  context.fillText(report ? '学习概况、阶段记录与真实课堂反馈。' : '按日期整理每一科老师的真实课堂反馈。', 82, 486)
 
   context.fillStyle = COLORS.surface
   roundedRect(context, 82, 620, CONTENT_WIDTH, 440, 28)
@@ -176,7 +225,7 @@ function drawCover(context: CanvasRenderingContext2D, archive: FeedbackArchiveRe
   const latestDate = archive.summary.latestFeedbackDate?.slice(0, 10) || '暂无记录'
   const rows = [
     ['年级', archive.student.grade || '未设置'],
-    ['反馈周期', `${firstDate} 至 ${latestDate}`],
+    [report ? '报告周期' : '反馈周期', report ? `${report.period.from} 至 ${report.period.to}` : `${firstDate} 至 ${latestDate}`],
     ['学习日', `${learningDays} 天`],
     ['课堂反馈', `${archive.summary.totalCount} 次`],
     ['涉及学科', `${archive.summary.subjectCount} 个`],
@@ -303,6 +352,7 @@ export async function renderParentFeedbackPdf(
   let pageNumber = 0
   let y = 0
   let currentDay: ParentFeedbackDay | null = null
+  let pageHeading = '课堂学习反馈'
   let embeddedImages = 0
   let skippedImages = 0
 
@@ -332,7 +382,7 @@ export async function renderParentFeedbackPdf(
     context.fillStyle = COLORS.muted
     context.font = '500 21px "Noto Sans SC", "Microsoft YaHei", sans-serif'
     context.textAlign = 'left'
-    context.fillText(`${archive.student.name} · 课堂学习反馈`, PAGE_MARGIN, 58)
+    context.fillText(`${archive.student.name} · ${pageHeading}`, PAGE_MARGIN, 58)
     y = 92
     if (day) {
       context.fillStyle = COLORS.primarySoft
@@ -387,10 +437,37 @@ export async function renderParentFeedbackPdf(
     drawSubjectHeader(item, true)
   }
 
-  drawCover(context, archive, days.length)
+  drawCover(context, archive, days.length, options.learningReport)
   pageNumber = 1
   pageOpen = true
   commitPage()
+
+  if (options.learningReport) {
+    pageHeading = '学情概览'
+    startContentPage(null)
+    for (const section of getAdminLearningReportSections(options.learningReport)) {
+      ensureSpace(86)
+      context.fillStyle = COLORS.primary
+      context.font = '700 31px "Noto Sans SC", "Microsoft YaHei", sans-serif'
+      context.fillText(section.title, PAGE_MARGIN, y + 31)
+      y += 62
+      for (const entry of section.lines) {
+        context.font = '400 25px "Noto Sans SC", "Microsoft YaHei", sans-serif'
+        const lines = wrapText(context, entry, CONTENT_WIDTH - 28)
+        for (const line of lines) {
+          ensureSpace(42)
+          context.fillStyle = COLORS.ink
+          context.font = '400 25px "Noto Sans SC", "Microsoft YaHei", sans-serif'
+          context.fillText(line, PAGE_MARGIN + 10, y + 27)
+          y += 38
+        }
+        y += 12
+      }
+      y += 25
+    }
+    if (pageOpen) commitPage()
+    pageHeading = '课堂学习反馈'
+  }
 
   if (!days.length) {
     startContentPage(null)

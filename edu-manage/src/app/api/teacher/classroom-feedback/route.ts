@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
+import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { triggerFeedbackBonus } from '@/lib/teacher-salary'
 import { apiHandler } from '@/lib/api-handler'
 import type { Prisma } from '@prisma/client'
@@ -12,6 +12,8 @@ import {
   parseFeedbackCourseType,
   resolveTeacherFeedbackCreationScope,
 } from '@/lib/classroom-feedback/access'
+import { createClassroomFeedbackWithSideEffects } from '@/lib/classroom-feedback/create'
+import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,6 +54,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const status = body.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT'
     const lessonContent = normalizeLessonContent(body.lessonContent)
     const knowledgePoints = asStringArray(body.knowledgePoints, 10)
+    const knowledgeCard = parseStoredKnowledgeCard(body.knowledgeCard)
     const imageUrls = asStringArray(body.imageUrls, 9)
     const studentIds = asStringArray(body.studentIds)
     const summary = typeof body.summary === 'string' ? body.summary.trim().slice(0, 500) : ''
@@ -77,6 +80,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       requestedStudentIds: studentIds,
       expandClassTarget: targetType === 'CLASS',
       submittedCourseType: feedbackCourseTypeInput,
+      requestedSubject: typeof body.subject === 'string' ? body.subject : null,
     })
     if (!scope.allowed) {
       const message = scope.reason === 'group'
@@ -94,7 +98,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const resolvedStudentRatings = filterStudentRatingsForStudents(studentRatings, students.map((student) => student.id))
 
     const feedback = await prisma.$transaction(async (tx) => {
-      const created = await tx.classroomFeedback.create({
+      return createClassroomFeedbackWithSideEffects(tx, {
         data: {
           termId: scope.termId,
           teacherId: teacher.id,
@@ -106,11 +110,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
           studentIds: students.map((student) => student.id),
           lessonContent: lessonContent || null,
           knowledgePoints,
+          knowledgeCard: knowledgeCard as Prisma.InputJsonValue || undefined,
           summary: summary || null,
           mood: mood || null,
           tags: Array.isArray(tags) ? tags : [],
           badge: badge || null,
-          overallComment: overallComment || null,
+          overallComment: typeof overallComment === 'string' ? overallComment.trim().slice(0, 1400) || null : null,
           homework,
           imageUrls,
           imageTypes,
@@ -118,54 +123,17 @@ export const POST = apiHandler(async (req: NextRequest) => {
           status,
           notifySent: status === 'PUBLISHED',
         },
+        actorUserId: user.id,
+        teacherName: teacher.name,
+        students,
+        knowledgePoints,
+        imageUrls,
+        status,
+        source: 'teacher',
+        detailFallback: '课堂反馈',
+        notificationContent: summary || knowledgePoints.join('、') || '课堂资料已更新',
+        metadata: { targetType },
       })
-
-      // 课堂反馈里的闪光徽章需要同步到成就徽章表，家长成长页才能统计到。
-      if (status === 'PUBLISHED' && badge) {
-        for (const student of students) {
-          await tx.achievementBadge.create({
-            data: {
-              studentId: student.id,
-              teacherId: teacher.id,
-              badgeType: badge,
-              description: summary || overallComment || lessonContent || null,
-            },
-          })
-        }
-      }
-
-      if (status === 'PUBLISHED') {
-        for (const student of students) {
-          const parentUserId = student.parentId || student.parentUserId
-          if (!parentUserId) continue
-          await tx.notification.create({
-            data: {
-              userId: parentUserId,
-              type: 'CLASSROOM_FEEDBACK',
-              title: `${teacher.name}老师发布了课堂反馈`,
-              content: `${student.name}: ${summary || knowledgePoints.join('、') || '课堂资料已更新'}`.slice(0, 80),
-              link: '/parent/class-feedback',
-              relatedType: 'CLASSROOM_FEEDBACK',
-              relatedId: created.id,
-              href: `/parent/class-feedback/${created.id}`,
-            },
-          })
-        }
-      }
-
-      await tx.activityLog.create({
-        data: {
-          userId: user.id,
-          teacherId: teacher.id,
-          action: status === 'PUBLISHED' ? TEACHER_LOG_ACTIONS.CLASSROOM_FEEDBACK_PUBLISH : TEACHER_LOG_ACTIONS.CLASSROOM_FEEDBACK_DRAFT,
-          detail: `${students.length}名学员 · ${knowledgePoints.join('/') || '课堂反馈'}`,
-          entityType: 'ClassroomFeedback',
-          entityId: created.id,
-          metadata: { status, targetType, studentCount: students.length, imageCount: imageUrls.length, feedbackGroupId, feedbackCourseType },
-        },
-      })
-
-      return created
     })
 
     const bonus = status === 'PUBLISHED'

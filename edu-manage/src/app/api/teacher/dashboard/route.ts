@@ -7,8 +7,8 @@ export const dynamic = 'force-dynamic'
 
 export const GET = apiHandler(async () => {
   try {
-    const { teacher } = await requireCurrentTeacher()
-    const dashboard = await getTeacherDashboardData(teacher.id)
+    const { user, teacher, prisma } = await requireCurrentTeacher()
+    const dashboard = await getTeacherDashboardData(teacher.id, prisma, user.id)
 
     return NextResponse.json({
       teacher: { id: teacher.id, name: teacher.name, avatar: teacher.avatar, subjects: teacher.subjects, tierLevel: teacher.tierLevel },

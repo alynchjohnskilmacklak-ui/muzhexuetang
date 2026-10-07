@@ -182,7 +182,6 @@ async function ensureVolunteerStepImages(guideId: string) {
   for (const step of steps) {
     const defaultUrl = STEP_IMAGE_MAP.get(step.order)
     if (!step.imageUrl && defaultUrl) {
-      console.log(`[volunteer] backfilling imageUrl for step order=${step.order}: ${defaultUrl}`)
       await prisma.guideStep.update({ where: { id: step.id }, data: { imageUrl: defaultUrl } })
       updated = true
     }

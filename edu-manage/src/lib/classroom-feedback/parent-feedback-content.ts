@@ -1,8 +1,16 @@
-import type { FeedbackArchiveItem } from './archive'
-
 export type ParentFeedbackSection = {
   label: string
   content: string
+}
+
+export type ParentFeedbackContentInput = {
+  lessonContent?: unknown
+  overallComment?: unknown
+  summary?: unknown
+  knowledgePoints?: unknown
+  homework?: unknown
+  tags?: unknown
+  studentRating?: unknown
 }
 
 export function feedbackValue(value: unknown): string | null {
@@ -20,7 +28,11 @@ export function feedbackValue(value: unknown): string | null {
   return String(value).trim() || null
 }
 
-function extractStructuredSections(item: FeedbackArchiveItem) {
+function extractStructuredSections(item: ParentFeedbackContentInput) {
+  const article = typeof item.overallComment === 'string' ? articleSections(item.overallComment) : null
+  if (article) return new Map<string, string>([
+    ['本节课学习内容', article[0]], ['课堂反馈', article[1]], ['孩子掌握情况', article[2]],
+  ])
   const source = [item.overallComment, item.summary].filter(Boolean).join('\n')
   const labels = ['课堂表现', '知识掌握', '存在问题', '后续建议'] as const
   const found = new Map<string, string>()
@@ -49,13 +61,19 @@ export function parentRatingLabel(value: unknown) {
     ?? rating
 }
 
-export function getParentFeedbackSections(item: FeedbackArchiveItem) {
+export function getParentFeedbackSections(item: ParentFeedbackContentInput) {
   const structured = extractStructuredSections(item)
   const sections: ParentFeedbackSection[] = []
 
-  addSection(sections, '本节课学习内容', item.lessonContent)
+  if (!structured.has('本节课学习内容')) addSection(sections, '本节课学习内容', item.lessonContent)
 
-  if (structured.size) {
+  if (structured.has('本节课学习内容')) {
+    // 三段内容（学习内容/课堂反馈/掌握情况）合并为一个"课堂反馈"卡，正文即完整反馈
+    const combined = [structured.get('本节课学习内容'), structured.get('课堂反馈'), structured.get('孩子掌握情况')]
+      .filter((item): item is string => Boolean(item))
+      .join('\n')
+    addSection(sections, '课堂反馈', combined)
+  } else if (structured.size) {
     addSection(sections, '课堂表现', structured.get('课堂表现'))
     addSection(sections, '孩子掌握情况', structured.get('知识掌握'))
     addSection(sections, '存在问题', structured.get('存在问题'))
@@ -67,11 +85,12 @@ export function getParentFeedbackSections(item: FeedbackArchiveItem) {
     }
   }
 
-  if (!structured.get('知识掌握')) addSection(sections, '知识点', item.knowledgePoints)
+  if (!structured.get('知识掌握') && !structured.get('孩子掌握情况')) addSection(sections, '知识点', item.knowledgePoints)
   if (!structured.get('后续建议')) addSection(sections, '课后安排', item.homework)
   addSection(sections, '课堂标签', item.tags)
-  if (!structured.get('知识掌握') && !feedbackValue(item.summary)) {
+  if (!structured.get('知识掌握') && !structured.get('孩子掌握情况') && !feedbackValue(item.summary)) {
     addSection(sections, '孩子掌握情况', parentRatingLabel(item.studentRating))
   }
   return sections
 }
+import { articleSections } from './ai-article'

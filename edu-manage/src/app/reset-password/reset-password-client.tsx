@@ -88,7 +88,7 @@ export function ResetPasswordClient({ token }: { token: string }) {
                   prefix={<LockOutlined />}
                   size="large"
                   autoComplete="new-password"
-                  placeholder={`至少 ${PASSWORD_MIN_LENGTH} 位，包含字母和数字`}
+                  placeholder={`至少 ${PASSWORD_MIN_LENGTH} 位，包含英文字母`}
                 />
               </Form.Item>
 
@@ -96,7 +96,7 @@ export function ResetPasswordClient({ token }: { token: string }) {
                 <Text strong>安全要求</Text>
                 <ul>
                   <li className={password.length >= PASSWORD_MIN_LENGTH ? styles.passed : ''}>至少 {PASSWORD_MIN_LENGTH} 位</li>
-                  <li className={/[A-Za-z]/.test(password) && /\d/.test(password) ? styles.passed : ''}>同时包含英文字母和数字</li>
+                  <li className={/[A-Za-z]/.test(password) ? styles.passed : ''}>包含英文字母</li>
                   <li className={password && !/\s/.test(password) ? styles.passed : ''}>不包含空格或常见弱密码</li>
                 </ul>
               </div>

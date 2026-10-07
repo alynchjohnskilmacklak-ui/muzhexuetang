@@ -14,20 +14,20 @@ export default async function ParentNotificationsPage() {
   const userId = (session.user as { id: string }).id
   const db = await getRequestPrisma()
 
-  const notifications = await db.notification.findMany({
-    where: { userId, ...visibleNotificationWhere },
-    orderBy: { createdAt: 'desc' },
-    take: 150,
-  })
-
-  const filteredNotifications = notifications.slice(0, 100)
-
-  // Mark all as read counter
-  const unreadCount = filteredNotifications.filter(n => !n.read).length
+  const [notifications, unreadCount] = await Promise.all([
+    db.notification.findMany({
+      where: { userId, ...visibleNotificationWhere },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    }),
+    db.notification.count({
+      where: { userId, read: false, ...visibleNotificationWhere },
+    }),
+  ])
 
   return (
     <ParentNotificationsClient
-      notifications={JSON.parse(JSON.stringify(filteredNotifications))}
+      notifications={JSON.parse(JSON.stringify(notifications))}
       unreadCount={unreadCount}
       userId={userId}
     />

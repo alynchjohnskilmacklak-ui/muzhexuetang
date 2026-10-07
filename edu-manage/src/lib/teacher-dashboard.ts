@@ -1,11 +1,13 @@
 import { getRequestPrisma } from '@/lib/prisma'
 import type { PrismaClient } from '@prisma/client'
-import { teacherLessonWhere, teacherStudentWhere, todayRange, weekRange } from '@/lib/teacher-portal'
+import { teacherLessonScopeWhere, teacherStudentWhere, todayRange, weekRange } from '@/lib/teacher-portal'
 import { visibleStudentWhere } from '@/lib/business-visibility'
 import { minutesToHours, roundHours } from '@/lib/hours'
 import { buildLatestFeedbackDateByStudent } from '@/lib/teacher-feedback-freshness'
 import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { localDateColumnValue, todayLocal } from '@/lib/date/local-day'
+import { attendanceKey, isoWeekday } from '@/lib/study-hall/domain'
 
 function atTime(date: Date, time: string) {
   const [hour, minute] = time.split(':').map(Number)
@@ -39,17 +41,21 @@ function daysSince(date?: Date | null) {
   return Math.floor((Date.now() - date.getTime()) / 86400000)
 }
 
-export async function getTeacherDashboardData(teacherId: string, prismaClient?: PrismaClient) {
+export async function getTeacherDashboardData(teacherId: string, prismaClient?: PrismaClient, teacherUserId?: string) {
   const prisma = prismaClient ?? await getRequestPrisma()
   const now = new Date()
   const { start: today, end: todayEnd } = todayRange(now)
   const { start: weekStart, end: weekEnd } = weekRange(now)
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  const teacher = await prisma.teacher.findUnique({ where: { id: teacherId }, select: { division: true } })
+  const teacher = await prisma.teacher.findUnique({ where: { id: teacherId }, select: { division: true, user: { select: { id: true } } } })
   const activeTerm = teacher ? await getActiveAcademicTerm(prisma, teacher.division) : null
   const termId = activeTerm?.id || '__NO_ACTIVE_TERM__'
-  const lessonWhere = teacherLessonWhere(teacherId, termId)
+  const lessonWhere = await teacherLessonScopeWhere(prisma, teacherId, termId)
   const studentWhere = teacherStudentWhere(teacherId, termId)
+  const todayKey = todayLocal()
+  const todayDate = localDateColumnValue(todayKey)
+  const todayWeekday = isoWeekday(todayKey)
+  const resolvedTeacherUserId = teacherUserId || teacher?.user?.id
 
   const [
     todayLessons,
@@ -63,6 +69,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     pendingLeaveRequests,
     todayPublishedFeedbacks,
     weekPublishedFeedbacks,
+    weekTeacherMessages,
   ] = await Promise.all([
     prisma.classLesson.findMany({
       where: { ...lessonWhere, lessonDate: { gte: today, lt: todayEnd } },
@@ -73,7 +80,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
             room: true,
             enrollments: {
               where: { status: 'ACTIVE', student: visibleStudentWhere },
-              include: { student: { select: { id: true, name: true, grade: true, school: true } } },
+              include: { student: { select: { id: true, name: true, grade: true, school: true, membershipLevel: true } } },
             },
           },
         },
@@ -165,7 +172,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       },
       include: {
         student: { select: { id: true, name: true } },
-        schedule: { select: { startTime: true, course: { select: { name: true } } } },
+        lesson: { select: { startTime: true, group: { select: { course: { select: { name: true } } } } } },
       },
       orderBy: { createdAt: 'desc' },
       take: 4,
@@ -182,6 +189,10 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
         createdAt: true,
         classLesson: { select: { groupId: true } },
       },
+    }),
+    prisma.teacherMessage.findMany({
+      where: { teacherId, createdAt: { gte: weekStart, lt: weekEnd } },
+      select: { id: true, readAt: true },
     }),
   ])
 
@@ -282,6 +293,79 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
   })
   const unreadParentComments = unreadPaperComments + unreadPostComments
 
+  const [studyHallClasses, studyHallClosures] = activeTerm && resolvedTeacherUserId ? await Promise.all([
+    prisma.studyHallClass.findMany({
+      where: {
+        termId,
+        status: 'ACTIVE',
+        weekdays: { has: todayWeekday },
+        teachers: { some: { teacherId: resolvedTeacherUserId, active: true } },
+      },
+      select: {
+        id: true,
+        name: true,
+        scheduleType: true,
+        students: {
+          where: { status: 'ACTIVE' },
+          select: { studentId: true, joinedAt: true, leftAt: true },
+        },
+        sessions: {
+          where: { active: true, weekday: todayWeekday },
+          select: { id: true },
+        },
+        records: {
+          where: { studyDate: todayDate },
+          take: 1,
+          select: {
+            entries: {
+              select: { studentId: true, attendanceKey: true, attendanceStatus: true, homeworkStatus: true },
+            },
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    }),
+    prisma.studyHallClosure.findMany({
+      where: {
+        termId,
+        startDate: { lte: todayDate },
+        endDate: { gte: todayDate },
+      },
+      select: { classId: true },
+    }),
+  ]) : [[], []]
+
+  const globallyClosed = studyHallClosures.some((closure) => !closure.classId)
+  const closedClassIds = new Set(studyHallClosures.flatMap((closure) => closure.classId ? [closure.classId] : []))
+  const studyHallPending = globallyClosed ? [] : studyHallClasses
+    .filter((studyClass) => !closedClassIds.has(studyClass.id))
+    .map((studyClass) => {
+      const activeStudents = studyClass.students.filter((member) => (
+        member.joinedAt <= todayDate && (!member.leftAt || member.leftAt >= todayDate)
+      ))
+      const targetKeys = studyClass.scheduleType === 'WEEKEND'
+        ? studyClass.sessions.map((session) => attendanceKey(session.id))
+        : ['DAY']
+      const entries = studyClass.records[0]?.entries || []
+      const expected = activeStudents.length * targetKeys.length
+      const attendanceDone = entries.filter((entry) => activeStudents.some((member) => member.studentId === entry.studentId)
+        && targetKeys.includes(entry.attendanceKey)
+        && ['PRESENT', 'PERSONAL_LEAVE', 'ABSENT'].includes(entry.attendanceStatus)).length
+      const homeworkDone = entries.filter((entry) => activeStudents.some((member) => member.studentId === entry.studentId)
+        && targetKeys.includes(entry.attendanceKey)
+        && entry.homeworkStatus !== 'NOT_RECORDED').length
+      return {
+        ...studyClass,
+        expected,
+        attendancePending: Math.max(0, expected - attendanceDone),
+        homeworkPending: Math.max(0, expected - homeworkDone),
+      }
+    })
+    .filter((studyClass) => studyClass.expected > 0)
+
+  const pendingStudyHallAttendance = studyHallPending.reduce((sum, item) => sum + item.attendancePending, 0)
+  const pendingStudyHallHomework = studyHallPending.reduce((sum, item) => sum + item.homeworkPending, 0)
+
   const todos = [
     ...decoratedTodayLessons
       .filter((lesson) => lesson.statusLabel === '待上课' || lesson.statusLabel === '上课中')
@@ -314,8 +398,30 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       status: '待发反馈',
       tone: 'purple',
       actionLabel: '发布反馈',
-      href: `/teacher/classroom-feedback?lessonId=${lesson.id}`,
+      href: `/teacher/feedback?lessonId=${lesson.id}`,
     })),
+    ...studyHallPending.flatMap((studyClass) => [
+      ...(studyClass.attendancePending ? [{
+        id: `study-hall-attendance-${studyClass.id}`,
+        type: 'study-hall-attendance',
+        title: `${studyClass.name} · 作业班考勤`,
+        description: `今天还有 ${studyClass.attendancePending} 项考勤未完成`,
+        status: '待考勤',
+        tone: 'red',
+        actionLabel: '去考勤',
+        href: `/teacher/study-hall?mode=attendance&classId=${studyClass.id}&date=${todayKey}`,
+      }] : []),
+      ...(studyClass.homeworkPending ? [{
+        id: `study-hall-homework-${studyClass.id}`,
+        type: 'study-hall-homework',
+        title: `${studyClass.name} · 作业登记`,
+        description: `今天还有 ${studyClass.homeworkPending} 项作业未登记`,
+        status: '待登记',
+        tone: 'orange',
+        actionLabel: '登记作业',
+        href: `/teacher/study-hall?mode=homework&classId=${studyClass.id}&date=${todayKey}`,
+      }] : []),
+    ]),
     ...recentDraftPapers.slice(0, 3).map((paper) => ({
       id: `paper-${paper.id}`,
       type: 'paper',
@@ -330,86 +436,13 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       id: `leave-${request.id}`,
       type: 'leave',
       title: `${request.student.name} 请假申请`,
-      description: `${request.schedule?.course?.name || '未指定课程'} · ${request.reason}`,
+      description: `${request.lesson?.group.course.name || '未指定课程'} · ${request.reason}`,
       status: '待审批',
       tone: 'brown',
       actionLabel: '去审批',
       href: '/teacher/leave',
     })),
   ].slice(0, 8)
-
-  const studentWarnings = students.flatMap((student) => {
-    const activeEnrollments = student.enrollments.filter((enrollment) => enrollment.status === 'ACTIVE')
-    const hasPaidEnrollment = activeEnrollments.some((enrollment) => Number(enrollment.totalHours || 0) > 0)
-    const remainHours = roundHours(activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.remainHours || 0), 0))
-    const lastFeedbackAt = latestFeedbackDateByStudent.get(student.id)
-    const firstEnrolledAt = activeEnrollments
-      .map((enrollment) => enrollment.enrolledAt)
-      .sort((a, b) => a.getTime() - b.getTime())[0]
-    const daysFromEnroll = daysSince(firstEnrolledAt)
-    const recentBadAttendance = student.attendances.filter((attendance) => ['ABSENT', 'LEAVE'].includes(attendance.status)).length
-    const hasWeakPaper = student.examPapers.some((paper) => paper.questions.some((question) => question.mastery === 'NEEDS_PRACTICE'))
-    const warnings = []
-
-    if (hasPaidEnrollment && remainHours <= 2) {
-      warnings.push({
-        id: `${student.id}-hours`,
-        studentId: student.id,
-        name: student.name,
-        grade: student.grade || '-',
-        school: student.school || '-',
-        type: '课时不足',
-        reason: `剩余 ${remainHours} 课时`,
-        tone: 'red',
-        actionLabel: '查看档案',
-        href: `/teacher/students/${student.id}`,
-      })
-    }
-    if (daysFromEnroll >= 3 && daysSince(lastFeedbackAt) > 7) {
-      warnings.push({
-        id: `${student.id}-feedback`,
-        studentId: student.id,
-        name: student.name,
-        grade: student.grade || '-',
-        school: student.school || '-',
-        type: '长期未反馈',
-        reason: lastFeedbackAt ? `${daysSince(lastFeedbackAt)} 天未发布课堂反馈` : '从未发布课堂反馈',
-        tone: 'purple',
-        actionLabel: '发布反馈',
-        href: '/teacher/feedback',
-      })
-    }
-    if (recentBadAttendance >= 2) {
-      warnings.push({
-        id: `${student.id}-attendance`,
-        studentId: student.id,
-        name: student.name,
-        grade: student.grade || '-',
-        school: student.school || '-',
-        type: '出勤需关注',
-        reason: `最近 3 次考勤中缺勤/请假 ${recentBadAttendance} 次`,
-        tone: 'orange',
-        actionLabel: '查看档案',
-        href: `/teacher/students/${student.id}`,
-      })
-    }
-    if (hasWeakPaper) {
-      warnings.push({
-        id: `${student.id}-paper`,
-        studentId: student.id,
-        name: student.name,
-        grade: student.grade || '-',
-        school: student.school || '-',
-        type: '成绩需关注',
-        reason: '最近试卷存在需要练习的知识点',
-        tone: 'blue',
-        actionLabel: '查看档案',
-        href: `/teacher/students/${student.id}`,
-      })
-    }
-
-    return warnings
-  }).slice(0, 8)
 
   const feedbackTasks = [
     ...pendingFeedbackLessons.map((lesson) => ({
@@ -419,7 +452,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       description: `${lesson.startTime}-${lesson.endTime} · ${lesson.group.course.name}`,
       tone: 'purple',
       actionLabel: '发布课堂反馈',
-      href: `/teacher/classroom-feedback?lessonId=${lesson.id}`,
+      href: `/teacher/feedback?lessonId=${lesson.id}`,
     })),
     ...recentDraftPapers.slice(0, 4).map((paper) => ({
       id: `draft-paper-${paper.id}`,
@@ -483,6 +516,71 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
   )
   const monthlyHours = roundHours(monthLessons.reduce((sum, lesson) => sum + minutesToHours(lesson.group.lessonMinutes), 0))
 
+  // ===== 教师端动态图表：近 6 个月课时/薪酬 + 出勤，按「月 × 4 周」 =====
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
+  const [monthAttendanceForTrend, salaryTxForTrend, hoursTxForTrend] = await Promise.all([
+    prisma.classLesson.findMany({
+      where: { ...lessonWhere, lessonDate: { gte: sixMonthsAgo } },
+      select: { lessonDate: true, attendances: { select: { status: true } } },
+    }),
+    prisma.teacherSalaryTransaction.findMany({
+      where: { teacherId, createdAt: { gte: sixMonthsAgo }, deletedAt: null },
+      select: { createdAt: true, amount: true },
+    }),
+    prisma.attendance.findMany({
+      where: { lesson: { ...lessonWhere, lessonDate: { gte: sixMonthsAgo } }, deletedAt: null },
+      select: { hoursDeducted: true, lesson: { select: { lessonDate: true } } },
+    }),
+  ])
+  const trendMonthKeys: string[] = []
+  for (let i = 5; i >= 0; i--) {
+    const trendDate = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    trendMonthKeys.push(trendDate.getFullYear() + '-' + trendDate.getMonth())
+  }
+  const trendLabels = trendMonthKeys.map((key) => (Number(key.split('-')[1]) + 1) + '月')
+  // 月内按 4 周分桶：1-7 第1周 / 8-14 第2周 / 15-21 第3周 / 22-31 第4周
+  const monthWeekKey = (d: Date): string => `${d.getFullYear()}-${d.getMonth()}-${Math.min(3, Math.floor((d.getDate() - 1) / 7))}`
+  const allMonthWeekKeys = trendMonthKeys.flatMap((key) => Array.from({ length: 4 }, (_, w) => `${key}-${w}`))
+  const hourBuckets = new Map<string, number>(allMonthWeekKeys.map((key) => [key, 0]))
+  for (const item of hoursTxForTrend) {
+    if (!item.lesson?.lessonDate) continue
+    const key = monthWeekKey(item.lesson.lessonDate)
+    if (hourBuckets.has(key)) hourBuckets.set(key, (hourBuckets.get(key) || 0) + (item.hoursDeducted || 0))
+  }
+  const payBuckets = new Map<string, number>(allMonthWeekKeys.map((key) => [key, 0]))
+  for (const tx of salaryTxForTrend) {
+    const key = monthWeekKey(tx.createdAt)
+    if (payBuckets.has(key)) payBuckets.set(key, (payBuckets.get(key) || 0) + tx.amount)
+  }
+  const salaryByMonth = trendMonthKeys.map((key, index) => ({
+    key,
+    label: trendLabels[index],
+    weeks: Array.from({ length: 4 }, (_, w) => ({
+      label: '第' + (w + 1) + '周',
+      hours: Number((hourBuckets.get(`${key}-${w}`) || 0).toFixed(1)),
+      pay: Math.round(payBuckets.get(`${key}-${w}`) || 0),
+    })),
+  }))
+  const attendanceBuckets = new Map<string, { present: number; total: number }>()
+  for (const lesson of monthAttendanceForTrend) {
+    const key = monthWeekKey(lesson.lessonDate)
+    const bucket = attendanceBuckets.get(key) || { present: 0, total: 0 }
+    bucket.total += lesson.attendances.length
+    bucket.present += lesson.attendances.filter((item) => item.status === 'PRESENT').length
+    attendanceBuckets.set(key, bucket)
+  }
+  const attendanceByMonth = trendMonthKeys.map((key, index) => ({
+    key,
+    label: trendLabels[index],
+    weeks: Array.from({ length: 4 }, (_, w) => {
+      const bucket = attendanceBuckets.get(`${key}-${w}`)
+      return {
+        label: '第' + (w + 1) + '周',
+        rate: bucket && bucket.total > 0 ? Math.round((bucket.present / bucket.total) * 100) : null,
+      }
+    }),
+  }))
+
   return {
     heroStats: {
       todayLessons: todayLessons.length,
@@ -491,30 +589,38 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       pendingPapers: recentDraftPapers.length,
       pendingLeave: pendingLeaveRequests.length,
       totalTodos: todos.length + unreadParentComments,
+      pendingStudyHallAttendance,
+      pendingStudyHallHomework,
     },
     todayLessons: decoratedTodayLessons,
     todos,
-    studentWarnings,
     feedbackTasks,
     weekCompletion: {
       attendance: { done: attendanceDone, total: endedWeekLessons.length, percent: percent(attendanceDone, endedWeekLessons.length) },
       classroomFeedback: { done: classroomDone, total: feedbackExpectedGroupIds.size, percent: percent(classroomDone, feedbackExpectedGroupIds.size) },
-      paperPush: { done: paperDone, total: weekPapers.length, percent: percent(paperDone, weekPapers.length) },
+      parentMessages: {
+        done: weekTeacherMessages.filter((message) => message.readAt).length,
+        total: weekTeacherMessages.length,
+        percent: percent(weekTeacherMessages.filter((message) => message.readAt).length, weekTeacherMessages.length),
+      },
     },
     quickActions: [
       { label: '提交今日考勤', desc: '完成课后考勤与课时结算', href: '/teacher/attendance', tone: 'orange' },
-      { label: '处理请假审批', desc: '批准或驳回家长请假申请', href: '/teacher/leave', tone: 'brown' },
-      { label: '上传试卷', desc: '上传试卷并推送给家长', href: '/teacher/papers', tone: 'green' },
-      { label: '发布课堂反馈', desc: '记录课堂内容与作业建议', href: '/teacher/classroom-feedback', tone: 'purple' },
-      { label: '发布表现反馈', desc: '同步学生近期学习状态', href: '/teacher/performance', tone: 'blue' },
+      { label: '我的课表', desc: '查看本周课表与上课安排', href: '/teacher/teaching-schedule', tone: 'green' },
+      { label: '薪酬福利', desc: '查看薪资流水与福利明细', href: '/teacher/compensation', tone: 'brown' },
+      { label: '仿真教学', desc: 'AI 仿真课堂辅助教学', href: '/teacher/ai', tone: 'green' },
+      { label: '发布课堂反馈', desc: '记录课堂内容与作业建议', href: '/teacher/feedback', tone: 'purple' },
+      { label: '家长留言', desc: '查看并回复家长留言', href: '/teacher/messages', tone: 'blue' },
       { label: '查看我的学生', desc: '查看课时、出勤与学习档案', href: '/teacher/students', tone: 'brown' },
-      { label: '打开 AI 助手', desc: '辅助备课、出题与讲解', href: '/teacher/ai', tone: 'dark' },
+      { label: '课程预告', desc: '查看即将开始的课程安排', href: '/teacher/lesson-previews', tone: 'dark' },
     ],
     pendingTasks: {
       unsubmittedAttendance: pendingAttendanceLessons.length,
       unpublishedPapers: recentDraftPapers.length,
       unreadParentComments,
       pendingLeave: pendingLeaveRequests.length,
+      pendingStudyHallAttendance,
+      pendingStudyHallHomework,
     },
     monthlyStats: {
       totalStudents: students.length,
@@ -522,9 +628,11 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       attendanceRate: percent(attendanceDone, endedWeekLessons.length),
       paperPublished: paperDone,
     },
+    attendanceByMonth,
+    salaryByMonth,
     weeklyRates: {
       attendance: { done: attendanceDone, total: endedWeekLessons.length },
-      papers: { done: paperDone, total: weekPapers.length },
+      parentMessages: { done: weekTeacherMessages.filter((message) => message.readAt).length, total: weekTeacherMessages.length },
       feedback: { done: weekFeedbackStudentIds.size, total: students.length },
     },
   }

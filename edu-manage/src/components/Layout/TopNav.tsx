@@ -28,7 +28,7 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
   const { data: unreadData } = useSWR(
     backgroundReady ? '/api/messages/unread-count' : null,
     (url: string) => fetch(url).then((r) => r.ok ? r.json() : { count: 0 }),
-    { refreshInterval: 5_000, revalidateOnFocus: true, revalidateOnReconnect: true },
+    { refreshInterval: 30_000, revalidateOnFocus: true, revalidateOnReconnect: true },
   )
   const unreadCount: number = unreadData?.count ?? 0
 
@@ -39,9 +39,6 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
 
   const userMenu = {
     items: [
-      { key: 'profile', icon: <UserOutlined />, label: '个人信息' },
-      { key: 'help', icon: <QuestionCircleOutlined />, label: '使用帮助', onClick: () => router.push('/dashboard?guide=1') },
-      { type: 'divider' as const },
       {
         key: 'logout',
         icon: <LogoutOutlined />,
@@ -59,7 +56,7 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
     return (
       <Dropdown menu={userMenu} placement="bottomRight" trigger={['click']}>
         <button type="button" aria-label="打开用户菜单" style={{ padding: 0, border: 0, background: 'transparent', cursor: 'pointer', borderRadius: '50%' }}>
-          <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: '#E8784A' }} />
+          <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: 'var(--color-role-admin)' }} />
         </button>
       </Dropdown>
     )
@@ -73,7 +70,7 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
         alignItems: 'center',
         justifyContent: 'space-between',
         borderBottom: '1px solid rgba(0,0,0,.06)',
-        height: 64,
+        height: 56,
         position: 'sticky',
         top: 0,
         zIndex: 100,
@@ -81,24 +78,23 @@ export function TopNav({ mobileMode = false }: { mobileMode?: boolean } = {}) {
       }}
     >
       <GlobalSearch />
-      <Space size={20}>
+      <Space size={12}>
         <Tooltip title="使用帮助" trigger={['hover', 'focus']}><Button type="text" icon={<QuestionCircleOutlined />} onClick={() => router.push('/dashboard?guide=1')} aria-label="打开使用帮助" /></Tooltip>
         <Badge count={unreadCount} size="small" offset={[-2, 2]}>
           <Button
             type="text"
             aria-label={unreadCount > 0 ? `打开家长留言，${unreadCount}条未读` : '打开家长留言'}
             icon={<BellOutlined style={{ fontSize: 18 }} />}
-            style={{ color: '#5a4e3a' }}
+            style={{ color: 'var(--color-ink-muted)' }}
             onClick={() => router.push('/parent-messages')}
           />
         </Badge>
         <Dropdown menu={userMenu} placement="bottomRight" trigger={['click']}>
           <button type="button" aria-label="打开用户菜单" style={{ padding: 0, border: 0, background: 'transparent', cursor: 'pointer' }}>
             <Space>
-            <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: '#E8784A' }} />
-            <span style={{ color: '#1a1201', fontSize: 14, fontWeight: 500 }}>
-              {userName}｜{systemName}
-            </span>
+            <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: 'var(--color-role-admin)' }} />
+            <span style={{ color: 'var(--color-ink)', fontSize: 13, fontWeight: 600 }}>{userName}</span>
+            <span style={{ color: 'var(--color-ink-subtle)', fontSize: 11 }}>{systemName}</span>
             </Space>
           </button>
         </Dropdown>

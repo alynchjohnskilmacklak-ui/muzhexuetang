@@ -13,6 +13,7 @@ import {
 } from '@ant-design/icons'
 import { adminNavItems } from './admin-nav'
 import type { MobileNavItem } from './MobileLayout'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const { Sider } = Layout
 const fetcher = (url: string) => fetch(url).then((res) => res.ok ? res.json() : [])
@@ -54,9 +55,11 @@ export function Sidebar({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { division } = useDivision()
   const { data: session } = useSession()
   const [backgroundReady, setBackgroundReady] = useState(false)
-  const { data: alerts } = useSWR(backgroundReady ? '/api/teacher-logs/alerts' : null, fetcher, {
+  const [pendingKey, setPendingKey] = useState<string | null>(null)
+  const { data: alerts } = useSWR(backgroundReady ? `/api/teacher-logs/alerts?division=${division}` : null, fetcher, {
     refreshInterval: 300_000,
     dedupingInterval: 30_000,
   })
@@ -72,28 +75,26 @@ export function Sidebar({
     return () => window.clearTimeout(timer)
   }, [])
 
+  useEffect(() => setPendingKey(null), [pathname, searchParams])
+
+  useEffect(() => {
+    if (!pendingKey) return
+    const timer = window.setTimeout(() => setPendingKey(null), 10_000)
+    return () => window.clearTimeout(timer)
+  }, [pendingKey])
+
   const menuKeys = useMemo(() => flattenMenuKeys(menuItems), [])
   const baseKey = resolveActiveKey(pathname, menuKeys, '/dashboard')
   const isScheduleIntensive = pathname.startsWith('/schedule/intensive')
   const viewParam = searchParams.get('view')
-  const selectedKey = isScheduleIntensive
+  const selectedKey = pendingKey || (isScheduleIntensive
     ? '/schedule/intensive'
     : baseKey === '/schedule' && viewParam
     ? `/schedule?view=${viewParam}`
-    : baseKey
-  const defaultOpenKeys = (baseKey === '/teachers' || baseKey === '/teacher-logs' || baseKey === '/teacher-salary')
-    ? ['teacher-group']
-    : (baseKey === '/schedule' || isScheduleIntensive)
-    ? ['schedule-group']
-    : (baseKey === '/fees' || baseKey === '/meals')
-    ? ['finance-group']
-    : (baseKey === '/parent-messages' || baseKey === '/notifications')
-    ? ['comm-group']
-    : (baseKey === '/volunteer' || baseKey === '/volunteer-sim' || baseKey === '/volunteer-sim/schools' || baseKey === '/volunteer-sim/rank-query')
-    ? ['volunteer-group']
-    : (baseKey === '/materials' || baseKey === '/phet' || baseKey === '/ai')
-    ? ['resource-group']
-    : []
+    : baseKey)
+  const defaultOpenKeys = menuItems
+    .filter((item) => item.children?.some((child) => child.key === selectedKey || child.key === baseKey))
+    .map((item) => String(item.key))
 
   // 初中部专属菜单：高中部不展示中考志愿相关入口
   const JUNIOR_ONLY_GROUP_KEY = 'volunteer-group'
@@ -102,28 +103,30 @@ export function Sidebar({
     return menuItems?.filter((item) => item?.key !== JUNIOR_ONLY_GROUP_KEY)
   }, [isSenior])
 
-  const items = useMemo(() => visibleMenuItems.map((item): SidebarMenuItem => {
-    if (item.key === 'teacher-group') {
-      return {
-        ...item,
-        children: item.children?.map((child) =>
-          child.key === '/teacher-logs'
-            ? { ...child, label: <Badge count={alertCount} size="small" offset={[8, 0]}>行为日志</Badge> }
-            : child
-        ),
-      }
-    }
-    return item
-  }), [visibleMenuItems, alertCount])
+  const items = useMemo(() => {
+    const decorate = (item: SidebarMenuItem): SidebarMenuItem => ({
+      ...item,
+      label: item.key.startsWith('/') ? (
+        <span onMouseEnter={() => router.prefetch(item.key)} style={{ display: 'block', width: '100%' }}>
+          {item.key === '/teacher-logs' ? <Badge count={alertCount} size="small" offset={[8, 0]}>行为日志</Badge> : item.label}
+          {pendingKey === item.key && <span style={{ marginInlineStart: 8, fontSize: 11, color: 'var(--color-ink-subtle)' }}>打开中…</span>}
+        </span>
+      ) : item.label,
+      children: item.children?.map(decorate),
+    })
+    return visibleMenuItems.map(decorate)
+  }, [visibleMenuItems, alertCount, pendingKey, router])
 
   const handleClick: MenuProps['onClick'] = ({ key }) => {
     if (!key.startsWith('/')) return
+    setPendingKey(key)
     router.push(key)
     onMenuClick?.()
   }
 
   return (
     <Sider
+      className="desktop-role-sidebar desktop-role-sidebar--admin"
       collapsible
       collapsed={collapsed}
       onCollapse={onCollapse}
@@ -132,21 +135,21 @@ export function Sidebar({
       collapsedWidth={72}
       style={{
         height: '100vh', position: onMenuClick ? 'relative' : 'fixed', left: 0, top: 0, bottom: 0, overflow: 'auto',
-        background: '#ffffff', borderRight: '1px solid rgba(0,0,0,.06)', zIndex: 98,
+        background: 'var(--color-canvas)', borderRight: '1px solid var(--color-hairline)', zIndex: 98,
       }}
     >
       <div style={{
-        height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: collapsed ? '0 12px' : '0 12px 0 24px', borderBottom: '1px solid rgba(0,0,0,.06)',
+        height: 56, display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between',
+        padding: collapsed ? 0 : '0 12px 0 18px', borderBottom: '1px solid var(--color-hairline)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {!collapsed && <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Image src="/images/logo.jpg" alt="牧哲学堂" width={32} height={32} style={{ borderRadius: 8, objectFit: 'cover' }} unoptimized />
-          {!collapsed && <span style={{ fontSize: 16, fontWeight: 700, color: '#E8784A', whiteSpace: 'nowrap' }}>牧哲学堂</span>}
-        </div>
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-ink)', whiteSpace: 'nowrap' }}>牧哲学堂 <small style={{ color: 'var(--color-role-admin)', fontSize: 11 }}>管理端</small></span>
+        </div>}
         <Tooltip title={collapsed ? '展开导航' : '收起导航'}>
-          <button onClick={() => onCollapse(!collapsed)} style={{
-            width: 32, height: 32, borderRadius: 8, border: '1px solid rgba(232,120,74,.2)',
-            cursor: 'pointer', background: 'rgba(232,120,74,.08)', color: '#E8784A',
+          <button type="button" aria-label={collapsed ? '展开导航' : '收起导航'} onClick={() => onCollapse(!collapsed)} style={{
+            width: 44, height: 44, borderRadius: 10, border: '1px solid var(--color-hairline-strong)',
+            cursor: 'pointer', background: 'var(--color-role-admin-bg)', color: 'var(--color-role-admin)',
             fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}>
@@ -155,12 +158,13 @@ export function Sidebar({
         </Tooltip>
       </div>
       <Menu
+        className="role-navigation role-navigation--admin"
         mode="inline"
         selectedKeys={[selectedKey]}
         defaultOpenKeys={defaultOpenKeys}
         items={items}
         onClick={handleClick}
-        style={{ background: '#ffffff', borderInlineEnd: 'none', marginTop: 8 }}
+        style={{ background: 'transparent', borderInlineEnd: 'none', marginTop: 8 }}
       />
     </Sider>
   )

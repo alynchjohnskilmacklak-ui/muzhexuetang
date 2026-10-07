@@ -89,6 +89,7 @@ export type FeedbackArchiveDetail = FeedbackArchiveItem & {
     }>
   }>
   images: Array<FeedbackArchiveImage & { originalUrl: string }>
+  knowledgeCard: Record<string, unknown> | null | undefined
 }
 
 export class FeedbackArchiveAccessError extends Error {
@@ -318,6 +319,7 @@ export async function getFeedbackArchive(
       lessonContent: true,
       summary: true,
       knowledgePoints: true,
+      knowledgeCard: true,
       homework: true,
       tags: true,
       badge: true,
@@ -435,6 +437,7 @@ export async function getFeedbackArchiveDetail(
       lessonContent: true,
       summary: true,
       knowledgePoints: true,
+      knowledgeCard: true,
       homework: true,
       tags: true,
       badge: true,
@@ -512,6 +515,7 @@ export async function getFeedbackArchiveDetail(
     lessonContent: feedback.lessonContent,
     summary: feedback.summary,
     knowledgePoints: feedback.knowledgePoints,
+    knowledgeCard: feedback.knowledgeCard as Record<string, unknown> | null | undefined,
     homework: feedback.homework,
     tags: feedback.tags,
     badge: feedback.badge,

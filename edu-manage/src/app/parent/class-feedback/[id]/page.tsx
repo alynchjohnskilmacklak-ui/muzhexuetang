@@ -5,6 +5,9 @@ import { FeedbackDetailClient } from './client'
 import { parentLinkedStudentWhere, visibleClassroomFeedbackWhere, visibleTeacherWhere } from '@/lib/business-visibility'
 import { resolveFeedbackImageVariants, variantsForFeedback } from '@/lib/file-asset-variants'
 import { redactFeedbackForParent } from '@/lib/classroom-feedback/access'
+import { feedbackSubject } from '@/lib/classroom-feedback/subject'
+import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
+import { signedFeedbackImageUrls } from '@/lib/classroom-feedback/signed-images'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,7 +36,7 @@ export default async function FeedbackDetailPage({ params }: { params: Promise<{
       teacher: { select: { id: true, name: true, subjects: true } },
       classLesson: {
         include: {
-          group: { include: { course: true, room: true } },
+          group: { include: { course: true, room: true, teacherAssignments: { select: { teacherId: true, subject: true } } } },
         },
       },
     },
@@ -42,10 +45,22 @@ export default async function FeedbackDetailPage({ params }: { params: Promise<{
   if (!feedback) notFound()
 
   const parentFeedback = redactFeedbackForParent(feedback, studentIds)
+  const unlinkedGroup = !feedback.classLesson && feedback.feedbackGroupId
+    ? await prisma.classGroup.findFirst({
+        where: { id: feedback.feedbackGroupId, deletedAt: null },
+        select: { course: { select: { subject: true } }, teacherAssignments: { select: { teacherId: true, subject: true } } },
+      })
+    : null
   const imageVariantMap = await resolveFeedbackImageVariants(prisma, parentFeedback.imageUrls)
+  const images = variantsForFeedback(parentFeedback.imageUrls, imageVariantMap)
+  const thumbnailKeys = [...new Set(images.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl))]
+  const signedThumbnails = await signedFeedbackImageUrls(thumbnailKeys)
   const feedbackWithImages = {
     ...parentFeedback,
-    images: variantsForFeedback(parentFeedback.imageUrls, imageVariantMap),
+    resolvedSubject: feedbackSubject(feedback.classLesson, feedback.teacherId, unlinkedGroup,
+      parseStoredKnowledgeCard(feedback.knowledgeCard)?.subject),
+    images,
+    signedThumbnails,
   }
 
   return <FeedbackDetailClient feedback={JSON.parse(JSON.stringify(feedbackWithImages))} />

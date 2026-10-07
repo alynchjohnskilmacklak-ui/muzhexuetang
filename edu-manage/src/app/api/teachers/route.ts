@@ -22,6 +22,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url)
   const q = searchParams.get('q') || ''
   const type = searchParams.get('type')
+  const status = searchParams.get('status')
   const subject = searchParams.get('subject')
   const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
   const page = parseInt(searchParams.get('page') || '1')
@@ -32,8 +33,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
   const where: Record<string, unknown> = { division }
   if (type === 'FULL_TIME' || type === 'PART_TIME') where.employmentType = type
-  if (type === 'RESIGNED') where.status = 'RESIGNED'
-  if (!type || type === 'FULL_TIME' || type === 'PART_TIME') where.status = { not: 'RESIGNED' }
+  if (type === 'RESIGNED' || status === 'RESIGNED') where.status = 'RESIGNED'
+  else if (status === 'ACTIVE') where.status = 'ACTIVE'
+  else where.status = { not: 'RESIGNED' }
   if (subject) where.subjects = { contains: subject }
   if (q) {
     where.OR = [
@@ -46,7 +48,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const [teachers, total] = await Promise.all([
     prisma.teacher.findMany({
       where,
-      include: { _count: { select: { schedules: true } } },
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { createdAt: 'desc' },
@@ -126,7 +127,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const teachersWithCounts = teachers.map((teacher) => ({
     ...teacher,
     _count: {
-      ...teacher._count,
       students: studentIdsByTeacher.get(teacher.id)?.size ?? 0,
       schedules: lessonIdsByTeacher.get(teacher.id)?.size ?? 0,
     },
@@ -161,6 +161,9 @@ export async function POST(req: NextRequest) {
     if (!name) return NextResponse.json({ error: '姓名不能为空', field: 'name' }, { status: 400 })
     if (!phone) return NextResponse.json({ error: '手机号不能为空', field: 'phone' }, { status: 400 })
     if (!subjects) return NextResponse.json({ error: '至少选择一个授课科目', field: 'subjects' }, { status: 400 })
+    if (typeof body.bio === 'string' && body.bio.length > 500) {
+      return NextResponse.json({ error: '个人介绍最多填写500字', field: 'bio' }, { status: 400 })
+    }
 
     const teacherData: Prisma.TeacherCreateInput = {
       name,

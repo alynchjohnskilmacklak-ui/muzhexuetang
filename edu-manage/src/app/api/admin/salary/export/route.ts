@@ -23,6 +23,8 @@ function typeLabel(type: string) {
   if (type === 'LESSON_PAY') return '课时薪资'
   if (type === 'LESSON_PAY_ADJUSTMENT') return '课时薪资结算调整'
   if (type === 'FEEDBACK_BONUS') return '反馈奖励'
+  if (type === 'STUDY_HALL_BONUS') return '作业登记奖励'
+  if (type === 'STUDY_HALL_ATTENDANCE') return '晚托考勤奖励'
   if (type === 'manual_adjust') return '手动调整'
   return '其他调整'
 }
@@ -68,7 +70,7 @@ export async function GET(req: NextRequest) {
     const now = new Date()
     const since = salaryPeriodStart(period, now)
     const transactions = await prisma.teacherSalaryTransaction.findMany({
-      where: { teacherId, createdAt: { gte: since }, termId: selectedTerm.id },
+      where: { teacherId, createdAt: { gte: since }, termId: selectedTerm.id, deletedAt: null },
       orderBy: [{ lessonDate: 'desc' }, { createdAt: 'desc' }],
     })
 

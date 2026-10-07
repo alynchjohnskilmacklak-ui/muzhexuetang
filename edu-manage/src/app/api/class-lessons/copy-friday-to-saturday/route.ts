@@ -7,6 +7,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { hasTimeOverlap } from '@/lib/schedule-conflict'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getRequestDivision } from '@/lib/division'
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 
 export const dynamic = 'force-dynamic'
 
@@ -108,10 +109,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
         include: {
           course: { select: { name: true } },
           room: { select: { id: true, name: true } },
-          enrollments: { where: { status: 'ACTIVE' }, select: { studentId: true } },
+          enrollments: { where: { status: 'ACTIVE' }, select: { studentId: true, subjects: true } },
         },
       },
       teacher: { select: { id: true, name: true } },
+      lessonStudents: { select: { studentId: true } },
     },
     orderBy: [{ groupId: 'asc' }, { startTime: 'asc' }],
   })
@@ -141,7 +143,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     teacherName: lesson.teacher?.name || '',
     roomId: lesson.group.room?.id || null,
     roomName: lesson.group.room?.name || null,
-    studentCount: lesson.group.enrollments.length,
+    studentCount: lesson.lessonStudents.length || lesson.group.enrollments.filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, lesson.subject)).length,
     oldDate: fridayDate,
     newDate: saturdayDate,
     startTime: lesson.startTime,
@@ -269,44 +271,58 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   const saturdayDayStartForCreate = new Date(`${saturdayDate}T00:00:00`)
-  let createdCount = 0
-  const createdLessonIds: string[] = []
+  const createdLessonIds = await prisma.$transaction(async (tx) => {
+    const ids: string[] = []
 
-  for (const item of toCreate) {
-    const newLesson = await prisma.classLesson.create({
-      data: {
-        groupId: item.groupId,
-        teacherId: item.teacherId,
-        subject: fridayLessons.find((l) => l.id === item.sourceLessonId)?.subject || null,
-        lessonDate: saturdayDayStartForCreate,
-        startTime: item.startTime,
-        endTime: item.endTime,
-        status: 'SCHEDULED',
-        note: `周六补开：复制自 ${fridayDate}`,
-        isManual: true,
-        division: targetDivision as 'JUNIOR' | 'SENIOR',
-      },
-    })
-    createdLessonIds.push(newLesson.id)
-    createdCount++
+    for (const item of toCreate) {
+      const newLesson = await tx.classLesson.create({
+        data: {
+          groupId: item.groupId,
+          teacherId: item.teacherId,
+          subject: fridayLessons.find((l) => l.id === item.sourceLessonId)?.subject || null,
+          lessonDate: saturdayDayStartForCreate,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          status: 'SCHEDULED',
+          note: `周六补开：复制自 ${fridayDate}`,
+          isManual: true,
+          division: targetDivision as 'JUNIOR' | 'SENIOR',
+        },
+      })
+      ids.push(newLesson.id)
 
-    // Update group totalLessons
-    await prisma.classGroup.update({
-      where: { id: item.groupId },
-      data: { totalLessons: { increment: 1 } },
-    })
-  }
+      const source = fridayLessons.find((lesson) => lesson.id === item.sourceLessonId)
+      const rosterStudentIds = source?.lessonStudents.length
+        ? source.lessonStudents.map((student) => student.studentId)
+        : source?.group.enrollments
+          .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, source.subject))
+          .map((enrollment) => enrollment.studentId) || []
+      if (rosterStudentIds.length) {
+        await tx.classLessonStudent.createMany({
+          data: rosterStudentIds.map((studentId) => ({ lessonId: newLesson.id, studentId })),
+          skipDuplicates: true,
+        })
+      }
 
-  // activityLog
-  if (createdCount > 0) {
-    await prisma.activityLog.create({
-      data: {
-        userId: user.id,
-        action: '周六补开',
-        detail: `复制 ${fridayDate} 课程到 ${saturdayDate}，创建 ${createdCount} 节，跳过 ${skipped.length} 节`,
-      },
-    })
-  }
+      await tx.classGroup.update({
+        where: { id: item.groupId },
+        data: { totalLessons: { increment: 1 } },
+      })
+    }
+
+    if (ids.length > 0) {
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: '周六补开',
+          detail: `复制 ${fridayDate} 课程到 ${saturdayDate}，创建 ${ids.length} 节，跳过 ${skipped.length} 节`,
+        },
+      })
+    }
+
+    return ids
+  })
+  const createdCount = createdLessonIds.length
 
   // Revalidate
   revalidatePath('/schedule')

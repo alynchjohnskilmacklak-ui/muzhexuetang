@@ -1,6 +1,5 @@
 import pinyin from 'pinyin'
 import bcrypt from 'bcryptjs'
-import { generateTemporaryPassword } from '@/lib/temporary-password'
 
 /**
  * Convert Chinese name to pinyin (lowercase, no spaces, no tones).
@@ -20,7 +19,8 @@ export async function generateParentCredentialsHashed(name: string): Promise<{
   plainPassword: string  // plain, for display
 }> {
   const py = chineseToPinyin(name)
-  const plainPassword = generateTemporaryPassword()
+  // 初始密码 = 学生姓名拼音（如 马紫晨 → mazichen），与账号邮箱前缀一致
+  const plainPassword = py
   const hashed = await bcrypt.hash(plainPassword, 12)
   return { email: `${py}@st.com`, password: hashed, plainPassword }
 }

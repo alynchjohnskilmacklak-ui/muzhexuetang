@@ -1,12 +1,13 @@
-﻿'use client'
+'use client'
 
-import { Card, Typography, Button, Space, Tag } from 'antd'
-import { EditOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons'
+import { Card, Typography, Button, Space, Tag, Image as AntImage } from 'antd'
+import { EditOutlined, EyeOutlined, DeleteOutlined, AlertOutlined, TrophyOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
 import NextImage from 'next/image'
 
 import { SUBJECT_COLORS } from '@/constants/subjects'
-import { normalizeUploadUrl } from '@/lib/upload-url'
+import { normalizeAvatarUrl } from '@/lib/upload-url'
+import { femaleDefaultAvatar } from '@/lib/teacher-avatars'
 import { resolveTier, TIER_THEME } from '@/constants/teacher-tier'
 
 const { Text } = Typography
@@ -23,10 +24,12 @@ type Teacher = {
   _count?: { students: number; schedules: number }
 }
 
-export function TeacherCard({ teacher, onEdit, onDelete }: {
+export function TeacherCard({ teacher, onEdit, onDelete, onMessage, unreadCount = 0 }: {
   teacher: Teacher
   onEdit: (t: Record<string, unknown>) => void
   onDelete: (t: Record<string, unknown>) => void
+  onMessage?: (t: Record<string, unknown>, type: 'remind' | 'praise') => void
+  unreadCount?: number
 }) {
   const router = useRouter()
   const initials = teacher.name.charAt(0)
@@ -42,8 +45,10 @@ export function TeacherCard({ teacher, onEdit, onDelete }: {
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
         <div style={{ width: 76, height: 96, position: 'relative', borderRadius: 10, backgroundColor: getAvatarColor(teacher.name), overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 20, fontWeight: 700, flexShrink: 0, border: '1px solid #23252a' }}>
           {teacher.avatar ? (
-            <NextImage src={normalizeUploadUrl(teacher.avatar)} alt={teacher.name} fill sizes="76px" unoptimized style={{ objectFit: 'cover', objectPosition: 'center top' }} />
-          ) : initials}
+            <NextImage src={normalizeAvatarUrl(teacher.avatar)} alt={teacher.name} fill sizes="76px" unoptimized style={{ objectFit: 'cover', objectPosition: 'center top' }} />
+          ) : (
+            <AntImage src={teacher.gender === '男' ? '/avatars/teacher-male.png' : femaleDefaultAvatar(teacher.name)} alt={teacher.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} preview={{ mask: '查看大图' }} />
+          )}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -76,9 +81,36 @@ export function TeacherCard({ teacher, onEdit, onDelete }: {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ fontSize: 12, color: '#62666d' }}>{new Date(teacher.joinedAt).toLocaleDateString('zh-CN')} 入职</Text>
+        <Space size={12}>
+          <Text style={{ fontSize: 12, color: '#62666d' }}>{new Date(teacher.joinedAt).toLocaleDateString('zh-CN')} 入职</Text>
+          {unreadCount > 0 && (
+            <Text style={{ fontSize: 12, color: '#E8784A', fontWeight: 600 }}>
+              <AlertOutlined /> {unreadCount} 条提醒/表扬未读
+            </Text>
+          )}
+        </Space>
         <Space>
           <Button type="text" size="small" icon={<EyeOutlined />} style={{ color: '#8a8f98' }} onClick={() => router.push(`/teachers/${teacher.id}`)} />
+          {onMessage && (
+            <>
+              <Button
+                type="text"
+                size="small"
+                icon={<AlertOutlined />}
+                title="发提醒"
+                style={{ color: '#E8784A' }}
+                onClick={() => onMessage(teacher as unknown as Record<string, unknown>, 'remind')}
+              />
+              <Button
+                type="text"
+                size="small"
+                icon={<TrophyOutlined />}
+                title="发表扬"
+                style={{ color: '#27a644' }}
+                onClick={() => onMessage(teacher as unknown as Record<string, unknown>, 'praise')}
+              />
+            </>
+          )}
           <Button type="text" size="small" icon={<EditOutlined />} style={{ color: '#8a8f98' }} onClick={() => onEdit(teacher as unknown as Record<string, unknown>)} />
           <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => onDelete(teacher as unknown as Record<string, unknown>)} />
         </Space>

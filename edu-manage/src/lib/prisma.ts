@@ -14,10 +14,31 @@ function buildUrl(rawUrl: string | undefined): string | undefined {
 }
 
 function createClient(url: string | undefined): PrismaClient {
-  return new PrismaClient({
+  const client = new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
     datasources: { db: { url: url ?? '' } },
   })
+  const softDeleteModels = new Set([
+    'Student', 'Course', 'ClassGroup', 'ClassLesson', 'Enrollment', 'ExamPaper', 'StudyMaterial', 'StudyHallClass', 'FileAsset',
+    'PerformancePost', 'HourTransaction', 'Attendance', 'GradeRecord', 'Fee', 'Notification', 'ClassroomFeedback', 'AchievementBadge', 'LearningGoal', 'StageSummary', 'LeaveRequest', 'TeacherSalaryTransaction',
+  ])
+  const withVisibleOnly = (model: string, args: { where?: Record<string, unknown> }) => {
+    if (softDeleteModels.has(model) && (!args.where || !Object.prototype.hasOwnProperty.call(args.where, 'deletedAt'))) {
+      args.where = { ...(args.where || {}), deletedAt: null }
+    }
+    return args
+  }
+  return client.$extends({
+    query: {
+      $allModels: {
+        findMany({ model, args, query }) { return query(withVisibleOnly(model, args)) },
+        findFirst({ model, args, query }) { return query(withVisibleOnly(model, args)) },
+        findFirstOrThrow({ model, args, query }) { return query(withVisibleOnly(model, args)) },
+        count({ model, args, query }) { return query(withVisibleOnly(model, args)) },
+        aggregate({ model, args, query }) { return query(withVisibleOnly(model, args)) },
+      },
+    },
+  }) as unknown as PrismaClient
 }
 
 export const prisma: PrismaClient =

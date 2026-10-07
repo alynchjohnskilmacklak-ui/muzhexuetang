@@ -3,6 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { getStudentArchive, ArchiveAccessError } from '@/lib/student-archive'
 import { apiHandler } from '@/lib/api-handler'
+import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +17,7 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
   // Get parent's linked children
   const parentStudents = user.role === 'parent'
     ? (await prisma.student.findMany({
-        where: { parentUserId: user.id, status: { not: 'INACTIVE' } },
+        where: parentLinkedStudentWhere(user.id),
         select: { id: true },
       })).map(s => s.id)
     : []

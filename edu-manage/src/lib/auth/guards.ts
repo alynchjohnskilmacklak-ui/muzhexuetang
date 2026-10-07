@@ -9,6 +9,7 @@ import { getPrismaForDivision, isDualDbEnabled } from '@/lib/prisma'
 import type { PrismaClient } from '@prisma/client'
 import { isUserActive } from '@/lib/user-status'
 import { resolveTeacherForUser } from '@/lib/teacher-account-binding'
+import { hasCurrentParentStudent, PARENT_TERM_EXPIRED_MESSAGE } from '@/lib/parent-account-validity'
 
 // ---- type helpers ----
 
@@ -65,6 +66,13 @@ export async function validateSessionMark(user: SessionUser): Promise<void> {
   }
   if (dbUser.currentSessionToken !== user.sessionMark) {
     throw new AuthError('账号已在其他设备登录，请重新登录', 401)
+  }
+  if (user.role === 'parent' && !await hasCurrentParentStudent(
+    prisma,
+    user.id,
+    user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR',
+  )) {
+    throw new AuthError(PARENT_TERM_EXPIRED_MESSAGE, 401)
   }
 }
 
@@ -146,21 +154,26 @@ export async function assertCanAccessStudent(
   if (ctx.role === 'teacher') {
     const tid = ctx.teacherId
     if (!tid) throw new AuthError('未绑定教师档案')
-    const enrollment = await prisma.enrollment.findFirst({
+    const student = await prisma.student.findFirst({
       where: {
-        studentId,
-        status: 'ACTIVE',
-        group: {
-          status: { not: 'ARCHIVED' },
-          OR: [
-            { teacherId: tid },
-            { teacherAssignments: { some: { teacherId: tid } } },
-          ],
+        id: studentId,
+        enrollments: { some: { status: 'ACTIVE', group: { status: { not: 'ARCHIVED' } } } },
+        classLessonStudents: {
+          some: {
+            lesson: {
+              status: { not: 'CANCELLED' },
+              OR: [
+                { teacherId: tid },
+                { teacherId: null, group: { teacherId: tid } },
+                { teacherId: null, group: { teacherAssignments: { some: { teacherId: tid } } } },
+              ],
+            },
+          },
         },
       },
       select: { id: true },
     })
-    if (!enrollment) throw new AuthError('无权访问该学生数据')
+    if (!student) throw new AuthError('无权访问该学生数据')
     return
   }
 

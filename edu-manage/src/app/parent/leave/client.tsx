@@ -67,7 +67,7 @@ export function ParentLeaveClient({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           studentId: values.studentId || selectedStudentId,
-          scheduleId: values.scheduleId || null,
+          lessonId: values.lessonId || null,
           reason: values.reason,
           leaveDate: values.leaveDate.toISOString(),
         }),
@@ -117,7 +117,7 @@ export function ParentLeaveClient({
             )}
           </Form.Item>
 
-          <Form.Item name="scheduleId" label="请假课次（可选）">
+          <Form.Item name="lessonId" label="请假课次（可选）">
             <Select
               allowClear
               placeholder="选择要请假的课次（可不选）"

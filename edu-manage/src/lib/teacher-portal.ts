@@ -7,25 +7,7 @@ import {
   requireTeacherUser,
 } from '@/lib/auth/guards'
 import { visibleClassGroupWhere, visibleClassLessonWhere, visibleStudentWhere } from '@/lib/business-visibility'
-
-export const TEACHER_LOG_ACTIONS = {
-  ATTENDANCE_SUBMIT: 'ATTENDANCE_SUBMIT',
-  ATTENDANCE_MISSING: 'ATTENDANCE_MISSING',
-  PAPER_UPLOAD: 'PAPER_UPLOAD',
-  PAPER_PUBLISH: 'PAPER_PUBLISH',
-  PERFORMANCE_POST: 'PERFORMANCE_POST',
-  CLASSROOM_FEEDBACK_DRAFT: 'CLASSROOM_FEEDBACK_DRAFT',
-  CLASSROOM_FEEDBACK_PUBLISH: 'CLASSROOM_FEEDBACK_PUBLISH',
-  LEARNING_GOAL_SAVE: 'LEARNING_GOAL_SAVE',
-  WEAKNESS_SAVE: 'WEAKNESS_SAVE',
-  STAGE_SUMMARY_DRAFT: 'STAGE_SUMMARY_DRAFT',
-  STAGE_SUMMARY_PUBLISH: 'STAGE_SUMMARY_PUBLISH',
-  COMMENT_REPLY: 'COMMENT_REPLY',
-  TEACHER_LOGIN: 'TEACHER_LOGIN',
-  MAKEUP_ARRANGE: 'MAKEUP_ARRANGE',
-} as const
-
-export type TeacherLogAction = keyof typeof TEACHER_LOG_ACTIONS
+export { TEACHER_LOG_ACTIONS, type TeacherLogAction } from '@/lib/teacher-log-actions'
 
 export const TEACHER_LOG_LABELS: Record<string, string> = {
   ATTENDANCE_SUBMIT: '考勤提交',
@@ -103,19 +85,20 @@ export async function assertTeacherOwnsStudent(
     where: {
       id: studentId,
       ...visibleStudentWhere,
-      enrollments: {
-        some: {
-          status: 'ACTIVE',
-          group: {
-            ...visibleClassGroupWhere,
-            ...(termId ? { termId } : {}),
-            OR: [
-              { teacherId },
-              { teacherAssignments: { some: { teacherId } } },
-            ],
+      AND: [
+        {
+          enrollments: {
+            some: {
+              status: 'ACTIVE',
+              group: {
+                ...visibleClassGroupWhere,
+                ...(termId ? { termId } : {}),
+              },
+            },
           },
         },
-      },
+        { classLessonStudents: { some: { lesson: teacherLessonWhere(teacherId, termId) } } },
+      ],
     },
     select: { id: true, name: true, parentId: true, parentUserId: true },
   })
@@ -158,19 +141,20 @@ export function teacherStudentWhere(teacherId: string, termId?: string): Prisma.
     ...visibleStudentWhere,
     OR: [
       {
-        enrollments: {
-          some: {
-            status: 'ACTIVE',
-            group: {
-              ...visibleClassGroupWhere,
-              ...(termId ? { termId } : {}),
-              OR: [
-                { teacherId },
-                { teacherAssignments: { some: { teacherId } } },
-              ],
+        AND: [
+          {
+            enrollments: {
+              some: {
+                status: 'ACTIVE',
+                group: {
+                  ...visibleClassGroupWhere,
+                  ...(termId ? { termId } : {}),
+                },
+              },
             },
           },
-        },
+          { classLessonStudents: { some: { lesson: teacherLessonWhere(teacherId, termId) } } },
+        ],
       },
       {
         studyHallClasses: {
@@ -184,6 +168,63 @@ export function teacherStudentWhere(teacherId: string, termId?: string): Prisma.
           },
         },
       },
+    ],
+  }
+}
+
+type TeacherLessonScopeClient = Pick<PrismaClient, 'classGroupTeacher' | 'classGroup'>
+
+/**
+ * Resolve lesson visibility at teacher + group + subject granularity.
+ *
+ * Older lessons may still carry the group's primary teacherId after subject
+ * teachers were edited. Building explicit group/subject clauses keeps those
+ * lessons visible to the actual subject teacher without exposing other
+ * subjects taught by colleagues in the same group.
+ */
+export async function teacherLessonScopeWhere(
+  prisma: TeacherLessonScopeClient,
+  teacherId: string,
+  termId?: string,
+): Promise<Prisma.ClassLessonWhereInput> {
+  const [assignments, legacyPrimaryGroups] = await Promise.all([
+    prisma.classGroupTeacher.findMany({
+      where: {
+        teacherId,
+        group: {
+          ...visibleClassGroupWhere,
+          ...(termId ? { termId } : {}),
+        },
+      },
+      select: { groupId: true, subject: true },
+    }),
+    prisma.classGroup.findMany({
+      where: {
+        teacherId,
+        ...visibleClassGroupWhere,
+        ...(termId ? { termId } : {}),
+        teacherAssignments: { none: { teacherId } },
+      },
+      select: { id: true },
+    }),
+  ])
+
+  const assignmentScopes: Prisma.ClassLessonWhereInput[] = assignments.map((assignment) => ({
+    groupId: assignment.groupId,
+    ...(assignment.subject ? { subject: assignment.subject } : {}),
+  }))
+  const legacyGroupIds = legacyPrimaryGroups.map((group) => group.id)
+
+  return {
+    ...visibleClassLessonWhere,
+    group: {
+      ...visibleClassGroupWhere,
+      ...(termId ? { termId } : {}),
+    },
+    OR: [
+      { teacherId },
+      ...assignmentScopes,
+      ...(legacyGroupIds.length ? [{ groupId: { in: legacyGroupIds } }] : []),
     ],
   }
 }

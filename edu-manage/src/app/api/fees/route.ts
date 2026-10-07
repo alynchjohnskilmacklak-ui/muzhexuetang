@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPrismaForDivision, isDualDbEnabled, getRequestPrisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import type { PrismaClient } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { requireFeeAdminScope } from '@/lib/fee-admin-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,8 +27,9 @@ async function queryFees(
   filters: FeeFilters,
 ) {
   const { type, campus, from, to, studentId, termId, page = 1, limit = 50 } = filters
-  const where: Record<string, unknown> = {}
+  const where: Record<string, unknown> = { deletedAt: null }
 
+  if (filters.division === 'JUNIOR' || filters.division === 'SENIOR') where.division = filters.division
   if (termId) where.termId = termId
   if (type) where.type = type
   if (campus) where.campus = campus
@@ -93,7 +94,7 @@ function mergeDualResults(
   const allRows = [...junior.rows, ...senior.rows]
     .sort((a, b) => new Date(b.paidAt ?? b.createdAt).getTime() - new Date(a.paidAt ?? a.createdAt).getTime())
 
-  const total = allRows.length
+  const total = junior.summary.count + senior.summary.count
   const paged = allRows.slice((page - 1) * limit, page * limit)
 
   return {
@@ -113,13 +114,9 @@ function mergeDualResults(
 }
 
 export const GET = apiHandler(async (req: NextRequest) => {
-  const session = await auth()
-  if (!session?.user || (session.user as { role?: string }).role !== 'admin') {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-
   const { searchParams } = new URL(req.url)
-  const division = searchParams.get('division') || 'JUNIOR'
+  const { user, division, canAccessAllDivisions } = await requireFeeAdminScope(searchParams.get('division'))
+  const access = { division: user.division, canAccessAllDivisions }
   const type = searchParams.get('type') || undefined
   const campus = searchParams.get('campus') || undefined
   const from = searchParams.get('from') || undefined
@@ -154,44 +151,44 @@ export const GET = apiHandler(async (req: NextRequest) => {
       totalHours,
       count: allRows.length,
       rows: allRows,
+      access,
     })
   }
 
-  if (division === 'all' && isDualDbEnabled()) {
+  if (division === 'all') {
+    const combinedLimit = page * limit
+    const defaultDb = isDualDbEnabled() ? null : await getRequestPrisma()
+    const juniorDb = defaultDb ?? getPrismaForDivision('JUNIOR')
+    const seniorDb = defaultDb ?? getPrismaForDivision('SENIOR')
     const [juniorTerm, seniorTerm] = await Promise.all([
-      resolveAdminTermScope(getPrismaForDivision('JUNIOR'), 'JUNIOR', req),
-      resolveAdminTermScope(getPrismaForDivision('SENIOR'), 'SENIOR', req),
+      resolveAdminTermScope(juniorDb, 'JUNIOR', req),
+      resolveAdminTermScope(seniorDb, 'SENIOR', req),
     ])
     const [junior, senior] = await Promise.all([
-      queryFees(getPrismaForDivision('JUNIOR'), { division, type, campus, from, to, studentId, page, limit, termId: juniorTerm?.id || '__NO_SELECTED_TERM__' }),
-      queryFees(getPrismaForDivision('SENIOR'), { division, type, campus, from, to, studentId, page, limit, termId: seniorTerm?.id || '__NO_SELECTED_TERM__' }),
+      queryFees(juniorDb, { division: 'JUNIOR', type, campus, from, to, studentId, page: 1, limit: combinedLimit, termId: juniorTerm?.id || '__NO_SELECTED_TERM__' }),
+      queryFees(seniorDb, { division: 'SENIOR', type, campus, from, to, studentId, page: 1, limit: combinedLimit, termId: seniorTerm?.id || '__NO_SELECTED_TERM__' }),
     ])
-    return NextResponse.json(mergeDualResults(junior, senior, page, limit))
+    return NextResponse.json({ ...mergeDualResults(junior, senior, page, limit), access })
   }
 
-  const db = division === 'SENIOR'
-    ? getPrismaForDivision('SENIOR')
-    : getPrismaForDivision('JUNIOR')
+  const db = isDualDbEnabled()
+    ? getPrismaForDivision(division)
+    : await getRequestPrisma()
 
-  const scopedDivision = division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
-  const selectedTerm = await resolveAdminTermScope(db, scopedDivision, req)
+  const selectedTerm = await resolveAdminTermScope(db, division, req)
   const result = await queryFees(db, {
     division, type, campus, from, to, studentId, page, limit,
     termId: selectedTerm?.id || '__NO_SELECTED_TERM__',
   })
-  return NextResponse.json({ ...result, total: result.summary.count, page, limit })
+  return NextResponse.json({ ...result, total: result.summary.count, page, limit, access })
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {
-  const session = await auth()
-  if (!session?.user || (session.user as { role?: string }).role !== 'admin') {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-
   const body = await req.json()
 
   const { studentId, type, amount, hours, campus, operator, notes, paidAt, courseId } = body
   const requestedDivision: Division = body.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+  const { user } = await requireFeeAdminScope(requestedDivision)
   const db = isDualDbEnabled()
     ? getPrismaForDivision(requestedDivision)
     : await getRequestPrisma()
@@ -199,10 +196,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!studentId || typeof studentId !== 'string') {
     return NextResponse.json({ error: '请选择学生' }, { status: 400 })
   }
-  if (typeof amount !== 'number' || amount < 0) {
+  if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {
     return NextResponse.json({ error: '金额必须 >= 0' }, { status: 400 })
   }
-  if (hours !== undefined && hours !== null && (typeof hours !== 'number' || hours < 0)) {
+  if (hours !== undefined && hours !== null && (typeof hours !== 'number' || !Number.isFinite(hours) || hours < 0)) {
     return NextResponse.json({ error: '课时数必须 >= 0' }, { status: 400 })
   }
 
@@ -224,26 +221,33 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '该学员不属于当前运营批次，不能录入本期收费' }, { status: 409 })
   }
 
-  const fee = await db.fee.create({
-    data: {
-      termId: selectedTerm.id,
-      studentId,
-      courseId: courseId || null,
-      amount,
-      type: type || '其他',
-      status: 'paid',
-      paidAt: paidAt ? new Date(paidAt) : new Date(),
-      hours: hours ?? null,
-      campus: campus || null,
-      operator: operator || null,
-      notes: notes || null,
-      division: student.division,
-    },
-  })
-
-  const userId = (session.user as { id: string }).id
-  await db.activityLog.create({
-    data: { userId, action: '新增收费记录', detail: `${student.division} ${studentId} ${type || '其他'} ¥${amount}` },
+  const fee = await db.$transaction(async (tx) => {
+    const created = await tx.fee.create({
+      data: {
+        termId: selectedTerm.id,
+        studentId,
+        courseId: courseId || null,
+        amount,
+        type: type || '其他',
+        status: 'paid',
+        paidAt: paidAt ? new Date(paidAt) : new Date(),
+        hours: hours ?? null,
+        campus: campus || null,
+        operator: operator || null,
+        notes: notes || null,
+        division: student.division,
+      },
+    })
+    await tx.activityLog.create({
+      data: {
+        userId: user.id,
+        action: '新增收费记录',
+        entityType: 'Fee',
+        entityId: created.id,
+        detail: `${student.division} ${studentId} ${type || '其他'} ¥${amount}`,
+      },
+    })
+    return created
   })
 
   revalidatePath('/fees')

@@ -69,7 +69,7 @@ export function MobileRoomView({
         {onNewCourseClick && (
           <button onClick={onNewCourseClick}
             style={{ marginLeft: 'auto', padding: '7px 18px', borderRadius: 8, background: '#E8784A', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            + 新建排课
+            + 临时加课
           </button>
         )}
       </div>
@@ -88,9 +88,12 @@ export function MobileRoomView({
                 border: `1px solid ${isExpanded ? '#E8784A50' : '#EEE7E1'}`,
                 overflow: 'hidden',
               }}>
-                <div
+                <button
+                  type="button"
+                  aria-expanded={isExpanded}
+                  aria-controls={`mobile-room-lessons-${room.id as string}`}
                   onClick={() => setExpandedRoom(isExpanded ? null : room.id as string)}
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', cursor: 'pointer' }}
+                  style={{ width: '100%', minHeight: 44, border: 0, background: 'transparent', color: 'inherit', font: 'inherit', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', cursor: 'pointer' }}
                 >
                   <div>
                     <span style={{ fontWeight: 700, fontSize: 15, color: '#1F2329' }}>{room.name as string}</span>
@@ -104,10 +107,10 @@ export function MobileRoomView({
                     )}
                     <span style={{ fontSize: 12, color: '#C4BAB0' }}>{isExpanded ? '▲' : '▼'}</span>
                   </div>
-                </div>
+                </button>
 
                 {isExpanded && (
-                  <div style={{ borderTop: '1px solid #F5F2EE', padding: '10px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div id={`mobile-room-lessons-${room.id as string}`} style={{ borderTop: '1px solid #F5F2EE', padding: '10px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {count === 0 ? (
                       <div style={{ textAlign: 'center', padding: '12px 0', color: '#C4BAB0', fontSize: 13 }}>今日暂无排课</div>
                     ) : (
@@ -116,8 +119,8 @@ export function MobileRoomView({
                         const ct = (l.courseType as string) || 'GROUP'
                         const color = TYPE_COLORS[ct] || '#E8784A'
                         return (
-                          <div key={i} onClick={() => onLessonClick?.(l)}
-                            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8,
+                          <button type="button" key={i} onClick={() => onLessonClick?.(l)}
+                            style={{ width: '100%', minHeight: 44, textAlign: 'left', color: 'inherit', font: 'inherit', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 8,
                               background: `${color}08`, border: `1px solid ${color}20`, cursor: 'pointer' }}>
                             <div style={{ width: 4, height: 36, borderRadius: 2, background: color, flexShrink: 0 }} />
                             <div style={{ flex: 1, minWidth: 0 }}>
@@ -136,7 +139,7 @@ export function MobileRoomView({
                                 <div style={{ fontSize: 11, color: '#C4BAB0', marginTop: 2 }}>{l.headcount as number}人</div>
                               )}
                             </div>
-                          </div>
+                          </button>
                         )
                       })
                     )}

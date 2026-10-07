@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { getPrismaForDivision } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ParentProfileClient } from './client'
+import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +21,7 @@ export default async function ParentProfilePage() {
   if (!user) redirect('/login')
 
   const students = await prisma.student.findMany({
-    where: { parentUserId: userId, status: { not: 'INACTIVE' } },
+    where: parentLinkedStudentWhere(userId),
     include: {
       mainTeacher: { select: { id: true, name: true } },
       enrollments: {
@@ -38,7 +39,7 @@ export default async function ParentProfilePage() {
     },
   })
 
-  // Gather teachers from enrollments (not old Schedule)
+  // Gather teachers from active class enrollments.
   const studentInfo = students.map(s => {
     const teacherSet = new Set<string>()
     if (s.mainTeacher?.name) teacherSet.add(s.mainTeacher.name)

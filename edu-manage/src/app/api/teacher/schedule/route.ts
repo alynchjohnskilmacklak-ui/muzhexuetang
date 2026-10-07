@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
+import { requireCurrentTeacher, teacherLessonScopeWhere } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 import { activeEnrollmentWhere } from '@/lib/business-visibility'
 import { dateRangeDays } from '@/lib/date/local-day'
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 
 export const dynamic = 'force-dynamic'
 
@@ -83,7 +84,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       return NextResponse.json({ currentTeacherId: teacher.id, lessons })
     }
     const where: Record<string, unknown> = {
-      ...teacherLessonWhere(teacher.id),
+      ...await teacherLessonScopeWhere(prisma, teacher.id),
       status: { notIn: ['CANCELLED', 'POSTPONED'] },
       ...(startDate || endDate ? {
         lessonDate: {
@@ -109,7 +110,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
             teacher: { select: { id: true, name: true, subjects: true } },
             teacherAssignments: { include: { teacher: { select: { id: true, name: true, subjects: true } } }, orderBy: { createdAt: 'asc' } },
             room: { select: { id: true, name: true, capacity: true, type: true } },
-            enrollments: { where: activeEnrollmentWhere, select: { id: true, totalHours: true, usedHours: true, remainHours: true, student: { select: { id: true, name: true } } } },
+            enrollments: { where: activeEnrollmentWhere, select: { id: true, totalHours: true, usedHours: true, remainHours: true, subjects: true, student: { select: { id: true, name: true } } } },
           },
         },
         teacher: { select: { id: true, name: true, subjects: true } },
@@ -122,9 +123,20 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
     return NextResponse.json({
       currentTeacherId: teacher.id,
-      lessons: lessons.map((lesson) => ({
-        ...lesson,
-        assignedSubject: lesson.subject || lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject,
-      })),
+      lessons: lessons.map((lesson) => {
+        const assignedSubject = lesson.subject || lesson.group.teacherAssignments.find((item) => item.teacherId === teacher.id)?.subject || lesson.group.course.subject
+        const eligibleStudentIds = new Set(lesson.group.enrollments
+          .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, assignedSubject))
+          .map((enrollment) => enrollment.student.id))
+        return {
+          ...lesson,
+          assignedSubject,
+          group: {
+            ...lesson.group,
+            enrollments: lesson.group.enrollments.filter((enrollment) => eligibleStudentIds.has(enrollment.student.id)),
+          },
+          lessonStudents: lesson.lessonStudents.filter((item) => eligibleStudentIds.has(item.student.id)),
+        }
+      }),
     })
 })

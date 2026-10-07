@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateOssSignedUrl, isOssEnabled } from '@/lib/storage'
+import { generateOssSignedUrl, isOssEnabled, isStorageObjectAvailable } from '@/lib/storage'
 import { requireAuthenticatedUser } from '@/lib/auth/guards'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { canAccessFeedbackImage } from '@/lib/classroom-feedback/access'
@@ -56,6 +56,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
       const cached = signedUrlCache.get(key)
       if (cached && cached.expiresAt > Date.now()) {
         urls[original] = cached.url
+        return
+      }
+
+      // OSS 账号不可用（如 UserDisable）或对象不存在时，跳过签名、走本地通道。
+      if (!(await isStorageObjectAvailable(key))) {
+        urls[original] = `/api/uploads/${encodeURIComponent(key)}`
         return
       }
 

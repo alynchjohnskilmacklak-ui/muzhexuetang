@@ -111,7 +111,7 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
       onCancel={handleClose}
       onOk={credentials.length ? handleClose : handleImport}
       okText={credentials.length ? '我已安全保存' : '确认导入'}
-      width={720}
+      width="min(960px, 100vw)"
       confirmLoading={importing}
       okButtonProps={{ disabled: !credentials.length && rows.length === 0 }}
     >

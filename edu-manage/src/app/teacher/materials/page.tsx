@@ -3,14 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import NextImage from 'next/image'
 import {
-  Button, Col, Form, Input, Modal, Popconfirm, Row, Select, Skeleton, Space,
-  Tabs, Tag, Typography, Upload,
+  Button, Input, Modal, Popconfirm, Select, Skeleton, Space,
+  Tabs, Tag, Typography,
 } from 'antd'
 import {
-  DeleteOutlined, DownloadOutlined, EyeOutlined, FileTextOutlined, PlusOutlined, UploadOutlined,
+  DeleteOutlined, DownloadOutlined, EyeOutlined, PlusOutlined,
 } from '@ant-design/icons'
-import type { UploadFile } from 'antd/es/upload/interface'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import { fmtDate } from '@/lib/format-date'
 import { GRADE_SUBJECTS, GRADES, SUBJECT_COLORS } from '@/data/subjects'
 import {
@@ -18,9 +18,9 @@ import {
   materialFileLabel,
 } from '@/lib/material-format'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const { Title, Text } = Typography
-const { TextArea } = Input
 
 type TabKey = 'all' | 'student' | 'teacher' | 'mine'
 
@@ -44,21 +44,21 @@ interface Material {
 }
 
 const FILE_TYPE_STYLE: Record<string, { color: string; bg: string }> = {
-  pdf: { color: '#E24B4A', bg: 'rgba(226,75,74,.10)' },
-  word: { color: '#185FA5', bg: 'rgba(24,95,165,.10)' },
-  doc: { color: '#185FA5', bg: 'rgba(24,95,165,.10)' },
-  docx: { color: '#185FA5', bg: 'rgba(24,95,165,.10)' },
-  ppt: { color: '#E8784A', bg: 'rgba(232,120,74,.12)' },
-  pptx: { color: '#E8784A', bg: 'rgba(232,120,74,.12)' },
-  excel: { color: '#1D9E75', bg: 'rgba(29,158,117,.10)' },
-  xls: { color: '#1D9E75', bg: 'rgba(29,158,117,.10)' },
-  xlsx: { color: '#1D9E75', bg: 'rgba(29,158,117,.10)' },
+  pdf: { color: 'var(--color-error)', bg: 'var(--color-surface-3)' },
+  word: { color: 'var(--color-chart-6)', bg: 'var(--color-surface-3)' },
+  doc: { color: 'var(--color-chart-6)', bg: 'var(--color-surface-3)' },
+  docx: { color: 'var(--color-chart-6)', bg: 'var(--color-surface-3)' },
+  ppt: { color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
+  pptx: { color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
+  excel: { color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
+  xls: { color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
+  xlsx: { color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
 }
 
 const AUDIENCE_STYLE: Record<string, { color: string; bg: string }> = {
-  STUDENT: { color: '#1D9E75', bg: 'rgba(29,158,117,.10)' },
-  TEACHER: { color: '#185FA5', bg: 'rgba(24,95,165,.10)' },
-  BOTH: { color: '#E8784A', bg: 'rgba(232,120,74,.12)' },
+  STUDENT: { color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
+  TEACHER: { color: 'var(--color-chart-6)', bg: 'var(--color-surface-3)' },
+  BOTH: { color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
 }
 
 function rgbaFromHex(hex: string | undefined, alpha: number) {
@@ -71,7 +71,21 @@ function rgbaFromHex(hex: string | undefined, alpha: number) {
 
 function getFileStyle(material: Pick<Material, 'fileType' | 'fileName'>) {
   const ext = material.fileName?.split('.').pop()?.toLowerCase() || ''
-  return FILE_TYPE_STYLE[material.fileType] || FILE_TYPE_STYLE[ext] || { color: '#7a7fad', bg: 'rgba(122,127,173,.12)' }
+  return FILE_TYPE_STYLE[material.fileType] || FILE_TYPE_STYLE[ext] || { color: 'var(--color-brand-secure)', bg: 'var(--color-surface-3)' }
+}
+
+/** 按科目主色生成迷你书本封面渐变（浅 → 深，保证白字可读） */
+function bookCoverStyle(subject: string) {
+  const hex = SUBJECT_COLORS[subject] || '#8A6F5C'
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) return { background: 'linear-gradient(160deg,#9C7B62 0%,#6E5340 100%)' }
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  const darken = (n: number) => Math.round(n * 0.62)
+  const bright = (n: number) => Math.min(255, Math.round(n * 1.14 + 18))
+  return {
+    background: `linear-gradient(160deg, rgb(${bright(r)},${bright(g)},${bright(b)}) 0%, rgb(${r},${g},${b}) 46%, rgb(${darken(r)},${darken(g)},${darken(b)}) 100%)`,
+  }
 }
 
 function softTagStyle(color?: string) {
@@ -92,18 +106,15 @@ function audienceTagStyle(audience: string) {
 }
 
 export default function TeacherMaterialsPage() {
+  const isMobile = useIsMobile() ?? false
+  const router = useRouter()
   const [tab, setTab] = useState<TabKey>('all')
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [modalOpen, setModalOpen] = useState(false)
   const [grade, setGrade] = useState('')
   const [subject, setSubject] = useState('')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [previewType, setPreviewType] = useState<'pdf' | 'image' | 'word' | 'download'>('pdf')
-  const [form] = Form.useForm()
-  const uploadGrade = Form.useWatch('grade', form)
-  const [fileList, setFileList] = useState<UploadFile[]>([])
 
   const fetchMaterials = useCallback(async () => {
     setLoading(true)
@@ -122,41 +133,6 @@ export default function TeacherMaterialsPage() {
     const source = grade ? GRADE_SUBJECTS[grade] || [] : Array.from(new Set(Object.values(GRADE_SUBJECTS).flat()))
     return source.map((item) => ({ label: item, value: item }))
   }, [grade])
-
-  const uploadSubjects = (uploadGrade ? GRADE_SUBJECTS[uploadGrade] || [] : []).map((item) => ({ label: item, value: item }))
-
-  const handleUpload = async () => {
-    const values = await form.validateFields()
-    if (!fileList[0]?.originFileObj) {
-      toast.warning('请选择文件')
-      return
-    }
-
-    setUploading(true)
-    const formData = new FormData()
-    formData.append('file', fileList[0].originFileObj as File)
-    formData.append('title', values.title)
-    formData.append('grade', values.grade)
-    formData.append('subject', values.subject)
-    formData.append('audience', values.audience)
-    formData.append('status', values.publishNow ? 'PUBLISHED' : 'DRAFT')
-    if (values.description) formData.append('description', values.description)
-    if (values.tags) formData.append('tags', values.tags)
-
-    const res = await fetch('/api/teacher/materials', { method: 'POST', body: formData })
-    setUploading(false)
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      toast.error(err.error || '上传失败')
-      return
-    }
-    toast.success('上传成功')
-    setModalOpen(false)
-    form.resetFields()
-    setFileList([])
-    setTab('mine')
-    fetchMaterials()
-  }
 
   const handleDelete = async (id: string) => {
     const res = await fetch(`/api/teacher/materials/${id}`, { method: 'DELETE' })
@@ -193,7 +169,7 @@ export default function TeacherMaterialsPage() {
           <Title level={4} className="materials-title">学习资料</Title>
           <Text type="secondary" className="materials-subtitle">上传与查看教学资料</Text>
         </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>上传资料</Button>
+        <Button icon={<PlusOutlined />} onClick={() => router.push('/teacher/materials/upload')}>上传普通资料</Button>
       </div>
 
       <div className="materials-filters">
@@ -221,13 +197,18 @@ export default function TeacherMaterialsPage() {
           <Skeleton active paragraph={{ rows: 3 }} />
         </div>
       ) : materials.length === 0 ? (
-        <div className="materials-empty"><GuidedEmpty title="还没有教学资料" description="上传讲义、练习或答案后，学生和教师可按权限查看，便于重复使用。" actionLabel="上传第一份资料" onAction={() => setModalOpen(true)} /></div>
+        <div className="materials-empty"><GuidedEmpty title="还没有教学资料" description="上传讲义、练习或答案后，学生和教师可按权限查看，便于重复使用。" actionLabel="上传第一份资料" onAction={() => router.push('/teacher/materials/upload')} /></div>
       ) : (
         <div className="materials-list">
           {materials.map((material) => (
             <div key={material.id} className="material-card">
-              <div className="file-icon" style={{ color: getFileStyle(material).color, backgroundColor: getFileStyle(material).bg }}>
-                <FileTextOutlined />
+              <div className="mini-book" style={bookCoverStyle(material.subject)}>
+                <div className="mini-book-spine" />
+                <div className="mini-book-inner">
+                  <span className="mini-book-title">{material.title}</span>
+                  <span className="mini-book-subject">{material.subject}</span>
+                  <span className="mini-book-type">{materialFileLabel(material.fileType)}</span>
+                </div>
               </div>
               <div className="material-body">
                 <Text strong className="material-title" ellipsis={{ tooltip: material.title }}>{material.title}</Text>
@@ -254,57 +235,6 @@ export default function TeacherMaterialsPage() {
           ))}
         </div>
       )}
-
-      <Modal
-        title="上传学习资料"
-        open={modalOpen}
-        onCancel={() => { setModalOpen(false); form.resetFields(); setFileList([]) }}
-        onOk={handleUpload}
-        confirmLoading={uploading}
-        okText="上传"
-        width={640}
-      >
-        <Form form={form} layout="vertical" initialValues={{ audience: 'TEACHER', publishNow: true }} style={{ marginTop: 16 }}>
-          <Form.Item name="title" label="标题" rules={[{ required: true, message: '请输入标题' }]}>
-            <Input maxLength={80} showCount />
-          </Form.Item>
-          <Row gutter={12}>
-            <Col xs={24} sm={12}>
-              <Form.Item name="grade" label="年级" rules={[{ required: true, message: '请选择年级' }]}>
-                <Select options={GRADES.map((item) => ({ label: item, value: item }))} onChange={() => form.setFieldValue('subject', undefined)} />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={12}>
-              <Form.Item name="subject" label="科目" rules={[{ required: true, message: '请选择科目' }]}>
-                <Select options={uploadSubjects} />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item name="audience" label="资料类型" rules={[{ required: true }]}>
-            <Select
-              options={[
-                { label: '教师版资料：仅教师和管理端可见', value: 'TEACHER' },
-                { label: '学生版资料：家长端可见', value: 'STUDENT' },
-                { label: '通用资料：家长端和教师端都可见', value: 'BOTH' },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item name="tags" label="标签">
-            <Input placeholder="多个标签用逗号或空格分隔" />
-          </Form.Item>
-          <Form.Item name="description" label="说明">
-            <TextArea rows={3} maxLength={200} showCount />
-          </Form.Item>
-          <Form.Item name="publishNow" label="发布状态">
-            <Select options={[{ label: '立即发布', value: true }, { label: '保存草稿', value: false }]} />
-          </Form.Item>
-          <Form.Item label="文件" required>
-            <Upload beforeUpload={() => false} maxCount={1} fileList={fileList} onChange={({ fileList: list }) => setFileList(list)} accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z">
-              <Button icon={<UploadOutlined />} style={{ minHeight: 40 }}>选择文件</Button>
-            </Upload>
-          </Form.Item>
-        </Form>
-      </Modal>
 
       <Modal title="资料预览" open={!!previewUrl} footer={null} onCancel={() => setPreviewUrl(null)} width="90vw" style={{ top: 20 }} styles={{ body: { padding: 0 } }}>
         {previewUrl && previewType === 'pdf' && <iframe src={previewUrl} title="PDF预览" style={{ width: '100%', height: '80vh', border: 0 }} />}
@@ -370,21 +300,90 @@ export default function TeacherMaterialsPage() {
           gap: 14px;
           min-height: 128px;
           padding: 16px;
-          border: 1px solid rgba(0,0,0,.06);
-          border-radius: 10px;
-          background: #fff;
-          box-shadow: 0 8px 20px rgba(26,18,1,.035);
+          border: 1px solid var(--color-hairline);
+          border-radius: var(--radius-md);
+          background: var(--color-surface-1);
+          box-shadow: var(--shadow-card);
         }
 
-        .file-icon {
-          width: 48px;
-          height: 48px;
-          border-radius: 10px;
+        .mini-book {
+          position: relative;
+          width: 84px;
+          height: 112px;
+          border-radius: 8px 9px 9px 8px;
+          flex: 0 0 84px;
+          overflow: hidden;
+          box-shadow:
+            0 8px 16px rgba(40, 30, 20, .16),
+            inset -1px 0 0 rgba(255, 255, 255, .14);
+        }
+
+        .mini-book-spine {
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 8px;
+          border-radius: 8px 0 0 8px;
+          background: rgba(0, 0, 0, .16);
+          box-shadow: inset -1px 0 0 rgba(255, 255, 255, .10);
+          z-index: 2;
+        }
+
+        .mini-book-spine::after {
+          content: '';
+          position: absolute;
+          left: 3px;
+          top: 5px;
+          bottom: 5px;
+          width: 1px;
+          background: rgba(255, 255, 255, .22);
+        }
+
+        .mini-book-inner {
+          position: absolute;
+          inset: 0;
+          padding: 12px 8px 8px 15px;
           display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: 0 0 48px;
-          font-size: 24px;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .mini-book-title {
+          color: #fff;
+          font-size: 13.5px;
+          font-weight: 700;
+          line-height: 1.4;
+          text-shadow: 0 1px 3px rgba(0, 0, 0, .28);
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          word-break: break-word;
+          flex: 1;
+        }
+
+        .mini-book-subject {
+          align-self: flex-start;
+          padding: 2px 7px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, .22);
+          border: 1px solid rgba(255, 255, 255, .30);
+          color: #fff;
+          font-size: 10.5px;
+          font-weight: 600;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, .18);
+        }
+
+        .mini-book-type {
+          align-self: flex-start;
+          padding: 1px 6px;
+          border-radius: 5px;
+          background: rgba(255, 255, 255, .20);
+          color: #fff;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: .4px;
         }
 
         .material-body {
@@ -411,18 +410,18 @@ export default function TeacherMaterialsPage() {
           height: 22px;
           line-height: 20px;
           margin-inline-end: 0;
-          border-radius: 999px;
+          border-radius: var(--radius-pill);
           padding: 0 8px;
           font-size: 12px;
-          color: #5a4e3a;
-          background: #f5f2ee;
-          border: 1px solid rgba(0,0,0,.06);
+          color: var(--color-ink-muted);
+          background: var(--color-surface-3);
+          border: 1px solid var(--color-hairline);
         }
 
         .material-meta {
           display: block;
           font-size: 12px;
-          color: #9a8e7a;
+          color: var(--color-ink-subtle);
         }
 
         .material-actions {
@@ -438,11 +437,68 @@ export default function TeacherMaterialsPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px dashed rgba(0,0,0,.10);
-          border-radius: 10px;
-          background: #fff;
+          border: 1px dashed var(--color-hairline-strong);
+          border-radius: var(--radius-md);
+          background: var(--color-surface-1);
         }
 
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        .file-drop-zone {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          min-height: 128px;
+          padding: 18px 14px;
+          border: 1.5px dashed var(--color-hairline-strong);
+          border-radius: 14px;
+          background: linear-gradient(180deg, var(--color-primary-bg), rgba(255, 255, 255, .6));
+          transition: border-color .18s ease, background .18s ease;
+          cursor: pointer;
+        }
+
+        .file-drop-zone:hover {
+          border-color: var(--color-primary);
+          background: var(--color-primary-bg);
+        }
+
+        .file-drop-icon {
+          font-size: 30px;
+          color: var(--color-primary);
+        }
+
+        .file-drop-title {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--color-ink);
+          text-align: center;
+          word-break: break-all;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .file-drop-sub {
+          font-size: 12px;
+          color: var(--color-ink-subtle);
+          text-align: center;
+        }
+
+        
+        
+        
+        
+        
         @media (max-width: 560px) {
           .materials-header {
             align-items: flex-start;
@@ -456,14 +512,22 @@ export default function TeacherMaterialsPage() {
           .material-card {
             gap: 10px;
             padding: 12px;
-            min-height: 120px;
+            min-height: 118px;
           }
 
-          .file-icon {
-            width: 44px;
-            height: 44px;
-            flex-basis: 44px;
-            font-size: 22px;
+          .mini-book {
+            width: 74px;
+            height: 100px;
+            flex-basis: 74px;
+          }
+
+          .mini-book-inner {
+            padding: 10px 7px 7px 13px;
+            gap: 5px;
+          }
+
+          .mini-book-title {
+            font-size: 12.5px;
           }
 
           .material-actions {

@@ -13,7 +13,7 @@
  *   ALIYUN_OSS_PRIVATE_BUCKET     — true 表示私有 bucket，需签名 URL
  */
 
-import { writeFile, mkdir, unlink, readFile } from 'fs/promises'
+import { writeFile, mkdir, unlink, readFile, open, stat } from 'fs/promises'
 import { join, extname } from 'path'
 import crypto from 'crypto'
 
@@ -38,6 +38,8 @@ export interface StorageDriver {
   put(key: string, file: File, bucket?: string): Promise<UploadResult>
   putBuffer(key: string, buffer: Buffer, mimeType: string): Promise<UploadResult>
   readBuffer(key: string): Promise<Buffer>
+  readPrefix(key: string, length: number): Promise<Buffer>
+  getMetadata(key: string): Promise<{ size: number; contentType?: string }>
   delete(key: string): Promise<void>
   getUrl(key: string): string
 }
@@ -158,6 +160,22 @@ class LocalStorageDriver implements StorageDriver {
     return readFile(join(UPLOAD_ROOT, key))
   }
 
+  async readPrefix(key: string, length: number): Promise<Buffer> {
+    const handle = await open(join(UPLOAD_ROOT, key), 'r')
+    try {
+      const buffer = Buffer.alloc(length)
+      const { bytesRead } = await handle.read(buffer, 0, length, 0)
+      return buffer.subarray(0, bytesRead)
+    } finally {
+      await handle.close()
+    }
+  }
+
+  async getMetadata(key: string): Promise<{ size: number }> {
+    const metadata = await stat(join(UPLOAD_ROOT, key))
+    return { size: metadata.size }
+  }
+
   getUrl(key: string): string {
     return `/api/uploads/${key}`
   }
@@ -220,6 +238,34 @@ class AliyunOssDriver implements StorageDriver {
     try {
       const result = await client.get(key)
       return Buffer.from(result.content)
+    } catch (err) {
+      throw classifyOssError(err)
+    }
+  }
+
+  async readPrefix(key: string, length: number): Promise<Buffer> {
+    const client = await this.getClient() as {
+      get(key: string, _file?: null, options?: { headers?: Record<string, string> }): Promise<{ content: Buffer | Uint8Array }>
+    }
+    try {
+      const result = await client.get(key, null, { headers: { Range: `bytes=0-${Math.max(0, length - 1)}` } })
+      return Buffer.from(result.content).subarray(0, length)
+    } catch (err) {
+      throw classifyOssError(err)
+    }
+  }
+
+  async getMetadata(key: string): Promise<{ size: number; contentType?: string }> {
+    const client = await this.getClient() as {
+      head(key: string): Promise<{ res?: { headers?: Record<string, string | number | undefined> } }>
+    }
+    try {
+      const result = await client.head(key)
+      const headers = result.res?.headers || {}
+      const size = Number(headers['content-length'])
+      if (!Number.isFinite(size) || size < 0) throw new Error('OSS_OBJECT_SIZE_INVALID')
+      const contentType = headers['content-type']
+      return { size, contentType: typeof contentType === 'string' ? contentType : undefined }
     } catch (err) {
       throw classifyOssError(err)
     }
@@ -334,10 +380,24 @@ export function isDocumentFile(file: File): boolean {
 }
 
 /** 上传 Buffer 并返回统一结果（推荐，避免重复 read arrayBuffer） */
-export async function uploadBuffer(buffer: Buffer, meta: { originalName: string; mimeType: string; prefix?: string; bucket?: string }): Promise<UploadResult> {
-  const driver = getDriver()
+export async function uploadBuffer(buffer: Buffer, meta: {
+  originalName: string
+  mimeType: string
+  prefix?: string
+  bucket?: string
+  allowLocalFallback?: boolean
+}): Promise<UploadResult> {
   const key = safeFilename(meta.originalName, meta.prefix)
-  return driver.putBuffer(key, buffer, meta.mimeType)
+  try {
+    return await getDriver().putBuffer(key, buffer, meta.mimeType)
+  } catch (error) {
+    if (!meta.allowLocalFallback || !(error instanceof StorageConfigurationError)) throw error
+    console.warn('[storage] OSS upload unavailable; using persistent local storage', {
+      code: error.code,
+      key,
+    })
+    return drivers.local.putBuffer(key, buffer, meta.mimeType)
+  }
 }
 
 /** 上传文件并返回统一结果 */
@@ -358,6 +418,38 @@ export async function readStoredBuffer(key: string, storageDriver?: string): Pro
   const driver = storageDriver ? drivers[storageDriver] : getDriver()
   if (!driver) throw new Error(`Unsupported storage driver: ${storageDriver}`)
   return driver.readBuffer(key)
+}
+
+/** Read only the first bytes needed for server-side file signature checks. */
+export async function readStoredPrefix(key: string, length = 16, storageDriver?: string): Promise<Buffer> {
+  const driver = storageDriver ? drivers[storageDriver] : getDriver()
+  if (!driver) throw new Error(`Unsupported storage driver: ${storageDriver}`)
+  return driver.readPrefix(key, length)
+}
+
+/** Fetch authoritative object metadata from the configured storage provider. */
+export async function getStoredObjectMetadata(key: string, storageDriver?: string) {
+  const driver = storageDriver ? drivers[storageDriver] : getDriver()
+  if (!driver) throw new Error(`Unsupported storage driver: ${storageDriver}`)
+  return driver.getMetadata(key)
+}
+
+/** 对象存在性检查（短期缓存），用于 OSS 不可用/对象缺失时回退本地通道。 */
+const objectAvailableCache = new Map<string, { ok: boolean; at: number }>()
+const OBJECT_AVAILABLE_TTL_MS = 5 * 60 * 1000
+
+export async function isStorageObjectAvailable(key: string, storageDriver?: string): Promise<boolean> {
+  const cacheKey = `${storageDriver || 'default'}:${key}`
+  const cached = objectAvailableCache.get(cacheKey)
+  if (cached && Date.now() - cached.at < OBJECT_AVAILABLE_TTL_MS) return cached.ok
+  try {
+    await getStoredObjectMetadata(key, storageDriver)
+    objectAvailableCache.set(cacheKey, { ok: true, at: Date.now() })
+    return true
+  } catch {
+    objectAvailableCache.set(cacheKey, { ok: false, at: Date.now() })
+    return false
+  }
 }
 
 /** 获取文件访问 URL */

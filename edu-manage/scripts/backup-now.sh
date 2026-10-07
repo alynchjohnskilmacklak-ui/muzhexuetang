@@ -27,8 +27,34 @@ export BACKUP_KEEP_DAYS="${BACKUP_KEEP_DAYS:-9999}"
 echo "[backup-now] === DB backup ==="
 bash "$SCRIPT_DIR/backup-db.sh"
 
-echo "[backup-now] === Uploads backup ==="
-bash "$SCRIPT_DIR/backup-uploads.sh" 2>/dev/null || echo "[backup-now] uploads backup skipped (may not be configured)"
+echo "[backup-now] === Persistent public files backup ==="
+set --
+for relative_dir in \
+  public/uploads \
+  public/services \
+  public/marketing \
+  public/business-assets \
+  public/volunteer/docs
+do
+  if [ -e "$PROJECT_DIR/$relative_dir" ]; then
+    set -- "$@" "$relative_dir"
+  fi
+done
+
+if [ "$#" -gt 0 ]; then
+  tar -czf "$OUT_DIR/shared-public.tar.gz" -C "$PROJECT_DIR" "$@"
+  sha256sum "$OUT_DIR/shared-public.tar.gz" > "$OUT_DIR/shared-public.tar.gz.sha256"
+  chmod 600 "$OUT_DIR/shared-public.tar.gz" "$OUT_DIR/shared-public.tar.gz.sha256"
+else
+  echo "[backup-now] no persistent public directories found"
+fi
+
+if [ -n "$(load_env OSS_BUCKET)" ]; then
+  echo "[backup-now] === Optional OSS upload ==="
+  bash "$SCRIPT_DIR/backup-uploads.sh"
+else
+  echo "[backup-now] OSS_BUCKET not configured; local archive retained"
+fi
 
 # Write metadata
 cat > "$OUT_DIR/backup-metadata.json" << JSONEOF

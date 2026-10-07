@@ -1,6 +1,7 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { calculateIntensiveDeductHours } from '@/lib/intensive-class'
 import { createIntensiveLessonPayInTransaction } from '@/lib/intensive-settlement'
+import { hasAttendingStudent } from '@/lib/attendance-submission'
 
 export type IntensiveReviewAttendanceStatus = 'PRESENT' | 'LEAVE' | 'ABSENT' | 'MAKEUP'
 
@@ -82,6 +83,9 @@ export function validateIntensiveReviewSubmission(input: {
     || expected.some((studentId, index) => studentId !== submitted[index])
   ) {
     return '必须提交本次课次全部学生的考勤'
+  }
+  if (!hasAttendingStudent(input.records)) {
+    return '本次课没有实际出勤学员，不能提交授课审核；请联系管理员取消或调整课次'
   }
   return null
 }
@@ -333,6 +337,13 @@ export async function reviewIntensiveLesson(params: {
       throw new IntensiveReviewError(
         'REVIEW_SNAPSHOT_MISMATCH',
         '课次学生或考勤数据已发生变化，请驳回后由教师重新提交',
+        409,
+      )
+    }
+    if (!hasAttendingStudent(snapshot)) {
+      throw new IntensiveReviewError(
+        'NO_ATTENDING_STUDENTS',
+        '本次课没有实际出勤学员，不能审核通过；请驳回并取消或调整课次',
         409,
       )
     }

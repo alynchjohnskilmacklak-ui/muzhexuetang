@@ -7,7 +7,13 @@ import type { ServiceCatalogItem } from './service-catalog'
 export async function getServiceMarkdown(service: ServiceCatalogItem) {
   if (!service.markdownFile) return convertTablesToLists(service.detailMarkdown || '')
   const filePath = path.join(process.cwd(), 'src', 'content', 'services', service.markdownFile)
-  let content = await readFile(filePath, 'utf8')
+  let content: string
+  try {
+    content = await readFile(filePath, 'utf8')
+  } catch {
+    // markdown 文件不存在时降级使用内置内容，避免整页崩溃
+    return convertTablesToLists(service.detailMarkdown || '')
+  }
 
   if (service.markdownStartHeading) {
     const startIndex = content.indexOf(service.markdownStartHeading)

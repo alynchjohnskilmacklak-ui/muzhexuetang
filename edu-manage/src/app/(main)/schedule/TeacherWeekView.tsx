@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { format, addDays, startOfWeek } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { Spin, Empty, Input, Modal, Select, Typography, message } from 'antd'
@@ -10,6 +10,7 @@ import { findSchedulePeriod, PERIOD_HEIGHTS, PERIOD_BG, SchedulePeriod } from '@
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
 import { findScheduleMoveConflicts } from '@/lib/schedule-conflicts'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const { Text } = Typography
 
@@ -57,9 +58,10 @@ export function TeacherWeekView({
   } | null>(null)
   const [moveBusy, setMoveBusy] = useState(false)
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
+  const { division } = useDivision()
   const { periods } = useSchedulePeriods()
 
-  const { data: teachersData, isLoading: loadingTeachers } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
+  const { data: teachersData, isLoading: loadingTeachers } = useSWR(`/api/teachers/options?division=${division}`, fetcher)
   const teacherList: Record<string, unknown>[] = Array.isArray(teachersData?.teachers)
     ? teachersData.teachers
     : Array.isArray(teachersData) ? teachersData : []
@@ -67,9 +69,11 @@ export function TeacherWeekView({
   const weekDates = useMemo(() => getWeekDates(weekStart), [weekStart])
   const weekStartStr = format(weekStart, 'yyyy-MM-dd')
 
+  useEffect(() => { setSelectedTeacherId(undefined) }, [division])
+
   const shouldFetch = !!selectedTeacherId
   const { data: weekData, mutate: mutateWeek } = useSWR(
-    shouldFetch ? `/api/schedules/teacher-week?teacherId=${selectedTeacherId}&weekStart=${weekStartStr}` : null,
+    shouldFetch ? `/api/schedules/teacher-week?teacherId=${selectedTeacherId}&weekStart=${weekStartStr}&division=${division}` : null,
     fetcher
   )
   const lessons: Record<string, unknown>[] = useMemo(() => Array.isArray(weekData?.lessons) ? weekData.lessons : [], [weekData])
@@ -192,16 +196,18 @@ export function TeacherWeekView({
         gap: 8, marginBottom: 12, padding: '10px 12px', borderRadius: 10,
         background: 'var(--color-primary-bg)', border: '1px solid var(--color-hairline)',
       }}>
-        <Text strong><SwapOutlined /> 拖拽调课已开启</Text>
+        <Text strong><SwapOutlined /> {isTablet ? '点按调课' : '拖拽调课已开启'}</Text>
         <Text type="secondary" style={{ fontSize: 12 }}>
-          电脑可直接拖到目标日期和节次；手机请点课次内“调课”。冲突时会自动恢复。
+          {isTablet ? '请点课次内“调课”选择目标日期和节次。' : '可直接拖到目标日期和节次；冲突时会自动恢复。'}
         </Text>
       </div>
       {/* Week navigation */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
         <button
+          type="button"
+          aria-label="查看上一周"
           onClick={() => setWeekStart((prev: Date) => addDays(prev, -7))}
-          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}
+          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', width: 44, height: 44, cursor: 'pointer', fontSize: 16 }}
         >←</button>
 
         <div style={{
@@ -213,13 +219,16 @@ export function TeacherWeekView({
         </div>
 
         <button
+          type="button"
+          aria-label="查看下一周"
           onClick={() => setWeekStart((prev: Date) => addDays(prev, 7))}
-          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}
+          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', width: 44, height: 44, cursor: 'pointer', fontSize: 16 }}
         >→</button>
 
         <button
+          type="button"
           onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
-          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}
+          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 12px', minHeight: 44, cursor: 'pointer', fontSize: 12 }}
         >本周</button>
 
         <div style={{ marginLeft: 'auto', width: 220 }}>
@@ -303,9 +312,9 @@ export function TeacherWeekView({
                     const cellLessons = lessonsByDayPeriod[dateKey]?.[period.id] || []
                     return (
                       <div key={dayIdx}
-                        onDragOver={(event) => { if (period.type === 'CLASS') { event.preventDefault(); setDragTarget(`${dateKey}:${period.id}`) } }}
-                        onDragLeave={() => setDragTarget(undefined)}
-                        onDrop={(event) => {
+                        onDragOver={isTablet ? undefined : (event) => { if (period.type === 'CLASS') { event.preventDefault(); setDragTarget(`${dateKey}:${period.id}`) } }}
+                        onDragLeave={isTablet ? undefined : () => setDragTarget(undefined)}
+                        onDrop={isTablet ? undefined : (event) => {
                           event.preventDefault()
                           if (draggingLesson) void moveLesson(draggingLesson, date, period)
                         }}
@@ -332,11 +341,21 @@ export function TeacherWeekView({
                               return (
                                 <div
                                   key={lesson.id as string}
-                                  draggable
+                                  role="button"
+                                  tabIndex={0}
+                                  aria-label={`查看${course?.name as string || '课程'}课次，${lesson.startTime as string}`}
+                                  draggable={!isTablet}
                                   onDragStart={(event) => { event.dataTransfer.effectAllowed = 'move'; setDraggingLesson(lesson) }}
                                   onDragEnd={() => { setDraggingLesson(null); setDragTarget(undefined) }}
                                   onClick={() => onLessonClick(lesson)}
-                                  title="按住拖到目标日期和节次进行调课"
+                                  onKeyDown={(event) => {
+                                    if (event.target !== event.currentTarget) return
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                      event.preventDefault()
+                                      onLessonClick(lesson)
+                                    }
+                                  }}
+                                  title={isTablet ? '点按调课按钮调整课次' : '按住拖到目标日期和节次进行调课'}
                                   style={{
                                     flex: 1, borderRadius: 4, padding: '2px 5px',
                                     background: `${cellColor}15`,
@@ -361,6 +380,7 @@ export function TeacherWeekView({
                                   <button
                                     type="button"
                                     draggable={false}
+                                    aria-label={`调整${course?.name as string || '课程'}课次`}
                                     onClick={(event) => { event.stopPropagation(); openMoveDialog(lesson) }}
                                     style={{
                                       marginTop: 2, padding: 0, border: 0, background: 'transparent',

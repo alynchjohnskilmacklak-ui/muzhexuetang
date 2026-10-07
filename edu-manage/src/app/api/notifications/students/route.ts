@@ -18,27 +18,24 @@ export const GET = apiHandler(async (req: NextRequest) => {
     where: { status: { not: 'INACTIVE' }, division },
     include: {
       parent: { select: { wxpusherUid: true } },
-      schedules: {
-        include: {
-          schedule: {
-            include: { room: { select: { id: true, name: true } } },
-          },
-        },
+      enrollments: {
+        where: { status: 'ACTIVE', group: { status: { not: 'ARCHIVED' }, course: { isActive: true } } },
+        include: { group: { include: { room: { select: { id: true, name: true } } } } },
       },
     },
     orderBy: { name: 'asc' },
   })
 
   const result = students.map(s => {
-    const roomEntry = s.schedules.find(ss => ss.schedule?.room?.name)
+    const roomEntry = s.enrollments.find((enrollment) => enrollment.group.room?.name)
     return {
       id: s.id,
       name: s.name,
       grade: s.grade || '未设置年级',
       parentName: s.parentName,
       wxBound: !!s.parent?.wxpusherUid,
-      roomId: roomEntry?.schedule?.room?.id || null,
-      roomName: roomEntry?.schedule?.room?.name || '未分配班级',
+      roomId: roomEntry?.group.room?.id || null,
+      roomName: roomEntry?.group.room?.name || '未分配班级',
     }
   })
 

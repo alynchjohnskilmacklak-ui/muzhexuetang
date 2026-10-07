@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminUser } from '@/lib/teacher-portal'
+import { getRequestDivision } from '@/lib/division'
 import {
   DEFAULT_FEEDBACK_RATE_GROUP,
   DEFAULT_FEEDBACK_RATE_ONE_ONE,
@@ -26,9 +27,13 @@ function normalizeOneOnOneRates(value: unknown) {
 
 export async function GET(req: NextRequest) {
   try {
-    const { prisma } = await requireAdminUser()
+    const admin = await requireAdminUser()
+    const { prisma } = admin
     const teacherId = req.nextUrl.searchParams.get('teacherId')
     if (!teacherId) return NextResponse.json({ error: '缺少 teacherId' }, { status: 400 })
+    const division = getRequestDivision(admin, req.nextUrl.searchParams.get('division'))
+    const teacher = await prisma.teacher.findFirst({ where: { id: teacherId, division }, select: { id: true } })
+    if (!teacher) return NextResponse.json({ error: '当前学部没有该教师' }, { status: 404 })
 
     const cfg = await prisma.teacherSalaryConfig.findUnique({ where: { teacherId } })
     return NextResponse.json({
@@ -48,13 +53,15 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const { user, prisma } = await requireAdminUser()
+    const admin = await requireAdminUser()
+    const { user, prisma } = admin
     const body = await req.json()
     const teacherId = typeof body.teacherId === 'string' ? body.teacherId : ''
     if (!teacherId) return NextResponse.json({ error: '缺少 teacherId' }, { status: 400 })
 
-    const teacher = await prisma.teacher.findUnique({ where: { id: teacherId }, select: { id: true } })
-    if (!teacher) return NextResponse.json({ error: '教师不存在' }, { status: 404 })
+    const division = getRequestDivision(admin, req.nextUrl.searchParams.get('division'))
+    const teacher = await prisma.teacher.findFirst({ where: { id: teacherId, division }, select: { id: true } })
+    if (!teacher) return NextResponse.json({ error: '当前学部没有该教师' }, { status: 404 })
 
     const data = {
       groupRateJunior: toNumberOrUndefined(body.groupRateJunior) ?? DEFAULT_GROUP_RATE_JUNIOR,

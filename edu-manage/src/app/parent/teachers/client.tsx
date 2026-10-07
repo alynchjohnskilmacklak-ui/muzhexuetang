@@ -3,11 +3,12 @@
 import { useMemo, useState } from 'react'
 import NextImage from 'next/image'
 import { Image as AntImage, Input, Tag, Typography } from 'antd'
-import { SearchOutlined, StarFilled, TeamOutlined } from '@ant-design/icons'
-import { normalizeUploadUrl } from '@/lib/upload-url'
+import { SearchOutlined, TeamOutlined } from '@ant-design/icons'
+import { normalizeAvatarUrl } from '@/lib/upload-url'
+import { femaleDefaultAvatar } from '@/lib/teacher-avatars'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ResponsiveDialog } from '@/components/Common/ResponsiveDialog'
-import { resolveTier, TIER_THEME } from '@/constants/teacher-tier'
+import { resolveTier, TIER_THEME, TIER_RANK } from '@/constants/teacher-tier'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -44,15 +45,15 @@ function TeacherGridCard({ teacher, onSelect }: { teacher: TeacherInfo; onSelect
   const tier = resolveTier(teacher.tierLevel)
   const tierTheme = TIER_THEME[tier]
 
-  return <button type="button" className="parent-teacher-card" onClick={onSelect}>
+  return <button type="button" className={`parent-teacher-card parent-teacher-card--${tier.toLowerCase()}`} onClick={onSelect}>
     <span className="parent-teacher-avatar" style={{ background: firstStyle.bg, color: firstStyle.color }}>
       {teacher.avatar && !imageFailed
-        ? <NextImage fill src={normalizeUploadUrl(teacher.avatar)} alt={teacher.name} sizes="(max-width: 768px) 38vw, 180px" onError={() => setImageFailed(true)} />
-        : teacher.name.slice(0, 1)}
+        ? <NextImage fill src={normalizeAvatarUrl(teacher.avatar)} alt={teacher.name} sizes="(max-width: 768px) 38vw, 180px" unoptimized onError={() => setImageFailed(true)} />
+        : <img src={teacher.gender === '男' ? '/avatars/teacher-male.png' : femaleDefaultAvatar(teacher.name)} alt={teacher.name} className="parent-teacher-avatar-img" />}
     </span>
     <span className="parent-teacher-name">
       <strong>{teacher.name}</strong>
-      {tier === 'SENIOR' && <StarFilled aria-label="资深教师" style={{ color: tierTheme.gold }} />}
+      <span className={`parent-teacher-tier-tag parent-teacher-tier-tag--${tier.toLowerCase()}`}>{tierTheme.label}</span>
     </span>
     <span className="parent-teacher-education">{[teacher.education, teacher.university].filter(Boolean).join(' · ') || (teacher.currentUnit || '牧哲学堂教师')}</span>
     <span className="parent-teacher-subjects">
@@ -61,6 +62,7 @@ function TeacherGridCard({ teacher, onSelect }: { teacher: TeacherInfo; onSelect
         return <span key={subject} style={{ background: style.bg, color: style.color }}>{subject}</span>
       })}
     </span>
+    <span className="parent-teacher-tip">点击查看教师信息</span>
   </button>
 }
 
@@ -75,7 +77,7 @@ export function ParentTeachersClient({ teachers }: { teachers: TeacherInfo[] }) 
       const matchesName = !normalizedQuery || teacher.name.toLowerCase().includes(normalizedQuery)
       const matchesSubject = !subject || teacherSubjects(teacher).includes(subject)
       return matchesName && matchesSubject
-    })
+    }).sort((a, b) => (TIER_RANK[resolveTier(b.tierLevel)] || 0) - (TIER_RANK[resolveTier(a.tierLevel)] || 0))
   }, [teachers, query, subject])
 
   const selectedSubjects = selectedTeacher ? teacherSubjects(selectedTeacher) : []
@@ -106,9 +108,13 @@ export function ParentTeachersClient({ teachers }: { teachers: TeacherInfo[] }) 
     <ResponsiveDialog open={Boolean(selectedTeacher)} onClose={() => setSelectedTeacher(null)} title={selectedTeacher?.name || '教师详情'} width={620} mobileHeight="88dvh" footer={null}>
       {selectedTeacher && <div className="parent-teacher-detail">
         <div className="parent-teacher-detail-head">
-          {selectedTeacher.avatar
-            ? <AntImage src={normalizeUploadUrl(selectedTeacher.avatar)} alt={selectedTeacher.name} width={96} height={120} style={{ objectFit: 'cover', borderRadius: 12 }} />
-            : <span className="parent-teacher-detail-fallback">{selectedTeacher.name.slice(0, 1)}</span>}
+          <AntImage
+            src={selectedTeacher.avatar ? normalizeAvatarUrl(selectedTeacher.avatar) : (selectedTeacher.gender === '男' ? '/avatars/teacher-male.png' : femaleDefaultAvatar(selectedTeacher.name))}
+            alt={selectedTeacher.name}
+            width={96} height={120}
+            style={{ objectFit: 'cover', borderRadius: 12 }}
+            preview={{ mask: '点击查看大图' }}
+          />
           <div>
             <Title level={4}>{selectedTeacher.name}</Title>
             <div className="parent-teacher-detail-tags">

@@ -59,6 +59,42 @@ describe('classroom feedback P0 access rules', () => {
     })).resolves.toMatchObject({ allowed: false, reason: 'student' })
   })
 
+  it('limits a multi-subject class to the explicitly selected subject', async () => {
+    const prisma = {
+      classGroup: {
+        findFirst: vi.fn(async () => ({
+          id: 'group-a',
+          termId: 'term-a',
+          intensiveMode: 'NORMAL',
+          course: { type: 'GROUP', subject: '语文' },
+          teacherAssignments: [{ subject: '数学' }, { subject: '英语' }],
+          enrollments: [
+            { studentId: 'student-math', subjects: ['数学', '英语'], student: { id: 'student-math', name: '牛博研', parentId: null, parentUserId: null } },
+            { studentId: 'student-chinese', subjects: ['语文'], student: { id: 'student-chinese', name: '语文学员', parentId: null, parentUserId: null } },
+          ],
+        })),
+      },
+      classLesson: { findFirst: vi.fn() },
+      student: { findMany: vi.fn(async () => []) },
+    } as unknown as PrismaClient
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-a',
+      feedbackGroupId: 'group-a',
+      requestedSubject: '数学',
+      requestedStudentIds: ['student-math'],
+      submittedCourseType: 'GROUP',
+    })).resolves.toMatchObject({ allowed: true, students: [{ id: 'student-math' }] })
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-a',
+      feedbackGroupId: 'group-a',
+      requestedSubject: '数学',
+      requestedStudentIds: ['student-chinese'],
+      submittedCourseType: 'GROUP',
+    })).resolves.toMatchObject({ allowed: false, students: [] })
+  })
+
   it('redacts every other student and rating from a parent DTO', () => {
     const result = redactFeedbackForParent({
       id: 'feedback-1',

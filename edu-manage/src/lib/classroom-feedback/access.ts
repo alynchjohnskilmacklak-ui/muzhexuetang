@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
 import { extractUploadStorageKey } from '@/lib/upload-url'
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 
 export type FeedbackAccessActor = {
   id: string
@@ -43,6 +44,7 @@ type FeedbackCreationScopeInput = {
   requestedStudentIds: string[]
   expandClassTarget?: boolean
   submittedCourseType?: 'GROUP' | 'ONE_ON_ONE'
+  requestedSubject?: string | null
 }
 
 type ScopedStudent = {
@@ -211,7 +213,7 @@ export async function resolveTeacherFeedbackCreationScope(
       include: {
         group: {
           include: {
-            course: { select: { type: true } },
+            course: { select: { type: true, subject: true } },
             enrollments: {
               where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
               include: { student: { select: studentSelect } },
@@ -224,9 +226,17 @@ export async function resolveTeacherFeedbackCreationScope(
     if (!lesson) {
       return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType, termId }
     }
-    allowedStudents = lesson.group.intensiveMode === 'INTENSIVE'
-      ? lesson.lessonStudents.map((row) => row.student)
-      : lesson.group.enrollments.map((row) => row.student)
+    // 按学科报名：普通班课也优先用课次快照（lessonStudents），未报该学科的学生不出现；
+    // 快照为空时才兜底用全班 ACTIVE 报名（兼容老数据）。
+    const lessonSubject = lesson.subject || lesson.group.course.subject
+    const eligibleEnrollments = lesson.group.enrollments
+      .filter((row) => enrollmentIncludesSubject(row.subjects, lessonSubject))
+    const eligibleStudentIds = new Set(eligibleEnrollments.map((row) => row.studentId))
+    allowedStudents = lesson.lessonStudents.length
+      ? lesson.lessonStudents
+        .filter((row) => eligibleStudentIds.has(row.student.id))
+        .map((row) => row.student)
+      : eligibleEnrollments.map((row) => row.student)
     feedbackGroupId = lesson.groupId
     termId = lesson.group.termId
     feedbackCourseType = lesson.group.intensiveMode === 'INTENSIVE' || lesson.group.course.type === 'ONE_ON_ONE'
@@ -244,7 +254,8 @@ export async function resolveTeacherFeedbackCreationScope(
         ],
       },
       include: {
-        course: { select: { type: true } },
+        course: { select: { type: true, subject: true } },
+        teacherAssignments: { where: { teacherId: input.teacherId }, select: { subject: true } },
         enrollments: {
           where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
           include: { student: { select: studentSelect } },
@@ -254,7 +265,16 @@ export async function resolveTeacherFeedbackCreationScope(
     if (!group) {
       return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType, termId }
     }
-    allowedStudents = group.enrollments.map((row) => row.student)
+    const teacherSubjects = group.teacherAssignments.map((assignment) => assignment.subject).filter((subject): subject is string => Boolean(subject))
+    if (!teacherSubjects.length) teacherSubjects.push(group.course.subject)
+    const requestedSubject = input.requestedSubject?.trim() || null
+    const scopedSubject = requestedSubject || (teacherSubjects.length === 1 ? teacherSubjects[0] : null)
+    if (!scopedSubject || !teacherSubjects.includes(scopedSubject)) {
+      return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType, termId }
+    }
+    allowedStudents = group.enrollments
+      .filter((row) => enrollmentIncludesSubject(row.subjects, scopedSubject))
+      .map((row) => row.student)
     termId = group.termId
     feedbackCourseType = group.intensiveMode === 'INTENSIVE' || group.course.type === 'ONE_ON_ONE'
       ? 'ONE_ON_ONE'

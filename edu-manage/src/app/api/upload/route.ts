@@ -113,6 +113,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       originalName: file.name,
       mimeType: file.type,
       prefix: ownerType,
+      allowLocalFallback: true,
     })
     const generatedVariants = isImage
       ? generateImageVariants(buffer).catch((variantError) => {
@@ -133,11 +134,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
           originalName: `${file.name.replace(/\.[^.]+$/, '')}-preview.webp`,
           mimeType: 'image/webp',
           prefix: `${ownerType}-preview`,
+          allowLocalFallback: true,
         }),
         uploadBuffer(generated.thumbnailBuffer, {
           originalName: `${file.name.replace(/\.[^.]+$/, '')}-thumbnail.webp`,
           mimeType: 'image/webp',
           prefix: `${ownerType}-thumbnail`,
+          allowLocalFallback: true,
         }),
       ])
       if (variantUploads[0].status === 'fulfilled') {

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { getPrismaForDivision, getRequestPrisma, isDualDbEnabled } from '@/lib/prisma'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { requireFeeAdminScope } from '@/lib/fee-admin-scope'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,22 +30,17 @@ async function findStudents(req: NextRequest, division: Division, q: string, lim
 }
 
 export const GET = apiHandler(async (req: NextRequest) => {
-  const session = await auth()
-  if (!session?.user || session.user.role !== 'admin') {
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
-
   const { searchParams } = new URL(req.url)
-  const division = searchParams.get('division') || 'all'
+  const { division } = await requireFeeAdminScope(searchParams.get('division'))
   const q = (searchParams.get('q') || '').trim().slice(0, 50)
   const limit = Math.min(100, Math.max(10, Number(searchParams.get('limit')) || 50))
 
-  const students = division === 'all' && isDualDbEnabled()
+  const students = division === 'all'
     ? (await Promise.all([
       findStudents(req, 'JUNIOR', q, limit),
       findStudents(req, 'SENIOR', q, limit),
     ])).flat().slice(0, limit)
-    : await findStudents(req, division === 'SENIOR' ? 'SENIOR' : 'JUNIOR', q, limit)
+    : await findStudents(req, division, q, limit)
 
   return NextResponse.json({ students })
 })

@@ -12,15 +12,30 @@ async function requireAdmin() {
   return session?.user && (session.user as { role?: string }).role === 'admin' ? session : null
 }
 
-export const GET = apiHandler(async () => {
+export const GET = apiHandler(async (req: NextRequest) => {
  
   const prisma = await getRequestPrisma()
   if (!await requireAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+  const division = req.nextUrl.searchParams.get('division') || 'JUNIOR'
+  const today = new Date()
   const templates = await prisma.mealTemplate.findMany({
-    where: { isActive: true, weekday: { gte: 1, lte: 6 } },
+    where: {
+      isActive: true,
+      weekday: { gte: 1, lte: 6 },
+      division,
+      OR: [
+        { startDate: null, endDate: null },
+        { startDate: { lte: today }, endDate: null },
+        { startDate: null, endDate: { gte: today } },
+        { startDate: { lte: today }, endDate: { gte: today } },
+      ],
+    },
     orderBy: { weekday: 'asc' },
   })
-  return NextResponse.json({ templates })
+  const dated = templates.filter((t) => t.startDate || t.endDate)
+  const undated = templates.filter((t) => !t.startDate && !t.endDate)
+  const datedWeekdays = new Set(dated.map((t) => t.weekday))
+  return NextResponse.json({ templates: [...dated, ...undated.filter((t) => !datedWeekdays.has(t.weekday))] })
 })
 
 export const POST = apiHandler(async (req: NextRequest) => {
@@ -33,7 +48,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: 'Invalid weekday' }, { status: 400 })
   }
 
-  const existing = await prisma.mealTemplate.findFirst({ where: { weekday, isActive: true } })
+  const existing = await prisma.mealTemplate.findFirst({ where: { weekday, isActive: true, OR: [{ endDate: null }, { endDate: { gte: new Date() } }] } })
   const data = {
     title: clean(body.title),
     breakfast: clean(body.breakfast),
@@ -42,6 +57,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
     snack: clean(body.snack),
     note: clean(body.note),
     allowDouble: body.allowDouble !== false,
+    startDate: body.startDate ? new Date(body.startDate) : null,
+    endDate: body.endDate ? new Date(body.endDate) : null,
   }
   const template = existing
     ? await prisma.mealTemplate.update({ where: { id: existing.id }, data })

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { Card, Typography, Table, Tag, Select, Statistic, Row, Col, Button } from 'antd'
@@ -31,7 +31,7 @@ export function ParentFeesClient({
   return (
     <div>
       <ChildSwitcher />
-      <Title level={4} style={{ marginBottom: 16 }}>缴费记录</Title>
+      <div className="parent-theme-title"><Title level={4} style={{ marginBottom: 16 }}>缴费记录</Title></div>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={12} sm={8}><Card bordered={false}><Statistic title="已缴总额" value={totalPaid} prefix="¥" valueStyle={{ color: '#27a644' }} suffix={<CheckCircleOutlined />} /></Card></Col>

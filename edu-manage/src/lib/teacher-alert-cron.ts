@@ -1,7 +1,8 @@
 import { revalidatePath } from 'next/cache'
 import { getPrismaForDivision, isDualDbEnabled, prisma } from '@/lib/prisma'
 import type { PrismaClient } from '@prisma/client'
-import { ALERT_TYPES, TEACHER_LOG_ACTIONS, todayRange } from '@/lib/teacher-portal'
+import { ALERT_TYPES, TEACHER_LOG_ACTIONS, teacherLessonScopeWhere, todayRange } from '@/lib/teacher-portal'
+import { hasSubmittedAttendance, isAttendanceDue } from '@/lib/teacher-attendance-monitor'
 
 async function createAlertOnce(db: PrismaClient, teacherId: string, type: string, message: string, since: Date) {
   const existing = await db.teacherAlert.findFirst({
@@ -22,13 +23,34 @@ async function checkTeacherAlertsForDb(prisma: PrismaClient) {
   let createdAlerts = 0
 
   for (const teacher of teachers) {
-    const [completedLessons, submittedLogs, studentCount, recentPapers, stalePaperComments, stalePostComments, loginToday] = await Promise.all([
+    const teacherLessonScope = await teacherLessonScopeWhere(prisma, teacher.id)
+    const [todayLessons, studentCount, recentPapers, stalePaperComments, stalePostComments, loginToday] = await Promise.all([
       prisma.classLesson.findMany({
-        where: { teacherId: teacher.id, lessonDate: { gte: today, lt: todayEnd }, status: 'COMPLETED' },
-        include: { attendances: true },
-      }),
-      prisma.activityLog.count({
-        where: { teacherId: teacher.id, action: TEACHER_LOG_ACTIONS.ATTENDANCE_SUBMIT, createdAt: { gte: today, lt: todayEnd } },
+        where: {
+          AND: [
+            teacherLessonScope,
+            {
+              division: teacher.division,
+              lessonDate: { gte: today, lt: todayEnd },
+              status: { notIn: ['CANCELLED', 'POSTPONED'] },
+              deletedAt: null,
+              group: { status: { not: 'ARCHIVED' }, term: { status: 'ACTIVE' } },
+            },
+          ],
+        },
+        include: {
+          attendances: { select: { id: true } },
+          lessonStudents: { select: { studentId: true } },
+          group: {
+            select: {
+              course: { select: { subject: true } },
+              enrollments: {
+                where: { status: 'ACTIVE', deletedAt: null, student: { status: { not: 'INACTIVE' } } },
+                select: { studentId: true, subjects: true },
+              },
+            },
+          },
+        },
       }),
       prisma.student.count({
         where: {
@@ -45,13 +67,14 @@ async function checkTeacherAlertsForDb(prisma: PrismaClient) {
       prisma.activityLog.count({ where: { teacherId: teacher.id, action: TEACHER_LOG_ACTIONS.TEACHER_LOGIN, createdAt: { gte: today, lt: todayEnd } } }),
     ])
 
-    const missingAttendance = completedLessons.filter((lesson) => lesson.attendances.length === 0).length
-    if (missingAttendance > 0 || submittedLogs < completedLessons.length) {
+    const dueLessons = todayLessons.filter((lesson) => isAttendanceDue(lesson, now))
+    const missingAttendance = dueLessons.filter((lesson) => !hasSubmittedAttendance(lesson)).length
+    if (missingAttendance > 0) {
       const created = await createAlertOnce(
         prisma,
         teacher.id,
         ALERT_TYPES.NO_ATTENDANCE,
-        `${teacher.name}今日有${Math.max(missingAttendance, completedLessons.length - submittedLogs)}节课未提交考勤`,
+        `${teacher.name}今日有${missingAttendance}节课未提交考勤`,
         today
       )
       if (created) {
@@ -60,10 +83,15 @@ async function checkTeacherAlertsForDb(prisma: PrismaClient) {
           data: {
             teacherId: teacher.id,
             action: TEACHER_LOG_ACTIONS.ATTENDANCE_MISSING,
-            detail: `系统检测：${Math.max(missingAttendance, completedLessons.length - submittedLogs)}节课考勤未提交`,
+            detail: `系统检测：${missingAttendance}节课考勤未提交`,
           },
         })
       }
+    } else {
+      await prisma.teacherAlert.updateMany({
+        where: { teacherId: teacher.id, type: ALERT_TYPES.NO_ATTENDANCE, isResolved: false, createdAt: { gte: today } },
+        data: { isResolved: true },
+      })
     }
 
     if (studentCount > 0 && recentPapers === 0) {
@@ -77,8 +105,8 @@ async function checkTeacherAlertsForDb(prisma: PrismaClient) {
       if (created) createdAlerts += 1
     }
 
-    if (loginToday === 0 && completedLessons.length > 0) {
-      const created = await createAlertOnce(prisma, teacher.id, ALERT_TYPES.NO_LOGIN, `${teacher.name}今日有${completedLessons.length}节课但未登录系统`, today)
+    if (loginToday === 0 && dueLessons.length > 0) {
+      const created = await createAlertOnce(prisma, teacher.id, ALERT_TYPES.NO_LOGIN, `${teacher.name}今日有${dueLessons.length}节课但未登录系统`, today)
       if (created) createdAlerts += 1
     }
   }

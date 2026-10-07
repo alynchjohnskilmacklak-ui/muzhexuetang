@@ -32,6 +32,7 @@ export interface StudentBasic {
   phone: string | null
   parentName: string | null
   mainTeacher: string | null
+  mainTeacherTier: string | null
   status: string | null
   remainHours: number
   totalHours: number
@@ -193,7 +194,7 @@ async function fetchStudentBasic(prisma: PrismaClient, studentId: string): Promi
       id: true, name: true, grade: true, school: true, phone: true,
       parentName: true, parentPhone: true,
       totalHours: true, remainHours: true, status: true,
-      mainTeacher: { select: { name: true } },
+      mainTeacher: { select: { name: true, tierLevel: true } },
     },
   })
   if (!s) return null
@@ -201,6 +202,7 @@ async function fetchStudentBasic(prisma: PrismaClient, studentId: string): Promi
     id: s.id, name: s.name, grade: s.grade, school: s.school, phone: s.phone,
     parentName: s.parentName || s.parentPhone || null,
     mainTeacher: s.mainTeacher?.name || null,
+    mainTeacherTier: s.mainTeacher?.tierLevel || null,
     status: s.status, remainHours: s.remainHours, totalHours: s.totalHours,
   }
 }

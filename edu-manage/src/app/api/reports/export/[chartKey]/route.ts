@@ -5,6 +5,11 @@ import * as XLSX from 'xlsx'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import {
+  getGuideActionLabel,
+  getPaperMasteryLabel,
+  getStudentStatusLabel,
+} from '@/lib/domain-labels'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,21 +66,19 @@ export const GET = apiHandler(async (
   const selectedTerm = await resolveAdminTermScope(prisma, division, request)
   const termId = selectedTerm?.id || '__NO_SELECTED_TERM__'
   const studentWhere = { division, termMemberships: { some: { termId } } }
-  const feeWhere = { division, termId }
+  const feeWhere = { division, termId, deletedAt: null }
 
   switch (chartKey) {
     case 'funnel': {
       const counts = await prisma.student.groupBy({ by: ['status'], _count: true, where: studentWhere })
-      const statusMap: Record<string, string> = { LEAD: '潜客咨询', TRIAL: '预约试听', ACTIVE: '报名缴费', INACTIVE: '暂停', GRADUATED: '毕业/离校' }
-      const rows = counts.map((c) => [statusMap[c.status] || c.status, c._count])
+      const rows = counts.map((c) => [getStudentStatusLabel(c.status), c._count])
       const ws = XLSX.utils.aoa_to_sheet([['阶段', '人数'], ...rows])
       const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '学员漏斗')
       return sendXlsx(wb, `学员入学漏斗-${new Date().toISOString().slice(0, 10)}`)
     }
     case 'paper-mastery': {
       const data = await prisma.paperQuestion.groupBy({ by: ['mastery'], _count: true, where: { paper: { termId, paperDate: { gte: from, lt: to } } } })
-      const labels: Record<string, string> = { MASTERED: '已掌握', NEEDS_REVIEW: '待复习', NEEDS_PRACTICE: '需练习' }
-      const rows = data.map((d) => [labels[d.mastery] || d.mastery, d._count])
+      const rows = data.map((d) => [getPaperMasteryLabel(d.mastery), d._count])
       const ws = XLSX.utils.aoa_to_sheet([['掌握程度', '题目数'], ...rows])
       const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '试卷掌握')
       return sendXlsx(wb, `试卷掌握分布-${new Date().toISOString().slice(0, 10)}`)
@@ -151,8 +154,7 @@ export const GET = apiHandler(async (
     }
     case 'guide-usage': {
       const data = await prisma.guideViewLog.groupBy({ by: ['action'], _count: true, where: { createdAt: { gte: from, lt: to } } })
-      const labels: Record<string, string> = { VIEW_GUIDE: '查看指南', VIEW_STEPS: '浏览步骤', DOWNLOAD: '下载文件', SEARCH_SCHOOL: '搜学校', VIEW_QUOTA: '查名额' }
-      const rows = data.map((d) => [labels[d.action] || d.action, d._count])
+      const rows = data.map((d) => [getGuideActionLabel(d.action), d._count])
       const ws = XLSX.utils.aoa_to_sheet([['操作', '次数'], ...rows])
       const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '志愿填报使用')
       return sendXlsx(wb, `志愿填报使用-${new Date().toISOString().slice(0, 10)}`)

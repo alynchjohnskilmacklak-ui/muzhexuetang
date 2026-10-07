@@ -137,26 +137,28 @@ export function ParentTodayTimeline({
                     fontWeight: 700,
                     lineHeight: 1.5,
                   }}>
-                    {event.title}
                     {isMobile && (
-                      <span style={{ color: 'var(--color-ink-subtle)', fontSize: 11, fontWeight: 500 }}>
-                        {event.timeLabel}
+                      <span style={{ color: 'var(--color-ink-subtle)', fontSize: 11, fontWeight: 500, marginRight: 2 }}>
+                        {event.timeLabel} ·
                       </span>
                     )}
+                    {event.title}
                   </span>
-                  <span style={{
-                    display: '-webkit-box',
-                    marginTop: 4,
-                    color: 'var(--color-ink-muted)',
-                    fontSize: 13,
-                    lineHeight: 1.6,
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    overflowWrap: 'anywhere',
-                  }}>
-                    {event.detail}
-                  </span>
+                  {event.detail && (
+                    <span style={{
+                      display: '-webkit-box',
+                      marginTop: 4,
+                      color: 'var(--color-ink-muted)',
+                      fontSize: 13,
+                      lineHeight: 1.6,
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      overflowWrap: 'anywhere',
+                    }}>
+                      {event.detail}
+                    </span>
+                  )}
                   {event.status && (
                     <span style={{
                       display: 'inline-block',

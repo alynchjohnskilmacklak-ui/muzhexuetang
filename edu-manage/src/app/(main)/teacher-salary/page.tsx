@@ -41,6 +41,7 @@ const TYPE_META: Record<string, { color: string; label: string }> = {
   LESSON_PAY_ADJUSTMENT: { color: '#C77F00', label: '课时薪资结算调整' },
   FEEDBACK_BONUS: { color: '#E8784A', label: '反馈奖励' },
   STUDY_HALL_BONUS: { color: '#C6821E', label: '作业登记奖励' },
+  STUDY_HALL_ATTENDANCE: { color: '#1D9E75', label: '晚托考勤奖励' },
   manual_adjust: { color: '#534AB7', label: '手动调整' },
 }
 

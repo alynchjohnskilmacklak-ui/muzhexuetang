@@ -31,7 +31,7 @@ export const DELETE = apiHandler(async (
   const ft = await prisma.feeType.findUnique({ where: { id } })
   if (!ft) return NextResponse.json({ error: '费用类型不存在' }, { status: 404 })
 
-  const feeCount = await prisma.fee.count({ where: { type: ft.name } })
+  const feeCount = await prisma.fee.count({ where: { type: ft.name, deletedAt: null } })
   if (feeCount > 0) {
     return NextResponse.json({ error: `该费用类型有 ${feeCount} 条缴费记录关联，无法删除` }, { status: 409 })
   }

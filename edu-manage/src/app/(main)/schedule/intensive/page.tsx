@@ -186,7 +186,7 @@ export default function IntensiveSchedulePage() {
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
   const { data: daily, isLoading, mutate } = useSWR(`/api/schedules/daily?date=${dateStr}&courseType=SMALL&division=${division}`, fetcher, { refreshInterval: 180_000 })
   const { data: roomsData } = useSWR('/api/rooms', fetcher)
-  const { data: teachersData } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
+  const { data: teachersData } = useSWR(`/api/teachers/options?division=${division}`, fetcher)
   const { data: studentsData } = useSWR(`/api/students?limit=500&division=${division}`, fetcher)
   const { data: coursesData } = useSWR(`/api/courses?limit=200&division=${division}`, fetcher)
   const { data: historyData, mutate: mutateHistory } = useSWR(
@@ -197,12 +197,12 @@ export default function IntensiveSchedulePage() {
   const { data: reviewData, mutate: mutateReviews } = useSWR(
     `/api/admin/intensive-reviews?division=${division}&status=PENDING`,
     fetcher,
-    { refreshInterval: 5_000, revalidateOnFocus: true, revalidateOnReconnect: true },
+    { refreshInterval: 30_000, revalidateOnFocus: true, revalidateOnReconnect: true },
   )
   const { data: appointmentData } = useSWR(
     `/api/admin/intensive-appointments?division=${division}`,
     fetcher,
-    { refreshInterval: 10_000, revalidateOnFocus: true, revalidateOnReconnect: true },
+    { refreshInterval: 60_000, revalidateOnFocus: true, revalidateOnReconnect: true },
   )
 
   const matrix = useMemo(() => (

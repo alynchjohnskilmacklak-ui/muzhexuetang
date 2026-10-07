@@ -34,7 +34,7 @@ const RATE_RULES: Array<{ prefix: string; rpm: number }> = [
   { prefix: '/api',                            rpm: 200 },
 ]
 
-function getRule(path: string): { prefix: string; rpm: number } {
+export function getRule(path: string): { prefix: string; rpm: number } {
   for (const rule of RATE_RULES) {
     if (path.startsWith(rule.prefix)) return rule
   }
@@ -73,9 +73,18 @@ function memCheck(key: string, rpm: number): { allowed: boolean; retryAfter?: nu
 let _redisClient: unknown = null
 let _redisInitFailed = false
 
+function isExplicitRedisDriver(): boolean {
+  return process.env.RATE_LIMIT_DRIVER?.toLowerCase() === 'redis'
+}
+
 async function getRedis(): Promise<unknown | null> {
   if (_redisClient) return _redisClient
-  if (_redisInitFailed) return null
+  if (_redisInitFailed) {
+    if (isExplicitRedisDriver()) {
+      throw new Error('[rate-limit] Redis 初始化此前已失败，显式 Redis 模式拒绝降级')
+    }
+    return null
+  }
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createClient } = require('redis') as { createClient: (opts: Record<string, unknown>) => { connect(): Promise<void>; incr(k: string): Promise<number>; expire(k: string, s: number): Promise<void>; ttl(k: string): Promise<number> } }
@@ -83,8 +92,11 @@ async function getRedis(): Promise<unknown | null> {
     await client.connect()
     _redisClient = client
     return client
-  } catch {
+  } catch (error) {
     _redisInitFailed = true
+    if (isExplicitRedisDriver()) {
+      throw new Error('[rate-limit] RATE_LIMIT_DRIVER=redis，但 Redis 初始化失败', { cause: error })
+    }
     console.warn('[rate-limit] Redis 不可用，降级为内存限流')
     return null
   }
@@ -105,7 +117,10 @@ async function redisCheck(key: string, rpm: number): Promise<{ allowed: boolean;
       return { allowed: false, retryAfter: Math.max(1, ttl) }
     }
     return { allowed: true }
-  } catch {
+  } catch (error) {
+    if (isExplicitRedisDriver()) {
+      throw new Error('[rate-limit] Redis 限流请求失败，拒绝静默降级', { cause: error })
+    }
     return memCheck(key, rpm)
   }
 }
@@ -113,9 +128,17 @@ async function redisCheck(key: string, rpm: number): Promise<{ allowed: boolean;
 // ---- public API ----
 
 function resolveDriver(): 'redis' | 'memory' {
-  const configured = process.env.RATE_LIMIT_DRIVER || 'auto'
-  if (configured === 'redis') return 'redis'
+  const configured = (process.env.RATE_LIMIT_DRIVER || 'auto').toLowerCase()
+  if (configured === 'redis') {
+    if (!process.env.REDIS_URL) {
+      throw new Error('[rate-limit] RATE_LIMIT_DRIVER=redis 时必须配置 REDIS_URL')
+    }
+    return 'redis'
+  }
   if (configured === 'memory') return 'memory'
+  if (configured !== 'auto') {
+    throw new Error(`[rate-limit] 不支持的 RATE_LIMIT_DRIVER: ${configured}`)
+  }
   // auto
   return process.env.REDIS_URL ? 'redis' : 'memory'
 }
@@ -124,9 +147,10 @@ export async function checkRateLimit(
   ip: string,
   path: string,
   tenant?: string,
+  rpmOverride?: number,
 ): Promise<{ allowed: boolean; retryAfter?: number }> {
   const rule = getRule(path)
-  const rpm = rule.rpm
+  const rpm = rpmOverride ?? rule.rpm
   const segment = tenant ? `rate:${tenant}:${rule.prefix}` : rule.prefix
   const key = `${ip}:${segment}`
 

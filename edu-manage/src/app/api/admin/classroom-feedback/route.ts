@@ -202,7 +202,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             data: {
               userId: parentUserId,
               type: 'CLASSROOM_FEEDBACK',
-              title: `${teacher.name}老师发布了课堂反馈`,
+              title: `${teacher.name.endsWith('老师') ? teacher.name : `${teacher.name}老师`}发布了课堂反馈`,
               content: `${student.name}: ${summary || knowledgePoints?.join('、') || '课堂资料已更新'}`.slice(0, 80),
               link: '/parent/class-feedback',
               relatedType: 'CLASSROOM_FEEDBACK',

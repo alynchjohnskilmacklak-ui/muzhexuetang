@@ -6,6 +6,10 @@ import { AuthError } from './auth/guards'
 
 /** 不同路径的请求体大小限制 */
 function getBodyLimit(path: string): number {
+  // 周末课讲义：业务层限制单文件 50MB、管理端单批文件总量 200MB。
+  // multipart/form-data 还会包含边界和分配信息，因此在网关层预留少量协议开销。
+  if (path.startsWith('/api/admin/materials/lesson-previews')) return 210 * 1024 * 1024
+  if (path.startsWith('/api/teacher/materials/lesson-previews')) return 55 * 1024 * 1024
   if (path.startsWith('/api/materials/upload')) return 210 * 1024 * 1024 // 200MB + overhead
   if (path.startsWith('/api/upload'))           return 30 * 1024 * 1024  // 30MB
   if (path.startsWith('/api/exam-papers'))      return 10 * 1024 * 1024
@@ -28,7 +32,14 @@ export function apiHandler<Args extends unknown[]>(handler: (...args: Args) => P
         const url = new URL(req.url)
         const path = url.pathname
 
-        const { allowed, retryAfter } = await checkRateLimit(ip, path)
+        const { allowed, retryAfter } = await checkRateLimit(
+          ip,
+          path,
+          undefined,
+          // GET/HEAD 是管理员正常浏览（一次页面会并发多个请求 + SWR 重验证），放宽到 300 rpm；
+          // POST/PUT/DELETE 是写操作，仍按 rate-limit.ts 里的严格规则限流。
+          req.method === 'GET' || req.method === 'HEAD' ? 300 : undefined,
+        )
         if (!allowed) {
           return NextResponse.json(
             { error: '请求过于频繁，请稍后重试' },

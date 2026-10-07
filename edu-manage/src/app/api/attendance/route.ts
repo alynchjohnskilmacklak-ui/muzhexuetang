@@ -6,6 +6,7 @@ import { resolveTeacherForUser } from '@/lib/performance'
 import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,10 +63,15 @@ export const GET = apiHandler(async (req: NextRequest) => {
           course: { select: { id: true, name: true, subject: true, type: true, color: true } },
           teacher: { select: { id: true, name: true } },
           room: { select: { id: true, name: true, type: true, usageType: true } },
+          teacherAssignments: { select: { teacherId: true, subject: true } },
           enrollments: {
-            include: { student: { select: { id: true, name: true } } },
+            where: { status: 'ACTIVE', deletedAt: null, student: { status: { not: 'INACTIVE' } } },
+            select: { studentId: true, subjects: true, student: { select: { id: true, name: true } } },
           },
         },
+      },
+      lessonStudents: {
+        include: { student: { select: { id: true, name: true } } },
       },
       attendances: {
         select: { id: true, studentId: true, status: true },
@@ -75,9 +81,27 @@ export const GET = apiHandler(async (req: NextRequest) => {
   })
 
   const result = lessons.map((lesson) => {
-    const enrollments = lesson.group.enrollments
-    const allDone = enrollments.length > 0 && enrollments.every(
-      (enr) => lesson.attendances.some((a) => a.studentId === enr.studentId)
+    // 管理端列表和教师端使用同一份按学科过滤的课次名单。
+    const snapshotStudents = (lesson.lessonStudents || []).map((ls) => ({
+      studentId: ls.studentId,
+      studentName: ls.student.name,
+    }))
+    const fallbackStudents = (lesson.group.enrollments || [])
+      .map((enr) => ({ studentId: enr.studentId, studentName: enr.student.name }))
+    const lessonTeacherId = lesson.teacherId || lesson.group.teacherId
+    const lessonSubject = lesson.subject
+      || lesson.group.teacherAssignments.find((assignment) => assignment.teacherId === lessonTeacherId)?.subject
+      || lesson.group.course.subject
+    const rosterStudentIds = new Set(resolveSubjectLessonStudentIds(
+      snapshotStudents.map((student) => student.studentId),
+      lesson.group.enrollments,
+      lessonSubject,
+      lesson.lessonDate,
+    ))
+    const students = (snapshotStudents.length ? snapshotStudents : fallbackStudents)
+      .filter((student) => rosterStudentIds.has(student.studentId))
+    const allDone = students.length > 0 && students.every(
+      (student) => lesson.attendances.some((a) => a.studentId === student.studentId)
     )
     const startTime = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T${lesson.startTime}:00`)
     const endTime = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T${lesson.endTime}:00`)
@@ -98,11 +122,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
       courseName: lesson.group.course?.name || '-',
       courseSubject: lesson.group.course?.subject || '',
       courseType: lesson.group.course?.type || null,
-      students: enrollments.map((enr) => ({
-        studentId: enr.studentId,
-        studentName: enr.student.name,
-      })),
-      studentCount: enrollments.length,
+      students,
+      studentCount: students.length,
       attendances: lesson.attendances.map((a) => ({
         studentId: a.studentId,
         status: a.status,

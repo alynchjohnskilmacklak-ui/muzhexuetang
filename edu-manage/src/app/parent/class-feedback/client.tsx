@@ -43,6 +43,7 @@ type FeedbackConversation = {
 
 type HomeworkItem = string | { content?: string; title?: string }
 type FeedbackItem = {
+  resolvedSubject?: string
   id: string
   createdAt: string
   status: string
@@ -58,8 +59,20 @@ type FeedbackItem = {
   homework: HomeworkItem[]
   imageUrls: string[]
   images: FeedbackImageVariant[]
+  signedThumbnails?: Record<string, string>
   studentRating?: unknown
   teacher?: { id: string; name: string; subjects?: string | null } | null
+  term?: { name: string; status: string } | null
+  knowledgeDetail?: {
+    edition?: string
+    grade?: string
+    subject?: string
+    topic?: string
+    definition?: string
+    formulas?: string[]
+    example?: { question?: string; steps?: string[]; answer?: string }
+    tips?: string[]
+  } | null
   parentMessages?: FeedbackConversation[]
   classLesson?: {
     name?: string | null
@@ -83,9 +96,15 @@ const SUBJECT_STYLES: Record<string, { background: string; color: string }> = {
 }
 
 function feedbackSubject(feedback: FeedbackItem) {
-  const assignedSubject = feedback.classLesson?.group?.teacherAssignments
-    ?.find(assignment => assignment.teacherId === feedback.teacher?.id)?.subject
-  return feedback.classLesson?.subject || assignedSubject || feedback.classLesson?.group?.course?.subject || '综合'
+  return feedback.resolvedSubject || '课堂反馈'
+}
+
+/** 家长端隐藏教师填写的关键字/提示词，只展示 AI 生成的反馈正文 */
+function parentVisibleComment(comment: string) {
+  const paragraphs = comment.split(/\n+/).map((part) => part.trim()).filter(Boolean)
+  if (paragraphs.length < 2) return comment
+  const firstLong = paragraphs.findIndex((part) => part.length >= 80)
+  return firstLong > 0 ? paragraphs.slice(firstLong).join('\n\n') : comment
 }
 
 export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedbacks: FeedbackItem[]; highlightedFeedback: FeedbackItem | null }) {
@@ -103,7 +122,7 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
   const detailImages = Array.isArray(detailModal?.images) && detailModal.images.length === detailImageUrls.length
     ? detailModal.images
     : detailImageUrls.map((url: string) => ({ originalUrl: url, previewUrl: url, thumbnailUrl: url }))
-  const { urls: signedDetailThumbnails, error: thumbnailError, refresh: retryThumbnails } = useSignedUrls(detailImages.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl))
+  const { urls: signedDetailThumbnails, error: thumbnailError, refresh: retryThumbnails } = useSignedUrls(detailImages.map((image) => image.thumbnailUrl || image.previewUrl || image.originalUrl), detailModal?.signedThumbnails)
   const { urls: signedDetailPreviews, error: previewError, refresh: retryPreviews } = useSignedUrls(imagePreviewOpen
     ? detailImages.map((image) => image.previewUrl || image.thumbnailUrl || image.originalUrl)
     : [])
@@ -182,13 +201,12 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
     <PullToRefresh onRefresh={async () => { router.refresh(); await new Promise((resolve) => setTimeout(resolve, 500)) }}>
     <div>
       <ChildSwitcher />
-      <div style={{ marginBottom: 20 }}>
+      <div className="parent-theme-title" style={{ marginBottom: 20 }}>
         <Title level={4} style={{ marginBottom: 4 }}>课堂反馈</Title>
         <Text type="secondary" style={{ fontSize: 13 }}>
           查看老师发送的课堂表现、学习内容、作业与照片
         </Text>
       </div>
-
       {/* Unread indicator */}
       {feedbacks.filter(f => !f.notifySent || new Date(f.createdAt) > recentCutoff).length > 0 && (
         <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 10, background: '#FFF3E8', border: '1px solid #FDD5B5', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -211,18 +229,20 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
               const subject = feedbackSubject(f)
               const subjectStyle = SUBJECT_STYLES[subject] || { background: 'var(--color-surface-3)', color: 'var(--color-ink-muted)' }
               const unread = !f.parentReadAt && f.status === 'PUBLISHED' && !locallyReadIds.has(f.id)
-              const summary = f.summary || f.lessonContent || f.overallComment || '老师已发布本次课堂反馈'
+              // 权限过滤后直接展示老师写的课堂摘要（两三行），照片张数在右侧已有；全文留在详情页
+              const rawSummary = (f.summary || '').trim()
+              const summary = rawSummary || (unread ? '新课堂反馈，请点击查看' : '课堂反馈已发布，请点击查看')
               return <button type="button" key={f.id} className={`parent-feedback-row${detailModal?.id === f.id ? ' is-active' : ''}`} onClick={() => openDetail(f)}>
                 <span className="parent-feedback-icon" style={subjectStyle}>{subject.slice(0, 1)}</span>
                 <span className="parent-feedback-body">
                   <span className="parent-feedback-heading">
                     <strong>{f.teacher?.name || '老师'}</strong>
                     <span className="parent-feedback-subject" style={subjectStyle}>{subject}</span>
+                    {f.term?.name && <span className="parent-feedback-term" style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999, lineHeight: 1.4, background: f.term.status === 'ACTIVE' ? '#E6F4EF' : 'var(--color-surface-3)', color: f.term.status === 'ACTIVE' ? '#1D9E75' : 'var(--color-ink-muted)' }}>{f.term.name.replace(/^牧哲学堂/, '').replace(/批次$/, '')}</span>}
                     {unread && <span className="parent-feedback-unread" aria-label="未读" />}
                     <time>{formatFriendlyTime(f.createdAt)}</time>
                   </span>
-                  <span className="parent-feedback-summary" title={summary}>{summary}</span>
-                </span>
+                  <span className="parent-feedback-summary" title={summary}>{summary}</span>                </span>
                 <span className="parent-feedback-extras">
                   {f.imageUrls?.length > 0 && <span><CameraOutlined /> {f.imageUrls.length}</span>}
                   {f.parentReply && <span><MessageOutlined /> 已回复</span>}
@@ -278,15 +298,6 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
               </Descriptions.Item>
             </Descriptions>
 
-            {detailModal.lessonContent && (
-              <div style={{ background: '#FFFBF7', borderRadius: 10, padding: 14, marginBottom: 14 }}>
-                <Text strong style={{ display: 'block', marginBottom: 6 }}>本节课学习内容</Text>
-                <Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
-                  {detailModal.lessonContent}
-                </Paragraph>
-              </div>
-            )}
-
             {/* Knowledge points */}
             {detailModal.knowledgePoints?.length > 0 && (
               <div style={{ marginBottom: 14 }}>
@@ -299,23 +310,56 @@ export function ClassFeedbackClient({ feedbacks, highlightedFeedback }: { feedba
               </div>
             )}
 
-            {/* Summary */}
-            {(detailModal.summary || parentMasteryLabel(detailModal.studentRating)) && (
-              <div style={{ background: '#FFFBF7', borderRadius: 10, padding: 14, marginBottom: 14 }}>
-                <Text strong style={{ display: 'block', marginBottom: 6 }}>孩子掌握情况</Text>
-                <Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
-                  {detailModal.summary || parentMasteryLabel(detailModal.studentRating)}
-                </Paragraph>
-              </div>
-            )}
-
             {/* Overall comment */}
             {detailModal.overallComment && (
               <div style={{ background: '#F5F2EE', borderRadius: 10, padding: 14, marginBottom: 14 }}>
                 <Text strong style={{ display: 'block', marginBottom: 6 }}>课堂反馈</Text>
                 <Paragraph style={{ fontSize: 14, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
-                  {detailModal.overallComment}
+                  {parentVisibleComment(detailModal.overallComment)}
                 </Paragraph>
+              </div>
+            )}
+
+            {/* Knowledge detail */}
+            {detailModal.knowledgeDetail && (
+              <div style={{ background: '#FFFDF7', border: '1px solid #EFE7D3', borderRadius: 10, padding: 14, marginBottom: 14 }}>
+                <Text strong style={{ display: 'block', marginBottom: 6 }}>知识点详解</Text>
+                {(detailModal.knowledgeDetail.formulas?.length ?? 0) > 0 && (
+                  <div style={{ marginBottom: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#8A6D3B', marginBottom: 4 }}>公式或方法</div>
+                    {detailModal.knowledgeDetail.formulas?.map((formula, i) => (
+                      <div key={i} style={{ fontSize: 13, lineHeight: 1.7, color: '#4B5563', whiteSpace: 'pre-wrap' }}>{formula}</div>
+                    ))}
+                  </div>
+                )}
+                {detailModal.knowledgeDetail.definition && (
+                  <div style={{ marginBottom: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#8A6D3B', marginBottom: 4 }}>知识讲解</div>
+                    <Paragraph style={{ fontSize: 13, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>
+                      {detailModal.knowledgeDetail.definition}
+                    </Paragraph>
+                  </div>
+                )}
+                {(detailModal.knowledgeDetail.tips?.length ?? 0) > 0 && (
+                  <div style={{ marginBottom: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#8A6D3B', marginBottom: 4 }}>易错点与学习建议</div>
+                    {detailModal.knowledgeDetail.tips?.map((tip, i) => (
+                      <div key={i} style={{ fontSize: 13, lineHeight: 1.7, color: '#4B5563', marginBottom: 2 }}>· {tip}</div>
+                    ))}
+                  </div>
+                )}
+                {detailModal.knowledgeDetail.example && (
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#8A6D3B', marginBottom: 4 }}>示例</div>
+                    <div style={{ fontSize: 13, lineHeight: 1.7, color: '#4B5563' }}>
+                      {detailModal.knowledgeDetail.example.question && <div style={{ marginBottom: 4 }}>题目：{detailModal.knowledgeDetail.example.question}</div>}
+                      {(detailModal.knowledgeDetail.example.steps?.length ?? 0) > 0 && detailModal.knowledgeDetail.example.steps?.map((step, i) => (
+                        <div key={i} style={{ marginBottom: 2 }}>{i + 1}. {step}</div>
+                      ))}
+                      {detailModal.knowledgeDetail.example.answer && <div style={{ marginTop: 4 }}>答案：{detailModal.knowledgeDetail.example.answer}</div>}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

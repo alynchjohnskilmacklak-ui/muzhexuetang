@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import { Card, Empty, Segmented, Space, Table, Tag, Typography } from 'antd'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { TeacherTrendCharts } from '@/components/teacher/TeacherTrendCharts'
 
 const { Text, Title } = Typography
 
@@ -20,6 +21,8 @@ const TYPE_META: Record<string, { color: string; label: string }> = {
   LESSON_PAY: { color: '#1D9E75', label: '课时费' },
   LESSON_PAY_ADJUSTMENT: { color: '#C77F00', label: '课时费结算调整' },
   FEEDBACK_BONUS: { color: '#E8784A', label: '反馈奖励' },
+  STUDY_HALL_BONUS: { color: '#C6821E', label: '作业登记奖励' },
+  STUDY_HALL_ATTENDANCE: { color: '#1D9E75', label: '晚托考勤奖励' },
   manual_adjust: { color: '#7A6F5F', label: '薪资调整' },
 }
 
@@ -49,6 +52,8 @@ export default function TeacherSalaryPage() {
   const [period, setPeriod] = useState('month')
   const [salaryBucket, setSalaryBucket] = useState<'ALL' | 'SMALL_CLASS' | 'INTENSIVE'>('ALL')
   const { data, isLoading } = useSWR<SalaryPayload>(`/api/teacher/salary?period=${period}`, fetcher)
+  // 教学与收入趋势（到课率 + 近 6 月课时/课时费），口径与教师首页一致
+  const { data: trendData } = useSWR<{ attendanceWeekTrend: Array<{ label: string; rate: number }>; salaryTrend: Array<{ label: string; hours: number; pay: number }> }>('/api/teacher/trends', fetcher)
   const transactions = (data?.transactions ?? []).filter((item) => (
     salaryBucket === 'ALL' || item.salaryBucket === salaryBucket
   ))
@@ -67,7 +72,7 @@ export default function TeacherSalaryPage() {
   }, [transactions])
 
   const renderAmount = (value: number) => (
-    <Text strong style={{ color: value >= 0 ? '#1D9E75' : '#C0392B' }}>
+    <Text strong style={{ color: value >= 0 ? '#1D9E75' : '#C0392B', whiteSpace: 'nowrap', flexShrink: 0, display: 'inline-block' }}>
       {value >= 0 ? '+' : ''}¥{value.toFixed(2)}
     </Text>
   )
@@ -157,6 +162,8 @@ export default function TeacherSalaryPage() {
             </div>
           ))}
         </div>
+
+        <TeacherTrendCharts attendanceWeekTrend={trendData?.attendanceWeekTrend} salaryTrend={trendData?.salaryTrend} />
 
         <Card title="薪资明细" bordered={false} style={{ borderRadius: 8 }} extra={<Text type="secondary" style={{ fontSize: 12 }}>考勤和课堂反馈自动结算</Text>}>
           {isMobile ? (

@@ -194,7 +194,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           href: `/parent/archive?feedbackId=${post.id}`,
           title: `${student.name}有新的课堂表现`,
           content: content.slice(0, 60),
-          link: '/parent/performance',
+          link: '/parent/archive',
         },
       })
       await prisma.performancePost.update({ where: { id: post.id }, data: { notifySent: true } })
@@ -204,6 +204,6 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   revalidatePath('/performance')
-  revalidatePath('/teacher/performance')
+  revalidatePath('/teacher/feedback')
   return NextResponse.json({ count: results.length, posts: results }, { status: 201 })
 })

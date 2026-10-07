@@ -4,10 +4,14 @@ import { useMemo, useState } from 'react'
 import { Select, Tag, Typography } from 'antd'
 import {
   CheckCircleOutlined,
+  CalendarOutlined,
   ClockCircleOutlined,
   DownOutlined,
   EnvironmentOutlined,
   MessageOutlined,
+  LinkOutlined,
+  LeftOutlined,
+  ReadOutlined,
   RightOutlined,
   TeamOutlined,
 } from '@ant-design/icons'
@@ -18,6 +22,7 @@ import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ParentCard } from '@/components/Parent/ParentCard'
 import { PullToRefresh } from '@/components/PullToRefresh'
 import { useRouter } from 'next/navigation'
+import { isParentStudentInLesson } from '@/lib/parent-lesson-visibility'
 import {
   calculateIntensiveDeductHours,
   intensiveTeachingTypeLabel,
@@ -26,7 +31,7 @@ import {
 const { Title, Text } = Typography
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
 
-type ScheduleStudent = { id: string; name: string; enrollments?: ScheduleEnrollment[] }
+type ScheduledStudent = { id: string; name: string; enrollments?: ScheduleEnrollment[] }
 type ScheduleEnrollment = { id: string; group?: ScheduleGroup | null }
 type ScheduleGroup = {
   id?: string; name?: string; intensiveMode?: string | null; teachingType?: string | null
@@ -34,10 +39,10 @@ type ScheduleGroup = {
   course?: { name?: string | null; subject?: string | null } | null
   teacher?: { id?: string; name?: string | null } | null
   teacherAssignments?: Array<{ teacherId?: string; subject?: string | null }>
-  enrollments?: Array<{ student?: { id?: string; name?: string | null } | null }>
+  enrollments?: Array<{ studentId?: string; subjects?: string[]; student?: { id?: string; name?: string | null } | null }>
 }
 type ScheduleLesson = {
-  id: string; lessonDate: string | Date; startTime: string; endTime: string; subject?: string | null
+  id: string; lessonDate: string | Date; startTime: string; endTime: string; subject?: string | null; isManual?: boolean; cancelReason?: string | null; _count?: { lessonStudents?: number }
   attendanceSubmittedAt?: string | null; actualMinutes?: number | null; intensiveReviewStatus?: string | null
   teacher?: { id?: string; name?: string | null } | null; group?: ScheduleGroup | null
   lessonStudents?: Array<{ studentId: string; student?: { name?: string | null } | null }>
@@ -61,7 +66,7 @@ function getSubjectColor(subject: string): string {
 function getLessonSubject(lesson: ScheduleLesson): string {
   const teacherId = lesson.teacher?.id || lesson.group?.teacher?.id
   const assignedSubject = lesson.group?.teacherAssignments?.find((assignment) => assignment.teacherId === teacherId)?.subject
-  return assignedSubject || lesson.subject || lesson.group?.course?.subject || ''
+  return lesson.subject || assignedSubject || lesson.group?.course?.subject || ''
 }
 
 function lessonDateTime(lesson: ScheduleLesson, time: string) {
@@ -82,12 +87,16 @@ function getLessonStatus(lesson: ScheduleLesson): { text: string; color: string;
 export function ParentScheduleClient({
   students,
   lessons,
+  cancelledLessons,
+  weekStart,
   historyLessons,
   intensiveSummary,
   periods,
 }: {
-  students: ScheduleStudent[]
+  students: ScheduledStudent[]
   lessons: ScheduleLesson[]
+  cancelledLessons: ScheduleLesson[]
+  weekStart: string
   historyLessons: ScheduleLesson[]
   intensiveSummary: Array<{
     studentId: string
@@ -104,23 +113,31 @@ export function ParentScheduleClient({
   const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || '')
   const [today] = useState(() => new Date())
 
-  const [monday] = useState(() => {
-    const value = new Date(today)
-    value.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1))
-    value.setHours(0, 0, 0, 0)
-    return value
-  })
+  const monday = useMemo(() => new Date(`${weekStart}T00:00:00`), [weekStart])
+  const canChangeWeek = (offset: number) => {
+    const target = new Date(monday)
+    target.setDate(target.getDate() + offset * 7)
+    return Math.abs(target.getTime() - today.getTime()) <= 366 * 86400000
+  }
+  const changeWeek = (offset: number) => {
+    if (!canChangeWeek(offset)) return
+    const target = new Date(monday)
+    target.setDate(target.getDate() + offset * 7)
+    const day = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}-${String(target.getDate()).padStart(2, '0')}`
+    router.push(`/parent/schedule?week=${day}`)
+  }
 
   const weekDates = useMemo(() => WEEKDAYS.map((_, i) => {
     const d = new Date(monday); d.setDate(monday.getDate() + i); return d
   }), [monday])
 
   // Filter lessons for selected child
-  const childLessons = useMemo(() => lessons.filter(l =>
-    l.group?.intensiveMode === 'INTENSIVE'
-      ? l.lessonStudents?.some((item) => item.studentId === selectedStudentId)
-      : l.group?.enrollments?.some((enrollment) => enrollment.student?.id === selectedStudentId)
+  const childLessons = useMemo(() => lessons.filter((lesson) =>
+    isParentStudentInLesson(lesson, selectedStudentId)
   ), [lessons, selectedStudentId])
+  const childCancelledLessons = useMemo(() => cancelledLessons.filter((lesson) =>
+    isParentStudentInLesson(lesson, selectedStudentId)
+  ), [cancelledLessons, selectedStudentId])
 
   // Build day × period grid
   const grid = useMemo(() => {
@@ -182,13 +199,33 @@ export function ParentScheduleClient({
   return (
     <PullToRefresh onRefresh={async () => { router.refresh(); await new Promise((resolve) => setTimeout(resolve, 500)) }}>
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
-        <div>
-          <Title level={4} style={{ margin: 0 }}>课程表</Title>
-          <Text type="secondary" style={{ fontSize: 12 }}>本周课程安排</Text>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 14, flexWrap: 'nowrap' }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontSize: 17, fontWeight: 700, color: '#1a1201', lineHeight: 1.2 }}>课程表</div>
+          <div style={{ fontSize: 11.5, color: '#9a8e7a', marginTop: 2 }}>按周查看课程与停课记录</div>
         </div>
-        <Select value={selectedStudentId || undefined} style={{ width: 180 }} getPopupContainer={(trigger) => trigger.parentElement ?? document.body} onChange={v => setSelectedStudentId(v)}
-          options={students.map((student) => ({ label: student.name, value: student.id }))} />
+        <Select
+          value={selectedStudentId || undefined}
+          style={{ width: 108, flexShrink: 0 }}
+          size="small"
+          getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
+          onChange={v => setSelectedStudentId(v)}
+          options={students.map((student) => ({ label: student.name, value: student.id }))}
+        />
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 16, width: '100%', maxWidth: '100%' }}>
+        <button type="button" aria-label="查看上一周课程" disabled={!canChangeWeek(-1)} onClick={() => changeWeek(-1)}
+          style={{ minWidth: 44, minHeight: 44, border: '1px solid var(--color-hairline-strong)', borderRadius: 10, background: 'var(--color-surface-1)', color: 'var(--color-ink-muted)' }}>
+          <LeftOutlined />
+        </button>
+        <Text strong style={{ textAlign: 'center', fontSize: isMobile ? 13 : 15 }}>
+          {fmtDate(weekDates[0])} 至 {fmtDate(weekDates[6])}
+        </Text>
+        <button type="button" aria-label="查看下一周课程" disabled={!canChangeWeek(1)} onClick={() => changeWeek(1)}
+          style={{ minWidth: 44, minHeight: 44, border: '1px solid var(--color-hairline-strong)', borderRadius: 10, background: 'var(--color-surface-1)', color: 'var(--color-ink-muted)' }}>
+          <RightOutlined />
+        </button>
       </div>
 
       {intensiveEnrollments.length > 0 && (
@@ -227,11 +264,11 @@ export function ParentScheduleClient({
 
       {!students.length ? (
         <ParentCard style={{ minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <BrandEmpty title="暂未绑定学员" hint="绑定孩子后即可查看课程安排" icon="🔗" />
+          <BrandEmpty title="暂未绑定学员" hint="绑定孩子后即可查看课程安排" icon={<LinkOutlined />} />
         </ParentCard>
       ) : childLessons.length === 0 ? (
         <ParentCard style={{ minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <BrandEmpty title="本周暂无课程" hint="有新排课时会第一时间显示在这里" icon="📅" />
+          <BrandEmpty title="所选周暂无课程" hint="可切换其他周查看；临时加课后会出现在对应日期" icon={<CalendarOutlined />} />
         </ParentCard>
       ) : isMobile ? (
         <div style={{ display: 'grid', gap: 10 }}>
@@ -243,6 +280,8 @@ export function ParentScheduleClient({
               <div className="stagger-item" key={group.key} style={{ display: 'grid', gap: 8, opacity: isPast ? .62 : 1, animationDelay: `${Math.min(groupIndex, 8) * 40}ms` }}>
                 <button
                   type="button"
+                  aria-expanded={expanded}
+                  aria-controls={`parent-schedule-day-${groupIndex}`}
                   onClick={() => setExpandedDates(current => ({ ...current, [group.key]: !expanded }))}
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -256,10 +295,11 @@ export function ParentScheduleClient({
                   </span>
                   {expanded ? <DownOutlined style={{ color: '#E8784A' }} /> : <RightOutlined style={{ color: '#E8784A' }} />}
                 </button>
-                {expanded && group.lessons.map((lesson, lessonIndex) => {
+                {expanded && <div id={`parent-schedule-day-${groupIndex}`} style={{ display: 'grid', gap: 8 }}>
+                  {group.lessons.map((lesson, lessonIndex) => {
                   const status = getLessonStatus(lesson)
                   const statusBorder = { '已结束': '#1D9E75', '上课中': '#E8784A', '待上课': '#6B9FD8', '待老师确认': '#F0A24A' }[status.text] || '#EEE7E1'
-                  const studentNames = lesson.group?.intensiveMode === 'INTENSIVE'
+                  const studentNames = lesson.isManual || lesson.group?.intensiveMode === 'INTENSIVE'
                     ? lesson.lessonStudents?.map((item) => item.student?.name).filter(Boolean).join('、') || selectedStudent?.name || '-'
                     : lesson.group?.enrollments?.map((enrollment) => enrollment.student?.name).filter(Boolean).join('、') || selectedStudent?.name || '-'
                   return (
@@ -278,7 +318,8 @@ export function ParentScheduleClient({
                       </div>
                     </ParentCard>
                   )
-                })}
+                  })}
+                </div>}
               </div>
             )
           })}
@@ -338,6 +379,28 @@ export function ParentScheduleClient({
         </ParentCard>
       )}
 
+      {childCancelledLessons.length > 0 && (
+        <section aria-label="本周停课记录" style={{ marginTop: 18 }}>
+          <Title level={5} style={{ marginBottom: 10 }}>本周停课记录</Title>
+          <div style={{ display: 'grid', gap: 8 }}>
+            {childCancelledLessons.map((lesson) => (
+              <ParentCard key={lesson.id} style={{ padding: isMobile ? 12 : 16 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                  <div>
+                    <Text strong>{lesson.group?.course?.name || '课程'} · {lesson.subject || lesson.group?.course?.subject || '学科待确认'}</Text>
+                    <div style={{ color: 'var(--color-ink-muted)', fontSize: 13, marginTop: 4 }}>
+                      {fmtDate(lesson.lessonDate)} {lesson.startTime}-{lesson.endTime}
+                    </div>
+                    {lesson.cancelReason && <div style={{ color: 'var(--color-ink-muted)', fontSize: 13, marginTop: 4 }}>原因：{lesson.cancelReason}</div>}
+                  </div>
+                  <Tag color="default" style={{ margin: 0, flexShrink: 0 }}>已停课</Tag>
+                </div>
+              </ParentCard>
+            ))}
+          </div>
+        </section>
+      )}
+
       {students.length > 0 && (
         <section style={{ marginTop: 18 }}>
           <div style={{
@@ -360,7 +423,7 @@ export function ParentScheduleClient({
 
           {childHistoryLessons.length === 0 ? (
             <ParentCard style={{ padding: 20 }}>
-              <BrandEmpty title="暂无个性化课程上课记录" hint="教师提交考勤后会显示在这里" icon="📚" />
+              <BrandEmpty title="暂无个性化课程上课记录" hint="教师提交考勤后会显示在这里" icon={<ReadOutlined />} />
             </ParentCard>
           ) : (
             <div style={{ display: 'grid', gap: 10 }}>
@@ -434,7 +497,7 @@ export function ParentScheduleClient({
                           type="button"
                           onClick={() => router.push(`/parent/class-feedback?childId=${encodeURIComponent(selectedStudentId)}&feedbackId=${encodeURIComponent(feedback.id)}`)}
                           style={{
-                            minHeight: 34,
+                            minHeight: 44,
                             border: '1px solid rgba(232,120,74,.24)',
                             borderRadius: 10,
                             padding: '6px 10px',

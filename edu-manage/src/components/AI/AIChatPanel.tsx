@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import aiLogo from '@/assets/ai-logo.png'
 import NextImage from 'next/image'
 import { useSession } from 'next-auth/react'
 import { Avatar, Input, Spin, Tooltip, message } from 'antd'
@@ -158,6 +159,7 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
   const [modelId, setModelId] = useState<ModelId>('deepseek')
   const [attachment, setAttachment] = useState<Attachment | null>(null)
   const [extracting, setExtracting] = useState(false)
+  const [showQuick, setShowQuick] = useState(false)
   const [hydratedStorageKey, setHydratedStorageKey] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -427,8 +429,8 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      height: isMobile ? 'calc(100vh - 100px)' : 'calc(100vh - 130px)',
-      minHeight: 500,
+      height: '100%',
+      minHeight: 0,
       borderRadius: 8,
       overflow: 'hidden',
       boxShadow: '0 4px 24px rgba(0,0,0,.08)',
@@ -515,15 +517,21 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
               height: isMobile ? 40 : 52,
               margin: '0 auto 10px',
               borderRadius: 8,
-              backgroundColor: currentModel.color,
-              color: '#fff',
+              overflow: 'hidden',
+              background: '#fff',
+              border: '1px solid rgba(232,117,69,.25)',
+              boxShadow: '0 2px 10px rgba(0,0,0,.08)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: isMobile ? 20 : 26,
-              fontWeight: 800,
             }}>
-              {currentModel.icon || currentModel.label.slice(0, 1)}
+              <img
+                src={aiLogo.src}
+                alt="小牧AI"
+                width={isMobile ? 40 : 52}
+                height={isMobile ? 40 : 52}
+                style={{ objectFit: 'cover', borderRadius: 8 }}
+              />
             </div>
             <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 700, color: '#1a1201', marginBottom: 6 }}>
               小牧 AI 助手
@@ -537,9 +545,14 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
 
             {suggestedQuestions.length > 0 && (
               <div style={{ textAlign: 'left', maxWidth: 520, margin: '0 auto' }}>
-                <div style={{ fontSize: 12, color: '#9a8e7a', marginBottom: 10, textAlign: 'center' }}>
-                  点击快速提问
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowQuick(v => !v)}
+                  style={{ fontSize: 12, color: '#9a8e7a', marginBottom: 10, textAlign: 'center', border: 'none', background: 'transparent', cursor: 'pointer', width: '100%', display: 'block', padding: 0 }}
+                >
+                  {showQuick ? '收起快捷提问 ▲' : '点击快速提问 ▼'}
+                </button>
+                {showQuick && (
                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 8 }}>
                   {suggestedQuestions.map((question) => (
                     <button
@@ -572,6 +585,7 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
                     </button>
                   ))}
                 </div>
+                )}
               </div>
             )}
           </div>
@@ -594,14 +608,16 @@ export function AIChatPanel({ aiRole, suggestedQuestions = [], quickAsk, onQuick
           >
             <Avatar
               size={isMobile ? 28 : 34}
+              src={item.role === 'user' ? undefined : aiLogo.src}
               style={{
-                backgroundColor: item.role === 'user' ? '#E87545' : bubbleModelColor,
+                backgroundColor: item.role === 'user' ? '#E87545' : '#fff',
                 flexShrink: 0,
                 fontSize: item.role === 'user' ? 14 : 16,
                 fontWeight: 700,
+                border: item.role === 'user' ? 'none' : '1px solid rgba(232,117,69,.25)',
               }}
             >
-              {item.role === 'user' ? '我' : bubbleModelIcon}
+              {item.role === 'user' ? '我' : ''}
             </Avatar>
 
             <div style={{

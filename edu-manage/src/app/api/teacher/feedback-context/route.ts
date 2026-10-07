@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
-import { requireCurrentTeacher, teacherLessonWhere, teacherStudentWhere } from '@/lib/teacher-portal'
+import { requireCurrentTeacher, teacherLessonScopeWhere, teacherStudentWhere } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 import { getLocalDayRange, todayLocal } from '@/lib/date/local-day'
 import { buildTodayFeedbackScopeSet, feedbackTodayScopeKey } from '@/lib/classroom-feedback/today-scope'
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,11 +18,7 @@ function localDateKey(date: Date) {
 
 export const GET = apiHandler(async () => {
   const { teacher, prisma } = await requireCurrentTeacher()
-  const activeTerm = await prisma.academicTerm.findFirst({
-    where: { status: 'ACTIVE' },
-    orderBy: { startDate: 'desc' },
-    select: { id: true, name: true },
-  })
+  const activeTerm = await getActiveAcademicTerm(prisma, teacher.division)
 
   if (!activeTerm) {
     return NextResponse.json({
@@ -44,7 +43,7 @@ export const GET = apiHandler(async () => {
     include: {
       term: { select: { id: true, name: true } },
       course: { select: { id: true, name: true, subject: true, grade: true, type: true } },
-      teacherAssignments: { where: { teacherId: teacher.id }, select: { subject: true }, take: 1 },
+      teacherAssignments: { where: { teacherId: teacher.id }, select: { subject: true }, orderBy: { createdAt: 'asc' } },
       enrollments: {
         where: { status: 'ACTIVE' },
         include: {
@@ -55,7 +54,7 @@ export const GET = apiHandler(async () => {
         where: { status: { not: 'CANCELLED' } },
         orderBy: { lessonDate: 'desc' },
         take: 5,
-        select: { id: true, lessonDate: true, startTime: true, endTime: true, lessonStudents: { select: { studentId: true } } },
+        select: { id: true, lessonDate: true, startTime: true, endTime: true, subject: true, lessonStudents: { select: { studentId: true } } },
       },
     },
   })
@@ -67,7 +66,7 @@ export const GET = apiHandler(async () => {
   const recentLessons = await prisma.classLesson.findMany({
     where: {
       AND: [
-        teacherLessonWhere(teacher.id),
+        await teacherLessonScopeWhere(prisma, teacher.id, activeTerm.id),
         { group: { termId: activeTerm.id } },
       ],
       lessonDate: { gte: sevenDaysAgo },
@@ -79,7 +78,7 @@ export const GET = apiHandler(async () => {
           course: { select: { name: true, type: true } },
           enrollments: {
             where: { status: 'ACTIVE' },
-            select: { studentId: true },
+            select: { studentId: true, subjects: true },
           },
         },
       },
@@ -145,22 +144,32 @@ export const GET = apiHandler(async () => {
   }
 
   // Assemble response
-  const groupsOut = groups.map(g => ({
-    id: g.id,
+  const groupsOut = groups.flatMap(g => {
+    const assignedSubjects = [...new Set(g.teacherAssignments
+      .map((assignment) => assignment.subject?.trim())
+      .filter((subject): subject is string => Boolean(subject)))]
+    const teachingSubjects = assignedSubjects.length ? assignedSubjects : [g.course?.subject || null]
+    return teachingSubjects.map((teachingSubject) => {
+      const visibleEnrollments = g.enrollments.filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, teachingSubject))
+      const scopeId = `${g.id}::${encodeURIComponent(teachingSubject || '未填学科')}`
+      const recentLesson = g.classLessons.find((lesson) => !teachingSubject || lesson.subject === teachingSubject)
+      return ({
+    id: scopeId,
+    groupId: g.id,
     name: g.name,
     courseName: g.course?.name || '-',
     termName: g.term?.name || activeTerm.name,
     courseType: g.course?.type || 'GROUP',
     intensiveMode: g.intensiveMode,
     teachingType: g.teachingType,
-    subject: g.teacherAssignments[0]?.subject || g.course?.subject || null,
+    subject: teachingSubject,
     grade: g.course?.grade || null,
-    studentCount: g.enrollments.length,
-    recentLesson: g.classLessons[0] ? {
-      date: g.classLessons[0].lessonDate,
-      time: `${g.classLessons[0].startTime}-${g.classLessons[0].endTime}`,
+    studentCount: visibleEnrollments.length,
+    recentLesson: recentLesson ? {
+      date: recentLesson.lessonDate,
+      time: `${recentLesson.startTime}-${recentLesson.endTime}`,
     } : null,
-    students: g.enrollments.map(e => {
+    students: visibleEnrollments.map(e => {
       const att = attendanceMap.get(e.student.id)
       const attRate = att && att.total > 0 ? Math.round((att.present / att.total) * 100) : null
       const lastFb = studentFeedbackMap.get(e.student.id)
@@ -179,7 +188,7 @@ export const GET = apiHandler(async () => {
         todayFeedback: feedbackedTodayScopes.has(feedbackTodayScopeKey(g.id, e.student.id)),
       }
     }),
-  }))
+  })})})
 
   const todayKey = localDateKey(now)
   const lessonsOut = [...recentLessons]
@@ -204,9 +213,14 @@ export const GET = apiHandler(async () => {
     lessonDate: l.lessonDate,
     startTime: l.startTime,
     endTime: l.endTime,
-    studentIds: l.group?.intensiveMode === 'INTENSIVE'
-      ? l.lessonStudents.map((item) => item.studentId)
-      : l.group?.enrollments?.map(e => e.studentId) || [],
+    scopeId: `${l.groupId}::${encodeURIComponent(l.subject || '未填学科')}`,
+    subject: l.subject,
+    studentIds: resolveSubjectLessonStudentIds(
+      l.lessonStudents.map((item) => item.studentId),
+      l.group?.enrollments || [],
+      l.subject,
+      l.lessonDate,
+    ),
   }))
 
   return NextResponse.json({

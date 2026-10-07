@@ -1,0 +1,527 @@
+.page {
+  --mkt-paper: #f3eedf;
+  --mkt-paper-card: #fbf8f0;
+  --mkt-rule: rgba(32, 26, 16, .1);
+  --mkt-rule-strong: rgba(32, 26, 16, .22);
+  --mkt-ink: #201a10;
+  --mkt-ink-soft: #6b6152;
+  --mkt-ink-faint: #9a9080;
+  --mkt-seal: #a73327;
+  --mkt-seal-soft: #f4e1da;
+  --mkt-jade: #2b6355;
+  --mkt-jade-soft: #e4ece6;
+  --font-serif-cn: "Noto Serif SC", "Songti SC", STSong, SimSun, serif;
+
+  min-height: 100vh;
+  color: var(--mkt-ink);
+  background-color: var(--mkt-paper);
+  background-image:
+    linear-gradient(var(--mkt-rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mkt-rule) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(243, 238, 223, .94);
+  border-bottom: 1px solid var(--mkt-rule-strong);
+  backdrop-filter: blur(6px);
+}
+
+.headerRow,
+.hero,
+.timetable,
+.facts,
+.closing {
+  width: min(1120px, calc(100% - 40px));
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.headerRow {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brandMark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: var(--mkt-paper);
+  background: var(--mkt-ink);
+  border-radius: 50%;
+  font-family: var(--font-serif-cn);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.brandName {
+  font-family: var(--font-serif-cn);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.brandName small {
+  display: block;
+  margin-top: 2px;
+  color: var(--mkt-ink-faint);
+  font-family: var(--font-geist-sans);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .12em;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.nav a {
+  color: var(--mkt-ink-soft);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nav a:hover {
+  color: var(--mkt-ink);
+}
+
+.nav .loginLink,
+.primaryAction,
+.closingAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mkt-paper);
+  background: var(--mkt-ink);
+  border-radius: 2px;
+  font-weight: 650;
+  text-decoration: none;
+  transition: color .15s ease, background .15s ease, transform .15s ease;
+}
+
+.nav .loginLink {
+  height: 40px;
+  padding: 0 20px;
+}
+
+.nav .loginLink:hover,
+.primaryAction:hover {
+  color: #fff;
+  background: var(--mkt-seal);
+}
+
+.hero {
+  display: grid;
+  padding: 64px 0 40px;
+  align-items: center;
+  grid-template-columns: 1.05fr .95fr;
+  gap: 56px;
+}
+
+.eyebrow {
+  margin: 0 0 14px;
+  color: var(--mkt-jade);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hero h1 {
+  margin: 0 0 22px;
+  color: var(--mkt-ink);
+  font-family: var(--font-serif-cn);
+  font-size: clamp(32px, 3.6vw, 46px);
+  font-weight: 700;
+  letter-spacing: .01em;
+  line-height: 1.32;
+}
+
+.lead {
+  max-width: 52ch;
+  margin: 0 0 30px;
+  color: var(--mkt-ink-soft);
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.primaryAction {
+  height: 48px;
+  padding: 0 26px;
+  color: #fff;
+  background: var(--mkt-seal);
+  font-size: 15px;
+}
+
+.primaryAction:hover {
+  background: #8f2a20;
+}
+
+.primaryAction:active,
+.closingAction:active {
+  transform: translateY(1px);
+}
+
+.secondaryAction {
+  color: var(--mkt-ink-soft);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.secondaryAction:hover {
+  color: var(--mkt-ink);
+}
+
+.heroVisual {
+  position: relative;
+}
+
+.calligraphyPanel {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--mkt-paper-card);
+  border: 1px solid var(--mkt-rule-strong);
+}
+
+.stamp {
+  position: absolute;
+  right: -14px;
+  bottom: -14px;
+  display: flex;
+  width: 96px;
+  height: 96px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--mkt-seal);
+  background: var(--mkt-paper);
+  border: 3px solid var(--mkt-seal);
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+  transform: rotate(-9deg);
+}
+
+.stamp b {
+  font-family: var(--font-serif-cn);
+  font-size: 19px;
+  line-height: 1;
+}
+
+.stamp span {
+  margin-top: 4px;
+  font-size: 10px;
+  letter-spacing: .06em;
+}
+
+.timetable {
+  padding: 0 0 64px;
+}
+
+.timetableInner {
+  background: var(--mkt-paper-card);
+  border: 1px solid var(--mkt-rule-strong);
+}
+
+.timetableHead {
+  display: flex;
+  padding: 16px 22px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--mkt-rule-strong);
+}
+
+.timetableHead h2 {
+  margin: 0;
+  font-family: var(--font-serif-cn);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.timetableHead span {
+  color: var(--mkt-ink-faint);
+  font-size: 12px;
+}
+
+.timetableRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.timetableCell {
+  padding: 26px 22px;
+  border-right: 1px solid var(--mkt-rule);
+}
+
+.timetableCell:last-child {
+  border-right: 0;
+}
+
+.timetableCell svg {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 16px;
+  color: var(--mkt-seal);
+}
+
+.timetableCell h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.timetableCell p {
+  margin: 0;
+  color: var(--mkt-ink-soft);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.facts {
+  display: grid;
+  margin-bottom: 70px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--mkt-rule-strong);
+  border-bottom: 1px solid var(--mkt-rule-strong);
+}
+
+.facts > div {
+  display: flex;
+  min-height: 92px;
+  padding: 20px 12px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-right: 1px solid var(--mkt-rule);
+}
+
+.facts > div:last-child {
+  border-right: 0;
+}
+
+.facts strong {
+  color: var(--mkt-ink-soft);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.facts .factPrimary strong {
+  color: var(--mkt-ink);
+  font-family: var(--font-serif-cn);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.facts span {
+  margin-top: 5px;
+  color: var(--mkt-ink-faint);
+  font-size: 12px;
+}
+
+.closing {
+  padding: 0 0 70px;
+}
+
+.closingPanel {
+  padding: 64px 48px;
+  color: var(--mkt-paper);
+  background: var(--mkt-ink);
+  text-align: center;
+}
+
+.closingPanel > p {
+  margin: 0 0 16px;
+  color: var(--mkt-jade-soft);
+  font-size: 12px;
+  letter-spacing: .08em;
+  opacity: .8;
+}
+
+.closingPanel h2 {
+  margin: 0 0 28px;
+  color: var(--mkt-paper);
+  font-family: var(--font-serif-cn);
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.closingAction {
+  height: 46px;
+  padding: 0 24px;
+  color: var(--mkt-ink);
+  background: #fff;
+  font-size: 14px;
+}
+
+.closingAction:hover {
+  color: #fff;
+  background: var(--mkt-seal);
+}
+
+@media (max-width: 860px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .heroVisual {
+    width: min(620px, 100%);
+    margin: 0 auto;
+  }
+
+  .timetableRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .timetableCell:nth-child(2) {
+    border-right: 0;
+  }
+
+  .timetableCell:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--mkt-rule);
+  }
+
+  .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .facts > div:nth-child(2) {
+    border-right: 0;
+  }
+
+  .facts > div:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--mkt-rule);
+  }
+}
+
+@media (max-width: 640px) {
+  .headerRow,
+  .hero,
+  .timetable,
+  .facts,
+  .closing {
+    width: calc(100% - 24px);
+  }
+
+  .brandMark {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brandName {
+    font-size: 15px;
+  }
+
+  .brandName small {
+    font-size: 9px;
+  }
+
+  .nav > a:not(.loginLink) {
+    display: none;
+  }
+
+  .nav .loginLink {
+    height: 38px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  .hero {
+    padding: 48px 0 52px;
+  }
+
+  .hero h1 {
+    font-size: 28px;
+    line-height: 1.42;
+  }
+
+  .lead {
+    font-size: 14px;
+  }
+
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .primaryAction,
+  .secondaryAction {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .calligraphyPanel {
+    aspect-ratio: 16 / 11;
+  }
+
+  .stamp {
+    right: -4px;
+    bottom: -18px;
+    width: 78px;
+    height: 78px;
+  }
+
+  .timetable {
+    padding-bottom: 48px;
+  }
+
+  .timetableHead {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .timetableCell {
+    min-height: 184px;
+    padding: 22px 18px;
+  }
+
+  .facts {
+    margin-bottom: 56px;
+  }
+
+  .facts > div {
+    min-height: 94px;
+    padding: 16px 8px;
+  }
+
+  .closing {
+    padding-bottom: 42px;
+  }
+
+  .closingPanel {
+    padding: 48px 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page * {
+    scroll-behavior: auto !important;
+    transition-duration: 0s !important;
+  }
+}

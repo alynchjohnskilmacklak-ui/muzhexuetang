@@ -3,21 +3,18 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { calculateAttendanceDeductHours } from '@/lib/attendance-hours'
-import { triggerLessonPay } from '@/lib/teacher-salary'
+import { createLessonPayInTransaction } from '@/lib/teacher-salary'
+import { postAttendanceHours } from '@/lib/attendance-hour-posting'
+import { normalizeAttendanceRecordStatus } from '@/lib/attendance-status'
 import { resolveIntensiveActualMinutes } from '@/lib/intensive-class'
 import { createIntensiveLessonPayInTransaction } from '@/lib/intensive-settlement'
 import { isClassLessonInActiveTerm } from '@/lib/admin-term-scope'
 import { syncAutomaticMealAttendance } from '@/lib/meal-attendance-sync'
+import { isFirstTeachingPeriod, normalizeSchedulePeriods } from '@/lib/schedule-periods'
+import { hasAttendingStudent } from '@/lib/attendance-submission'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
 
 export const dynamic = 'force-dynamic'
-
-const VALID_STATUS = new Set(['PRESENT', 'LEAVE', 'ABSENT', 'MAKEUP'])
-
-function normalizeStatus(status: unknown) {
-  const value = String(status || '').toUpperCase()
-  if (value === 'LATE') return 'PRESENT'
-  return VALID_STATUS.has(value) ? value : 'PRESENT'
-}
 
 export const POST = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
@@ -46,8 +43,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
         include: {
           course: true,
           teacher: { select: { id: true, name: true } },
+          teacherAssignments: { select: { teacherId: true, subject: true } },
           enrollments: {
-            where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
+            where: { status: 'ACTIVE', deletedAt: null, student: { status: { not: 'INACTIVE' } } },
           },
         },
       },
@@ -61,24 +59,18 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   const teacherId = lesson.teacherId || lesson.group.teacherId
-  const firstTeacherLesson = Array.isArray(mealStudentIds)
-    ? await prisma.classLesson.findFirst({
-        where: {
-          lessonDate: lesson.lessonDate,
-          status: { not: 'CANCELLED' },
-          division: lesson.division,
-          OR: [
-            { teacherId },
-            { teacherId: null, group: { teacherId } },
-            { teacherId: null, group: { teacherAssignments: { some: { teacherId } } } },
-          ],
-        },
-        select: { id: true },
-        orderBy: [{ startTime: 'asc' }, { id: 'asc' }],
-      })
-    : null
-  if (Array.isArray(mealStudentIds) && firstTeacherLesson?.id !== lesson.id) {
-    return NextResponse.json({ error: '就餐只能随该教师当天首节课登记' }, { status: 400 })
+  if (Array.isArray(mealStudentIds)) {
+    const scheduleConfig = await prisma.systemConfig.findUnique({
+      where: { id: 'singleton' },
+      select: { schedulePeriods: true },
+    })
+    const isSystemFirstPeriod = isFirstTeachingPeriod(
+      normalizeSchedulePeriods(scheduleConfig?.schedulePeriods),
+      lesson.startTime,
+    )
+    if (!isSystemFirstPeriod) {
+      return NextResponse.json({ error: '就餐只能随系统第一课节登记' }, { status: 400 })
+    }
   }
 
   const [lessonHour, lessonMinute = 0] = (lesson.startTime || '00:00').split(':').map(Number)
@@ -99,13 +91,24 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (isIntensive && lesson.intensiveReviewStatus === 'PENDING') {
     return NextResponse.json({ error: '教师已经提交授课审核，请在个性化课程审核区处理，不能绕过审核直接结算' }, { status: 409 })
   }
-  const snapshotStudentIds = new Set(lesson.lessonStudents.map((item) => item.studentId))
+  const lessonSubject = lesson.subject
+    || lesson.group.teacherAssignments.find((assignment) => assignment.teacherId === teacherId)?.subject
+    || lesson.group.course.subject
+  const rosterStudentIds = new Set(resolveSubjectLessonStudentIds(
+    lesson.lessonStudents.map((item) => item.studentId),
+    lesson.group.enrollments,
+    lessonSubject,
+    lesson.lessonDate,
+  ))
   const enrollmentByStudentId = new Map(lesson.group.enrollments.map((enrollment) => [enrollment.studentId, enrollment]))
   const validRecords = records.filter((record) => typeof record.studentId === 'string'
     && enrollmentByStudentId.has(record.studentId)
-    && (!isIntensive || snapshotStudentIds.has(record.studentId)))
+    && rosterStudentIds.has(record.studentId))
   if (validRecords.length === 0) {
-    return NextResponse.json({ error: '没有有效考勤记录，请检查学生是否仍在班级中' }, { status: 400 })
+    return NextResponse.json({ error: '没有本节学科的有效考勤记录，请先核对学员报名学科与课次名单' }, { status: 400 })
+  }
+  if (!hasAttendingStudent(validRecords)) {
+    return NextResponse.json({ error: '本次课没有实际出勤学员，不能提交已上课考勤；请取消或调整课次' }, { status: 400 })
   }
 
   const alreadyDeducted = !isIntensive && (
@@ -114,6 +117,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }) > 0
   )
   let processedCount = 0
+  let presentCount = 0
   let deductedCount = 0
   let mealCount = 0
   const now = new Date()
@@ -139,9 +143,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
       const enrollment = enrollmentByStudentId.get(studentId)
       if (!enrollment) continue
 
-      const status = normalizeStatus(record.status) as 'PRESENT' | 'LEAVE' | 'ABSENT' | 'MAKEUP'
+      const status = normalizeAttendanceRecordStatus(record.status)
       const actualMinutes = isIntensive ? intensiveActualMinutes : Number(record.actualMinutes) || null
       processedCount += 1
+      if (status === 'PRESENT') presentCount += 1
 
       const attendance = await tx.attendance.upsert({
         where: {
@@ -163,32 +168,23 @@ export const POST = apiHandler(async (req: NextRequest) => {
           intensiveMode: lesson.group.intensiveMode,
         })
         if (hoursDeducted > 0 && (!attendance.hoursDeducted || attendance.hoursDeducted <= 0)) {
-          const safeDeduct = Math.min(hoursDeducted, enrollment.remainHours)
-          if (safeDeduct <= 0) continue
+          const posting = await postAttendanceHours(tx, {
+            attendanceId: attendance.id,
+            enrollmentId: enrollment.id,
+            enrollmentTotalHours: Number(enrollment.totalHours || 0),
+            studentId,
+            lessonId,
+            groupName: lesson.group.name,
+            operatorId: user.id,
+            hours: hoursDeducted,
+          })
+          if (!posting.posted) continue
           deductedCount += 1
-          await tx.attendance.update({
-            where: { id: attendance.id },
-            data: { hoursDeducted: safeDeduct },
-          })
-          await tx.enrollment.update({
-            where: { id: enrollment.id },
-            data: { usedHours: { increment: safeDeduct }, remainHours: { decrement: safeDeduct } },
-          })
-          await tx.hourTransaction.create({
-            data: {
-              studentId,
-              enrollmentId: enrollment.id,
-              lessonId,
-              amount: -safeDeduct,
-              beforeHours: enrollment.remainHours,
-              afterHours: enrollment.remainHours - safeDeduct,
-              type: 'ATTENDANCE_DEDUCT',
-              reason: `${lesson.group.name} 考勤扣课时`,
-              operatorId: user.id,
-            },
-          })
         }
       }
+    }
+    if (presentCount === 0) {
+      throw new Error('NO_ATTENDING_STUDENTS')
     }
     if (Array.isArray(mealStudentIds)) {
       const eligibleStudentIds = validRecords
@@ -227,6 +223,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
       },
     })
 
+    if (!isIntensive) {
+      const lessonPay = await createLessonPayInTransaction(tx, lessonId)
+      if (!lessonPay.success) throw new Error(lessonPay.error || 'LESSON_PAY_FAILED')
+    }
+
     if (isIntensive) {
       const latestReview = await tx.intensiveLessonReview.findFirst({
         where: { lessonId },
@@ -242,7 +243,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           actualMinutes: Number(intensiveActualMinutes),
           attendanceSnapshot: validRecords.map((record) => ({
             studentId: record.studentId,
-            status: normalizeStatus(record.status),
+            status: normalizeAttendanceRecordStatus(record.status),
           })),
           teacherNote: '管理员直接登记并审核',
           status: 'APPROVED',
@@ -266,14 +267,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
     })
   } catch (error) {
+    if (error instanceof Error && error.message === 'NO_ATTENDING_STUDENTS') {
+      return NextResponse.json({ error: '本次课没有实际出勤学员，不能提交已上课考勤；请取消或调整课次' }, { status: 400 })
+    }
     if (error instanceof Error && error.message === 'INTENSIVE_SETTLEMENT_LOCKED') {
       return NextResponse.json({ error: '该突击班课次已被结算，请刷新后通过结算调整流程修改' }, { status: 409 })
     }
     throw error
-  }
-
-  if (!isIntensive && !alreadyDeducted) {
-    await triggerLessonPay(lessonId)
   }
 
   return NextResponse.json({ success: true, count: processedCount, mealCount })

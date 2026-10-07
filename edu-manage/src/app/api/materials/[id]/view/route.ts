@@ -6,29 +6,64 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { parentVisibleMaterialWhere, teacherVisibleMaterialWhere } from '@/lib/material-visibility'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { apiHandler } from '@/lib/api-handler'
-import { generateOssSignedUrl } from '@/lib/storage'
+import { readStoredBuffer } from '@/lib/storage'
+import { parentVisibleLessonWhere } from '@/lib/business-visibility'
+import { teacherLessonWhere } from '@/lib/teacher-portal'
+import { canRoleAccessMaterialAudience, materialContentType } from '@/lib/material-file'
 
 export const dynamic = 'force-dynamic'
 
-function contentTypeFor(fileType: string, ext: string) {
-  if (fileType === 'pdf') return 'application/pdf'
-  if (fileType === 'word') return ext === '.doc' ? 'application/msword' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-  if (fileType === 'excel') return ext === '.xls' ? 'application/vnd.ms-excel' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  if (fileType === 'ppt') return ext === '.ppt' ? 'application/vnd.ms-powerpoint' : 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-  if (fileType === 'archive') return 'application/octet-stream'
-  if (ext === '.png') return 'image/png'
-  if (ext === '.gif') return 'image/gif'
-  if (ext === '.webp') return 'image/webp'
-  if (ext === '.jpg' || ext === '.jpeg') return 'image/jpeg'
-  return 'application/octet-stream'
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[character] || character)
 }
 
-function checkAudience(role: string | undefined, audience: string): boolean {
-  if (role === 'admin') return true
-  if (audience === 'BOTH') return true
-  if (role === 'teacher' && (audience === 'TEACHER' || audience === 'STUDENT')) return true
-  if (role === 'parent' && audience === 'STUDENT') return true
-  return false
+async function wordPreviewResponse(buffer: Buffer, title: string) {
+  const mammoth = await import('mammoth')
+  const result = await mammoth.extractRawText({ buffer })
+  const safeTitle = escapeHtml(title)
+  const safeText = escapeHtml(result.value || '文档暂无可提取的文字内容')
+  const html = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safeTitle}</title><style>body{margin:0;background:#faf8f5;color:#1a1201;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}.page{box-sizing:border-box;max-width:860px;min-height:100vh;margin:0 auto;padding:32px 28px;background:#fff}.title{margin:0 0 24px;font-size:22px}.content{white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.85}@media(max-width:600px){.page{padding:22px 18px}.title{font-size:19px}.content{font-size:15px}}</style></head><body><main class="page"><h1 class="title">${safeTitle}</h1><div class="content">${safeText}</div></main></body></html>`
+  return new NextResponse(html, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Disposition': 'inline',
+      'Cache-Control': 'private, no-store',
+      'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:",
+      'X-Frame-Options': 'SAMEORIGIN',
+    },
+  })
+}
+
+/**
+ * 从 fileUrl 解析存储 key：
+ * - local driver：key 即相对路径（uploads/xxx）
+ * - aliyun-oss：若 fileUrl 存了完整 URL，取 URL 路径部分作为对象 key
+ */
+function resolveStorageKey(fileUrl: string, storageDriver?: string): string {
+  if (storageDriver === 'aliyun-oss' && /^https?:\/\//i.test(fileUrl)) {
+    try {
+      const pathname = new URL(fileUrl).pathname
+      return decodeURIComponent(pathname.replace(/^\/+/, ''))
+    } catch { /* 解析失败则回退原值 */ }
+  }
+  return fileUrl
+}
+
+/** 读取文件内容：优先按记录驱动读，失败后降级尝试另一驱动，最终返回 null */
+async function tryReadStoredBuffer(fileUrl: string, storageDriver?: string): Promise<Buffer | null> {
+  const primary = storageDriver || 'local'
+  const attempts: Array<{ driver: string; key: string }> = []
+  attempts.push({ driver: primary, key: resolveStorageKey(fileUrl, primary) })
+  const fallbackDriver = primary === 'aliyun-oss' ? 'local' : 'aliyun-oss'
+  attempts.push({ driver: fallbackDriver, key: resolveStorageKey(fileUrl, fallbackDriver) })
+  for (const attempt of attempts) {
+    try {
+      return await readStoredBuffer(attempt.key, attempt.driver)
+    } catch { /* 尝试下一个 */ }
+  }
+  return null
 }
 
 export const GET = apiHandler(async (
@@ -48,7 +83,7 @@ export const GET = apiHandler(async (
   }
 
   // audience 鉴权：角色不在可见范围内则 403
-  if (!checkAudience(user.role, material.audience)) {
+  if (!canRoleAccessMaterialAudience(user.role, material.audience)) {
     return NextResponse.json({ error: '无权限查看该资料' }, { status: 403 })
   }
 
@@ -62,46 +97,54 @@ export const GET = apiHandler(async (
       role: user.role,
     }, prisma)
     if (teacher) {
-      const matched = await prisma.studyMaterial.findFirst({
-        where: { id, ...teacherVisibleMaterialWhere(teacher.id, user.id) },
-        select: { id: true },
-      })
+      const matched = material.isLessonPreview && material.classLessonId
+        ? await prisma.classLesson.findFirst({ where: { id: material.classLessonId, ...teacherLessonWhere(teacher.id) }, select: { id: true } })
+        : await prisma.studyMaterial.findFirst({
+            where: { id, ...teacherVisibleMaterialWhere(teacher.id, user.id) },
+            select: { id: true },
+          })
       allowed = !!matched
     }
   }
   if (!allowed && user.role === 'parent') {
-    const matched = await prisma.studyMaterial.findFirst({
-      where: { id, ...parentVisibleMaterialWhere() },
-      select: { id: true },
-    })
+    let matched: { id: string } | null = null
+    if (material.isLessonPreview && material.classLessonId && material.status === 'PUBLISHED') {
+      matched = await prisma.classLesson.findFirst({
+        where: { id: material.classLessonId, ...parentVisibleLessonWhere(user.id || '') },
+        select: { id: true },
+      })
+    } else {
+      matched = await prisma.studyMaterial.findFirst({
+        where: { id, ...parentVisibleMaterialWhere() },
+        select: { id: true },
+      })
+    }
     allowed = !!matched
   }
   if (!allowed) return NextResponse.json({ error: '无权限查看该资料' }, { status: 403 })
 
   const download = new URL(req.url).searchParams.get('download') === '1'
 
-  // OSS 文件：生成签名 URL
-  if (material.storageDriver === 'aliyun-oss') {
-    const signedUrl = await generateOssSignedUrl(material.fileUrl, { expireSeconds: 600 })
-
-    // Word 文档用 Google Docs 预览（非下载模式）
-    if (material.fileType === 'word' && !download) {
-      await prisma.studyMaterial.update({
-        where: { id },
-        data: { downloads: { increment: 1 } },
-      })
-      const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(signedUrl)}&embedded=true`
-      return NextResponse.json({ type: 'word', viewerUrl })
+  // 本地与 OSS 文件都由本站鉴权后代理返回，避免微信内置浏览器跳转到
+  // 临时 OSS 域名时触发“无法确认是否安全”，也保证 PDF 可以同源预览。
+  if (material.storageDriver === 'local' || material.storageDriver === 'aliyun-oss') {
+    const buffer = await tryReadStoredBuffer(material.fileUrl, material.storageDriver)
+    if (!buffer) {
+      return NextResponse.json({ error: '资料文件不存在或已被清理，请联系管理员重新上传' }, { status: 404 })
     }
-
-    await prisma.studyMaterial.update({
-      where: { id },
-      data: { downloads: { increment: 1 } },
+    await prisma.studyMaterial.update({ where: { id }, data: { downloads: { increment: 1 } } })
+    const ext = path.extname(material.fileName).toLowerCase()
+    if (!download && material.fileType === 'word' && ext === '.docx') return wordPreviewResponse(buffer, material.title)
+    const inlinePreview = !download && ['pdf', 'image'].includes(material.fileType)
+    const encodedName = encodeURIComponent(material.fileName)
+    return new NextResponse(new Uint8Array(buffer), {
+      headers: {
+        'Content-Type': materialContentType(material.fileType, ext),
+        'Content-Disposition': `${inlinePreview ? 'inline' : 'attachment'}; filename*=UTF-8''${encodedName}`,
+        'Cache-Control': 'private, no-store',
+        'X-Frame-Options': 'SAMEORIGIN',
+      },
     })
-
-    // 下载：302 跳转；预览(PDF/图片)：返回 URL 供前端 iframe
-    if (download) return NextResponse.redirect(signedUrl, 302)
-    return NextResponse.json({ type: material.fileType, url: signedUrl })
   }
 
   // -- 以下为本地文件逻辑 --
@@ -116,16 +159,11 @@ export const GET = apiHandler(async (
     return NextResponse.json({ error: '无效的文件路径' }, { status: 400 })
   }
 
-  if (material.fileType === 'word' && !download) {
-    await prisma.studyMaterial.update({
-      where: { id },
-      data: { downloads: { increment: 1 } },
-    })
-
-    const baseUrl = process.env.NEXTAUTH_URL || ''
-    const publicFileUrl = `${baseUrl.replace(/\/$/, '')}${material.fileUrl}`
-    const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(publicFileUrl)}&embedded=true`
-    return NextResponse.json({ type: 'word', viewerUrl })
+  let buffer: Buffer
+  try {
+    buffer = await readFile(filePath)
+  } catch {
+    return NextResponse.json({ error: '资料文件不存在或已被清理，请联系管理员重新上传' }, { status: 404 })
   }
 
   await prisma.studyMaterial.update({
@@ -134,13 +172,13 @@ export const GET = apiHandler(async (
   })
 
   const ext = path.extname(material.fileName).toLowerCase()
-  const buffer = await readFile(filePath)
+  if (!download && material.fileType === 'word' && ext === '.docx') return wordPreviewResponse(buffer, material.title)
   const inlinePreview = !download && ['pdf', 'image'].includes(material.fileType)
   const encodedName = encodeURIComponent(material.fileName)
 
-  return new NextResponse(buffer, {
+  return new NextResponse(new Uint8Array(buffer), {
     headers: {
-      'Content-Type': contentTypeFor(material.fileType, ext),
+      'Content-Type': materialContentType(material.fileType, ext),
       'Content-Disposition': `${inlinePreview ? 'inline' : 'attachment'}; filename*=UTF-8''${encodedName}`,
       'Cache-Control': 'private, no-store',
       'X-Frame-Options': 'SAMEORIGIN',

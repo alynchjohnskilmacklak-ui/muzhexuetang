@@ -10,9 +10,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const prisma = await getRequestPrisma()
   const userId = (session.user as { id: string }).id
 
-  const { studentId, scheduleId: _scheduleId, reason, leaveDate } = await req.json() as {
+  const { studentId, lessonId, reason, leaveDate } = await req.json() as {
     studentId: string
-    scheduleId?: string
+    lessonId?: string
     reason: string
     leaveDate: string
   }
@@ -30,10 +30,25 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  const lesson = lessonId
+    ? await prisma.classLesson.findFirst({
+        where: {
+          id: lessonId,
+          deletedAt: null,
+          status: { not: 'CANCELLED' },
+          group: { enrollments: { some: { studentId, status: 'ACTIVE', deletedAt: null } } },
+        },
+        select: { id: true },
+      })
+    : null
+  if (lessonId && !lesson) {
+    return NextResponse.json({ error: '所选课次不存在或不属于该学员' }, { status: 400 })
+  }
+
   const leaveRequest = await prisma.leaveRequest.create({
     data: {
       studentId,
-      scheduleId: null, // ClassLesson ID not applicable to deprecated Schedule FK
+      lessonId: lesson?.id || null,
       reason,
       leaveDate: new Date(leaveDate),
       status: 'pending',
@@ -41,7 +56,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     },
     include: {
       student: { select: { name: true } },
-      schedule: { include: { course: { select: { name: true } } } },
+      lesson: { include: { group: { include: { course: { select: { name: true } } } } } },
     },
   })
 
@@ -99,7 +114,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
   return NextResponse.json({
     id: leaveRequest.id,
     studentName: leaveRequest.student.name,
-    courseName: leaveRequest.schedule?.course?.name || '未指定课程',
+    courseName: leaveRequest.lesson?.group.course.name || '未指定课程',
     leaveDate: leaveRequest.leaveDate.toISOString(),
     reason: leaveRequest.reason,
     status: leaveRequest.status,

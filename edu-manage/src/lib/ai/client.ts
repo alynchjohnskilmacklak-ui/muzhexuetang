@@ -64,7 +64,7 @@ export async function callKimi(params: {
         top_p: 0.95,
       }),
     },
-    Number(process.env.AI_TIMEOUT_MS || 45_000),
+    Number(process.env.AI_TIMEOUT_MS || 120_000),
   )
 
   if (!response.ok) {
@@ -119,7 +119,7 @@ export async function callDeepSeek(params: {
         ...(params.jsonMode && !isKimiCompatible ? { response_format: { type: 'json_object' } } : {}),
       }),
     },
-    Number(process.env.AI_TIMEOUT_MS || 45_000),
+    Number(process.env.AI_TIMEOUT_MS || 120_000),
   )
 
   if (!response.ok) {
@@ -134,6 +134,59 @@ export async function callDeepSeek(params: {
     throw new AIProviderError(
       `DeepSeek 调用失败：${errText.slice(0, 160) || '请求异常'}`,
       { status: response.status >= 500 ? 502 : 500, provider: 'deepseek', detail: errText },
+    )
+  }
+
+  const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> }
+  return data.choices?.[0]?.message?.content ?? ''
+}
+
+export async function callDoubao(params: {
+  system: string
+  user: string
+  maxTokens?: number
+  temperature?: number
+  jsonMode?: boolean
+}): Promise<string> {
+  const baseUrl = process.env.ARK_BASE_URL || 'https://ark.cn-beijing.volces.com/api/v3'
+  const apiKey = process.env.ARK_API_KEY || process.env.DOUBAO_API_KEY || ''
+  const model = process.env.DOUBAO_MODEL || 'doubao-seed-1-6-flash'
+
+  if (!apiKey || apiKey.includes('你的') || apiKey.includes('填入')) {
+    throw new AIProviderError('豆包（火山方舟）API Key 未配置，请管理员检查 ARK_API_KEY', { status: 500, provider: 'doubao' })
+  }
+
+  const response = await fetchWithTimeout(
+    `${baseUrl.replace(/\/$/, '')}/chat/completions`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: params.system },
+          { role: 'user', content: params.user },
+        ],
+        temperature: params.temperature ?? 0.7,
+        max_tokens: params.maxTokens ?? 500,
+        ...(params.jsonMode ? { response_format: { type: 'json_object' } } : {}),
+      }),
+    },
+    Number(process.env.AI_TIMEOUT_MS || 120_000),
+  )
+
+  if (!response.ok) {
+    const errText = await response.text()
+    console.error(`[Doubao Error ${response.status}]`, errText.slice(0, 300))
+    if (response.status === 401 || response.status === 403) {
+      throw new AIProviderError('豆包密钥无效或权限不足', { status: 502, provider: 'doubao' })
+    }
+    if (response.status === 429) {
+      throw new AIProviderError('豆包调用过于频繁或额度不足，请稍后重试', { status: 429, provider: 'doubao' })
+    }
+    throw new AIProviderError(
+      `豆包调用失败：${errText.slice(0, 160) || '请求异常'}`,
+      { status: response.status >= 500 ? 502 : 500, provider: 'doubao', detail: errText },
     )
   }
 

@@ -50,8 +50,8 @@ export function deriveTeacherLessonWorkflow(
       action: {
         label: '查看反馈',
         href: lesson.feedbackId
-          ? `/teacher/classroom-feedback?viewId=${lesson.feedbackId}`
-          : '/teacher/classroom-feedback',
+          ? `/teacher/feedback?viewId=${lesson.feedbackId}`
+          : '/teacher/feedback',
       },
     }
   }
@@ -67,8 +67,8 @@ export function deriveTeacherLessonWorkflow(
       action: {
         label: '填写反馈',
         href: lesson.lessonId
-          ? `/teacher/classroom-feedback?lessonId=${lesson.lessonId}`
-          : '/teacher/classroom-feedback',
+          ? `/teacher/feedback?lessonId=${lesson.lessonId}`
+          : '/teacher/feedback',
       },
     }
   }
@@ -138,10 +138,25 @@ function timeLabel(value: string) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return '--:--'
   return date.toLocaleTimeString('zh-CN', {
-    hour: '2-digit',
-    minute: '2-digit',
+    hour: '2-digit',    minute: '2-digit',
     hour12: false,
   })
+}
+
+/** 班型标识（GROUP/ONE_ON_ONE/SMALL_GROUP）不是学科，不得展示给家长 */
+const FEEDBACK_COURSE_TYPE_MARKERS = new Set(['GROUP', 'ONE_ON_ONE', 'SMALL_GROUP'])
+
+/** 反馈通知标题：老师 学科 · 课堂反馈请点击查看（班型标识不是学科，不得展示给家长） */
+export function feedbackTimelineTitle(feedback: { subject?: string | null; teacherName?: string | null }) {
+  const subject = feedback.subject?.trim()
+  const teacher = feedback.teacherName?.trim()
+  const subjectLabel = subject && !FEEDBACK_COURSE_TYPE_MARKERS.has(subject) ? subject : ''
+  const teacherLabel = teacher ? (teacher.endsWith('老师') ? teacher : `${teacher}老师`) : ''
+  const tail = '课堂反馈请点击查看'
+  if (teacherLabel && subjectLabel) return `${teacherLabel} ${subjectLabel} · ${tail}`
+  if (subjectLabel) return `${subjectLabel} · ${tail}`
+  if (teacherLabel) return `${teacherLabel} · ${tail}`
+  return tail
 }
 
 export function buildParentTodayTimeline(input: {
@@ -177,9 +192,8 @@ export function buildParentTodayTimeline(input: {
       type: 'feedback',
       timestamp: feedback.createdAt,
       timeLabel: timeLabel(feedback.createdAt),
-      title: `${feedback.subject || '课堂'}反馈已发布`,
-      detail: feedback.summary?.trim()
-        || (feedback.teacherName ? `${feedback.teacherName}老师已完成本次课堂反馈` : '老师已完成本次课堂反馈'),
+      title: feedbackTimelineTitle(feedback),
+      detail: '',
       status: '新反馈',
       href: `/parent/class-feedback/${feedback.id}`,
     })

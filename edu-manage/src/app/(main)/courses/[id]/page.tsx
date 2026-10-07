@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
-import { Alert, Button, Card, Col, Dropdown, Empty, Input, InputNumber, message, Modal, Popconfirm, Progress, Row, Select, Space, Statistic, Table, Tag } from 'antd'
+import { Alert, Button, Card, Checkbox, Col, Dropdown, Empty, Input, InputNumber, message, Modal, Popconfirm, Progress, Row, Select, Space, Statistic, Table, Tag } from 'antd'
 import { ArrowLeftOutlined, CalendarOutlined, DeleteOutlined, MoreOutlined, PlusOutlined, ReloadOutlined, TeamOutlined, UserSwitchOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
@@ -11,6 +11,10 @@ import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { formatRemaining } from '@/lib/lesson-units'
+import { SubjectChangeModal } from '@/components/Enrollment/SubjectChangeModal'
+import { ManualLessonModal } from '@/app/(main)/schedule/_components/ManualLessonModal'
+import { chinaClock } from '@/lib/enrollment-subject-change'
+import { localDateKey } from '@/lib/date/local-day'
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
@@ -24,6 +28,7 @@ export default function CourseGroupDetailPage() {
   const isMobile = useIsMobile() ?? false
   const [enrollOpen, setEnrollOpen] = useState(false)
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
+  const [newEnrollmentSubjects, setNewEnrollmentSubjects] = useState<string[]>([])
   const [studentGrade, setStudentGrade] = useState('')
   const [studentSearch, setStudentSearch] = useState('')
   const [totalHours, setTotalHours] = useState<number | null>(null)
@@ -46,13 +51,19 @@ export default function CourseGroupDetailPage() {
   const [reviewNote, setReviewNote] = useState('')
   const [reviewing, setReviewing] = useState(false)
 
+  const [subjectTarget, setSubjectTarget] = useState<{ studentId: string; name: string; subjects: string[] } | null>(null)
+  const [manualLessonOpen, setManualLessonOpen] = useState(false)
+  const [cancelLessonId, setCancelLessonId] = useState('')
+  const [cancelReason, setCancelReason] = useState('')
+  const [cancellingLesson, setCancellingLesson] = useState(false)
+
   const { data: group, mutate, isLoading } = useSWR(params.id ? `/api/class-groups/${params.id}` : null, fetcher)
   const { data: reviewData, mutate: mutateReviews } = useSWR(
     group?.intensiveMode === 'INTENSIVE'
       ? `/api/admin/intensive-reviews?division=${group.division}&status=PENDING`
       : null,
     fetcher,
-    { refreshInterval: 15_000, revalidateOnFocus: true },
+    { refreshInterval: 60_000, revalidateOnFocus: true },
   )
   const { data: studentsData } = useSWR(enrollOpen ? `/api/students?limit=200&q=${encodeURIComponent(studentSearch)}` : null, fetcher)
   const { data: teachers } = useSWR('/api/teachers?status=ACTIVE', fetcher)
@@ -85,17 +96,29 @@ export default function CourseGroupDetailPage() {
     ))
     : []
   const selectedReview = pendingReviews.find((review: Record<string, unknown>) => review.id === reviewOpenId)
-  const todayStr = format(new Date(), 'yyyy-MM-dd')
-  const todayLessons = lessons.filter((lesson: Record<string, unknown>) => String(lesson.lessonDate || '').slice(0, 10) === todayStr)
+  const currentClock = chinaClock(new Date())
+  const todayStr = currentClock.day
   const visibleLessons = isIntensive
     ? [...lessons].sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
       const pendingOrder = Number(b.intensiveReviewStatus === 'PENDING') - Number(a.intensiveReviewStatus === 'PENDING')
       if (pendingOrder !== 0) return pendingOrder
       return new Date(String(b.lessonDate)).getTime() - new Date(String(a.lessonDate)).getTime()
     })
-    : todayLessons.length > 0 ? todayLessons : lessons.slice(0, 5)
+    : [...lessons].sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+      const aFuture = a.status === 'SCHEDULED' && localDateKey(String(a.lessonDate)) >= todayStr
+      const bFuture = b.status === 'SCHEDULED' && localDateKey(String(b.lessonDate)) >= todayStr
+      if (aFuture !== bFuture) return aFuture ? -1 : 1
+      return aFuture
+        ? new Date(String(a.lessonDate)).getTime() - new Date(String(b.lessonDate)).getTime()
+        : new Date(String(b.lessonDate)).getTime() - new Date(String(a.lessonDate)).getTime()
+    })
   const teacherList = Array.isArray(teachers?.teachers) ? teachers.teachers : Array.isArray(teachers) ? teachers : []
   const teacherAssignments = useMemo(() => Array.isArray(group?.teacherAssignments) ? group.teacherAssignments : [], [group])
+  const availableGroupSubjects = useMemo(() => [...new Set([
+    group?.course?.subject,
+    ...teacherAssignments.map((assignment: { subject?: string | null }) => assignment.subject),
+    ...lessons.map((lesson: { subject?: string | null }) => lesson.subject),
+  ].filter((subject): subject is string => Boolean(subject)))].sort(), [group?.course?.subject, teacherAssignments, lessons])
 
   // 合并 teacherAssignments + classLessons 去重作为数据源
   const mergedTeacherRecords = useMemo(() => {
@@ -156,13 +179,17 @@ export default function CourseGroupDetailPage() {
       message.error('请选择要加入班级的学员')
       return
     }
+    if (!newEnrollmentSubjects.length) {
+      message.error('请先选择学员实际报读的学科')
+      return
+    }
     setSubmitting(true)
     try {
       for (const studentId of selectedStudentIds) {
         const res = await fetch(`/api/class-groups/${params.id}/enrollments`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ studentId, totalHours }),
+          body: JSON.stringify({ studentId, totalHours, subjects: newEnrollmentSubjects }),
         })
         const payload = await res.json().catch(() => ({}))
         if (!res.ok) throw new Error(payload.error || '添加学员失败')
@@ -183,6 +210,7 @@ export default function CourseGroupDetailPage() {
     setStudentSearch('')
     setStudentGrade('')
     setSelectedStudentIds([])
+    setNewEnrollmentSubjects([])
   }
 
   const handleSelectGradeStudents = () => {
@@ -228,6 +256,30 @@ export default function CourseGroupDetailPage() {
       mutate()
     } catch (error) {
       message.error(error instanceof Error ? error.message : '重新生成失败')
+    }
+  }
+
+  const handleCancelLesson = async () => {
+    if (!cancelLessonId || cancelReason.trim().length < 2) {
+      message.warning('请填写停课原因')
+      return
+    }
+    setCancellingLesson(true)
+    try {
+      const response = await fetch(`/api/class-lessons/${cancelLessonId}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'CANCELLED', cancelReason: cancelReason.trim() }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(payload.error || '取消课次失败')
+      message.success('本次课已取消')
+      setCancelLessonId('')
+      setCancelReason('')
+      mutate()
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '取消课次失败')
+    } finally {
+      setCancellingLesson(false)
     }
   }
 
@@ -418,6 +470,7 @@ export default function CourseGroupDetailPage() {
           <Button type="primary" icon={<PlusOutlined />} disabled={isHistoricalTerm} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a' }}>添加学员</Button>
           {group.status === 'WAITING' && <Button type="primary" disabled={isHistoricalTerm} loading={starting} onClick={handleStartGroup} style={{ background: '#27a644' }}>开班并通知家长</Button>}
           <Button icon={<UserSwitchOutlined />} disabled={isHistoricalTerm} onClick={openReplaceTeacher}>更换老师</Button>
+          {!isIntensive && <Button icon={<CalendarOutlined />} disabled={isHistoricalTerm} onClick={() => setManualLessonOpen(true)}>临时加课</Button>}
           {group.status === 'WAITING' && <Button icon={<ReloadOutlined />} disabled={isHistoricalTerm} onClick={handleRegenerateLessons}>重新生成课表</Button>}
           <Popconfirm title="确定删除这个班级？" description="删除后班级会归档，不再出现在课程和排课列表。" onConfirm={handleDeleteGroup}>
             <Button danger disabled={isHistoricalTerm} icon={<DeleteOutlined />}>删除班级</Button>
@@ -438,6 +491,7 @@ export default function CourseGroupDetailPage() {
       {isMobile && (
         <Space.Compact block style={{ marginBottom: 16 }}>
           <Button type="primary" icon={<PlusOutlined />} disabled={isHistoricalTerm} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a', flex: 1 }}>添加学员</Button>
+          {!isIntensive && <Button icon={<CalendarOutlined />} disabled={isHistoricalTerm} onClick={() => setManualLessonOpen(true)} style={{ flex: 1 }}>临时加课</Button>}
           {group.status === 'WAITING' && <Button type="primary" disabled={isHistoricalTerm} loading={starting} onClick={handleStartGroup} style={{ background: '#27a644', flex: 1 }}>开班通知</Button>}
         </Space.Compact>
       )}
@@ -507,17 +561,28 @@ export default function CourseGroupDetailPage() {
               <Space direction="vertical" style={{ width: '100%' }}>
                 {enrollments.map((enrollment: Record<string, unknown>) => {
                   const student = enrollment.student as Record<string, unknown> | undefined
+                  const studentSubjects = Array.isArray(enrollment.subjects) ? (enrollment.subjects as string[]) : []
                   return (
                     <div key={enrollment.id as string} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #EEE7E1' }}>
-                      <div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ color: '#1F2329' }}>{student?.name as string}</div>
-                        <div style={{ color: '#98A2B3', fontSize: 12 }}>
+                        <div style={{ color: '#98A2B3', fontSize: 12, marginBottom: studentSubjects.length ? 4 : 0 }}>
                           {student?.grade as string || '-'} / 剩余 {formatRemaining(Number(enrollment.remainHours ?? 0), group.course?.type || null, Number(group.lessonMinutes || 40)).text}
                         </div>
+                        {studentSubjects.length > 0 && (
+                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                            {studentSubjects.map((s) => <Tag key={s} color="geekblue" style={{ margin: 0, fontSize: 12 }}>{s}</Tag>)}
+                          </div>
+                        )}
                       </div>
-                      <Popconfirm title="确定把该学员移出班级？" onConfirm={() => handleRemoveStudent(enrollment.id as string)}>
-                        <Button size="small" danger type="text" disabled={isHistoricalTerm}>移出</Button>
-                      </Popconfirm>
+                      <Space size={4}>
+                        <Button size="small" type="text" onClick={() => {
+                          setSubjectTarget({ studentId: enrollment.studentId as string, name: student?.name as string || '', subjects: studentSubjects })
+                        }} disabled={isHistoricalTerm}>调整学科</Button>
+                        <Popconfirm title="确定把该学员移出班级？" onConfirm={() => handleRemoveStudent(enrollment.id as string)}>
+                          <Button size="small" danger type="text" disabled={isHistoricalTerm}>移出</Button>
+                        </Popconfirm>
+                      </Space>
                     </div>
                   )
                 })}
@@ -529,12 +594,12 @@ export default function CourseGroupDetailPage() {
           <Card
             title={(
               <span style={{ color: '#1F2329' }}>
-                <CalendarOutlined /> {isIntensive ? '个性化课次' : todayLessons.length > 0 ? '今日课次' : '近期课次'}
+                <CalendarOutlined /> {isIntensive ? '个性化课次' : '本班课次管理'}
               </span>
             )}
             extra={isIntensive
               ? <Tag color={intensivePendingReview > 0 ? 'orange' : 'green'}>{intensivePendingReview} 节待审核</Tag>
-              : <Tag color={todayLessons.length > 0 ? 'orange' : 'blue'}>{todayLessons.length > 0 ? `${todayLessons.length} 节` : '前 5 节'}</Tag>}
+              : <Tag color="orange">{lessons.length} 节</Tag>}
             bordered={false}
             style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}
           >
@@ -578,11 +643,36 @@ export default function CourseGroupDetailPage() {
                     )
                   ),
                 }] : []),
+                ...(!isIntensive ? [{
+                  title: '管理',
+                  width: 86,
+                  render: (_: unknown, row: Record<string, unknown>) => row.status === 'SCHEDULED' && !isHistoricalTerm
+                    && (localDateKey(String(row.lessonDate)) > currentClock.day
+                      || (localDateKey(String(row.lessonDate)) === currentClock.day && String(row.startTime) > currentClock.time)) ? (
+                    <Button size="small" danger type="link" onClick={() => { setCancelLessonId(String(row.id)); setCancelReason('') }}>取消本次</Button>
+                  ) : <span style={{ color: 'var(--color-text-tertiary)', fontSize: 12 }}>—</span>,
+                }] : []),
               ]}
             />
           </Card>
         </Col>
       </Row>
+
+      {manualLessonOpen && (
+        <ManualLessonModal initialGroupId={params.id} onClose={() => setManualLessonOpen(false)} onSuccess={() => mutate()} />
+      )}
+      <Modal
+        title="取消本次课"
+        open={Boolean(cancelLessonId)}
+        onCancel={() => setCancelLessonId('')}
+        onOk={handleCancelLesson}
+        confirmLoading={cancellingLesson}
+        okText="确认取消"
+        okButtonProps={{ danger: true }}
+      >
+        <p>只能取消尚未开始且没有考勤、反馈或结算记录的课次。系统保留取消记录并通知相关家长。</p>
+        <Input.TextArea aria-label="停课原因" placeholder="例如：国庆假期调整" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} maxLength={200} showCount rows={3} />
+      </Modal>
 
       <Modal
         title="审核个性化课程"
@@ -724,6 +814,16 @@ export default function CourseGroupDetailPage() {
               value: student.id as string,
             }))}
           />
+          <div style={{ fontSize: 13, fontWeight: 600 }}>报读学科</div>
+          <Checkbox.Group
+            value={newEnrollmentSubjects}
+            onChange={(values) => setNewEnrollmentSubjects(values as string[])}
+            options={availableGroupSubjects}
+            style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px' }}
+          />
+          <div style={{ fontSize: 12, color: 'var(--ink-muted, #5a4e3a)' }}>
+            只选实际报读的学科。一次添加多人时，所选学科会应用于全部；报读不同学科的学员请分批添加。
+          </div>
           <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 8, padding: '6px 10px', background: '#F5F2EE', borderRadius: 6 }}>
             插班生将按当前尚未完成的有效课次自动计算剩余课时，不追溯加入前已完成的课程；如购买课时不同，可在下方自定义。
           </div>
@@ -858,6 +958,19 @@ export default function CourseGroupDetailPage() {
           </div>
         </Space>
       </Modal>
+      {subjectTarget && (
+        <SubjectChangeModal
+          key={subjectTarget.studentId}
+          groupId={params.id}
+          groupName={String(group?.name || '')}
+          studentId={subjectTarget.studentId}
+          studentName={subjectTarget.name}
+          initialSubjects={subjectTarget.subjects}
+          availableSubjects={availableGroupSubjects}
+          onClose={() => setSubjectTarget(null)}
+          onSaved={() => mutate()}
+        />
+      )}
     </PageLayout>
   )
 }

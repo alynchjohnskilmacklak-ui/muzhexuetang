@@ -26,18 +26,6 @@ async function main() {
     data: { status: 'WITHDRAWN' },
   })
 
-  const removedInactiveScheduleStudents = await prisma.scheduleStudent.deleteMany({
-    where: { student: { status: 'INACTIVE' } },
-  })
-
-  const cancelledInvalidCourseSchedules = await prisma.schedule.updateMany({
-    where: {
-      status: { not: 'cancelled' },
-      course: { isActive: false },
-    },
-    data: { status: 'cancelled' },
-  })
-
   const cancelledInvalidLessons = await prisma.classLesson.updateMany({
     where: {
       status: { notIn: ['CANCELLED', 'COMPLETED'] },
@@ -77,7 +65,6 @@ async function main() {
     where: {
       isActive: true,
       classGroups: { none: { status: { not: 'ARCHIVED' } } },
-      schedules: { none: { status: { not: 'cancelled' } } },
     },
     data: { isActive: false },
   })
@@ -86,8 +73,6 @@ async function main() {
     inactiveStudents: inactiveStudents.count,
     withdrawnInactiveStudentEnrollments: withdrawnInactiveStudentEnrollments.count,
     withdrawnInvalidGroupEnrollments: withdrawnInvalidGroupEnrollments.count,
-    removedInactiveScheduleStudents: removedInactiveScheduleStudents.count,
-    cancelledInvalidCourseSchedules: cancelledInvalidCourseSchedules.count,
     cancelledInvalidLessons: cancelledInvalidLessons.count,
     cancelledInvalidMakeups: cancelledInvalidMakeups.count,
     deactivatedOrphanCourses: deactivatedOrphanCourses.count,

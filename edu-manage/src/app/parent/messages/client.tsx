@@ -21,7 +21,11 @@ import { WorkspacePageHeader } from '@/components/Common/WorkspacePageHeader'
 
 const { Text } = Typography
 const { TextArea } = Input
-const fetcher = (url: string) => fetch(url).then(r => r.json())
+const fetcher = async (url: string) => {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`加载失败（${response.status}）`)
+  return response.json()
+}
 
 type Reply = {
   id: string; messageId: string; authorName: string; role: string
@@ -110,15 +114,22 @@ function MessageCard({
   const subjectColor = msg.subject ? SUBJECT_COLORS[msg.subject] : null
 
   return (
-    <div
+    <button
+      type="button"
+      aria-pressed={active}
       onClick={onClick}
       style={{
+        display: 'block',
+        width: '100%',
+        color: 'inherit',
+        font: 'inherit',
+        textAlign: 'left',
         background: active ? '#FFF6F1' : '#fff',
         border: active ? '1.5px solid #E8784A' : '1px solid rgba(0,0,0,.07)',
         borderRadius: 12,
         padding: '14px 16px',
         cursor: 'pointer',
-        transition: 'all .18s ease',
+        transition: 'background-color var(--motion-standard) ease, border-color var(--motion-standard) ease',
         marginBottom: 8,
       }}
     >
@@ -153,7 +164,7 @@ function MessageCard({
           {lastReply.content}
         </Text>
       )}
-    </div>
+    </button>
   )
 }
 
@@ -176,13 +187,7 @@ export function ParentMessagesClient({
   const recommendedTeachers = composeStudentId ? teacherRecommendations[composeStudentId] || [] : []
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  const [activeChildId, setActiveChildId] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      return params.get('childId') || (students[0]?.id ?? '')
-    }
-    return students[0]?.id ?? ''
-  })
+  const [activeChildId, setActiveChildId] = useState<string>(students[0]?.id ?? '')
   const [filterChildId, setFilterChildId] = useState<string>(activeChildId)
   const { data, mutate } = usePausableSWR('/api/messages', fetcher, {
     fallbackData: { messages: initialMessages },
@@ -197,10 +202,17 @@ export function ParentMessagesClient({
   const active = allMessages.find(m => m.id === activeId) || null
 
   useEffect(() => {
-    if (active) {
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
-    }
-  }, [active])
+    const requestedChildId = new URLSearchParams(window.location.search).get('childId')
+    if (!requestedChildId || !students.some(student => student.id === requestedChildId)) return
+    setActiveChildId(requestedChildId)
+    setFilterChildId(requestedChildId)
+  }, [students])
+
+  useEffect(() => {
+    if (!activeId) return
+    const timer = window.setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+    return () => window.clearTimeout(timer)
+  }, [activeId, active?.replies.length])
 
   useEffect(() => {
     if (!showCompose || !composeStudentId) return

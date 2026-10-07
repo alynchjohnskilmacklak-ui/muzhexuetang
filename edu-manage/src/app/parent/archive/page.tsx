@@ -1,8 +1,9 @@
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import { getStudentProfile } from '@/lib/student-profile'
+import type { StudentProfile } from '@/lib/student-profile'
 import { ParentArchiveClient } from './client'
+import { getParentChildren } from '@/lib/parent-children'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,23 +14,14 @@ export default async function ParentArchivePage() {
 
   const prisma = await getRequestPrisma()
 
-  const children = await prisma.student.findMany({
-    where: { OR: [{ parentId: userId }, { parentUserId: userId }], status: { not: 'INACTIVE' } },
-    select: { id: true, name: true },
-    orderBy: { createdAt: 'asc' },
-  })
+  const children = await getParentChildren(prisma, userId)
 
-  const initial: { children: typeof children; activeStudentId: string | null; profile: Awaited<ReturnType<typeof getStudentProfile>> } = {
+  // Render the route after the lightweight child list; the detailed profile loads in parallel on the client.
+  const initial: { children: typeof children; activeStudentId: string | null; profile: StudentProfile | null; parentId: string } = {
     children,
     activeStudentId: children[0]?.id || null,
     profile: null,
-  }
-
-  if (initial.activeStudentId) {
-    const to = new Date()
-    const from = new Date(to)
-    from.setMonth(from.getMonth() - 6)
-    initial.profile = await getStudentProfile(prisma, initial.activeStudentId, { from, to })
+    parentId: userId,
   }
 
   return <ParentArchiveClient initial={JSON.parse(JSON.stringify(initial))} />

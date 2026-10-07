@@ -3,7 +3,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { SERVICE_ASSET_BASE, SERVICE_ASSET_VERSION, serviceCatalog, type ServiceCatalogItem } from '@/lib/service-catalog'
+import {
+  SERVICE_ASSET_BASE,
+  serviceCatalog,
+  type ServiceCatalogItem,
+} from '@/lib/service-catalog'
 
 type GroupKey = 'course' | 'growth' | 'plan'
 
@@ -34,25 +38,18 @@ const serviceGroups: Array<{
 ]
 
 function ServiceThumbnail({ service }: { service: ServiceCatalogItem }) {
-  if (!service.imageCount) {
-    return <span className="service-list-thumb service-list-thumb--placeholder" aria-hidden>
-      <b>{service.shortTitle.slice(0, 1)}</b>
-      <small>牧哲学堂</small>
-    </span>
-  }
-
+  const theme = service.category === '课程辅导' ? 'course' : service.category === '长期成长' ? 'growth' : 'plan'
+  const firstImageFile = service.imageFiles?.[0] ?? ((service.imageCount ?? 0) > 0 ? 1 : null)
   const assetSlug = service.imageAssetSlug || service.slug
-  const imageFile = service.imageFiles?.[0] || 1
+  const imageSrc = firstImageFile === null
+    ? null
+    : `${SERVICE_ASSET_BASE}/${assetSlug}/${firstImageFile}.png`
 
-  return <span className="service-list-thumb" aria-hidden>
-    <Image
-      src={`${SERVICE_ASSET_BASE}/${assetSlug}/${imageFile}.png?v=${SERVICE_ASSET_VERSION}`}
-      alt=""
-      fill
-      sizes="72px"
-      unoptimized
-    />
-    <span className="service-list-thumb__wash" />
+  return <span className={`service-list-thumb service-theme--${theme}`} aria-hidden>
+    {imageSrc
+      ? <span className="service-list-thumb__media"><Image src={imageSrc} alt="" fill sizes="64px" /></span>
+      : <span className="service-list-thumb__fallback">牧哲</span>}
+    <span className="service-list-thumb__index">{service.index}</span>
   </span>
 }
 
@@ -77,6 +74,9 @@ export function ServiceOverviewPage({ basePath }: { basePath: string }) {
   const resultCount = groups.reduce((total, group) => total + group.services.length, 0)
 
   return <main className="service-page-shell service-catalog">
+    <nav className="service-context-bar" aria-label="业务页面导航">
+      <span className="service-context-bar__current">业务总览</span>
+    </nav>
     <header className="service-catalog-head">
       <span className="service-eyebrow">牧哲学堂 · 服务中心</span>
       <h1>全部业务</h1>

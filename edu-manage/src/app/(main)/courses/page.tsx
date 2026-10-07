@@ -20,6 +20,7 @@ import {
   Space,
   Spin,
   Tag,
+  Typography,
 } from 'antd'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { toast } from 'sonner'
@@ -48,7 +49,10 @@ import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 import { SafeFormModal } from '@/components/Common/SafeFormModal'
 
+const { Text } = Typography
+
 type CourseType = 'GROUP' | 'ONE_ON_ONE' | 'SMALL_GROUP'
+type CourseTab = 'GROUP' | 'SMALL'
 type ScheduleTemplateRow = {
   periodId: string
   periodName: string
@@ -59,6 +63,7 @@ type ScheduleTemplateRow = {
 }
 
 const SUBJECTS = ['语文', '数学', '英语', '物理', '化学', '生物', '地理', '历史', '政治']
+const COURSE_TAB_STORAGE_KEY = 'muzhe-courses-active-tab'
 const SUBJECT_COLOR: Record<string, string> = {
   语文: '#e8784a',
   数学: '#E8784A',
@@ -89,8 +94,14 @@ const GROUP_STATUS_MAP: Record<string, { color: string; label: string }> = {
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
-  if (!res.ok) throw new Error('加载失败')
-  return res.json()
+  const payload = await res.json().catch(() => null)
+  if (!res.ok) {
+    const message = payload && typeof payload === 'object' && 'error' in payload
+      ? String(payload.error)
+      : `加载失败（${res.status}）`
+    throw new Error(message)
+  }
+  return payload
 }
 
 function todayString() {
@@ -118,6 +129,14 @@ function countScheduledLessons(template: unknown) {
     .filter(row => row.teacherId && row.subject && row.startTime && row.endTime).length
 }
 
+function addMinutesToTime(startTime: string, minutes: number) {
+  const match = /^(\d{2}):(\d{2})$/.exec(startTime)
+  if (!match) return ''
+  const total = Number(match[1]) * 60 + Number(match[2]) + Math.max(1, minutes)
+  const normalized = Math.min(total, 23 * 60 + 59)
+  return `${String(Math.floor(normalized / 60)).padStart(2, '0')}:${String(normalized % 60).padStart(2, '0')}`
+}
+
 function buildScheduleTemplate(type: CourseType, periods: SchedulePeriod[] = CLASS_PERIODS_ONLY): ScheduleTemplateRow[] {
   void type
   void periods
@@ -129,7 +148,7 @@ function buildScheduleTemplate(type: CourseType, periods: SchedulePeriod[] = CLA
 export default function CoursesPage() {
   const router = useRouter()
   const { division } = useDivision()
-  const { data: groups, mutate: mutateGroups, isLoading } = useSWR(`/api/class-groups?division=${division}`, fetcher)
+  const { data: groups, mutate: mutateGroups, isLoading, error: groupsError } = useSWR(`/api/class-groups?division=${division}`, fetcher)
   const { data: courses, mutate: mutateCourses } = useSWR(`/api/courses?division=${division}`, fetcher)
   const { data: teachers } = useSWR('/api/teachers?status=ACTIVE', fetcher)
   const { data: rooms } = useSWR('/api/rooms', fetcher)
@@ -138,7 +157,7 @@ export default function CoursesPage() {
   const { periods } = useSchedulePeriods(division)
   const classPeriods = useMemo(() => periods.filter(period => period.type === 'CLASS'), [periods])
 
-  const [courseTab, setCourseTab] = useState<'GROUP'|'SMALL'>('GROUP')
+  const [courseTab, setCourseTab] = useState<CourseTab>('GROUP')
   const [filterType, setFilterType] = useState('')
   const [filterGrade, setFilterGrade] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
@@ -161,12 +180,40 @@ export default function CoursesPage() {
   const [regeneratingGroupId, setRegeneratingGroupId] = useState('')
   const [deletingGroupId, setDeletingGroupId] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<{id:string;name:string}|null>(null)
+  const [deleteImpact, setDeleteImpact] = useState<{ lessons?: number; enrollments?: number; attendances?: number; feedbacks?: number; papers?: number; summary?: string } | null>(null)
+  const [deletePreviewLoading, setDeletePreviewLoading] = useState(false)
   const [addDayOpen, setAddDayOpen] = useState(false)
   const [addDayDate, setAddDayDate] = useState('')
   const [addingDay, setAddingDay] = useState(false)
   const isMobile = useIsMobile() ?? false
 
+  useEffect(() => {
+    try {
+      const savedTab = window.localStorage.getItem(COURSE_TAB_STORAGE_KEY)
+      if (savedTab === 'GROUP' || savedTab === 'SMALL') setCourseTab(savedTab)
+    } catch {
+      // Storage can be unavailable in privacy-restricted browsers. The page
+      // remains usable with the default tab in that case.
+    }
+  }, [])
+
+  const selectCourseTab = (tab: CourseTab) => {
+    setCourseTab(tab)
+    setFilterType('')
+    try {
+      window.localStorage.setItem(COURSE_TAB_STORAGE_KEY, tab)
+    } catch {
+      // Keep tab switching functional even when browser storage is disabled.
+    }
+  }
+
   const groupList = useMemo(() => Array.isArray(groups) ? groups : [], [groups])
+  const courseTabCounts = useMemo(() => groupList.reduce((counts, group: Record<string, unknown>) => {
+    const course = group.course as Record<string, unknown> | undefined
+    if (course?.type === 'GROUP') counts.GROUP += 1
+    if (course?.type === 'ONE_ON_ONE' || course?.type === 'SMALL_GROUP') counts.SMALL += 1
+    return counts
+  }, { GROUP: 0, SMALL: 0 }), [groupList])
   const courseList = (Array.isArray(courses) ? courses : []).filter((course: Record<string, unknown>) => {
     const type = course.type as string
     if (courseTab === 'GROUP') return type === 'GROUP'
@@ -306,6 +353,7 @@ export default function CoursesPage() {
       startTime: r.startTime as string,
       endTime: r.endTime as string,
     })))
+    let cancelled = false
     const timer = setTimeout(async () => {
       try {
         const res = await fetch('/api/class-groups/check-teacher-conflict/batch', {
@@ -316,10 +364,13 @@ export default function CoursesPage() {
         const data = await res.json()
         const map: Record<string, string> = {}
         for (const r of (data.results || [])) if (r.conflict) map[r.key] = r.conflictDetail || '已有课程'
-        setSlotConflicts(map)
+        if (!cancelled) setSlotConflicts(map)
       } catch { /* 静默，不打断填写 */ }
     }, 350)
-    return () => clearTimeout(timer)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createOpen, createData.scheduleTemplate, createData.scheduleSlots, createData.teacherAssignments, createData.recurringDays, createData.startDate, previewDates])
 
@@ -414,6 +465,12 @@ export default function CoursesPage() {
         }
       }
 
+      const scheduleTemplate = isIntensiveCreate ? [] : resolveCreateScheduleTemplate(scheduleTemplateOverride)
+      if (!isIntensiveCreate && !scheduleTemplate.length) {
+        toast.error(isHourly ? '请至少选择一个上课时间段' : '请至少为一个节次选择老师和科目')
+        return
+      }
+
       const courseId = await createCourseIfNeeded()
       const teacherAssignments = (Array.isArray(createData.teacherAssignments) ? createData.teacherAssignments as Record<string, unknown>[] : [])
         .filter((item) => item.teacherId && item.subject)
@@ -450,6 +507,13 @@ export default function CoursesPage() {
       const group = await groupRes.json().catch(() => ({}))
       if (!groupRes.ok) throw new Error(group.error || '班级创建失败')
 
+      // The class exists from this point onward. Reveal it immediately as a
+      // WAITING class even if lesson generation subsequently fails.
+      setFilterType('')
+      setFilterGrade('')
+      setFilterStatus('WAITING')
+      await Promise.all([mutateGroups(), mutateDashboard()])
+
       if (isIntensiveCreate) {
         toast.success(`「${createData.name}」已创建，教师现在可以自主安排每次上课时间`)
         mutateGroups()
@@ -460,21 +524,20 @@ export default function CoursesPage() {
         return
       }
 
-      const scheduleTemplate = resolveCreateScheduleTemplate(scheduleTemplateOverride)
-
-      if (!scheduleTemplate.length) {
-        toast.error(isHourly ? '请至少选择一个上课时间段' : '请至少为一个节次选择老师科目')
-        setCreateLoading(false)
+      let lessonPayload: Record<string, unknown>
+      try {
+        const lessonRes = await fetch(`/api/class-groups/${group.id}/generate-lessons`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...groupPayload, scheduleTemplate }),
+        })
+        lessonPayload = await lessonRes.json().catch(() => ({}))
+        if (!lessonRes.ok) throw new Error(String(lessonPayload.error || '课表生成失败'))
+      } catch (error) {
+        toast.warning(`「${createData.name}」已保存到待开班；${error instanceof Error ? error.message : '课表生成失败'}，请在列表中修改后重新生成`)
+        closeCreate()
         return
       }
-
-      const lessonRes = await fetch(`/api/class-groups/${group.id}/generate-lessons`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...groupPayload, scheduleTemplate }),
-      })
-      const lessonPayload = await lessonRes.json().catch(() => ({}))
-      if (!lessonRes.ok) throw new Error(lessonPayload.error || '课表生成失败')
 
       toast.success(`「${createData.name}」已创建，并生成 ${lessonPayload.count || previewDates.length} 节课`)
       mutateGroups()
@@ -624,19 +687,30 @@ export default function CoursesPage() {
   }
 
   const handleCancelLesson = async (lessonId: string) => {
+    let reason = ''
     Modal.confirm({
       title: '确认停课本次？',
-      content: '停课后会标记本次课为已取消。',
+      content: (
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <span>只能取消尚未开始、没有考勤或结算记录的课次；历史记录不会删除。</span>
+          <Input.TextArea placeholder="请填写停课原因" rows={3} maxLength={200} onChange={(event) => { reason = event.target.value }} />
+        </Space>
+      ),
       okText: '确认停课',
       okButtonProps: { danger: true },
       cancelText: '再想想',
       onOk: async () => {
+        if (reason.trim().length < 2) {
+          toast.error('请填写停课原因')
+          throw new Error('请填写停课原因')
+        }
         const res = await fetch(`/api/class-lessons/${lessonId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'CANCELLED' }),
+          body: JSON.stringify({ status: 'CANCELLED', cancelReason: reason.trim() }),
         })
-        if (!res.ok) throw new Error('停课失败')
+        const payload = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(payload.error || '停课失败')
         toast.success('课次已取消')
         mutateGroups()
       },
@@ -673,8 +747,20 @@ export default function CoursesPage() {
     }
   }
 
-  const handleDeleteGroup = (groupId: string, groupName: string) => {
+  const handleDeleteGroup = async (groupId: string, groupName: string) => {
     setDeleteTarget({ id: groupId, name: groupName })
+    setDeleteImpact(null)
+    setDeletePreviewLoading(true)
+    try {
+      const response = await fetch(`/api/admin/trash/preview?type=ClassGroup&id=${encodeURIComponent(groupId)}`)
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error || '无法加载影响范围')
+      setDeleteImpact(payload.data.impact)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '无法加载影响范围')
+    } finally {
+      setDeletePreviewLoading(false)
+    }
   }
 
   const handleAddDay = async () => {
@@ -766,18 +852,18 @@ export default function CoursesPage() {
 
       {/* Type tabs */}
       <div style={{ display: 'flex', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8, overflow: 'hidden', width: isMobile ? '100%' : 'fit-content', marginBottom: 12 }}>
-        <button onClick={() => setCourseTab('GROUP')} style={{
+        <button onClick={() => selectCourseTab('GROUP')} style={{
           padding: '7px 18px', background: courseTab === 'GROUP' ? '#E8784A' : 'transparent',
           color: courseTab === 'GROUP' ? '#fff' : 'var(--color-text-secondary, #666)',
           border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: courseTab === 'GROUP' ? 500 : 400,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, flex: isMobile ? 1 : undefined, minWidth: 0,
-        }}><TeamOutlined /> 精品班课</button>
-        <button onClick={() => setCourseTab('SMALL')} style={{
+        }}><TeamOutlined /> 精品班课（{courseTabCounts.GROUP}）</button>
+        <button onClick={() => selectCourseTab('SMALL')} style={{
           padding: '7px 18px', background: courseTab === 'SMALL' ? '#534AB7' : 'transparent',
           color: courseTab === 'SMALL' ? '#fff' : 'var(--color-text-secondary, #666)',
           border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: courseTab === 'SMALL' ? 500 : 400,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, flex: isMobile ? 1 : undefined, minWidth: 0,
-        }}><BookOutlined /> {isMobile ? '个性化课程' : '突击全能班（1对1/2/3）'}</button>
+        }}><BookOutlined /> {isMobile ? `个性化课程（${courseTabCounts.SMALL}）` : `突击全能班（1对1/2/3，共 ${courseTabCounts.SMALL} 个）`}</button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : '128px 128px 128px auto', gap: 8, marginBottom: 16, width: '100%' }}>
@@ -820,9 +906,47 @@ export default function CoursesPage() {
 
       {isLoading ? (
         <CardSkeleton rows={3} />
+      ) : groupsError ? (
+        <Alert
+          type="error"
+          showIcon
+          message="班级列表加载失败，现有班级并未被删除"
+          description={groupsError instanceof Error ? groupsError.message : '请检查网络或稍后重试。'}
+          action={<Button danger icon={<ReloadOutlined />} onClick={() => void mutateGroups()}>重新加载</Button>}
+        />
       ) : filteredGroups.length === 0 ? (
         <Card bordered={false} style={{ borderRadius: 8, minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <GuidedEmpty title={filterType || filterGrade || filterStatus ? '没有符合条件的班级' : isHistoricalTerm ? '这个历史批次没有班级记录' : '还没有班级'} description={filterType || filterGrade || filterStatus ? '可以清除班型、年级或状态筛选，查看当前运营批次的全部班级。' : isHistoricalTerm ? '历史批次只用于查看，请切换到当前运营批次后再建班。' : '创建班级后可以分配老师和学员，并继续生成课表。'} actionLabel={filterType || filterGrade || filterStatus ? '清除筛选' : isHistoricalTerm ? undefined : '创建第一个班级'} actionIcon={!filterType && !filterGrade && !filterStatus && !isHistoricalTerm ? <PlusOutlined /> : undefined} onAction={filterType || filterGrade || filterStatus ? () => { setFilterType(''); setFilterGrade(''); setFilterStatus('') } : isHistoricalTerm ? undefined : openCreate} />
+          <GuidedEmpty
+            title={filterType || filterGrade || filterStatus
+              ? '没有符合条件的班级'
+              : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
+                ? '精品班课中暂无班级'
+                : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
+                  ? '个性化课程中暂无班级'
+                  : isHistoricalTerm ? '这个历史批次没有班级记录' : '还没有班级'}
+            description={filterType || filterGrade || filterStatus
+              ? '可以清除班型、年级或状态筛选，查看当前运营批次的全部班级。'
+              : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
+                ? `当前运营批次另有 ${courseTabCounts.SMALL} 个一对一、小组课或突击班，切换标签即可查看。`
+                : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
+                  ? `当前运营批次另有 ${courseTabCounts.GROUP} 个精品班课，切换标签即可查看。`
+                  : isHistoricalTerm ? '历史批次只用于查看，请切换到当前运营批次后再建班。' : '创建班级后可以分配老师和学员，并继续生成课表。'}
+            actionLabel={filterType || filterGrade || filterStatus
+              ? '清除筛选'
+              : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
+                ? '查看个性化课程'
+                : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
+                  ? '查看精品班课'
+                  : isHistoricalTerm ? undefined : '创建第一个班级'}
+            actionIcon={!filterType && !filterGrade && !filterStatus && courseTabCounts.GROUP === 0 && courseTabCounts.SMALL === 0 && !isHistoricalTerm ? <PlusOutlined /> : undefined}
+            onAction={filterType || filterGrade || filterStatus
+              ? () => { setFilterType(''); setFilterGrade(''); setFilterStatus('') }
+              : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
+                ? () => selectCourseTab('SMALL')
+                : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
+                  ? () => selectCourseTab('GROUP')
+                  : isHistoricalTerm ? undefined : openCreate}
+          />
         </Card>
       ) : (
         <Row gutter={[16, 16]}>
@@ -1030,7 +1154,9 @@ export default function CoursesPage() {
                 ) as { value: CourseType; label: string; sub: string; icon: string }[]).map((option) => {
                   const active = ((createData.type as CourseType) || 'GROUP') === option.value
                   return (
-                    <div
+                    <button
+                      type="button"
+                      aria-pressed={active}
                       key={option.value}
                       onClick={() => {
                         const isHourly = option.value !== 'GROUP'
@@ -1046,6 +1172,8 @@ export default function CoursesPage() {
                       }}
                       style={{
                         padding: '8px 14px',
+                        color: 'inherit',
+                        font: 'inherit',
                         borderRadius: 8,
                         cursor: 'pointer',
                         userSelect: 'none',
@@ -1071,7 +1199,7 @@ export default function CoursesPage() {
                       }}>{option.icon}</span>
                       <span style={{ fontSize: 13, fontWeight: active ? 700 : 400, color: active ? '#E8784A' : '#1F2329' }}>{option.label}</span>
                       <span style={{ fontSize: 11, color: '#98A2B3' }}>{option.sub}</span>
-                    </div>
+                    </button>
                   )
                 })}
               </div>
@@ -1263,16 +1391,17 @@ export default function CoursesPage() {
           const validAssignments = ((createData.teacherAssignments as Record<string, unknown>[]) || [])
             .filter(assignment => assignment.teacherId && assignment.subject)
           const scheduledCount = countScheduledLessons(createData.scheduleTemplate)
-          const addGroupPeriod = (label: string, startTime: string, endTime: string) => {
+          const addGroupPeriod = (label: string, startTime: string) => {
             const current = Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : []
             const assignment = validAssignments[0]
+            const lessonMinutes = Number(createData.lessonMinutes || 40)
             setCreateData((previous) => ({
               ...previous,
               scheduleTemplate: [...current, {
                 periodId: `custom-${Date.now()}-${current.length}`,
                 periodName: label,
                 startTime,
-                endTime,
+                endTime: addMinutesToTime(startTime, lessonMinutes),
                 teacherId: assignment?.teacherId || '',
                 subject: assignment?.subject || '',
               }],
@@ -1375,7 +1504,9 @@ export default function CoursesPage() {
                     {HOURLY_PERIODS.map(period => {
                       const selected = selectedSlots.includes(period.id)
                       return (
-                        <div
+                        <button
+                          type="button"
+                          aria-pressed={selected}
                           key={period.id}
                           onClick={() => {
                             const nextSlots = selected
@@ -1395,6 +1526,8 @@ export default function CoursesPage() {
                           }}
                           style={{
                             padding: '8px 4px',
+                            color: 'inherit',
+                            font: 'inherit',
                             borderRadius: 8,
                             cursor: 'pointer',
                             textAlign: 'center',
@@ -1404,14 +1537,14 @@ export default function CoursesPage() {
                             WebkitTapHighlightColor: 'transparent',
                           }}
                         >
-                          <div style={{ fontSize: 13, fontWeight: selected ? 700 : 400, color: selected ? '#E8784A' : '#1F2329' }}>{period.name}</div>
-                          <div style={{ fontSize: 10, color: '#C4BAB0' }}>{period.end}</div>
+                          <span style={{ display: 'block', fontSize: 13, fontWeight: selected ? 700 : 400, color: selected ? '#E8784A' : '#1F2329' }}>{period.name}</span>
+                          <span style={{ display: 'block', fontSize: 10, color: '#C4BAB0' }}>{period.end}</span>
                           {selected && validAssignments.some(a =>
                             slotConflicts[`${a.teacherId}::${period.start}-${period.end}`]
                           ) && (
-                            <div style={{ fontSize: 10, color: '#E24B4A', fontWeight: 700 }}>⚠ 冲突</div>
+                            <span style={{ display: 'block', fontSize: 10, color: '#E24B4A', fontWeight: 700 }}>⚠ 冲突</span>
                           )}
-                        </div>
+                        </button>
                       )
                     })}
                   </div>
@@ -1425,12 +1558,12 @@ export default function CoursesPage() {
               ) : (
                 <Space direction="vertical" size={6} style={{ width: '100%' }}>
                   <Space wrap size={[8, 8]} style={{ marginBottom: 6 }}>
-                    <Button size="small" icon={<PlusOutlined />} onClick={() => addGroupPeriod('上午时段', '08:30', '12:00')}>上午半天</Button>
-                    <Button size="small" icon={<PlusOutlined />} onClick={() => addGroupPeriod('下午时段', '14:00', '18:00')}>下午半天</Button>
-                    <Button size="small" icon={<PlusOutlined />} onClick={() => addGroupPeriod('晚间时段', '18:30', '20:30')}>晚间 2 小时</Button>
-                    <Button size="small" type="primary" ghost icon={<PlusOutlined />} onClick={() => addGroupPeriod(`时段${scheduledCount + 1}`, '09:00', '10:30')}>自定义时段</Button>
+                    <Button size="small" icon={<PlusOutlined />} onClick={() => addGroupPeriod('上午课程', '08:30')}>上午一节</Button>
+                    <Button size="small" icon={<PlusOutlined />} onClick={() => addGroupPeriod('下午课程', '14:00')}>下午一节</Button>
+                    <Button size="small" icon={<PlusOutlined />} onClick={() => addGroupPeriod('晚间课程', '18:30')}>晚间一节</Button>
+                    <Button size="small" type="primary" ghost icon={<PlusOutlined />} onClick={() => addGroupPeriod(`时段${scheduledCount + 1}`, '09:00')}>自定义时段</Button>
                   </Space>
-                  {scheduledCount === 0 && <Alert type="info" showIcon message="请添加实际上课时段" description="周末班最多 4 小时可直接设置起止时间；特殊日期如需延长，创建后可调整单次课次，不需要补满全天空余时段。" />}
+                  {scheduledCount === 0 && <Alert type="info" showIcon message="请添加实际上课时段" description="添加一节后只需填写开始时间，结束时间会按下方课时分钟数自动计算，仍可手动微调。" />}
                   {(Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : []).map((row, index) => {
                     const assignments = (Array.isArray(createData.teacherAssignments) ? createData.teacherAssignments as Record<string, unknown>[] : [])
                     const filled = !!(row.teacherId && row.subject)
@@ -1454,7 +1587,12 @@ export default function CoursesPage() {
                             value={row.startTime as string}
                             onChange={event => {
                               const template = [...(Array.isArray(createData.scheduleTemplate) ? createData.scheduleTemplate as Record<string, unknown>[] : [])]
-                              template[index] = { ...template[index], startTime: event.target.value }
+                              const startTime = event.target.value
+                              template[index] = {
+                                ...template[index],
+                                startTime,
+                                endTime: addMinutesToTime(startTime, Number(createData.lessonMinutes || 40)),
+                              }
                               setCreateData(prev => ({ ...prev, scheduleTemplate: template }))
                             }}
                           />
@@ -1516,7 +1654,14 @@ export default function CoursesPage() {
             </div>
 
             <Row gutter={[12, 10]}>
-              <Col xs={12} sm={8}><InputNumber min={isHourly ? 60 : 30} max={isHourly ? 120 : 240} step={isHourly ? 60 : 5} addonBefore="课时" addonAfter="分钟" style={{ width: '100%' }} value={Number(createData.lessonMinutes || (isHourly ? 60 : 40))} disabled={isHourly} onChange={(value) => setCreateData((prev) => ({ ...prev, lessonMinutes: value || (isHourly ? 60 : 40) }))} /></Col>
+              <Col xs={12} sm={8}><InputNumber min={isHourly ? 60 : 30} max={isHourly ? 120 : 240} step={isHourly ? 60 : 5} addonBefore="课时" addonAfter="分钟" style={{ width: '100%' }} value={Number(createData.lessonMinutes || (isHourly ? 60 : 40))} disabled={isHourly} onChange={(value) => setCreateData((prev) => {
+                const lessonMinutes = Number(value || (isHourly ? 60 : 40))
+                const scheduleTemplate = (Array.isArray(prev.scheduleTemplate) ? prev.scheduleTemplate as Record<string, unknown>[] : []).map((row) => ({
+                  ...row,
+                  endTime: addMinutesToTime(String(row.startTime || ''), lessonMinutes),
+                }))
+                return { ...prev, lessonMinutes, scheduleTemplate }
+              })} /></Col>
               <Col xs={12} sm={8}><InputNumber min={1} max={120} addonBefore="上课天数" style={{ width: '100%' }} value={Number(createData.totalLessons || 16)} onChange={(value) => setCreateData((prev) => ({ ...prev, totalLessons: value || 16 }))} /></Col>
             </Row>
             <div style={{ background: '#FCFBF9', border: '1px solid #EEE7E1', borderRadius: 8, padding: 14, minHeight: 104 }}>
@@ -1588,8 +1733,8 @@ export default function CoursesPage() {
       <Modal
         title="删除班级"
         open={!!deleteTarget}
-        okText="备份并删除"
-        okButtonProps={{ danger: true, loading: deletingGroupId === deleteTarget?.id }}
+        okText="确认删除并移入回收站"
+        okButtonProps={{ danger: true, loading: deletingGroupId === deleteTarget?.id, disabled: deletePreviewLoading || !deleteImpact }}
         cancelText="取消"
         onCancel={() => setDeleteTarget(null)}
         onOk={async () => {
@@ -1599,9 +1744,8 @@ export default function CoursesPage() {
             const res = await fetch(`/api/class-groups/${deleteTarget.id}`, { method: 'DELETE' })
             const payload = await res.json().catch(() => ({}))
             if (!res.ok) throw new Error(payload.error || '删除失败')
-            toast.success('已备份并删除班级')
-            mutateGroups()
-            mutateDashboard()
+            toast.success('班级已移入回收站，教师时间段已立即释放')
+            await Promise.all([mutateGroups(), mutateCourses(), mutateDashboard()])
             setDeleteTarget(null)
           } catch (error) {
             toast.error(error instanceof Error ? error.message : '删除失败')
@@ -1610,7 +1754,19 @@ export default function CoursesPage() {
           }
         }}
       >
-        确定删除「{deleteTarget?.name}」吗？系统会先备份班级及相关课次、报名、考勤、测评数据，然后从业务数据库中清除。
+        <Space direction="vertical" size={14} style={{ width: '100%' }}>
+          <Text>确定删除「<Text strong>{deleteTarget?.name}</Text>」吗？</Text>
+          <Card size="small" loading={deletePreviewLoading} className="impact-list" styles={{ body: { background: 'var(--color-surface-3)' } }}>
+            {deleteImpact && <Space direction="vertical" size={8}>
+              <Text strong>这次删除将一并影响</Text>
+              <Text>排课记录：{deleteImpact.lessons || 0} 条</Text>
+              <Text>学员归属：{deleteImpact.enrollments || 0} 名（学员档案不会删除）</Text>
+              <Text>考勤记录：{deleteImpact.attendances || 0} 条</Text>
+              <Text>课堂反馈与试卷：{(deleteImpact.feedbacks || 0) + (deleteImpact.papers || 0)} 条</Text>
+            </Space>}
+          </Card>
+          <Alert className="modal-note" type="info" showIcon message="删除后会先进入回收站，30 天内可恢复；教师对应的时间段会立刻释放，不再显示课程冲突。" />
+        </Space>
       </Modal>
 
       <Modal

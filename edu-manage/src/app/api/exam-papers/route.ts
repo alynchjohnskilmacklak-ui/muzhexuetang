@@ -25,7 +25,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const mine = searchParams.get('mine')
   const division = getRequestDivision(user, searchParams.get('division'))
 
-  const where: Record<string, unknown> = {}
+  const where: Record<string, unknown> = { deletedAt: null }
   if (mine === 'true' && user.role === 'parent') {
     Object.assign(where, parentVisibleExamPaperWhere(user.id))
   } else if (user.role === 'admin' || user.role === 'teacher') {
@@ -43,7 +43,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       if (term) where.termId = term.id
     }
   }
-  if (Object.keys(where).length === 0) {
+  if (Object.keys(where).length === 1) {
     where.status = { not: 'DELETED' }
   }
 

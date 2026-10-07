@@ -58,7 +58,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const include = searchParams.get('include')
   const division = getRequestDivision(user, searchParams.get('division'))
 
-  const where: Record<string, unknown> = { course: activeCourseWhere, division }
+  const where: Record<string, unknown> = { course: activeCourseWhere, division, deletedAt: null }
   const selectedTerm = user.role === 'admin'
     ? await resolveAdminTermScope(prisma, division, req)
     : await getActiveAcademicTerm(prisma, division)
@@ -106,7 +106,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     _count: {
       select: {
         enrollments: { where: activeEnrollmentWhere },
-        classLessons: { where: { status: { not: 'CANCELLED' as const } } },
+        classLessons: { where: { status: { not: 'CANCELLED' as const }, deletedAt: null } },
       },
     },
   }

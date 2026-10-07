@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
@@ -10,6 +9,11 @@ import {
   teacherVisibleMaterialWhere,
 } from '@/lib/material-visibility'
 import { MaterialAudience, MaterialSource } from '@prisma/client'
+import { LessonPreviewPublishError, publishLessonPreviewMaterial } from '@/lib/lesson-preview-material'
+import { detectMaterialFileType, hasValidMaterialFileSignature, isAllowedMaterialExtension } from '@/lib/material-file'
+import { StorageConfigurationError, uploadBuffer } from '@/lib/storage'
+import { listStudyMaterials } from '@/lib/material-list'
+import { compressPdfIfNeeded } from '@/lib/compress-pdf'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,17 +33,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
         ? teacherOwnMaterialWhere(teacher.id, user.id)
         : teacherVisibleMaterialWhere(teacher.id, user.id)
 
-    const materials = await prisma.studyMaterial.findMany({
-      where: {
+    const { materials } = await listStudyMaterials(prisma, {
         ...tabWhere,
+        isLessonPreview: false,
         ...(grade ? { grade } : {}),
         ...(subject ? { subject } : {}),
-      },
-      include: {
-        uploader: { select: { name: true } },
-        teacher: { select: { id: true, name: true } },
-      },
-      orderBy: [{ isPinned: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
     })
 
     return NextResponse.json({ materials })
@@ -55,59 +53,99 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const description = formData.get('description') as string | null
     const audience = normalizeMaterialAudience(formData.get('audience'))
     const status = normalizeMaterialStatus(formData.get('status'))
+    const rawType = String(formData.get('materialType') || '').trim().toUpperCase()
+    const validTypes = ['TEXTBOOK','HANDOUT','EXERCISE','EXAM','ANSWER','REFERENCE']
+    const materialType = validTypes.includes(rawType) ? rawType : 'HANDOUT'
     const tags = String(formData.get('tags') || '')
       .split(/[,，\s]+/)
       .map((tag) => tag.trim())
       .filter(Boolean)
+    const classLessonId = String(formData.get('classLessonId') || '').trim() || null
 
-    if (!file || !title || !grade || !subject) {
+    if (classLessonId) {
+      if (!file || !title) return NextResponse.json({ error: '请选择文件并填写讲义标题' }, { status: 400 })
+      try {
+        const material = await publishLessonPreviewMaterial({
+          prisma,
+          actor: { role: 'TEACHER', userId: user.id, teacherId: teacher.id, division: user.division },
+          classLessonId,
+          file,
+          title,
+          description,
+        })
+        return NextResponse.json(material, { status: 201 })
+      } catch (error) {
+        if (error instanceof LessonPreviewPublishError) {
+          return NextResponse.json({ error: error.message }, { status: error.status })
+        }
+        throw error
+      }
+    }
+
+    const resolvedGrade = grade
+    const resolvedSubject = subject
+    if (!file || !title || !resolvedGrade || !resolvedSubject) {
       return NextResponse.json({ error: '参数缺失' }, { status: 400 })
     }
 
-    const allowedExts = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.zip', '.rar', '.7z']
     const ext = path.extname(file.name).toLowerCase()
-    if (!allowedExts.includes(ext)) {
+    if (!isAllowedMaterialExtension(ext)) {
       return NextResponse.json({ error: '仅支持 PDF、Word、Excel、PPT、图片和压缩包格式' }, { status: 400 })
     }
     if (file.size > 50 * 1024 * 1024) {
       return NextResponse.json({ error: '文件大小不能超过 50MB' }, { status: 400 })
     }
 
-    const storedName = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'materials')
-    await mkdir(uploadDir, { recursive: true })
-    await writeFile(path.join(uploadDir, storedName), Buffer.from(await file.arrayBuffer()))
+    const buffer = Buffer.from(await file.arrayBuffer())
+    if (!hasValidMaterialFileSignature(buffer, ext)) {
+      return NextResponse.json({ error: '文件内容与扩展名不匹配，请检查文件后重试' }, { status: 400 })
+    }
 
-    const fileType = ext === '.pdf'
-      ? 'pdf'
-      : ['.doc', '.docx'].includes(ext)
-      ? 'word'
-      : ['.xls', '.xlsx'].includes(ext)
-      ? 'excel'
-      : ['.ppt', '.pptx'].includes(ext)
-      ? 'ppt'
-      : ['.zip', '.rar', '.7z'].includes(ext)
-      ? 'archive'
-      : 'image'
+    // PDF > 3MB 自动压缩（手机端加载优化），失败则降级用原文件
+    let finalBuffer: Buffer = buffer
+    if (ext === '.pdf') {
+      finalBuffer = await compressPdfIfNeeded(buffer)
+    }
 
-    const material = await prisma.studyMaterial.create({
-      data: {
+    let stored
+    try {
+      stored = await uploadBuffer(finalBuffer, {
+        originalName: file.name,
+        mimeType: file.type,
+        prefix: 'materials',
+      })
+    } catch (error) {
+      if (error instanceof StorageConfigurationError) {
+        return NextResponse.json({ error: error.message, code: error.code }, { status: error.status })
+      }
+      throw error
+    }
+
+    const fileType = detectMaterialFileType(ext)
+
+    const data = {
         title,
-        grade,
-        subject,
+        grade: resolvedGrade,
+        subject: resolvedSubject,
         description: description || null,
-        fileUrl: `/uploads/materials/${storedName}`,
+        fileUrl: stored.storageKey,
         fileName: file.name,
-        fileSize: file.size,
+        fileSize: finalBuffer.length,
         fileType,
+        materialType: materialType as never,
+        storageDriver: stored.storageDriver,
         uploadedBy: user.id,
+        uploadedByRole: 'TEACHER',
+        uploadedByAdminId: null,
         teacherId: teacher.id,
         source: MaterialSource.TEACHER,
         audience,
         status,
         tags,
-      },
-    })
+        classLessonId: null,
+        isLessonPreview: false,
+      }
+    const material = await prisma.studyMaterial.create({ data })
 
     return NextResponse.json(material, { status: 201 })
 })

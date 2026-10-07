@@ -21,6 +21,7 @@ import {
 import { EditOutlined, HistoryOutlined, KeyOutlined, LinkOutlined, PlusOutlined, StopOutlined } from '@ant-design/icons'
 import { isUserActive } from '@/lib/user-status'
 import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
+import { formatLocaleDateTime } from '@/lib/format-date'
 
 type AccountStatus = 'active' | 'disabled' | string
 
@@ -81,10 +82,6 @@ const fetcher = async (url: string) => {
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(data.error || '请求失败')
   return data
-}
-
-function formatDate(value: string | null) {
-  return value ? new Date(value).toLocaleString('zh-CN') : '-'
 }
 
 function statusTag(status: AccountStatus) {
@@ -237,7 +234,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
       </Tag>
       <Typography.Text type="secondary" style={{ fontSize: 12 }}>
         {record.passwordSecurity.source}
-        {record.passwordSecurity.changedAt ? ` · ${formatDate(record.passwordSecurity.changedAt)}` : ''}
+        {record.passwordSecurity.changedAt ? ` · ${formatLocaleDateTime(record.passwordSecurity.changedAt)}` : ''}
       </Typography.Text>
       <Button
         type="link"
@@ -282,7 +279,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
     { title: '邮箱', dataIndex: 'email', key: 'email', width: 220 },
     { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: statusTag },
     { title: '密码状态', key: 'passwordSecurity', width: 210, render: passwordSecurity },
-    { title: '最近登录', dataIndex: 'lastLoginAt', key: 'lastLoginAt', width: 180, render: formatDate },
+    { title: '最近登录', dataIndex: 'lastLoginAt', key: 'lastLoginAt', width: 180, render: (value: string | null) => formatLocaleDateTime(value) },
     {
       title: '操作',
       key: 'action',
@@ -335,7 +332,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
         </Space>
       ),
     },
-    { title: '最近登录', dataIndex: 'lastLoginAt', key: 'lastLoginAt', width: 180, render: formatDate },
+    { title: '最近登录', dataIndex: 'lastLoginAt', key: 'lastLoginAt', width: 180, render: (value: string | null) => formatLocaleDateTime(value) },
     {
       title: '操作',
       key: 'action',
@@ -470,13 +467,13 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
                 passwordRule,
               ]}
             >
-              <Input.Password autoComplete="new-password" placeholder={`至少 ${PASSWORD_MIN_LENGTH} 位，包含字母和数字`} />
+              <Input.Password autoComplete="new-password" placeholder={`至少 ${PASSWORD_MIN_LENGTH} 位，包含英文字母`} />
             </Form.Item>
           )}
 
           {mode === 'reset' && (
             <Form.Item name="password" label="新密码" rules={[{ required: true, message: '请输入新密码' }, passwordRule]}>
-              <Input.Password autoComplete="new-password" placeholder={`至少 ${PASSWORD_MIN_LENGTH} 位，包含字母和数字`} />
+              <Input.Password autoComplete="new-password" placeholder={`至少 ${PASSWORD_MIN_LENGTH} 位，包含英文字母`} />
             </Form.Item>
           )}
 
@@ -536,7 +533,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
           pagination={false}
           dataSource={passwordHistoryTarget?.passwordSecurity.history || []}
           columns={[
-            { title: '时间', dataIndex: 'changedAt', render: formatDate, width: 190 },
+            { title: '时间', dataIndex: 'changedAt', render: (value: string | null) => formatLocaleDateTime(value), width: 190 },
             { title: '方式', dataIndex: 'source', width: 150 },
             { title: '操作人', dataIndex: 'operator' },
           ]}

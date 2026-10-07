@@ -18,6 +18,9 @@ import {
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { OperatingOverview } from '@/components/Dashboard/OperatingOverview'
+import { PeopleReports } from '@/components/Reports/PeopleReports'
+import type { AdminDashboardData } from '@/types/dashboard'
 
 const { RangePicker } = DatePicker
 const ReactECharts = dynamic(() => import('echarts-for-react'), {
@@ -44,6 +47,12 @@ interface ReportsData {
 async function fetcher(url: string): Promise<ReportsData> {
   const res = await fetch(url)
   if (!res.ok) throw new Error('数据加载失败')
+  return res.json()
+}
+
+const dashboardFetcher = async (url: string): Promise<AdminDashboardData> => {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error('经营数据加载失败')
   return res.json()
 }
 
@@ -92,6 +101,7 @@ export default function ReportsPage() {
   const isMobile = useIsMobile() ?? false
   const { division } = useDivision()
   const [period, setPeriod] = useState<string>('month')
+  const [view, setView] = useState('overview')
   const [customRange, setCustomRange] = useState<[string, string] | null>(null)
 
   const queryParams = new URLSearchParams({ period })
@@ -102,6 +112,12 @@ export default function ReportsPage() {
   }
 
   const { data, isLoading } = useSWR(`/api/reports/summary?${queryParams}`, fetcher, { refreshInterval: 600_000 })
+
+  // 经营总览（原管理端首页组件，迁入数据报表页）：复用 /api/dashboard 实时口径
+  const { data: adminData } = useSWR('/api/dashboard', dashboardFetcher, {
+    refreshInterval: 600_000,
+    revalidateOnFocus: true,
+  })
 
   const funnelOption = useMemo(() => data ? buildFunnelOption(data.funnel) : {}, [data])
   const masteryOption = useMemo(() => data ? buildPaperMasteryOption(data.paperMastery) : {}, [data])
@@ -121,6 +137,19 @@ export default function ReportsPage() {
 
   return (
     <PageLayout title="数据报表" subtitle="学员分析、教学质量与财务统计">
+      <Segmented
+        options={[
+          { label: '经营数据', value: 'overview' },
+          { label: '教师 · 学生 · 家长登录', value: 'people' },
+        ]}
+        value={view}
+        onChange={(val) => setView(val as string)}
+        style={{ marginBottom: 16 }}
+      />
+      {view === 'people' ? (
+        <PeopleReports />
+      ) : (
+        <>
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center', flexWrap: 'wrap' }}>
         <Segmented
           options={[
@@ -163,6 +192,12 @@ export default function ReportsPage() {
               </Card>
             </Col>
           </Row>
+
+          {adminData && (
+            <div style={{ marginBottom: 12 }}>
+              <OperatingOverview metrics={adminData.metrics} growthData={adminData.growthData} />
+            </div>
+          )}
 
           <Row gutter={[12, 12]}>
             <Col xs={24} lg={12}>
@@ -220,6 +255,8 @@ export default function ReportsPage() {
               </ChartCard>
             </Col>
           </Row>
+        </>
+      )}
         </>
       )}
     </PageLayout>

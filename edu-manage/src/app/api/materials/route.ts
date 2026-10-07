@@ -9,6 +9,7 @@ import {
 } from '@/lib/material-visibility'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { apiHandler } from '@/lib/api-handler'
+import { listStudyMaterials } from '@/lib/material-list'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,6 +47,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const limit = Math.min(200, Math.max(1, Number(searchParams.get('limit') || 20)))
   const where = {
     ...visibilityWhere,
+    deletedAt: null,
     ...(grade ? { grade } : {}),
     ...(subject ? { subject } : {}),
     ...(audience && role === 'admin' ? { audience: audience as MaterialAudience } : {}),
@@ -53,19 +55,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ...(teacherId && role === 'admin' ? { teacherId } : {}),
   }
 
-  const [materials, total] = await Promise.all([
-    prisma.studyMaterial.findMany({
-      where,
-      include: {
-        uploader: { select: { name: true } },
-        teacher: { select: { id: true, name: true } },
-      },
-      orderBy: [{ isPinned: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.studyMaterial.count({ where }),
-  ])
+  const { materials, total } = await listStudyMaterials(prisma, where, { page, limit, count: true })
 
   return NextResponse.json({ materials, total, page, limit })
 })

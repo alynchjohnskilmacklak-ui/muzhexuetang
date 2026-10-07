@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminUser, TEACHER_LOG_ACTIONS, todayRange, weekRange } from '@/lib/teacher-portal'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getRequestDivision } from '@/lib/division'
+import { hasSubmittedAttendance, isAttendanceDue } from '@/lib/teacher-attendance-monitor'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,12 +43,27 @@ export async function GET(req: NextRequest) {
       }),
       prisma.classLesson.findMany({
         where: {
-          teacherId: { in: teacherIds },
-          group: { termId },
+          division,
+          group: { termId, status: { not: 'ARCHIVED' } },
           lessonDate: { gte: today, lt: todayEnd },
-          status: 'COMPLETED',
+          status: { notIn: ['CANCELLED', 'POSTPONED'] },
+          deletedAt: null,
         },
-        include: { attendances: { select: { id: true } } },
+        include: {
+          attendances: { select: { id: true } },
+          lessonStudents: { select: { studentId: true } },
+          group: {
+            select: {
+              teacherId: true,
+              teacherAssignments: { select: { teacherId: true, subject: true } },
+              course: { select: { subject: true } },
+              enrollments: {
+                where: { status: 'ACTIVE', deletedAt: null, student: { status: { not: 'INACTIVE' } } },
+                select: { studentId: true, subjects: true },
+              },
+            },
+          },
+        },
       }),
       prisma.examPaper.groupBy({
         by: ['teacherId'],
@@ -62,13 +78,30 @@ export async function GET(req: NextRequest) {
     ])
 
     const logsByTeacher = groupBy(allLogs.filter((log) => log.teacherId), (log) => log.teacherId!)
-    const lessonsByTeacher = groupBy(allLessons.filter((lesson) => lesson.teacherId), (lesson) => lesson.teacherId!)
+    const lessonsByTeacher = new Map<string, typeof allLessons>()
+    const activeTeacherIds = new Set(teacherIds)
+    for (const lesson of allLessons) {
+      const lessonSubject = lesson.subject || lesson.group.course.subject
+      const assignedTeacherIds = new Set([
+        lesson.teacherId,
+        ...lesson.group.teacherAssignments
+          .filter((assignment) => !assignment.subject || assignment.subject === lessonSubject)
+          .map((assignment) => assignment.teacherId),
+        ...(!lesson.teacherId && lesson.group.teacherAssignments.length === 0 ? [lesson.group.teacherId] : []),
+      ])
+      for (const teacherId of assignedTeacherIds) {
+        if (!teacherId || !activeTeacherIds.has(teacherId)) continue
+        const scopedLessons = lessonsByTeacher.get(teacherId) || []
+        scopedLessons.push(lesson)
+        lessonsByTeacher.set(teacherId, scopedLessons)
+      }
+    }
     const draftPaperMap = new Map(allDraftPapers.filter((row) => row.teacherId).map((row) => [row.teacherId!, row._count.id]))
     const alertMap = new Map(allAlerts.filter((row) => row.teacherId).map((row) => [row.teacherId!, row._count.id]))
 
     const rows = teachers.map((teacher) => {
       const todayLogs = logsByTeacher.get(teacher.id) || []
-      const todayLessons = lessonsByTeacher.get(teacher.id) || []
+      const todayLessons = (lessonsByTeacher.get(teacher.id) || []).filter((lesson) => isAttendanceDue(lesson, now))
       const draftPapers = draftPaperMap.get(teacher.id) || 0
       const alerts = alertMap.get(teacher.id) || 0
 
@@ -77,7 +110,7 @@ export async function GET(req: NextRequest) {
           .filter((log) => log.action === TEACHER_LOG_ACTIONS.ATTENDANCE_SUBMIT && log.entityType === 'ClassLesson' && log.entityId)
           .map((log) => log.entityId!)
       )
-      const submittedCount = todayLessons.filter((lesson) => lesson.attendances.length > 0 || submittedLessonIds.has(lesson.id)).length
+      const submittedCount = todayLessons.filter((lesson) => hasSubmittedAttendance(lesson) || submittedLessonIds.has(lesson.id)).length
       const papersToday = todayLogs.filter((log) => log.action === TEACHER_LOG_ACTIONS.PAPER_PUBLISH).length
       const postsToday = todayLogs.filter((log) => log.action === TEACHER_LOG_ACTIONS.PERFORMANCE_POST).length
       const commentRepliesToday = todayLogs.filter((log) => log.action === TEACHER_LOG_ACTIONS.COMMENT_REPLY).length
@@ -112,7 +145,7 @@ export async function GET(req: NextRequest) {
       prisma.examPaper.findMany({ where: { termId, status: 'PUBLISHED', paperDate: { gte: weekStart, lt: weekEnd } }, select: { studentId: true } }),
       prisma.performancePost.findMany({ where: { termId, deletedAt: null, createdAt: { gte: weekStart, lt: weekEnd } }, select: { studentId: true } }),
       prisma.student.count({ where: { division, status: { not: 'INACTIVE' }, termMemberships: { some: { termId } } } }),
-      prisma.teacherAlert.count({ where: { isResolved: false } }),
+      prisma.teacherAlert.count({ where: { teacherId: { in: teacherIds }, isResolved: false } }),
     ])
 
     const weekPaperStudents = new Set(weeklyPublishedPapers.map((paper) => paper.studentId)).size
@@ -121,7 +154,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       teachers: rows,
       summary: {
-        attendanceCompleteTeachers: rows.filter((row) => row.todayLessons === 0 || row.submittedCount >= row.todayLessons).length,
+        attendanceCompleteTeachers: rows.filter((row) => row.todayLessons > 0 && row.submittedCount >= row.todayLessons).length,
         pendingPapers: totalDraftPapers,
         weeklyPaperRate: activeStudents ? Math.round((weekPaperStudents / activeStudents) * 100) : 100,
         weeklyFeedbackRate: activeStudents ? Math.round((weekFeedbackStudents / activeStudents) * 100) : 100,

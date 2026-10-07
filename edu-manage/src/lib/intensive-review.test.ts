@@ -28,6 +28,15 @@ describe('INTENSIVE lesson review', () => {
       expectedStudentIds: ['student-a'],
       records: [{ studentId: 'student-a', status: 'PRESENT' }],
     })).toContain('实际授课分钟')
+
+    expect(validateIntensiveReviewSubmission({
+      actualMinutes: 60,
+      expectedStudentIds: ['student-a', 'student-b'],
+      records: [
+        { studentId: 'student-a', status: 'LEAVE' },
+        { studentId: 'student-b', status: 'ABSENT' },
+      ],
+    })).toContain('没有实际出勤学员')
   })
 
   it('tracks approved teaching hours even when prepaid balance starts at zero', () => {

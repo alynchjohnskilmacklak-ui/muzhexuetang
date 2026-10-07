@@ -16,7 +16,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const division = getRequestDivision(user, request.nextUrl.searchParams.get('division'))
 
   const fees = await prisma.fee.findMany({
-    where: { createdAt: { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) }, division },
+    where: { createdAt: { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) }, division, deletedAt: null },
     include: { student: { select: { name: true } } },
     orderBy: { createdAt: 'desc' },
   })

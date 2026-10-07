@@ -4,6 +4,7 @@ import useSWR from 'swr'
 import { Alert, Button, Card, Popconfirm, Space, Table, Tag, Typography, message } from 'antd'
 import { StopOutlined } from '@ant-design/icons'
 import { isUserActive } from '@/lib/user-status'
+import { formatLocaleDateTime } from '@/lib/format-date'
 
 type AccountStatus = 'active' | 'disabled' | string
 
@@ -25,10 +26,6 @@ const fetcher = async (url: string) => {
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(data.error || '请求失败')
   return data
-}
-
-function formatDate(value: string | null) {
-  return value ? new Date(value).toLocaleString('zh-CN') : '-'
 }
 
 function statusTag(status: AccountStatus) {
@@ -58,7 +55,7 @@ export function TeacherAccountsTab() {
     { title: '姓名', dataIndex: 'name', key: 'name', width: 140 },
     { title: '邮箱（拼音@tea.com）', dataIndex: 'email', key: 'email', width: 240 },
     { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: statusTag },
-    { title: '最近登录', dataIndex: 'lastLoginAt', key: 'lastLoginAt', width: 180, render: formatDate },
+    { title: '最近登录', dataIndex: 'lastLoginAt', key: 'lastLoginAt', width: 180, render: (value: string | null) => formatLocaleDateTime(value) },
     {
       title: '操作',
       key: 'action',

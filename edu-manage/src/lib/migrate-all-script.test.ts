@@ -16,7 +16,8 @@ describe('dual database migration safety', () => {
   })
 
   it('does not retry arbitrary prisma migrate deploy failures', () => {
-    expect(script.match(/npx prisma migrate deploy/g)).toHaveLength(1)
+    expect(script.match(/run_prisma migrate deploy/g)).toHaveLength(1)
+    expect(script).toContain('npx --no-install prisma "$@"')
     expect(script).not.toContain('migrate deploy failed; checking known StageSummary recovery')
   })
 

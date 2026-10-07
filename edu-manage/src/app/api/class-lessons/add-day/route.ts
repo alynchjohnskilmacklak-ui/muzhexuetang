@@ -4,6 +4,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { selectReplacementTeachingDay } from '@/lib/class-schedule-plan'
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,6 +51,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       division: true,
       totalLessons: true,
       course: { select: { totalLessons: true } },
+      enrollments: { where: { status: 'ACTIVE', deletedAt: null }, select: { studentId: true, subjects: true } },
     },
   })
 
@@ -215,6 +217,17 @@ export const POST = apiHandler(async (req: NextRequest) => {
       const created = existingCount > 0
         ? 0
         : (await tx.classLesson.createMany({ data, skipDuplicates: true })).count
+
+      if (created > 0) {
+        const createdRows = await tx.classLesson.findMany({
+          where: { groupId: group.id, lessonDate: { gte: dayStart, lt: dayEnd }, status: 'SCHEDULED', deletedAt: null },
+          select: { id: true, subject: true },
+        })
+        const rosterRows = createdRows.flatMap((lesson) => group.enrollments
+          .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, lesson.subject))
+          .map((enrollment) => ({ lessonId: lesson.id, studentId: enrollment.studentId })))
+        if (rosterRows.length) await tx.classLessonStudent.createMany({ data: rosterRows, skipDuplicates: true })
+      }
 
       let replaced = 0
       if (replacement) {

@@ -44,21 +44,42 @@ export async function proxy(request: NextRequest) {
   const user = session?.user as { role?: string; id?: string; sessionMark?: string; division?: string } | undefined
   const apiRequest = isApiRequest(pathname)
   const loginRequest = pathname === '/login' || pathname.startsWith('/login/')
+  const parentTermExpiredRequest = loginRequest && request.nextUrl.searchParams.get('error') === 'PARENT_TERM_EXPIRED'
   const resetPasswordRequest = pathname === '/reset-password' || pathname.startsWith('/reset-password/')
+  const baiduVerificationRequest = pathname === '/baidu_verify_codeva-LcCyyIUZRF.html'
+  const bingVerificationRequest = pathname === '/BingSiteAuth.xml'
+  const byteDanceVerificationRequest = pathname === '/ByteDanceVerify.html'
+  const shenmaVerificationRequest = pathname === '/shenma-site-verification.txt'
+  const aboutRequest = pathname === '/about'
+
+  // The public brand homepage, the about page and crawler discovery files are
+  // open to everyone — signed-in visitors also see the public site at "/",
+  // and use the "进入系统" button to reach their dashboard.
+  if (pathname === '/' || pathname === '/about' || pathname === '/home.html' || pathname === '/about.html' || pathname === '/robots.txt' || pathname === '/sitemap.xml' || pathname === '/manifest.json') {
+    return NextResponse.next()
+  }
 
   // Allow public routes and explicitly protected self-contained setup endpoint.
   if (
     pathname.startsWith('/api/auth') ||
+    baiduVerificationRequest ||
+    bingVerificationRequest ||
+    byteDanceVerificationRequest ||
+    shenmaVerificationRequest ||
+    aboutRequest ||
     resetPasswordRequest ||
     pathname === '/api/setup' ||
     pathname.startsWith('/api/wxpusher/callback') ||
     pathname.startsWith('/people/') ||
+    pathname.startsWith('/avatars/') ||
     pathname.startsWith('/images/') ||
     pathname.startsWith('/business-assets/') ||
     pathname.startsWith('/services/') ||
     pathname.startsWith('/UI_picture/') ||
     pathname.startsWith('/volunteer/picture/') ||
     pathname.startsWith('/volunteer/docs/') ||
+    pathname === '/pdf.worker.min.mjs' ||
+    pathname === '/echarts.min.js' ||
     pathname === '/0a039113432e6c816c8f59c7c6c7f211.txt' ||
     pathname === '/api/volunteer/schools'
   ) {
@@ -129,6 +150,7 @@ export async function proxy(request: NextRequest) {
   const role = user.role
 
   if (loginRequest) {
+    if (parentTermExpiredRequest) return NextResponse.next()
     if (role === 'parent') return NextResponse.redirect(new URL('/parent/dashboard', request.url))
     if (role === 'teacher') return NextResponse.redirect(new URL('/teacher/dashboard', request.url))
     return NextResponse.redirect(new URL('/dashboard', request.url))
@@ -152,19 +174,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  if (pathname === '/') {
-    if (role === 'parent') {
-      return NextResponse.redirect(new URL('/parent/dashboard', request.url))
-    }
-    if (role === 'teacher') {
-      return NextResponse.redirect(new URL('/teacher/dashboard', request.url))
-    }
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
-
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|images|business-assets|services|people|UI_picture|volunteer/picture|volunteer/docs|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|images|business-assets|services|people|avatars|UI_picture|volunteer/picture|volunteer/docs|about\.html|home\.html|manifest\.json|about-images|pdf\.worker\.min\.mjs|echarts\.min\.js|favicon\.ico|shenma-site-verification\.txt|ByteDanceVerify\.html).*)'],
 }

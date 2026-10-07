@@ -28,3 +28,13 @@ export function hasSubmittedLessonAttendance(
   return expectedStudentIds.length > 0
     && expectedStudentIds.every((studentId) => attendanceStudentIds.has(studentId))
 }
+
+/** A lesson only takes place when at least one student actually attends. */
+export function hasAttendingStudent(
+  records: Array<{ status?: unknown }>,
+) {
+  return records.some((record) => {
+    const status = String(record.status || '').toUpperCase()
+    return status === 'PRESENT' || status === 'LATE'
+  })
+}

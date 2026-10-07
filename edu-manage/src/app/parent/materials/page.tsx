@@ -1,10 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import NextImage from 'next/image'
-import { Button, Modal, Select, Skeleton, Space, Tag, Typography } from 'antd'
-import { DownloadOutlined, ExportOutlined, EyeOutlined, FileTextOutlined } from '@ant-design/icons'
-import { toast } from 'sonner'
+import { Button, Select, Skeleton, Typography } from 'antd'
+import { DownloadOutlined, EyeOutlined } from '@ant-design/icons'
 import { GRADE_SUBJECTS, GRADES, SUBJECT_COLORS } from '@/data/subjects'
 import { fmtDate } from '@/lib/format-date'
 import { materialFileLabel } from '@/lib/material-format'
@@ -21,11 +19,7 @@ const COPY = {
   empty: '\u8001\u5e08\u8fd8\u6ca1\u6709\u4e0a\u4f20\u5b66\u4e60\u8d44\u6599',
   teacher: '\u8001\u5e08',
   download: '\u4e0b\u8f7d',
-  preview: '\u9884\u89c8',
-  pdfPreview: 'PDF\u9884\u89c8',
-  wordPreview: 'Word\u9884\u89c8',
-  openPdf: '\u5728\u65b0\u6807\u7b7e\u6253\u5f00PDF',
-  copyright: '\u672c\u8d44\u6599\u4ec5\u4f9b\u5728\u7ebf\u67e5\u770b\uff0c\u7248\u6743\u5f52\u7267\u54f2\u5b66\u5802\u6240\u6709',
+  tapToPreview: '\u70b9\u51fb\u5c01\u9762\u9884\u89c8',
 }
 
 interface Material {
@@ -35,11 +29,22 @@ interface Material {
   subject: string
   fileName: string
   fileType: string
+  materialType: string
   description: string | null
   downloads?: number
   teacher?: { id: string; name: string } | null
   createdAt: string
 }
+
+const MATERIAL_TYPES = [
+  { value: '', label: '全部' },
+  { value: 'TEXTBOOK', label: '课本' },
+  { value: 'HANDOUT', label: '讲义' },
+  { value: 'EXERCISE', label: '题库' },
+  { value: 'EXAM', label: '试卷' },
+  { value: 'ANSWER', label: '答案' },
+  { value: 'REFERENCE', label: '参考' },
+] as const
 
 const FILE_TYPE_STYLE: Record<string, { color: string; bg: string }> = {
   pdf: { color: '#E24B4A', bg: 'rgba(226,75,74,.10)' },
@@ -74,63 +79,72 @@ function getFileStyle(material: Pick<Material, 'fileType' | 'fileName'>) {
   return FILE_TYPE_STYLE[material.fileType] || FILE_TYPE_STYLE[ext] || { color: '#7a7fad', bg: 'rgba(122,127,173,.12)' }
 }
 
+/** 按科目主色生成书籍封面渐变（浅色 → 深色），保证白字可读 */
+function bookCoverStyle(subject: string) {
+  const hex = SUBJECT_COLORS[subject] || '#8A6F5C'
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) return { background: 'linear-gradient(160deg,#9C7B62 0%,#6E5340 100%)' }
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  const darken = (n: number) => Math.round(n * 0.62)
+  const bright = (n: number) => Math.min(255, Math.round(n * 1.14 + 18))
+  return {
+    background: `linear-gradient(160deg, rgb(${bright(r)},${bright(g)},${bright(b)}) 0%, rgb(${r},${g},${b}) 46%, rgb(${darken(r)},${darken(g)},${darken(b)}) 100%)`,
+  }
+}
+
 export default function ParentMaterialsPage() {
   const router = useRouter()
-  const [selectedGrade, setSelectedGrade] = useState<string>(COPY.defaultGrade)
+  const [selectedGrade, setSelectedGrade] = useState<string>('')
   const [selectedSubject, setSelectedSubject] = useState<string>('')
+  const [selectedType, setSelectedType] = useState<string>('')
   const [materials, setMaterials] = useState<Material[]>([])
-  const [loading, setLoading] = useState(false)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [previewTitle, setPreviewTitle] = useState('')
-  const [previewType, setPreviewType] = useState<'pdf' | 'image' | 'word'>('pdf')
+  const [loading, setLoading] = useState(true)
+
+  // 默认选中当前孩子所在年级：URL ?childId= > cookie mz_parent_active_child > 第一个孩子
+  useEffect(() => {
+    const resolveDefaultGrade = async () => {
+      try {
+        const res = await fetch('/api/parent/today')
+        const data = await res.json()
+        const students: Array<{ student: { id: string; grade: string | null } }> = data.students || []
+        if (!students.length) { setLoading(false); return }
+        const params = new URLSearchParams(window.location.search)
+        const childId = params.get('childId')
+          || (document.cookie.match(/(?:^|;\s*)mz_parent_active_child=([^;]*)/)?.[1] || '')
+          || students[0].student.id
+        const active = students.find((item) => item.student.id === childId)?.student || students[0].student
+        if (active.grade) {
+          setSelectedGrade(active.grade)
+        } else {
+          setLoading(false)
+        }
+      } catch {
+        setLoading(false)
+      }
+    }
+    resolveDefaultGrade()
+  }, [])
 
   useEffect(() => {
+    if (!selectedGrade) return
     const fetchMaterials = async () => {
       setLoading(true)
       const params = new URLSearchParams({ grade: selectedGrade })
       if (selectedSubject) params.set('subject', selectedSubject)
+      if (selectedType) params.set('materialType', selectedType)
       const res = await fetch(`/api/parent/materials?${params}`)
       const data = await res.json()
       setMaterials(data.materials || [])
       setLoading(false)
     }
     fetchMaterials()
-  }, [selectedGrade, selectedSubject])
-
-  useEffect(() => () => {
-    if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl)
-  }, [previewUrl])
+  }, [selectedGrade, selectedSubject, selectedType])
 
   const subjects = GRADE_SUBJECTS[selectedGrade] || []
 
-  const handleView = async (material: Material) => {
-    const endpoint = `/api/materials/${material.id}/view`
-    try {
-      const res = await fetch(endpoint)
-      const contentType = res.headers.get('content-type') || ''
-      if (!res.ok) {
-        const errorData = contentType.includes('application/json') ? await res.json() : null
-        throw new Error(errorData?.error || '\u8d44\u6599\u9884\u89c8\u52a0\u8f7d\u5931\u8d25')
-      }
-
-      let nextType = material.fileType as 'pdf' | 'image' | 'word'
-      let nextUrl: string
-      if (contentType.includes('application/json')) {
-        const data = await res.json() as { type?: string; url?: string; viewerUrl?: string }
-        nextUrl = data.viewerUrl || data.url || ''
-        if (data.type === 'word' || data.type === 'pdf' || data.type === 'image') nextType = data.type
-        if (!nextUrl) throw new Error('\u9884\u89c8\u5730\u5740\u65e0\u6548')
-      } else {
-        nextUrl = URL.createObjectURL(await res.blob())
-      }
-
-      setPreviewTitle(material.title)
-      setPreviewType(nextType)
-      setPreviewUrl(nextUrl)
-    } catch (error) {
-      console.error('\u5bb6\u957f\u7aef\u8d44\u6599\u9884\u89c8\u5931\u8d25', error)
-      toast.error(error instanceof Error ? error.message : '\u8d44\u6599\u9884\u89c8\u52a0\u8f7d\u5931\u8d25')
-    }
+  const handleView = (material: Material) => {
+    router.push(`/parent/materials/preview?id=${material.id}`)
   }
 
   const handleDownload = (material: Material) => {
@@ -145,72 +159,60 @@ export default function ParentMaterialsPage() {
       </div>
 
       <div className="materials-filters">
-        <Select className="materials-select" value={selectedGrade} onChange={(value) => { setSelectedGrade(value); setSelectedSubject('') }} options={GRADES.map((grade) => ({ label: grade, value: grade }))} />
-        <Select className="materials-select" placeholder={COPY.allSubjects} allowClear value={selectedSubject || undefined} onChange={(value) => setSelectedSubject(value || '')} options={subjects.map((subject) => ({ label: subject, value: subject }))} />
+        <Select className="materials-select" placeholder="选择年级" value={selectedGrade || undefined} onChange={(value) => { setSelectedGrade(value); setSelectedSubject('') }} options={GRADES.map((grade) => ({ label: grade, value: grade }))} popupClassName="materials-select-popup" />
+        <Select className="materials-select" placeholder={COPY.allSubjects} allowClear value={selectedSubject || undefined} onChange={(value) => setSelectedSubject(value || '')} options={subjects.map((subject) => ({ label: subject, value: subject }))} popupClassName="materials-select-popup" />
+      </div>
+
+      <div className="type-tabs">
+        {MATERIAL_TYPES.map((t) => (
+          <button
+            key={t.value || 'all'}
+            className={`type-tab ${selectedType === t.value ? 'active' : ''}`}
+            onClick={() => setSelectedType(t.value)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {loading ? (
-        <div className="materials-list">
-          <Skeleton active paragraph={{ rows: 3 }} />
-          <Skeleton active paragraph={{ rows: 3 }} />
-          <Skeleton active paragraph={{ rows: 3 }} />
+        <div className="materials-grid">
+          <Skeleton.Node active style={{ width: '100%', height: 170 }} />
+          <Skeleton.Node active style={{ width: '100%', height: 170 }} />
+          <Skeleton.Node active style={{ width: '100%', height: 170 }} />
+          <Skeleton.Node active style={{ width: '100%', height: 170 }} />
         </div>
       ) : materials.length === 0 ? (
         <div className="materials-empty">
           <GuidedEmpty title={selectedSubject ? '当前科目还没有资料' : '还没有学习资料'} description={selectedSubject ? '老师上传的对应科目讲义会显示在这里，可以先查看全部科目或课堂反馈。' : '老师准备的讲义和练习会显示在这里，帮助孩子课后复习。'} actionLabel={selectedSubject ? '查看全部科目' : '看看课堂反馈'} onAction={() => selectedSubject ? setSelectedSubject('') : router.push('/parent/class-feedback')} />
         </div>
       ) : (
-        <div className="materials-list">
+        <div className="materials-grid">
           {materials.map((material) => (
-            <div key={material.id} className="material-card">
-              <div className="file-icon" style={{ color: getFileStyle(material).color, backgroundColor: getFileStyle(material).bg }}>
-                <FileTextOutlined />
+            <div key={material.id} className="book-card">
+              <div className="book-cover" style={bookCoverStyle(material.subject)} onClick={() => handleView(material)}>
+                <div className="book-spine" />
+                <div className="book-cover-inner">
+                  <span className="book-topic">{material.subject}</span>
+                  <span className="book-title">{material.title}</span>
+                  <div className="book-rule" />
+                  <div className="book-foot">
+                    <span className="book-grade">{material.grade}</span>
+                    <span className="book-type">{materialFileLabel(material.fileType)}</span>
+                  </div>
+                </div>
+                <div className="book-hint"><EyeOutlined /> {COPY.tapToPreview}</div>
               </div>
-              <div className="material-body">
-                <Text strong className="material-title" ellipsis={{ tooltip: material.title }}>{material.title}</Text>
-                <Space size={4} wrap className="material-tags">
-                  <Tag className="material-tag">{material.grade}</Tag>
-                  <Tag className="material-tag" style={softTagStyle(SUBJECT_COLORS[material.subject])}>{material.subject}</Tag>
-                  <Tag className="material-tag" style={{ color: getFileStyle(material).color, backgroundColor: getFileStyle(material).bg, border: `1px solid ${getFileStyle(material).bg}` }}>{materialFileLabel(material.fileType)}</Tag>
-                </Space>
-                <Text type="secondary" className="material-meta" ellipsis>
+              <div className="book-meta">
+                <Text className="book-meta-text" ellipsis={{ tooltip: material.teacher?.name ? `${material.teacher.name} \u00b7 ${fmtDate(material.createdAt)}` : `${COPY.teacher} \u00b7 ${fmtDate(material.createdAt)}` }}>
                   {material.teacher?.name || COPY.teacher} · {fmtDate(material.createdAt)}
                 </Text>
-              </div>
-              <div className="material-actions">
-                <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleDownload(material)}>{COPY.download}</Button>
-                <Button icon={<EyeOutlined />} onClick={() => handleView(material)}>{COPY.preview}</Button>
+                <Button type="text" className="book-download" icon={<DownloadOutlined />} aria-label={COPY.download} onClick={() => handleDownload(material)} />
               </div>
             </div>
           ))}
         </div>
       )}
-
-      <Modal
-        title={previewTitle}
-        open={!!previewUrl}
-        onCancel={() => setPreviewUrl(null)}
-        footer={null}
-        width="95vw"
-        style={{ top: 10 }}
-        styles={{ body: { padding: 0 } }}
-      >
-        {previewUrl && previewType === 'pdf' && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 0' }}>
-            <Button icon={<ExportOutlined />} onClick={() => window.open(previewUrl, '_blank', 'noopener,noreferrer')}>{COPY.openPdf}</Button>
-          </div>
-        )}
-        {previewUrl && previewType === 'pdf' && <iframe src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`} style={{ width: '100%', height: '85vh', border: 'none' }} title={COPY.pdfPreview} />}
-        {previewUrl && previewType === 'word' && <iframe src={previewUrl} style={{ width: '100%', height: '85vh', border: 'none' }} title={COPY.wordPreview} />}
-        {previewUrl && previewType === 'image' && (
-          <div style={{ textAlign: 'center', padding: 16, background: '#f0f0f0' }}>
-            <NextImage src={previewUrl} alt={previewTitle} width={1200} height={800} unoptimized style={{ width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: '82vh', objectFit: 'contain' }} onContextMenu={(event) => event.preventDefault()} draggable={false} />
-          </div>
-        )}
-        <div style={{ padding: '8px 16px', backgroundColor: '#fff8f6', borderTop: '1px solid rgba(0,0,0,.06)', textAlign: 'center' }}>
-          <Text type="secondary" style={{ fontSize: 12 }}>{COPY.copyright}</Text>
-        </div>
-      </Modal>
 
       <style jsx>{`
         .parent-materials-page {
@@ -242,79 +244,202 @@ export default function ParentMaterialsPage() {
           width: 148px;
         }
 
-        .materials-list {
+        .type-tabs {
+          display: flex;
+          gap: 8px;
+          margin: -4px 0 14px;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+        .type-tabs::-webkit-scrollbar { display: none; }
+
+        .type-tab {
+          flex: 0 0 auto;
+          padding: 7px 16px;
+          border-radius: 999px;
+          border: 1px solid rgba(0,0,0,.10);
+          background: #fff;
+          color: #6b5d48;
+          font-size: 13px;
+          font-weight: 500;
+          white-space: nowrap;
+          cursor: pointer;
+          transition: all .15s;
+        }
+        .type-tab.active {
+          background: #9A4622;
+          border-color: #9A4622;
+          color: #fff;
+          font-weight: 600;
+        }
+
+        :global(.materials-select-popup .ant-select-item) {
+          font-size: 14px !important;
+          line-height: 22px !important;
+          min-height: 38px !important;
+          white-space: normal !important;
+        }
+
+        /* ===== 书架网格 ===== */
+        .materials-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px 12px;
+        }
+
+        .book-card {
+          min-width: 0;
           display: flex;
           flex-direction: column;
-          gap: 12px;
         }
 
-        .material-card {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          min-height: 124px;
-          padding: 16px;
-          border: 1px solid rgba(0,0,0,.06);
-          border-radius: 10px;
-          background: #fff;
-          box-shadow: 0 8px 20px rgba(26,18,1,.035);
+        .book-cover {
+          position: relative;
+          aspect-ratio: 3 / 4.1;
+          border-radius: 10px 12px 12px 10px;
+          box-shadow:
+            0 10px 22px rgba(40, 30, 20, .18),
+            0 2px 6px rgba(40, 30, 20, .10),
+            inset -1px 0 0 rgba(255, 255, 255, .16);
+          cursor: pointer;
+          overflow: hidden;
+          transition: transform .18s cubic-bezier(.2, 0, 0, 1), box-shadow .18s ease;
+          -webkit-tap-highlight-color: transparent;
+          user-select: none;
         }
 
-        .file-icon {
-          width: 48px;
-          height: 48px;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: 0 0 48px;
-          font-size: 24px;
+        .book-cover:active {
+          transform: scale(.975);
         }
 
-        .material-body {
-          flex: 1;
-          min-width: 0;
+        /* 书脊 */
+        .book-spine {
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 11px;
+          border-radius: 10px 0 0 10px;
+          background: rgba(0, 0, 0, .16);
+          box-shadow: inset -1px 0 0 rgba(255, 255, 255, .10);
+          z-index: 2;
+        }
+
+        .book-spine::after {
+          content: '';
+          position: absolute;
+          left: 3px;
+          top: 6px;
+          bottom: 6px;
+          width: 1px;
+          background: rgba(255, 255, 255, .22);
+        }
+
+        .book-cover-inner {
+          position: absolute;
+          inset: 0;
+          padding: 22px 12px 12px 24px;
           display: flex;
           flex-direction: column;
           gap: 8px;
         }
 
-        .material-title {
-          display: block;
-          max-width: 100%;
-          font-size: 16px;
-          line-height: 1.35;
-          color: #1a1201;
-        }
-
-        :global(.material-tag) {
-          height: 22px;
-          line-height: 20px;
-          margin-inline-end: 0;
+        .book-topic {
+          display: inline-block;
+          align-self: flex-start;
+          padding: 3px 10px;
           border-radius: 999px;
-          padding: 0 8px;
+          background: rgba(255, 255, 255, .22);
+          border: 1px solid rgba(255, 255, 255, .32);
+          color: #fff;
           font-size: 12px;
-          color: #5a4e3a;
-          background: #f5f2ee;
-          border: 1px solid rgba(0,0,0,.06);
+          font-weight: 600;
+          letter-spacing: 1px;
+          backdrop-filter: blur(2px);
+          text-shadow: 0 1px 2px rgba(0, 0, 0, .18);
         }
 
-        .material-meta {
-          display: block;
+        .book-title {
+          color: #fff;
+          font-size: 16px;
+          font-weight: 700;
+          line-height: 1.45;
+          text-shadow: 0 1px 3px rgba(0, 0, 0, .28);
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          word-break: break-word;
+          flex: 1;
+        }
+
+        .book-rule {
+          height: 1px;
+          background: linear-gradient(90deg, rgba(255,255,255,.55), rgba(255,255,255,.08));
+        }
+
+        .book-foot {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 6px;
+        }
+
+        .book-grade {
+          color: rgba(255, 255, 255, .92);
+          font-size: 13px;
+          font-weight: 600;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, .20);
+        }
+
+        .book-type {
+          padding: 2px 8px;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, .20);
+          color: #fff;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: .5px;
+        }
+
+        .book-hint {
+          position: absolute;
+          left: 24px;
+          right: 10px;
+          bottom: 0;
+          height: 34px;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          color: rgba(255, 255, 255, .94);
+          font-size: 11.5px;
+          font-weight: 600;
+          background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .22) 100%);
+          z-index: 1;
+        }
+
+        .book-meta {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-top: 7px;
+          padding: 0 2px;
+          min-width: 0;
+        }
+
+        .book-meta-text {
+          flex: 1;
+          min-width: 0;
           font-size: 12px;
           color: #9a8e7a;
         }
 
-        .material-actions {
-          flex: 0 0 92px;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .material-actions :global(.ant-btn) {
-          min-height: 36px;
-          border-radius: 10px;
+        .book-download {
+          flex: 0 0 auto;
+          width: 34px;
+          height: 34px;
+          color: #8a6f5c !important;
         }
 
         .materials-empty {
@@ -322,7 +447,7 @@ export default function ParentMaterialsPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px dashed rgba(0,0,0,.10);
+          border: 1px dashed rgba(0, 0, 0, .10);
           border-radius: 10px;
           background: #fff;
         }
@@ -333,25 +458,32 @@ export default function ParentMaterialsPage() {
             min-width: 132px;
           }
 
-          .material-card {
-            gap: 10px;
-            padding: 12px;
-            min-height: 120px;
+          .materials-grid {
+            gap: 12px 10px;
           }
 
-          .file-icon {
-            width: 44px;
-            height: 44px;
-            flex-basis: 44px;
-            font-size: 22px;
+          .book-cover-inner {
+            padding: 18px 10px 10px 20px;
+            gap: 7px;
           }
 
-          .material-actions {
-            flex-basis: 78px;
+          .book-title {
+            font-size: 15px;
           }
 
-          .material-actions :global(.ant-btn) {
-            padding-inline: 8px;
+          .book-topic {
+            font-size: 11px;
+            padding: 2px 8px;
+          }
+        }
+
+        @media (max-width: 340px) {
+          .book-title {
+            font-size: 14px;
+          }
+
+          .book-grade {
+            font-size: 12px;
           }
         }
       `}</style>

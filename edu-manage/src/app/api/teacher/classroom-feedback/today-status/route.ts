@@ -3,6 +3,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
 import { visibleStudentWhere } from '@/lib/business-visibility'
 import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
+import { resolveLessonStudentIds } from '@/lib/lesson-roster'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,9 +42,11 @@ export const GET = apiHandler(async () => {
   let completedCount = 0
 
   for (const lesson of todayLessons) {
-    const expectedStudentIds = lesson.group.intensiveMode === 'INTENSIVE'
-      ? lesson.lessonStudents.map((student) => student.studentId)
-      : lesson.group.enrollments.map((enrollment) => enrollment.student.id)
+    const expectedStudentIds = resolveLessonStudentIds(
+      lesson.lessonStudents.map((student) => student.studentId),
+      lesson.group.enrollments.map((enrollment) => enrollment.student.id),
+      lesson.lessonDate,
+    )
     if (!hasSubmittedLessonAttendance({
       attendanceSubmittedAt: lesson.attendanceSubmittedAt,
       status: lesson.status,
@@ -54,7 +57,9 @@ export const GET = apiHandler(async () => {
     const feedbackedStudentIds = new Set(lesson.classroomFeedbacks.flatMap((feedback) => feedback.studentIds))
     completedCount += lesson.classroomFeedbacks.length
     const lessonName = lesson.group.course?.name || lesson.group.name
+    const expectedStudentIdSet = new Set(expectedStudentIds)
     for (const enrollment of lesson.group.enrollments) {
+      if (!expectedStudentIdSet.has(enrollment.student.id)) continue
       if (feedbackedStudentIds.has(enrollment.student.id)) continue
       pendingStudents.push({
         key: `${lesson.id}-${enrollment.student.id}`,

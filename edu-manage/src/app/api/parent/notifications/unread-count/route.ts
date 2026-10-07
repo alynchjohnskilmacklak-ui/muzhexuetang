@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { unreadNotificationWhere } from '@/lib/notification-read-state'
 
 export const GET = apiHandler(async () => {
   const session = await auth()
@@ -12,7 +13,7 @@ export const GET = apiHandler(async () => {
   const userId = (session.user as { id: string }).id
 
   const count = await prisma.notification.count({
-    where: { userId, readAt: null, ...visibleNotificationWhere },
+    where: { userId, ...unreadNotificationWhere, ...visibleNotificationWhere },
   })
   return NextResponse.json({ count })
 })

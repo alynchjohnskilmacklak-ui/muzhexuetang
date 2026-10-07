@@ -9,7 +9,7 @@ interface WeeklyReportData {
   weekStart: string
   reports: Array<{
     student: { id: string; name: string; grade: string | null }
-    stats: { totalSchedules: number; attendanceRate: number; notificationCount: number }
+    stats: { totalSchedules: number; attendanceRate: number | null; notificationCount: number }
     grades: Array<{ subject: string; score: number; type: string }>
   }>
 }
@@ -44,7 +44,7 @@ export function WeeklyReport({ activeChildId }: { activeChildId?: string }) {
     : null
   const metrics = [
     { label: '本周课次', value: report.stats.totalSchedules },
-    { label: '出勤率', value: `${report.stats.attendanceRate}%` },
+    { label: '出勤率', value: report.stats.attendanceRate == null ? '暂无' : `${report.stats.attendanceRate}%` },
     { label: '消息通知', value: report.stats.notificationCount },
     { label: '周测均分', value: averageScore ?? '暂无' },
   ]

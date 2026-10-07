@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Avatar, Badge, Dropdown, Layout, Menu, Space, Tooltip } from 'antd'
 import {
+  AccountBookOutlined,
   BankOutlined,
   AppstoreOutlined,
   BarChartOutlined,
@@ -36,7 +37,9 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
+import { ParentUsageGuideDrawerExtra } from '@/components/Parent/ParentUsageGuide'
 import { MobileLayout, type MobileNavItem } from './MobileLayout'
+import type { MembershipLevel } from '@/constants/membership'
 
 const { Sider, Content, Header } = Layout
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
@@ -56,17 +59,18 @@ function resolveActiveKey(pathname: string, items: MobileNavItem[], fallback: st
   return match?.key || fallback
 }
 
-export function ParentLayout({ children }: { children: React.ReactNode }) {
+export function ParentLayout({ children, initialMembershipLevel }: { children: React.ReactNode; initialMembershipLevel: MembershipLevel }) {
   const { data: session } = useSession()
   const pathname = usePathname()
   const router = useRouter()
   const isMobile = useIsMobile()
   const [collapsed, setCollapsed] = useState(false)
   const [backgroundReady, setBackgroundReady] = useState(false)
+  const [parentTheme, setParentTheme] = useState<'normal' | 'vip' | 'svip'>(() => initialMembershipLevel.toLowerCase() as 'normal' | 'vip' | 'svip')
   const { data: unreadData, mutate: mutateUnread } = useSWR(
     backgroundReady ? '/api/parent/unread-counts' : null,
     fetcher,
-    { refreshInterval: 5_000, revalidateOnFocus: true, revalidateOnReconnect: true },
+    { refreshInterval: 30_000, revalidateOnFocus: true, revalidateOnReconnect: true },
   )
   useKickListener()
   useSessionPing({ initialDelay: 6_000 })
@@ -77,6 +81,28 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
+    const onThemeChange = (event: Event) => {
+      const level = (event as CustomEvent<MembershipLevel>).detail
+      if (level === 'VIP' || level === 'SVIP') setParentTheme(level.toLowerCase() as 'vip' | 'svip')
+      else setParentTheme('normal')
+    }
+    window.addEventListener('parent-theme-change', onThemeChange)
+    return () => window.removeEventListener('parent-theme-change', onThemeChange)
+  }, [])
+
+  const navTheme = parentTheme === 'svip'
+    ? { accent: '#C9A45C', tabBg: '#123C35', tabBorder: '1px solid rgba(201,164,92,.42)', accentBg: 'rgba(201,164,92,.12)', tabActive: '#F6E9C8', tabInactive: 'rgba(246,233,200,.78)' }
+    : parentTheme === 'vip'
+      ? { accent: '#A9512A', tabBg: 'linear-gradient(180deg,#9A4622 0%,#7E3A1C 100%)', tabBorder: '1px solid rgba(255,236,222,.22)', accentBg: 'rgba(169,81,42,.10)', tabActive: '#FFF6EF', tabInactive: 'rgba(255,244,236,.74)' }
+      : { accent: 'var(--color-role-parent)', tabBg: '#ffffff', tabBorder: '1px solid rgba(0,0,0,.06)', accentBg: 'var(--color-role-parent-bg)' }
+
+  const headerTheme = parentTheme === 'svip'
+    ? undefined
+    : parentTheme === 'vip'
+      ? { bg: 'linear-gradient(180deg,#FFF9F4 0%,#FFEFE3 100%)', fg: '#7E3A1C', border: '1px solid rgba(169,81,42,.18)', mainBg: '#FFF7F1', dark: false }
+      : undefined
+
+  useEffect(() => {
     const saved = localStorage.getItem('parent_sider_collapsed')
     if (saved !== null) setCollapsed(saved === 'true')
   }, [])
@@ -85,18 +111,13 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     localStorage.setItem('parent_sider_collapsed', String(collapsed))
   }, [collapsed])
 
-  const { data: msgUnreadData } = useSWR(backgroundReady ? '/api/messages/unread-count' : null, fetcher, {
-    refreshInterval: 5_000,
-    revalidateOnFocus: true,
-    revalidateOnReconnect: true,
-  })
   const unread = {
     papers: Number(unreadData?.papers || 0),
     posts: Number(unreadData?.posts || 0),
     notifications: Number(unreadData?.notifications || 0),
     studyHallHomework: Number(unreadData?.studyHallHomework || 0),
     feedbacks: Number(unreadData?.feedbacks || 0),
-    messages: Number(msgUnreadData?.count || 0),
+    messages: Number(unreadData?.messages || 0),
   }
   const totalUnread = unread.papers + unread.posts + unread.notifications + unread.feedbacks + unread.messages
 
@@ -124,26 +145,25 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
       { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长档案', badge: unread.papers + unread.posts },
       { key: '/parent/teachers', icon: <TeamOutlined />, label: '教师信息' },
     ] },
-    { key: 'volunteer-group', icon: <BankOutlined />, label: '中考志愿', children: [
+    { key: 'family-group', icon: <CommentOutlined />, label: '家校服务', children: [
+      { key: '/parent/notifications', icon: <BellOutlined />, label: '通知', badge: unread.notifications },
+      { key: '/parent/messages', icon: <CommentOutlined />, label: '我的留言', badge: unread.messages },
+      { key: '/parent/leave', icon: <CalendarOutlined />, label: '请假' },
+      { key: '/parent/meals', icon: <CoffeeOutlined />, label: '就餐安排' },
+      { key: '/parent/archive?tab=hours', icon: <ClockCircleOutlined />, label: '课时与考勤' },
+      { key: '/parent/fees', icon: <AccountBookOutlined />, label: '缴费账单' },
+    ] },
+    { key: 'volunteer-group', icon: <BankOutlined />, label: '升学服务', children: [
       { key: '/parent/volunteer/schools', icon: <BankOutlined />, label: '高中学校库' },
       { key: '/parent/volunteer', icon: <ReadOutlined />, label: '志愿咨询' },
       { key: '/parent/volunteer/rank-query', icon: <BarChartOutlined />, label: '一分一档位次' },
-    ] },
-    { key: 'communication-group', icon: <CommentOutlined />, label: '消息沟通', children: [
-      { key: '/parent/notifications', icon: <BellOutlined />, label: '通知', badge: unread.notifications },
-      { key: '/parent/messages', icon: <CommentOutlined />, label: '我的留言', badge: unread.messages },
-    ] },
-    { key: 'service-group', icon: <CoffeeOutlined />, label: '生活服务', children: [
-      { key: '/parent/meals', icon: <CoffeeOutlined />, label: '就餐安排' },
-      { key: '/parent/leave', icon: <CalendarOutlined />, label: '请假' },
-      { key: '/parent/hour-records', icon: <ClockCircleOutlined />, label: '课时明细' },
     ] },
     { key: 'resource-group', icon: <ReadOutlined />, label: '学习工具', children: [
       { key: '/parent/materials', icon: <ReadOutlined />, label: '学习资料' },
       { key: '/parent/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
       { key: '/parent/ai', icon: <MessageFilled />, label: 'AI 助手' },
     ] },
-    { key: 'account-group', icon: <IdcardOutlined />, label: '账户设置', children: [
+    { key: 'account-group', icon: <IdcardOutlined />, label: '账户与服务', children: [
       { key: '/parent/benefits', icon: <CrownOutlined />, label: '会员权益' },
       { key: '/parent/bind', icon: <WechatOutlined />, label: '绑定微信' },
       { key: '/parent/profile', icon: <IdcardOutlined />, label: '个人中心' },
@@ -162,10 +182,17 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
   const defaultOpenKeys = navItems.filter(item => item.children?.some(child => child.key === currentKey)).map(item => item.key)
 
   const markAllRead = async () => {
-    await fetch('/api/parent/notifications/read-all', { method: 'PATCH' })
-    await fetch('/api/messages/read-all', { method: 'PATCH' })
-    mutateUnread()
-    toast.success('已全部标为已读')
+    try {
+      const responses = await Promise.all([
+        fetch('/api/parent/notifications/read-all', { method: 'PATCH' }),
+        fetch('/api/messages/read-all', { method: 'PATCH' }),
+      ])
+      if (responses.some((response) => !response.ok)) throw new Error('批量已读操作失败')
+      await mutateUnread()
+      toast.success('已全部标为已读')
+    } catch {
+      toast.error('未能全部标为已读，请检查网络后重试')
+    }
   }
 
   const menuItems = navItems.map(item => ({
@@ -181,7 +208,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
     })),
   }))
 
-  if (isMobile === null) return null
+  if (isMobile === null) return <div aria-hidden="true" style={{ minHeight: '100dvh', background: parentTheme === 'svip' ? '#F6F2E9' : parentTheme === 'vip' ? '#FFF7F1' : 'var(--color-canvas)' }} />
 
   if (isMobile) {
     return (
@@ -190,18 +217,32 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
         navItems={navItems}
         bottomTabs={bottomTabs}
         moreItems={navItems}
-        title="牧哲学堂 家长"
-        menuLabel="全部功能"
-        drawerHeaderExtra={totalUnread > 0 ? (
-          <button onClick={markAllRead} style={{
-            width: '100%', padding: '10px 14px', borderRadius: 10,
-            background: 'rgba(232,120,74,.08)', border: '1px solid rgba(232,120,74,.2)',
-            color: '#E8784A', fontWeight: 600, fontSize: 14, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          }}>
-            <CheckOutlined /> 一键已读（{totalUnread}条未读）
-          </button>
-        ) : undefined}
+        title="牧哲学堂"
+        roleLabel="家长端"
+        menuLabel="菜单"
+        accentColor={navTheme.accent}
+        accentBackground={navTheme.accentBg}
+        tabBackground={navTheme.tabBg}
+        tabBorderTop={navTheme.tabBorder}
+        tabActiveColor={(navTheme as any).tabActive}
+        tabInactiveColor={(navTheme as any).tabInactive}
+        headerTheme={headerTheme}
+        pageTheme={parentTheme}
+        drawerHeaderExtra={(
+          <Space direction="vertical" size={8} style={{ width: '100%' }}>
+            <ParentUsageGuideDrawerExtra parentUserId={session?.user?.id} />
+            {totalUnread > 0 && (
+              <button type="button" onClick={markAllRead} style={{
+                width: '100%', padding: '10px 14px', borderRadius: 10,
+                background: 'rgba(232,120,74,.08)', border: '1px solid rgba(232,120,74,.2)',
+                color: '#E8784A', fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                <CheckOutlined /> 一键已读（{totalUnread}条未读）
+              </button>
+            )}
+          </Space>
+        )}
       >
         {children}
       </MobileLayout>
@@ -232,22 +273,22 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
           height: 56,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: collapsed ? '0 12px' : '0 12px 0 20px',
+          justifyContent: collapsed ? 'center' : 'space-between',
+          padding: collapsed ? 0 : '0 12px 0 20px',
           borderBottom: '1px solid rgba(0,0,0,.06)',
         }}>
-          {collapsed ? (
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#E8784A' }}>牧</span>
-          ) : (
-            <span style={{ fontSize: 17, fontWeight: 700, color: '#E8784A', whiteSpace: 'nowrap' }}>牧哲学堂</span>
+          {!collapsed && (
+            <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-ink)', whiteSpace: 'nowrap' }}>牧哲学堂 <small style={{ color: 'var(--color-role-parent)', fontSize: 11 }}>家长端</small></span>
           )}
           <Tooltip title={collapsed ? '展开导航' : '收起导航'}>
             <button
+              type="button"
+              aria-label={collapsed ? '展开导航' : '收起导航'}
               onClick={() => setCollapsed(!collapsed)}
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: 8,
+                width: 44,
+                height: 44,
+                borderRadius: 10,
                 border: '1px solid rgba(232,120,74,.2)',
                 cursor: 'pointer',
                 background: 'rgba(232,120,74,.08)',
@@ -265,6 +306,7 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         <Menu
+          className="role-navigation role-navigation--parent"
           mode="inline"
           selectedKeys={[currentKey]}
           defaultOpenKeys={defaultOpenKeys}
@@ -274,12 +316,12 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
         />
       </Sider>
 
-      <Layout style={{ marginLeft: collapsed ? 72 : 220, transition: 'margin-left 0.2s', background: '#faf8f5' }}>
+      <Layout style={{ marginLeft: collapsed ? 72 : 220, background: '#faf8f5' }}>
         <Header style={{
           padding: '0 24px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
           borderBottom: '1px solid rgba(0,0,0,.08)',
           height: 56,
           position: 'sticky',
@@ -288,18 +330,25 @@ export function ParentLayout({ children }: { children: React.ReactNode }) {
           background: '#fff',
           gap: 16,
         }}>
+          <span style={{ color: 'var(--color-ink-muted)', fontSize: 13, fontWeight: 600 }}>家长中心</span>
+          <Space size={12}>
           <Badge count={totalUnread} size="small">
-            <BellOutlined
-              style={{ fontSize: 18, color: '#5a4e3a', cursor: 'pointer' }}
+            <button
+              type="button"
+              aria-label={totalUnread > 0 ? `查看通知，${totalUnread} 条未读` : '查看通知'}
               onClick={() => router.push('/parent/notifications')}
-            />
+              style={{ width: 44, height: 44, display: 'grid', placeItems: 'center', padding: 0, border: 0, borderRadius: 10, background: 'transparent', color: 'var(--color-ink-muted)', cursor: 'pointer' }}
+            >
+              <BellOutlined style={{ fontSize: 18 }} />
+            </button>
           </Badge>
           <Dropdown menu={userMenu} placement="bottomRight">
             <Space style={{ cursor: 'pointer' }}>
-              <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: '#E8784A' }} />
+              <Avatar size={32} icon={<UserOutlined />} style={{ backgroundColor: 'var(--color-role-parent)' }} />
               <span style={{ fontSize: 14, color: '#1a1201' }}>{session?.user?.name || '家长'}</span>
             </Space>
           </Dropdown>
+          </Space>
         </Header>
 
         <Content style={{ padding: 24, maxWidth: pathname.startsWith('/parent/volunteer') ? 1140 : 800, margin: '0 auto', width: '100%' }}>

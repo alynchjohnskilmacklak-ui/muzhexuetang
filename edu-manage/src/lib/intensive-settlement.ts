@@ -91,6 +91,7 @@ export async function createIntensiveLessonPayInTransaction(
       amount: context.amount,
       termId: context.lesson.group.termId,
       lessonId,
+      lessonPayKey: lessonId,
       lessonDate: context.lesson.lessonDate,
       description: `${context.lesson.group.name}（${context.minutes}分钟 × ￥${context.hourlyRate}/小时）`,
     },
@@ -116,7 +117,7 @@ export async function createIntensiveLessonPayInTransaction(
 
 async function getIntensiveLessonSalaryTotal(tx: Prisma.TransactionClient, lessonId: string) {
   const transactions = await tx.teacherSalaryTransaction.findMany({
-    where: { lessonId, type: { in: ['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT'] } },
+    where: { lessonId, type: { in: ['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT'] }, deletedAt: null },
     select: { amount: true },
   })
   return roundMoney(transactions.reduce((total, transaction) => total + transaction.amount, 0))
@@ -129,7 +130,7 @@ async function createIntensiveLessonPayAdjustmentInTransaction(
 ) {
   const context = await getIntensiveLessonPayContext(tx, lessonId)
   const transactions = await tx.teacherSalaryTransaction.findMany({
-    where: { lessonId, type: { in: ['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT'] } },
+    where: { lessonId, type: { in: ['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT'] }, deletedAt: null },
     select: { type: true, amount: true },
   })
   const original = transactions.find((transaction) => transaction.type === 'LESSON_PAY')

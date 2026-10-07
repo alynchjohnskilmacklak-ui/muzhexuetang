@@ -143,9 +143,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
     const presentCount = attendanceList.filter(item => item.status === 'PRESENT').length
     const absentCount = attendanceList.filter(item => item.status === 'ABSENT').length
     const lateCount = 0
-    const attendanceRate = totalSchedules > 0
-      ? Math.round((presentCount / totalSchedules) * 100)
-      : 100
+    // 出勤率分母用"实际有考勤记录的课次"（未考勤/未结算的课不再拉低出勤率）；无考勤记录时为 null（前端显示"暂无"）
+    const attendanceRate = attendanceList.length > 0
+      ? Math.round((presentCount / attendanceList.length) * 100)
+      : null
 
     const normalizedGrades = grades.map((grade) => ({
       subject: grade.assessment?.name || '测评',
@@ -156,6 +157,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     let comment = ''
     if (totalSchedules === 0) {
       comment = '本周暂无课程安排，请关注下周课程。'
+    } else if (attendanceRate == null) {
+      comment = '本周课程考勤尚未记录，老师会在课后陆续更新。'
     } else if (attendanceRate === 100) {
       comment = '本周全勤，学习态度积极，继续保持！'
     } else if (attendanceRate >= 80) {
@@ -167,12 +170,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
     }
 
     if (normalizedGrades.length > 0) {
+      // 测评按百分制计（辅导机构测评均为百分制）；如后续引入不同满分测评需按满分归一
       const avgScore = Math.round(normalizedGrades.reduce((sum, grade) => sum + grade.score, 0) / normalizedGrades.length)
       comment += avgScore >= 85
-        ? ` 本周测验平均分 ${avgScore} 分，表现优秀！`
+        ? ` 本周测验平均分 ${avgScore} 分（满分 100），表现优秀！`
         : avgScore >= 70
-          ? ` 本周测验平均分 ${avgScore} 分，继续努力。`
-          : ` 本周测验平均分 ${avgScore} 分，需要加强复习。`
+          ? ` 本周测验平均分 ${avgScore} 分（满分 100），继续努力。`
+          : ` 本周测验平均分 ${avgScore} 分（满分 100），需要加强复习。`
     }
 
     return {

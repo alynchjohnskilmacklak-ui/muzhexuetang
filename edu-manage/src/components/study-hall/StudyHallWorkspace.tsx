@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import {
   Alert, App, Button, Card, Checkbox, Col, DatePicker, Drawer, Empty, Form, Image, Input, InputNumber, List,
-  Progress, Radio, Row, Select, Space, Steps, Switch, Tabs, Tag, Typography, Upload, theme,
+  Popconfirm, Progress, Radio, Row, Select, Space, Steps, Switch, Tabs, Tag, Typography, Upload, theme,
 } from 'antd'
 import {
   ArrowLeftOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DeleteOutlined, EditOutlined,
@@ -74,7 +74,7 @@ const weekdayLabel = (value: number) => WEEKDAY_OPTIONS.find((item) => item.valu
 const isoWeekday = (value: dayjs.Dayjs) => value.day() === 0 ? 7 : value.day()
 const getMobilePopupContainer = (trigger: HTMLElement) => trigger.parentElement || document.body
 
-export function StudyHallWorkspace({ admin, embedded = false, initialClassId, initialDate }: { admin: boolean; embedded?: boolean; initialClassId?: string; initialDate?: string }) {
+export function StudyHallWorkspace({ admin, embedded = false, initialClassId, initialDate, initialMode = 'attendance' }: { admin: boolean; embedded?: boolean; initialClassId?: string; initialDate?: string; initialMode?: 'attendance' | 'homework' }) {
   const isMobile = useIsMobile()
   const { token } = theme.useToken()
   const { modal } = App.useApp()
@@ -84,6 +84,7 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
   const [date, setDate] = useState(initialDate ? dayjs(initialDate) : dayjs())
   const [termId, setTermId] = useState<string>()
   const [selectedClassId, setSelectedClassId] = useState<string | undefined>(initialClassId)
+  const [teacherWorkMode, setTeacherWorkMode] = useState<'attendance' | 'homework'>(initialMode)
   const query = new URLSearchParams({ date: date.format('YYYY-MM-DD'), ...(termId ? { termId } : {}) })
   const { data, error, isLoading, mutate } = useSWR<StudyData>(`/api/study-hall?${query}`, fetcher, {
     refreshInterval: 5000, revalidateOnFocus: true, revalidateOnReconnect: true,
@@ -93,6 +94,7 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
   const [editingClass, setEditingClass] = useState<StudyClass | null>(null)
   const [recording, setRecording] = useState<{ studyClass: StudyClass; member: Membership; sessionId: string | null } | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [batchSubmitting, setBatchSubmitting] = useState(false)
   const [imageUploading, setImageUploading] = useState(false)
   const [beforeImages, setBeforeImages] = useState<string[]>([])
   const [afterImages, setAfterImages] = useState<string[]>([])
@@ -117,8 +119,10 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
   const allVisibleImages = useMemo(() => data?.classes.flatMap((item) => item.records[0]?.entries.flatMap((entry) => entry.imageUrls) || []) || [], [data])
   const { urlMap: signedVisibleImages } = useSignedUrls(allVisibleImages)
   const activeTermId = termId || data?.selectedTermId || data?.terms.find((item) => item.status === 'ACTIVE')?.id
-  const selectedClass = data?.classes.find((item) => item.id === selectedClassId) || data?.classes[0]
   const selectedWeekday = isoWeekday(date)
+  const selectedClass = data?.classes.find((item) => item.id === selectedClassId)
+    || (!admin ? data?.classes.find((item) => item.status === 'ACTIVE' && item.weekdays.includes(selectedWeekday)) : undefined)
+    || data?.classes[0]
   const isScheduled = selectedClass?.weekdays.includes(selectedWeekday) ?? false
   const activeClosure = data?.closures?.find((item) => !item.classId || item.classId === selectedClass?.id)
   const activeSessions = selectedClass?.scheduleType === 'WEEKEND'
@@ -194,6 +198,18 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
     return studyClass.records[0]?.entries.find((entry) => entry.studentId === studentId && entry.attendanceKey === key)
   }
 
+  const entryDoneForMode = (entry?: Entry) => teacherWorkMode === 'attendance'
+    ? Boolean(entry && entry.attendanceStatus && entry.attendanceStatus !== 'UNRECORDED')
+    : Boolean(entry && entry.homeworkStatus !== 'NOT_RECORDED')
+
+  const targetsForDate = (studyClass: StudyClass): Array<Session | null> => studyClass.scheduleType === 'WEEKEND'
+    ? studyClass.sessions.filter((session) => session.active && session.weekday === selectedWeekday)
+    : [null]
+
+  const isClassClosed = (studyClass: StudyClass) => Boolean(
+    data?.closures?.some((item) => !item.classId || item.classId === studyClass.id),
+  )
+
   const openRecord = (studyClass: StudyClass, member: Membership, sessionId: string | null) => {
     const entry = entryFor(studyClass, member.student.id, sessionId)
     setRecording({ studyClass, member, sessionId })
@@ -220,6 +236,7 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
       const values = await recordForm.validateFields()
       const payload = await submitJson('PATCH', {
         classId: recording.studyClass.id, studentId: recording.member.student.id, sessionId: recording.sessionId,
+        operation: teacherWorkMode === 'attendance' ? 'ATTENDANCE' : 'HOMEWORK',
         studyDate: date.format('YYYY-MM-DD'), homeworkStatus: values.homeworkStatus,
         homeworkItems: String(values.homeworkItemsText || '').split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
         teacherComment: values.teacherComment, contentType: values.contentType,
@@ -227,8 +244,10 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
         imageUrls: values.contentType === 'LESSON' ? lessonImages : [...beforeImages, ...afterImages], checkedIn: values.checkedIn, checkedOut: values.checkedOut,
         attendanceStatus: values.attendanceStatus,
       })
-      const reward = payload.reward as { amount?: number; alreadyAwarded?: boolean } | undefined
-      toast.success(reward?.amount ? `作业与考勤已保存，本次登记奖励 ¥${reward.amount.toFixed(2)}` : '作业与考勤已保存，家长通知已同步')
+      const reward = payload.reward as { amount?: number; homeworkAmount?: number; attendanceAmount?: number } | undefined
+      if (reward?.attendanceAmount) toast.success('全班考勤已完成，¥40.00 考勤奖励已计入薪资')
+      else if (reward?.homeworkAmount) toast.success('作业登记已保存，¥0.50 奖励已计入薪资')
+      else toast.success(teacherWorkMode === 'attendance' ? '考勤已保存' : '作业登记已保存，家长通知已同步')
       setRecording(null)
       recordForm.resetFields()
       await mutate()
@@ -476,12 +495,73 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
     </Space>
   )
 
+  const teacherTodayClasses = (data?.classes || []).filter((item) => item.status === 'ACTIVE' && item.weekdays.includes(selectedWeekday))
+  const teacherVisibleClasses = teacherTodayClasses.length ? teacherTodayClasses : (data?.classes || [])
+  const teacherTodayMetrics = teacherTodayClasses.reduce((summary, studyClass) => {
+    if (isClassClosed(studyClass)) return summary
+    const targets = targetsForDate(studyClass)
+    for (const member of studyClass.students.filter((item) => item.status === 'ACTIVE')) {
+      for (const target of targets) {
+        summary.expected += 1
+        if (entryDoneForMode(entryFor(studyClass, member.student.id, target?.id || null))) summary.recorded += 1
+      }
+    }
+    return summary
+  }, { expected: 0, recorded: 0 })
   const teacherMembers = selectedClass?.students.filter((item) => item.status === 'ACTIVE') || []
-  const teacherTargets = selectedClass?.scheduleType === 'WEEKEND' ? activeSessions : [null]
+  const teacherTargets = selectedClass ? targetsForDate(selectedClass) : []
   const teacherTargetCount = teacherMembers.length * teacherTargets.length
   const teacherRecordedCount = selectedClass ? teacherMembers.reduce((count, member) => (
-    count + teacherTargets.filter((target) => Boolean(entryFor(selectedClass, member.student.id, target?.id || null))).length
+    count + teacherTargets.filter((target) => entryDoneForMode(entryFor(selectedClass, member.student.id, target?.id || null))).length
   ), 0) : 0
+  const teacherPendingTargets = selectedClass ? teacherMembers.flatMap((member) => teacherTargets
+    .filter((target) => !entryDoneForMode(entryFor(selectedClass, member.student.id, target?.id || null)))
+    .map((target) => ({ member, sessionId: target?.id || null }))) : []
+
+  const markAllPresent = async () => {
+    if (!selectedClass || !teacherPendingTargets.length) return
+    setBatchSubmitting(true)
+    try {
+      const results: PromiseSettledResult<unknown>[] = []
+      // Run in sequence so the final save observes every committed row and can
+      // trigger the once-per-class ¥40 attendance reward deterministically.
+      for (const { member, sessionId } of teacherPendingTargets) {
+        try {
+          const value = await submitJson('PATCH', {
+            classId: selectedClass.id,
+            studentId: member.student.id,
+            sessionId,
+            operation: 'ATTENDANCE',
+            studyDate: date.format('YYYY-MM-DD'),
+            checkedIn: true,
+            checkedOut: false,
+            attendanceStatus: 'PRESENT',
+          })
+          results.push({ status: 'fulfilled', value })
+        } catch (reason) {
+          results.push({ status: 'rejected', reason })
+        }
+      }
+      const failed = results.filter((result) => result.status === 'rejected')
+      const succeeded = results.length - failed.length
+      const awarded = results.some((result) => result.status === 'fulfilled'
+        && Number((result.value as { reward?: { attendanceAmount?: number } }).reward?.attendanceAmount || 0) > 0)
+      await mutate()
+      if (!failed.length) toast.success(awarded
+        ? `已完成 ${succeeded} 项考勤，¥40.00 全班考勤奖励已计入薪资`
+        : `已将 ${succeeded} 项待考勤记录标记为到勤`)
+      else if (succeeded) toast.warning(`已登记 ${succeeded} 项，另有 ${failed.length} 项失败，请重试`)
+      else {
+        const firstError = failed[0]?.reason
+        toast.error(firstError instanceof Error ? firstError.message : '批量登记失败，请重试')
+      }
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : '批量登记失败，请重试')
+    } finally {
+      setBatchSubmitting(false)
+    }
+  }
+
   const teacherDailyRoster = !selectedClass ? (
     <Card loading={isLoading} className="study-hall-teacher-empty">
       <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="当前还没有分配给你的作业班" />
@@ -495,22 +575,41 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
             <Text strong>{selectedClass.name}</Text>
             <div><Text type="secondary">{date.format('M月D日 dddd')} · {selectedClass.gradeScope?.[0] || '未设置年级'}</Text></div>
           </div>
-          <div className="study-hall-teacher-progress__number"><strong>{teacherRecordedCount}</strong><span> / {teacherTargetCount} 已登记</span></div>
+          <div className="study-hall-teacher-progress__number"><strong>{teacherRecordedCount}</strong><span> / {teacherTargetCount} {teacherWorkMode === 'attendance' ? '已考勤' : '已登记作业'}</span></div>
         </div>
         <div className="study-hall-teacher-progress__bar"><span style={{ width: `${teacherTargetCount ? Math.round(teacherRecordedCount / teacherTargetCount * 100) : 0}%` }} /></div>
+        {teacherWorkMode === 'attendance' && <Popconfirm
+          title="确认一键登记全部到勤？"
+          description={`将为 ${teacherPendingTargets.length} 项尚未考勤的记录补充到勤状态，已有考勤不会改动。`}
+          okText="确认登记"
+          cancelText="取消"
+          onConfirm={markAllPresent}
+          disabled={!teacherPendingTargets.length || !isScheduled || Boolean(activeClosure) || selectedClass.status !== 'ACTIVE'}
+        >
+          <Button
+            block
+            className="study-hall-teacher-batch"
+            icon={<CheckCircleOutlined />}
+            loading={batchSubmitting}
+            disabled={!teacherPendingTargets.length || !isScheduled || Boolean(activeClosure) || selectedClass.status !== 'ACTIVE'}
+          >
+            {teacherPendingTargets.length ? `一键登记全部到勤（${teacherPendingTargets.length}项）` : '本班考勤已全部完成'}
+          </Button>
+        </Popconfirm>}
       </Card>
       {!isScheduled && <Alert type="info" showIcon message={`${date.format('M月D日')}不是该班的登记日`} description="非上课日不需要登记，系统也不会扣除购买天数。" />}
-      {activeClosure && <Alert type="success" showIcon message={`今日放假：${activeClosure.reason}`} description="当天不考勤、不反馈、不扣购买天数。" />}
       {selectedClass.scheduleType === 'WEEKEND' && isScheduled && activeSessions.length === 0 && <Alert type="warning" showIcon message="今天没有有效授课时段" description="请联系管理员补充当天的上课时间。" />}
       <Card className="study-hall-teacher-roster" loading={isLoading} styles={{ body: { padding: 0 } }}>
         {teacherMembers.length ? teacherMembers.map((member) => {
           const balance = selectedClass.balances.find((item) => item.studentId === member.student.id)
-          return <div className="study-hall-teacher-student" key={member.id}>
+          const memberRecorded = teacherTargets.length > 0 && teacherTargets.every((target) => entryDoneForMode(entryFor(selectedClass, member.student.id, target?.id || null)))
+          const balanceWarning = balance?.remainingDays != null && balance.remainingDays < 5
+          return <div className={`study-hall-teacher-student ${memberRecorded ? 'is-recorded' : 'is-pending'}`} key={member.id}>
             <div className="study-hall-teacher-student__identity">
               <span className="study-hall-teacher-avatar">{member.student.name.slice(0, 1)}</span>
               <div>
                 <Text strong>{member.student.name}</Text>
-                <div className={balance?.quotaState === 'EXPIRED' || balance?.quotaState === 'LOW' ? 'is-low' : ''}>
+                <div className={balanceWarning ? 'is-low' : ''}>
                   {balance?.remainingDays == null ? '购买天数未设置' : balance.quotaState === 'EXPIRED' ? '购买天数已用完' : `剩余 ${balance.remainingDays} 天`}
                 </div>
               </div>
@@ -519,14 +618,19 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
               {teacherTargets.length ? teacherTargets.map((target) => {
                 const entry = entryFor(selectedClass, member.student.id, target?.id || null)
                 const homework = HOMEWORK_OPTIONS.find((item) => item.value === entry?.homeworkStatus) || HOMEWORK_OPTIONS[3]
+                const targetRecorded = entryDoneForMode(entry)
                 const disabled = !isScheduled || Boolean(activeClosure) || selectedClass.status !== 'ACTIVE'
-                return <div className={`study-hall-teacher-target${!entry && !disabled ? ' is-actionable' : ''}`} key={target?.id || 'DAY'} onClick={() => { if (!entry && !disabled) openRecord(selectedClass, member, target?.id || null) }}>
+                const attendanceLabel = entry?.attendanceStatus === 'PRESENT' ? (entry.checkInAt ? `${dayjs(entry.checkInAt).format('HH:mm')} 到校` : '正常到勤') : entry?.attendanceStatus === 'PERSONAL_LEAVE' ? '个人请假' : entry?.attendanceStatus === 'ABSENT' ? '无故缺勤' : '尚未考勤'
+                return <div className={`study-hall-teacher-target ${targetRecorded ? 'is-recorded' : 'is-pending'}${!targetRecorded && !disabled ? ' is-actionable' : ''}`} key={target?.id || 'DAY'}>
                   <div className="study-hall-teacher-target__status">
                     {target && <Text strong>{target.label} {target.startTime}—{target.endTime}</Text>}
-                    <Text type="secondary">{entry?.attendanceStatus === 'PERSONAL_LEAVE' ? '个人请假' : entry?.attendanceStatus === 'ABSENT' ? '无故缺勤' : entry?.checkInAt ? `${dayjs(entry.checkInAt).format('HH:mm')} 到校` : '尚未登记'}</Text>
-                    {entry && <Tag color={homework.color}>{homework.label}</Tag>}
+                    {teacherWorkMode === 'attendance'
+                      ? <Tag color={targetRecorded ? 'success' : 'warning'}>{attendanceLabel}</Tag>
+                      : <Tag color={homework.color}>{homework.label}</Tag>}
                   </div>
-                  <Button type={entry ? 'default' : 'primary'} disabled={disabled} onClick={(event) => { event.stopPropagation(); openRecord(selectedClass, member, target?.id || null) }}>{entry ? '已登记' : '去登记'}</Button>
+                  <Button className={targetRecorded ? 'is-recorded' : 'is-pending'} type={targetRecorded ? 'default' : 'primary'} disabled={disabled} onClick={() => openRecord(selectedClass, member, target?.id || null)}>
+                    {teacherWorkMode === 'attendance' ? (targetRecorded ? '修改考勤' : '去考勤') : (targetRecorded ? '修改作业' : '登记作业')}
+                  </Button>
                 </div>
               }) : <Text type="secondary">今天没有需要登记的时段</Text>}
             </div>
@@ -552,14 +656,37 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
           { key: 'teacher-feedback', label: '教师反馈', children: teacherFeedbackAuditPanel },
           { key: 'closures', label: '放假与停课', children: <Space direction="vertical" size={16} style={{ width: '100%' }}><Row justify="space-between" align="middle" gutter={[12, 12]}><Col xs={24} md={16}><Title level={4} style={{ margin: 0 }}>放假与停课</Title><Text type="secondary">放假期间不考勤、不反馈、不扣购买天数。</Text></Col>{admin && <Col xs={24} md="auto"><Button block={Boolean(isMobile)} type="primary" icon={<CalendarOutlined />} onClick={openClosure}>设置放假</Button></Col>}</Row><Card title="当前放假记录" styles={{ body: { padding: isMobile ? '0 14px' : '0 20px' } }}><List dataSource={data?.closures || []} locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无放假记录" /> }} renderItem={(item) => { const target = item.classId ? data?.classes.find((studyClass) => studyClass.id === item.classId)?.name || '指定班级' : '全部作业班'; return <List.Item><List.Item.Meta avatar={<CheckCircleOutlined style={{ color: 'var(--color-success)', fontSize: 20 }} />} title={item.reason} description={`${item.startDate} 至 ${item.endDate} · ${target}`} /></List.Item> }} /></Card></Space> },
         ]} /> : <Space direction="vertical" size={12} style={{ width: '100%' }}>
+          <Card className="study-hall-work-mode" styles={{ body: { padding: isMobile ? 10 : 12 } }}>
+            <Radio.Group
+              optionType="button"
+              buttonStyle="solid"
+              value={teacherWorkMode}
+              onChange={(event) => setTeacherWorkMode(event.target.value)}
+              aria-label="选择作业班工作内容"
+            >
+              <Radio.Button value="attendance">考勤管理</Radio.Button>
+              <Radio.Button value="homework">作业管理</Radio.Button>
+            </Radio.Group>
+            <Text type="secondary">
+              {teacherWorkMode === 'attendance'
+                ? '逐人确认到勤、请假或缺勤；全班完成考勤后奖励 ¥40。'
+                : '逐人登记作业完成情况；每名学员首次完成登记奖励 ¥0.50。'}
+            </Text>
+          </Card>
+          <div className="study-hall-teacher-stats" aria-label={teacherWorkMode === 'attendance' ? '今日考勤统计' : '今日作业登记统计'}>
+            <div><strong>{teacherTodayClasses.length}</strong><span>今日班级</span></div>
+            <div><strong>{teacherTodayMetrics.recorded}<small>/{teacherTodayMetrics.expected}</small></strong><span>{teacherWorkMode === 'attendance' ? '已考勤' : '作业已登记'}</span></div>
+            <div><strong>{Math.max(0, teacherTodayMetrics.expected - teacherTodayMetrics.recorded)}</strong><span>{teacherWorkMode === 'attendance' ? '待考勤' : '作业待登记'}</span></div>
+          </div>
           <Card className="study-hall-teacher-filter" styles={{ body: { padding: isMobile ? 10 : 14 } }}>
             <div className="study-hall-teacher-filter__row">
-              <DatePicker inputReadOnly={Boolean(isMobile)} value={date} onChange={(value) => value && setDate(value)} allowClear={false} />
-              <Select allowClear value={termId} onChange={setTermId} placeholder="当前运营期" options={(data?.terms || []).map((item) => ({ value: item.id, label: item.name }))} {...popupProps} />
+              <DatePicker inputReadOnly={Boolean(isMobile)} value={date} onChange={(value) => { if (value) { setDate(value); setSelectedClassId(undefined) } }} allowClear={false} />
+              <Select allowClear value={termId} onChange={(value) => { setTermId(value); setSelectedClassId(undefined) }} placeholder="当前运营期" options={(data?.terms || []).map((item) => ({ value: item.id, label: item.name }))} {...popupProps} />
             </div>
           </Card>
-          {(data?.classes || []).length > 1 && <div className="study-hall-teacher-class-tabs" role="tablist" aria-label="选择作业班">
-            {(data?.classes || []).map((item) => <button key={item.id} type="button" role="tab" aria-selected={selectedClass?.id === item.id} className={selectedClass?.id === item.id ? 'is-active' : ''} onClick={() => setSelectedClassId(item.id)}>{item.name}</button>)}
+          {activeClosure && <Alert className="study-hall-teacher-closure" type="success" showIcon message={`今日放假：${activeClosure.reason}`} description={`${selectedClass?.name || '当前班级'}当天不考勤、不反馈、不扣购买天数。`} />}
+          {teacherVisibleClasses.length > 1 && <div className="study-hall-teacher-class-tabs" role="tablist" aria-label="选择作业班">
+            {teacherVisibleClasses.map((item) => <button key={item.id} type="button" role="tab" aria-selected={selectedClass?.id === item.id} className={selectedClass?.id === item.id ? 'is-active' : ''} onClick={() => setSelectedClassId(item.id)}>{item.name}<small>{item.gradeScope?.[0] || '未设年级'}</small></button>)}
           </div>}
           {teacherDailyRoster}
         </Space>}
@@ -584,17 +711,16 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
         <Form form={closureForm} layout="vertical"><Form.Item name="dates" label="放假日期" rules={[{ required: true, message: '请选择日期范围' }]}><DatePicker.RangePicker inputReadOnly={Boolean(isMobile)} style={{ width: '100%' }} /></Form.Item><Form.Item name="scope" label="适用范围" rules={[{ required: true }]}><Select options={[{ value: 'ALL', label: '当前运营期全部作业班' }, { value: 'CLASSES', label: '指定一个或多个班级' }]} {...popupProps} /></Form.Item><Form.Item noStyle shouldUpdate={(previous, currentValues) => previous.scope !== currentValues.scope}>{({ getFieldValue }) => getFieldValue('scope') === 'CLASSES' && <Form.Item name="classIds" label="选择班级" rules={[{ required: true, message: '请至少选择一个班级' }]}><Select mode="multiple" options={(data?.classes || []).map((item) => ({ value: item.id, label: `${item.name} · ${item.gradeScope?.[0] || '未设年级'}` }))} {...popupProps} /></Form.Item>}</Form.Item><Form.Item name="reason" label="放假原因" rules={[{ required: true, message: '请填写原因' }]}><Input maxLength={100} placeholder="例如：国庆节放假" /></Form.Item></Form>
       </SafeFormModal>
 
-      <SafeFormModal rootClassName="study-hall-record-modal" title={`登记 ${recording?.member.student.name || ''} · ${date.format('M月D日')}`} open={Boolean(recording)} onClose={closeRecordForm} onOk={saveRecord} dirty={Boolean(recording) && (JSON.stringify(recordFormValues || {}) !== recordInitialValues || JSON.stringify([beforeImages, afterImages, lessonImages]) !== recordInitialMedia)} okText="保存并通知家长" confirmLoading={submitting || imageUploading} width={620} mobileFullHeight bodyStyle={{ padding: isMobile ? '14px 14px 4px' : undefined, maxHeight: isMobile ? undefined : '72dvh', overflowY: 'auto' }}>
-        <Alert type="info" showIcon message="保存后自动通知家长，重复保存不会重复推送。" style={{ marginBottom: 16 }} />
+      <SafeFormModal rootClassName="study-hall-record-modal" title={`${teacherWorkMode === 'attendance' ? '考勤' : '登记作业'} ${recording?.member.student.name || ''} · ${date.format('M月D日')}`} open={Boolean(recording)} onClose={closeRecordForm} onOk={saveRecord} dirty={Boolean(recording) && (JSON.stringify(recordFormValues || {}) !== recordInitialValues || JSON.stringify([beforeImages, afterImages, lessonImages]) !== recordInitialMedia)} okText={teacherWorkMode === 'attendance' ? '保存考勤' : '保存作业并通知家长'} confirmLoading={submitting || imageUploading} width={620} mobileFullHeight bodyStyle={{ padding: isMobile ? '14px 14px 4px' : undefined, maxHeight: isMobile ? undefined : '72dvh', overflowY: 'auto' }}>
+        <Alert type="info" showIcon message={teacherWorkMode === 'attendance' ? '请按实际情况确认到勤、请假或缺勤。全班完成后系统自动发放一次 ¥40 奖励。' : '保存后自动通知家长；每名学员每天首次完成作业登记奖励 ¥0.50。'} style={{ marginBottom: 16 }} />
         <Form form={recordForm} layout="vertical">
+          {teacherWorkMode === 'homework' ? <>
           <Form.Item name="contentType" label="今天记录什么" rules={[{ required: true }]}>
             <Select showSearch={false} options={[{ value: 'HOMEWORK', label: '学校作业 · 记录开始前和完成后' }, { value: 'LESSON', label: '无学校作业 · 记录今天讲解内容' }]} {...recordPopupProps} />
           </Form.Item>
           <Form.Item name="homeworkStatus" label="作业完成情况" rules={[{ required: true }]}><Radio.Group optionType="button" buttonStyle="solid" className="study-hall-record-segments" options={HOMEWORK_OPTIONS.map(({ value, label }) => ({ value, label }))} /></Form.Item>
           <Form.Item name="homeworkItemsText" label={recordContentType === 'LESSON' ? '今日讲解内容（每行一项）' : '今日作业（每行一项）'}><Input.TextArea autoSize={{ minRows: 3, maxRows: 6 }} placeholder={recordContentType === 'LESSON' ? '例如：复习一元二次方程\n讲解错题两道' : '例如：数学练习册第12页\n英语单词默写'} /></Form.Item>
           <Form.Item name="teacherComment" label="给家长的说明"><Input.TextArea autoSize={{ minRows: 2, maxRows: 5 }} maxLength={500} showCount placeholder="可填写完成质量、需要家长关注的事项" /></Form.Item>
-          <Form.Item name="attendanceStatus" label="出勤状态" rules={[{ required: true }]}><Radio.Group optionType="button" buttonStyle="solid" className="study-hall-record-segments" options={[{ value: 'PRESENT', label: '正常到勤' }, { value: 'PERSONAL_LEAVE', label: '个人请假' }, { value: 'ABSENT', label: '无故缺勤' }, { value: 'UNRECORDED', label: '暂不登记' }]} /></Form.Item>
-          <Form.Item name="checkedOut" label="离校状态" valuePropName="checked"><Switch checkedChildren="已离校" unCheckedChildren="未记录" /></Form.Item>
           <Form.Item label={`过程照片（合计最多9张，当前${recordImages.length}张）`}>
             <Space direction="vertical" size={10} style={{ width: '100%' }}>
               {recordContentType === 'LESSON'
@@ -605,6 +731,10 @@ export function StudyHallWorkspace({ admin, embedded = false, initialClassId, in
                 </>}
             </Space>
           </Form.Item>
+          </> : <>
+          <Form.Item name="attendanceStatus" label="出勤状态" rules={[{ required: true }]}><Radio.Group optionType="button" buttonStyle="solid" className="study-hall-record-segments" options={[{ value: 'PRESENT', label: '正常到勤' }, { value: 'PERSONAL_LEAVE', label: '个人请假' }, { value: 'ABSENT', label: '无故缺勤' }, { value: 'UNRECORDED', label: '暂不登记' }]} /></Form.Item>
+          <Form.Item name="checkedOut" label="离校状态" valuePropName="checked"><Switch checkedChildren="已离校" unCheckedChildren="未记录" /></Form.Item>
+          </>}
         </Form>
       </SafeFormModal>
     </div>

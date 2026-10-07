@@ -27,6 +27,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
         teacherId: teacher.id,
         createdAt: { gte: since },
         termId: activeTerm?.id || '__NO_ACTIVE_TERM__',
+        deletedAt: null,
       },
       orderBy: { createdAt: 'desc' },
     })
@@ -70,7 +71,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
 
     const lessonPayTypes = new Set(['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT'])
     const totalLesson = transactions.filter((item) => lessonPayTypes.has(item.type)).reduce((sum, item) => sum + item.amount, 0)
-    const rewardTypes = new Set(['FEEDBACK_BONUS', 'STUDY_HALL_BONUS'])
+    const rewardTypes = new Set(['FEEDBACK_BONUS', 'STUDY_HALL_BONUS', 'STUDY_HALL_ATTENDANCE'])
     const totalFeedback = transactions.filter((item) => rewardTypes.has(item.type)).reduce((sum, item) => sum + item.amount, 0)
     const totalAdjustment = transactions
       .filter((item) => !lessonPayTypes.has(item.type) && !rewardTypes.has(item.type))
@@ -87,6 +88,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       if (type === 'LESSON_PAY_ADJUSTMENT') return '课时费结算调整'
       if (type === 'FEEDBACK_BONUS') return '反馈奖励'
       if (type === 'STUDY_HALL_BONUS') return '作业登记奖励'
+      if (type === 'STUDY_HALL_ATTENDANCE') return '晚托考勤奖励'
       if (type === 'manual_adjust') return '薪资调整'
       return '其他调整'
     }

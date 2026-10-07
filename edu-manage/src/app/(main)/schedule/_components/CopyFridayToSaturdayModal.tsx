@@ -112,7 +112,7 @@ export function CopyFridayToSaturdayModal({ open, onClose, onSuccess }: Props) {
       open={open}
       onCancel={handleClose}
       footer={null}
-      width={640}
+      width="min(960px, 100vw)"
       destroyOnClose
     >
       <Space direction="vertical" style={{ width: '100%' }} size={16}>

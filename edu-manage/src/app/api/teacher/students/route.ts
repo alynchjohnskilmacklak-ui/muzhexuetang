@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
 import { differenceInDays } from 'date-fns'
-import { requireCurrentTeacher } from '@/lib/teacher-portal'
+import { requireCurrentTeacher, teacherLessonScopeWhere, teacherStudentWhere } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 import { calculateApprovedIntensiveHours, calculateTaughtHours } from '@/lib/student-taught-hours'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,39 +14,11 @@ export const GET = apiHandler(async () => {
     if (!activeTerm) return NextResponse.json([])
     const now = new Date()
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lessonScope = await teacherLessonScopeWhere(prisma, teacher.id, activeTerm.id)
     const students = await prisma.student.findMany({
       where: {
+        ...teacherStudentWhere(teacher.id, activeTerm.id),
         status: { not: 'INACTIVE' },
-        OR: [
-          {
-            enrollments: {
-              some: {
-                status: 'ACTIVE',
-                group: {
-                  termId: activeTerm.id,
-                  status: { not: 'ARCHIVED' },
-                  course: { isActive: true },
-                  OR: [
-                    { teacherId: teacher.id },
-                    { teacherAssignments: { some: { teacherId: teacher.id } } },
-                  ],
-                },
-              },
-            },
-          },
-          {
-            studyHallClasses: {
-              some: {
-                status: 'ACTIVE',
-                studyClass: {
-                  termId: activeTerm.id,
-                  status: 'ACTIVE',
-                  teachers: { some: { teacherId: user.id, active: true } },
-                },
-              },
-            },
-          },
-        ],
       },
       select: {
         id: true,
@@ -53,6 +26,7 @@ export const GET = apiHandler(async () => {
         grade: true,
         gender: true,
         school: true,
+        membershipLevel: true,
         enrollments: {
           where: {
             status: 'ACTIVE',
@@ -60,10 +34,6 @@ export const GET = apiHandler(async () => {
               termId: activeTerm.id,
               status: { not: 'ARCHIVED' },
               course: { isActive: true },
-              OR: [
-                { teacherId: teacher.id },
-                { teacherAssignments: { some: { teacherId: teacher.id } } },
-              ],
             },
           },
           select: {
@@ -72,6 +42,7 @@ export const GET = apiHandler(async () => {
             remainHours: true,
             totalHours: true,
             usedHours: true,
+            subjects: true,
             group: {
               select: {
                 id: true,
@@ -89,6 +60,10 @@ export const GET = apiHandler(async () => {
               },
             },
           },
+        },
+        classLessonStudents: {
+          where: { lesson: lessonScope },
+          select: { lesson: { select: { groupId: true, subject: true } } },
         },
         studyHallClasses: {
           where: {
@@ -109,10 +84,7 @@ export const GET = apiHandler(async () => {
         attendances: {
           where: {
             createdAt: { gte: monthStart },
-            lesson: {
-              group: { termId: activeTerm.id },
-              OR: [{ teacherId: teacher.id }, { group: { teacherId: teacher.id } }, { group: { teacherAssignments: { some: { teacherId: teacher.id } } } }],
-            },
+            lesson: lessonScope,
           },
           select: { status: true },
         },
@@ -177,11 +149,20 @@ export const GET = apiHandler(async () => {
       }
     }
 
-    return NextResponse.json(students.map((student) => {
+    const visibleStudents = students.map((student) => {
+      const visibleGroupIds = new Set(student.classLessonStudents.map((snapshot) => snapshot.lesson.groupId))
       const activeEnrollments = student.enrollments.filter((enrollment) => (
         enrollment.status === 'ACTIVE'
         && enrollment.group?.status !== 'ARCHIVED'
         && enrollment.group?.course?.isActive !== false
+        && visibleGroupIds.has(enrollment.group?.id)
+        && (() => {
+          const subjects = enrollment.group?.teacherAssignments
+            .map((assignment) => assignment.subject)
+            .filter((subject): subject is string => Boolean(subject)) || []
+          const teacherSubjects = subjects.length ? subjects : [enrollment.group?.course?.subject || '']
+          return teacherSubjects.some((subject) => enrollmentIncludesSubject(enrollment.subjects, subject))
+        })()
       ))
       const remainHours = activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.remainHours || 0), 0)
       const totalHours = activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.totalHours || 0), 0)
@@ -193,6 +174,7 @@ export const GET = apiHandler(async () => {
       const present = student.attendances.filter((attendance) => attendance.status === 'PRESENT').length
       const lastFeedback = lastFeedbackMap.get(student.id) || null
       const activeStudyHallMemberships = student.studyHallClasses
+      if (!activeEnrollments.length && !activeStudyHallMemberships.length) return null
       const primaryCourseType = activeEnrollments.some((enrollment) => enrollment.group?.course?.type === 'ONE_ON_ONE')
         ? 'ONE_ON_ONE'
         : activeEnrollments.some((enrollment) => enrollment.group?.course?.type === 'SMALL_GROUP')
@@ -208,6 +190,7 @@ export const GET = apiHandler(async () => {
         grade: student.grade,
         gender: student.gender,
         school: student.school,
+        membershipLevel: student.membershipLevel || 'NORMAL',
         enrollments: activeEnrollments.map((enrollment) => ({
           id: enrollment.id,
           remainHours: enrollment.remainHours,
@@ -243,5 +226,6 @@ export const GET = apiHandler(async () => {
         daysSinceLastFeedback: lastFeedback ? differenceInDays(now, lastFeedback) : 999,
         primaryCourseType,
       }
-    }))
+    }).filter((student) => student !== null)
+    return NextResponse.json(visibleStudents)
 })

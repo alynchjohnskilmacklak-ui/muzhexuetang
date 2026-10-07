@@ -12,6 +12,10 @@ import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
 import { isFirstTeachingPeriod } from '@/lib/schedule-periods'
+import {
+  normalizeAttendanceRecordStatus,
+  resolveAttendanceSubmissionStatus,
+} from '@/lib/attendance-status'
 
 const { Text } = Typography
 
@@ -77,6 +81,7 @@ export default function AttendancePage() {
 
   const [selectedSchedule, setSelectedSchedule] = useState<Record<string, unknown> | null>(null)
   const [attMap, setAttMap] = useState<Map<string, AttStatus>>(new Map())
+  const [changedStudentIds, setChangedStudentIds] = useState<Set<string>>(new Set())
   const [mealStudentIds, setMealStudentIds] = useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = useState(false)
   const [attendanceDrawerOpen, setAttendanceDrawerOpen] = useState(false)
@@ -91,6 +96,7 @@ export default function AttendancePage() {
     const group = lesson.group as Record<string, unknown> | undefined
     const students: Record<string, unknown>[] = (Array.isArray(lesson.students) ? lesson.students as Record<string, unknown>[] : []).map((student) => ({
       ...student,
+      originalStatus: normalizeAttendanceRecordStatus(student.status),
       status: toLocalStatus(student.status),
     }))
     const lessonDate = String(lesson.lessonDate || selectedDate).slice(0, 10)
@@ -123,7 +129,7 @@ export default function AttendancePage() {
   }) : []
   const schedules: Record<string, unknown>[] = rawSchedules.map((schedule) => ({
     ...schedule,
-    isTeacherFirstLessonToday: isFirstTeachingPeriod(periods, formatTime(String(schedule.startTime || ''))),
+    isSystemFirstPeriod: isFirstTeachingPeriod(periods, formatTime(String(schedule.startTime || ''))),
   }))
   const allSchedules = filterType ? schedules.filter((schedule) => schedule.classType === filterType) : schedules
 
@@ -157,6 +163,7 @@ export default function AttendancePage() {
       newMap.set(stu.studentId as string, (existing?.status as AttStatus) || 'present')
     })
     setAttMap(newMap)
+    setChangedStudentIds(new Set())
     setMealStudentIds(new Set(
       students.filter((student) => Boolean(student.eating)).map((student) => String(student.studentId)),
     ))
@@ -171,10 +178,12 @@ export default function AttendancePage() {
     const students = (selectedSchedule?.students as Array<Record<string, unknown>>) || []
     students.forEach(s => newMap.set(s.studentId as string, 'present'))
     setAttMap(newMap)
+    setChangedStudentIds(new Set(students.map((student) => String(student.studentId))))
   }
 
   const setStudentStatus = (studentId: string, status: AttStatus) => {
     setAttMap(prev => { const next = new Map(prev); next.set(studentId, status); return next })
+    setChangedStudentIds(prev => new Set(prev).add(studentId))
   }
 
   const toggleMeal = (studentId: string) => {
@@ -201,7 +210,11 @@ export default function AttendancePage() {
     setSubmitting(true)
     const records = students.map(s => ({
       studentId: s.studentId,
-      status: toApiStatus(attMap.get(s.studentId as string) || 'present'),
+      status: resolveAttendanceSubmissionStatus({
+        displayedStatus: toApiStatus(attMap.get(s.studentId as string) || 'present'),
+        originalStatus: s.originalStatus,
+        changed: changedStudentIds.has(String(s.studentId)),
+      }),
       actualMinutes: selectedSchedule.intensiveMode === 'INTENSIVE' ? actualMinutes : undefined,
     }))
     if (selectedSchedule.intensiveMode === 'INTENSIVE' && !actualMinutes) {
@@ -217,7 +230,7 @@ export default function AttendancePage() {
         body: JSON.stringify({
           lessonId,
           records,
-          mealStudentIds: selectedSchedule.isTeacherFirstLessonToday ? [...mealStudentIds] : undefined,
+          mealStudentIds: selectedSchedule.isSystemFirstPeriod ? [...mealStudentIds] : undefined,
         }),
       })
       if (!res.ok) throw new Error((await res.json()).error || '提交失败')
@@ -423,8 +436,8 @@ export default function AttendancePage() {
                     </Card>
                   )}
 
-                  {Boolean(selectedSchedule.isTeacherFirstLessonToday) && (
-                    <div className="attendance-meal-banner">这是该教师当天首节课，可同时登记学生是否就餐；未勾选表示不就餐。</div>
+                  {Boolean(selectedSchedule.isSystemFirstPeriod) && (
+                    <div className="attendance-meal-banner">这是系统第一课节，可同时登记学生是否就餐；未勾选表示不就餐。</div>
                   )}
 
                   <div style={{ maxHeight: isMobile ? 'none' : 'calc(100vh - 500px)', overflowY: 'auto' }}>
@@ -452,7 +465,7 @@ export default function AttendancePage() {
                                   {t === 'present' ? '出勤' : '请假'}
                                 </button>
                               ))}
-                              {Boolean(selectedSchedule.isTeacherFirstLessonToday) && (
+                              {Boolean(selectedSchedule.isSystemFirstPeriod) && (
                                 <button
                                   type="button"
                                   className={`attendance-meal-toggle ${mealStudentIds.has(String(s.studentId)) ? 'is-active' : ''}`}
@@ -471,7 +484,7 @@ export default function AttendancePage() {
                       <Space size={20}>
                         <span style={{ fontSize: 13, color: '#27a644' }}>出勤 {summary.present}</span>
                         <span style={{ fontSize: 13, color: '#f5a623' }}>请假 {summary.leave}</span>
-                        {Boolean(selectedSchedule.isTeacherFirstLessonToday) && <span style={{ fontSize: 13, color: '#E8784A' }}>就餐 {mealStudentIds.size}</span>}
+                        {Boolean(selectedSchedule.isSystemFirstPeriod) && <span style={{ fontSize: 13, color: '#E8784A' }}>就餐 {mealStudentIds.size}</span>}
                       </Space>
                       <Button type="primary" loading={submitting} onClick={handleSubmit}
                         disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}
@@ -551,8 +564,8 @@ export default function AttendancePage() {
                   </div>
                 )}
 
-                {Boolean(selectedSchedule.isTeacherFirstLessonToday) && (
-                  <div className="attendance-meal-banner">这是该教师当天首节课，可同时登记学生是否就餐；未勾选表示不就餐。</div>
+                {Boolean(selectedSchedule.isSystemFirstPeriod) && (
+                  <div className="attendance-meal-banner">这是系统第一课节，可同时登记学生是否就餐；未勾选表示不就餐。</div>
                 )}
 
                 {/* 学生列表 */}
@@ -582,7 +595,7 @@ export default function AttendancePage() {
                           <span style={{ fontSize: 15, fontWeight: 600, color: '#1F2329' }}>{s.studentName as string}</span>
                         </div>
                         
-                        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${selectedSchedule.isTeacherFirstLessonToday ? 3 : 2}, 1fr)`, gap: 8 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${selectedSchedule.isSystemFirstPeriod ? 3 : 2}, 1fr)`, gap: 8 }}>
                           {(['present', 'leave'] as AttStatus[]).map(t => {
                             const active = status === t
                             const c = statusColors[t]
@@ -605,7 +618,7 @@ export default function AttendancePage() {
                               </button>
                             )
                           })}
-                          {Boolean(selectedSchedule.isTeacherFirstLessonToday) && (
+                          {Boolean(selectedSchedule.isSystemFirstPeriod) && (
                             <button
                               type="button"
                               className={`attendance-meal-toggle ${mealStudentIds.has(String(s.studentId)) ? 'is-active' : ''}`}
@@ -639,7 +652,7 @@ export default function AttendancePage() {
                         <div style={{ fontSize: 16, fontWeight: 700, color: '#f5a623' }}>{summary.leave}</div>
                         <div style={{ fontSize: 10, color: '#98A2B3' }}>请假</div>
                       </div>
-                      {Boolean(selectedSchedule.isTeacherFirstLessonToday) && (
+                      {Boolean(selectedSchedule.isSystemFirstPeriod) && (
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: 16, fontWeight: 700, color: '#E8784A' }}>{mealStudentIds.size}</div>
                           <div style={{ fontSize: 10, color: '#98A2B3' }}>就餐</div>

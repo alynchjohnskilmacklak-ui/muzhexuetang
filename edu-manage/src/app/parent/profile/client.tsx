@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { Card, Descriptions, Tag, Typography, Empty, Avatar, Button, Form, Input, Modal } from 'antd'
@@ -46,7 +46,7 @@ export function ParentProfileClient({
 
   return (
     <div>
-      <Title level={4} style={{ marginBottom: 20 }}>个人中心</Title>
+      <div className="parent-theme-title"><Title level={4} style={{ marginBottom: 20 }}>个人中心</Title></div>
 
       <Card bordered={false} style={{ borderRadius: 12, background: '#fff', border: '1px solid #F0DDD2', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
@@ -112,7 +112,7 @@ export function ParentProfileClient({
                   type="link"
                   size="small"
                   icon={<RightOutlined />}
-                  onClick={() => router.push(`/parent/students/${s.id}/archive`)}
+                  onClick={() => router.push(`/parent/archive?studentId=${s.id}`)}
                   style={{ color: '#E8784A', padding: 0 }}
                 >
                   查看学习档案
@@ -146,7 +146,7 @@ export function ParentProfileClient({
               },
             },
           ]}>
-            <Input.Password placeholder={`至少${PASSWORD_MIN_LENGTH}位，包含字母和数字`} style={{ borderRadius: 8 }} />
+            <Input.Password placeholder={`至少${PASSWORD_MIN_LENGTH}位，包含英文字母`} style={{ borderRadius: 8 }} />
           </Form.Item>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <Button onClick={() => { setChangingPwd(false); form.resetFields() }}>取消</Button>

@@ -34,3 +34,10 @@ export function protectedUploadFallback(value?: string | null) {
   const key = extractUploadStorageKey(raw)
   return key ? `/api/uploads/${encodeURIComponent(key)}` : normalizeUploadUrl(raw)
 }
+
+/** Teacher portraits may live in public/people or protected upload storage. */
+export function normalizeAvatarUrl(value?: string | null) {
+  const raw = value?.trim() || ''
+  if (!raw || raw.startsWith('/people/') || raw.startsWith('data:') || raw.startsWith('blob:')) return raw
+  return protectedUploadFallback(raw)
+}

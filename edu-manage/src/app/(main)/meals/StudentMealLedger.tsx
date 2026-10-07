@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
-import html2canvas from 'html2canvas'
 import {
   Button,
   Card,
@@ -123,6 +122,7 @@ export function StudentMealLedger() {
     if (!reportRef.current || !data?.student) return
     setExporting(true)
     try {
+      const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(reportRef.current, {
         backgroundColor: '#faf8f5',
         scale: 2,

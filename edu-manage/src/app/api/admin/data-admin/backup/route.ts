@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { requireSuperAdmin } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { createActivityLog } from '@/lib/data-admin/entities-server'
@@ -13,6 +13,22 @@ export const dynamic = 'force-dynamic'
 const execFileAsync = promisify(execFile)
 
 const BACKUP_DIR = process.env.BACKUP_DIR || '/data/backups/edu-manage'
+const LABELS_FILE = path.join(BACKUP_DIR, '.backup-labels.json')
+
+function readLabels(): Record<string, string> {
+  try {
+    if (!fs.existsSync(LABELS_FILE)) return {}
+    const value = JSON.parse(fs.readFileSync(LABELS_FILE, 'utf8'))
+    return value && typeof value === 'object' ? value : {}
+  } catch { return {} }
+}
+
+function writeLabels(labels: Record<string, string>) {
+  fs.mkdirSync(BACKUP_DIR, { recursive: true })
+  const temporary = `${LABELS_FILE}.tmp`
+  fs.writeFileSync(temporary, JSON.stringify(labels, null, 2), { encoding: 'utf8', mode: 0o600 })
+  fs.renameSync(temporary, LABELS_FILE)
+}
 
 export const POST = apiHandler(async () => {
   const user = await requireSuperAdmin()
@@ -61,6 +77,7 @@ export const GET = apiHandler(async () => {
     name: string
     timestamp: string
   }[] = []
+  const labels = readLabels()
 
   if (fs.existsSync(manualDir)) {
     const entries = fs.readdirSync(manualDir, { withFileTypes: true })
@@ -70,7 +87,7 @@ export const GET = apiHandler(async () => {
       const stat = fs.statSync(dirPath)
       history.push({
         id: entry.name,
-        name: entry.name,
+        name: labels[entry.name] || entry.name,
         timestamp: stat.birthtime.toISOString(),
       })
     }
@@ -82,4 +99,35 @@ export const GET = apiHandler(async () => {
     { success: true, data: history },
     { headers: { 'Cache-Control': 'no-store' } },
   )
+})
+
+export const PATCH = apiHandler(async (req: NextRequest) => {
+  const user = await requireSuperAdmin()
+  const body = await req.json().catch(() => ({}))
+  const backupId = typeof body.backupId === 'string' ? body.backupId : ''
+  const displayName = typeof body.displayName === 'string' ? body.displayName.trim() : ''
+  const directory = resolveBackupDirectory(BACKUP_DIR, backupId)
+  if (!directory || !fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) return NextResponse.json({ error: '备份不存在' }, { status: 404 })
+  if (!displayName || displayName.length > 80 || /[\r\n\t]/.test(displayName)) return NextResponse.json({ error: '名称应为 1 到 80 个字符' }, { status: 400 })
+  const labels = readLabels()
+  labels[backupId] = displayName
+  writeLabels(labels)
+  await createActivityLog(user.id, 'BACKUP_RENAME', 'Backup', backupId, { displayName })
+  return NextResponse.json({ success: true, name: displayName })
+})
+
+export const DELETE = apiHandler(async (req: NextRequest) => {
+  const user = await requireSuperAdmin()
+  const body = await req.json().catch(() => ({}))
+  const backupId = typeof body.backupId === 'string' ? body.backupId : ''
+  const directory = resolveBackupDirectory(BACKUP_DIR, backupId)
+  const allowed = path.resolve(BACKUP_DIR)
+  if (!directory || directory === allowed || !directory.startsWith(`${allowed}${path.sep}`)) return NextResponse.json({ error: '备份标识无效' }, { status: 400 })
+  if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) return NextResponse.json({ error: '备份不存在' }, { status: 404 })
+  fs.rmSync(directory, { recursive: true, force: false })
+  const labels = readLabels()
+  delete labels[backupId]
+  writeLabels(labels)
+  await createActivityLog(user.id, 'BACKUP_DELETE', 'Backup', backupId)
+  return NextResponse.json({ success: true })
 })

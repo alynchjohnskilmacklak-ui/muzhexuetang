@@ -82,8 +82,8 @@ export default function ParentActivationPage({ params }: { params: Promise<{ tok
             <Alert type="success" showIcon icon={<CheckCircleOutlined />} message="请确认以上是您的孩子" description="若孩子信息不正确，请不要继续设置，联系管理员核对绑定关系。" />
             {error && <Alert type="error" showIcon message={error} closable onClose={() => setError('')} />}
             <Form form={form} layout="vertical" onFinish={activate}>
-              <Form.Item name="password" label="设置登录密码" rules={[{ required: true, message: '请输入密码' }, { min: 8, message: '至少 8 位' }, { pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/, message: '需要同时包含字母和数字' }]}>
-                <Input.Password size="large" prefix={<LockOutlined />} placeholder="至少 8 位，包含字母和数字" autoComplete="new-password" />
+              <Form.Item name="password" label="设置登录密码" rules={[{ required: true, message: '请输入密码' }, { min: 8, message: '至少 8 位' }, { pattern: /^(?=.*[A-Za-z]).+$/, message: '需要包含英文字母' }]}>
+                <Input.Password size="large" prefix={<LockOutlined />} placeholder="至少 8 位，包含英文字母" autoComplete="new-password" />
               </Form.Item>
               <Form.Item name="confirm" label="再次输入密码" dependencies={['password']} rules={[{ required: true, message: '请再次输入密码' }, ({ getFieldValue }) => ({ validator(_, value) { return !value || getFieldValue('password') === value ? Promise.resolve() : Promise.reject(new Error('两次密码不一致')) } })]}>
                 <Input.Password size="large" prefix={<LockOutlined />} placeholder="请再次输入" autoComplete="new-password" />

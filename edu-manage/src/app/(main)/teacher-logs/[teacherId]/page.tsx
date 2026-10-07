@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { Card, Tag, Timeline, Statistic, Row, Col, List, Button, message, Typography } from 'antd'
 import { CheckCircleOutlined, FileTextOutlined, StarOutlined, LoginOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
+import { useDivision } from '@/contexts/DivisionContext'
 
 const { Text } = Typography
 
@@ -24,22 +25,28 @@ type TeacherAlert = { id: string; type: string; message: string; createdAt: stri
 type TeacherLog = { id: string; action: string; createdAt: string; detail?: string | null }
 type TeacherLogDetail = {
   teacher?: { name?: string; subjects?: string }
-  stats?: { totalLogs?: number; attendanceRate?: number; papersPublished?: number; performancePosts?: number; commentReplyRate?: number }
+  stats?: { totalLogs?: number; attendanceDueLessons?: number; attendanceRate?: number; papersPublished?: number; performancePosts?: number; commentReplyRate?: number }
   alerts?: TeacherAlert[]
   logs?: TeacherLog[]
 }
 
 export default function TeacherLogDetailPage() {
   const { teacherId } = useParams()
-  const { data, isLoading } = useSWR<TeacherLogDetail>(`/api/teacher-logs/${teacherId}?period=month`, fetcher)
+  const { division } = useDivision()
+  const { data, isLoading, mutate } = useSWR<TeacherLogDetail>(`/api/teacher-logs/${teacherId}?period=month&division=${division}`, fetcher)
 
   const handleResolve = async (alertId: string) => {
-    await fetch('/api/teacher-logs/alerts', {
+    const response = await fetch(`/api/teacher-logs/alerts?division=${division}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ alertId }),
     })
+    if (!response.ok) {
+      message.error('预警处理失败，请重试')
+      return
+    }
     message.success('预警已处理')
+    void mutate()
   }
 
   if (isLoading || !data) return <PageLayout title="加载中..."><div /></PageLayout>
@@ -48,7 +55,7 @@ export default function TeacherLogDetailPage() {
     <PageLayout title={`${data.teacher?.name} - 操作日志`} subtitle={data.teacher?.subjects}>
       <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
         <Col xs={12} lg={4}><Card bordered={false}><Statistic title="本月操作" value={data.stats?.totalLogs || 0} suffix="条" /></Card></Col>
-        <Col xs={12} lg={4}><Card bordered={false}><Statistic title="考勤完成率" value={data.stats?.attendanceRate || 0} suffix="%" prefix={<CheckCircleOutlined style={{ color: '#1D9E75' }} />} /></Card></Col>
+        <Col xs={12} lg={4}><Card bordered={false}><Statistic title="考勤完成率" value={data.stats?.attendanceDueLessons ? data.stats.attendanceRate ?? 0 : '暂无应交'} suffix={data.stats?.attendanceDueLessons ? '%' : undefined} prefix={<CheckCircleOutlined style={{ color: '#1D9E75' }} />} /></Card></Col>
         <Col xs={12} lg={4}><Card bordered={false}><Statistic title="试卷推送" value={data.stats?.papersPublished || 0} prefix={<FileTextOutlined style={{ color: '#E8784A' }} />} /></Card></Col>
         <Col xs={12} lg={4}><Card bordered={false}><Statistic title="表现反馈" value={data.stats?.performancePosts || 0} prefix={<StarOutlined style={{ color: '#8892f0' }} />} /></Card></Col>
         <Col xs={12} lg={4}><Card bordered={false}><Statistic title="留言回复率" value={data.stats?.commentReplyRate || 0} suffix="%" prefix={<LoginOutlined style={{ color: '#185FA5' }} />} /></Card></Col>

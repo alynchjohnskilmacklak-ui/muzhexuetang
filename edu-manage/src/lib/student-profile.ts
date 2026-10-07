@@ -9,21 +9,24 @@ export async function getStudentProfile(
   prisma: PrismaClient,
   studentId: string,
   range: ProfileRange,
+  historicalStudentIds: string[] = [studentId],
 ) {
   const { from, to } = range
+  const studentIds = [...new Set([studentId, ...historicalStudentIds])]
+  const linkedStudentWhere = { studentId: { in: studentIds } }
 
-  const [student, papers, grades, weaknesses, goals, badges, feedbacks, posts, attendances, stageSummary] =
+  const [studentRows, papers, grades, weaknesses, goals, badges, feedbacks, posts, attendances, stageSummary] =
     await Promise.all([
-      prisma.student.findUnique({
-        where: { id: studentId },
+      prisma.student.findMany({
+        where: { id: { in: studentIds } },
         select: {
           id: true, name: true, grade: true, school: true,
           totalHours: true, remainHours: true,
-          mainTeacher: { select: { name: true } },
+          mainTeacher: { select: { name: true, tierLevel: true } },
         },
       }),
       prisma.examPaper.findMany({
-        where: { studentId, status: 'PUBLISHED', paperDate: { gte: from, lte: to } },
+        where: { ...linkedStudentWhere, status: 'PUBLISHED', paperDate: { gte: from, lte: to } },
         select: {
           id: true, title: true, subject: true, paperDate: true, teacher: { select: { name: true, subjects: true } },
           questions: { select: { mastery: true, topic: true } },
@@ -31,7 +34,7 @@ export async function getStudentProfile(
         orderBy: { paperDate: 'desc' }, take: 50,
       }),
       prisma.gradeRecord.findMany({
-        where: { studentId, assessment: { assessDate: { gte: from, lte: to } } },
+        where: { ...linkedStudentWhere, assessment: { assessDate: { gte: from, lte: to } } },
         select: {
           score: true, comment: true, createdAt: true,
           assessment: { select: { name: true, type: true, assessDate: true, fullScore: true,
@@ -41,23 +44,23 @@ export async function getStudentProfile(
         orderBy: { assessment: { assessDate: 'asc' } },
       }),
       prisma.weaknessRecord.findMany({
-        where: { studentId },
+        where: linkedStudentWhere,
         select: { id: true, topic: true, mistakeCount: true, suggestion: true, createdAt: true },
         orderBy: [{ mistakeCount: 'desc' }, { createdAt: 'desc' }], take: 20,
       }),
       prisma.learningGoal.findMany({
-        where: { studentId },
+        where: linkedStudentWhere,
         select: { id: true, subject: true, goalDesc: true, deadline: true, isAchieved: true, achievedAt: true, createdAt: true },
         orderBy: [{ isAchieved: 'asc' }, { createdAt: 'desc' }],
       }),
       prisma.achievementBadge.findMany({
-        where: { studentId, earnedAt: { gte: from, lte: to } },
+        where: { ...linkedStudentWhere, earnedAt: { gte: from, lte: to } },
         select: { id: true, badgeType: true, description: true, earnedAt: true },
         orderBy: { earnedAt: 'desc' },
       }),
       prisma.classroomFeedback.findMany({
-        where: { studentIds: { has: studentId }, status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
-        select: { id: true, mood: true, tags: true, lessonContent: true, knowledgePoints: true, summary: true, overallComment: true,
+        where: { studentIds: { hasSome: studentIds }, status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
+        select: { id: true, mood: true, tags: true, lessonContent: true, knowledgePoints: true, knowledgeCard: true, summary: true, overallComment: true,
           feedbackGroupId: true,
           homework: true, badge: true,
           imageUrls: true,
@@ -67,20 +70,21 @@ export async function getStudentProfile(
         orderBy: { createdAt: 'desc' }, take: 50,
       }),
       prisma.performancePost.findMany({
-        where: { studentId, ...visiblePerformancePostWhere, teacher: visibleTeacherWhere, createdAt: { gte: from, lte: to } },
+        where: { ...linkedStudentWhere, ...visiblePerformancePostWhere, teacher: visibleTeacherWhere, createdAt: { gte: from, lte: to } },
         select: { id: true, type: true, content: true, mood: true, tags: true, images: true, createdAt: true, teacher: { select: { name: true, subjects: true } } },
         orderBy: { createdAt: 'desc' }, take: 50,
       }),
       prisma.attendance.findMany({
-        where: { studentId, createdAt: { gte: from, lte: to } },
+        where: { ...linkedStudentWhere, lesson: { lessonDate: { gte: from, lte: to } } },
         select: {
           status: true,
           actualMinutes: true,
-          lesson: { select: { actualMinutes: true, intensiveReviewStatus: true, group: { select: { intensiveMode: true } } } },
+          hoursDeducted: true,
+          lesson: { select: { lessonDate: true, actualMinutes: true, intensiveReviewStatus: true, group: { select: { intensiveMode: true } } } },
         },
       }),
       prisma.stageSummary.findFirst({
-        where: { studentId, status: 'PUBLISHED' },
+        where: { ...linkedStudentWhere, status: 'PUBLISHED' },
         orderBy: { periodEnd: 'desc' },
         select: {
           summary: true,
@@ -93,6 +97,7 @@ export async function getStudentProfile(
       }),
     ])
 
+  const student = studentRows.find((row) => row.id === studentId)
   if (!student) return null
   const feedbackGroupIds = [...new Set(feedbacks.map((feedback) => feedback.feedbackGroupId).filter((id): id is string => Boolean(id)))]
   const feedbackGroups = feedbackGroupIds.length ? await prisma.classGroup.findMany({
@@ -138,6 +143,37 @@ export async function getStudentProfile(
     .slice(0, 8)
     .map(f => ({ mood: f.mood, date: f.createdAt }))
     .reverse()
+
+  // ── 本月课时趋势（按自然日切 4 周，供学习趋势卡无成绩数据时使用）──
+  const nowW = new Date()
+  const weeklyHours: { week: string; hours: number; range: string }[] = []
+  {
+    const y = nowW.getFullYear()
+    const m = nowW.getMonth()
+    const buckets: number[] = [0, 0, 0, 0]
+    attendances.forEach((att) => {
+      const d = att.lesson?.lessonDate
+      if (!d) return
+      if (d.getFullYear() !== y || d.getMonth() !== m) return
+      const bucket = Math.min(3, Math.floor((d.getDate() - 1) / 7))
+      const lessonMin = att.actualMinutes || att.lesson?.actualMinutes || 0
+      const hours = att.hoursDeducted != null && Number(att.hoursDeducted) > 0
+        ? Number(att.hoursDeducted)
+        : Number(lessonMin) / 60
+      buckets[bucket] += hours
+    })
+    const monthDays = new Date(y, m + 1, 0).getDate()
+    const boundaries = [1, 8, 15, 22, monthDays + 1]
+    for (let i = 0; i < 4; i += 1) {
+      const startD = Math.min(boundaries[i], monthDays)
+      const endD = Math.min(boundaries[i + 1] - 1, monthDays)
+      weeklyHours.push({
+        week: `第${i + 1}周`,
+        hours: Math.round(buckets[i] * 100) / 100,
+        range: `${m + 1}/${startD}-${m + 1}/${endD}`,
+      })
+    }
+  }
 
   // 作业完成率 & 课堂表现趋势
   const feedbacksWithHomework = feedbacks.filter(f => f.homeworkDone !== null && f.homeworkDone !== undefined)
@@ -217,11 +253,11 @@ export async function getStudentProfile(
   }
 
   // ── 档：成绩趋势（按学科，归一化为百分比）+ 统一时间线 ──
-  const trendBySubject: Record<string, { date: Date; pct: number; name: string }[]> = {}
+  const trendBySubject: Record<string, { date: Date; pct: number; name: string; score: number; fullScore: number }[]> = {}
   for (const g of grades) {
     const subj = g.assessment.group?.course?.subject || '综合'
     const p = g.assessment.fullScore ? Math.round((g.score / g.assessment.fullScore) * 100) : g.score
-    ;(trendBySubject[subj] ||= []).push({ date: g.assessment.assessDate, pct: p, name: g.assessment.name })
+    ;(trendBySubject[subj] ||= []).push({ date: g.assessment.assessDate, pct: p, name: g.assessment.name, score: g.score, fullScore: g.assessment.fullScore })
   }
 
   const subjOf = (t?: { subjects?: string | null }) =>
@@ -239,7 +275,7 @@ export async function getStudentProfile(
     )?.subject || group?.course?.subject || subjOf(feedback.teacher)
   }
 
-  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; teacherSubject?: string; images?: Array<string | FeedbackImageVariant>; refType?: 'feedback' | 'paper' | 'post'; refId?: string; detail?: { lessonContent?: string; comment?: string; summary?: string; knowledgePoints?: string[]; homework?: string[]; tags?: string[]; badge?: string | null; mood?: string | null } }
+  type TLItem = { type: 'paper' | 'feedback' | 'post' | 'badge' | 'grade' | 'goal'; title: string; sub?: string; date: Date; teacher?: string; teacherSubject?: string; images?: Array<string | FeedbackImageVariant>; refType?: 'feedback' | 'paper' | 'post'; refId?: string; detail?: { lessonContent?: string; comment?: string; summary?: string; knowledgePoints?: string[]; knowledgeCard?: unknown; homework?: string[]; tags?: string[]; badge?: string | null; mood?: string | null } }
   const timeline: TLItem[] = []
   for (const p of papers) {
     const m = p.questions.filter(q => q.mastery === 'MASTERED').length
@@ -256,6 +292,7 @@ export async function getStudentProfile(
       comment: f.overallComment || undefined,
       summary: f.summary || undefined,
       knowledgePoints: f.knowledgePoints || [],
+      knowledgeCard: f.knowledgeCard || null,
       homework: Array.isArray(f.homework) ? (f.homework as unknown[]).map((item) => {
         if (typeof item === 'string') return item
         if (!item || typeof item !== 'object' || !('content' in item)) return undefined
@@ -275,7 +312,9 @@ export async function getStudentProfile(
   return {
     identity: {
       id: student.id, name: student.name, grade: student.grade, school: student.school,
-      mainTeacher: student.mainTeacher?.name || null, totalHours: student.totalHours,
+      mainTeacher: student.mainTeacher?.name || null,
+      mainTeacherTier: student.mainTeacher?.tierLevel || null,
+      totalHours: student.totalHours,
     },
     overview: {
       attendanceRate, totalHours: student.totalHours,
@@ -294,6 +333,7 @@ export async function getStudentProfile(
     record: {
       trendBySubject: Object.entries(trendBySubject).map(([subject, points]) => ({ subject, points })),
       timeline: timeline.slice(0, 40),
+      weeklyHours,
     },
     profileCase: {
       goals: goals.map(g => ({ subject: g.subject, goalDesc: g.goalDesc, deadline: g.deadline, isAchieved: g.isAchieved })),

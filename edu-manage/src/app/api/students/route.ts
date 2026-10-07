@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { chineseToPinyin, generateParentCredentialsHashed } from '@/lib/pinyin'
+import { canReuseStudentRecord, parentIdsForPhone } from '@/lib/parent-binding'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { calculateApprovedIntensiveHours, calculateTaughtHours } from '@/lib/student-taught-hours'
@@ -61,7 +62,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
   const skip = (page - 1) * limit
 
-  const where: Record<string, unknown> = { division }
+  const where: Record<string, unknown> = { division, deletedAt: null }
   const selectedTerm = await resolveAdminTermScope(prisma, division, req)
   if (requestedTermId && !selectedTerm) {
     return NextResponse.json({ error: '运营批次不存在或不属于当前学部' }, { status: 404 })
@@ -134,7 +135,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
       where,
       include: {
         mainTeacher: { select: { id: true, name: true } },
-        schedules: { include: { schedule: { include: { course: { select: { id: true, name: true } } } } } },
         enrollments: {
           where: {
             status: 'ACTIVE',
@@ -142,6 +142,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
           },
           include: { group: { include: { course: { select: { id: true, name: true, type: true, isActive: true } } } } },
           orderBy: { enrolledAt: 'desc' },
+        },
+        fees: {
+          where: { status: 'pending', deletedAt: null },
+          select: { id: true, status: true, dueDate: true, amount: true },
+          orderBy: { dueDate: 'asc' },
         },
         studyHallClasses: {
           where: { status: 'ACTIVE', studyClass: { termId: selectedTerm.id, status: 'ACTIVE' } },
@@ -281,18 +286,51 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const studentGrade = typeof body.grade === 'string' ? body.grade.trim() : ''
     if (studentGrade && requestedClasses.some((item) => item.gradeScope.length && !item.gradeScope.includes(studentGrade))) return NextResponse.json({ error: '学员年级与所选作业班的适用年级不一致' }, { status: 409 })
 
-    const creds = await generateParentCredentialsHashed(name)
+    const requestedParentId = typeof body.existingParentUserId === 'string' ? body.existingParentUserId.trim() : ''
+    const parentPhone = typeof body.parentPhone === 'string' ? body.parentPhone.trim() : ''
+    let parentUserId = requestedParentId
+    if (!parentUserId && parentPhone) {
+      const samePhoneStudents = await prisma.student.findMany({
+        where: { parentPhone, deletedAt: null, OR: [{ parentUserId: { not: null } }, { parentId: { not: null } }] },
+        select: { parentUserId: true, parentId: true },
+      })
+      const matchingIds = parentIdsForPhone(samePhoneStudents)
+      if (matchingIds.length > 1) return NextResponse.json({ error: '该家长手机号关联多个账号，请在“绑定已有家长账号”中选择正确账号' }, { status: 409 })
+      parentUserId = matchingIds[0] || ''
+    }
+    const selectedParent = parentUserId ? await prisma.user.findFirst({
+      where: { id: parentUserId, role: 'parent', status: { not: 'deleted' } },
+      select: { id: true, email: true },
+    }) : null
+    if (parentUserId && !selectedParent) return NextResponse.json({ error: '家长账号不存在或不可用，请重新选择' }, { status: 409 })
+
+    const reuseExistingStudentId = typeof body.reuseExistingStudentId === 'string' ? body.reuseExistingStudentId.trim() : ''
+    const previousStudent = reuseExistingStudentId ? await prisma.student.findFirst({
+      where: {
+        id: reuseExistingStudentId,
+        division,
+        deletedAt: null,
+        OR: [{ parentId: parentUserId }, { parentUserId }],
+      },
+      select: { id: true, name: true, birthYear: true, termMemberships: { where: { termId: selectedTerm.id }, select: { id: true } } },
+    }) : null
+    if (reuseExistingStudentId && (!parentUserId || !previousStudent)) return NextResponse.json({ error: '原学员档案不属于选定的家长账号' }, { status: 409 })
+    if (previousStudent && !canReuseStudentRecord(previousStudent, { name, birthYear: body.birthYear ? Number(body.birthYear) : null })) {
+      return NextResponse.json({ error: '原档案姓名或出生年份与当前填写内容不一致，请核对后再复用' }, { status: 409 })
+    }
+    if (previousStudent?.termMemberships.length) return NextResponse.json({ error: '该学员已在当前运营批次中，无需再次建档' }, { status: 409 })
+
+    const creds = selectedParent ? null : await generateParentCredentialsHashed(name)
+    if (creds && await prisma.user.findUnique({ where: { email: creds.email }, select: { id: true } })) {
+      return NextResponse.json({ error: '系统发现同名学员关联的家长账号，请先在“绑定已有家长账号”中确认归属，避免把不同家庭误绑到一起' }, { status: 409 })
+    }
     const creation = await prisma.$transaction(async (tx) => {
-      const existingParent = await tx.user.findUnique({ where: { email: creds.email } })
-      const parentUser = existingParent
-        ? await tx.user.update({
-            where: { id: existingParent.id },
-            data: { status: 'active', division },
-          })
+      const parentUser = selectedParent
+        ? await tx.user.update({ where: { id: selectedParent.id }, data: { status: 'active' } })
         : await tx.user.create({
             data: {
-              email: creds.email,
-              password: creds.password,
+              email: creds!.email,
+              password: creds!.password,
               name: body.parentName || `${name}家长`,
               role: 'parent',
               status: 'active',
@@ -300,8 +338,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             },
           })
 
-      const student = await tx.student.create({
-        data: {
+      const studentData = {
           name,
           gender: body.gender || null,
           birthYear: body.birthYear ? parseInt(body.birthYear) : null,
@@ -321,8 +358,21 @@ export const POST = apiHandler(async (req: NextRequest) => {
           tags: JSON.stringify(body.tags || []),
           status: requestedStudyHallMemberships.length ? 'ACTIVE' : 'TRIAL',
           membershipLevel: body.membershipLevel || 'NORMAL',
-        },
-      })
+      }
+      const student = previousStudent
+        ? await tx.student.update({
+            where: { id: previousStudent.id },
+            data: {
+              parentId: parentUser.id,
+              parentUserId: parentUser.id,
+              grade: body.grade || undefined,
+              school: body.school || undefined,
+              parentName: body.parentName || undefined,
+              parentPhone: parentPhone || undefined,
+              status: requestedStudyHallMemberships.length ? 'ACTIVE' : undefined,
+            },
+          })
+        : await tx.student.create({ data: studentData })
 
       await tx.studentTermMembership.create({
         data: {
@@ -339,13 +389,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
       await tx.activityLog.create({
         data: {
           userId,
-          action: '添加学员',
-          detail: `${student.name}，家长账号：${creds.email}`,
+          action: previousStudent ? '沿用学员档案加入运营批次' : '添加学员',
+          detail: `${student.name}，家长账号：${parentUser.email}`,
           entityType: 'Student',
           entityId: student.id,
         },
       })
-      if (!existingParent) {
+      if (!selectedParent) {
         await tx.activityLog.create({
           data: {
             userId,
@@ -357,7 +407,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           },
         })
       }
-      return { student, parentUser, parentCreated: !existingParent }
+      return { student, parentUser, parentCreated: !selectedParent }
     })
 
     revalidatePath('/dashboard')
@@ -366,7 +416,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({
       ...creation.student,
       parentEmail: creation.parentUser.email,
-      parentPlainPassword: creation.parentCreated ? creds.plainPassword : null,
+      parentPlainPassword: creation.parentCreated ? creds?.plainPassword : null,
     }, { status: 201 })
   } catch (error) {
     console.error('[students:create] failed', error)

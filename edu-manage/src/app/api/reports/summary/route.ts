@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getStudentStatusLabel } from '@/lib/domain-labels'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,7 +56,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const selectedTerm = await resolveAdminTermScope(prisma, division, request)
   const termId = selectedTerm?.id || '__NO_SELECTED_TERM__'
   const studentWhere = { division, termMemberships: { some: { termId } } }
-  const feeWhere = { division, termId }
+  const feeWhere = { division, termId, deletedAt: null }
   const paperWhere = { termId }
 
   const [
@@ -98,8 +99,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
     prisma.guideViewLog.groupBy({ by: ['action'], _count: true, where: { createdAt: { gte: from, lt: to } } }),
   ])
 
-  const statusMap: Record<string, string> = { LEAD: '潜客咨询', TRIAL: '预约试听', ACTIVE: '报名缴费', INACTIVE: '暂停', GRADUATED: '毕业/离校' }
-  const funnel = studentStatusCounts.map((s) => ({ status: statusMap[s.status] || s.status, count: s._count }))
+  const funnel = studentStatusCounts.map((s) => ({ status: getStudentStatusLabel(s.status), count: s._count }))
 
   const masteryAll = { MASTERED: 0, NEEDS_REVIEW: 0, NEEDS_PRACTICE: 0 }
   for (const m of masteryDistribution) {

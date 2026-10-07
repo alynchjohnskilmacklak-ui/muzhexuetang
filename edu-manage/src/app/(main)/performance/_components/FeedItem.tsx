@@ -4,7 +4,7 @@ import { Avatar, Button, Card, Image as AntImage, Popconfirm, Rate, Space, Tag }
 import { DeleteOutlined, UserOutlined } from '@ant-design/icons'
 
 import { MOOD_META, PERFORMANCE_BADGES, RATING_LABELS } from '@/lib/mood-meta'
-import { normalizeUploadUrl } from '@/lib/upload-url'
+import { normalizeAvatarUrl, normalizeUploadUrl } from '@/lib/upload-url'
 
 type FeedPost = {
   id: string
@@ -37,7 +37,7 @@ export function FeedItem({ post, onDelete }: { post: FeedPost; onDelete?: (id: s
         <div style={{ minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
             <Space align="center">
-              <Avatar src={normalizeUploadUrl(post.teacher?.avatar) || undefined} icon={<UserOutlined />} style={{ background: '#E8784A' }} />
+              <Avatar src={normalizeAvatarUrl(post.teacher?.avatar) || undefined} icon={<UserOutlined />} style={{ background: '#E8784A' }} />
               <div>
                 <div style={{ color: '#1F2329', fontWeight: 700 }}>{post.teacher?.name || '老师'}</div>
                 <div style={{ color: '#98A2B3', fontSize: 12 }}>

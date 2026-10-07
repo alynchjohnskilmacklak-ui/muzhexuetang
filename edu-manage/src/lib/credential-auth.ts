@@ -5,6 +5,8 @@ import {
   clearCredentialFailures,
   recordCredentialFailure,
 } from '@/lib/login-rate-limit'
+import { getPrismaForDivision } from '@/lib/prisma'
+import { hasCurrentParentStudent, PARENT_TERM_EXPIRED_CODE } from '@/lib/parent-account-validity'
 
 type CredentialMeta = {
   ip: string
@@ -40,6 +42,14 @@ export async function authenticateCredentialInput(input: {
   if (!result.ok) {
     recordCredentialFailure(accountKey)
     return result
+  }
+
+  if (result.user.role === 'parent') {
+    const division = result.user.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+    const prisma = getPrismaForDivision(division)
+    if (!await hasCurrentParentStudent(prisma, result.user.id, division)) {
+      return { ok: false as const, code: PARENT_TERM_EXPIRED_CODE }
+    }
   }
 
   clearCredentialFailures(accountKey)

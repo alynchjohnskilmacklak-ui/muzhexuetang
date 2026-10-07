@@ -266,6 +266,8 @@ export default function GradesPage() {
             <div style={{ fontSize: 12, color: '#98A2B3', marginBottom: 8, fontWeight: 600 }}>选择学员</div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
               <button
+                type="button"
+                aria-pressed={!filterGrade}
                 onClick={() => { setFilterGrade(''); setStudentId(''); setSelectedPaperId('') }}
                 style={{ padding: '5px 12px', borderRadius: 9999, fontSize: 12, cursor: 'pointer', border: 'none',
                   background: !filterGrade ? '#E8784A' : '#F5F2EE',
@@ -273,7 +275,7 @@ export default function GradesPage() {
                 全部
               </button>
               {gradeOptions.map(grade => (
-                <button key={grade}
+                <button key={grade} type="button" aria-pressed={filterGrade === grade}
                   onClick={() => { setFilterGrade(grade); setStudentId(''); setSelectedPaperId('') }}
                   style={{ padding: '5px 12px', borderRadius: 9999, fontSize: 12, cursor: 'pointer', border: 'none',
                     background: filterGrade === grade ? '#E8784A' : '#F5F2EE',
@@ -321,8 +323,8 @@ export default function GradesPage() {
                 const pSubject = p.subject as string
                 const subjectColor = SUBJECT_COLORS[pSubject] || '#8D806F'
                 return (
-                  <div key={pId} onClick={() => selectPaper(pId)}
-                    style={{ flexShrink: 0, width: 130, padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
+                  <button type="button" key={pId} aria-pressed={isSelected} onClick={() => selectPaper(pId)}
+                    style={{ flexShrink: 0, width: 130, minHeight: 44, padding: '10px 12px', borderRadius: 10, cursor: 'pointer', textAlign: 'left', color: 'inherit', font: 'inherit',
                       background: isSelected ? '#FFF3EC' : '#fff',
                       border: `1.5px solid ${isSelected ? '#E8784A' : '#EEE7E1'}` }}>
                     <div style={{ fontSize: 12, fontWeight: 600, color: '#1F2329', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -331,7 +333,7 @@ export default function GradesPage() {
                     <span style={{ fontSize: 11, fontWeight: 700, color: subjectColor, background: `${subjectColor}15`, padding: '1px 6px', borderRadius: 9999 }}>
                       {pSubject}
                     </span>
-                  </div>
+                  </button>
                 )
               })}
             </div>
@@ -346,10 +348,13 @@ export default function GradesPage() {
                 const statusLabel = pStatus === 'PUBLISHED' ? '已发布' : pStatus === 'DRAFT' ? '草稿' : '已删除'
                 const subjectColor = SUBJECT_COLORS[pSubject] || '#8D806F'
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={pId}
+                    aria-pressed={isSelected}
                     onClick={() => selectPaper(pId)}
                     style={{
+                      width: '100%', minHeight: 44, textAlign: 'left', color: 'inherit', font: 'inherit',
                       background: isSelected ? 'linear-gradient(135deg, #FFF3EC 0%, #FFF8F4 100%)' : '#fff',
                       border: `1.5px solid ${isSelected ? '#E8784A' : '#EEE7E1'}`,
                       borderRadius: 10,
@@ -380,7 +385,7 @@ export default function GradesPage() {
                         <span style={{ fontSize: 11, color: '#C4BAB0' }}>{(p.questions as unknown[]).length}题</span>
                       )}
                     </div>
-                  </div>
+                  </button>
                 )
               })}
             </div>

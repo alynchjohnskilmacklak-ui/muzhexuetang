@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
-import { getTeacherBusy } from '@/lib/teacher-busy'
+import { checkTeacherConflict } from '@/lib/teacher-conflict'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,9 +17,5 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ conflict: false })
   }
 
-  const busy = await getTeacherBusy(prisma, teacherId, date, startTime, endTime)
-  if (busy) {
-    return NextResponse.json({ conflict: true, conflictDetail: `${busy.label} ${busy.start}-${busy.end}` })
-  }
-  return NextResponse.json({ conflict: false })
+  return NextResponse.json(await checkTeacherConflict(prisma, { teacherId, date, startTime, endTime }))
 })

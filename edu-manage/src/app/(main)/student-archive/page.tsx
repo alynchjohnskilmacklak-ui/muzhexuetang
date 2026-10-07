@@ -48,7 +48,7 @@ export default function StudentArchiveDashboardPage() {
   const { data, isLoading } = useSWR<CompletenessPayload>(`/api/admin/profile-completeness?months=${months}`, fetcher)
 
   return (
-    <PageLayout title="学情档案总览" subtitle="按月检查成绩、课堂反馈与阶段小结是否补齐">
+    <PageLayout title="学情资料检查" subtitle="按月查看成绩、课堂反馈与阶段小结是否有记录；无记录不等于漏填，请结合实际课程核对">
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
         <Card bordered={false} style={{ borderRadius: 8, border: '1px solid #EEE7E1' }}>
           <Space wrap style={{ width: '100%', justifyContent: 'space-between' }}>
@@ -87,6 +87,7 @@ export default function StudentArchiveDashboardPage() {
             <Table<CompletenessItem>
               rowKey="studentId"
               dataSource={data.items}
+              scroll={{ x: 'max-content' }}
               pagination={{ pageSize: 20 }}
               columns={[
                 {
@@ -94,7 +95,7 @@ export default function StudentArchiveDashboardPage() {
                   dataIndex: 'name',
                   render: (_, record) => (
                     <Space direction="vertical" size={0}>
-                      <Link href={`/student-archive/${record.studentId}`} style={{ fontWeight: 700, color: '#1F2329' }}>
+                      <Link href={`/students/${record.studentId}#learning`} style={{ fontWeight: 700, color: '#1F2329' }}>
                         {record.name}
                       </Link>
                       <Text type="secondary" style={{ fontSize: 12 }}>{record.grade || '未设年级'}</Text>
@@ -120,8 +121,8 @@ export default function StudentArchiveDashboardPage() {
                   title: '操作',
                   width: 130,
                   render: (_, record) => (
-                    <Link href={`/student-archive/${record.studentId}`}>
-                      <FileSearchOutlined /> 查看档案
+                    <Link href={`/students/${record.studentId}#learning`}>
+                      <FileSearchOutlined /> 查看学情
                     </Link>
                   ),
                 },

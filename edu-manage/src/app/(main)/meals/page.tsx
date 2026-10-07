@@ -8,6 +8,7 @@ import {
 import { DownOutlined, DownloadOutlined, EditOutlined, ReloadOutlined, UpOutlined } from '@ant-design/icons'
 import dayjs, { Dayjs } from 'dayjs'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useDivision } from '@/contexts/DivisionContext'
 import { StudentMealLedger } from './StudentMealLedger'
 
 const { Title, Text } = Typography
@@ -23,6 +24,8 @@ type MealTemplate = {
   snack: string | null
   note: string | null
   allowDouble?: boolean
+  startDate?: string | null
+  endDate?: string | null
 }
 
 type MealReport = {
@@ -56,6 +59,7 @@ function mondayOf(value: Dayjs) {
 
 export default function MealsPage() {
   const isMobile = useIsMobile() ?? false
+  const { division } = useDivision()
   const [historyWeek, setHistoryWeek] = useState(() => mondayOf(dayjs()))
   const [templates, setTemplates] = useState<MealTemplate[]>([])
   const [reports, setReports] = useState<MealReport[]>([])
@@ -73,10 +77,10 @@ export default function MealsPage() {
   const today = dayjs().format('YYYY-MM-DD')
 
   const fetchTemplates = useCallback(async () => {
-    const res = await fetch('/api/admin/meal-templates')
+    const res = await fetch(`/api/admin/meal-templates?division=${division}`)
     const data = await res.json()
     setTemplates(data.templates || [])
-  }, [])
+  }, [division])
 
   const fetchToday = useCallback(async () => {
     setRefreshingToday(true)
@@ -158,6 +162,9 @@ export default function MealsPage() {
       lunch: template?.lunch,
       allowDouble: template?.allowDouble !== false,
       note: template?.note,
+      dateRange: template?.startDate || template?.endDate
+        ? [template.startDate ? dayjs(template.startDate) : null, template.endDate ? dayjs(template.endDate) : null]
+        : null,
     })
   }
 
@@ -168,7 +175,12 @@ export default function MealsPage() {
       const res = await fetch(templateEditing?.template ? `/api/admin/meal-templates/${templateEditing.template.id}` : '/api/admin/meal-templates', {
         method: templateEditing?.template ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...values, weekday: templateEditing?.weekday }),
+        body: JSON.stringify({
+          ...values,
+          weekday: templateEditing?.weekday,
+          startDate: values.dateRange?.[0] ? values.dateRange[0].format('YYYY-MM-DD') : null,
+          endDate: values.dateRange?.[1] ? values.dateRange[1].format('YYYY-MM-DD') : null,
+        }),
       })
       if (!res.ok) throw new Error('save failed')
       message.success('周期菜单已保存')
@@ -232,11 +244,22 @@ export default function MealsPage() {
           key: 'templates',
           label: '周期菜单',
           children: (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))',
-              gap: 12,
-            }}>
+            <div>
+              <div style={{
+                display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8,
+                marginBottom: 12, padding: '10px 12px', borderRadius: 10,
+                background: 'var(--color-primary-bg)', border: '1px solid var(--color-hairline)',
+              }}>
+                <Text strong>当前运营批次：{division === 'SENIOR' ? '高中' : '初中'}</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  周期菜单按生效日期展示；如显示的不是当季菜品，请编辑该日模板并设置生效起止日期。
+                </Text>
+              </div>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))',
+                gap: 12,
+              }}>
               {WEEKDAYS.map((weekday, index) => {
                 const dayOfWeek = index + 1
                 const template = templateMap.get(dayOfWeek)
@@ -274,6 +297,11 @@ export default function MealsPage() {
                             {template.allowDouble !== false ? '可双倍米饭' : '不可双倍'}
                           </Tag>
                           {template.note && <Text type="secondary" style={{ fontSize: 12 }}>{template.note}</Text>}
+                          {(template.startDate || template.endDate) && (
+                            <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>
+                              生效：{template.startDate ? dayjs(template.startDate).format('MM-DD') : '不限'} 至 {template.endDate ? dayjs(template.endDate).format('MM-DD') : '不限'}
+                            </Text>
+                          )}
                         </div>
                       </div>
                     ) : (
@@ -284,6 +312,7 @@ export default function MealsPage() {
                   </Card>
                 )
               })}
+            </div>
             </div>
           ),
         },
@@ -427,6 +456,9 @@ export default function MealsPage() {
           </Form.Item>
           <Form.Item name="note" label="备注">
             <Input.TextArea rows={2} placeholder="可选备注" />
+          </Form.Item>
+          <Form.Item name="dateRange" label="生效日期（可选，留空则一直生效）">
+            <DatePicker.RangePicker style={{ width: '100%' }} />
           </Form.Item>
         </Form>
       </Modal>

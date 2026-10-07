@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getEffectiveMealMenuForDate } from '@/lib/meal-template'
 import { apiHandler } from '@/lib/api-handler'
+import { parentLinkedStudentWhere } from '@/lib/business-visibility'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,7 +30,7 @@ export const GET = apiHandler(async () => {
   const menu = dayOfWeek >= 1 && dayOfWeek <= 6 ? await getEffectiveMealMenuForDate(today) : null
 
   const students = await prisma.student.findMany({
-    where: { OR: [{ parentId: userId }, { parentUserId: userId }] },
+    where: parentLinkedStudentWhere(userId),
     select: { id: true, name: true },
     orderBy: { name: 'asc' },
   })

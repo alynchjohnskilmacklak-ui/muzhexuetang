@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner'
 import { formatFriendlyTime } from '@/lib/date/relative'
 import { useRouter } from 'next/navigation'
+import { useSWRConfig } from 'swr'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ParentCard } from '@/components/Parent/ParentCard'
@@ -56,19 +57,27 @@ export function ParentNotificationsClient({
   userId: string
 }) {
   const router = useRouter()
+  const { mutate } = useSWRConfig()
   const isMobile = useIsMobile() ?? false
   const [notifications, setNotifications] = useState(initialNotifications)
+  const [unreadCount, setUnreadCount] = useState(initialUnread)
 
-  useEffect(() => setNotifications(initialNotifications), [initialNotifications])
+  useEffect(() => {
+    setNotifications(initialNotifications)
+    setUnreadCount(initialUnread)
+  }, [initialNotifications, initialUnread])
 
   const markAsRead = async (id: string) => {
     try {
-      await fetch('/api/parent/notifications/mark-read', {
+      const response = await fetch('/api/parent/notifications/mark-read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       })
+      if (!response.ok) throw new Error('通知标记失败')
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+      setUnreadCount((count) => Math.max(0, count - 1))
+      void mutate('/api/parent/unread-counts')
     } catch {
       toast.error('操作失败')
     }
@@ -76,12 +85,15 @@ export function ParentNotificationsClient({
 
   const markAllRead = async () => {
     try {
-      await fetch('/api/parent/notifications/mark-read', {
+      const response = await fetch('/api/parent/notifications/mark-read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ all: true }),
       })
+      if (!response.ok) throw new Error('全部已读操作失败')
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+      setUnreadCount(0)
+      void mutate('/api/parent/unread-counts')
       toast.success('全部已读')
     } catch {
       toast.error('操作失败')
@@ -97,17 +109,14 @@ export function ParentNotificationsClient({
     router.push(n.href || `/parent/notifications/${n.id}`)
   }
 
-  const unreadCount = notifications.filter(n => !n.read).length
-
   return (
     <PullToRefresh onRefresh={async () => { router.refresh(); await new Promise((resolve) => setTimeout(resolve, 500)) }}>
     <div className="parent-notifications-page">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: isMobile ? 14 : 20 }}>
+      <div className="parent-theme-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: isMobile ? 14 : 20 }}>
         <div>
           <Title level={4} style={{ marginBottom: 4, fontSize: isMobile ? 18 : undefined }}>最新通知</Title>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            共 {notifications.length} 条，{unreadCount} 条未读
-            {initialUnread !== unreadCount ? `，已同步 ${initialUnread} 条初始未读` : ''}
+            当前显示 {notifications.length} 条，{unreadCount} 条未读
           </Text>
         </div>
         {unreadCount > 0 && (

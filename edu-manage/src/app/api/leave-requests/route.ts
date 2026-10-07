@@ -37,7 +37,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       where,
       include: {
         student: { select: { id: true, name: true } },
-        schedule: { select: { id: true, startTime: true, title: true, course: { select: { name: true } } } },
+        lesson: { select: { id: true, lessonDate: true, startTime: true, group: { select: { course: { select: { name: true } } } } } },
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -46,5 +46,16 @@ export const GET = apiHandler(async (req: NextRequest) => {
     prisma.leaveRequest.count({ where }),
   ])
 
-  return NextResponse.json({ records, total })
+  return NextResponse.json({
+    records: records.map((record) => ({
+      ...record,
+      schedule: record.lesson ? {
+        id: record.lesson.id,
+        startTime: record.lesson.lessonDate,
+        title: record.lesson.group.course.name,
+        course: record.lesson.group.course,
+      } : null,
+    })),
+    total,
+  })
 })

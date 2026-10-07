@@ -71,15 +71,14 @@ export function normalizeSchedulePeriods(value: unknown): SchedulePeriod[] {
   })
   if (!periods.length) return SCHEDULE_PERIODS.map(period => ({ ...period }))
 
-  // Older installations saved the original daytime-only defaults in the database.
-  // Append the standard evening rows once so room matrices do not silently hide
-  // late-care and evening lessons after an upgrade. Fully custom evening settings
+  // If the saved periods have no evening teaching block (after 18:00), append the
+  // standard evening rows. We no longer require the daytime rows to match the
+  // built-in defaults exactly — schools adjust morning start times freely, and
+  // the old check (which compared every daytime row verbatim) silently left
+  // evening lessons off the schedule matrix. Fully custom evening settings
   // remain untouched.
   const hasEveningClass = periods.some(period => period.type === 'CLASS' && period.start >= '18:00')
-  const legacyDaytimeDefaults = SCHEDULE_PERIODS
-    .filter(period => !period.id.startsWith('ev'))
-    .every(defaultPeriod => periods.some(period => period.id === defaultPeriod.id && period.start === defaultPeriod.start && period.end === defaultPeriod.end))
-  const normalized = hasEveningClass || !legacyDaytimeDefaults
+  const normalized = hasEveningClass
     ? periods
     : [...periods, ...SCHEDULE_PERIODS.filter(period => period.id.startsWith('ev'))]
   return normalized.sort((a, b) => a.start.localeCompare(b.start))

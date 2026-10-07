@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getRequestPrisma } from '@/lib/prisma'
-import { requireTeacherPage } from '@/lib/teacher-portal'
+import { assertTeacherOwnsStudent, requireTeacherPage, teacherLessonWhere } from '@/lib/teacher-portal'
 import { fmtDate } from '@/lib/format-date'
 import { formatDeducted } from '@/lib/lesson-units'
 import { calculateApprovedIntensiveHours, calculateTaughtHours } from '@/lib/student-taught-hours'
@@ -10,23 +10,11 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
   const teacher = await requireTeacherPage()
   const { id } = await params
   const db = await getRequestPrisma()
+  if (!await assertTeacherOwnsStudent(teacher.id, id, db)) notFound()
   const student = await db.student.findFirst({
     where: {
       id,
       status: { not: 'INACTIVE' },
-      enrollments: {
-        some: {
-          status: 'ACTIVE',
-          group: {
-            status: { not: 'ARCHIVED' },
-            course: { isActive: true },
-            OR: [
-              { teacherId: teacher.id },
-              { teacherAssignments: { some: { teacherId: teacher.id } } },
-            ],
-          },
-        },
-      },
     },
     include: {
       enrollments: {
@@ -35,13 +23,13 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
           group: {
             status: { not: 'ARCHIVED' },
             course: { isActive: true },
-            OR: [
-              { teacherId: teacher.id },
-              { teacherAssignments: { some: { teacherId: teacher.id } } },
-            ],
           },
         },
         include: { group: { include: { course: true, teacherAssignments: true } } },
+      },
+      classLessonStudents: {
+        where: { lesson: teacherLessonWhere(teacher.id) },
+        select: { lesson: { select: { groupId: true } } },
       },
       examPapers: { where: { teacherId: teacher.id, status: { not: 'DELETED' } }, orderBy: { createdAt: 'desc' }, take: 20 },
       performancePosts: { where: { teacherId: teacher.id, deletedAt: null }, orderBy: { createdAt: 'desc' }, take: 20 },
@@ -51,11 +39,12 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
             group: {
               status: { not: 'ARCHIVED' },
               course: { isActive: true },
-              OR: [
-                { teacherId: teacher.id },
-                { teacherAssignments: { some: { teacherId: teacher.id } } },
-              ],
             },
+            OR: [
+              { teacherId: teacher.id },
+              { teacherId: null, group: { teacherId: teacher.id } },
+              { teacherId: null, group: { teacherAssignments: { some: { teacherId: teacher.id } } } },
+            ],
           },
         },
         include: { lesson: { include: { group: { include: { course: true } } } } },
@@ -65,6 +54,9 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
     },
   })
   if (!student) notFound()
+
+  const visibleGroupIds = new Set(student.classLessonStudents.map((snapshot) => snapshot.lesson.groupId))
+  const visibleEnrollments = student.enrollments.filter((enrollment) => visibleGroupIds.has(enrollment.groupId))
 
   const approvedIntensiveAttendances = await db.attendance.findMany({
     where: {
@@ -93,10 +85,10 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
     },
   })
   const taughtHours = calculateTaughtHours(
-    student.enrollments,
+    visibleEnrollments,
     calculateApprovedIntensiveHours(approvedIntensiveAttendances),
   )
-  const courseNames = [...new Set(student.enrollments.map((enrollment) => enrollment.group.course.name))]
+  const courseNames = [...new Set(visibleEnrollments.map((enrollment) => enrollment.group.course.name))]
 
   return (
     <div style={{ padding: '0 0 32px' }}>
@@ -108,10 +100,10 @@ export default async function TeacherStudentDetailPage({ params }: { params: Pro
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          <Link href={`/teacher/classroom-feedback?studentId=${student.id}`} style={{ padding: '7px 14px', borderRadius: 8, border: '1.5px solid #E8784A', color: '#E8784A', fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          <Link href={`/teacher/feedback?studentId=${student.id}`} style={{ padding: '7px 14px', borderRadius: 8, border: '1.5px solid #E8784A', color: '#E8784A', fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap' }}>
             课堂反馈
           </Link>
-          <Link href={`/teacher/performance?studentId=${student.id}`} style={{ padding: '7px 14px', borderRadius: 8, background: '#E8784A', color: '#fff', fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          <Link href={`/teacher/feedback?studentId=${student.id}`} style={{ padding: '7px 14px', borderRadius: 8, background: '#E8784A', color: '#fff', fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap' }}>
             表现反馈
           </Link>
         </div>

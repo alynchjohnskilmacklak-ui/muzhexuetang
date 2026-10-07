@@ -10,6 +10,7 @@ import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { PullToRefresh } from '@/components/PullToRefresh'
+import { localDateKey } from '@/lib/date/local-day'
 
 const { Title, Text } = Typography
 const fetcher = (url: string) => fetch(url).then(r => r.json())
@@ -93,8 +94,8 @@ export default function TeacherSchedulePage() {
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({})
   const { periods } = useSchedulePeriods()
   const { start, end } = getWeekRange(weekOffset)
-  const startDate = start.toISOString().slice(0,10)
-  const endDate = end.toISOString().slice(0,10)
+  const startDate = localDateKey(start)
+  const endDate = localDateKey(end)
 
   // Fetch both types for stats
   const { data: groupData, isLoading: loadingGroup, mutate: mutateGroup } = useSWR<ScheduleResponse>(
@@ -134,8 +135,9 @@ export default function TeacherSchedulePage() {
     }
     for (const lesson of groupLessons) {
       if (!lesson.startTime) continue
-      const ld = new Date(lesson.lessonDate)
-      const dayIdx = (ld.getDay() + 6) % 7
+      const lessonDateKey = localDateKey(lesson.lessonDate)
+      const weekday = new Date(`${lessonDateKey}T00:00:00.000Z`).getUTCDay()
+      const dayIdx = (weekday + 6) % 7
       const period = findSchedulePeriod(periods, lesson.startTime)
       if (period) map[`${dayIdx}-${period.id}`]?.push(lesson)
     }
@@ -149,8 +151,9 @@ export default function TeacherSchedulePage() {
       for (const s of INTENSIVE_SLOTS) map[`${d}-${s.id}`] = []
     }
     for (const lesson of intensiveLessons) {
-      const ld = new Date(lesson.lessonDate)
-      const dayIdx = (ld.getDay() + 6) % 7
+      const lessonDateKey = localDateKey(lesson.lessonDate)
+      const weekday = new Date(`${lessonDateKey}T00:00:00.000Z`).getUTCDay()
+      const dayIdx = (weekday + 6) % 7
       const sh = parseInt((lesson.startTime || '00').split(':')[0])
       const slot = INTENSIVE_SLOTS.find(s => parseInt(s.start.split(':')[0]) === sh)
       if (slot) map[`${dayIdx}-${slot.id}`]?.push(lesson)
@@ -170,7 +173,7 @@ export default function TeacherSchedulePage() {
     const today = new Date().toDateString()
     const days = weekDates.map((date, index) => {
       const lessons = visibleLessons
-        .filter((lesson) => new Date(lesson.lessonDate).toDateString() === date.toDateString())
+        .filter((lesson) => localDateKey(lesson.lessonDate) === localDateKey(date))
         .sort((a, b) => String(a.startTime || '').localeCompare(String(b.startTime || '')))
       return { key: dateKey(date), date, label: WEEKDAYS[index], lessons, isToday: date.toDateString() === today }
     })

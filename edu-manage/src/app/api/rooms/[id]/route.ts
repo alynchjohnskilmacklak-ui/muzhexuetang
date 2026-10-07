@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
+import { activeRoomUsageMessage, countActiveRoomUsage } from '@/lib/room-usage'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,14 +32,9 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
   }
   const prisma = await getRequestPrisma()
   const { id } = await params
-  const count = await prisma.schedule.count({ where: { roomId: id, status: 'scheduled' } })
-  if (count > 0) {
-    return NextResponse.json({ error: `该教室有 ${count} 条未完成排课，请先调整排课后再删除` }, { status: 409 })
-  }
-  // 同时检查新排课系统（ClassGroup）对教室的引用，避免删除仍被班级课占用的教室。
-  const classGroupCount = await prisma.classGroup.count({ where: { roomId: id, status: { not: 'ARCHIVED' } } })
-  if (classGroupCount > 0) {
-    return NextResponse.json({ error: `该教室有 ${classGroupCount} 个班级排课引用，请先调整排课后再删除` }, { status: 409 })
+  const usage = await countActiveRoomUsage(prisma, id)
+  if (usage.total > 0) {
+    return NextResponse.json({ error: activeRoomUsageMessage(usage), usage }, { status: 409 })
   }
   await prisma.room.delete({ where: { id } })
   return NextResponse.json({ success: true })

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { randomUUID } from 'crypto'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { getRequestDivision } from '@/lib/division'
 import { classifySalaryBucket, type SalaryBucket } from '@/lib/salary-bucket'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { TRASH_RETENTION_DAYS } from '@/lib/data-correction/trash'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,6 +36,7 @@ export async function GET(req: NextRequest) {
       teacher: { division },
       createdAt: { gte: since },
       termId: selectedTerm?.id || '__NO_SELECTED_TERM__',
+      deletedAt: null,
     }
 
     const page = Math.max(1, Number(req.nextUrl.searchParams.get('page') || 1))
@@ -118,12 +121,12 @@ export async function GET(req: NextRequest) {
       if (!row) continue
       const amount = item.amount
       if (item.type === 'LESSON_PAY' || item.type === 'LESSON_PAY_ADJUSTMENT') row.lesson += amount
-      if (item.type === 'FEEDBACK_BONUS' || item.type === 'STUDY_HALL_BONUS') {
+      if (['FEEDBACK_BONUS', 'STUDY_HALL_BONUS', 'STUDY_HALL_ATTENDANCE'].includes(item.type)) {
         row.feedback += amount
         row.rewardCount += 1
       }
-      if (item.type === 'STUDY_HALL_BONUS') studyHallRewardCount.set(item.teacherId, (studyHallRewardCount.get(item.teacherId) || 0) + 1)
-      if (!['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT', 'FEEDBACK_BONUS', 'STUDY_HALL_BONUS'].includes(item.type)) row.adjustment += amount
+      if (item.type === 'STUDY_HALL_BONUS' || item.type === 'STUDY_HALL_ATTENDANCE') studyHallRewardCount.set(item.teacherId, (studyHallRewardCount.get(item.teacherId) || 0) + 1)
+      if (!['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT', 'FEEDBACK_BONUS', 'STUDY_HALL_BONUS', 'STUDY_HALL_ATTENDANCE'].includes(item.type)) row.adjustment += amount
       if (salaryBucket(item) === 'INTENSIVE') row.intensive += amount
       else row.smallClass += amount
       row.total += amount
@@ -220,11 +223,11 @@ export async function POST(req: NextRequest) {
     }
     if (!description) return NextResponse.json({ error: '请填写调整原因' }, { status: 400 })
 
-    const teacher = await adminUser.prisma.teacher.findUnique({
-      where: { id: teacherId },
+    const teacher = await adminUser.prisma.teacher.findFirst({
+      where: { id: teacherId, division },
       select: { id: true, name: true },
     })
-    if (!teacher) return NextResponse.json({ error: '教师不存在' }, { status: 404 })
+    if (!teacher) return NextResponse.json({ error: '当前学部没有该教师' }, { status: 404 })
 
     const transaction = await adminUser.prisma.teacherSalaryTransaction.create({
       data: {
@@ -258,8 +261,8 @@ export async function DELETE(req: NextRequest) {
     const id = req.nextUrl.searchParams.get('id')?.trim() || ''
     if (!id) return NextResponse.json({ error: '缺少流水ID' }, { status: 400 })
 
-    const transaction = await adminUser.prisma.teacherSalaryTransaction.findUnique({
-      where: { id },
+    const transaction = await adminUser.prisma.teacherSalaryTransaction.findFirst({
+      where: { id, deletedAt: null },
       select: { id: true, type: true, termId: true },
     })
     if (!transaction) return NextResponse.json({ error: '流水不存在' }, { status: 404 })
@@ -268,7 +271,42 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: '只能删除手动调整流水' }, { status: 400 })
     }
 
-    await adminUser.prisma.teacherSalaryTransaction.delete({ where: { id } })
+    const deletedAt = new Date()
+    const deletionBatchId = randomUUID()
+    const expiresAt = new Date(deletedAt.getTime() + TRASH_RETENTION_DAYS * 86_400_000)
+    await adminUser.prisma.$transaction(async (tx) => {
+      await tx.teacherSalaryTransaction.update({
+        where: { id },
+        data: { deletedAt, deletionBatchId },
+      })
+      await tx.deletedRecord.create({
+        data: {
+          entityType: 'CleanupBatch',
+          entityId: deletionBatchId,
+          entityName: `工资手动调整流水 ${id}`,
+          payload: {
+            categories: ['teacherSalaryTransaction'],
+            scope: { division, termId: selectedTerm.id, transactionId: id },
+          },
+          deletedById: adminUser.id,
+          reason: '管理员删除工资手动调整流水',
+          deletionBatchId,
+          termId: selectedTerm.id,
+          impact: { total: 1, summary: '1 条工资手动调整流水' },
+          expiresAt,
+        },
+      })
+      await tx.activityLog.create({
+        data: {
+          userId: adminUser.id,
+          action: 'SOFT_DELETE',
+          entityType: 'TeacherSalaryTransaction',
+          entityId: id,
+          detail: '工资手动调整流水已进入回收站',
+          metadata: { deletionBatchId },
+        },
+      })
+    })
     return NextResponse.json({ success: true })
   } catch (error) {
     if (error instanceof Error && error.message === 'ADMIN_UNAUTHORIZED') {

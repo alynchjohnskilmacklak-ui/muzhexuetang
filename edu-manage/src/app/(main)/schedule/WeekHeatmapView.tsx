@@ -113,16 +113,16 @@ export function WeekHeatmapView({
       </div>
       {/* Week navigation */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-        <button onClick={() => setWeekStart(addDays(weekStart, -7))}
-          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>←</button>
+        <button type="button" aria-label="查看上一周" onClick={() => setWeekStart(addDays(weekStart, -7))}
+          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', width: 44, height: 44, cursor: 'pointer', fontSize: 16 }}>←</button>
         <div style={{ padding: '0 16px', height: 34, display: 'flex', alignItems: 'center', background: '#fff',
           border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8, fontSize: 14, fontWeight: 500 }}>
           {format(weekStart, 'M月d日', { locale: zhCN })} – {format(addDays(weekStart, 6), 'M月d日', { locale: zhCN })}
         </div>
-        <button onClick={() => setWeekStart(addDays(weekStart, 7))}
-          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>→</button>
-        <button onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
-          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>本周</button>
+        <button type="button" aria-label="查看下一周" onClick={() => setWeekStart(addDays(weekStart, 7))}
+          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', width: 44, height: 44, cursor: 'pointer', fontSize: 16 }}>→</button>
+        <button type="button" onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
+          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 12px', minHeight: 44, cursor: 'pointer', fontSize: 12 }}>本周</button>
       </div>
 
       {loadingGroup ? (
@@ -165,7 +165,8 @@ export function WeekHeatmapView({
                     { key: 'evening', label: '晚上（至21:00）' },
                   ] as const
                   return (
-                    <div key={dayIdx} style={{ padding: 4, minHeight: 80, cursor: 'pointer',
+                    <button type="button" key={dayIdx} aria-label={`查看${room.name}${format(date, 'M月d日')}排课`} style={{ padding: 4, minHeight: 80, cursor: 'pointer',
+                      width: '100%', textAlign: 'left', color: 'inherit', font: 'inherit', background: 'transparent',
                       borderRight: '0.5px solid var(--color-border, #EEE7E1)', borderBottom: '0.5px solid var(--color-border, #EEE7E1)',
                     }} onClick={() => onCellClick(date)}>
                       {lessons.length === 0 ? (
@@ -192,7 +193,7 @@ export function WeekHeatmapView({
                           })}
                         </>
                       )}
-                    </div>
+                    </button>
                   )
                 })}
               </div>
@@ -219,7 +220,8 @@ export function WeekHeatmapView({
               ).values()]
 
               return (
-                <div key={dayIdx} style={{ padding: 4, minHeight: 80, cursor: 'pointer',
+                <button type="button" key={dayIdx} aria-label={`查看${format(date, 'M月d日')}突击全能班排课`} style={{ padding: 4, minHeight: 80, cursor: 'pointer',
+                  width: '100%', textAlign: 'left', color: 'inherit', font: 'inherit',
                   borderRight: '0.5px solid var(--color-border, #EEE7E1)',
                   borderBottom: '0.5px solid var(--color-border, #EEE7E1)',
                   background: 'rgba(83,74,183,.015)',
@@ -249,7 +251,7 @@ export function WeekHeatmapView({
                       <span style={{ fontSize: 10, color: 'rgba(0,0,0,.25)' }}>未排课</span>
                     </div>
                   )}
-                </div>
+                </button>
               )
             })}
           </div>

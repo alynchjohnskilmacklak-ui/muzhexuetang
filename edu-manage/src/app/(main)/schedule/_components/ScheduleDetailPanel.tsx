@@ -1,11 +1,13 @@
 'use client'
 
-import { Drawer, Input, Select, Space, Tag, Typography, message } from 'antd'
+import { Alert, Drawer, Input, Select, Space, Tag, Typography, message } from 'antd'
 import { CalendarOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { useRouter } from 'next/navigation'
-import { TYPE_LABELS, STATUS_LABELS, SUBJECTS } from '../_types'
+import { TYPE_LABELS, STATUS_LABELS } from '../_types'
+import { chinaClock } from '@/lib/enrollment-subject-change'
+import { localDateKey } from '@/lib/date/local-day'
 
 const { Text } = Typography
 
@@ -31,6 +33,21 @@ export function ScheduleDetailPanel({
   const selectedRoom = selectedGroup?.room as Record<string, unknown> | undefined
   const selectedType = selectedCourse?.type as string | undefined
   const selectedStatus = STATUS_LABELS[selectedLesson.status as string] || { text: String(selectedLesson.status || '-'), color: 'default' }
+  const assignments = (Array.isArray(selectedGroup?.teacherAssignments) ? selectedGroup.teacherAssignments : []) as Array<{ teacherId: string; subject: string | null; teacher?: { name?: string } }>
+  const teacherSubjectOptions = assignments.filter((item) => item.subject).map((item) => ({
+    label: `${item.subject} · ${item.teacher?.name || '任课教师'}`,
+    value: `${item.teacherId}::${item.subject}`,
+  }))
+  if (!teacherSubjectOptions.length && selectedGroup?.teacherId && selectedCourse?.subject) {
+    teacherSubjectOptions.push({
+      label: `${selectedCourse.subject} · ${(selectedGroup.teacher as { name?: string } | undefined)?.name || '任课教师'}`,
+      value: `${selectedGroup.teacherId}::${selectedCourse.subject}`,
+    })
+  }
+  const clock = chinaClock(new Date())
+  const lessonDay = localDateKey(String(selectedLesson.lessonDate))
+  const canEdit = selectedLesson.status === 'SCHEDULED'
+    && (lessonDay > clock.day || (lessonDay === clock.day && String(selectedLesson.startTime) > clock.time))
 
   return (
     <Drawer title="课次详情" open={true} onClose={onClose} width={320}>
@@ -48,7 +65,7 @@ export function ScheduleDetailPanel({
           <InfoRow label="类型" value={TYPE_LABELS[selectedType || 'GROUP'] || '-'} />
           <InfoRow label="学员" value={`${Array.isArray(selectedGroup.enrollments) ? selectedGroup.enrollments.length : 0}人`} />
 
-          <div style={{ borderTop: '1px solid #EEE7E1', paddingTop: 12 }}>
+          {canEdit ? <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 12 }}>
             <Text strong style={{ color: '#1F2329' }}>编辑本次课</Text>
             <Space direction="vertical" size={8} style={{ width: '100%', marginTop: 10 }}>
               <Input type="date" value={editLesson.lessonDate} onChange={e => setEditLesson(prev => ({ ...prev, lessonDate: e.target.value }))} />
@@ -56,29 +73,19 @@ export function ScheduleDetailPanel({
                 <Input type="time" value={editLesson.startTime} onChange={e => setEditLesson(prev => ({ ...prev, startTime: e.target.value }))} />
                 <Input type="time" value={editLesson.endTime} onChange={e => setEditLesson(prev => ({ ...prev, endTime: e.target.value }))} />
               </Space.Compact>
-              <Select placeholder="本次课老师" value={editLesson.teacherId || undefined}
-                onChange={value => setEditLesson(prev => ({ ...prev, teacherId: value }))}
-                options={(Array.isArray(selectedGroup.teacherAssignments) ? selectedGroup.teacherAssignments : []).map((a) => ({
-                  label: a.teacher?.name || '老师', value: a.teacherId,
-                }))} />
-              <Select placeholder="本次课科目" value={editLesson.subject || undefined}
-                onChange={value => setEditLesson(prev => ({ ...prev, subject: value }))}
-                options={SUBJECTS.map(s => ({ label: s, value: s }))} />
-              <Select placeholder="课次状态" value={editLesson.status || undefined}
-                onChange={value => setEditLesson(prev => ({ ...prev, status: value }))}
-                options={[
-                  { label: '待上课', value: 'SCHEDULED' },
-                  { label: '进行中', value: 'IN_PROGRESS' },
-                  { label: '已完成', value: 'COMPLETED' },
-                  { label: '已调课', value: 'POSTPONED' },
-                  { label: '已停课', value: 'CANCELLED' },
-                ]} />
+              <Select placeholder="本次课学科与任课教师"
+                value={editLesson.teacherId && editLesson.subject ? `${editLesson.teacherId}::${editLesson.subject}` : undefined}
+                onChange={(value: string) => {
+                  const [teacherId, subject] = value.split('::')
+                  setEditLesson(prev => ({ ...prev, teacherId, subject }))
+                }}
+                options={teacherSubjectOptions} />
               <button onClick={onSave} disabled={savingLesson} style={{
                 width: '100%', padding: '8px 0', borderRadius: 6,
                 background: '#E8784A', color: '#fff', border: 'none', fontSize: 14, cursor: 'pointer', fontWeight: 500,
               }}>{savingLesson ? '保存中...' : '保存本次课'}</button>
             </Space>
-          </div>
+          </div> : <Alert type="info" showIcon message="历史或已开始的课次只读" description="涉及考勤和结算的修正请使用专门的业务纠错流程。" />}
 
           <div style={{ borderTop: '1px solid #EEE7E1', paddingTop: 12 }}>
             <Space direction="vertical" style={{ width: '100%' }}>
@@ -90,10 +97,10 @@ export function ScheduleDetailPanel({
                 width: '100%', padding: '8px 0', borderRadius: 6,
                 background: 'transparent', color: '#E8784A', border: '1px solid #E8784A', fontSize: 14, cursor: 'pointer',
               }}>复制新建</button>
-              <button onClick={() => onCancel(selectedLesson.id as string)} style={{
+              {canEdit && <button onClick={() => onCancel(selectedLesson.id as string)} style={{
                 width: '100%', padding: '8px 0', borderRadius: 6,
                 background: 'transparent', color: '#E24B4A', border: '1px solid #E24B4A', fontSize: 14, cursor: 'pointer',
-              }}>取消本次课</button>
+              }}>取消本次课</button>}
             </Space>
           </div>
         </Space>
@@ -104,7 +111,7 @@ export function ScheduleDetailPanel({
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, borderBottom: '1px solid #1f2126', paddingBottom: 8 }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, borderBottom: '1px solid var(--color-border)', paddingBottom: 8 }}>
       <Text style={{ color: '#98A2B3', fontSize: 12 }}>{label}</Text>
       <Text style={{ color: '#1F2329', fontSize: 12, textAlign: 'right' }}>{value}</Text>
     </div>

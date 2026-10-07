@@ -5,8 +5,12 @@ import { Providers } from './providers'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: '牧哲学堂 - 教育管理系统',
-  description: '教育培训机构综合管理系统',
+  metadataBase: new URL('https://muzhexuetang.xyz'),
+  title: { default: '牧哲学堂', template: '%s｜牧哲学堂' },
+  description: '牧哲学堂教育教学与家校沟通平台',
+  keywords: '牧哲学堂,牧哲学堂教育,太原牧哲学堂,中小学辅导,初中辅导,高中辅导,语文数学英语物理化学生物',
+  applicationName: '牧哲学堂',
+  robots: { index: true, follow: true },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -14,6 +18,7 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
   },
   icons: {
+    icon: '/images/logo.jpg',
     apple: '/icons/apple-touch-icon.png',
   },
 }

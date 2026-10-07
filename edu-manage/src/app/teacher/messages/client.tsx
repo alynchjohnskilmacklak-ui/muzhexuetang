@@ -95,7 +95,8 @@ function MessageCard({ msg, onClick, active, index }: { msg: Message; onClick: (
   const lastReply = msg.replies[msg.replies.length - 1]
   const subjectColor = msg.subject ? SUBJECT_COLORS[msg.subject] : null
   return (
-    <div className="pressable stagger-item" onClick={onClick} style={{
+    <button type="button" aria-pressed={active} className="pressable stagger-item" onClick={onClick} style={{
+      display: 'block', width: '100%', textAlign: 'left', color: 'inherit', font: 'inherit',
       background: active ? '#F0F9F5' : '#fff',
       border: active ? '1.5px solid #1D9E75' : '1px solid rgba(0,0,0,.07)',
       borderRadius: 12, padding: '14px 16px',
@@ -138,7 +139,7 @@ function MessageCard({ msg, onClick, active, index }: { msg: Message; onClick: (
           {lastReply.role === 'parent' ? `${lastReply.authorName}：` : '我：'}{lastReply.content}
         </Text>
       )}
-    </div>
+    </button>
   )
 }
 

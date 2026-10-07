@@ -14,6 +14,7 @@ import {
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useSession } from 'next-auth/react'
 
 const { Text } = Typography
 const { RangePicker } = DatePicker
@@ -67,6 +68,10 @@ interface FeeListData {
   page: number
   limit: number
   summary: FeeSummary
+  access: {
+    division: 'JUNIOR' | 'SENIOR'
+    canAccessAllDivisions: boolean
+  }
 }
 
 interface StudentAggregate {
@@ -79,8 +84,11 @@ interface StudentAggregate {
 
 export function FeesClient() {
   const { message } = App.useApp()
+  const { data: session, status: sessionStatus } = useSession()
   const isMobile = useIsMobile() ?? false
-  const [division, setDivision] = useState('all')
+  const sessionDivision = session?.user?.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+  const [divisionOverride, setDivision] = useState<string | null>(null)
+  const division = divisionOverride ?? sessionDivision
   const [type, setType] = useState<string>()
   const [campus, setCampus] = useState<string>()
   const [studentSearch, setStudentSearch] = useState('')
@@ -112,7 +120,7 @@ export function FeesClient() {
   params.set('limit', String(pageSize))
 
   const { data, isLoading, mutate } = useSWR<FeeListData>(
-    `/api/fees?${params.toString()}`,
+    sessionStatus === 'authenticated' ? `/api/fees?${params.toString()}` : null,
     fetcher,
     { refreshInterval: 0, revalidateOnFocus: false },
   )
@@ -125,7 +133,7 @@ export function FeesClient() {
 
   // Fee types for dropdown
   const { data: feeTypes } = useSWR<{ id: string; name: string }[]>(
-    '/api/fees/fee-types',
+    `/api/fees/fee-types?division=${division}`,
     fetcher,
   )
 
@@ -317,6 +325,9 @@ export function FeesClient() {
   }
 
   const s = data?.summary
+  const divisionOptions = data?.access.canAccessAllDivisions
+    ? DIVISION_OPTIONS
+    : DIVISION_OPTIONS.filter(option => option.value === data?.access.division)
 
   // Campus summary
   const campusSummary = useMemo(() => {
@@ -360,7 +371,7 @@ export function FeesClient() {
       {/* Filters */}
       <Card size="small" style={{ marginBottom: 12 }}>
         <Space wrap>
-          <Select value={division} onChange={(v) => { setDivision(v); setPage(1) }} options={DIVISION_OPTIONS} style={{ width: 100 }} />
+          <Select value={division} onChange={(v) => { setDivision(v); setPage(1) }} options={divisionOptions} style={{ width: 100 }} />
           <Select allowClear placeholder="收费类型" value={type} onChange={(v) => { setType(v); setPage(1) }}
             options={(feeTypes || []).map((t: { name: string }) => ({ label: t.name, value: t.name }))}
             style={{ width: 110 }} />

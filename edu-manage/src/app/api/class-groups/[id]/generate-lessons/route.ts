@@ -5,6 +5,7 @@ import { visibleClassGroupWhere } from '@/lib/business-visibility'
 import { addDays, format } from 'date-fns'
 import { apiHandler } from '@/lib/api-handler'
 import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 
 const WEEK_DAYS = new Set(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'])
 
@@ -72,7 +73,9 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     }, { status: 409 })
   }
 
-  const start = startDate ? new Date(startDate) : group.startDate
+  // DATE columns use UTC midnight. Weekday calculation must stay in UTC so
+  // deployments in different server timezones generate the same weekdays.
+  const start = startDate ? new Date(`${startDate}T00:00:00.000Z`) : group.startDate
   const requestDays = normalizeRecurringDays(recurringDays)
   const days = requestDays.length ? requestDays : group.recurringDays
   const mins = lessonMinutes || group.lessonMinutes || 45
@@ -83,24 +86,13 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   if (!total || total <= 0) return NextResponse.json({ error: '请设置总课次数' }, { status: 400 })
   if (total > 365) return NextResponse.json({ error: '单次最多安排 365 天课次' }, { status: 400 })
 
-  // Clean up attendances before deleting lessons (FK constraint)
-  const oldLessons = await prisma.classLesson.findMany({
-    where: { groupId: id, status: { not: 'COMPLETED' }, isManual: false },
-    select: { id: true },
-  })
-  const oldIds = oldLessons.map(l => l.id)
-  await prisma.attendance.deleteMany({ where: { lessonId: { in: oldIds } } })
-  await prisma.classLesson.deleteMany({
-    where: { groupId: id, status: { not: 'COMPLETED' }, isManual: false },
-  })
-
   const dates: Date[] = []
   let cursor = new Date(start)
   const dayMap: Record<string, number> = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 }
   const targetDays = days.map((d: string) => dayMap[d] ?? -1).filter((d: number) => d >= 0)
 
   while (dates.length < total) {
-    if (targetDays.includes(cursor.getDay())) {
+    if (targetDays.includes(cursor.getUTCDay())) {
       dates.push(new Date(cursor))
     }
     cursor = addDays(cursor, 1)
@@ -161,26 +153,65 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
   }
 
   const BATCH_SIZE = 50
-  let created = 0
-  for (let i = 0; i < allData.length; i += BATCH_SIZE) {
-    const batch = allData.slice(i, i + BATCH_SIZE)
-    const result = await prisma.classLesson.createMany({ data: batch, skipDuplicates: true })
-    created += result.count
-  }
+  const created = await prisma.$transaction(async (tx) => {
+    // All validation and schedule construction above must finish before any old
+    // lessons are removed. The replacement itself is atomic so a failed batch
+    // cannot leave the class without its previous timetable.
+    const oldLessons = await tx.classLesson.findMany({
+      where: { groupId: id, status: { not: 'COMPLETED' }, isManual: false },
+      select: { id: true },
+    })
+    const oldIds = oldLessons.map((lesson) => lesson.id)
+    if (oldIds.length) {
+      await tx.attendance.deleteMany({ where: { lessonId: { in: oldIds } } })
+      await tx.classLesson.deleteMany({ where: { id: { in: oldIds } } })
+    }
 
-  const activeLessonCount = await prisma.classLesson.count({
-    where: { groupId: id, status: { not: 'CANCELLED' } },
-  })
+    let createdCount = 0
+    for (let i = 0; i < allData.length; i += BATCH_SIZE) {
+      const batch = allData.slice(i, i + BATCH_SIZE)
+      const result = await tx.classLesson.createMany({ data: batch, skipDuplicates: true })
+      createdCount += result.count
+    }
 
-  await prisma.classGroup.update({
-    where: { id },
-    data: { totalLessons: activeLessonCount, lessonStartTime: startTime, lessonMinutes: mins,
-      recurringDays: days, startDate: start },
-  })
+    // Snapshot the active roster in the same transaction as lesson creation.
+    const snapshotStudents = await tx.enrollment.findMany({
+      where: { groupId: id, status: 'ACTIVE', deletedAt: null },
+      select: { studentId: true, subjects: true },
+    })
+    if (snapshotStudents.length) {
+      const snapshotLessons = await tx.classLesson.findMany({
+        where: { groupId: id, status: { in: ['SCHEDULED', 'IN_PROGRESS'] }, isManual: false, deletedAt: null },
+        select: { id: true, subject: true },
+      })
+      const snapshotRows = snapshotLessons.flatMap((lesson) =>
+        snapshotStudents
+          .filter((student) => enrollmentIncludesSubject(student.subjects, lesson.subject))
+          .map((student) => ({ lessonId: lesson.id, studentId: student.studentId })),
+      )
+      if (snapshotRows.length) {
+        await tx.classLessonStudent.createMany({ data: snapshotRows, skipDuplicates: true })
+      }
+    }
 
-  await prisma.activityLog.create({
-    data: { userId: user.id, action: '生成课次', detail: `${group.name} 共${dates.length}节` },
-  })
+    const activeLessonCount = await tx.classLesson.count({
+      where: { groupId: id, status: { not: 'CANCELLED' }, deletedAt: null },
+    })
+    await tx.classGroup.update({
+      where: { id },
+      data: {
+        totalLessons: activeLessonCount,
+        lessonStartTime: startTime,
+        lessonMinutes: mins,
+        recurringDays: days,
+        startDate: start,
+      },
+    })
+    await tx.activityLog.create({
+      data: { userId: user.id, action: '生成课次', detail: `${group.name} 共${dates.length}节` },
+    })
+    return createdCount
+  }, { timeout: 30_000 })
 
   return NextResponse.json({ count: created, dates: dates.map(d => format(d, 'yyyy-MM-dd')) })
 })

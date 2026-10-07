@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import {
   Alert,
   Button,
+  Card,
   Descriptions,
   Drawer,
   Empty,
@@ -290,6 +291,8 @@ export function DataAdminClient() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deletingRecord, setDeletingRecord] = useState<Record<string, unknown> | null>(null)
   const [deleteReason, setDeleteReason] = useState('')
+  const [deleteImpact, setDeleteImpact] = useState<{ summary?: string } | null>(null)
+  const [deletePreviewLoading, setDeletePreviewLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [detailOpen, setDetailOpen] = useState(false)
   const [detailRecord, setDetailRecord] = useState<Record<string, unknown> | null>(null)
@@ -381,10 +384,21 @@ export function DataAdminClient() {
     }
   }
 
-  const handleDeleteClick = (record: Record<string, unknown>) => {
+  const handleDeleteClick = async (record: Record<string, unknown>) => {
     setDeletingRecord(record)
     setDeleteReason('')
     setDeleteModalOpen(true)
+    setDeleteImpact(null)
+    const typeByEntity: Partial<Record<EntityKey, string>> = { students: 'Student', 'class-groups': 'ClassGroup', 'class-lessons': 'ClassLesson', 'exam-papers': 'ExamPaper', materials: 'StudyMaterial' }
+    const trashType = typeByEntity[entityKey]
+    if (!trashType) { setDeleteImpact({ summary: '该记录将按现有业务状态进入删除视图' }); return }
+    setDeletePreviewLoading(true)
+    try {
+      const response = await fetch(`/api/admin/trash/preview?type=${trashType}&id=${encodeURIComponent(String(record.id))}`)
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error || '无法加载影响范围')
+      setDeleteImpact(payload.data.impact)
+    } catch (error) { message.error(error instanceof Error ? error.message : '无法加载影响范围') } finally { setDeletePreviewLoading(false) }
   }
 
   const handleDeleteConfirm = async () => {
@@ -488,6 +502,7 @@ export function DataAdminClient() {
   }
 
   const isDeletedRecord = (record: Record<string, unknown>): boolean => {
+    if (record.deletedAt) return true
     const status = record.status as string
     if (entityKey === 'performance-posts') return !!record.deletedAt
     const deletedValues = ['INACTIVE', 'RESIGNED', 'ARCHIVED', 'CANCELLED', 'DELETED']
@@ -830,14 +845,12 @@ export function DataAdminClient() {
         confirmLoading={deleteLoading}
         okText="确认删除"
         cancelText="取消"
-        okButtonProps={{ danger: true }}
+        okButtonProps={{ danger: true, disabled: deletePreviewLoading || !deleteImpact || !deleteReason.trim() }}
       >
         <Space direction="vertical" style={{ width: '100%' }} size={16}>
-          <div>
-            确认删除
-            <Text strong> {deletingRecord ? getRecordName(deletingRecord) : ''}</Text>
-            ？此操作为软删除，数据可在「显示已删除」视图中恢复。
-          </div>
+          <div>确认删除 <Text strong>{deletingRecord ? getRecordName(deletingRecord) : ''}</Text>？</div>
+          <Card size="small" loading={deletePreviewLoading} className="impact-list" styles={{ body: { background: 'var(--color-surface-3)' } }}><Text>{deleteImpact?.summary || '正在计算关联影响…'}</Text></Card>
+          <Alert className="modal-note" type="info" showIcon message="核心业务数据会进入回收站，30 天内可恢复；关联的排课占用会立即释放。" />
           <div>
             <Text type="secondary">删除原因（必填）</Text>
             <Input.TextArea

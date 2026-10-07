@@ -11,7 +11,11 @@ import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 
 const { Title, Text } = Typography
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = async (url: string) => {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`加载失败（${response.status}）`)
+  return response.json()
+}
 
 type TeacherStudent = {
   id: string
@@ -19,6 +23,7 @@ type TeacherStudent = {
   grade?: string | null
   gender?: string | null
   school?: string | null
+  membershipLevel?: string | null
   remainHours?: number | string | null
   totalHours?: number | string | null
   taughtHours?: number | string | null
@@ -62,7 +67,7 @@ export default function TeacherStudentsPage() {
   const isMobile = useIsMobile() ?? false
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState('全部')
-  const { data: rawStudents, isLoading } = useSWR<TeacherStudent[]>('/api/teacher/students', fetcher)
+  const { data: rawStudents, error, isLoading, mutate } = useSWR<TeacherStudent[]>('/api/teacher/students', fetcher)
   const students = useMemo(() => rawStudents ?? [], [rawStudents])
 
   const filters = ['全部', '未反馈', '初一', '初二', '初三']
@@ -129,6 +134,14 @@ export default function TeacherStudentsPage() {
           </Avatar>
           <div style={{ flex: 1, minWidth: 0 }}>
             <Text strong style={{ fontSize: 15 }}>{student.name}</Text>
+            {student.membershipLevel && (
+              <span style={{
+                display: 'inline-block', fontSize: 10, fontWeight: 700, lineHeight: 1.4, padding: '1px 6px', borderRadius: 999, marginLeft: 6, letterSpacing: .3, verticalAlign: 2,
+                color: student.membershipLevel === 'SVIP' ? '#123C35' : student.membershipLevel === 'VIP' ? '#123C35' : 'rgba(40,60,50,.7)',
+                background: student.membershipLevel === 'SVIP' ? 'linear-gradient(135deg,#C9A45C,#A8873D)' : student.membershipLevel === 'VIP' ? 'linear-gradient(135deg,#F0875B,#E8784A)' : 'rgba(40,60,50,.10)',
+                border: student.membershipLevel === 'SVIP' ? '1px solid rgba(255,255,255,.35)' : student.membershipLevel === 'VIP' ? '1px solid rgba(255,255,255,.35)' : '1px solid rgba(40,60,50,.16)',
+              }}>{student.membershipLevel === 'SVIP' ? '★SVIP' : student.membershipLevel === 'VIP' ? '★VIP' : '普通'}</span>
+            )}
             {gradeGender && (
               <Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>
                 {gradeGender}
@@ -216,8 +229,20 @@ export default function TeacherStudentsPage() {
     return <CardSkeleton rows={3} />
   }
 
+  if (error) {
+    return (
+      <BrandEmpty
+        title="学员列表加载失败"
+        hint={error instanceof Error ? error.message : '请检查网络后重新加载'}
+        icon={<ProfileOutlined />}
+        actionText="重新加载"
+        onAction={() => void mutate()}
+      />
+    )
+  }
+
   return (
-    <div style={{ paddingBottom: isMobile ? 88 : 0, overflowX: 'hidden' }}>
+    <div style={{ paddingBottom: isMobile ? 88 : 0, overflowX: 'clip' }}>
       <div
         style={{
           display: 'flex',
@@ -269,8 +294,8 @@ export default function TeacherStudentsPage() {
             value={filter}
             onChange={(value) => setFilter(String(value))}
             options={filters}
-            block={!isMobile}
-            style={{ minWidth: isMobile ? 420 : undefined }}
+            block
+            style={{ width: '100%', maxWidth: '100%' }}
           />
         </div>
       </Card>
