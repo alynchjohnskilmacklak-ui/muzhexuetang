@@ -9,26 +9,9 @@ import { apiHandler } from '@/lib/api-handler'
 import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
 import { normalizeEnrollmentSubjects, validateEnrollmentSubjects } from '@/lib/enrollment-subjects'
 import { chinaClock, isEditableSubjectRosterLesson } from '@/lib/enrollment-subject-change'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
 export const dynamic = 'force-dynamic'
-
-async function syncStudentHours(tx: Prisma.TransactionClient, studentId: string) {
-  const activeEnrollments = await tx.enrollment.findMany({
-    where: {
-      studentId,
-      status: 'ACTIVE',
-      group: { status: { not: 'ARCHIVED' }, course: { isActive: true } },
-    },
-    select: { remainHours: true, totalHours: true },
-  })
-  const totalRemain = activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.remainHours || 0), 0)
-  const totalAll = activeEnrollments.reduce((sum, enrollment) => sum + Number(enrollment.totalHours || 0), 0)
-
-  await tx.student.update({
-    where: { id: studentId },
-    data: { remainHours: totalRemain, totalHours: totalAll },
-  })
-}
 
 function trimmedMeanHours(hours: number[]) {
   const sorted = [...hours].sort((a, b) => a - b)
@@ -190,7 +173,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
       where: { id: studentId },
       data: { status: 'ACTIVE', mainTeacherId: group.teacherId },
     })
-    await syncStudentHours(tx, studentId)
+    await syncStudentHourSnapshot(tx, studentId)
 
     // 插班只进入尚未开始且未考勤/结算的报读学科课次；历史名单不追补。
     const now = new Date()
@@ -302,7 +285,7 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
         group: { status: { not: 'ARCHIVED' }, course: { isActive: true } },
       },
     })
-    await syncStudentHours(tx, enrollment.studentId)
+    await syncStudentHourSnapshot(tx, enrollment.studentId)
     if (activeClassCount === 0) {
       await tx.student.update({
         where: { id: enrollment.studentId },

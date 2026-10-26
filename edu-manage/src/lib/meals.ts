@@ -53,6 +53,8 @@ export type EffectiveMealMenu = {
   sideDish: string | null
   allowDouble: boolean
   notes: string | null
+  image: string | null
+  description: string | null
   source: 'date' | 'template'
 }
 
@@ -65,6 +67,8 @@ export function templateToMenuLike(template: {
   dinner: string | null
   snack: string | null
   note: string | null
+  image?: string | null
+  description?: string | null
 }): EffectiveMealMenu {
   const sideParts = [
     template.breakfast ? `早餐：${template.breakfast}` : '',
@@ -73,12 +77,14 @@ export function templateToMenuLike(template: {
   ].filter(Boolean)
 
   return {
-    id: null,
+    id: `tpl_${template.id}`,
     dayOfWeek: template.weekday,
     mainDish: template.lunch || template.title || '周期菜单',
     sideDish: sideParts.join('；') || null,
     allowDouble: false,
     notes: template.note,
+    image: template.image ?? null,
+    description: template.description ?? null,
     source: 'template',
   }
 }

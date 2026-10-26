@@ -1,12 +1,12 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { ArrowLeftOutlined, CameraOutlined, EnvironmentOutlined, StarFilled, ClockCircleOutlined, BookOutlined, TeamOutlined, CalendarOutlined } from '@ant-design/icons'
-import { Image, Typography } from 'antd'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { ArrowLeftOutlined, CameraOutlined, EnvironmentOutlined, StarFilled, ClockCircleOutlined, BookOutlined, TeamOutlined, CalendarOutlined, RightOutlined } from '@ant-design/icons'
+import { Button, Image, Typography } from 'antd'
 import { resolveTier, TIER_THEME } from '@/constants/teacher-tier'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { fmtDateTime } from '@/lib/format-date'
-import { femaleDefaultAvatar } from '@/lib/teacher-avatars'
+import { getTeacherAvatarUrl } from '@/lib/teacher-avatars'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -40,6 +40,7 @@ type LessonTeacher = {
 }
 
 type LessonFeedback = {
+  id: string
   createdAt: string
   lessonContent?: string | null
   summary?: string | null
@@ -74,6 +75,7 @@ export function LessonDetailClient({
   signedThumbnails,
   time,
   room,
+  lessonDate,
 }: {
   teacher: LessonTeacher | null
   course: string
@@ -82,8 +84,11 @@ export function LessonDetailClient({
   signedThumbnails: Record<string, string>
   time?: string
   room?: string
+  lessonDate?: string
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const childId = searchParams.get('childId') || ''
   const signed = useSignedUrls(imageUrls, signedThumbnails)
   const tier = resolveTier(teacher?.tierLevel)
   const tierTheme = TIER_THEME[tier]
@@ -96,6 +101,19 @@ export function LessonDetailClient({
     : '')
   const roomName = room || feedback?.classLesson?.group?.room?.name || ''
 
+  // 判断课程日期是否为今天
+  const lessonDateObj = lessonDate ? new Date(lessonDate) : null
+  const now = new Date()
+  const isToday = lessonDateObj
+    && lessonDateObj.getFullYear() === now.getFullYear()
+    && lessonDateObj.getMonth() === now.getMonth()
+    && lessonDateObj.getDate() === now.getDate()
+  const isFuture = lessonDateObj ? lessonDateObj.getTime() > now.getTime() : false
+  const dateLabel = lessonDateObj
+    ? `${lessonDateObj.getMonth() + 1}月${lessonDateObj.getDate()}日 · 周${['日','一','二','三','四','五','六'][lessonDateObj.getDay()]}`
+    : fmtDateToday()
+  const heroTag = isToday ? '今日课程' : isFuture ? '即将上课' : '历史课程'
+
   return (
     <div className="lesson-detail">
       <button type="button" className="lesson-detail__back" onClick={() => router.back()}>
@@ -104,8 +122,8 @@ export function LessonDetailClient({
 
       <div className="lesson-detail__hero">
         <div className="lesson-detail__hero-top">
-          <span className="lesson-detail__hero-tag">今日课程</span>
-          <span className="lesson-detail__hero-date"><CalendarOutlined /> {fmtDateToday()}</span>
+          <span className="lesson-detail__hero-tag">{heroTag}</span>
+          <span className="lesson-detail__hero-date"><CalendarOutlined /> {dateLabel}</span>
         </div>
         <div className="lesson-detail__hero-title">{course || teacher?.name || '课程'}</div>
         <div className="lesson-detail__hero-tags">
@@ -128,7 +146,8 @@ export function LessonDetailClient({
           <div className="lesson-detail-teacher__body">
             <div className="lesson-detail-teacher__avatar">
               <Image
-                src={teacher.avatar || (teacher.gender === '男' ? '/avatars/teacher-male.png' : femaleDefaultAvatar(teacher.name))}
+                src={getTeacherAvatarUrl(teacher.avatar, teacher.gender, teacher.name)}
+                fallback={getTeacherAvatarUrl(null, teacher.gender, teacher.name)}
                 alt={teacher.name}
                 preview={{ mask: '点击查看大图' }}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 12 }}
@@ -160,69 +179,47 @@ export function LessonDetailClient({
         </section>
       )}
 
-      {feedback && (
-        <section className="lesson-detail-card">
-          <div className="lesson-detail-card__title">上课内容与课堂反馈</div>
-          {feedback.lessonContent && (
-            <div className="lesson-detail-block">
-              <div className="lesson-detail-block__label">上课内容</div>
-              <Paragraph className="lesson-detail-block__text" style={{ whiteSpace: 'pre-wrap' }}>{feedback.lessonContent}</Paragraph>
-            </div>
-          )}
-          {feedback.overallComment && (
-            <div className="lesson-detail-block">
-              <div className="lesson-detail-block__label">课堂反馈</div>
-              <Paragraph className="lesson-detail-block__text" style={{ whiteSpace: 'pre-wrap' }}>{parentVisibleComment(feedback.overallComment)}</Paragraph>
-            </div>
-          )}
-          {!feedback.lessonContent && !feedback.overallComment && feedback.summary && (
-            <Paragraph className="lesson-detail-block__text" style={{ whiteSpace: 'pre-wrap' }}>{feedback.summary}</Paragraph>
-          )}
-          {feedback.createdAt && (
-            <Text type="secondary" style={{ fontSize: 12 }}>发布于 {fmtDateTime(feedback.createdAt)}</Text>
-          )}
-
-          {feedback.knowledgeDetail && (
-            <div className="lesson-detail-knowledge">
-              <div className="lesson-detail-knowledge__title">知识点详解</div>
-              {(feedback.knowledgeDetail.formulas?.length ?? 0) > 0 && (
-                <div style={{ marginBottom: 10 }}>
-                  <div className="lesson-detail-knowledge__label">公式或方法</div>
-                  {feedback.knowledgeDetail.formulas?.map((formula, i) => (
-                    <div key={i} className="lesson-detail-knowledge__text" style={{ whiteSpace: 'pre-wrap' }}>{formula}</div>
-                  ))}
-                </div>
-              )}
-              {feedback.knowledgeDetail.definition && (
-                <div style={{ marginBottom: 10 }}>
-                  <div className="lesson-detail-knowledge__label">知识讲解</div>
-                  <Paragraph className="lesson-detail-knowledge__text" style={{ whiteSpace: 'pre-wrap' }}>{feedback.knowledgeDetail.definition}</Paragraph>
-                </div>
-              )}
-              {(feedback.knowledgeDetail.tips?.length ?? 0) > 0 && (
-                <div style={{ marginBottom: 10 }}>
-                  <div className="lesson-detail-knowledge__label">易错点与学习建议</div>
-                  {feedback.knowledgeDetail.tips?.map((tip, i) => (
-                    <div key={i} className="lesson-detail-knowledge__text">· {tip}</div>
-                  ))}
-                </div>
-              )}
-              {feedback.knowledgeDetail.example && (
-                <div>
-                  <div className="lesson-detail-knowledge__label">示例</div>
-                  <div className="lesson-detail-knowledge__text">
-                    {feedback.knowledgeDetail.example.question && <div style={{ marginBottom: 4 }}>题目：{feedback.knowledgeDetail.example.question}</div>}
-                    {(feedback.knowledgeDetail.example.steps?.length ?? 0) > 0 && feedback.knowledgeDetail.example.steps?.map((step, i) => (
-                      <div key={i} style={{ marginBottom: 2 }}>{i + 1}. {step}</div>
-                    ))}
-                    {feedback.knowledgeDetail.example.answer && <div style={{ marginTop: 4 }}>答案：{feedback.knowledgeDetail.example.answer}</div>}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </section>
-      )}
+      <section className="lesson-detail-card">
+        <div className="lesson-detail-card__title">课堂反馈</div>
+        {feedback ? (
+          <>
+            {feedback.createdAt && (
+              <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 6 }}>发布于 {fmtDateTime(feedback.createdAt)}</Text>
+            )}
+            {(() => {
+              const text = String(feedback.lessonContent || parentVisibleComment(feedback.overallComment || '') || feedback.summary || '').trim()
+              return text ? (
+                <Paragraph
+                  className="lesson-detail-block__text"
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    WebkitLineClamp: 3,
+                    display: '-webkit-box',
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {text}
+                </Paragraph>
+              ) : (
+                <Text type="secondary" style={{ fontSize: 12.5, display: 'block', marginBottom: 8 }}>老师已发布本节课课堂反馈，点击下方按钮查看完整内容。</Text>
+              )
+            })()}
+            <Button
+              type="primary"
+              icon={<RightOutlined />}
+              onClick={() => router.push(`/parent/class-feedback/${feedback.id}${childId ? `?childId=${encodeURIComponent(childId)}` : ''}`)}
+              style={{ marginTop: 8, background: '#0E5E4E', border: 'none', borderRadius: 10, height: 40, fontWeight: 600 }}
+            >
+              查看完整课堂反馈
+            </Button>
+          </>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '24px 0', color: '#999', fontSize: 13 }}>
+            {isFuture ? '本节课还未上课，课后老师会发布课堂反馈' : '本节课暂未发布课堂反馈'}
+          </div>
+        )}
+      </section>
 
       {images.length > 0 && (
         <section className="lesson-detail-card">

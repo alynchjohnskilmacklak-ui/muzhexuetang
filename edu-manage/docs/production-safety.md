@@ -36,9 +36,15 @@ RSYNC_REMOTE=user@backup-host:/data/backups/edu-manage/
 
 ## Rate limiting and login lockout
 
-Current rate limiting and login failure counters are process-memory Maps. They are acceptable only while PM2 runs one forked instance.
+API rate limits use Redis when `REDIS_URL` is configured. The production Compose file provides this URL, and `RATE_LIMIT_DRIVER=auto` selects Redis. Credential sign-in, role detection, and login precheck use the shared rate limiter for their IP limits.
 
-Required production constraint until Redis is introduced:
+Rate-limit keys use `X-Real-IP`, not the first client-supplied `X-Forwarded-For` value. The repository Nginx config overwrites `X-Real-IP` with `$remote_addr`, and the app port is bound to localhost. If a CDN or load balancer sits in front of Nginx, configure its trusted proxy ranges and real-IP header; otherwise requests will be grouped under the upstream proxy address.
+
+In `auto` mode, Redis connection or command failures fall back to process memory and write a warning to the application log. The fallback is not shared across instances and is cleared on restart. Do not scale the app horizontally unless Redis is healthy; monitor for `[rate-limit] Redis 不可用，降级为内存限流`.
+
+Account lockout is also checked against persisted login records: five failed attempts within 30 minutes trigger a 30-minute lock. This account lock survives app restarts.
+
+Until Redis health is monitored and fallback behavior is addressed, keep one app process:
 
 ```bash
 pm2 delete edu-manage || true
@@ -79,6 +85,19 @@ Run the administrator WxPusher report at 21:00 every day. Ensure `CRON_SECRET` i
 0 21 * * * curl -s "https://muzhexuetang.xyz/api/cron/daily-ops-report?token=$CRON_SECRET"
 ```
 
-## Schedule migration risk
+## Recycle-bin retention cleanup
 
-The app still has two schedule systems: legacy `Schedule` and new `ClassGroup/ClassLesson`. New statistics must explicitly decide whether they need both sources. Long-term target is to migrate remaining legacy schedules and make `ClassLesson` the only lesson source.
+Configure `TRASH_CLEANUP_USER_ID` with an existing administrator user id used for cleanup audit logs, then run the recycle-bin purge once per day. The retention period defaults to 30 days and can be changed with `TRASH_RETENTION_DAYS`.
+
+```cron
+30 2 * * * curl -fsS "https://muzhexuetang.xyz/api/cron/trash-cleanup?token=$CRON_SECRET" >> /var/log/edu-manage-trash-cleanup.log 2>&1
+```
+
+The same cleanup can be triggered from the recycle-bin page for a deployment smoke test. Do not enable the cron entry until the Prisma migration `20260901193000_add_data_correction_trash` has been applied to both division databases.
+
+## Schedule source of truth
+
+`ClassGroup/ClassLesson` is the only scheduling system. Migration
+`20260912193000_retire_legacy_schedule` refuses to drop the retired
+`Schedule/ScheduleStudent` tables if any legacy rows or dependent references
+exist, so every database must pass `npm run audit:legacy-schedules` first.

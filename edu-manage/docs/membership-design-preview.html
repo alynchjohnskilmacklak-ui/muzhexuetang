@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会员等级体验设计 · 审核稿</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #F5F2EE; color: #2B2B2B; padding: 24px 16px 60px; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; margin-bottom: 6px; }
+  .sub { color: #8A7F70; font-size: 13px; margin-bottom: 22px; }
+  h2 { font-size: 15px; margin: 26px 0 10px; padding-left: 8px; border-left: 3px solid #E8784A; }
+  .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 600px) { .row3 { grid-template-columns: 1fr; } }
+
+  /* 三档 Hero 对比 */
+  .hero { border-radius: 16px; padding: 16px; color: #fff; position: relative; overflow: hidden; min-height: 170px; }
+  .hero .lv { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+  .hero .name { font-size: 17px; font-weight: 800; margin: 9px 0 2px; }
+  .hero .grade { font-size: 11px; opacity: .85; }
+  .hero .quote { font-size: 11.5px; opacity: .9; margin-top: 8px; line-height: 1.6; }
+  .hero .stats { display: flex; gap: 10px; margin-top: 12px; }
+  .hero .stat { background: rgba(255,255,255,.14); border-radius: 10px; padding: 7px 10px; flex: 1; text-align: center; }
+  .hero .stat b { display: block; font-size: 15px; }
+  .hero .stat span { font-size: 9.5px; opacity: .8; }
+  .hero .shine { position: absolute; top: -40%; right: -20%; width: 140px; height: 220px; background: radial-gradient(circle, rgba(255,255,255,.22), transparent 70%); transform: rotate(12deg); }
+  .hero .crown { position: absolute; right: 12px; top: 12px; font-size: 20px; }
+  .n { background: linear-gradient(135deg, #E8784A, #C96D3E); }
+  .v { background: linear-gradient(135deg, #C96D3E, #A9512A); }
+  .s { background: linear-gradient(135deg, #123C35, #0B2A25); border: 1px solid rgba(201,164,92,.55); box-shadow: inset 0 0 0 1px rgba(201,164,92,.25); }
+  .lv.n2 { background: rgba(255,255,255,.22); }
+  .lv.v2 { background: rgba(255,255,255,.24); }
+  .lv.s2 { background: linear-gradient(135deg, #C9A45C, #A8873D); color: #123C35; }
+
+  /* 权益卡 */
+  .svc { border-radius: 14px; padding: 14px; border: 1px solid; position: relative; }
+  .svc .t { font-size: 13.5px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .svc .ben { display: flex; flex-direction: column; gap: 7px; }
+  .ben-item { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; line-height: 1.5; }
+  .ben-item .ic { width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; font-size: 12px; flex-shrink: 0; }
+  .ben-item .ic + div { flex: 1; }
+  .ben-item b { display: block; font-size: 12px; }
+  .ben-item span { font-size: 11px; opacity: .75; }
+  .svc-v { background: #FFF7F1; border-color: #F2B58F; }
+  .svc-v .t { color: #B85C2E; }
+  .svc-v .ic { background: #FDE3D4; }
+  .svc-s { background: #F8F3E7; border-color: #C9A45C; }
+  .svc-s .t { color: #8A6A2A; }
+  .svc-s .ic { background: #EFE4C8; }
+
+  /* 晋升引导 */
+  .up { border-radius: 12px; padding: 10px 12px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 12px; }
+  .up-n { background: #F0FBF4; border: 1px dashed #3E8E6E; color: #285247; }
+  .up-v { background: #FDF1E6; border: 1px dashed #C96D3E; color: #8A4A20; }
+  .up-s { background: #F6F1E4; border: 1px solid #C9A45C; color: #7A5D20; }
+  .up b { font-size: 12.5px; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #EFEAE2; color: #6E675D; }
+
+  .note { background: #FFF9F2; border: 1px solid #F2DDC8; border-radius: 12px; padding: 12px 14px; font-size: 12.5px; color: #6E5B45; line-height: 1.8; margin-top: 18px; }
+  .ask { background: #F3F0FA; border: 1px solid #DCD3F0; border-radius: 12px; padding: 12px 14px; font-size: 12.5px; color: #4A3E6E; line-height: 1.8; margin-top: 18px; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; background: #fff; border-radius: 10px; overflow: hidden; }
+  .tbl th { background: #F7F3EC; padding: 8px 10px; text-align: left; font-weight: 700; color: #5A4E3A; }
+  .tbl td { padding: 8px 10px; border-top: 1px solid #F0EBE2; color: #4A443C; }
+  .tbl tr td:first-child { font-weight: 700; color: #2B2B2B; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>会员等级体验 · 设计审核稿</h1>
+  <div class="sub">牧哲学堂 · 三档等级（普通 / VIP / SVIP）体验优化方向与效果预览 · 待审核</div>
+
+  <h2>一、三档首页头图效果对比（升级后）</h2>
+  <div class="row3">
+    <div class="hero n">
+      <div class="lv n2">普通用户</div>
+      <div class="crown">🍃</div>
+      <div class="shine"></div>
+      <div class="name">马子墨</div>
+      <div class="grade">初一 · 负责老师 胡老师</div>
+      <div class="quote">「千淘万漉虽辛苦，吹尽狂沙始到金。」</div>
+      <div class="stats"><div class="stat"><b>0</b><span>今日课次</span></div><div class="stat"><b>86%</b><span>本月出勤</span></div><div class="stat"><b>1</b><span>待处理通知</span></div></div>
+    </div>
+    <div class="hero v">
+      <div class="lv v2">👑 VIP 用户</div>
+      <div class="shine"></div>
+      <div class="name">马子墨</div>
+      <div class="grade">初一 · 负责老师 胡老师</div>
+      <div class="quote">「千淘万漉虽辛苦，吹尽狂沙始到金。」</div>
+      <div class="stats"><div class="stat"><b>0</b><span>今日课次</span></div><div class="stat"><b>86%</b><span>本月出勤</span></div><div class="stat"><b>1</b><span>待处理通知</span></div></div>
+    </div>
+    <div class="hero s">
+      <div class="lv s2">👑 SVIP · 核心陪伴家庭</div>
+      <div class="crown">✨</div>
+      <div class="shine"></div>
+      <div class="name">马子墨</div>
+      <div class="grade">初一 · 负责老师 胡老师</div>
+      <div class="quote">「千淘万漉虽辛苦，吹尽狂沙始到金。」</div>
+      <div class="stats"><div class="stat"><b>0</b><span>今日课次</span></div><div class="stat"><b>86%</b><span>本月出勤</span></div><div class="stat"><b>1</b><span>待处理通知</span></div></div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:#9A8E7A;margin-top:6px">左：普通（清新浅绿） · 中：VIP（品牌橙+渐变） · 右：SVIP（深墨绿+哑光金描边）——徽章从「纯文字标签」升级为「等级徽章 + 氛围光带」</div>
+
+  <h2>二、权益服务卡升级（情绪价值核心）</h2>
+  <div class="row3">
+    <div class="svc svc-v">
+      <div class="t">🟠 VIP 专属服务</div>
+      <div class="ben">
+        <div class="ben-item"><div class="ic">📅</div><div><b>优先排课</b><span>热门时段先选先定</span></div></div>
+        <div class="ben-item"><div class="ic">⚡</div><div><b>反馈提速</b><span>课堂反馈优先撰写发布</span></div></div>
+        <div class="ben-item"><div class="ic">🎧</div><div><b>专属顾问</b><span>一名顾问跟进学习与课务</span></div></div>
+      </div>
+      <div class="up up-v"><b>再进一步 · 解锁 SVIP 深度陪伴</b><span class="tag">进阶引导</span></div>
+    </div>
+    <div class="svc svc-s">
+      <div class="t">🟡 SVIP 尊享服务</div>
+      <div class="ben">
+        <div class="ben-item"><div class="ic">👑</div><div><b>专属顾问 1V1</b><span>全周期专人服务</span></div></div>
+        <div class="ben-item"><div class="ic">🗂️</div><div><b>志愿填报咨询</b><span>中考/高考规划建议</span></div></div>
+        <div class="ben-item"><div class="ic">⚡</div><div><b>响应优先</b><span>问题优先响应专人跟进</span></div></div>
+        <div class="ben-item"><div class="ic">📅</div><div><b>排课优先</b><span>热门时段先选先定</span></div></div>
+        <div class="ben-item"><div class="ic">💌</div><div><b>专属问候</b><span>节日/关键节点温暖问候</span></div></div>
+      </div>
+      <div class="up up-s"><b>您已享有最高级别服务</b><span class="tag">尊享</span></div>
+    </div>
+    <div class="svc" style="background:#F7FBF8;border-color:#D9EFE3">
+      <div class="t" style="color:#3E8E6E">🍃 普通用户 · 基础服务</div>
+      <div class="ben">
+        <div class="ben-item"><div class="ic" style="background:#E1F1E8">📋</div><div><b>学习记录</b><span>课程/反馈/考勤查看</span></div></div>
+        <div class="ben-item"><div class="ic" style="background:#E1F1E8">🔔</div><div><b>消息通知</b><span>动态及时送达</span></div></div>
+        <div class="ben-item"><div class="ic" style="background:#E1F1E8">🌤️</div><div><b>天气关怀</b><span>出行提醒</span></div></div>
+      </div>
+      <div class="up up-n"><b>升级 VIP · 享优先排课与专属服务</b><span class="tag">升级引导</span></div>
+    </div>
+  </div>
+
+  <h2>三、整体等级标识系统</h2>
+  <table class="tbl">
+    <tr><th>元素</th><th>普通</th><th>VIP</th><th>SVIP</th></tr>
+    <tr><td>等级徽章</td><td>不显示</td><td>橙色徽章 + 👑</td><td>金黑徽章 + 👑✨</td></tr>
+    <tr><td>首页头图</td><td>品牌橙（现状）</td><td>橙红渐变 + 光带</td><td>深墨绿 + 金边 + 光带</td></tr>
+    <tr><td>数据卡/按钮点缀</td><td>全局暖色（现状）</td><td>橙系描边点缀</td><td>金系描边点缀</td></tr>
+    <tr><td>服务卡</td><td>不显示</td><td>3 项权益清单</td><td>5 项权益清单 + 专属热线</td></tr>
+    <tr><td>晋升引导</td><td>升级 VIP 提示</td><td>升级 SVIP 提示</td><td>「已享最高服务」</td></tr>
+    <tr><td>情绪关键词</td><td>清爽、可靠</td><td>被重视、高效</td><td>尊贵、专属、温度</td></tr>
+  </table>
+
+  <div class="note">
+    <b>📌 设计原则：</b>等级只做「氛围与标识」升级，不改变功能路径；普通用户不加徽章避免视觉噪音；权益清单为示意，<b>具体权益内容需按机构真实服务确认后写入</b>，不编造承诺。
+  </div>
+  <div class="ask">
+    <b>❓ 需要你确认：</b><br>
+    ① 三档真实权益分别是什么（排课/反馈/顾问/志愿填报/其他）？我好写进权益卡；<br>
+    ② 等级是管理端手动设置，还是按消费/续费自动升级？升级引导要不要做；<br>
+    ③ 深墨绿 SVIP 主题是保持现状只加金边，还是换更深的墨绿+鎏金氛围？
+  </div>
+</div>
+</body>
+</html>

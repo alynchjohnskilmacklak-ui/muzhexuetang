@@ -1,18 +1,24 @@
 ---
 version: v2
 name: Muzhe Academy Warm Light
-description: "A warm, low-eye-strain education platform canvas built around #faf8f5 (warm cream), warm near-black text (#1a1201), and the signature warm orange (#E8784A) as the single chromatic accent. Designed for parents (mostly middle-aged, mobile-first, evening use) checking school options for their children."
+description: "A warm, low-eye-strain education platform built around a warm cream canvas, forest-green identity, and restrained brass accents. Deep forest green carries primary actions; brass marks brand highlights and selected levels, while #E8784A remains a warm illustration and parent-role accent. Designed for mobile-first school communication and learning workflows."
 
 colors:
-  primary: "#E8784A"
+  primary: "#14574D"
   on-primary: "#ffffff"
-  primary-hover: "#f08a5f"
-  primary-focus: "#d0683a"
-  primary-bg: "#fff3ec"
+  primary-hover: "#10483F"
+  primary-focus: "#0B3D35"
+  primary-bg: "#EAF4F1"
+  brand-green: "#14574D"
+  brand-green-deep: "#0D3732"
+  brand-gold: "#8A6517"
+  brand-gold-fill: "#D6B45B"
+  brand-gold-bg: "#F8F1DE"
+  brand-orange: "#E8784A"
   ink: "#1a1201"
   ink-muted: "#5a4e3a"
-  ink-subtle: "#9a8e7a"
-  ink-tertiary: "rgba(0,0,0,.35)"
+  ink-subtle: "#756A58"
+  ink-tertiary: "#756A58"
   canvas: "#faf8f5"
   surface-1: "#ffffff"
   surface-2: "#faf8f5"
@@ -27,11 +33,14 @@ colors:
   inverse-ink: "rgba(255,255,255,.9)"
   brand-secure: "#7a7fad"
   semantic-success: "#1D9E75"
+  semantic-success-action: "#137A5A"
   semantic-success-bg: "#eaf7f1"
-  semantic-warning: "#f5a623"
-  semantic-warning-text: "#C77F00"
-  semantic-error: "#E24B4A"
-  semantic-info: "#E8784A"
+  semantic-warning: "#A56B00"
+  semantic-warning-text: "#805A0D"
+  semantic-warning-bg: "#F8F1DE"
+  semantic-error: "#B42318"
+  semantic-error-bg: "#FEF0EE"
+  semantic-info: "#14574D"
   semantic-overlay: "#000000"
 
 chart:
@@ -207,7 +216,7 @@ components:
     rounded: "{rounded.lg}"
     headerBg: "{colors.canvas}"
     headerColor: "{colors.ink-muted}"
-    rowHoverBg: "rgba(232,120,74,.04)"
+    rowHoverBg: "rgba(20,87,77,.045)"
   chart-container:
     backgroundColor: "{colors.surface-1}"
     textColor: "{colors.ink}"
@@ -217,11 +226,13 @@ components:
 
 ## Overview
 
-牧哲学堂 (Muzhe Academy) is an education management platform serving parents of middle-school students in Xinle city (Shijiazhuang). The design system is a warm, low-eye-strain light canvas built around `{colors.canvas}` (#faf8f5 warm cream), warm near-black text (`{colors.ink}` #1a1201), and the signature warm orange (`{colors.primary}` #E8784A) as the single chromatic accent.
+牧哲学堂 (Muzhe Academy) is an education management platform serving parents of middle-school students in Xinle city (Shijiazhuang). The design system is a warm, low-eye-strain light canvas built around `{colors.canvas}` (#faf8f5 warm cream), warm near-black text (`{colors.ink}` #1a1201), and a warm orange family that uses a deeper accessible tone for interactive controls.
 
 **Key Characteristics:**
 - Warm light canvas — `{colors.canvas}` (#faf8f5) is a warm cream, not pure white
-- Orange brand accent (`{colors.primary}` #E8784A) — used on primary CTAs, focus rings, selected states
+- Forest-green action color (`{colors.primary}` #14574D) — used on primary CTAs, focus rings, and selected states; white text remains highly legible
+- Brass accent (`{colors.brand-gold}` #8A6517) with a pale brass surface (`{colors.brand-gold-bg}` #F8F1DE) — used for brand highlights and level labels
+- Bright orange accent (`{colors.brand-orange}` #E8784A) — used for illustration, chart series, and warm parent-role details
 - Four-step surface ladder (canvas to surface-1/2/3/4) carries hierarchy through subtle warmth shifts
 - Cards use `{rounded.lg}` 14px corners with hairline borders and subtle warm shadow
 - System font stack with Chinese support: `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', 'Microsoft YaHei', sans-serif`
@@ -230,10 +241,12 @@ components:
 ## Colors
 
 ### Brand & Accent
-- **Primary Orange** (`{colors.primary}` #E8784A): Primary CTA, brand mark, focus rings, selected states, chart series primary.
-- **Primary Hover** (`{colors.primary-hover}` #f08a5f): Lighter orange for hover states.
-- **Primary Focus** (`{colors.primary-focus}` #d0683a): Deeper orange for active/pressed states.
-- **Primary Background** (`{colors.primary-bg}` #fff3ec): Very light orange for selected backgrounds.
+- **Primary Forest** (`{colors.primary}` #14574D): Primary CTA, text on selected states, and focus rings.
+- **Primary Hover** (`{colors.primary-hover}` #10483F): Deeper green for hover states.
+- **Primary Focus** (`{colors.primary-focus}` #0B3D35): Deep green for active/pressed states.
+- **Primary Background** (`{colors.primary-bg}` #EAF4F1): Pale green for selected backgrounds.
+- **Brand Brass** (`{colors.brand-gold}` #8A6517): Readable brass text and small marks; pair the brighter brass fill with dark ink.
+- **Bright Orange Accent** (`{colors.brand-orange}` #E8784A): Brand illustrations and chart series; pair with dark text when used as a large fill.
 
 ### Surface Hierarchy
 - **Canvas** (`{colors.canvas}` #faf8f5): Default page background — warm cream.
@@ -247,16 +260,19 @@ components:
 ### Text
 - **Ink** (`{colors.ink}` #1a1201): All headlines and emphasized body — warm near-black, NOT #000.
 - **Ink Muted** (`{colors.ink-muted}` #5a4e3a): Secondary text — meta info, descriptions.
-- **Ink Subtle** (`{colors.ink-subtle}` #9a8e7a): Tertiary text — footnotes, placeholders.
-- **Ink Tertiary** (`{colors.ink-tertiary}` rgba(0,0,0,.35)): Disabled text.
+- **Ink Subtle** (`{colors.ink-subtle}` #756A58): Tertiary text — footnotes, placeholders.
+- **Ink Tertiary** (`{colors.ink-tertiary}` #756A58): Secondary low-priority text; disabled controls also reduce opacity.
 
 ### Semantic Colors
 - **Success** (`{colors.semantic-success}` #1D9E75): Positive states, safe-tier indicators, attendance present.
+- **Success Action** (`{colors.semantic-success-action}` #137A5A): Green buttons and message bubbles with white text.
 - **Success BG** (`{colors.semantic-success-bg}` #eaf7f1): Subtle green background for safe-tier cards.
-- **Warning** (`{colors.semantic-warning}` #f5a623): Warnings, pending states.
-- **Warning Text** (`{colors.semantic-warning-text}` #C77F00): Warning text on light backgrounds.
-- **Error** (`{colors.semantic-error}` #E24B4A): Errors, reach-tier indicators, attendance absent.
-- **Info** (`{colors.semantic-info}` #E8784A): Reuses primary orange.
+- **Warning** (`{colors.semantic-warning}` #A56B00): Warnings, pending states; use dark ink for readable text.
+- **Warning Text** (`{colors.semantic-warning-text}` #805A0D): Warning text on light backgrounds.
+- **Warning BG** (`{colors.semantic-warning-bg}` #F8F1DE): Pale brass background for pending and caution states.
+- **Error** (`{colors.semantic-error}` #B42318): Errors, reach-tier indicators, attendance absent.
+- **Error BG** (`{colors.semantic-error-bg}` #FEF0EE): Pale red background for error states.
+- **Info** (`{colors.semantic-info}` #14574D): Reuses the accessible forest-green brand action.
 
 ## Typography
 
@@ -347,21 +363,23 @@ Implementation rules:
 ### Quick Color Reference
 - Canvas (page bg): `#faf8f5`
 - Surface 1 (cards): `#ffffff`
-- Primary (CTAs, focus): `#E8784A`
-- Primary Hover: `#f08a5f`
+- Primary (CTAs, focus): `#14574D`
+- Brand orange accent: `#E8784A`
+- Brand brass: `#8A6517` (text) / `#D6B45B` (fill)
+- Primary Hover: `#10483F`
 - Text (headlines): `#1a1201`
 - Text Muted (secondary): `#5a4e3a`
-- Text Subtle (tertiary): `#9a8e7a`
+- Text Subtle (tertiary): `#756A58`
 - Border (hairline): `rgba(0,0,0,.06)`
 - Success: `#1D9E75`
-- Warning: `#f5a623`
-- Error: `#E24B4A`
+- Warning: `#A56B00` (text: `#805A0D`, brass fill: `#D6B45B`)
+- Error: `#B42318`
 
 ### Ready-to-Use Prompts
 - "Build a dashboard page with metrics cards, charts, and a data table using the DESIGN.md warm-light system."
 - "Create a student list page with a searchable data table, following DESIGN.md table and card styling."
-- "Style the volunteer simulation page following DESIGN.md's warm-light theme and orange accent."
-- "Build a settings form with DESIGN.md's input fields and orange primary buttons."
+- "Style the volunteer simulation page following DESIGN.md's warm-light theme, forest-green actions, and restrained brass highlights."
+- "Build a settings form with DESIGN.md's input fields and forest-green primary buttons."
 
 ## Growth Feature Palette
 

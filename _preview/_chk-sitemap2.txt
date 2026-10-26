@@ -1,0 +1,42 @@
+﻿=== 1) sitemap / robots 在 http 与 https 下的表现 ===
+  http://muzhexuetang.xyz/sitemap.xml            301 178 https://muzhexuetang.xyz/sitemap.xml
+  https://muzhexuetang.xyz/sitemap.xml           200 415
+  http://muzhexuetang.xyz/robots.txt             301 178 https://muzhexuetang.xyz/robots.txt
+  https://muzhexuetang.xyz/robots.txt            200 956
+
+=== 2) 神马爬虫 UA 走 http 抓 sitemap 的真实内容 ===
+<html>
+
+<head><title>301 Moved Permanently</title></head>
+
+<body>
+
+<center><h1>301 Moved Permanently</h1></center>
+
+<hr><center>nginx/1.18.0 (Ubuntu)</center>
+
+</body>
+
+</html>
+
+=== 3) 其他验证文件在 http 下是否也被 301 挡住 ===
+  /baidu_verify_codeva-LcCyyIUZRF.html    http=301 178 https://muzhexuetang.xyz/baidu_verify_codeva-LcCyyIUZRF.html   https=200 33
+  /BingSiteAuth.xml                       http=301 178 https://muzhexuetang.xyz/BingSiteAuth.xml   https=200 85
+  /ByteDanceVerify.html                   http=301 178 https://muzhexuetang.xyz/ByteDanceVerify.html   https=200 20
+
+=== 4) 各搜索引擎爬虫今天的抓取情况（按 IP 归属粗看）===
+116.179.37.251 [03/Oct/2026:11:35:51 /echarts.min.js 200
+116.179.37.45 [03/Oct/2026:11:35:51 /about-images/01-2-thumb.webp 200
+116.179.37.231 [03/Oct/2026:11:35:51 /about-images/01-3-thumb.webp 200
+116.179.37.209 [03/Oct/2026:11:35:51 /about-images/01-1-thumb.webp 200
+111.53.198.24 [03/Oct/2026:14:18:54 / 200
+111.53.198.24 [03/Oct/2026:14:18:54 / 200
+220.181.108.156 [03/Oct/2026:14:29:50 / 200
+111.53.198.24 [03/Oct/2026:15:24:04 / 200
+111.53.198.24 [03/Oct/2026:15:24:04 / 200
+157.55.39.202 [03/Oct/2026:15:41:51 /sitemap.xml 200
+220.181.108.168 [03/Oct/2026:15:43:34 / 200
+220.181.108.102 [03/Oct/2026:15:43:47 / 200
+220.181.108.176 [03/Oct/2026:15:50:31 / 200
+111.53.198.24 [03/Oct/2026:15:50:52 /shenma-site-verification.txt 200
+111.53.198.24 [03/Oct/2026:15:55:23 /shenma-site-verification.txt 200

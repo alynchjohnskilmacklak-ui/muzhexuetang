@@ -176,7 +176,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
     guideUsage: guideActions.map((g) => ({ action: g.action, count: g._count })),
   }, {
     headers: {
-      'Cache-Control': 'private, max-age=300, stale-while-revalidate=60',
+      'Cache-Control': 'private, no-store, max-age=0',
     },
   })
 })

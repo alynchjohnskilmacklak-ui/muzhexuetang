@@ -1,0 +1,41 @@
+﻿=== 1) 容器状态 ===
+edu-manage-app-1 | Up About a minute (healthy)
+edu-manage-redis-1 | Up 3 weeks (healthy)
+edu-manage-db-1 | Up 3 weeks (healthy)
+
+=== 2) app 容器最近日志（找错误）===
+  未发现错误日志 ✓
+
+=== 3) 公网各路径可用性 ===
+  ✓ 200     67044  /
+  ✓ 200     59589  /about
+  ✓ 200     33621  /login
+  ✓ 200       956  /robots.txt
+  ✓ 200       415  /sitemap.xml
+  ✓ 200     57821  /images/logo.jpg
+  ✓ 200    818990  /about-images/01-1.png
+  ✓ 200       478  /manifest.json
+  ✓ 200      7129  /favicon.ico
+  ✓ 200        33  /baidu_verify_codeva-LcCyyIUZRF.html
+  ✓ 200        85  /BingSiteAuth.xml
+  ✓ 200        43  /shenma-site-verification.txt
+
+=== 4) 后台登录页是否正常（重建容器后回归）===
+  HTTP 200  <title>牧哲学堂</title>
+
+=== 5) 健康检查端点 ===
+  healthy (failing streak: 0)
+
+=== 6) robots.txt 仍屏蔽后台（未被误改）===
+  Disallow 条目数 = 38
+
+=== 7) 回滚资产就位确认 ===
+3571 /opt/edu-manage-docker/source/compose.production.yaml.bak-seo-20261003
+58940 /opt/edu-manage-docker/source/public/about.html.orig-20261003
+66295 /opt/edu-manage-docker/source/public/home.html.orig-20261003
+  回滚版本哈希：
+54deeb292962be2f /opt/edu-manage-docker/source/public/home.html.orig-20261003
+1968d74824444874 /opt/edu-manage-docker/source/public/about.html.orig-20261003
+  当前线上版本：
+5dd81479b6aa0bfa /app/public/home.html
+f3f2ab6d21c32351 /app/public/about.html

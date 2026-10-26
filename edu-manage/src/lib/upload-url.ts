@@ -38,6 +38,6 @@ export function protectedUploadFallback(value?: string | null) {
 /** Teacher portraits may live in public/people or protected upload storage. */
 export function normalizeAvatarUrl(value?: string | null) {
   const raw = value?.trim() || ''
-  if (!raw || raw.startsWith('/people/') || raw.startsWith('data:') || raw.startsWith('blob:')) return raw
+  if (!raw || raw.startsWith('/people/') || raw.startsWith('/avatars/') || raw.startsWith('data:') || raw.startsWith('blob:')) return raw
   return protectedUploadFallback(raw)
 }

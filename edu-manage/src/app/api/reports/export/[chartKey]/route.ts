@@ -10,6 +10,9 @@ import {
   getPaperMasteryLabel,
   getStudentStatusLabel,
 } from '@/lib/domain-labels'
+import { brandAoaRows } from '@/lib/export-brand'
+import { brandXlsxBufferOnServer } from '@/lib/export-xlsx-brand-server'
+import { copyXlsxAsArrayBuffer } from '@/lib/export-xlsx-brand'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,12 +44,13 @@ function parseRange(searchParams: URLSearchParams) {
   return { from, to }
 }
 
-function sendXlsx(wb: XLSX.WorkBook, filename: string) {
-  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
-  return new NextResponse(buf, {
+async function sendXlsx(wb: XLSX.WorkBook, filename: string) {
+  const rawBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
+  const buf = await brandXlsxBufferOnServer(new Uint8Array(rawBuffer))
+  return new NextResponse(copyXlsxAsArrayBuffer(buf), {
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(filename)}.xlsx"`,
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(`牧哲学堂_${filename}`)}.xlsx"`,
     },
   })
 }
@@ -72,14 +76,14 @@ export const GET = apiHandler(async (
     case 'funnel': {
       const counts = await prisma.student.groupBy({ by: ['status'], _count: true, where: studentWhere })
       const rows = counts.map((c) => [getStudentStatusLabel(c.status), c._count])
-      const ws = XLSX.utils.aoa_to_sheet([['阶段', '人数'], ...rows])
+      const ws = XLSX.utils.aoa_to_sheet(brandAoaRows('学员漏斗', ['阶段', '人数'], rows))
       const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '学员漏斗')
       return sendXlsx(wb, `学员入学漏斗-${new Date().toISOString().slice(0, 10)}`)
     }
     case 'paper-mastery': {
       const data = await prisma.paperQuestion.groupBy({ by: ['mastery'], _count: true, where: { paper: { termId, paperDate: { gte: from, lt: to } } } })
       const rows = data.map((d) => [getPaperMasteryLabel(d.mastery), d._count])
-      const ws = XLSX.utils.aoa_to_sheet([['掌握程度', '题目数'], ...rows])
+      const ws = XLSX.utils.aoa_to_sheet(brandAoaRows('试卷掌握', ['掌握程度', '题目数'], rows))
       const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '试卷掌握')
       return sendXlsx(wb, `试卷掌握分布-${new Date().toISOString().slice(0, 10)}`)
     }
@@ -92,7 +96,7 @@ export const GET = apiHandler(async (
         const active = await prisma.student.count({ where: { createdAt: { gte: mFrom, lt: mTo }, status: 'ACTIVE', ...studentWhere } })
         rows.push([mFrom.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit' }), created > 0 ? Math.round((active / created) * 100) : 100])
       }
-      const ws = XLSX.utils.aoa_to_sheet([['月份', '留存率(%)'], ...rows])
+      const ws = XLSX.utils.aoa_to_sheet(brandAoaRows('留存率', ['月份', '留存率(%)'], rows))
       const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '留存率')
       return sendXlsx(wb, `月度留存率-${new Date().toISOString().slice(0, 10)}`)
     }
@@ -107,13 +111,12 @@ export const GET = apiHandler(async (
         prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to } } }),
         prisma.volunteerConsultation.count({ where: { createdAt: { gte: from, lt: to }, isReplied: true } }),
       ])
-      const ws = XLSX.utils.aoa_to_sheet([
-        ['指标', '百分比'],
+      const ws = XLSX.utils.aoa_to_sheet(brandAoaRows('家长互动', ['指标', '百分比'], [
         ['试卷已读率', published > 0 ? Math.round((read / published) * 100) : 0],
         ['动态互动率', posts > 0 ? Math.round((reactions / posts) * 100) : 0],
         ['留言率', students > 0 ? Math.round((comments / students) * 100) : 0],
         ['咨询回复率', total > 0 ? Math.round((replied / total) * 100) : 0],
-      ])
+      ]))
       const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '家长互动')
       return sendXlsx(wb, `家长互动数据-${new Date().toISOString().slice(0, 10)}`)
     }
@@ -130,7 +133,7 @@ export const GET = apiHandler(async (
         map.set(k, (map.get(k) || 0) + f.amount)
       }
       const rows = [...map.entries()].map(([month, income]) => [month, Math.round(income)])
-      const ws = XLSX.utils.aoa_to_sheet([['月份', '收入(元)'], ...rows])
+      const ws = XLSX.utils.aoa_to_sheet(brandAoaRows('财务', ['月份', '收入(元)'], rows))
       const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '财务')
       return sendXlsx(wb, `财务收支分析-${new Date().toISOString().slice(0, 10)}`)
     }
@@ -142,20 +145,19 @@ export const GET = apiHandler(async (
       const find = (arr: { status: string; _count: number }[], s: string) => arr.find((a) => a.status === s)?._count ?? 0
       const attP = find(attData, 'PRESENT'); const attL = find(attData, 'LEAVE'); const attA = find(attData, 'ABSENT')
       const mkC = find(mkData, 'COMPLETED'); const mkAr = find(mkData, 'ARRANGED'); const mkP = find(mkData, 'PENDING')
-      const ws = XLSX.utils.aoa_to_sheet([
-        ['指标', '值'],
+      const ws = XLSX.utils.aoa_to_sheet(brandAoaRows('考勤补课', ['指标', '值'], [
         ['出勤人数', attP], ['请假人数', attL], ['旷课人数', attA],
         ['出勤率(%)', attP + attL + attA > 0 ? Math.round((attP / (attP + attL + attA)) * 100) : 0],
         ['补课完成', mkC], ['补课已排', mkAr], ['补课待排', mkP],
         ['补课完成率(%)', mkC + mkAr + mkP > 0 ? Math.round((mkC / (mkC + mkAr + mkP)) * 100) : 0],
-      ])
+      ]))
       const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '考勤补课')
       return sendXlsx(wb, `考勤补课统计-${new Date().toISOString().slice(0, 10)}`)
     }
     case 'guide-usage': {
       const data = await prisma.guideViewLog.groupBy({ by: ['action'], _count: true, where: { createdAt: { gte: from, lt: to } } })
       const rows = data.map((d) => [getGuideActionLabel(d.action), d._count])
-      const ws = XLSX.utils.aoa_to_sheet([['操作', '次数'], ...rows])
+      const ws = XLSX.utils.aoa_to_sheet(brandAoaRows('志愿填报使用', ['操作', '次数'], rows))
       const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, '志愿填报使用')
       return sendXlsx(wb, `志愿填报使用-${new Date().toISOString().slice(0, 10)}`)
     }

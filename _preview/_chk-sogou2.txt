@@ -1,0 +1,60 @@
+﻿=== 1) �ѹ������Ƿ�������Sogou web spider / ���� IP �Σ�===
+101.200.191.201 - - [03/Oct/2026:16:15:56 +0800] "GET /sogousiteverification.txt HTTP/1.1" 200 10 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:15:56 +0800] "GET /sogousiteverification.txt HTTP/2.0" 307 6 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:15:56 +0800] "GET /sogousiteverification.txt HTTP/1.1" 200 10 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:15:56 +0800] "GET /sogousiteverification.txt HTTP/2.0" 307 6 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:16:10 +0800] "HEAD /sogousiteverification.txt HTTP/2.0" 307 0 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:16:10 +0800] "GET /sogousiteverification.txt HTTP/1.1" 200 10 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:16:10 +0800] "GET /sogousiteverification.txt HTTP/2.0" 307 6 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:16:42 +0800] "GET /sogousiteverification.txt HTTP/1.1" 200 10 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:16:43 +0800] "GET /sogousiteverification.txt HTTP/2.0" 200 10 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:16:44 +0800] "GET /sogousiteverification.txt HTTP/1.1" 200 10 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:16:44 +0800] "GET /sogousiteverification.txt HTTP/2.0" 200 10 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:17:02 +0800] "GET /sogousiteverification.txt HTTP/1.1" 200 10 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:17:02 +0800] "GET /sogousiteverification.txt HTTP/2.0" 200 10 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:17:03 +0800] "GET /sogousiteverification.txt HTTP/2.0" 200 10 "-" "curl/7.81.0"
+49.234.4.25 - - [03/Oct/2026:16:17:36 +0800] "GET /sogousiteverification.txt HTTP/1.1" 200 10 "-" "Sogou web spider/4.0(+http://www.sogou.com/docs/help/webmasters.htm#07)"
+
+=== 2) ������зǱ��ط��ʣ����µ����棩===
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/61866-a47b0f9ec5d652d1.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/12378-9a3ab6fae083f1c3.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/68814-1f380c0f1060c47f.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/74586-d320682f17e301cf.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/66513-8a93f4393ced9ce9.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/52590-63b65cd6121a026e.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/56649-703e8742a4dd121d.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/css/c1ef44374d0f9d81.css 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/86619-d9e325ed015217f4.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/28089-897fac64ed99d868.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/48350-95a423dfcfc294f4.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/app/login/page-c397ebf43665ac5c.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/87501-c967836657b64525.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/43519-459ac4e086f2d6c8.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/93794-a0c514c3ad245de1.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/static/chunks/4bd1b696-f998cba21de05210.js 200
+117.136.90.224 [03/Oct/2026:16:17:09 /manifest.json 200
+117.136.90.224 [03/Oct/2026:16:17:09 /_next/image?url=%2Fservices%2Fseasonal-bootcamp%2F1.png&w=750&q=75 200
+49.234.4.25 [03/Oct/2026:16:17:36 /sogousiteverification.txt 200
+45.198.224.123 [03/Oct/2026:16:17:39 / 200
+
+=== 3) �ѹ���֤�ļ���ǰ״̬ ===
+  http://muzhexuetang.xyz/sogousiteverification.txt    200 10
+  https://muzhexuetang.xyz/sogousiteverification.txt   200 10
+  ����: IR7MJtFx5d
+
+=== 4) sitemap ��ǰ���ݣ�ȷ���ѹ��ܶ���ʲô��===
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>https://muzhexuetang.xyz</loc>
+<lastmod>2026-09-06T00:00:00.000Z</lastmod>
+<changefreq>monthly</changefreq>
+<priority>1</priority>
+</url>
+<url>
+<loc>https://muzhexuetang.xyz/about</loc>
+<lastmod>2026-09-07T00:00:00.000Z</lastmod>
+<changefreq>weekly</changefreq>
+<priority>0.9</priority>
+</url>
+</urlset>

@@ -1,0 +1,19 @@
+﻿本地: 67044 B  sha=97e36b12acf9a5cc  CRLF=1432
+
+=== 上传（二进制，不做任何换行转换）===
+  ✓ 上传校验通过 97e36b12acf9a5cc
+  服务器临时文件 67044 B
+  已覆盖 shared + source: OK 
+
+=== 校验 ===
+  shared 文件 sha : 97e36b12acf9a5cc  ✓
+  source 文件 sha : 97e36b12acf9a5cc  ✓
+  容器内   sha    : 97e36b12acf9a5cc  ✓
+  容器内 CRLF 行数: 0  (应 1432)
+
+  线上 meta : <meta name="shenma-site-verification" content="3f17ed1785b9a82fd4176b64ecffb169_1791014088"/>
+  首页 HTTP 200  67044 B  sha=97e36b12acf9a5cc
+       <title>新乐牧哲学堂｜河北新乐文化课辅导</title>
+  .txt     : shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_1791013955
+
+★★ 现在立刻回神马点「验证」——不要刷新页面！

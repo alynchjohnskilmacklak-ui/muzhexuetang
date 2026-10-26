@@ -1,0 +1,136 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
+import { apiHandler } from '@/lib/api-handler'
+import { resolveTeacherForUser } from '@/lib/performance'
+import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { resolveSubjectLessonStudentIds } from '@/lib/lesson-roster'
+
+export const dynamic = 'force-dynamic'
+
+export const GET = apiHandler(async (req: NextRequest) => {
+  const session = await auth()
+  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const role = (session.user as { role?: string }).role
+  const prisma = await getRequestPrisma()
+  const { searchParams } = new URL(req.url)
+  const dateStr = searchParams.get('date') || new Date().toISOString().slice(0, 10)
+  const teacherIdParam = searchParams.get('teacherId')
+  const classType = searchParams.get('classType')
+  const division = getRequestDivision(session.user as Record<string, unknown> | undefined, searchParams.get('division'))
+
+  const dayStart = new Date(`${dateStr}T00:00:00`)
+  const dayEnd = new Date(`${dateStr}T23:59:59`)
+
+  const where: Record<string, unknown> = {
+    status: { notIn: ['CANCELLED', 'POSTPONED'] },
+    lessonDate: { gte: dayStart, lt: dayEnd },
+  }
+
+  // Role-based access control
+  if (role === 'admin') {
+    if (teacherIdParam) where.teacherId = teacherIdParam
+    where.division = division
+    const selectedTerm = await resolveAdminTermScope(prisma, division, req)
+    where.group = { termId: selectedTerm?.id || '__NO_SELECTED_TERM__' }
+  } else if (role === 'teacher') {
+    const teacher = await resolveTeacherForUser(session.user as { id: string; email?: string | null; name?: string | null; role?: string | null }, prisma)
+    if (!teacher) return NextResponse.json({ error: '未绑定教师身份' }, { status: 403 })
+    const activeTerm = await getActiveAcademicTerm(prisma, division)
+    where.group = { termId: activeTerm?.id || '__NO_ACTIVE_TERM__' }
+    where.OR = [
+      { teacherId: teacher.id },
+      { teacherId: null, group: { teacherId: teacher.id } },
+      { teacherId: null, group: { teacherAssignments: { some: { teacherId: teacher.id } } } },
+    ]
+  } else {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  if (classType) {
+    where.group = { ...(where.group as Record<string, unknown> || {}), course: { type: classType } }
+  }
+
+  const lessons = await prisma.classLesson.findMany({
+    where,
+    include: {
+      teacher: { select: { id: true, name: true } },
+      group: {
+        include: {
+          course: { select: { id: true, name: true, subject: true, type: true, color: true } },
+          teacher: { select: { id: true, name: true } },
+          room: { select: { id: true, name: true, type: true, usageType: true } },
+          teacherAssignments: { select: { teacherId: true, subject: true } },
+          enrollments: {
+            where: { status: 'ACTIVE', deletedAt: null, student: { status: { not: 'INACTIVE' } } },
+            select: { studentId: true, subjects: true, student: { select: { id: true, name: true } } },
+          },
+        },
+      },
+      lessonStudents: {
+        include: { student: { select: { id: true, name: true } } },
+      },
+      attendances: {
+        select: { id: true, studentId: true, status: true },
+      },
+    },
+    orderBy: { startTime: 'asc' },
+  })
+
+  const result = lessons.map((lesson) => {
+    // 管理端列表和教师端使用同一份按学科过滤的课次名单。
+    const snapshotStudents = (lesson.lessonStudents || []).map((ls) => ({
+      studentId: ls.studentId,
+      studentName: ls.student.name,
+    }))
+    const fallbackStudents = (lesson.group.enrollments || [])
+      .map((enr) => ({ studentId: enr.studentId, studentName: enr.student.name }))
+    const lessonTeacherId = lesson.teacherId || lesson.group.teacherId
+    const lessonSubject = lesson.subject
+      || lesson.group.teacherAssignments.find((assignment) => assignment.teacherId === lessonTeacherId)?.subject
+      || lesson.group.course.subject
+    const rosterStudentIds = new Set(resolveSubjectLessonStudentIds(
+      snapshotStudents.map((student) => student.studentId),
+      lesson.group.enrollments,
+      lessonSubject,
+      lesson.lessonDate,
+    ))
+    const students = (snapshotStudents.length ? snapshotStudents : fallbackStudents)
+      .filter((student) => rosterStudentIds.has(student.studentId))
+    const allDone = students.length > 0 && students.every(
+      (student) => lesson.attendances.some((a) => a.studentId === student.studentId)
+    )
+    const startTime = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T${lesson.startTime}:00`)
+    const endTime = new Date(`${lesson.lessonDate.toISOString().slice(0, 10)}T${lesson.endTime}:00`)
+    return {
+      id: lesson.id,
+      title: lesson.group.name || lesson.group.course?.name || '-',
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+      status: lesson.status,
+      classType: lesson.group.course?.type || null,
+      color: lesson.group.course?.color || null,
+      teacherId: lesson.teacherId,
+      teacherName: lesson.teacher?.name || lesson.group.teacher?.name || '未分配',
+      roomId: lesson.group.roomId,
+      roomName: lesson.group.room?.name || '未分配',
+      roomType: lesson.group.room?.type || null,
+      roomUsageType: lesson.group.room?.usageType || null,
+      courseName: lesson.group.course?.name || '-',
+      courseSubject: lesson.group.course?.subject || '',
+      courseType: lesson.group.course?.type || null,
+      students,
+      studentCount: students.length,
+      attendances: lesson.attendances.map((a) => ({
+        studentId: a.studentId,
+        status: a.status,
+      })),
+      attendanceStatus: allDone ? 'done' : 'pending',
+    }
+  })
+
+  return NextResponse.json(result)
+})

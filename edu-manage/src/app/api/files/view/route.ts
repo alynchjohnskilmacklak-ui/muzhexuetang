@@ -67,7 +67,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
     headers: {
       'Content-Type': mimeType || 'application/octet-stream',
       'Content-Disposition': 'inline',
-      'Cache-Control': hasValidExportToken ? 'private, max-age=3600' : 'private, max-age=300',
+      'Cache-Control': 'private, no-store, max-age=0',
       'X-Content-Type-Options': 'nosniff',
     },
   })

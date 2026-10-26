@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Card, Space, Tag, Typography } from 'antd'
+import { Button, Card, Space, Tag, Typography } from 'antd'
 import { BellOutlined, CalendarOutlined, CoffeeOutlined, DownOutlined, EnvironmentOutlined, RightOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
 import { findSchedulePeriod, PERIOD_HEIGHTS, PERIOD_BG } from '@/lib/schedule-periods'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -211,7 +211,7 @@ export default function TeacherSchedulePage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', border: '1px solid var(--color-hairline)', borderRadius: 10, overflow: 'hidden', width: isMobile ? '100%' : 540, marginBottom: 12, background: 'var(--color-surface-1)' }}>
         <button onClick={() => setScheduleType('group')} style={{
           padding: '9px 10px', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: scheduleType === 'group' ? 600 : 400,
-          background: scheduleType === 'group' ? '#E8784A' : 'transparent',
+          background: scheduleType === 'group' ? 'var(--color-primary)' : 'transparent',
           color: scheduleType === 'group' ? '#fff' : 'var(--color-text-secondary, #666)',
         }}>精品班课</button>
         <button onClick={() => setScheduleType('intensive')} style={{
@@ -221,7 +221,7 @@ export default function TeacherSchedulePage() {
         }}>突击全能班</button>
         <button onClick={() => setScheduleType('studyHall')} style={{
           padding: '9px 10px', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: scheduleType === 'studyHall' ? 600 : 400,
-          background: scheduleType === 'studyHall' ? '#E8784A' : 'transparent',
+          background: scheduleType === 'studyHall' ? 'var(--color-primary)' : 'transparent',
           color: scheduleType === 'studyHall' ? '#fff' : 'var(--color-ink-muted)',
         }}>晚托作业班</button>
       </div>

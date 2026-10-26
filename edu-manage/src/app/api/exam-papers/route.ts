@@ -61,7 +61,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   })
 
   return NextResponse.json({ papers }, {
-    headers: { 'Cache-Control': 'private, max-age=60, stale-while-revalidate=120' },
+    headers: { 'Cache-Control': 'private, no-store, max-age=0' },
   })
 })
 

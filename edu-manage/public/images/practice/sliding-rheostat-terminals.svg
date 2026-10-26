@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="320" viewBox="0 0 760 320" role="img" aria-labelledby="title desc">
+  <title id="title">滑动变阻器接线柱和滑片移动方向</title>
+  <desc id="desc">电阻丝固定端A在左，B在右；滑片P及其接线柱C、D沿电阻丝向右移动时，A到滑片的有效电阻丝变长。</desc>
+  <rect width="760" height="320" rx="18" fill="#fff"/>
+  <text x="380" y="36" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#333">滑动变阻器结构示意（C、D为同一滑片的两个接线柱）</text>
+  <path d="M160 108V188M600 108V188" stroke="#30343b" stroke-width="5"/>
+  <path d="M160 148H600" stroke="#30343b" stroke-width="4"/>
+  <path d="M186 148L205 132L224 164L243 132L262 164L281 132L300 164L319 132L338 164L357 132L376 164L395 132L414 164L433 132L452 164L471 132L490 164L509 132L528 164L547 132L566 148" fill="none" stroke="#e8784a" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="160" cy="108" r="6" fill="#30343b"/><circle cx="600" cy="108" r="6" fill="#30343b"/>
+  <text x="160" y="94" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#222">A</text><text x="600" y="94" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#222">B</text>
+  <path d="M436 93V133L421 150L436 164L451 150L436 133" fill="#f2b195" stroke="#8d4429" stroke-width="3"/>
+  <path d="M436 164V208H365V237M436 208H507V237" fill="none" stroke="#30343b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="365" cy="246" r="17" fill="#fff" stroke="#30343b" stroke-width="3"/><circle cx="507" cy="246" r="17" fill="#fff" stroke="#30343b" stroke-width="3"/>
+  <text x="365" y="253" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#222">C</text><text x="507" y="253" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#222">D</text>
+  <text x="469" y="190" font-family="sans-serif" font-size="18" fill="#333">滑片 P</text>
+  <path d="M295 282H550" stroke="#4376a8" stroke-width="4" stroke-linecap="round"/><path d="M537 271L555 282L537 293" fill="none" stroke="#4376a8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="420" y="311" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#315d84">P 向右移动</text>
+</svg>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import aiLogo from '@/assets/ai-logo.png'
 import { useSession } from 'next-auth/react'
 import { CloseOutlined } from '@ant-design/icons'
@@ -109,8 +110,8 @@ export function AIFloatingLauncher() {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <img
-                src={aiLogo.src}
+              <Image
+                src={aiLogo}
                 alt=""
                 width={26}
                 height={26}
@@ -152,12 +153,12 @@ export function AIFloatingLauncher() {
         type="button"
         aria-label="打开AI助手"
         onClick={() => {
-          if (peeked) { setPeeked(false); return }
+          if (peeked) { setPeeked(false); setOpen(true); return }
           setOpen((v) => !v)
         }}
         style={{
           position: 'fixed',
-          right: peeked ? (isMobile ? -(ballSize - 30) : -(ballSize - 36)) : (isMobile ? 12 : 24),
+          right: peeked ? -(ballSize - 44) : (isMobile ? 12 : 24),
           bottom: isMobile ? 88 : 28,
           width: ballSize,
           height: ballSize,
@@ -187,8 +188,8 @@ export function AIFloatingLauncher() {
             background: '#fff',
           }}
         >
-          <img
-            src={aiLogo.src}
+          <Image
+            src={aiLogo}
             alt="AI助手"
             width={ballSize}
             height={ballSize}

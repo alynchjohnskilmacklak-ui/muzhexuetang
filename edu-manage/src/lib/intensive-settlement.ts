@@ -1,6 +1,7 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { calculateIntensiveDeductHours, shouldGenerateIntensiveLessonPay } from '@/lib/intensive-class'
 import { calcLessonPay, getTeacherSalaryConfig, inferGrade } from '@/lib/teacher-salary'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
 const roundHours = (value: number) => Number(value.toFixed(4))
 const roundMoney = (value: number) => Number(value.toFixed(2))
@@ -242,6 +243,10 @@ export async function adjustIntensiveSettlement(params: {
           operatorId: params.operatorId,
         },
       })
+    }
+
+    for (const studentId of new Set(lesson.attendances.map((attendance) => attendance.studentId))) {
+      await syncStudentHourSnapshot(tx, studentId)
     }
 
     const salary = await createIntensiveLessonPayAdjustmentInTransaction(tx, lesson.id, adjustment.id)

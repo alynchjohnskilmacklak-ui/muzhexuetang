@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
-import { MaterialSource } from '@prisma/client'
+import { MaterialSource, MaterialType } from '@prisma/client'
 import { normalizeMaterialAudience, normalizeMaterialStatus } from '@/lib/material-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import {
@@ -21,6 +21,12 @@ function requireAdmin(session: { user?: { role?: string; id?: string } } | null)
   const id = (session?.user as { id?: string } | undefined)?.id
   if (!session?.user || role !== 'admin') return null
   return id || null
+}
+
+function parseMaterialType(value: unknown): MaterialType | null {
+  if (value === null || value === undefined || value === '') return MaterialType.HANDOUT
+  if (typeof value !== 'string') return null
+  return Object.values(MaterialType).includes(value as MaterialType) ? value as MaterialType : null
 }
 
 /** 传统 FormData 上传：文件在请求体中，经 ECS 中转写入存储 */
@@ -45,13 +51,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const description = formData.get('description') as string | null
   const audience = normalizeMaterialAudience(formData.get('audience'))
   const status = normalizeMaterialStatus(formData.get('status'))
+  const materialType = parseMaterialType(formData.get('materialType'))
   const tags = String(formData.get('tags') || '')
     .split(/[，,\s]+/)
     .map((tag) => tag.trim())
     .filter(Boolean)
   const isPinned = formData.get('isPinned') === 'true'
 
-  if (!file || !title || !grade || !subject) {
+  if (!file || !title || !grade || !subject || !materialType) {
     return NextResponse.json({ error: '参数缺失' }, { status: 400 })
   }
 
@@ -94,6 +101,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       title,
       grade,
       subject,
+      materialType,
       fileUrl: result.storageKey,
       fileName: file.name,
       fileSize: file.size,
@@ -119,9 +127,10 @@ export const PUT = apiHandler(async (req: NextRequest) => {
   if (!userId) return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const body = await req.json()
-  const { key, fileName, fileSize, title, grade, subject, description, audience: audienceRaw, status: statusRaw, tags: tagsStr, isPinned } = body as Record<string, unknown>
+  const { key, fileName, fileSize, title, grade, subject, materialType: materialTypeRaw, description, audience: audienceRaw, status: statusRaw, tags: tagsStr, isPinned } = body as Record<string, unknown>
+  const materialType = parseMaterialType(materialTypeRaw)
 
-  if (!key || !fileName || !fileSize || !title || !grade || !subject) {
+  if (!key || !fileName || !fileSize || !title || !grade || !subject || !materialType) {
     return NextResponse.json({ error: '参数缺失' }, { status: 400 })
   }
 
@@ -164,6 +173,7 @@ export const PUT = apiHandler(async (req: NextRequest) => {
       title: String(title),
       grade: String(grade),
       subject: String(subject),
+      materialType,
       fileUrl: storageKey,
       fileName: String(fileName),
       fileSize: fileSize as number,

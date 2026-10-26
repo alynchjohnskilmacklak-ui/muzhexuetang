@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button, Card, Divider, Empty, Image as AntImage, Input, InputNumber, List, Modal, Select, Space, Tag, Tabs, Typography, Upload } from 'antd'
 import {
   BookOutlined, LineChartOutlined, PlusOutlined,
@@ -53,6 +53,7 @@ const MASTERY_LEVELS = [
 
 export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherId }: { studentId: string; studentName: string; teacherId: string }) {
   const router = useRouter()
+  const pendingFeedbackRequestRef = useRef<{ fingerprint: string; requestId: string } | null>(null)
   const [tab, setTab] = useState('feedback')
 
   // Stage summary
@@ -197,17 +198,25 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
     if (!feedbackText.trim()) { toast.warning('请输入反馈内容'); return }
     setFeedbackSaving(true)
     try {
+      const requestBody = {
+        studentIds: [studentId],
+        mood: feedbackMood,
+        tags: feedbackTags.split(/[,，]/).filter(Boolean).map((t: string) => t.trim()),
+        overallComment: feedbackText,
+        homeworkDone, inClassRating,
+        imageUrls, status: 'PUBLISHED',
+      }
+      const fingerprint = JSON.stringify(requestBody)
+      const pending = pendingFeedbackRequestRef.current
+      const requestId = pending?.fingerprint === fingerprint
+        ? pending.requestId
+        : globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`
+      pendingFeedbackRequestRef.current = { fingerprint, requestId }
       await requestJson('/api/feedback', {
         method: 'POST',
-        body: JSON.stringify({
-          studentIds: [studentId],
-          mood: feedbackMood,
-          tags: feedbackTags.split(/[,，]/).filter(Boolean).map((t: string) => t.trim()),
-          overallComment: feedbackText,
-          homeworkDone, inClassRating,
-          imageUrls, status: 'PUBLISHED',
-        }),
+        body: JSON.stringify({ ...requestBody, clientRequestId: requestId }),
       })
+      pendingFeedbackRequestRef.current = null
       toast.success('成长反馈已发布，家长会立即收到通知')
       setFeedbackText(''); setFeedbackMood('GOOD'); setFeedbackTags('')
       setHomeworkDone(null); setInClassRating(null); setImageUrls([]); setImageDisplayUrls({})
@@ -380,7 +389,7 @@ export function TeacherStudentWorkbenchClient({ studentId, studentName, teacherI
             </div>
 
             <Button type="primary" icon={<SendOutlined />} loading={feedbackSaving} onClick={submitFeedback}
-              style={{ marginTop: 14, background: '#E8784A', border: 'none' }}>发布反馈</Button>
+              style={{ marginTop: 14, background: 'var(--color-primary)', border: 'none' }}>发布反馈</Button>
           </Card>
         </div>
       ),

@@ -1,4 +1,5 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useEffect, useMemo, useState } from 'react'
 import { format } from 'date-fns'
@@ -20,6 +21,15 @@ import {
   Typography,
 } from 'antd'
 import useSWR from 'swr'
+import {
+  CalendarOutlined,
+  CheckOutlined,
+  ClockCircleOutlined,
+  CrownOutlined,
+  EnvironmentOutlined,
+  PlusOutlined,
+  TeamOutlined,
+} from '@ant-design/icons'
 import { useDivision } from '@/contexts/DivisionContext'
 import { MobileSelect } from '@/components/MobileSelect'
 import { HOURLY_PERIODS } from '@/lib/schedule-periods'
@@ -313,14 +323,32 @@ export default function IntensiveSchedulePage() {
     return count
   }, [grid])
 
-  const openCreate = (spotId: string, slotId: string) => {
-    const spot = spots.find(s => s.id === spotId)
-    const slot = HOURLY_SLOTS.find(s => s.id === slotId)
+  // 当日个性化课程时间线（替代桌位×小时矩阵课表）
+  const todayLessons = useMemo(() => {
+    const list: Array<{ spot: string; slotStart: string; slotEnd: string; lesson: ScheduleLesson }> = []
+    Object.entries(grid).forEach(([roomId, hours]) => {
+      const spot = spots.find((s) => s.id === roomId)
+      Object.entries(hours).forEach(([slotId, lessons]) => {
+        const slot = HOURLY_SLOTS.find((h) => h.id === slotId)
+        lessons.forEach((lesson) => {
+          list.push({
+            spot: (spot?.name as string) || '未分配桌位',
+            slotStart: slot?.start || lesson.startTime || '',
+            slotEnd: slot?.end || '',
+            lesson,
+          })
+        })
+      })
+    })
+    return list.sort((a, b) => a.slotStart.localeCompare(b.slotStart))
+  }, [grid, spots])
+
+  const openCreate = () => {
     setCreateData({
-      roomId: spotId,
-      roomName: (spot?.name as string) || '',
-      startTime: slot?.start || '',
-      endTime: slot?.end || '',
+      roomId: '',
+      roomName: '',
+      startTime: '',
+      endTime: '',
       date: dateStr,
       teacherId: '',
       studentIds: [],
@@ -333,6 +361,18 @@ export default function IntensiveSchedulePage() {
 
   const handleCreate = async () => {
     const expectedStudents = getPersonalClassLimit(createData.teachingType)
+    if (!createData.roomId) {
+      message.warning('请选择桌位')
+      return
+    }
+    if (!createData.startTime || !createData.endTime) {
+      message.warning('请填写开始与结束时间')
+      return
+    }
+    if (createData.endTime <= createData.startTime) {
+      message.warning('结束时间必须晚于开始时间')
+      return
+    }
     if (!createData.teacherId || !createData.courseId || createData.studentIds.length !== expectedStudents) {
       message.warning(`请选择老师、课程和${expectedStudents}名学员`)
       return
@@ -487,49 +527,100 @@ export default function IntensiveSchedulePage() {
 
   return (
     <div>
+      {/* Hero：个性化排课驾驶舱（深墨绿鎏金 · 贵宾服务） */}
       <div style={{
-        marginBottom: 12,
-        display: 'flex',
-        alignItems: isMobile ? 'stretch' : 'center',
-        flexDirection: isMobile ? 'column' : 'row',
-        justifyContent: 'space-between',
-        gap: 10,
+        borderRadius: 18, overflow: 'hidden', marginBottom: 16,
+        border: '1px solid #C9A45C',
+        boxShadow: '0 10px 26px rgba(18,60,53,.25)',
+        background: 'linear-gradient(150deg,#17352F 0%,#0E5E4E 55%,#0B4B40 100%)',
+        padding: 16, color: '#F5F1E8',
       }}>
-        <div>
-          <Text strong style={{ fontSize: 16, color: '#1F2329' }}>突击全能班</Text>
-          <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>一对一/一对二/一对三 · 灵活排课</Text>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            fontSize: 11, fontWeight: 700, letterSpacing: 1,
+            color: '#F2E3B6', background: 'rgba(201,164,92,.16)',
+            border: '1px solid rgba(201,164,92,.5)',
+            padding: '3px 10px', borderRadius: 999, whiteSpace: 'nowrap',
+          }}>
+            <CrownOutlined /> 个性化排课 · 贵宾服务
+          </span>
+          <Button
+            onClick={openHistory}
+            style={{
+              minHeight: 34, borderRadius: 999, fontSize: 12.5, fontWeight: 600,
+              color: '#F2E3B6', background: 'rgba(201,164,92,.12)',
+              border: '1px solid rgba(201,164,92,.55)',
+            }}
+          >
+            <CalendarOutlined /> 历史课程补录
+          </Button>
         </div>
-        <Button
-          type="primary"
-          onClick={openHistory}
-          style={{ minHeight: 42, borderRadius: 10, background: '#E8784A' }}
-        >
-          历史课程补录
-        </Button>
+        <div style={{ marginTop: 12, fontSize: 17, fontWeight: 800, color: '#F5F1E8', lineHeight: 1.4 }}>
+          突击全能班 · 一对一 / 一对二 / 一对三
+        </div>
+        <div style={{ marginTop: 4, fontSize: 11.5, color: 'rgba(245,241,232,.72)', lineHeight: 1.6 }}>
+          教师灵活约课 · 授课审核闭环 · 课时与工资自动结算
+        </div>
+        <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
+          {[
+            { label: '今日已排', value: intensiveCount, unit: '节' },
+            { label: '待上课约课', value: pendingAppointments.length, unit: '节', highlight: pendingAppointments.length > 0 },
+            { label: '待审核', value: pendingReviews.length, unit: '条', highlight: pendingReviews.length > 0 },
+            { label: '可用桌位', value: spots.length, unit: '个' },
+          ].map((it) => (
+            <div key={it.label} style={{
+              textAlign: 'center', padding: '9px 2px', borderRadius: 12,
+              background: it.highlight ? 'linear-gradient(135deg,#F2E3B6,#D8BC7C)' : 'rgba(255,255,255,.08)',
+              border: it.highlight ? '1px solid rgba(242,227,182,.7)' : '1px solid rgba(242,227,182,.18)',
+            }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: it.highlight ? '#123C35' : '#F5F1E8', fontVariantNumeric: 'tabular-nums' }}>
+                {it.value}<span style={{ fontSize: 10.5, fontWeight: 600 }}> {it.unit}</span>
+              </div>
+              <div style={{ marginTop: 2, fontSize: 10, color: it.highlight ? 'rgba(18,60,53,.7)' : 'rgba(245,241,232,.6)' }}>{it.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <Card
         id="intensive-appointments"
         title={(
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            <span>教师约课记录</span>
-            <Tag color={pendingAppointments.length ? 'blue' : 'green'} style={{ borderRadius: 999, margin: 0 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 7, color: '#2B2110', fontWeight: 700 }}>
+              <span style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 26, height: 26, borderRadius: 8,
+                background: 'linear-gradient(155deg,#FFB84D,#E8784A)', color: '#fff', fontSize: 13,
+              }}><CalendarOutlined /></span>
+              教师约课记录
+            </span>
+            <Tag color={pendingAppointments.length ? 'orange' : 'green'} style={{ borderRadius: 999, margin: 0 }}>
               {pendingAppointments.length ? `${appointmentData?.total || pendingAppointments.length}节待上课/考勤` : '暂无待跟进约课'}
             </Tag>
           </div>
         )}
-        style={{ marginBottom: 16, borderRadius: 14 }}
+        style={{ marginBottom: 16, borderRadius: 16, border: '1px solid rgba(232,120,74,.14)', boxShadow: '0 2px 8px rgba(58,50,39,.05)' }}
         styles={{ body: { padding: isMobile ? 12 : 16 } }}
       >
-        <Alert
-          type="info"
-          showIcon
-          message="约课与授课审核分开管理"
-          description="这里展示教师已经安排的课次；教师上课并提交考勤后，记录才会进入下方“待审核授课记录”，审核通过后才累计课时和工资。"
-          style={{ marginBottom: 12, borderRadius: 10 }}
-        />
         {!pendingAppointments.length ? (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无教师新约的个性化课程" />
+          <div style={{
+            borderRadius: 14, padding: '26px 18px', textAlign: 'center',
+            background: 'linear-gradient(150deg,#FFFDF7,#FBF3E4)',
+            border: '1px dashed rgba(201,164,92,.5)',
+          }}>
+            <div style={{
+              width: 46, height: 46, margin: '0 auto 10px', borderRadius: 999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'linear-gradient(135deg,#F2E3B6,#D8BC7C)', color: '#123C35', fontSize: 20,
+            }}>
+              <CrownOutlined />
+            </div>
+            <div style={{ color: '#2B2110', fontSize: 14, fontWeight: 700 }}>暂无教师新约的个性化课程</div>
+            <div style={{ marginTop: 6, color: '#9A8E7A', fontSize: 12, lineHeight: 1.7, maxWidth: 320, margin: '6px auto 0' }}>
+              教师发起约课后会第一时间出现在这里；如需补录历史课次，使用右上角「历史课程补录」。
+            </div>
+          </div>
         ) : (
           <div style={{
             display: 'grid',
@@ -544,14 +635,14 @@ export default function IntensiveSchedulePage() {
                   id={`appointment-lesson-${appointment.id}`}
                   style={{
                     minWidth: 0,
-                    border: highlighted
-                      ? '2px solid var(--color-primary)'
-                      : '1px solid var(--color-hairline)',
                     borderRadius: 14,
                     padding: isMobile ? 12 : 14,
                     background: highlighted
-                      ? 'var(--color-primary-bg)'
-                      : 'var(--color-surface-1)',
+                      ? 'linear-gradient(150deg,#123C35,#0E5E4E)'
+                      : 'linear-gradient(150deg,#FFFDF7,#FDF6E9)',
+                    border: highlighted ? '1px solid #C9A45C' : '1px solid rgba(201,164,92,.35)',
+                    boxShadow: highlighted ? '0 6px 16px rgba(18,60,53,.2)' : '0 2px 8px rgba(58,50,39,.05)',
+                    color: highlighted ? '#F5F1E8' : '#2B2110',
                   }}
                 >
                   <div style={{
@@ -561,15 +652,15 @@ export default function IntensiveSchedulePage() {
                     gap: 10,
                   }}>
                     <div style={{ minWidth: 0 }}>
-                      <Text strong style={{ display: 'block', overflowWrap: 'anywhere' }}>
+                      <Text strong style={{ display: 'block', overflowWrap: 'anywhere', fontSize: 15, color: highlighted ? '#F5F1E8' : '#2B2110' }}>
                         {appointment.groupName}
                       </Text>
-                      <Text style={{ color: 'var(--color-ink-muted)', fontSize: 13 }}>
+                      <Text style={{ color: highlighted ? 'rgba(245,241,232,.75)' : '#9A8E7A', fontSize: 13 }}>
                         {appointment.teacherName} · {appointment.subject || '学科待确认'}
                       </Text>
                     </div>
                     <Tag
-                      color={appointment.statusLabel === '待补交考勤' ? 'orange' : 'blue'}
+                      color={appointment.statusLabel === '待补交考勤' ? 'orange' : 'gold'}
                       style={{ borderRadius: 999, margin: 0, flexShrink: 0 }}
                     >
                       {appointment.statusLabel}
@@ -579,25 +670,28 @@ export default function IntensiveSchedulePage() {
                     marginTop: 12,
                     padding: 12,
                     borderRadius: 10,
-                    background: 'var(--color-surface-3)',
+                    background: highlighted ? 'rgba(255,255,255,.07)' : 'rgba(232,120,74,.06)',
+                    border: highlighted ? '1px solid rgba(242,227,182,.25)' : '1px solid rgba(232,120,74,.14)',
                     display: 'grid',
                     gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
                     gap: 8,
                     fontSize: 13,
                   }}>
                     <div>
-                      <Text type="secondary">上课时间</Text>
-                      <div>{format(new Date(appointment.lessonDate), 'M月d日')} {appointment.startTime}-{appointment.endTime}</div>
+                      <Text type="secondary" style={{ color: highlighted ? 'rgba(245,241,232,.6)' : undefined }}>上课时间</Text>
+                      <div style={{ fontWeight: 700, color: highlighted ? '#F2E3B6' : undefined }}>
+                        {format(new Date(appointment.lessonDate), 'M月d日')} {appointment.startTime}-{appointment.endTime}
+                      </div>
                     </div>
                     <div>
-                      <Text type="secondary">班型与学生</Text>
-                      <div style={{ fontWeight: 700 }}>
+                      <Text type="secondary" style={{ color: highlighted ? 'rgba(245,241,232,.6)' : undefined }}>班型与学生</Text>
+                      <div style={{ fontWeight: 700, color: highlighted ? '#F5F1E8' : undefined }}>
                         {appointment.teachingTypeLabel} · {appointment.students.map((student) => student.name).join('、') || '待确认'}
                       </div>
                     </div>
                   </div>
                   {appointment.note && (
-                    <Text style={{ display: 'block', marginTop: 10, color: 'var(--color-ink-muted)', overflowWrap: 'anywhere' }}>
+                    <Text style={{ display: 'block', marginTop: 10, color: highlighted ? 'rgba(242,227,182,.75)' : '#9A8E7A', overflowWrap: 'anywhere' }}>
                       约课说明：{appointment.note}
                     </Text>
                   )}
@@ -612,20 +706,40 @@ export default function IntensiveSchedulePage() {
         id="intensive-reviews"
         title={(
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            <span>待审核授课记录</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 7, color: '#2B2110', fontWeight: 700 }}>
+              <span style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 26, height: 26, borderRadius: 8,
+                background: 'linear-gradient(155deg,#4CB782,#2E8E66)', color: '#fff', fontSize: 13,
+              }}><CheckOutlined /></span>
+              待审核授课记录
+            </span>
             <Tag color={pendingReviews.length ? 'orange' : 'green'} style={{ borderRadius: 999, margin: 0 }}>
               {pendingReviews.length ? `${pendingReviews.length}条待处理` : '全部处理完成'}
             </Tag>
           </div>
         )}
-        style={{ marginBottom: 16, borderRadius: 14 }}
+        style={{ marginBottom: 16, borderRadius: 16, border: '1px solid rgba(62,142,110,.16)', boxShadow: '0 2px 8px rgba(58,50,39,.05)' }}
         styles={{ body: { padding: isMobile ? 12 : 16 } }}
       >
         {!pendingReviews.length ? (
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description="暂无教师提交的待审核授课记录"
-          />
+          <div style={{
+            borderRadius: 14, padding: '24px 18px', textAlign: 'center',
+            background: 'linear-gradient(150deg,#F4FAF6,#EBF4EE)',
+            border: '1px dashed rgba(62,142,110,.45)',
+          }}>
+            <div style={{
+              width: 44, height: 44, margin: '0 auto 10px', borderRadius: 999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'linear-gradient(135deg,#4CB782,#2E8E66)', color: '#fff', fontSize: 20,
+            }}>
+              <CheckOutlined />
+            </div>
+            <div style={{ color: '#285247', fontSize: 14, fontWeight: 700 }}>全部处理完成</div>
+            <div style={{ marginTop: 6, color: '#7A8F83', fontSize: 12, lineHeight: 1.7, maxWidth: 320, margin: '6px auto 0' }}>
+              教师完成个性化课程并提交考勤后，授课记录会进入这里，审核通过即累计课时并结算教师工资。
+            </div>
+          </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
             {pendingReviews.map((review) => (
@@ -634,22 +748,23 @@ export default function IntensiveSchedulePage() {
                 id={`review-lesson-${review.lessonId}`}
                 style={{
                   minWidth: 0,
-                  border: targetReviewLessonId === review.lessonId
-                    ? '2px solid var(--color-primary)'
-                    : '1px solid var(--color-hairline)',
                   borderRadius: 14,
                   padding: isMobile ? 12 : 14,
                   background: targetReviewLessonId === review.lessonId
-                    ? 'var(--color-primary-bg)'
-                    : 'var(--color-surface-1)',
+                    ? 'linear-gradient(150deg,#FFF7EE,#FDF0DF)'
+                    : '#FFFFFF',
+                  border: targetReviewLessonId === review.lessonId
+                    ? '1px solid rgba(232,120,74,.6)'
+                    : '1px solid rgba(232,120,74,.2)',
+                  boxShadow: '0 2px 8px rgba(58,50,39,.04)',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
                   <div style={{ minWidth: 0 }}>
-                    <Text strong style={{ display: 'block', overflowWrap: 'anywhere' }}>
+                    <Text strong style={{ display: 'block', overflowWrap: 'anywhere', fontSize: 15, color: '#2B2110' }}>
                       {review.groupName}
                     </Text>
-                    <Text style={{ color: 'var(--color-ink-muted)', fontSize: 13 }}>
+                    <Text style={{ color: '#9A8E7A', fontSize: 13 }}>
                       {review.subject} · {review.teacherName}
                     </Text>
                   </div>
@@ -660,7 +775,8 @@ export default function IntensiveSchedulePage() {
                   marginTop: 12,
                   padding: 12,
                   borderRadius: 10,
-                  background: 'var(--color-surface-3)',
+                  background: '#FFF8F4',
+                  border: '1px solid rgba(232,120,74,.12)',
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',
                   gap: 8,
@@ -668,7 +784,7 @@ export default function IntensiveSchedulePage() {
                 }}>
                   <div>
                     <Text type="secondary">上课时间</Text>
-                    <div>{format(new Date(review.lessonDate), 'M月d日')} {review.startTime}-{review.endTime}</div>
+                    <div style={{ fontWeight: 700 }}>{format(new Date(review.lessonDate), 'M月d日')} {review.startTime}-{review.endTime}</div>
                   </div>
                   <div>
                     <Text type="secondary">教师申报</Text>
@@ -685,7 +801,7 @@ export default function IntensiveSchedulePage() {
                 </div>
 
                 {review.teacherNote && (
-                  <Text style={{ display: 'block', marginTop: 10, color: 'var(--color-ink-muted)', overflowWrap: 'anywhere' }}>
+                  <Text style={{ display: 'block', marginTop: 10, color: '#9A8E7A', overflowWrap: 'anywhere' }}>
                     教师说明：{review.teacherNote}
                   </Text>
                 )}
@@ -699,7 +815,7 @@ export default function IntensiveSchedulePage() {
                   placeholder="审核备注（驳回时必填）"
                   rows={2}
                   maxLength={500}
-                  style={{ marginTop: 12, resize: 'none' }}
+                  style={{ marginTop: 12, resize: 'none', borderRadius: 10 }}
                 />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>
                   <Button
@@ -715,7 +831,7 @@ export default function IntensiveSchedulePage() {
                     loading={reviewingId === review.id}
                     disabled={Boolean(reviewingId) && reviewingId !== review.id}
                     onClick={() => handleReview(review, 'APPROVE')}
-                    style={{ minHeight: 42, borderRadius: 10, background: 'var(--color-primary)' }}
+                    style={{ minHeight: 42, borderRadius: 10, background: 'linear-gradient(135deg,#4CB782,#2E8E66)', border: 'none' }}
                   >
                     核对无误并通过
                   </Button>
@@ -727,150 +843,118 @@ export default function IntensiveSchedulePage() {
       </Card>
 
       {/* Date navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
         <button onClick={() => setSelectedDate(subDays(selectedDate, 1))}
-          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>←</button>
-        <div style={{ padding: '0 16px', height: 34, display: 'flex', alignItems: 'center', gap: 8,
-          background: '#fff', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8, fontSize: 14, fontWeight: 500 }}>
-          <span style={{ color: INTENSIVE_COLOR }}>📅</span>
+          style={{ border: '1px solid rgba(201,164,92,.4)', borderRadius: 8, background: '#FFFDF7', padding: '5px 12px', cursor: 'pointer', fontSize: 14, color: '#A06E0B' }}>←</button>
+        <div style={{ padding: '0 14px', height: 34, display: 'flex', alignItems: 'center', gap: 8,
+          background: 'linear-gradient(135deg,#123C35,#0E5E4E)', border: '1px solid rgba(201,164,92,.5)', borderRadius: 10, fontSize: 14, fontWeight: 600, color: '#F5F1E8' }}>
+          <CalendarOutlined style={{ color: '#F2E3B6' }} />
           {format(selectedDate, 'M月d日 EEEE', { locale: zhCN })}
         </div>
         <button onClick={() => setSelectedDate(addDays(selectedDate, 1))}
-          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 10px', cursor: 'pointer', fontSize: 16 }}>→</button>
+          style={{ border: '1px solid rgba(201,164,92,.4)', borderRadius: 8, background: '#FFFDF7', padding: '5px 12px', cursor: 'pointer', fontSize: 14, color: '#A06E0B' }}>→</button>
         <button onClick={() => setSelectedDate(new Date())}
-          style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>今天</button>
-        <div style={{ marginLeft: 'auto', fontSize: 12, color: INTENSIVE_COLOR, fontWeight: 500 }}>
-          今日已排 {intensiveCount} 课时
+          style={{ border: '1px solid rgba(201,164,92,.4)', borderRadius: 8, background: '#FFFDF7', padding: '5px 12px', cursor: 'pointer', fontSize: 12, color: '#A06E0B' }}>今天</button>
+        <div style={{ marginLeft: 'auto', fontSize: 12, color: '#A06E0B', fontWeight: 700 }}>
+          今日已排 <span style={{ fontSize: 15 }}>{intensiveCount}</span> 课时
         </div>
       </div>
 
-      {isLoading ? (
-        <div style={{ textAlign: 'center', padding: 80 }}><Spin size="large" /></div>
-      ) : spots.length === 0 ? (
-        <Empty description="暂无突击全能班桌位，请在系统设置→教室管理中添加类型为'一对一'的教室/桌位" />
-      ) : (
-        <div style={{ overflowX: 'auto', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: `80px repeat(${spots.length}, 1fr)`, minWidth: 80 + spots.length * 160 }}>
-            {/* Header */}
-            <div />
-            {spots.map(spot => (
-              <div key={spot.id as string} style={{
-                padding: '10px 8px', textAlign: 'center',
-                borderRight: '0.5px solid var(--color-border, #EEE7E1)',
-                borderBottom: `2px solid ${INTENSIVE_COLOR}`,
-                background: 'rgba(83,74,183,.03)',
-              }}>
-                <div style={{ fontSize: 12, fontWeight: 600 }}>{spot.name as string}</div>
-                <div style={{ fontSize: 9, color: INTENSIVE_COLOR, marginTop: 2 }}>突击全能班</div>
-              </div>
-            ))}
-
-            {/* Hour slots */}
-            {HOURLY_SLOTS.map(slot => (
-              <div key={slot.id} style={{ display: 'contents' }}>
-                <div style={{
-                  minHeight: SLOT_HEIGHT, borderRight: '0.5px solid var(--color-border, #EEE7E1)',
-                  borderBottom: '0.5px solid var(--color-border, #EEE7E1)',
-                  padding: '4px 8px', textAlign: 'right',
-                  display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end',
-                  background: '#fafafa',
+      {/* 当日个性化课程时间线（替代桌位×小时矩阵课表） */}
+      <Card
+        title={(
+          <span style={{ display: 'flex', alignItems: 'center', gap: 7, color: '#2B2110', fontWeight: 700 }}>
+            <span style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 26, height: 26, borderRadius: 8,
+              background: 'linear-gradient(155deg,#123C35,#0E5E4E)', color: '#F2E3B6', fontSize: 13,
+            }}><ClockCircleOutlined /></span>
+            当日个性化课程
+          </span>
+        )}
+        extra={(
+          <Button
+            icon={<PlusOutlined />}
+            onClick={openCreate}
+            style={{ minHeight: 32, borderRadius: 999, fontSize: 12, fontWeight: 600, color: '#F2E3B6', background: 'linear-gradient(135deg,#123C35,#0E5E4E)', border: '1px solid rgba(201,164,92,.55)' }}
+          >
+            快捷排课
+          </Button>
+        )}
+        style={{ marginBottom: 16, borderRadius: 16, border: '1px solid rgba(201,164,92,.2)', boxShadow: '0 2px 8px rgba(58,50,39,.05)' }}
+        styles={{ body: { padding: isMobile ? 12 : 16 } }}
+      >
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: 60 }}><Spin size="large" /></div>
+        ) : todayLessons.length === 0 ? (
+          <div style={{
+            borderRadius: 14, padding: '26px 18px', textAlign: 'center',
+            background: 'linear-gradient(150deg,#FFFDF7,#FBF3E4)',
+            border: '1px dashed rgba(201,164,92,.5)',
+          }}>
+            <div style={{
+              width: 46, height: 46, margin: '0 auto 10px', borderRadius: 999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'linear-gradient(135deg,#F2E3B6,#D8BC7C)', color: '#123C35', fontSize: 20,
+            }}>
+              <ClockCircleOutlined />
+            </div>
+            <div style={{ color: '#2B2110', fontSize: 14, fontWeight: 700 }}>今日暂无个性化课程排课</div>
+            <div style={{ marginTop: 6, color: '#9A8E7A', fontSize: 12, lineHeight: 1.7, maxWidth: 320, margin: '6px auto 0' }}>
+              点击右上角「快捷排课」选择桌位与时段，为学员安排一对一 / 一对二 / 一对三课程。
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {todayLessons.map((item, index) => {
+              const lesson = item.lesson
+              const courseType = lesson.courseType || 'ONE_ON_ONE'
+              const typeConfig = TYPE_CONFIG[courseType] || TYPE_CONFIG.ONE_ON_ONE
+              const subject = lesson.subject || '其他学科'
+              const palette = subjectStyle(subject)
+              const startHM = item.slotStart.slice(0, 5)
+              const endHM = item.slotEnd.slice(0, 5)
+              return (
+                <div key={lesson.lessonId || `${item.slotStart}-${index}`} style={{
+                  display: 'flex', gap: 10, alignItems: 'stretch',
+                  padding: '10px 12px', borderRadius: 14,
+                  background: 'linear-gradient(150deg,#FFFDF7,#FDF6E9)',
+                  border: '1px solid rgba(201,164,92,.35)',
+                  boxShadow: '0 2px 8px rgba(58,50,39,.05)',
                 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: INTENSIVE_COLOR }}>{slot.start}</div>
-                  <div style={{ fontSize: 9, color: 'var(--color-text-tertiary, #98A2B3)' }}>至 {slot.end}</div>
-                </div>
-
-                {spots.map(spot => {
-                  const lessons = grid[spot.id as string]?.[slot.id] || []
-                  return (
-                    <div key={spot.id as string} style={{
-                      minHeight: SLOT_HEIGHT, borderRight: '0.5px solid var(--color-border, #EEE7E1)',
-                      borderBottom: '0.5px solid var(--color-border, #EEE7E1)',
-                      padding: 4, cursor: lessons.length ? 'default' : 'pointer',
-                    }} onClick={() => { if (!lessons.length) openCreate(spot.id as string, slot.id) }}>
-                      {lessons.length ? (
-                        <div style={{ display: 'grid', gap: 4 }}>
-                          {lessons.length > 1 && (
-                            <div style={{
-                              padding: '3px 6px',
-                              borderRadius: 6,
-                              background: 'rgba(245,166,35,.12)',
-                              color: '#8A5B00',
-                              fontSize: 9,
-                              lineHeight: 1.35,
-                            }}>
-                              同地点同时间有 {lessons.length} 节课，请核对安排
-                            </div>
-                          )}
-                          {lessons.map((lesson, lessonIndex) => {
-                            const courseType = lesson.courseType || 'ONE_ON_ONE'
-                            const typeConfig = TYPE_CONFIG[courseType] || TYPE_CONFIG.ONE_ON_ONE
-                            const subject = lesson.subject || '其他学科'
-                            const palette = subjectStyle(subject)
-                            return (
-                              <div key={lesson.lessonId || `${subject}-${lessonIndex}`} style={{
-                                minHeight: 64,
-                                borderRadius: 8,
-                                padding: '6px 7px',
-                                background: palette.bg,
-                                border: `1px solid ${palette.color}33`,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                minWidth: 0,
-                              }}>
-                                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4, marginBottom: 3 }}>
-                                  <span style={{
-                                    fontSize: 9,
-                                    fontWeight: 700,
-                                    color: typeConfig.color,
-                                    background: typeConfig.bg,
-                                    padding: '1px 5px',
-                                    borderRadius: 999,
-                                  }}>
-                                    {typeConfig.label}
-                                  </span>
-                                  <span style={{ fontSize: 9, color: palette.color, fontWeight: 700 }}>{subject}</span>
-                                </div>
-                                <div style={{ fontSize: 11, fontWeight: 700, color: '#1a1201', lineHeight: 1.35, overflowWrap: 'anywhere' }}>
-                                  {lesson.teacherName || '未分配教师'}
-                                </div>
-                                <div style={{ fontSize: 10, color: '#5A4E3A', lineHeight: 1.35, overflowWrap: 'anywhere' }}>
-                                  {lesson.courseName || '个性化课程'}
-                                </div>
-                                <div style={{ fontSize: 9, color: '#7A6F61', lineHeight: 1.35 }}>
-                                  {lesson.grade || '未填年级'} · {lesson.headcount || 1}人
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      ) : (
-                        <div style={{ minHeight: SLOT_HEIGHT - 8, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          background: 'transparent', transition: 'all .15s' }}
-                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(83,74,183,.06)' }}
-                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
-                          <span style={{ fontSize: 10, color: 'rgba(0,0,0,.12)' }}>+ 安排</span>
-                        </div>
-                      )}
+                  <div style={{
+                    width: 58, flexShrink: 0, borderRadius: 10,
+                    background: 'linear-gradient(155deg,#123C35,#0E5E4E)',
+                    border: '1px solid rgba(201,164,92,.55)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    padding: '6px 0',
+                  }}>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: '#F2E3B6', fontVariantNumeric: 'tabular-nums' }}>{startHM}</div>
+                    <div style={{ fontSize: 9.5, color: 'rgba(242,227,182,.7)', marginTop: 1 }}>至 {endHM}</div>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 700, color: '#2B2110', overflowWrap: 'anywhere' }}>
+                        {lesson.courseName || '个性化课程'}
+                      </span>
+                      <span style={{
+                        fontSize: 9.5, fontWeight: 700, color: typeConfig.color,
+                        background: typeConfig.bg, padding: '1px 6px', borderRadius: 999, whiteSpace: 'nowrap',
+                      }}>{typeConfig.label}</span>
+                      <span style={{ fontSize: 9.5, fontWeight: 700, color: palette.color, background: palette.bg, padding: '1px 6px', borderRadius: 999, whiteSpace: 'nowrap' }}>{subject}</span>
                     </div>
-                  )
-                })}
-              </div>
-            ))}
+                    <div style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', color: '#5C4F3F', fontSize: 12 }}>
+                      <span><TeamOutlined style={{ marginRight: 3, color: '#A06E0B' }} />{lesson.teacherName || '未分配教师'}</span>
+                      <span><EnvironmentOutlined style={{ marginRight: 3, color: '#A06E0B' }} />{item.spot}</span>
+                      <span style={{ color: '#9A8E7A' }}>{lesson.grade || '未填年级'} · {lesson.headcount || 1}人</span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
-
-          {/* Legend */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, padding: '8px 14px', borderTop: '0.5px solid var(--color-border, #EEE7E1)', background: '#faf8f5' }}>
-            {SUBJECT_CONFIG.map((cfg) => (
-              <div key={cfg.match} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10 }}>
-                <div style={{ width: 12, height: 12, borderRadius: 3, background: cfg.bg, border: `1px solid ${cfg.color}55` }} />
-                <span>{cfg.match}</span>
-              </div>
-            ))}
-            <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--color-text-tertiary, #98A2B3)' }}>每小时为1课时单位 · 点击空格安排课程</span>
-          </div>
-        </div>
-      )}
+        )}
+      </Card>
 
       <Modal
         title="历史课程补录"
@@ -899,7 +983,7 @@ export default function IntensiveSchedulePage() {
 
           <div>
             <Text strong style={{ display: 'block', marginBottom: 5 }}>突击全能班 *</Text>
-            <Select
+            <AdaptiveSelect
               showSearch
               optionFilterProp="label"
               value={historyDraft.groupId || undefined}
@@ -923,7 +1007,7 @@ export default function IntensiveSchedulePage() {
               }}>
                 <div>
                   <Text strong style={{ display: 'block', marginBottom: 5 }}>授课教师 *</Text>
-                  <Select
+                  <AdaptiveSelect
                     value={historyDraft.teacherId || undefined}
                     onChange={(teacherId) => {
                       setHistoryDraft((current) => ({ ...current, teacherId }))
@@ -1014,7 +1098,7 @@ export default function IntensiveSchedulePage() {
                 <Text strong style={{ display: 'block', marginBottom: 5 }}>
                   上课学生（必须选择{selectedHistoryGroup.expectedStudents}人）*
                 </Text>
-                <Select
+                <AdaptiveSelect
                   mode="multiple"
                   value={historyDraft.records.map((record) => record.studentId)}
                   onChange={(studentIds: string[]) => {
@@ -1066,7 +1150,7 @@ export default function IntensiveSchedulePage() {
                           当前剩余 {Number(student?.remainHours || 0).toFixed(1)} 小时 · 本次预计扣 {deductHours.toFixed(1)} 小时
                         </Text>
                       </div>
-                      <Select
+                      <AdaptiveSelect
                         value={record.status}
                         onChange={(status: HistoryStatus) => {
                           setHistoryDraft((current) => ({
@@ -1146,16 +1230,49 @@ export default function IntensiveSchedulePage() {
         okButtonProps={{ style: { background: INTENSIVE_COLOR, borderColor: INTENSIVE_COLOR } }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 8 }}>
           <div>
-            <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>桌位</Text>
-            <Input value={createData.roomName || ''} readOnly style={{ background: '#f5f5f5' }} />
+            <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>桌位 *</Text>
+            <MobileSelect
+              placeholder="选择一对一桌位"
+              style={{ width: '100%' }}
+              value={createData.roomId || undefined}
+              onChange={(value) => {
+                const spot = spots.find((s) => s.id === value)
+                setCreateData((current) => ({ ...current, roomId: value, roomName: (spot?.name as string) || '' }))
+              }}
+              options={spots.map((spot) => ({ label: spot.name as string, value: spot.id as string }))}
+            />
+            {spots.length === 0 && (
+              <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 4 }}>
+                暂无一对一桌位，请到系统设置 → 教室管理中添加类型为“一对一”的教室/桌位
+              </Text>
+            )}
           </div>
           <div>
-            <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>时间</Text>
-            <Input value={`${createData.date || ''} ${createData.startTime || ''}-${createData.endTime || ''}`} readOnly style={{ background: '#f5f5f5' }} />
+            <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>时间 *</Text>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div>
+                <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 4 }}>开始时间</Text>
+                <Input
+                  type="time"
+                  value={createData.startTime}
+                  onChange={(event) => setCreateData((current) => ({ ...current, startTime: event.target.value }))}
+                  style={{ minHeight: 42 }}
+                />
+              </div>
+              <div>
+                <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 4 }}>结束时间</Text>
+                <Input
+                  type="time"
+                  value={createData.endTime}
+                  onChange={(event) => setCreateData((current) => ({ ...current, endTime: event.target.value }))}
+                  style={{ minHeight: 42 }}
+                />
+              </div>
+            </div>
           </div>
           <div>
             <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>班型 *</Text>
-            <Select style={{ width: '100%' }} value={createData.teachingType}
+            <AdaptiveSelect style={{ width: '100%' }} value={createData.teachingType}
               onChange={(value) => setCreateData((current) => ({ ...current, teachingType: value, studentIds: [] }))}
               options={[
                 { label: '一对一', value: 'ONE_ON_ONE' },
@@ -1171,7 +1288,7 @@ export default function IntensiveSchedulePage() {
           </div>
           <div>
             <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>学员（需要 {getPersonalClassLimit(createData.teachingType)} 人）*</Text>
-            <Select mode="multiple" placeholder="选择学员" style={{ width: '100%' }}
+            <AdaptiveSelect mode="multiple" placeholder="选择学员" style={{ width: '100%' }}
               value={createData.studentIds} onChange={(value: string[]) => {
                 const limit = getPersonalClassLimit(createData.teachingType)
                 if (value.length > limit) return message.warning(`最多选择${limit}名学员`)
@@ -1181,7 +1298,7 @@ export default function IntensiveSchedulePage() {
           </div>
           <div>
             <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>课程/科目 *</Text>
-            <Select showSearch optionFilterProp="label" placeholder="选择课程" style={{ width: '100%' }}
+            <AdaptiveSelect showSearch optionFilterProp="label" placeholder="选择课程" style={{ width: '100%' }}
               value={createData.courseId || undefined} onChange={(value) => setCreateData((current) => ({ ...current, courseId: value }))}
               options={courseList.map((course) => ({ label: `${course.name}${course.subject ? ` · ${course.subject}` : ''}`, value: course.id as string }))} />
           </div>

@@ -1,0 +1,103 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\01muzhexuetang\\muzhexuetang\\coding\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\01muzhexuetang\\muzhexuetang\\coding\\edu-manage\\src\\app\\error.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:edu-manage\\src\\app\\error.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\01muzhexuetang\\muzhexuetang\\coding\\_svrbase\\admin-dashboard-page.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:_svrbase\\admin-dashboard-page.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\01muzhexuetang\\muzhexuetang\\coding\\\u7267\u54F2\u5B66\u5802\u6559\u80B2\u7CFB\u7EDF\\02-\u6570\u5B66\\\u7267\u54F2\u5B66\u5802\u8D44\u6599\\\u4E03\u5E74\u7EA7\u4E0A\u518C\\\u7B2C\u4E00\u7AE0 \u6709\u7406\u6570\u77E5\u8BC6\u5F52\u7EB3\u4E0E\u9898\u578B\u7A81\u7834\uFF0814\u7C7B\u9898\u578B\u6E05\u5355\uFF09\uFF08\u5B66\u751F\u7248\uFF09.assets\\image2.png||{177559E0-D141-11D0-92DF-00A0C9138C45}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:\u7267\u54F2\u5B66\u5802\u6559\u80B2\u7CFB\u7EDF\\02-\u6570\u5B66\\\u7267\u54F2\u5B66\u5802\u8D44\u6599\\\u4E03\u5E74\u7EA7\u4E0A\u518C\\\u7B2C\u4E00\u7AE0 \u6709\u7406\u6570\u77E5\u8BC6\u5F52\u7EB3\u4E0E\u9898\u578B\u7A81\u7834\uFF0814\u7C7B\u9898\u578B\u6E05\u5355\uFF09\uFF08\u5B66\u751F\u7248\uFF09.assets\\image2.png||{177559E0-D141-11D0-92DF-00A0C9138C45}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\01muzhexuetang\\muzhexuetang\\coding\\baidu_platform.png||{177559E0-D141-11D0-92DF-00A0C9138C45}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:baidu_platform.png||{177559E0-D141-11D0-92DF-00A0C9138C45}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\01muzhexuetang\\muzhexuetang\\coding\\attachment_new.png||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:attachment_new.png||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "error.tsx",
+              "DocumentMoniker": "D:\\01muzhexuetang\\muzhexuetang\\coding\\edu-manage\\src\\app\\error.tsx",
+              "RelativeDocumentMoniker": "edu-manage\\src\\app\\error.tsx",
+              "ToolTip": "D:\\01muzhexuetang\\muzhexuetang\\coding\\edu-manage\\src\\app\\error.tsx",
+              "RelativeToolTip": "edu-manage\\src\\app\\error.tsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-10-03T05:41:39.089Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "admin-dashboard-page.tsx",
+              "DocumentMoniker": "D:\\01muzhexuetang\\muzhexuetang\\coding\\_svrbase\\admin-dashboard-page.tsx",
+              "RelativeDocumentMoniker": "_svrbase\\admin-dashboard-page.tsx",
+              "ToolTip": "D:\\01muzhexuetang\\muzhexuetang\\coding\\_svrbase\\admin-dashboard-page.tsx",
+              "RelativeToolTip": "_svrbase\\admin-dashboard-page.tsx",
+              "ViewState": "AgIAAEQAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-10-03T05:40:58.174Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "image2.png - PNG [20x20, 24 \u4F4D, PNG]",
+              "DocumentMoniker": "D:\\01muzhexuetang\\muzhexuetang\\coding\\\u7267\u54F2\u5B66\u5802\u6559\u80B2\u7CFB\u7EDF\\02-\u6570\u5B66\\\u7267\u54F2\u5B66\u5802\u8D44\u6599\\\u4E03\u5E74\u7EA7\u4E0A\u518C\\\u7B2C\u4E00\u7AE0 \u6709\u7406\u6570\u77E5\u8BC6\u5F52\u7EB3\u4E0E\u9898\u578B\u7A81\u7834\uFF0814\u7C7B\u9898\u578B\u6E05\u5355\uFF09\uFF08\u5B66\u751F\u7248\uFF09.assets\\image2.png",
+              "RelativeDocumentMoniker": "\u7267\u54F2\u5B66\u5802\u6559\u80B2\u7CFB\u7EDF\\02-\u6570\u5B66\\\u7267\u54F2\u5B66\u5802\u8D44\u6599\\\u4E03\u5E74\u7EA7\u4E0A\u518C\\\u7B2C\u4E00\u7AE0 \u6709\u7406\u6570\u77E5\u8BC6\u5F52\u7EB3\u4E0E\u9898\u578B\u7A81\u7834\uFF0814\u7C7B\u9898\u578B\u6E05\u5355\uFF09\uFF08\u5B66\u751F\u7248\uFF09.assets\\image2.png",
+              "ToolTip": "D:\\01muzhexuetang\\muzhexuetang\\coding\\\u7267\u54F2\u5B66\u5802\u6559\u80B2\u7CFB\u7EDF\\02-\u6570\u5B66\\\u7267\u54F2\u5B66\u5802\u8D44\u6599\\\u4E03\u5E74\u7EA7\u4E0A\u518C\\\u7B2C\u4E00\u7AE0 \u6709\u7406\u6570\u77E5\u8BC6\u5F52\u7EB3\u4E0E\u9898\u578B\u7A81\u7834\uFF0814\u7C7B\u9898\u578B\u6E05\u5355\uFF09\uFF08\u5B66\u751F\u7248\uFF09.assets\\image2.png - PNG [20x20, 24 \u4F4D, PNG]",
+              "RelativeToolTip": "\u7267\u54F2\u5B66\u5802\u6559\u80B2\u7CFB\u7EDF\\02-\u6570\u5B66\\\u7267\u54F2\u5B66\u5802\u8D44\u6599\\\u4E03\u5E74\u7EA7\u4E0A\u518C\\\u7B2C\u4E00\u7AE0 \u6709\u7406\u6570\u77E5\u8BC6\u5F52\u7EB3\u4E0E\u9898\u578B\u7A81\u7834\uFF0814\u7C7B\u9898\u578B\u6E05\u5355\uFF09\uFF08\u5B66\u751F\u7248\uFF09.assets\\image2.png - PNG [20x20, 24 \u4F4D, PNG]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001533|",
+              "WhenOpened": "2026-10-03T05:40:51.969Z",
+              "EditorCaption": " - PNG [20x20, 24 \u4F4D, PNG]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "baidu_platform.png - PNG [1341x791, 24 \u4F4D, PNG]",
+              "DocumentMoniker": "D:\\01muzhexuetang\\muzhexuetang\\coding\\baidu_platform.png",
+              "RelativeDocumentMoniker": "baidu_platform.png",
+              "ToolTip": "D:\\01muzhexuetang\\muzhexuetang\\coding\\baidu_platform.png - PNG [1341x791, 24 \u4F4D, PNG]",
+              "RelativeToolTip": "baidu_platform.png - PNG [1341x791, 24 \u4F4D, PNG]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001533|",
+              "WhenOpened": "2026-10-03T05:40:43.589Z",
+              "EditorCaption": " - PNG [1341x791, 24 \u4F4D, PNG]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "attachment_new.png",
+              "DocumentMoniker": "D:\\01muzhexuetang\\muzhexuetang\\coding\\attachment_new.png",
+              "RelativeDocumentMoniker": "attachment_new.png",
+              "ToolTip": "D:\\01muzhexuetang\\muzhexuetang\\coding\\attachment_new.png",
+              "RelativeToolTip": "attachment_new.png",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001533|",
+              "WhenOpened": "2026-10-03T05:40:40.528Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

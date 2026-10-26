@@ -1,0 +1,52 @@
+﻿========================================================================
+1) 从容器内取出这三个文件，放到 /var/www/verify
+========================================================================
+  baidu_verify_codeva-LcCyyIUZRF.html    -> 33 B  
+  BingSiteAuth.xml                       -> 85 B  
+  ByteDanceVerify.html                   -> 20 B  
+
+========================================================================
+2) 内容比对：/var/www/verify 与 容器内 是否一致
+========================================================================
+  baidu_verify_codeva-LcCyyIUZRF.html    静态=76b71476bfa426f9  容器=76b71476bfa426f9  ✓
+  BingSiteAuth.xml                       静态=820722f44ff89573  容器=820722f44ff89573  ✓
+  ByteDanceVerify.html                   静态=6862fc23866d78d8  容器=6862fc23866d78d8  ✓
+
+========================================================================
+3) reload nginx
+========================================================================
+  nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+RELOADED
+
+========================================================================
+4) 全部验证文件 http + https 复验
+========================================================================
+  OK  sogousiteverification.txt              http=[200 10]  https=[200 10]
+  OK  shenma-site-verification.txt           http=[200 68]  https=[200 68]
+  !!  baidu_verify_codeva-LcCyyIUZRF.html    http=[301 178]  https=[200 33]
+  !!  BingSiteAuth.xml                       http=[301 178]  https=[200 85]
+  !!  ByteDanceVerify.html                   http=[301 178]  https=[200 20]
+
+  结论: 仍有问题 ❌
+
+========================================================================
+5) 内容抽查（确认没取到空文件）
+========================================================================
+  sogousiteverification.txt              'IR7MJtFx5d'
+  shenma-site-verification.txt           'shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_17'
+  baidu_verify_codeva-LcCyyIUZRF.html    '2488629523bb7038a88c0fb7280cc12b'
+  BingSiteAuth.xml                       '<?xml version="1.0"?>\n<users>\n\t<user>281E3D92248116898DECA86'
+  ByteDanceVerify.html                   '2xyG3kXWLWtOh+K67LB+'
+
+========================================================================
+6) 回归
+========================================================================
+  http robots          200 956
+  http sitemap         200 415
+  http /               301 178
+  https /              200 67044
+  https /about         200 59589
+  https /login         200 33621
+  https /dashboard     307 6
+  首页 sha: 97e36b12acf9a5cc  (应 97e36b12acf9a5cc)

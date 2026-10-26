@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 import { hasTimeOverlap } from '@/lib/schedule-conflict'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getRequestDivision } from '@/lib/division'
@@ -271,8 +272,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   const saturdayDayStartForCreate = new Date(`${saturdayDate}T00:00:00`)
-  const createdLessonIds = await prisma.$transaction(async (tx) => {
+  const changeEvents = await prisma.$transaction(async (tx) => {
     const ids: string[] = []
+    const affectedByGroup = new Map<string, { lessonIds: string[]; studentIds: Set<string> }>()
 
     for (const item of toCreate) {
       const newLesson = await tx.classLesson.create({
@@ -303,11 +305,29 @@ export const POST = apiHandler(async (req: NextRequest) => {
           skipDuplicates: true,
         })
       }
+      const affected = affectedByGroup.get(item.groupId) || { lessonIds: [], studentIds: new Set<string>() }
+      affected.lessonIds.push(newLesson.id)
+      rosterStudentIds.forEach((studentId) => affected.studentIds.add(studentId))
+      affectedByGroup.set(item.groupId, affected)
 
       await tx.classGroup.update({
         where: { id: item.groupId },
         data: { totalLessons: { increment: 1 } },
       })
+    }
+
+    const events: Awaited<ReturnType<typeof recordCourseChangeEvent>>[] = []
+    for (const [groupId, affected] of affectedByGroup) {
+      const groupName = fridayLessons.find((source) => source.groupId === groupId)?.group.name || '班级'
+      events.push(await recordCourseChangeEvent(tx, {
+        eventType: 'MAKEUP_ADDED',
+        actorUserId: user.id,
+        groupId,
+        lessonIds: affected.lessonIds,
+        studentIds: [...affected.studentIds],
+        title: `${groupName}周六补课已安排`,
+        summary: `${saturdayDate}补开课程，课次已按周五安排复制，请查看家长端最新课表。`,
+      }))
     }
 
     if (ids.length > 0) {
@@ -320,9 +340,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
       })
     }
 
-    return ids
+    return { ids, events }
   })
-  const createdCount = createdLessonIds.length
+  const createdCount = changeEvents.ids.length
+  const notifiedParents = changeEvents.events.reduce((total, item) => total + item.recipientCount, 0)
 
   // Revalidate
   revalidatePath('/schedule')
@@ -333,7 +354,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
   return NextResponse.json({
     ok: true,
     createdCount,
+    notifiedParents,
+    changeEventIds: changeEvents.events.map((item) => item.event.id),
     skippedCount: skipped.length,
-    createdLessonIds,
+    createdLessonIds: changeEvents.ids,
   })
 })

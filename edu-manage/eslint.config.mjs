@@ -24,6 +24,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "tmp/**",
+    "public/pdf.worker.min.mjs",
     "next-env.d.ts",
   ]),
 ]);

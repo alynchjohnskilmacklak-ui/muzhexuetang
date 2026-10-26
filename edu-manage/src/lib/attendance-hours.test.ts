@@ -17,6 +17,17 @@ describe('attendance hour deduction', () => {
     expect(clampDeductHours(2, 0.5)).toBe(0.5)
     expect(clampDeductHours(2, -1)).toBe(0)
   })
+
+  it('区分计费模式：暑假班按月 ABSENT 也扣；周末课按课时 ABSENT 不扣', () => {
+    // 暑假班（MONTHLY，默认）：来不来都算课时
+    expect(calculateAttendanceDeductHours({ status: 'ABSENT', courseType: 'GROUP', lessonMinutes: 90 })).toBe(1.5)
+    expect(calculateAttendanceDeductHours({ status: 'ABSENT', courseType: 'GROUP', lessonMinutes: 90, billingMode: 'MONTHLY' })).toBe(1.5)
+    // 周末课（PER_HOUR）：没来不扣课时
+    expect(calculateAttendanceDeductHours({ status: 'ABSENT', courseType: 'GROUP', lessonMinutes: 90, billingMode: 'PER_HOUR' })).toBe(0)
+    // 周末课出勤/请假仍正常扣
+    expect(calculateAttendanceDeductHours({ status: 'PRESENT', courseType: 'GROUP', lessonMinutes: 90, billingMode: 'PER_HOUR' })).toBe(1.5)
+    expect(calculateAttendanceDeductHours({ status: 'LEAVE', courseType: 'GROUP', lessonMinutes: 90, billingMode: 'PER_HOUR' })).toBe(1.5)
+  })
 })
 
 describe('attendance rate', () => {

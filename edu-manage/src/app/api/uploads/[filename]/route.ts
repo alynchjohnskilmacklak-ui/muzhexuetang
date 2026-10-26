@@ -3,9 +3,10 @@ import { readFile, stat } from 'fs/promises'
 import path from 'path'
 import { apiHandler } from '@/lib/api-handler'
 import { isOssEnabled, readStoredBuffer } from '@/lib/storage'
-import { requireAuthenticatedUser } from '@/lib/auth/guards'
+import { AuthError, requireAuthenticatedUser } from '@/lib/auth/guards'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { canAccessFeedbackImage } from '@/lib/classroom-feedback/access'
+import { assertCanAccessStoredFileAsset } from '@/lib/upload-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,7 +78,16 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
     { id: user.id, role: user.role, teacherId },
     [relativePath],
   )
-  if (!access.get(relativePath)?.allowed) {
+  let allowed = access.get(relativePath)?.allowed === true
+  if (!allowed) {
+    try {
+      await assertCanAccessStoredFileAsset({ ...user, teacherId }, relativePath)
+      allowed = true
+    } catch (error) {
+      if (!(error instanceof AuthError)) throw error
+    }
+  }
+  if (!allowed) {
     console.warn('[uploads/read] denied feedback image', { key: relativePath, userId: user.id, role: user.role })
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
@@ -91,7 +101,8 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
       return new NextResponse(new Uint8Array(body), {
         headers: {
           'Content-Type': CONTENT_TYPES[ext] || 'application/octet-stream',
-          'Cache-Control': 'private, max-age=3600, stale-while-revalidate=86400',
+          'Cache-Control': 'private, max-age=60, must-revalidate',
+          Vary: 'Cookie',
         },
       })
     } catch (error) {
@@ -111,7 +122,8 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
       status: 304,
       headers: {
         ETag: etag,
-        'Cache-Control': 'private, max-age=86400, immutable',
+        'Cache-Control': 'private, no-cache, must-revalidate',
+        Vary: 'Cookie',
       },
     })
   }
@@ -121,7 +133,8 @@ export const GET = apiHandler(async (req: NextRequest, { params }: { params: Pro
   return new NextResponse(body, {
     headers: {
       'Content-Type': CONTENT_TYPES[ext] || 'application/octet-stream',
-      'Cache-Control': 'private, max-age=86400, immutable',
+      'Cache-Control': 'private, no-cache, must-revalidate',
+      Vary: 'Cookie',
       ETag: etag,
     },
   })

@@ -1,8 +1,10 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Button, Input, Modal, Form, Popconfirm, Tag, Space, message, ColorPicker } from 'antd'
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
+import { fetchJson } from '@/lib/fetch-json'
+import { saveSettingsRequest } from '@/lib/settings-client'
+import { Alert, Card, Button, Input, Modal, Form, Popconfirm, Tag, Space, Spin, message, ColorPicker } from 'antd'
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent,
@@ -10,7 +12,7 @@ import {
 import { SortableContext, useSortable, horizontalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = (url: string) => fetchJson<SubjectItem[]>(url)
 
 interface SubjectItem {
   id: string; name: string; color: string; textColor: string; isActive: boolean; order: number
@@ -23,22 +25,23 @@ function SortableTag({ subject, onEdit }: { subject: SubjectItem; onEdit: (s: Su
     transition,
   }
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={{ ...style, display: 'flex', alignItems: 'center' }}>
+      <span {...attributes} {...listeners} aria-label={`拖动排序：${subject.name}`} style={{ cursor: 'grab', padding: 12, minHeight: 44 }}>⋮⋮</span>
       <Tag
         color={subject.color}
         style={{ fontSize: 14, padding: '4px 12px', cursor: 'grab', margin: 4 }}
-        closable
-        onClose={(e) => { e.preventDefault(); onEdit(subject) }}
       >
         {subject.name}
       </Tag>
+      <Button type="text" icon={<EditOutlined />} aria-label={`编辑${subject.name}`} onClick={() => onEdit(subject)} style={{ minHeight: 44 }}>编辑</Button>
     </div>
   )
 }
 
 export function SubjectsTab() {
-  const { data, isLoading, mutate } = useSWR<SubjectItem[]>('/api/settings/subjects', fetcher)
+  const { data, error, isLoading, mutate } = useSWR<SubjectItem[]>('/api/settings/subjects', fetcher)
   const [open, setOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState<SubjectItem | null>(null)
   const [form] = Form.useForm()
 
@@ -48,29 +51,28 @@ export function SubjectsTab() {
   )
 
   const handleSubmit = async (values: { name: string; color?: string; textColor?: string }) => {
+    if (saving) return
+    setSaving(true)
+    try {
     if (editing) {
-      await fetch(`/api/settings/subjects/${editing.id}`, {
+      if (!await saveSettingsRequest(`/api/settings/subjects/${editing.id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values),
-      })
+      })) return
       message.success('学科已更新')
     } else {
-      await fetch('/api/settings/subjects', {
+      if (!await saveSettingsRequest('/api/settings/subjects', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values),
-      })
+      })) return
       message.success('学科已添加')
     }
     setOpen(false); setEditing(null); form.resetFields(); mutate()
+    } finally { setSaving(false) }
   }
 
-  const handleDelete = async (id: string, name: string) => {
-    const res = await fetch(`/api/settings/subjects/${id}`, { method: 'DELETE' })
-    if (!res.ok) {
-      const err = await res.json()
-      Modal.warning({ title: '无法删除', content: err.error || err.details || '该学科有关联数据' })
-      return
-    }
-    message.success(`已删除「${name}」`)
-    mutate()
+  const handleDelete = async (id: string) => {
+    if (!await saveSettingsRequest(`/api/settings/subjects/${id}`, { method: 'DELETE' })) return
+    message.success('已删除')
+    void mutate()
   }
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -82,32 +84,34 @@ export function SubjectsTab() {
     const [moved] = reordered.splice(oldIdx, 1)
     reordered.splice(newIdx, 0, moved)
     mutate(reordered, false)
-    await fetch('/api/settings/subjects/reorder', {
+    if (!await saveSettingsRequest('/api/settings/subjects/reorder', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ids: reordered.map((s) => s.id) }),
-    })
+    })) { await mutate(); return }
   }
 
   return (
-    <Card bordered={false} style={{ borderRadius: 10 }}>
+    <Card bordered={false} style={{ borderRadius: 14 }}>
+      {error && <Alert type="error" showIcon message="加载失败，请重试" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 16 }} />}
+      <Alert type="info" showIcon message="学科目录只维护名称、标签与顺序，不会修改教材和题库目录；已被课程使用的学科不能直接改名。" style={{ marginBottom: 16 }} />
       <Space style={{ marginBottom: 16 }}>
-        <Button type="primary" icon={<PlusOutlined />} style={{ background: '#E8784A' }} onClick={() => { setEditing(null); form.resetFields(); setOpen(true) }}>添加学科</Button>
+        <Button type="primary" icon={<PlusOutlined />} style={{  }} onClick={() => { setEditing(null); form.resetFields(); setOpen(true) }}>添加学科</Button>
       </Space>
 
       <div style={{ minHeight: 60 }}>
-        {isLoading ? null : (
+        {isLoading ? <Spin /> : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={(data || []).map((s) => s.id)} strategy={horizontalListSortingStrategy}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                 {(data || []).map((s) => (
-                  <div key={s.id} style={{ position: 'relative' }}>
+                  <div key={s.id} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', maxWidth: '100%' }}>
                     <SortableTag subject={s} onEdit={(sub) => {
                       setEditing(sub)
                       form.setFieldsValue({ name: sub.name, color: sub.color, textColor: sub.textColor })
                       setOpen(true)
                     }} />
-                    <Popconfirm title={`确定删除「${s.name}」？`} onConfirm={() => handleDelete(s.id, s.name)}>
-                      <DeleteOutlined style={{ position: 'absolute', top: -4, right: -4, fontSize: 10, color: '#ff4d4f', cursor: 'pointer', background: '#fff', borderRadius: '50%', padding: 2 }} />
+                    <Popconfirm title={`确定删除「${s.name}」？`} onConfirm={() => handleDelete(s.id)}>
+                      <Button danger type="text" icon={<DeleteOutlined />} aria-label={`删除${s.name}`} style={{ minHeight: 44 }}>删除</Button>
                     </Popconfirm>
                   </div>
                 ))}
@@ -115,15 +119,15 @@ export function SubjectsTab() {
             </SortableContext>
           </DndContext>
         )}
-        {!isLoading && (!data || data.length === 0) && (
+        {!error && !isLoading && (!data || data.length === 0) && (
           <div style={{ color: '#9a8e7a', padding: 24, textAlign: 'center' }}>暂无学科，点击上方按钮添加</div>
         )}
       </div>
 
-      <Modal title={editing ? '编辑学科' : '添加学科'} open={open} onCancel={() => { setOpen(false); setEditing(null) }} onOk={() => form.submit()}>
+      <Modal title={editing ? '编辑学科' : '添加学科'} open={open} onCancel={() => { if (!saving) { setOpen(false); setEditing(null) } }} confirmLoading={saving} maskClosable={!saving} closable={!saving} onOk={() => form.submit()}>
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item name="name" label="学科名称" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="color" label="标签颜色"><ColorPicker format="hex" /></Form.Item>
+          <Form.Item name="color" label="标签颜色" getValueFromEvent={(_, hex: string) => hex}><ColorPicker format="hex" /></Form.Item>
         </Form>
       </Modal>
     </Card>

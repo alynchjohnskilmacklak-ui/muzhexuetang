@@ -54,6 +54,7 @@ export default async function ParentProfilePage() {
       name: s.name,
       grade: s.grade,
       school: s.school,
+      gender: s.gender,
       teachers: [...teacherSet],
     }
   })

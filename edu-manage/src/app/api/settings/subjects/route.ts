@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { parseSubjectSettings } from '@/lib/subject-settings'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,9 +27,12 @@ export const POST = apiHandler(async (request: NextRequest) => {
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
   const prisma = await getRequestPrisma()
 
-  const body = await request.json()
+  let body: ReturnType<typeof parseSubjectSettings>
+  try { body = parseSubjectSettings(await request.json(), true) }
+  catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : '学科内容无效' }, { status: 400 }) }
   const { name, color, textColor } = body
   if (!name) return NextResponse.json({ error: '学科名称不能为空' }, { status: 400 })
+  if (await prisma.subject.findUnique({ where: { name } })) return NextResponse.json({ error: '该学科名称已存在' }, { status: 409 })
 
   const max = await prisma.subject.aggregate({ _max: { order: true } })
   const subject = await prisma.subject.create({

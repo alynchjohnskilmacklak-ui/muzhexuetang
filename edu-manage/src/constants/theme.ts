@@ -1,12 +1,18 @@
 ﻿// 牧哲学堂 Unified Design Tokens
-// Warm, bright, education-focused theme
+// Warm-light surfaces with a forest-green and brass brand system.
 
 export const COLORS = {
   // Brand — synced with DESIGN.md v2
-  primary: '#E8784A',
-  primaryHover: '#f08a5f',
-  primaryFocus: '#d0683a',
-  primaryLight: '#fff3ec',
+  primary: '#14574D',
+  primaryHover: '#10483F',
+  primaryFocus: '#0B3D35',
+  primaryLight: '#EAF4F1',
+  brandGreen: '#14574D',
+  brandGreenDeep: '#0D3732',
+  brandGold: '#8A6517',
+  brandGoldFill: '#D6B45B',
+  brandGoldLight: '#F8F1DE',
+  brandOrange: '#E8784A',
 
   // Backgrounds — synced with DESIGN.md surface ladder
   pageBg: '#faf8f5',       // canvas
@@ -18,22 +24,24 @@ export const COLORS = {
   textPrimary: '#1a1201',   // ink
   textSecondary: '#5a4e3a', // ink-muted
   textBody: '#5a4e3a',      // ink-muted (alias)
-  textMuted: '#9a8e7a',     // ink-subtle
+  textMuted: '#756A58',     // ink-subtle, readable on white and canvas
 
   // Borders — synced with DESIGN.md
   border: 'rgba(0,0,0,.06)',
   borderLight: 'rgba(0,0,0,.04)',
-  borderFocus: '#E8784A',
+  borderStrong: 'rgba(0,0,0,.12)',
+  borderFocus: '#14574D',
 
   // Semantic — synced with DESIGN.md
-  success: '#1D9E75',
+  success: '#137A5A',
+  successAction: '#137A5A',
   successBg: '#eaf7f1',
-  warning: '#f5a623',
-  warningText: '#C77F00',
-  warningBg: '#fdf4e3',
-  error: '#E24B4A',
-  errorBg: '#fdeceb',
-  info: '#E8784A',
+  warning: '#A56B00',
+  warningText: '#805A0D',
+  warningBg: '#F8F1DE',
+  error: '#B42318',
+  errorBg: '#FEF0EE',
+  info: '#14574D',
 
   // Shadows
   shadow: '0 8px 24px rgba(26,18,1,.04)',
@@ -61,22 +69,22 @@ export const SPACING = {
 // Shared Ant Design ConfigProvider theme — used by admin and parent providers
 export const ANTD_THEME = {
   token: {
-    colorPrimary: '#E8784A',
-    colorInfo: '#E8784A',
-    colorSuccess: '#1D9E75',
-    colorWarning: '#f5a623',
-    colorError: '#E24B4A',
-    colorBgBase: '#faf8f5',
-    colorBgContainer: '#ffffff',
-    colorBgElevated: '#ffffff',
-    colorBgLayout: '#faf8f5',
-    colorBorder: 'rgba(0,0,0,.06)',
-    colorBorderSecondary: 'rgba(0,0,0,.04)',
-    colorText: '#1a1201',
-    colorTextSecondary: '#5a4e3a',
-    colorTextTertiary: '#9a8e7a',
-    colorTextQuaternary: 'rgba(0,0,0,.35)',
-    colorBgSpotlight: '#2a2211',
+    colorPrimary: COLORS.primary,
+    colorInfo: COLORS.info,
+    colorSuccess: COLORS.successAction,
+    colorWarning: COLORS.warning,
+    colorError: COLORS.error,
+    colorBgBase: COLORS.pageBg,
+    colorBgContainer: COLORS.cardBg,
+    colorBgElevated: COLORS.cardBg,
+    colorBgLayout: COLORS.pageBg,
+    colorBorder: COLORS.border,
+    colorBorderSecondary: COLORS.borderLight,
+    colorText: COLORS.textPrimary,
+    colorTextSecondary: COLORS.textSecondary,
+    colorTextTertiary: COLORS.textMuted,
+    colorTextQuaternary: COLORS.textMuted,
+    colorBgSpotlight: COLORS.brandGreenDeep,
     boxShadowSecondary: '0 16px 48px rgba(26,18,1,.14)',
     motionDurationFast: '0.15s',
     motionDurationMid: '0.18s',
@@ -96,41 +104,41 @@ export const ANTD_THEME = {
       borderRadius: 10,
       controlHeight: 38,
       paddingInline: 16,
-      primaryShadow: '0 4px 14px rgba(232,120,74,.3)',
+      primaryShadow: '0 4px 14px rgba(20,87,77,.22)',
       primaryColor: '#ffffff',
       defaultBg: '#ffffff',
-      defaultBorderColor: 'rgba(0,0,0,.12)',
-      defaultColor: '#1a1201',
+      defaultBorderColor: COLORS.borderStrong,
+      defaultColor: COLORS.textPrimary,
     },
     Card: {
       borderRadiusLG: 14,
       paddingLG: 24,
       colorBgContainer: '#ffffff',
-      colorBorderSecondary: 'rgba(0,0,0,.06)',
+      colorBorderSecondary: COLORS.border,
     },
     Table: {
       borderRadiusLG: 14,
       colorBgContainer: '#ffffff',
-      headerBg: '#faf8f5',
-      headerColor: '#5a4e3a',
-      rowHoverBg: 'rgba(232,120,74,.04)',
-      borderColor: 'rgba(0,0,0,.06)',
+      headerBg: COLORS.cardBgSecondary,
+      headerColor: COLORS.textSecondary,
+      rowHoverBg: 'rgba(20,87,77,.045)',
+      borderColor: COLORS.border,
     },
     Input: {
       borderRadius: 10,
       paddingInline: 12,
       controlHeight: 38,
       colorBgContainer: '#fafafa',
-      colorBorder: '#EFE3DC',
-      hoverBorderColor: 'rgba(232,120,74,.5)',
-      activeBorderColor: '#E8784A',
+      colorBorder: COLORS.borderStrong,
+      hoverBorderColor: 'rgba(20,87,77,.5)',
+      activeBorderColor: COLORS.primary,
     },
     Select: {
       borderRadius: 10,
       controlHeight: 38,
       colorBgContainer: '#ffffff',
-      colorBorder: 'rgba(0,0,0,.12)',
-      optionSelectedBg: 'rgba(232,120,74,.08)',
+      colorBorder: COLORS.borderStrong,
+      optionSelectedBg: 'rgba(20,87,77,.08)',
     },
     Layout: {
       siderBg: '#faf8f5',
@@ -138,16 +146,16 @@ export const ANTD_THEME = {
       bodyBg: '#faf8f5',
     },
     Menu: {
-      itemSelectedBg: 'rgba(232,120,74,.1)',
-      itemSelectedColor: '#E8784A',
-      itemHoverBg: 'rgba(232,120,74,.04)',
+      itemSelectedBg: 'rgba(20,87,77,.1)',
+      itemSelectedColor: COLORS.primary,
+      itemHoverBg: 'rgba(20,87,77,.04)',
     },
     Tag: {
       borderRadiusSM: 9999,
     },
     Modal: {
-      contentBg: '#ffffff',
-      headerBg: '#ffffff',
+      contentBg: COLORS.cardBg,
+      headerBg: COLORS.cardBg,
     },
   },
 } as const

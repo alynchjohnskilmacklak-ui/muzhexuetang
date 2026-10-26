@@ -4,7 +4,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { getLocalDayRange, localDateKey } from '@/lib/date/local-day'
 import { checkScheduleConflict, type ConflictInfo } from '@/lib/schedule-conflict'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
-import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 import {
   calculatePlannedMinutes,
   canTeacherEditIntensiveLesson,
@@ -25,10 +25,13 @@ const courseScopeKey = (groupId: string, subject: string) => `${groupId}:${subje
 
 export const GET = apiHandler(async () => {
   const { user, teacher, prisma } = await requireCurrentTeacher()
-  const activeTerm = await getActiveAcademicTerm(prisma, teacher.division)
+  const activeTerms = await prisma.academicTerm.findMany({
+    where: { division: teacher.division, status: 'ACTIVE' },
+    select: { id: true },
+  })
   const groups = await prisma.classGroup.findMany({
     where: {
-      termId: activeTerm?.id || '__NO_ACTIVE_TERM__',
+      termId: activeTerms.length ? { in: activeTerms.map((term) => term.id) } : '__NO_ACTIVE_TERM__',
       intensiveMode: 'INTENSIVE',
       status: { not: 'ARCHIVED' },
       course: { isActive: true },
@@ -252,8 +255,11 @@ export const GET = apiHandler(async () => {
 
 export const POST = apiHandler(async (request: NextRequest) => {
   const { user, teacher, prisma } = await requireCurrentTeacher()
-  const activeTerm = await getActiveAcademicTerm(prisma, teacher.division)
-  if (!activeTerm) {
+  const activeTerms = await prisma.academicTerm.findMany({
+    where: { division: teacher.division, status: 'ACTIVE' },
+    select: { id: true },
+  })
+  if (!activeTerms.length) {
     return NextResponse.json({ error: '当前没有启用的运营批次，请联系管理员' }, { status: 409 })
   }
   const body = await request.json()
@@ -268,7 +274,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
   const group = await prisma.classGroup.findFirst({
     where: {
       id: groupId,
-      termId: activeTerm.id,
+      termId: { in: activeTerms.map((term) => term.id) },
       intensiveMode: 'INTENSIVE',
       status: { not: 'ARCHIVED' },
       course: { isActive: true },
@@ -369,6 +375,16 @@ export const POST = apiHandler(async (request: NextRequest) => {
       data: selectedStudentIds.map((studentId) => ({ lessonId: created.id, studentId })),
       skipDuplicates: true,
     })
+    await recordCourseChangeEvent(tx, {
+      eventType: isHistorical ? 'LESSON_BACKFILLED' : 'LESSON_CREATED',
+      actorUserId: user.id,
+      groupId: group.id,
+      lessonIds: [created.id],
+      studentIds: selectedStudentIds,
+      title: isHistorical ? '课程记录已补录' : '课程安排已更新',
+      summary: `${lessonDate} ${startTime}-${endTime}，${subject}课程${isHistorical ? '已补录' : '已安排'}。`,
+      notifyParents: !isHistorical,
+    })
     await tx.activityLog.create({
       data: {
         userId: user.id,
@@ -393,5 +409,6 @@ export const POST = apiHandler(async (request: NextRequest) => {
 
   revalidatePath('/teacher/intensive')
   revalidatePath('/teacher/schedule')
+  revalidatePath('/parent/schedule')
   return NextResponse.json({ success: true, lesson, isHistorical }, { status: 201 })
 })

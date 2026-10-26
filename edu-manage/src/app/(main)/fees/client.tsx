@@ -1,4 +1,5 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
@@ -315,7 +316,7 @@ export function FeesClient() {
       const a = document.createElement('a')
       a.href = url
       const range = dateRange ? `${dateRange[0].format('YYYYMMDD')}_${dateRange[1].format('YYYYMMDD')}` : 'all'
-      a.download = `收费台账_${division === 'all' ? '全部' : division}_${range}.csv`
+      a.download = `牧哲学堂_收费台账_${division === 'all' ? '全部' : division}_${range}.csv`
       a.click()
       URL.revokeObjectURL(url)
       message.success({ content: '导出完成', key: 'export' })
@@ -371,13 +372,13 @@ export function FeesClient() {
       {/* Filters */}
       <Card size="small" style={{ marginBottom: 12 }}>
         <Space wrap>
-          <Select value={division} onChange={(v) => { setDivision(v); setPage(1) }} options={divisionOptions} style={{ width: 100 }} />
-          <Select allowClear placeholder="收费类型" value={type} onChange={(v) => { setType(v); setPage(1) }}
+          <AdaptiveSelect value={division} onChange={(v) => { setDivision(v); setPage(1) }} options={divisionOptions} style={{ width: 100 }} />
+          <AdaptiveSelect allowClear placeholder="收费类型" value={type} onChange={(v) => { setType(v); setPage(1) }}
             options={(feeTypes || []).map((t: { name: string }) => ({ label: t.name, value: t.name }))}
             style={{ width: 110 }} />
-          <Select allowClear placeholder="校区" value={campus} onChange={(v) => { setCampus(v); setPage(1) }}
+          <AdaptiveSelect allowClear placeholder="校区" value={campus} onChange={(v) => { setCampus(v); setPage(1) }}
             options={campusOptions} style={{ width: 120 }} />
-          <Select allowClear showSearch placeholder="搜索学生" value={studentSearch || undefined}
+          <AdaptiveSelect allowClear showSearch placeholder="搜索学生" value={studentSearch || undefined}
             onSearch={handleStudentSearch} onChange={(v) => { setStudentSearch(v || ''); setPage(1) }}
             onDropdownVisibleChange={(open) => { if (open) void handleStudentSearch('') }}
             filterOption={false} options={studentOptions} loading={searchingStudents}
@@ -444,7 +445,7 @@ export function FeesClient() {
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="studentId" label="学生" rules={[{ required: true, message: '请选择学生' }]}>
-            <Select showSearch placeholder="按名字搜索学生" filterOption={false}
+            <AdaptiveSelect showSearch placeholder="按名字搜索学生" filterOption={false}
               onSearch={handleStudentSearch}
               onDropdownVisibleChange={(open) => { if (open) void handleStudentSearch('') }}
               notFoundContent={searchingStudents ? '正在加载学生…' : '没有匹配的学生'}
@@ -456,7 +457,7 @@ export function FeesClient() {
           <Row gutter={12}>
             <Col xs={24} sm={12}>
               <Form.Item name="type" label="收费类型" rules={[{ required: true }]}>
-                <Select placeholder="选择类型" options={
+                <AdaptiveSelect placeholder="选择类型" options={
                   (feeTypes || []).map((t: { name: string }) => ({ label: t.name, value: t.name }))
                 } />
               </Form.Item>

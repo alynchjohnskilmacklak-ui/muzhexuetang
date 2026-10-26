@@ -54,7 +54,7 @@ export const GET = apiHandler(async (
             'Content-Type': candidate.mimeType,
             'Content-Length': String(body.byteLength),
             'Content-Disposition': 'inline',
-            'Cache-Control': 'private, max-age=300',
+            'Cache-Control': 'private, no-store, max-age=0',
             'X-Content-Type-Options': 'nosniff',
           },
         })

@@ -1,4 +1,5 @@
-FROM public.ecr.aws/docker/library/node:22-bookworm-slim AS base
+# 基础镜像经 DaoCloud 加速拉取（等价官方 node:22-bookworm-slim，public.ecr.aws 直连不可用）
+FROM docker.m.daocloud.io/library/node:22-bookworm-slim AS base
 FROM base AS deps
 WORKDIR /app
 RUN apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=30 \
@@ -13,7 +14,7 @@ RUN --mount=type=cache,target=/root/.npm \
 FROM deps AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1 \
-  NODE_OPTIONS=--max-old-space-size=2048 \
+  NODE_OPTIONS=--max-old-space-size=3072 --stack-size=4000 \
   NEXT_BUILD_WORKERS=1 \
   DATABASE_URL=postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder \
   DATABASE_URL_JUNIOR=postgresql://placeholder:placeholder@127.0.0.1:5432/junior \

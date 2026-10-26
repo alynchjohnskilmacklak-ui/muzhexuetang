@@ -3,9 +3,9 @@
 import { useCallback, useState } from 'react'
 import { Button, Modal, Typography } from 'antd'
 import { ExclamationOutlined } from '@ant-design/icons'
-import { ResponsiveDialog, type ResponsiveDialogProps } from './ResponsiveDialog'
+import { BrandModal, type BrandModalProps } from './BrandModal'
 
-export type SafeFormModalProps = Omit<ResponsiveDialogProps, 'onClose'> & {
+export type SafeFormModalProps = Omit<BrandModalProps, 'onClose'> & {
   onClose: () => void
   dirty?: boolean
   closeConfirmTitle?: string
@@ -39,7 +39,7 @@ export function SafeFormModal({
 
   return (
     <>
-      <ResponsiveDialog
+      <BrandModal
         {...dialogProps}
         confirmLoading={confirmLoading}
         onClose={requestClose}
@@ -54,6 +54,7 @@ export function SafeFormModal({
         closable={false}
         width={420}
         className="safe-form-discard-modal"
+        rootClassName="safe-form-discard-root"
         onCancel={() => setDiscardOpen(false)}
       >
         <div className="safe-form-discard-content">

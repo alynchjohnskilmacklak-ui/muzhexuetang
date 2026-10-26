@@ -99,7 +99,7 @@ export function StudentContextPanel({ studentId }: { studentId: string }) {
             <div style={{ fontSize: 11, color: '#7A869A', marginTop: 2 }}>{[basic.grade, basic.school].filter(Boolean).join(' / ')}</div></div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 11, color: '#7A869A' }}>课时 <strong style={{ color: '#E8784A' }}>{basic.remainHours}h</strong></div>
-            <div style={{ fontSize: 11, color: '#7A869A' }}>出勤 <strong style={{ color: attendance.rate != null ? '#1D9E75' : '#7A869A' }}>{attendance.rate != null ? `${attendance.rate}%` : '—'}</strong></div>
+            <div style={{ fontSize: 11, color: '#7A869A' }}>出勤 <strong style={{ color: attendance.rate != null ? 'var(--color-success-action)' : '#7A869A' }}>{attendance.rate != null ? `${attendance.rate}%` : '—'}</strong></div>
           </div>
         </div>
       </Card>
@@ -167,7 +167,7 @@ export function StudentContextPanel({ studentId }: { studentId: string }) {
         <Input size="small" placeholder="下一步建议（可选）" value={suggestionsText} onChange={e => setSuggestionsText(e.target.value)} style={{ marginTop: 4, fontSize: 11 }} />
         <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
           <Button size="small" icon={<SaveOutlined />} loading={saving} onClick={() => saveStage('draft')}>草稿</Button>
-          <Button size="small" type="primary" icon={<SendOutlined />} loading={saving} onClick={() => saveStage('publish')} style={{ background: '#E8784A', borderColor: '#E8784A' }}>发布</Button>
+          <Button size="small" type="primary" icon={<SendOutlined />} loading={saving} onClick={() => saveStage('publish')} style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>发布</Button>
         </div>
       </Card>
 

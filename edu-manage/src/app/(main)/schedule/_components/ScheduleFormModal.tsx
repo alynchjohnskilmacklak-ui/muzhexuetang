@@ -1,4 +1,5 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useEffect, useState } from 'react'
 import { Alert, DatePicker, Form, Input, Modal, Select, Tag, TimePicker, message } from 'antd'
@@ -165,11 +166,11 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
 
       <Form form={form} layout="vertical" style={{ marginTop: 8 }}>
         <Form.Item name="division" label="学部" rules={[{ required: true, message: '请选择学部' }]}>
-          <Select options={[{ label: '初中部', value: 'JUNIOR' }, { label: '高中部', value: 'SENIOR' }]} />
+          <AdaptiveSelect options={[{ label: '初中部', value: 'JUNIOR' }, { label: '高中部', value: 'SENIOR' }]} />
         </Form.Item>
 
         <Form.Item name="classType" label="班型" rules={[{ required: true, message: '请选择班型' }]}>
-          <Select
+          <AdaptiveSelect
             options={CLASS_TYPE_OPTIONS}
             onChange={(value) => {
               setClassType(value)
@@ -180,7 +181,7 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
         </Form.Item>
 
         <Form.Item name="courseId" label="所属课程" rules={[{ required: true, message: '请选择课程' }]}>
-          <Select
+          <AdaptiveSelect
             showSearch
             optionFilterProp="label"
             placeholder="选择课程（决定科目与归属）"
@@ -196,7 +197,7 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
         </Form.Item>
 
         <Form.Item name="teacherId" label="教师" rules={[{ required: true, message: '请选择教师' }]}>
-          <Select
+          <AdaptiveSelect
             showSearch
             optionFilterProp="label"
             placeholder="选择教师"
@@ -208,7 +209,7 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
         </Form.Item>
 
         <Form.Item name="roomId" label="教室">
-          <Select
+          <AdaptiveSelect
             allowClear
             placeholder={isPersonalClassType(classType) ? '优先个性化教室' : '优先小班课教室'}
             options={filteredRooms.map((room: Record<string, unknown>) => ({
@@ -232,7 +233,7 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
         </div>
 
         <Form.Item label={isPersonalClassType(classType) ? `选择学生（需要 ${getPersonalClassLimit(classType)} 人）` : '选择学生（可多选）'}>
-          <Select
+          <AdaptiveSelect
             mode="multiple"
             placeholder={isPersonalClassType(classType) ? `请选择 ${getPersonalClassLimit(classType)} 名学生` : '选择多名学生'}
             value={selectedStudentIds}

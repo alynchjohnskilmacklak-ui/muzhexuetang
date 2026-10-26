@@ -2,6 +2,7 @@ import { Prisma, PrismaClient } from '@prisma/client'
 import { chinaClock } from '@/lib/enrollment-subject-change'
 import { localDateKey } from '@/lib/date/local-day'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 
 export class CancelLessonError extends Error {
   constructor(message: string, readonly status = 409) { super(message) }
@@ -68,21 +69,21 @@ export async function cancelScheduledLesson(
     const affected = snapshotIds.size
       ? lesson.group.enrollments.filter((enrollment) => snapshotIds.has(enrollment.studentId))
       : lesson.group.enrollments.filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, lesson.subject))
-    const parentIds = [...new Set(affected
-      .map((enrollment) => enrollment.student.parentId || enrollment.student.parentUserId)
-      .filter((parentId): parentId is string => Boolean(parentId)))]
-    if (lesson.group.status === 'ACTIVE' && parentIds.length) {
-      await tx.notification.createMany({ data: parentIds.map((parentId) => ({
-        userId: parentId, type: 'SCHEDULE_CHANGE', title: `${lesson.group.name}本次停课`,
-        content: `${lessonDay} ${lesson.startTime}-${lesson.endTime} 已取消。原因：${reason}`,
-        href: '/parent/schedule', relatedType: 'ClassLesson', relatedId: lesson.id,
-      })) })
-    }
+    const change = await recordCourseChangeEvent(tx, {
+      eventType: 'LESSON_CANCELLED',
+      actorUserId: input.operatorId,
+      groupId: lesson.groupId,
+      lessonIds: [lesson.id],
+      studentIds: affected.map((enrollment) => enrollment.studentId),
+      title: `${lesson.group.name}本次停课`,
+      summary: `${lessonDay} ${lesson.startTime}-${lesson.endTime} 已取消。原因：${reason}`,
+      notifyParents: lesson.group.status === 'ACTIVE',
+    })
     await tx.activityLog.create({ data: {
       userId: input.operatorId, action: '取消课次', entityType: 'ClassLesson', entityId: lesson.id,
       detail: `${lesson.group.name} ${lessonDay} ${lesson.startTime}-${lesson.endTime}；原因：${reason}`,
-      metadata: { groupId: lesson.groupId, reason, notifiedParents: parentIds.length },
+      metadata: { groupId: lesson.groupId, reason, notifiedParents: change.recipientCount, courseChangeEventId: change.event.id },
     } })
-    return { id: lesson.id, groupId: lesson.groupId, status: 'CANCELLED' as const, notifiedParents: parentIds.length }
+    return { id: lesson.id, groupId: lesson.groupId, status: 'CANCELLED' as const, notifiedParents: change.recipientCount, courseChangeEventId: change.event.id }
   }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  getTeacherResponseMinutes,
   getParentMessageWorkflowState,
   summarizeParentMessageWorkflow,
 } from './parent-message-workflow'
@@ -79,5 +80,26 @@ describe('parent message workflow', () => {
 
     expect(summary.pendingTeacherReplies).toBe(1)
     expect(summary.unreadForTeacher).toBe(2)
+  })
+
+  it('pairs each parent turn with only its first teacher reply in timestamp order', () => {
+    const reply = (role: string, minute: number) => ({
+      role,
+      createdAt: at(minute),
+      isReadByParent: true,
+      isReadByTeacher: true,
+    })
+
+    const minutes = getTeacherResponseMinutes([
+      reply('teacher', 8),
+      reply('parent', 5),
+      reply('teacher', 4),
+      reply('admin', 3),
+      reply('parent', 2),
+      reply('parent', 1),
+      reply('teacher', 9),
+    ])
+
+    expect(minutes).toEqual([2, 3])
   })
 })

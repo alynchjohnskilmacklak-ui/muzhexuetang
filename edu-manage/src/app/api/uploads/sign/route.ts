@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateOssSignedUrl, isOssEnabled, isStorageObjectAvailable } from '@/lib/storage'
-import { requireAuthenticatedUser } from '@/lib/auth/guards'
+import { AuthError, requireAuthenticatedUser } from '@/lib/auth/guards'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { canAccessFeedbackImage } from '@/lib/classroom-feedback/access'
+import { assertCanAccessStoredFileAsset } from '@/lib/upload-access'
 import { extractUploadStorageKey } from '@/lib/upload-url'
 import { apiHandler } from '@/lib/api-handler'
 
@@ -42,7 +43,16 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const urls: Record<string, string> = {}
   const denied: string[] = []
   await Promise.all(keyPairs.map(async ({ original, key }) => {
-    if (!access.get(original)?.allowed) {
+    let allowed = access.get(original)?.allowed === true
+    if (!allowed) {
+      try {
+        await assertCanAccessStoredFileAsset({ ...user, teacherId }, key)
+        allowed = true
+      } catch (error) {
+        if (!(error instanceof AuthError)) throw error
+      }
+    }
+    if (!allowed) {
       denied.push(original)
       console.warn('[uploads/sign] denied feedback image', { key, userId: user.id, role: user.role })
       return

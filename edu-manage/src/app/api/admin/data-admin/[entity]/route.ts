@@ -10,6 +10,7 @@ import {
 import { createActivityLog } from '@/lib/data-admin/entities-server'
 import { getRequestDivision } from '@/lib/division'
 import { getDynamicModel } from '@/lib/data-admin/dynamic-model'
+import { getDataAdminDivisionScope } from '@/lib/data-admin/division-scope'
 
 const ALLOWED_ENTITIES = Object.keys(DATA_ADMIN_ENTITIES)
 
@@ -42,14 +43,10 @@ export async function GET(
 
   const where: Record<string, unknown> = {}
 
-  const studentLinked = ['exam-papers', 'notifications', 'materials', 'performance-posts', 'enrollments', 'attendances', 'classroom-feedbacks'] as EntityKey[]
-  if (studentLinked.includes(entityKey)) {
-    where.student = { division }
-  } else {
-    Object.assign(where, { division })
-  }
+  Object.assign(where, getDataAdminDivisionScope(entityKey, division))
 
   if (!includeDeleted) {
+    if (!['teachers', 'meals'].includes(entityKey)) where.deletedAt = null
     const scMap: Record<EntityKey, { field: string; deletedValue: string } | undefined> = {
       students: { field: 'status', deletedValue: 'INACTIVE' },
       teachers: { field: 'status', deletedValue: 'RESIGNED' },

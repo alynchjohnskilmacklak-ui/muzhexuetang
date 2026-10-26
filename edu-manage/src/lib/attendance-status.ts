@@ -14,6 +14,12 @@ export function normalizeAttendanceRecordStatus(value: unknown): AttendanceRecor
   return VALID_ATTENDANCE_STATUSES.has(normalized) ? normalized : 'PRESENT'
 }
 
+/** 严格解析（提交入口用）：非法状态返回 null，由调用方拒绝，不再静默容错为 PRESENT。 */
+export function parseAttendanceRecordStatus(value: unknown): AttendanceRecordStatus | null {
+  const raw = String(value || '').toUpperCase()
+  return VALID_ATTENDANCE_STATUSES.has(raw as AttendanceRecordStatus) ? (raw as AttendanceRecordStatus) : null
+}
+
 export function toAttendanceDisplayStatus(value: unknown): AttendanceDisplayStatus {
   const normalized = normalizeAttendanceRecordStatus(value)
   return normalized === 'LEAVE' || normalized === 'ABSENT' ? 'LEAVE' : 'PRESENT'

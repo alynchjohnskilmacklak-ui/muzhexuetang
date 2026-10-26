@@ -1,4 +1,5 @@
-import Image from 'next/image'
+import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
+import { normalizeAvatarUrl } from '@/lib/upload-url'
 
 interface Props {
   photoUrl?: string | null
@@ -10,24 +11,29 @@ interface Props {
 }
 
 /**
- * 学生统一头像：有照片用照片，否则按性别用默认头像。
+ * 学生统一头像：有档案照片时使用档案照片，否则显示固定的性别默认头像。
  * gender: 'M' | 'F' | 'MALE' | 'FEMALE' | '男' | '女'
  */
 export function StudentAvatar({ photoUrl, gender, name, size = 40, className, rounded = true }: Props) {
   const g = (gender || '').toUpperCase()
   const isFemale = g === 'F' || g === 'FEMALE' || g === '女'
-  const src = photoUrl || (isFemale ? '/avatars/student-female.png' : '/avatars/student-male.png')
+  const defaultSrc = isFemale ? '/avatars/student-female.png' : '/avatars/student-male.png'
+  const src = normalizeAvatarUrl(photoUrl) || defaultSrc
   const radius = rounded ? '50%' : 10
   return (
     <div
       className={className}
       style={{
         width: size, height: size, borderRadius: radius, overflow: 'hidden',
-        flexShrink: 0, background: '#f0e7de', position: 'relative',
+        flexShrink: 0, background: 'var(--color-surface-3)', position: 'relative',
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={name || 'avatar'} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+      <CachedAvatarImage
+        src={src}
+        fallbackSrc={defaultSrc}
+        alt={name || 'avatar'}
+        style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', objectFit: 'cover', display: 'block', background: 'transparent' }}
+      />
     </div>
   )
 }

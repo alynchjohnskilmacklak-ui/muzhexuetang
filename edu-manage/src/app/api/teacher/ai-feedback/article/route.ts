@@ -7,6 +7,7 @@ import { AIProviderError, callDeepSeek, callDoubao, callKimi } from '@/lib/ai/cl
 import { aiProviderLabel, resolveAIProvider } from '@/lib/classroom-feedback/ai-chat'
 import { findVerifiedKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
 import { normalizeTextbookGrade, textbookEdition } from '@/lib/classroom-feedback/textbook-editions'
+import { checkTeacherAiRateLimit } from '@/lib/teacher-ai-rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,6 +60,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '当前年级或学科尚未配置教材版本，请先核对班级学科与学生年级' }, { status: 400 })
   }
   const verifiedCard = findVerifiedKnowledgeCard(edition, grade, subject, note)
+
+  const aiLimit = await checkTeacherAiRateLimit(teacher.id)
+  if (!aiLimit.allowed) {
+    return NextResponse.json(
+      { error: 'AI 助手使用较频繁，请稍后再试；已输入内容仍会保留' },
+      { status: 429, headers: aiLimit.retryAfter ? { 'Retry-After': String(aiLimit.retryAfter) } : {} },
+    )
+  }
   const performance = body.performance && typeof body.performance === 'object'
     ? body.performance as Record<string, unknown> : {}
   const input = {
@@ -79,7 +88,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       '只可使用教师输入的课堂要点、每名学生自己对应的观察与表现档位；知识概念可客观解释。不得编造任何课堂事件、分数、名次、答题数量、进步、作业或掌握程度。档位只定语气，不证明具体事实。',
       '输入可能只是关键词。学生之间严格隔离，绝不能挪用另一名学生的观察。没有个人观察时，明确写本次未记录个人课堂表现，不推断个人掌握。',
       '每份 article 严格三段，标题各占一行且顺序固定：本节课学习内容：、课堂反馈：、孩子掌握情况：。学习内容解释知识点，课堂反馈只描述有证据的个人表现，掌握情况给与证据一致的谨慎结论。信息少时宁可短，不凑字数。',
-      '正文第一次提到学生用匿名代号加“同学”（如 S1同学）。不要输出真实姓名。禁用孩子同学、这位同学、该同学、宝贝、小朋友，以及最好、第一、保证提分等夸大词。',
+      '匿名代号只用于 articles[].key 区分学生，article 正文必须用“孩子”称呼目标学生，任何位置都不得出现 S1/S2 等代号或真实姓名。禁用孩子同学、这位同学、该同学、宝贝、小朋友，以及最好、第一、保证提分等夸大词。',
       '输出纯 JSON：topic, intro（给家长的1-3句知识点概述）, card（topic, definition, formulas字符串数组, 可选example含question/steps/answer）, articles数组（key, article）。',
       verifiedCard
         ? '输入附有人工核实卡片。必须原样使用其定义、公式与例题，不改写卡片，不生成额外教材原文。'

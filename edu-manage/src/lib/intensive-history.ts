@@ -7,6 +7,7 @@ import {
   lessonStartAt,
 } from '@/lib/teacher-intensive-scheduling'
 import { getLocalDayRange, localDateKey } from '@/lib/date/local-day'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
 export type IntensiveHistoryAttendanceStatus = 'PRESENT' | 'LEAVE' | 'ABSENT' | 'MAKEUP'
 
@@ -251,6 +252,10 @@ export async function createIntensiveHistoryRecord(params: {
           operatorId: params.operatorId,
         },
       })
+    }
+
+    for (const studentId of new Set(input.records.map((record) => record.studentId))) {
+      await syncStudentHourSnapshot(tx, studentId)
     }
 
     const salary = await createIntensiveLessonPayInTransaction(tx, lesson.id)

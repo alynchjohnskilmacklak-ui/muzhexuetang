@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { runDataHealthCheck } from '@/lib/data-admin/health'
+import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,7 +12,7 @@ export async function GET() {
   }
 
   try {
-    const issues = await runDataHealthCheck()
+    const issues = await runDataHealthCheck(undefined, getRequestDivision(session.user))
     return NextResponse.json({ success: true, data: issues })
   } catch (error) {
     console.error('data-health error:', error)

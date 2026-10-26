@@ -4,12 +4,13 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import {
   parentActiveEnrollmentWhere,
-  parentLinkedStudentWhere,
   visibleClassGroupWhere,
   visibleClassLessonWhere,
   visibleNotificationWhere,
   visibleTeacherWhere,
 } from '@/lib/business-visibility'
+import { findParentChild, getParentChildren } from '@/lib/parent-children'
+import { buildWeeklyLessonRosters, summarizeWeeklyAttendance } from '@/lib/parent-weekly-report'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,15 +21,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const userId = (session.user as { id: string }).id
   const childId = req.nextUrl.searchParams.get('childId') || ''
 
-  const students = await prisma.student.findMany({
-    where: {
-      ...parentLinkedStudentWhere(userId),
-      ...(childId ? { id: childId } : {}),
-    },
-    select: { id: true, name: true, grade: true },
-    orderBy: { name: 'asc' },
-  })
-  const studentIds = students.map((student) => student.id)
+  const linkedChildren = await getParentChildren(prisma, userId)
+  const requestedChild = childId ? findParentChild(linkedChildren, childId) : null
+  if (childId && !requestedChild) return NextResponse.json({ error: '学生不存在或无权访问' }, { status: 403 })
+  const students = childId ? (requestedChild ? [requestedChild] : []) : linkedChildren
+  const studentIds = [...new Set(students.flatMap((student) => student.recordIds))]
 
   const now = new Date()
   const weekStart = new Date(now)
@@ -38,7 +35,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const weekEnd = new Date(weekStart)
   weekEnd.setDate(weekStart.getDate() + 7)
 
-  const [classLessons, attendanceRows, gradeRows, notificationRows, leaveRows] = await Promise.all([
+  const [classLessons, attendanceRows, gradeRows, notificationRows, leaveRows, feedbackRows] = await Promise.all([
       prisma.classLesson.findMany({
         where: {
           ...visibleClassLessonWhere,
@@ -55,21 +52,28 @@ export const GET = apiHandler(async (req: NextRequest) => {
           },
         },
         select: {
+          id: true,
+          subject: true,
           group: {
             select: {
+              course: { select: { subject: true } },
               enrollments: {
                 where: { studentId: { in: studentIds }, ...parentActiveEnrollmentWhere(userId) },
-                select: { studentId: true },
+                select: { studentId: true, subjects: true },
               },
             },
           },
+          lessonStudents: { select: { studentId: true } },
         },
       }),
       prisma.attendance.findMany({
         where: {
           studentId: { in: studentIds },
           createdAt: { gte: weekStart, lt: weekEnd },
+          deletedAt: null,
         },
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, studentId: true, lessonId: true, status: true, createdAt: true, deletedAt: true },
       }),
       prisma.gradeRecord.findMany({
         where: {
@@ -99,17 +103,33 @@ export const GET = apiHandler(async (req: NextRequest) => {
         },
         select: { studentId: true },
       }),
+    prisma.classroomFeedback.findMany({
+      where: {
+        status: 'PUBLISHED',
+        deletedAt: null,
+        createdAt: { gte: weekStart, lt: weekEnd },
+        studentIds: { hasSome: studentIds },
+      },
+      select: {
+        id: true,
+        studentIds: true,
+        feedbackCourseType: true,
+        knowledgePoints: true,
+        overallComment: true,
+        summary: true,
+        lessonContent: true,
+        createdAt: true,
+        teacher: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    }),
     ])
 
-  const classLessonCounts = new Map<string, number>()
-  classLessons.forEach((lesson) => {
-    lesson.group.enrollments.forEach(({ studentId }) => {
-      classLessonCounts.set(studentId, (classLessonCounts.get(studentId) || 0) + 1)
-    })
-  })
+  const weeklyLessonRosters = buildWeeklyLessonRosters(classLessons, studentIds)
 
   const attendanceByStudent = new Map<string, typeof attendanceRows>()
-  attendanceRows.forEach((attendance) => {
+  attendanceRows.filter((attendance) => attendance.deletedAt === null).forEach((attendance) => {
     const items = attendanceByStudent.get(attendance.studentId) || []
     items.push(attendance)
     attendanceByStudent.set(attendance.studentId, items)
@@ -133,20 +153,23 @@ export const GET = apiHandler(async (req: NextRequest) => {
   })
 
   const reports = students.map((student) => {
-    const classLessonCount = classLessonCounts.get(student.id) || 0
-    const attendanceList = attendanceByStudent.get(student.id) || []
-    const grades = gradesByStudent.get(student.id) || []
-    const notificationCount = notificationCounts.get(student.id) || 0
-    const leaveCount = leaveCounts.get(student.id) || 0
+    const scheduleIds = new Set(student.recordIds.flatMap((id) => [...(weeklyLessonRosters.get(id) || [])]))
+    const classLessonCount = scheduleIds.size
+    const attendanceList = student.recordIds.flatMap((id) => attendanceByStudent.get(id) || [])
+    const attendanceSummary = summarizeWeeklyAttendance(scheduleIds, attendanceList)
+    const grades = student.recordIds.flatMap((id) => gradesByStudent.get(id) || [])
+    const notificationCount = student.recordIds.reduce((sum, id) => sum + (notificationCounts.get(id) || 0), 0)
+    const leaveCount = student.recordIds.reduce((sum, id) => sum + (leaveCounts.get(id) || 0), 0)
+    const studentRecordIds = new Set(student.recordIds)
+    const feedbacks = feedbackRows
+      .filter((feedback) => feedback.studentIds.some((id) => studentRecordIds.has(id)))
+      .slice(0, 5)
 
     const totalSchedules = classLessonCount
-    const presentCount = attendanceList.filter(item => item.status === 'PRESENT').length
-    const absentCount = attendanceList.filter(item => item.status === 'ABSENT').length
+    const presentCount = attendanceSummary.presentCount
+    const absentCount = attendanceSummary.absentCount
     const lateCount = 0
-    // 出勤率分母用"实际有考勤记录的课次"（未考勤/未结算的课不再拉低出勤率）；无考勤记录时为 null（前端显示"暂无"）
-    const attendanceRate = attendanceList.length > 0
-      ? Math.round((presentCount / attendanceList.length) * 100)
-      : null
+    const attendanceRate = attendanceSummary.attendanceRate
 
     const normalizedGrades = grades.map((grade) => ({
       subject: grade.assessment?.name || '测评',
@@ -159,8 +182,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
       comment = '本周暂无课程安排，请关注下周课程。'
     } else if (attendanceRate == null) {
       comment = '本周课程考勤尚未记录，老师会在课后陆续更新。'
+    } else if (attendanceRate === 100 && attendanceSummary.fullyAttendedWeek) {
+      comment = '本周已安排课程均有出勤记录，且均正常出勤，继续保持！'
     } else if (attendanceRate === 100) {
-      comment = '本周全勤，学习态度积极，继续保持！'
+      comment = '截至目前已登记课次均为出勤，未登记课次会在课后更新。'
     } else if (attendanceRate >= 80) {
       comment = '本周出勤情况良好，请继续坚持规律学习。'
     } else if (attendanceRate >= 60) {
@@ -193,8 +218,17 @@ export const GET = apiHandler(async (req: NextRequest) => {
         leaveCount,
         attendanceRate,
         notificationCount,
+        feedbackCount: feedbacks.length,
       },
       grades: normalizedGrades,
+      feedbacks: feedbacks.map((feedback) => ({
+        id: feedback.id,
+        subject: feedback.feedbackCourseType,
+        teacherName: feedback.teacher.name,
+        content: feedback.overallComment || feedback.summary || feedback.lessonContent || '',
+        knowledgePoints: feedback.knowledgePoints,
+        createdAt: feedback.createdAt.toISOString(),
+      })),
       comment,
     }
   })

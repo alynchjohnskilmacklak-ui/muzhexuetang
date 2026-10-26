@@ -27,8 +27,8 @@ export function AppErrorState({
         <p style={{ margin: '0 0 24px', color: 'var(--color-ink-muted, #7a6e60)', lineHeight: 1.7 }}>请检查网络后重试；如果问题持续存在，可以先返回首页继续使用其他功能。</p>
         {error.digest && <p style={{ margin: '-12px 0 20px', color: 'var(--color-ink-subtle, #8d806f)', fontSize: 12 }}>问题编号：{error.digest}</p>}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <button type="button" onClick={retry} style={{ minHeight: 44, padding: '10px 20px', borderRadius: 10, border: '1px solid var(--color-primary, #e8784a)', background: 'var(--color-primary, #e8784a)', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>重新加载</button>
-          <Link href={homeHref} style={{ minHeight: 44, boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center', padding: '10px 20px', borderRadius: 10, border: '1px solid var(--color-primary, #e8784a)', color: 'var(--color-primary, #e8784a)', textDecoration: 'none', fontWeight: 700 }}>{homeLabel}</Link>
+          <button type="button" onClick={retry} style={{ minHeight: 44, padding: '10px 20px', borderRadius: 10, border: '1px solid var(--color-primary, #14574D)', background: 'var(--color-primary, #14574D)', color: '#fff', cursor: 'pointer', fontWeight: 700 }}>重新加载</button>
+          <Link href={homeHref} style={{ minHeight: 44, boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center', padding: '10px 20px', borderRadius: 10, border: '1px solid var(--color-primary, #14574D)', color: 'var(--color-primary, #14574D)', textDecoration: 'none', fontWeight: 700 }}>{homeLabel}</Link>
         </div>
       </section>
     </main>

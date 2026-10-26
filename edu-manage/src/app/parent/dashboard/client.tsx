@@ -6,7 +6,9 @@ import { Button, Tag, Typography } from 'antd'
 import { format } from 'date-fns'
 import { useRouter, useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
-import { fillName, MEMBERSHIP_BENEFITS, MEMBERSHIP_HERO_THEME, MEMBERSHIP_THEME, MEMBERSHIP_UPGRADE, MEMBERSHIP_WELCOME, PARENT_ACTIVE_CHILD_COOKIE, resolveMembership, type MembershipLevel } from '@/constants/membership'
+import { fillName, MEMBERSHIP_BENEFITS, MEMBERSHIP_HERO_THEME, MEMBERSHIP_THEME, MEMBERSHIP_UPGRADE, MEMBERSHIP_WELCOME, resolveMembership } from '@/constants/membership'
+import { rememberParentChild, rememberParentChildGender } from '@/lib/parent-child-preference'
+import { resolveParentChildId } from '@/lib/parent-child-selection'
 import { getDailyQuote } from '@/data/daily-quotes'
 import { resolveTier, TIER_THEME } from '@/constants/teacher-tier'
 import { MessageWorkflowNotice } from '@/components/MessageWorkflowNotice'
@@ -14,6 +16,7 @@ import { WeatherHeroStrip } from '@/components/Common/WeatherHeroStrip'
 import { ParentTodayPanel } from '@/components/Parent/ParentTodayPanel'
 import { WeeklyReport } from '@/components/Parent/WeeklyReport'
 import { ParentLessonPreview } from '@/components/Parent/ParentLessonPreview'
+import { StudentAvatar } from '@/components/Common/StudentAvatar'
 import type { getParentDashboardData } from '@/lib/parent-dashboard'
 
 const { Text } = Typography
@@ -68,11 +71,6 @@ function hasShownToday(key: string) {
   }
 }
 
-function rememberParentChild(studentId: string, level: MembershipLevel) {
-  document.cookie = `${PARENT_ACTIVE_CHILD_COOKIE}=${encodeURIComponent(studentId)}; Path=/parent; Max-Age=7776000; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`
-  window.dispatchEvent(new CustomEvent<MembershipLevel>('parent-theme-change', { detail: level }))
-}
-
 function lessonStatus(lesson: { startTimeRaw?: string | null; endTimeRaw?: string | null; attendanceSubmittedAt?: string | null }) {
   if (lesson.attendanceSubmittedAt) return '已结束'
   if (!lesson.startTimeRaw || !lesson.endTimeRaw) return '待老师确认'
@@ -92,6 +90,7 @@ export function ParentDashboardClient({
   studentTopTeacher,
   todaySchedules,
   todayClassLessons,
+  nextUpcomingLessons = [],
   notifications,
   latestPost,
   latestClassroomFeedback,
@@ -110,7 +109,9 @@ export function ParentDashboardClient({
   const today = new Date()
   const dailyQuote = getDailyQuote()
   const childIdFromUrl = searchParams.get('childId') || ''
-  const [activeChildId, setActiveChildId] = useState(childIdFromUrl || initialActiveChildId || students[0]?.id || '')
+  const [activeChildId, setActiveChildId] = useState(() =>
+    resolveParentChildId(students, [childIdFromUrl, initialActiveChildId]),
+  )
   const [welcomeMounted, setWelcomeMounted] = useState(false)
   const [welcomeVisible, setWelcomeVisible] = useState(false)
   const [weeklyReady, setWeeklyReady] = useState(false)
@@ -126,9 +127,9 @@ export function ParentDashboardClient({
   }, [])
 
   useEffect(() => {
-    if (childIdFromUrl) setActiveChildId(childIdFromUrl)
-    else if (!activeChildId && students[0]?.id) setActiveChildId(students[0].id)
-  }, [activeChildId, childIdFromUrl, students])
+    const resolvedId = resolveParentChildId(students, [childIdFromUrl, initialActiveChildId, activeChildId])
+    if (resolvedId && resolvedId !== activeChildId) setActiveChildId(resolvedId)
+  }, [activeChildId, childIdFromUrl, initialActiveChildId, students])
 
   const activeStudent = useMemo(
     () => students.find(student => student.id === activeChildId) || students[0],
@@ -187,6 +188,11 @@ export function ParentDashboardClient({
     })),
   ].sort((a, b) => a.startTime.localeCompare(b.startTime))
   const todayLessons = rawTodayLessons.filter(lesson => students.length <= 1 || !activeChildId || lesson.studentIds.includes(activeChildId))
+  // 今天无课时的"下一次课程"：从未来课程中取当前孩子的最近一节
+  const activeNextLessons = students.length <= 1 || !activeChildId
+    ? nextUpcomingLessons
+    : nextUpcomingLessons.filter(lesson => lesson.studentIds.includes(activeChildId))
+  const upcomingNextLesson = activeNextLessons[0] || null
   const activeNotifications = students.length <= 1 || !activeChildId
     ? notifications
     : notifications.filter(notification => !notification.studentId || notification.studentId === activeChildId)
@@ -199,6 +205,44 @@ export function ParentDashboardClient({
   const pendingLesson = todayLessons.find(lesson => lessonStatus(lesson) === '待老师确认')
   const nextLesson = todayLessons.find(lesson => lessonStatus(lesson) === '待上课')
   const todayStatus = !todayLessons.length ? '今日暂无课程' : activeLesson ? '上课中' : pendingLesson ? '待老师确认' : nextLesson ? '待上课' : '今日课程已完成'
+
+  // 课程展示逻辑：
+  // 1. 今天有课 → 显示今天的全天课程列表
+  // 2. 今天没课 → 找到最近的一个有课日期，显示那一天的全天课程列表
+  // 3. 都没有 → 空状态
+  let displayLessons: typeof todayLessons = todayLessons
+  let displayLessonDate: string | null = null
+
+  if (todayLessons.length === 0 && activeNextLessons.length > 0) {
+    // 找到最近的一个有课日期
+    const nextDate = activeNextLessons[0].lessonDate
+    if (nextDate) {
+      // 筛选出那一天的所有课程
+      const sameDayLessons = activeNextLessons.filter(l => l.lessonDate === nextDate)
+      displayLessonDate = nextDate
+      // 结合日期和时间构造完整时间戳，用于状态判断
+      displayLessons = sameDayLessons.map(l => {
+        const dateBase = l.lessonDate ? new Date(l.lessonDate) : null
+        const [sh, sm] = (l.startTime || '00:00').split(':').map(Number)
+        const [eh, em] = (l.endTime || '00:00').split(':').map(Number)
+        const startRaw = dateBase ? new Date(dateBase.getFullYear(), dateBase.getMonth(), dateBase.getDate(), sh || 0, sm || 0).toISOString() : null
+        const endRaw = dateBase ? new Date(dateBase.getFullYear(), dateBase.getMonth(), dateBase.getDate(), eh || 0, em || 0).toISOString() : null
+        return {
+          id: l.id,
+          title: l.title,
+          startTime: l.startTime || '',
+          endTime: l.endTime || '',
+          teacherName: l.teacherName,
+          roomName: l.roomName,
+          studentIds: l.studentIds || [],
+          startTimeRaw: startRaw,
+          endTimeRaw: endRaw,
+          attendanceSubmittedAt: null,
+          lessonDate: l.lessonDate,
+        }
+      })
+    }
+  }
   const activeTodayAttendances = students.length <= 1 || !activeChildId
     ? todayAttendances
     : todayAttendances.filter(attendance => attendance.studentId === activeChildId)
@@ -246,7 +290,11 @@ export function ParentDashboardClient({
   const selectStudent = (studentId: string) => {
     setActiveChildId(studentId)
     const picked = students.find(st => st.id === studentId)
-    if (picked) rememberParentChild(picked.id, resolveMembership(picked.membershipLevel))
+    if (picked) {
+      rememberParentChild(picked.id, resolveMembership(picked.membershipLevel))
+      // 存当前学生性别到 cookie，供右上角头像使用
+      rememberParentChildGender(picked.gender)
+    }
     const params = new URLSearchParams(window.location.search)
     params.set('childId', studentId)
     window.history.replaceState({}, '', `?${params.toString()}`)
@@ -272,7 +320,12 @@ export function ParentDashboardClient({
 
       <section className="parent-dashboard-hero" style={{ background: heroTheme.background, border: heroTheme.border, boxShadow: heroTheme.shadow, position: 'relative', overflow: 'hidden' }}>
         {heroTheme.shine && <div style={{ position: 'absolute', top: '-45%', right: '-12%', width: 190, height: 270, background: 'radial-gradient(circle, rgba(255,255,255,.17), transparent 70%)', transform: 'rotate(12deg)', pointerEvents: 'none' }} />}
-        <div className="parent-dashboard-hero__identity"><div style={{ background: heroTheme.badgeBg }}>{(activeStudent?.name || '牧')[0]}</div><span><span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><strong>{activeStudent?.name || '牧哲学堂同学'}</strong>{membershipLevel !== 'NORMAL' && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, color: membershipLevel === 'SVIP' ? '#123C35' : '#fff', background: membershipLevel === 'SVIP' ? 'linear-gradient(135deg,#C9A45C,#A8873D)' : 'rgba(255,255,255,.26)' }}>{membershipLevel === 'SVIP' ? '👑 SVIP' : '👑 VIP'}</span>}</span><small className="parent-hero-teacher-line">
+        <div className="parent-dashboard-hero__identity">
+          <StudentAvatar
+            name={activeStudent?.name || '牧'}
+            gender={activeStudent?.gender}
+            size={56}
+          /><span><span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><strong>{activeStudent?.name || '牧哲学堂同学'}</strong>{membershipLevel !== 'NORMAL' && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, color: membershipLevel === 'SVIP' ? '#123C35' : '#fff', background: membershipLevel === 'SVIP' ? 'linear-gradient(135deg,#C9A45C,#A8873D)' : 'rgba(255,255,255,.26)' }}>{membershipLevel === 'SVIP' ? '👑 SVIP' : '👑 VIP'}</span>}</span><small className="parent-hero-teacher-line">
             <span className="parent-hero-teacher-prefix">{activeStudent?.grade || '未填写年级'} · 负责老师</span>
             <span className="parent-hero-teacher-name-row">
               <span className="parent-hero-teacher-name">{topTeacher?.name || '待分配'}</span>
@@ -302,7 +355,7 @@ export function ParentDashboardClient({
         {feedbackItems.length ? (
           <div className="parent-latest-feedback-list">
             {feedbackItems.map(item => (
-              <button type="button" key={item.id} className="parent-latest-feedback" onClick={() => router.push(`/parent/archive?feedbackId=${item.id}`)}>
+              <button type="button" key={item.id} className="parent-latest-feedback" onClick={() => router.push(`/parent/class-feedback/${item.id}${activeStudent?.id ? `?childId=${activeStudent.id}` : ''}`)}>
                 <span>{item.type === '课堂反馈' ? <BookOutlined /> : <HeartOutlined />}</span>
                 <div>
                   <div><strong>{item.teacherName}</strong><Tag>{item.type}</Tag>{item.subject ? <Tag>{item.subject}</Tag> : null}<small>{item.date.toLocaleString('zh-CN')}</small></div>
@@ -318,7 +371,7 @@ export function ParentDashboardClient({
 
       <ParentLessonPreview items={lessonPreviews} activeChildId={activeChildId} />
 
-      <ParentTodayPanel lessons={todayLessons} activeChildId={activeChildId} studentName={activeStudent?.name || '孩子'} />
+      <ParentTodayPanel lessons={displayLessons} nextLesson={null} lessonDate={displayLessonDate} activeChildId={activeChildId} studentName={activeStudent?.name || '孩子'} />
 
       {(() => {
         const benefits = MEMBERSHIP_BENEFITS[membershipLevel]

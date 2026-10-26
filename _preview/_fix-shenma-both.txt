@@ -1,0 +1,32 @@
+﻿========================================================================
+步骤 1/3：上传（先校验，后替换）
+========================================================================
+  ✓ home.html  本地=4e01c5ae196d4289  →  shared(67044 B) + source  
+  ✓ shenma-site-verification.txt  本地=53b869ecb13e7c06  →  shared(68 B) + source  
+
+========================================================================
+步骤 2/3：重建 app 容器
+========================================================================
+Container edu-manage-app-1  Running
+  容器 running/healthy ✓（5s）
+
+========================================================================
+步骤 3/3：逐项校验
+========================================================================
+  [文件验证] 'shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_1791013955'
+             期望 'shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_1791013955'  →  ✓
+             HTTP 200
+
+  [代码验证] <meta name="shenma-site-verification" content="3f17ed1785b9a82fd4176b64ecffb169_1791013602"/>
+             期望 <meta name="shenma-site-verification" content="3f17ed1785b9a82fd4176b64ecffb169_1791013602"/>
+             →  ✓
+
+  容器内 home.html meta: shenma-site-verification" content="3f17ed1785b9a82fd4176b64ecffb169_1791013602"
+  容器内 .txt          : shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_1791013955
+
+  首页: sha=4e01c5ae196d4289  67044 B  <title>新乐牧哲学堂｜河北新乐文化课辅导</title>
+        （改前 5dd81479b6aa0bfa / 67044 B；只换了 meta 内容，字节数不变）
+  /about   HTTP 200
+  /login   HTTP 200
+
+★ 完成——现在去神马后台：代码验证 和 文件验证 两个页签都可以点「验证」

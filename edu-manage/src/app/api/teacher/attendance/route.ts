@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { requireCurrentTeacher, TEACHER_LOG_ACTIONS, teacherLessonScopeWhere, todayRange } from '@/lib/teacher-portal'
-import { calculateAttendanceDeductHours, shouldCreateMakeupRequest } from '@/lib/attendance-hours'
+import { calculateAttendanceDeductHours, shouldCreateMakeupRequest, termKindToBillingMode } from '@/lib/attendance-hours'
 import { createLessonPayInTransaction } from '@/lib/teacher-salary'
 import { postAttendanceHours } from '@/lib/attendance-hour-posting'
-import { normalizeAttendanceRecordStatus } from '@/lib/attendance-status'
+import { parseAttendanceRecordStatus } from '@/lib/attendance-status'
 import { resolveIntensiveActualMinutes } from '@/lib/intensive-class'
 import {
   IntensiveReviewError,
@@ -208,6 +208,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
         group: {
           include: {
             course: true,
+            term: { select: { kind: true } },
             enrollments: { where: { status: 'ACTIVE', deletedAt: null, student: { status: { not: 'INACTIVE' } } }, select: { id: true, studentId: true, subjects: true, student: { select: { id: true, name: true, gender: true, grade: true, membershipLevel: true } } } },
           },
         },
@@ -256,6 +257,13 @@ export const POST = apiHandler(async (request: NextRequest) => {
 
     const group = lesson.group
     const isIntensive = group.intensiveMode === 'INTENSIVE'
+    // 提交锁定：教师提交后不可再自行修改，仅管理员可更正
+    if (lesson.attendanceSubmittedAt && session.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: '本节课考勤已提交，如需修改请联系管理员更正' },
+        { status: 403 }
+      )
+    }
     if (isIntensive && lesson.settlementStatus !== 'UNSETTLED') {
       return NextResponse.json({ error: '该突击班课次已经结算，如需修改实际分钟请联系管理员走结算调整流程' }, { status: 409 })
     }
@@ -348,7 +356,10 @@ export const POST = apiHandler(async (request: NextRequest) => {
       for (const rec of records) {
         const studentId = typeof rec.studentId === 'string' ? rec.studentId : ''
         if (!eligibleStudentIds.has(studentId)) continue
-        const status = normalizeAttendanceRecordStatus(rec.status)
+        const status = parseAttendanceRecordStatus(rec.status)
+        if (!status) {
+          throw new Error(`INVALID_ATTENDANCE_STATUS_${String(rec.status)}`)
+        }
         const enrollment = await tx.enrollment.findFirst({
           where: {
             studentId,
@@ -388,6 +399,7 @@ export const POST = apiHandler(async (request: NextRequest) => {
             lessonMinutes: group.lessonMinutes,
             actualMinutes,
             intensiveMode: group.intensiveMode,
+            billingMode: termKindToBillingMode(group.term?.kind),
           })
           if (hoursDeducted > 0) {
             if (!attendance.hoursDeducted || attendance.hoursDeducted <= 0) {

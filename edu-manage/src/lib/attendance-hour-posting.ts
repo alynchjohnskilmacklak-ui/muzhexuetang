@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client'
 import { accrueEnrollmentHours, deductEnrollmentHours } from '@/lib/attendance-balance'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
 type AttendanceHourPostingInput = {
   attendanceId: string
@@ -51,6 +52,7 @@ export async function postAttendanceHours(
         operatorId: input.operatorId,
       },
     })
+    await syncStudentHourSnapshot(tx, input.studentId)
     return { posted: true, mode: 'accrual', amount: accrual.accrued }
   }
 
@@ -73,5 +75,6 @@ export async function postAttendanceHours(
       operatorId: input.operatorId,
     },
   })
+  await syncStudentHourSnapshot(tx, input.studentId)
   return { posted: true, mode: 'deduction', amount: deduction.deducted }
 }

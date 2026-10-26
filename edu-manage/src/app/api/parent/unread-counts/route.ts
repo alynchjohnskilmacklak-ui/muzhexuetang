@@ -74,6 +74,6 @@ export const GET = apiHandler(async () => {
   const messages = summarizeParentMessageWorkflow(messageRows).unreadForParent
 
   return NextResponse.json({ papers, posts, notifications, feedbacks, studyHallHomework, messages }, {
-    headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
+    headers: { 'Cache-Control': 'private, no-store, max-age=0' },
   })
 })

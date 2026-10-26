@@ -42,6 +42,9 @@ export function validatePassword(
   if (!/[A-Za-z]/.test(password)) {
     errors.push('密码必须包含英文字母')
   }
+  if (!/\d/.test(password)) {
+    errors.push('密码至少需要包含一个数字')
+  }
   if (/\s/.test(password)) {
     errors.push('密码不能包含空格')
   }

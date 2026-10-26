@@ -1,0 +1,59 @@
+﻿========================================================================
+步骤 1/5：上传到 shared 目录
+========================================================================
+  home.html: 5dd81479b6aa0bfa  ✓  (本地 5dd81479b6aa0bfa)  
+  about.html: f3f2ab6d21c32351  ✓  (本地 f3f2ab6d21c32351)  
+
+========================================================================
+步骤 2/5：compose 增加两个 bind mount
+========================================================================
+  已下载原文件到 _preview/_compose.production.yaml.orig
+  已备份到 /opt/edu-manage-docker/source/compose.production.yaml.bak-seo-20261003
+  已写入新 compose
+  --- 修改后的 volumes 段 ---
+volumes:
+      - /srv/edu-manage/shared/public/uploads:/app/public/uploads
+      - /srv/edu-manage/shared/public/services:/app/public/services
+      - /srv/edu-manage/shared/public/marketing:/app/public/marketing
+      - /srv/edu-manage/shared/public/business-assets:/app/public/business-assets
+      - /srv/edu-manage/shared/public/volunteer/docs:/app/public/volunteer/docs
+      - /srv/edu-manage/shared/public/home.html:/app/public/home.html
+      - /srv/edu-manage/shared/public/about.html:/app/public/about.html
+      - /data/backups/edu-manage:/data/backups/edu-manage
+      - next_cache:/app/.next/cache
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+  --- compose 语法校验 ---
+  compose 配置合法 ✓
+
+========================================================================
+步骤 3/5：重建 app 容器（不动 db / redis）
+========================================================================
+Container edu-manage-app-1  Recreate
+ Container edu-manage-app-1  Recreated
+ Container edu-manage-app-1  Starting
+ Container edu-manage-app-1  Started
+  等待健康检查...
+  容器状态：running/healthy ✓（等待 10s）
+
+========================================================================
+步骤 4/5：容器内文件与挂载校验
+========================================================================
+5dd81479b6aa0bfa /app/public/home.html
+f3f2ab6d21c32351 /app/public/about.html
+  挂载确认：
+798 746 252:3 /srv/edu-manage/shared/public/about.html /app/public/about.html rw,relatime - ext4 /dev/vda3 rw
+800 746 252:3 /srv/edu-manage/shared/public/home.html /app/public/home.html rw,relatime - ext4 /dev/vda3 rw
+
+========================================================================
+步骤 5/5：公网校验
+========================================================================
+  /        HTTP 200  sha=5dd81479b6aa0bfa  size=67044
+           <title>新乐牧哲学堂｜河北新乐文化课辅导</title>
+  /about   HTTP 200  sha=f3f2ab6d21c32351  size=59589
+           <title>新乐牧哲学堂｜机构介绍 - 河北新乐</title>
+  /login   HTTP 200  sha=609acb1b20907957  size=33621
+           <title>牧哲学堂</title>
+
+部署流程结束

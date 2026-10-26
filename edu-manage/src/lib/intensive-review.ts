@@ -2,6 +2,7 @@ import type { Prisma, PrismaClient } from '@prisma/client'
 import { calculateIntensiveDeductHours } from '@/lib/intensive-class'
 import { createIntensiveLessonPayInTransaction } from '@/lib/intensive-settlement'
 import { hasAttendingStudent } from '@/lib/attendance-submission'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
 export type IntensiveReviewAttendanceStatus = 'PRESENT' | 'LEAVE' | 'ABSENT' | 'MAKEUP'
 
@@ -426,6 +427,10 @@ export async function reviewIntensiveLesson(params: {
         hoursDeductedAt: deductedStudents > 0 ? now : null,
       },
     })
+    for (const studentId of new Set(review.lesson.attendances.map((attendance) => attendance.studentId))) {
+      await syncStudentHourSnapshot(tx, studentId)
+    }
+
     const salary = await createIntensiveLessonPayInTransaction(tx, review.lessonId)
     const completedLessons = await tx.classLesson.count({
       where: {

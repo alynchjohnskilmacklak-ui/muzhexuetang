@@ -1,4 +1,5 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
@@ -152,14 +153,17 @@ export default function BackupRestorePanel({ backupOnly = false }: { backupOnly?
           })
           const data = await res.json()
           if (res.ok && data.success) {
-            message.success('恢复完成')
+            if (data.warning) message.warning(data.warning)
+            else message.success('恢复完成')
             setRestorePassword('')
             setRestoreConfirm('')
           } else {
-            message.error(data.error || '恢复失败')
+            const labels: Record<string, string> = { JUNIOR: '初中部', SENIOR: '高中部' }
+            const completed = (data.completedDivisions || []).map((division: string) => labels[division] || division).join('、')
+            modal.error({ title: data.partial ? '恢复部分完成，请核对后再操作' : '恢复失败', content: `${data.error || '恢复失败'}${completed ? ` 已完成：${completed}。` : ''}` })
           }
         } catch {
-          message.error('恢复请求失败')
+          modal.error({ title: '未收到恢复结果', content: '网络中断不代表服务器已停止恢复。请核对操作日志和数据库状态后再操作，不要立即重复恢复。' })
         } finally {
           setRestoring(false)
         }
@@ -180,7 +184,7 @@ export default function BackupRestorePanel({ backupOnly = false }: { backupOnly?
           <p>即将清空以下数据：</p>
           <ul>{selectedCats.map((k) => <li key={k}>{categories.find((c) => c.key === k)?.label ?? k}</li>)}</ul>
           <p>范围：{resetDivision === 'BOTH' ? '初中部 + 高中部' : resetDivision === 'SENIOR' ? '高中部' : '初中部'}</p>
-          <p>预估影响：约 {resetPreview?.total || 0} 条。执行后将进入回收站，30 天内可恢复。</p>
+          <p>预估影响：约 {resetPreview?.total || 0} 条。执行后将进入回收站，保留期内可恢复。</p>
         </div>
       ),
       okText: '确认清空',
@@ -207,7 +211,7 @@ export default function BackupRestorePanel({ backupOnly = false }: { backupOnly?
           })
           const data = await res.json()
           if (res.ok && data.success) {
-            message.success('数据已移入回收站，可在 30 天内恢复')
+            message.success('数据已移入回收站，可在 保留期内恢复')
             setResetResults(data.results)
             setResetPassword('')
             setResetConfirm('')
@@ -331,14 +335,14 @@ export default function BackupRestorePanel({ backupOnly = false }: { backupOnly?
         <Space direction="vertical" size="middle" style={{ width: '100%' }}>
           <Alert
             type="error"
-            message="危险操作：恢复将用备份数据覆盖当前数据。强烈建议先在测试环境验证流程。"
+            message="危险操作：覆盖恢复数据库前，请先创建新备份并在测试环境验证。此入口不自动还原上传附件；双学部恢复为分别提交，不能保证两个数据库一起回滚。"
             showIcon
             icon={<WarningOutlined />}
           />
 
           <div>
             <Text strong>选择备份</Text>
-            <Select
+            <AdaptiveSelect
               style={{ width: '100%', marginTop: 8 }}
               placeholder="选择要恢复的备份"
               value={selectedBackup}
@@ -349,7 +353,7 @@ export default function BackupRestorePanel({ backupOnly = false }: { backupOnly?
 
           <div>
             <Text strong>目标学部</Text>
-            <Select
+            <AdaptiveSelect
               style={{ width: '100%', marginTop: 8 }}
               value={restoreDivision}
               onChange={setRestoreDivision}
@@ -404,7 +408,7 @@ export default function BackupRestorePanel({ backupOnly = false }: { backupOnly?
 
           <div>
             <Text strong>清理范围（学部）</Text>
-            <Select
+            <AdaptiveSelect
               style={{ width: '100%', marginTop: 8 }}
               value={resetDivision}
               onChange={(value) => { setResetDivision(value); setResetPreview(null) }}
@@ -414,14 +418,14 @@ export default function BackupRestorePanel({ backupOnly = false }: { backupOnly?
 
           <div>
             <Text strong>运营批次</Text>
-            <Select style={{ width: '100%', marginTop: 8 }} value={effectiveTermId} onChange={(value) => { setResetTermId(value); setResetClassId(undefined); setResetPreview(null) }} options={[...academicTerms.map((term: { id: string; name: string; status: string }) => ({ label: `${term.name}${term.status === 'ACTIVE' ? '（当前）' : '（历史）'}`, value: term.id })), { label: '全部批次（高危）', value: 'ALL' }]} />
+            <AdaptiveSelect style={{ width: '100%', marginTop: 8 }} value={effectiveTermId} onChange={(value) => { setResetTermId(value); setResetClassId(undefined); setResetPreview(null) }} options={[...academicTerms.map((term: { id: string; name: string; status: string }) => ({ label: `${term.name}${term.status === 'ACTIVE' ? '（当前）' : '（历史）'}`, value: term.id })), { label: '全部批次（高危）', value: 'ALL' }]} />
           </div>
           {effectiveTermId === 'ALL' && <Alert type="warning" showIcon message="当前选择全部批次，将跨当前与历史批次清理数据，影响范围更大。" />}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
             <div><Text strong>日期范围（可选）</Text><DatePicker.RangePicker style={{ width: '100%', marginTop: 8 }} onChange={(_, values) => { setResetDateRange(values[0] && values[1] ? [values[0], values[1]] : null); setResetPreview(null) }} /></div>
-            <div><Text strong>指定班级（可选）</Text><Select allowClear showSearch optionFilterProp="label" style={{ width: '100%', marginTop: 8 }} placeholder="留空为批次内全部班级" value={resetClassId} onChange={(value) => { setResetClassId(value); setResetPreview(null) }} options={classOptions} /></div>
-            <div><Text strong>指定学员（可选）</Text><Select allowClear showSearch optionFilterProp="label" style={{ width: '100%', marginTop: 8 }} placeholder="留空为范围内全部学员" value={resetStudentId} onChange={(value) => { setResetStudentId(value); setResetPreview(null) }} options={studentOptions} /></div>
+            <div><Text strong>指定班级（可选）</Text><AdaptiveSelect allowClear showSearch optionFilterProp="label" style={{ width: '100%', marginTop: 8 }} placeholder="留空为批次内全部班级" value={resetClassId} onChange={(value) => { setResetClassId(value); setResetPreview(null) }} options={classOptions} /></div>
+            <div><Text strong>指定学员（可选）</Text><AdaptiveSelect allowClear showSearch optionFilterProp="label" style={{ width: '100%', marginTop: 8 }} placeholder="留空为范围内全部学员" value={resetStudentId} onChange={(value) => { setResetStudentId(value); setResetPreview(null) }} options={studentOptions} /></div>
           </div>
 
           <div>
@@ -451,7 +455,7 @@ export default function BackupRestorePanel({ backupOnly = false }: { backupOnly?
           </div>
 
           <Button icon={<ReloadOutlined />} loading={previewing} onClick={handlePreviewReset}>预估影响条数</Button>
-          {resetPreview && <Alert className="preview-box" type={resetPreview.total > 0 ? 'warning' : 'info'} showIcon message={`本次将清理${effectiveTermId === 'ALL' ? '全部批次' : `「${academicTerms.find((term: { id: string }) => term.id === effectiveTermId)?.name || '所选批次'}」`}内的${selectedCats.map((key) => categories.find((category) => category.key === key)?.label).filter(Boolean).join('、')}，共约 ${resetPreview.total} 条。`} description="清理结果会先进入回收站，30 天内可整批恢复。请确认数字符合预期后再继续。" />}
+          {resetPreview && <Alert className="preview-box" type={resetPreview.total > 0 ? 'warning' : 'info'} showIcon message={`本次将清理${effectiveTermId === 'ALL' ? '全部批次' : `「${academicTerms.find((term: { id: string }) => term.id === effectiveTermId)?.name || '所选批次'}」`}内的${selectedCats.map((key) => categories.find((category) => category.key === key)?.label).filter(Boolean).join('、')}，共约 ${resetPreview.total} 条。`} description="清理结果会先进入回收站，保留期内可整批恢复。请确认数字符合预期后再继续。" />}
 
           <div>
             <Text strong>确认短语（请逐字输入）：</Text>

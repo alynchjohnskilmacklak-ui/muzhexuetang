@@ -1,0 +1,50 @@
+﻿本地文件: 68 B  sha256=6b62205e71aa0cce
+本地内容: 'shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_1791013604'
+
+========================================================================
+步骤 1/4：上传到 shared 与 source
+========================================================================
+  ✓ 上传校验通过
+  已写入两处，大小 68 B（应 68） 
+
+========================================================================
+步骤 2/4：compose 增加挂载
+========================================================================
+  已插入挂载，备份为 compose.production.yaml.bak-shenma-20261003
+  --- volumes 段 ---
+volumes:
+      - /srv/edu-manage/shared/public/uploads:/app/public/uploads
+      - /srv/edu-manage/shared/public/services:/app/public/services
+      - /srv/edu-manage/shared/public/marketing:/app/public/marketing
+      - /srv/edu-manage/shared/public/business-assets:/app/public/business-assets
+      - /srv/edu-manage/shared/public/volunteer/docs:/app/public/volunteer/docs
+      - /srv/edu-manage/shared/public/home.html:/app/public/home.html
+      - /srv/edu-manage/shared/public/about.html:/app/public/about.html
+      - /srv/edu-manage/shared/public/shenma-site-verification.txt:/app/public/shenma-site-verification.txt
+      - /data/backups/edu-manage:/data/backups/edu-manage
+      - next_cache:/app/.next/cache
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+  语法校验: OK
+
+========================================================================
+步骤 3/4：重建 app 容器
+========================================================================
+Container edu-manage-app-1  Recreate
+ Container edu-manage-app-1  Recreated
+ Container edu-manage-app-1  Starting
+ Container edu-manage-app-1  Started
+  容器 running/healthy ✓（10s）
+
+========================================================================
+步骤 4/4：校验
+========================================================================
+  容器内   : 'shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_1791013604'  ✓
+  公网返回 : 'shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_1791013604'  ✓
+  HTTP 200  68 B（应 68）
+  挂载确认 : 784 746 252:3 /srv/edu-manage/shared/public/shenma-site-verification.txt /app/public/shenma-site-verification.txt rw,relatime - ext4 /dev/vda3 rw
+  首页未受影响: 5dd81479b6aa0bfa (应 5dd81479b6aa0bfa)
+
+★ 完成——请立刻回神马后台点「验证」按钮

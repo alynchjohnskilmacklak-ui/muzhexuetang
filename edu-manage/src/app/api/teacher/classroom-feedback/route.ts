@@ -8,12 +8,14 @@ import {
   filterStudentRatingsForStudents,
   hasRequiredLessonContent,
   hasMeaningfulFeedbackContent,
+  feedbackStudentLimitError,
   normalizeLessonContent,
   parseFeedbackCourseType,
   resolveTeacherFeedbackCreationScope,
 } from '@/lib/classroom-feedback/access'
 import { createClassroomFeedbackWithSideEffects } from '@/lib/classroom-feedback/create'
 import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
+import { createFeedbackOnce, hashFeedbackPayload, parseFeedbackClientRequestId } from '@/lib/classroom-feedback/idempotency'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,6 +41,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
 export const POST = apiHandler(async (req: NextRequest) => {
     const { user, teacher, prisma } = await requireCurrentTeacher()
     const body = await req.json()
+    const clientRequestId = parseFeedbackClientRequestId(body?.clientRequestId)
+    if (clientRequestId === false) return NextResponse.json({ error: '提交请求编号无效，请刷新页面后重试' }, { status: 400 })
+    if (!clientRequestId) return NextResponse.json({ error: '提交请求编号缺失，请刷新页面后重试' }, { status: 400 })
     const classLessonId = typeof body.classLessonId === 'string' && body.classLessonId ? body.classLessonId : null
     let feedbackGroupId = typeof body.feedbackGroupId === 'string' && body.feedbackGroupId
       ? body.feedbackGroupId
@@ -92,13 +97,17 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
     const students = scope.students
     if (!students.length) return NextResponse.json({ error: '请选择学员或关联一个有学员的课次' }, { status: 400 })
-    if (students.length > 3) return NextResponse.json({ error: '一次最多反馈3名学生' }, { status: 400 })
+    const studentLimitError = feedbackStudentLimitError('teacher', students.length)
+    if (studentLimitError) return NextResponse.json({ error: studentLimitError }, { status: 400 })
     feedbackGroupId = scope.feedbackGroupId
     feedbackCourseType = scope.feedbackCourseType
     const resolvedStudentRatings = filterStudentRatingsForStudents(studentRatings, students.map((student) => student.id))
 
-    const feedback = await prisma.$transaction(async (tx) => {
-      return createClassroomFeedbackWithSideEffects(tx, {
+    const feedbackResult = await prisma.$transaction(async (tx) => createFeedbackOnce(tx, {
+      clientRequestId,
+      actorUserId: user.id,
+      payloadHash: hashFeedbackPayload({ ...body, clientRequestId: undefined, resolvedStudentIds: students.map((student) => student.id) }),
+    }, () => createClassroomFeedbackWithSideEffects(tx, {
         data: {
           termId: scope.termId,
           teacherId: teacher.id,
@@ -133,14 +142,22 @@ export const POST = apiHandler(async (req: NextRequest) => {
         detailFallback: '课堂反馈',
         notificationContent: summary || knowledgePoints.join('、') || '课堂资料已更新',
         metadata: { targetType },
-      })
-    })
+    })))
+    if (!feedbackResult.ok) {
+      const message = feedbackResult.conflict === 'PAYLOAD_CHANGED'
+        ? '这次提交内容与已处理的请求不同，请检查反馈记录后重新提交'
+        : feedbackResult.conflict === 'RESULT_MISSING'
+          ? '提交仍在处理中，请稍后刷新反馈列表'
+          : '提交编号已被使用，请刷新页面后重试'
+      return NextResponse.json({ error: message }, { status: 409 })
+    }
+    const feedback = feedbackResult.feedback
 
-    const bonus = status === 'PUBLISHED'
+    const bonus = status === 'PUBLISHED' && !feedbackResult.replayed
       ? await triggerFeedbackBonus(feedback.id)
       : null
 
     revalidatePath('/teacher/dashboard')
     revalidatePath('/parent/grades')
-    return NextResponse.json({ feedback, bonus }, { status: 201 })
+    return NextResponse.json({ feedback, bonus, replayed: feedbackResult.replayed }, { status: feedbackResult.replayed ? 200 : 201 })
 })

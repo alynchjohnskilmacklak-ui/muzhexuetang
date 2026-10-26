@@ -1,0 +1,94 @@
+﻿==============================================================================
+1) 「360Spider」这 69 次到底是什么（看 IP 和 UA）
+==============================================================================
+180.153.236.40 - - [01/Oct/2026:19:50:03 +0800] "GET /robots.txt HTTP/1.1" 200 968 "https://www.muzhexuetang.xyz/robots.txt" "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Ch
+180.153.236.41 - - [01/Oct/2026:19:51:03 +0800] "GET /robots.txt HTTP/1.1" 200 968 "https://www.muzhexuetang.xyz/robots.txt" "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Ch
+180.153.236.183 - - [01/Oct/2026:21:07:01 +0800] "GET / HTTP/1.1" 200 18142 "https://muzhexuetang.xyz/" "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari
+180.153.236.83 - - [01/Oct/2026:21:14:24 +0800] "GET / HTTP/1.1" 301 178 "http://muzhexuetang.xyz/" "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537
+180.153.236.162 - - [01/Oct/2026:21:14:50 +0800] "GET / HTTP/1.1" 200 18142 "https://muzhexuetang.xyz/" "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari
+180.153.236.42 - - [30/Sep/2026:02:41:07 +0800] "GET / HTTP/1.1" 200 18149 "https://muzhexuetang.xyz" "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/5
+180.153.236.51 - - [30/Sep/2026:02:41:14 +0800] "GET / HTTP/1.1" 301 178 "http://muzhexuetang.xyz" "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.
+180.153.236.27 - - [30/Sep/2026:02:41:42 +0800] "GET / HTTP/1.1" 200 18142 "https://muzhexuetang.xyz/" "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/
+
+  UA 分布:
+72 "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0; 360Spider"
+      2 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0; 360Spider"
+      1 "User-Agent:Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36; 360Spider"
+
+==============================================================================
+2) Google 44 次首页抓取 —— 真实 Googlebot 还是扫描器？
+==============================================================================
+66.249.69.225 - - [02/Oct/2026:11:51:29 +0800] "GET / HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.52 Mobile Safari/537.36 (com
+66.249.69.232 - - [02/Oct/2026:11:51:30 +0800] "GET / HTTP/1.1" 200 18142 "-" "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.52 Mobile Safari/537.36 (c
+176.65.144.71 - - [02/Oct/2026:14:07:09 +0800] "GET / HTTP/1.1" 200 30213 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+192.178.7.168 - - [01/Oct/2026:01:40:38 +0800] "GET / HTTP/1.1" 200 18142 "-" "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.52 Mobile Safari/537.36 (c
+192.178.7.162 - - [30/Sep/2026:02:53:42 +0800] "GET / HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.52 Mobile Safari/537.36 (com
+192.178.7.166 - - [30/Sep/2026:02:53:43 +0800] "GET / HTTP/1.1" 200 18142 "-" "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.52 Mobile Safari/537.36 (c
+
+  Google 抓取的 IP 分布:
+9976 163.7.13.50
+    152 176.65.144.71
+     15 93.152.209.6
+     10 136.85.85.238
+      8 66.249.77.198
+      7 66.249.77.199
+      5 192.178.7.166
+      4 66.249.77.197
+
+==============================================================================
+3) 过去 7 天逐日：各引擎抓首页次数
+==============================================================================
+  引擎         03/Oct   04/Oct   05/Oct   06/Oct   07/Oct   08/Oct   09/Oct
+  百度             12        1        0        1        2        0        1
+  必应              1        0        0        0        0        0        0
+  搜狗              0        0        0        0        0        0        0
+  字节              0        0        0        0        0        0        0
+  神马              3        0        0        0        0        0        0
+  Yandex          1        0        0        0        0        0        0
+  Google          5        5        2        0        2        2        0
+  360             0       12        7        3        7        3        0
+
+==============================================================================
+4) 10/09 当天完整活动（各引擎抓了什么）
+==============================================================================
+  [百度]
+220.181.108.84 [09/Oct/2026:15:44:25 / 200
+     116.179.37.14 [09/Oct/2026:15:44:28 /about-images/01-3-thumb.webp 200
+  [必应]  无活动
+  [搜狗]  无活动
+  [字节]  无活动
+  [神马]  无活动
+  [Yandex]  无活动
+  [Google]  无活动
+  [360]  无活动
+
+==============================================================================
+5) sitemap / robots 最近被抓记录（全日志）
+==============================================================================
+51.8.102.211 [09/Oct/2026:14:21:44 /robots.txt 200 "Mozilla/5.0 (Macintosh;
+119.249.100.175 [09/Oct/2026:15:44:33 /robots.txt 200 "Mozilla/5.0 (Windows
+111.225.214.210 [09/Oct/2026:15:44:39 /robots.txt 200 "Mozilla/5.0 (Windows
+
+==============================================================================
+6) /about 页面被真实爬虫抓取的时间线（排除我们自己的 IP）
+==============================================================================
+43.159.132.207 [03/Oct/2026:16:14:46 499 iPhone OS 13_2_3
+87.250.224.89 [03/Oct/2026:16:39:45 200 +http://yandex.com/bots)"  
+43.166.244.66 [03/Oct/2026:16:58:45 200 iPhone OS 13_2_3
+43.157.179.227 [03/Oct/2026:17:07:34 200 iPhone OS 13_2_3
+43.153.10.13 [03/Oct/2026:17:11:17 200 iPhone OS 13_2_3
+43.131.253.14 [03/Oct/2026:17:18:54 200 iPhone OS 13_2_3
+43.161.233.190 [03/Oct/2026:17:27:57 200 iPhone OS 13_2_3
+43.165.65.117 [03/Oct/2026:17:30:36 200 iPhone OS 13_2_3
+43.153.26.165 [03/Oct/2026:17:52:06 200 iPhone OS 13_2_3
+43.134.23.177 [03/Oct/2026:17:55:57 200 iPhone OS 13_2_3
+43.135.144.126 [03/Oct/2026:18:01:34 200 iPhone OS 13_2_3
+43.166.250.187 [03/Oct/2026:18:08:18 200 iPhone OS 13_2_3
+49.51.195.195 [03/Oct/2026:18:16:05 200 iPhone OS 13_2_3
+170.106.187.106 [03/Oct/2026:18:25:25 200 iPhone OS 13_2_3
+43.164.133.138 [03/Oct/2026:18:56:32 200 iPhone OS 13_2_3
+43.157.82.252 [03/Oct/2026:19:06:38 200 iPhone OS 13_2_3
+43.131.39.179 [03/Oct/2026:19:17:23 200 iPhone OS 13_2_3
+43.130.100.35 [03/Oct/2026:19:27:56 200 iPhone OS 13_2_3
+51.68.247.196 [03/Oct/2026:19:36:19 200 +http://ahrefs.com/robot/)"  
+85.208.96.200 [01/Oct/2026:03:22:07 200 +http://www.semrush.com/bot.html)"

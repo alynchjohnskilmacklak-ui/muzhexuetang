@@ -31,6 +31,7 @@ interface Material {
   fileName: string
   fileSize: number
   fileType: string
+  materialType: string
   description: string | null
   downloads: number
   audience: string
@@ -48,6 +49,7 @@ const OSS_DOC_EXTS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx']
 const OSS_MAX_SIZE = 200 * 1024 * 1024 // 200MB
 const LOCAL_MAX_SIZE = 50 * 1024 * 1024 // 50MB
 const LOCAL_EXTS = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.zip', '.rar', '.7z']
+const MATERIAL_TYPE_NAMES: Record<string, string> = { TEXTBOOK: '课本', HANDOUT: '讲义', EXERCISE: '题库', EXAM: '试卷', ANSWER: '答案', REFERENCE: '参考' }
 
 async function readApiError(res: Response, fallback: string) {
   const data = await res.json().catch(() => ({}))
@@ -186,6 +188,7 @@ export default function MaterialsPage() {
             grade: values.grade,
             subject: values.subject,
             audience: values.audience,
+            materialType: values.materialType,
             status: 'PUBLISHED',
             isPinned: Boolean(values.isPinned),
             description: values.description || undefined,
@@ -206,6 +209,7 @@ export default function MaterialsPage() {
         formData.append('grade', values.grade)
         formData.append('subject', values.subject)
         formData.append('audience', values.audience)
+        formData.append('materialType', values.materialType)
         formData.append('status', 'PUBLISHED')
         formData.append('isPinned', String(Boolean(values.isPinned)))
         if (values.description) formData.append('description', values.description)
@@ -285,7 +289,8 @@ export default function MaterialsPage() {
     },
     { title: '年级', dataIndex: 'grade', width: 90, render: (grade: string) => <Tag>{grade}</Tag> },
     { title: '科目', dataIndex: 'subject', width: 90, render: (subject: string) => <Tag color={SUBJECT_COLORS[subject] || 'default'}>{subject}</Tag> },
-    { title: '资料类型', dataIndex: 'audience', width: 110, render: (value: string) => <Tag color={value === 'TEACHER' ? 'orange' : value === 'BOTH' ? 'blue' : 'green'}>{materialAudienceLabel(value)}</Tag> },
+    { title: '内容分类', dataIndex: 'materialType', width: 90, render: (value: string) => <Tag>{MATERIAL_TYPE_NAMES[value] || '讲义'}</Tag> },
+    { title: '查看对象', dataIndex: 'audience', width: 110, render: (value: string) => <Tag color={value === 'TEACHER' ? 'orange' : value === 'BOTH' ? 'blue' : 'green'}>{materialAudienceLabel(value)}</Tag> },
     { title: '来源', dataIndex: 'source', width: 100, render: (value: string) => materialSourceLabel(value) },
     { title: '上传老师', dataIndex: ['teacher', 'name'], width: 110, render: (value: string) => value || '-' },
     { title: '文件类型', dataIndex: 'fileType', width: 100, render: (type: string) => <Tag color={materialFileColor(type)}>{materialFileLabel(type)}</Tag> },
@@ -361,6 +366,7 @@ export default function MaterialsPage() {
                     <Paragraph type="secondary" ellipsis={{ rows: 2 }} style={{ marginBottom: 8 }}>{material.description || material.fileName}</Paragraph>
                     <Space size={4} wrap>
                       <Tag>{material.grade}</Tag>
+                      <Tag>{MATERIAL_TYPE_NAMES[material.materialType] || '讲义'}</Tag>
                       <Tag color={SUBJECT_COLORS[material.subject] || 'default'}>{material.subject}</Tag>
                       <Tag color={material.audience === 'TEACHER' ? 'orange' : material.audience === 'BOTH' ? 'blue' : 'green'}>{materialAudienceLabel(material.audience)}</Tag>
                       <Tag color={materialFileColor(material.fileType)}>{materialFileLabel(material.fileType)}</Tag>
@@ -384,7 +390,7 @@ export default function MaterialsPage() {
       </div>
 
       <Modal title="上传学习资料" open={uploadOpen} onCancel={() => { setUploadOpen(false); form.resetFields(); setFileList([]) }} onOk={handleUpload} confirmLoading={uploading} okText="上传" width={640}>
-        <Form form={form} layout="vertical" initialValues={{ audience: 'STUDENT', isPinned: false }} style={{ marginTop: 16 }}>
+        <Form form={form} layout="vertical" initialValues={{ audience: 'STUDENT', materialType: 'HANDOUT', isPinned: false }} style={{ marginTop: 16 }}>
           <Form.Item name="title" label="资料标题" rules={[{ required: true, message: '请输入资料标题' }]}>
             <Input maxLength={80} showCount />
           </Form.Item>
@@ -400,7 +406,14 @@ export default function MaterialsPage() {
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item name="audience" label="资料类型" rules={[{ required: true }]}>
+          <Form.Item name="materialType" label="内容分类" rules={[{ required: true, message: '请选择内容分类' }]}>
+            <Select virtual={false} getPopupContainer={(node) => node.parentElement || document.body} options={[
+              { label: '课本', value: 'TEXTBOOK' }, { label: '讲义', value: 'HANDOUT' },
+              { label: '题库（可预览、下载的文件）', value: 'EXERCISE' }, { label: '试卷', value: 'EXAM' },
+              { label: '答案', value: 'ANSWER' }, { label: '参考', value: 'REFERENCE' },
+            ]} />
+          </Form.Item>
+          <Form.Item name="audience" label="谁可以查看" rules={[{ required: true }]}>
             <Select options={[
               { label: '学生版资料：家长端可见，教师端也可查看', value: 'STUDENT' },
               { label: '教师版资料：仅教师端和管理端可见', value: 'TEACHER' },

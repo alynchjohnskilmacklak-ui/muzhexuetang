@@ -4,18 +4,15 @@ import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import { Avatar, Button, Card, Col, Empty, Input, List, Popconfirm, Row, Select, Space, Tag, Typography, message } from 'antd'
-import { CheckOutlined, DeleteOutlined, MessageOutlined, ReloadOutlined, SendOutlined } from '@ant-design/icons'
+import { CheckOutlined, DeleteOutlined, MessageOutlined, ReloadOutlined, SendOutlined, UserOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { fetchJson } from '@/lib/fetch-json'
 
 const { Text, Paragraph } = Typography
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error('加载失败')
-  return res.json()
-}
+const fetcher = (url: string) => fetchJson<{ items?: CommunicationItem[] }>(url)
 type CommunicationItem = {
   id: string
   type: string
@@ -39,10 +36,11 @@ export default function CommunicationsPage() {
   const [q, setQ] = useState('')
   const [replying, setReplying] = useState('')
   const [replyText, setReplyText] = useState('')
+  const [saving, setSaving] = useState(false)
   const params = new URLSearchParams({ source, limit: '80' })
   if (unread) params.set('unread', '1')
   if (q.trim()) params.set('q', q.trim())
-  const { data, mutate, isLoading } = useSWR<{ items?: CommunicationItem[] }>(`/api/parent-communications?${params.toString()}`, fetcher)
+  const { data, error, mutate, isLoading } = useSWR<{ items?: CommunicationItem[] }>(`/api/parent-communications?${params.toString()}`, fetcher)
   const items = useMemo(() => Array.isArray(data?.items) ? data.items : [], [data])
 
   const stats = useMemo(() => ({
@@ -53,38 +51,41 @@ export default function CommunicationsPage() {
   }), [items])
 
   const markRead = async (item: CommunicationItem) => {
-    const res = await fetch('/api/parent-communications', {
+    try {
+    await fetchJson('/api/parent-communications', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: item.id, type: item.type }),
     })
-    if (!res.ok) return message.error('标记失败')
     message.success('已标记为已读')
-    mutate()
+    void mutate()
+    } catch (error) { message.error(error instanceof Error ? error.message : '标记失败，请重试') }
   }
 
   const deleteComment = async (item: CommunicationItem) => {
-    const res = await fetch(`/api/parent-communications?type=${item.type}&id=${item.id}&targetId=${item.targetId}`, { method: 'DELETE' })
-    if (!res.ok) return message.error('删除失败')
+    try {
+    await fetchJson(`/api/parent-communications?${new URLSearchParams({ type: item.type, id: item.id, targetId: item.targetId })}`, { method: 'DELETE' })
     message.success('该条关联沟通已清除')
-    mutate()
+    void mutate()
+    } catch (error) { message.error(error instanceof Error ? error.message : '删除失败，请重试') }
   }
 
   const sendReply = async (item: CommunicationItem) => {
     if (!replyText.trim()) return message.warning('请输入回复内容')
-    const res = await fetch('/api/parent-communications', {
+    if (saving) return
+    setSaving(true)
+    try {
+    await fetchJson('/api/parent-communications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: item.type, targetId: item.targetId, content: replyText }),
     })
-    if (!res.ok) {
-      const payload = await res.json().catch(() => ({}))
-      return message.error(payload.error || '回复失败')
-    }
     message.success('已回复家长')
     setReplying('')
     setReplyText('')
-    mutate()
+    void mutate()
+    } catch (error) { message.error(error instanceof Error ? error.message : '回复失败，已保留输入，请重试') }
+    finally { setSaving(false) }
   }
 
   return (
@@ -93,6 +94,7 @@ export default function CommunicationsPage() {
       subtitle="统一查看学习档案、在校表现中的家长留言，管理端可回复、标记和清理"
       actions={<Button icon={<ReloadOutlined />} onClick={() => mutate()}>刷新</Button>}
     >
+      {error && <div role="alert" style={{ marginBottom: 16 }}><Text type="danger">{error instanceof Error ? error.message : '沟通记录读取失败'}</Text> <Button onClick={() => void mutate()}>重试</Button></div>}
       <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
         {[
           { label: '全部沟通', value: stats.total, color: '#1F2329', bg: '#fff' },
@@ -144,7 +146,7 @@ export default function CommunicationsPage() {
             <Button
               type="primary"
               icon={<SendOutlined />}
-              style={{ background: '#E8784A', borderColor: '#E8784A' }}
+              style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}
               onClick={() => router.push('/notifications')}
             >
               发送新通知
@@ -178,7 +180,7 @@ export default function CommunicationsPage() {
                   style={{ borderBlockEnd: '1px solid #F0E7DE' }}
                 >
                   <List.Item.Meta
-                    avatar={<Avatar style={{ background: fromParent ? '#E8784A' : '#E8784A' }}>{(item.author?.name || item.author?.label || '?').charAt(0)}</Avatar>}
+                    avatar={<Avatar icon={<UserOutlined />} style={{ background: '#E8784A' }} />}
                     title={
                       <Space wrap>
                         <Text strong>{item.author?.name || item.author?.label || '未知用户'}</Text>
@@ -204,7 +206,7 @@ export default function CommunicationsPage() {
                     {replying === item.id && (
                       <Space.Compact style={{ width: '100%', marginTop: 12 }}>
                         <Input value={replyText} onChange={(event) => setReplyText(event.target.value)} placeholder="以管理端身份回复家长..." maxLength={200} />
-                        <Button type="primary" icon={<SendOutlined />} onClick={() => sendReply(item)}>发送</Button>
+                        <Button type="primary" loading={saving} icon={<SendOutlined />} onClick={() => sendReply(item)}>发送</Button>
                       </Space.Compact>
                     )}
                   </div>

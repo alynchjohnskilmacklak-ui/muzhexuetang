@@ -429,7 +429,7 @@ export default function TeacherAttendancePage() {
               <Tag color="blue" style={{ borderRadius: 9999 }}>{students.length}人</Tag>
               <Button disabled={intensiveSettlementLocked} icon={<CheckCircleOutlined />} onClick={handleAllPresent} style={{ borderColor: '#1D9E75', color: '#1D9E75' }}>一键全勤</Button>
               {attendanceTimeHint(selectedLesson)}
-              <Button type="primary" disabled={intensiveSettlementLocked} loading={submitting} onClick={submitAttendance} style={{ background: '#E8784A' }}>{submitLabel}</Button>
+              <Button type="primary" disabled={intensiveSettlementLocked} loading={submitting} onClick={submitAttendance} style={{ background: 'var(--color-primary)' }}>{submitLabel}</Button>
             </Space>
           ) : null}>
           {selectedLesson?.scheduleKind === 'STUDY_HALL' || selectedLesson?.id.startsWith('study-hall:') ? (

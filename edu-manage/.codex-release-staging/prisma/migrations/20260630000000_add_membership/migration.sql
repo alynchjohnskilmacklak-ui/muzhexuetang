@@ -1,0 +1,5 @@
+ALTER TABLE "Student"
+ADD COLUMN IF NOT EXISTS "membershipLevel" TEXT NOT NULL DEFAULT 'NORMAL';
+
+ALTER TABLE "SystemConfig"
+ADD COLUMN IF NOT EXISTS "membershipBenefits" TEXT;

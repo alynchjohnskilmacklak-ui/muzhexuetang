@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
+import { parseSettingsUpdate } from '@/lib/settings-schema'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,15 +28,15 @@ export const PATCH = apiHandler(async (request: NextRequest) => {
   const prisma = await getRequestPrisma()
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
-  const body = await request.json()
-  const config = await prisma.systemConfig.upsert({
-    where: { id: 'singleton' },
-    create: { id: 'singleton', ...body },
-    update: body,
-  })
-
-  await prisma.activityLog.create({
-    data: { userId: user.id, action: '更新了机构信息', detail: '修改了系统配置' },
+  let body: ReturnType<typeof parseSettingsUpdate>
+  try { body = parseSettingsUpdate(await request.json()) }
+  catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : '设置格式无效' }, { status: 400 }) }
+  const config = await prisma.$transaction(async tx => {
+    const saved = await tx.systemConfig.upsert({
+      where: { id: 'singleton' }, create: { id: 'singleton', ...body }, update: body,
+    })
+    await tx.activityLog.create({ data: { userId: user.id, action: '更新了机构信息', detail: '修改了系统配置' } })
+    return saved
   })
 
   return NextResponse.json(config)

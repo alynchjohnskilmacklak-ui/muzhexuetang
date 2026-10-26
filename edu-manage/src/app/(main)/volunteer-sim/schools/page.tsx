@@ -1,4 +1,5 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
@@ -194,6 +195,11 @@ export default function SchoolsManagePage() {
   const openEdit = (school: SchoolInfo) => {
     form.setFieldsValue({
       ...school,
+      xinleAccessibleOverride: school.xinleAccessibleOverride === true
+        ? 1
+        : school.xinleAccessibleOverride === false
+          ? 0
+          : undefined,
       infoVerifiedAt: school.infoVerifiedAt ? dayjs(school.infoVerifiedAt) : null,
     })
     setEditModal({ open: true, school })
@@ -205,6 +211,11 @@ export default function SchoolsManagePage() {
     setSaving(true)
 
     const payload: Record<string, unknown> = { ...values }
+    payload.xinleAccessibleOverride = payload.xinleAccessibleOverride === 1
+      ? true
+      : payload.xinleAccessibleOverride === 0
+        ? false
+        : null
     if (payload.infoVerifiedAt instanceof dayjs || (payload.infoVerifiedAt && typeof payload.infoVerifiedAt === 'object')) {
       payload.infoVerifiedAt = (payload.infoVerifiedAt as dayjs.Dayjs).toISOString()
     }
@@ -384,10 +395,10 @@ export default function SchoolsManagePage() {
           <Title level={5} style={{ fontSize: 14, marginBottom: 8 }}>基本信息</Title>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
             <Form.Item name="type" label="学校类型" rules={[{ required: true }]}>
-              <Select options={TYPE_OPTIONS.map((t) => ({ label: t, value: t }))} />
+              <AdaptiveSelect options={TYPE_OPTIONS.map((t) => ({ label: t, value: t }))} />
             </Form.Item>
             <Form.Item name="location" label="所在地" rules={[{ required: true }]}>
-              <Select
+              <AdaptiveSelect
                 showSearch
                 options={locationOptions.map((l) => ({ label: l, value: l }))}
                 placeholder="选择或输入地区"
@@ -423,12 +434,12 @@ export default function SchoolsManagePage() {
               <Switch checkedChildren="可报" unCheckedChildren="不可报" />
             </Form.Item>
             <Form.Item name="xinleAccessibleOverride" label="手动覆盖推导">
-              <Select
+              <AdaptiveSelect
                 allowClear
                 placeholder="留空=自动推导"
                 options={[
-                  { label: '强制可报', value: true },
-                  { label: '强制不可报', value: false },
+                  { label: '强制可报', value: 1 },
+                  { label: '强制不可报', value: 0 },
                 ]}
               />
             </Form.Item>
@@ -484,7 +495,7 @@ export default function SchoolsManagePage() {
               <Input placeholder="如：石家庄市教育局官网2025年招生计划" />
             </Form.Item>
             <Form.Item name="infoConfidence" label="信息可信度">
-              <Select
+              <AdaptiveSelect
                 allowClear
                 placeholder="选择可信度等级"
                 options={CONFIDENCE_OPTIONS}

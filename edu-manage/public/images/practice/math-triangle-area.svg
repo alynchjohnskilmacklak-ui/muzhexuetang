@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="420" viewBox="0 0 680 420" role="img" aria-labelledby="title desc">
+  <title id="title">利用勾股定理求三角形面积</title>
+  <desc id="desc">三角形ABC三边分别为15、13、14，从A向BC作垂线AD。</desc>
+  <rect width="680" height="420" rx="18" fill="#fff"/>
+  <g fill="none" stroke="#284c47" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M115 330 390 65 555 330Z"/>
+    <path d="M390 65V330" stroke="#8a6517" stroke-width="3" stroke-dasharray="8 7"/>
+    <path d="M390 330h-25v-25"/>
+  </g>
+  <g fill="#14574d">
+    <circle cx="115" cy="330" r="5"/><circle cx="390" cy="65" r="5"/><circle cx="555" cy="330" r="5"/><circle cx="390" cy="330" r="5"/>
+  </g>
+  <g font-family="Microsoft YaHei, Noto Sans SC, sans-serif" font-size="23" font-weight="600" fill="#1a1201">
+    <text x="91" y="359">B</text><text x="383" y="42">A</text><text x="565" y="359">C</text><text x="396" y="359">D</text>
+    <text x="215" y="179" transform="rotate(-44 215 179)" font-size="21">AB = 15</text>
+    <text x="478" y="186" transform="rotate(57 478 186)" font-size="21">AC = 13</text>
+    <text x="303" y="387" font-size="21">BC = 14</text>
+  </g>
+</svg>

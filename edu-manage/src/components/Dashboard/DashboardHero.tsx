@@ -1,14 +1,11 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { Card, Typography } from 'antd'
 import { CalendarOutlined, ClockCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatHours } from '@/lib/format'
 import type { AdminDashboardMetrics } from '@/types/dashboard'
 import { WeatherHeroStrip } from '@/components/Common/WeatherHeroStrip'
-
-const { Title, Text } = Typography
 
 const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 
@@ -30,19 +27,23 @@ export function DashboardHero({
   ]
 
   return (
-    <Card
-      bordered={false}
+    <div
       style={{
+        position: 'relative',
+        overflow: 'hidden',
         borderRadius: 18,
         marginBottom: 16,
-        overflow: 'hidden',
-        background: 'var(--color-primary-bg)',
-        boxShadow: '0 10px 30px rgba(90, 54, 20, 0.08)',
+        padding: isMobile ? 18 : 28,
+        background: 'linear-gradient(155deg, #33220F 0%, #5A3A17 52%, #7E4A1B 100%)',
+        border: '1px solid rgba(245,166,35,.4)',
+        boxShadow: '0 14px 36px rgba(58,36,16,.2)',
       }}
-      styles={{ body: { padding: isMobile ? 18 : 28 } }}
     >
+      <div style={{ position: 'absolute', top: '-70%', right: '-12%', width: 320, height: 460, background: 'radial-gradient(circle, rgba(245,166,35,.28), transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '-55%', left: '-8%', width: 260, height: 380, background: 'radial-gradient(circle, rgba(255,255,255,.07), transparent 70%)', pointerEvents: 'none' }} />
       <div
         style={{
+          position: 'relative',
           display: 'grid',
           gridTemplateColumns: isMobile ? '1fr' : '1.5fr 1fr',
           gap: isMobile ? 16 : 28,
@@ -50,18 +51,19 @@ export function DashboardHero({
         }}
       >
         <div>
-          <div className="admin-dashboard-hero__eyebrow">
-            <Text style={{ color: 'var(--color-ink-muted)', fontWeight: 600 }}>{dateText}</Text>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ color: 'rgba(255,255,255,.62)', fontWeight: 600, fontSize: 13 }}>{dateText}</span>
+            <span style={{ color: '#FFD58A', fontSize: 13, fontWeight: 600 }}>运营中枢</span>
             {toolbar}
           </div>
-          <Title level={isMobile ? 4 : 2} style={{ margin: '6px 0 8px', color: '#1a1201' }}>
+          <h2 style={{ margin: '8px 0 8px', color: 'rgba(255,255,255,.95)', fontSize: isMobile ? 20 : 28, fontWeight: 800, letterSpacing: .5 }}>
             牧哲学堂 · 数据总览
-          </Title>
-          <Text style={{ color: '#5a4e3a', fontSize: isMobile ? 13 : 15 }}>
-            今日 {metrics.todayLessons} 节课，{metrics.todayLessonsPendingAttendance} 节待考勤，
-            {metrics.pendingTasks} 项待处理
-          </Text>
-          <div style={{ marginTop: 10, color: '#8a7a68', fontSize: 13 }}>
+          </h2>
+          <div style={{ color: 'rgba(255,255,255,.82)', fontSize: isMobile ? 13 : 15, lineHeight: 1.8 }}>
+            今日 <strong style={{ color: '#FFD58A' }}>{metrics.todayLessons}</strong> 节课，<strong style={{ color: '#FFD58A' }}>{metrics.todayLessonsPendingAttendance}</strong> 节待考勤，
+            <strong style={{ color: 'rgba(255,255,255,.95)' }}>{metrics.pendingTasks}</strong> 项待处理
+          </div>
+          <div style={{ marginTop: 10, color: 'rgba(255,255,255,.6)', fontSize: 13 }}>
             让每一节课有记录，让每一个孩子的成长被看见。
           </div>
         </div>
@@ -69,7 +71,7 @@ export function DashboardHero({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(3, 1fr)',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: 10,
           }}
         >
@@ -80,30 +82,32 @@ export function DashboardHero({
                 minHeight: isMobile ? 74 : 92,
                 padding: isMobile ? '10px 8px' : '14px 12px',
                 borderRadius: 14,
-                background: 'rgba(255,255,255,0.72)',
-                border: '1px solid rgba(232,117,69,0.14)',
+                background: 'rgba(255,255,255,.07)',
+                border: '1px solid rgba(245,166,35,.3)',
                 textAlign: 'center',
               }}
             >
-              <div style={{ color: '#E87545', fontSize: isMobile ? 16 : 20 }}>{item.icon}</div>
+              <div style={{ color: '#FFD58A', fontSize: isMobile ? 16 : 20 }}>{item.icon}</div>
               <div
                 style={{
                   marginTop: 5,
-                  color: '#1a1201',
                   fontSize: isMobile ? 18 : 24,
                   fontWeight: 800,
                   lineHeight: 1.1,
                   fontVariantNumeric: 'tabular-nums',
+                  background: 'linear-gradient(135deg,#FFD58A,#E8784A)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
                 }}
               >
                 {item.value}
               </div>
-              <div style={{ marginTop: 4, color: '#8a7a68', fontSize: 12 }}>{item.label}</div>
+              <div style={{ marginTop: 4, color: 'rgba(255,255,255,.66)', fontSize: 12 }}>{item.label}</div>
             </div>
           ))}
         </div>
       </div>
-      <WeatherHeroStrip audience="admin" variant="light" />
-    </Card>
+      <WeatherHeroStrip audience="admin" variant="dark" />
+    </div>
   )
 }

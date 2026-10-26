@@ -5,6 +5,8 @@ import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { selectReplacementTeachingDay } from '@/lib/class-schedule-plan'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
+import { isSerializationConflict, runSerializableWithRetry } from '@/lib/serializable-retry'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +28,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   const targetDate = new Date(`${date}T00:00:00`)
-  if (Number.isNaN(targetDate.getTime())) {
+  const [year, month, dayOfMonth] = date.split('-').map(Number)
+  if (Number.isNaN(targetDate.getTime())
+    || targetDate.getFullYear() !== year
+    || targetDate.getMonth() !== month - 1
+    || targetDate.getDate() !== dayOfMonth) {
     return NextResponse.json({ error: '日期格式不正确' }, { status: 400 })
   }
 
@@ -48,10 +54,18 @@ export const POST = apiHandler(async (req: NextRequest) => {
     select: {
       id: true,
       name: true,
+      status: true,
       division: true,
       totalLessons: true,
       course: { select: { totalLessons: true } },
-      enrollments: { where: { status: 'ACTIVE', deletedAt: null }, select: { studentId: true, subjects: true } },
+      enrollments: {
+        where: { status: 'ACTIVE', deletedAt: null },
+        select: {
+          studentId: true,
+          subjects: true,
+          student: { select: { name: true, parentId: true, parentUserId: true } },
+        },
+      },
     },
   })
 
@@ -75,7 +89,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
   let skippedNoReplacement = 0
   let replacedGroups = 0
   let replacedLessons = 0
+  let notifiedParents = 0
   let alreadyBalanced = 0
+  const failedGroups: Array<{ groupId: string; groupName: string; message: string }> = []
   const replacementDates = new Set<string>()
 
   // 2. 逐个班级处理
@@ -88,6 +104,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const existingLessons = await prisma.classLesson.findMany({
       where: {
         groupId: group.id,
+        deletedAt: null,
         lessonDate: { gte: dayStart, lt: dayEnd },
         status: { not: 'CANCELLED' },
       },
@@ -213,24 +230,54 @@ export const POST = apiHandler(async (req: NextRequest) => {
       isManual: true,
     }))
 
-    const result = await prisma.$transaction(async (tx) => {
+    let result: { created: number; replaced: number; notifiedParents: number; alreadyExisted: boolean }
+    try {
+      const initialLessonIds = new Set(existingLessons.map((lesson) => lesson.id))
+      result = await runSerializableWithRetry(() => prisma.$transaction(async (tx) => {
+      const transactionDayRows = await tx.classLesson.findMany({
+        where: {
+          groupId: group.id,
+          lessonDate: { gte: dayStart, lt: dayEnd },
+          status: { not: 'CANCELLED' },
+          deletedAt: null,
+        },
+        select: { id: true },
+      })
+      const transactionDayIds = new Set(transactionDayRows.map((lesson) => lesson.id))
+      const dayChangedAfterPlanning = transactionDayIds.size !== initialLessonIds.size
+        || [...transactionDayIds].some((id) => !initialLessonIds.has(id))
+      if (dayChangedAfterPlanning) {
+        return { created: 0, replaced: 0, notifiedParents: 0, alreadyExisted: true }
+      }
+
       const created = existingCount > 0
         ? 0
         : (await tx.classLesson.createMany({ data, skipDuplicates: true })).count
 
-      if (created > 0) {
-        const createdRows = await tx.classLesson.findMany({
-          where: { groupId: group.id, lessonDate: { gte: dayStart, lt: dayEnd }, status: 'SCHEDULED', deletedAt: null },
-          select: { id: true, subject: true },
-        })
-        const rosterRows = createdRows.flatMap((lesson) => group.enrollments
-          .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, lesson.subject))
-          .map((enrollment) => ({ lessonId: lesson.id, studentId: enrollment.studentId })))
-        if (rosterRows.length) await tx.classLessonStudent.createMany({ data: rosterRows, skipDuplicates: true })
+      const targetRows = await tx.classLesson.findMany({
+        where: { groupId: group.id, lessonDate: { gte: dayStart, lt: dayEnd }, status: 'SCHEDULED', deletedAt: null },
+        select: { id: true, subject: true, teacherId: true, startTime: true, endTime: true },
+      })
+      const targetScheduleComplete = data.every((slot) => targetRows.some((lesson) =>
+        lesson.teacherId === slot.teacherId
+        && lesson.subject === slot.subject
+        && lesson.startTime === slot.startTime
+        && lesson.endTime === slot.endTime,
+      ))
+      if (created > 0 && !targetScheduleComplete) {
+        throw new Error(`${group.name}的补课课次未完整创建，本次调整已回滚，请刷新后重试`)
+      }
+      if (replacement && !targetScheduleComplete) {
+        throw new Error(`${group.name}的补课课次不完整，未取消原排课，请刷新后核对`)
       }
 
+      const rosterRows = targetRows.flatMap((lesson) => group.enrollments
+        .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, lesson.subject))
+        .map((enrollment) => ({ lessonId: lesson.id, studentId: enrollment.studentId })))
+      if (rosterRows.length) await tx.classLessonStudent.createMany({ data: rosterRows, skipDuplicates: true })
+
       let replaced = 0
-      if (replacement) {
+      if (replacement && targetScheduleComplete) {
         const updated = await tx.classLesson.updateMany({
           where: {
             id: { in: replacement.lessonIds },
@@ -242,6 +289,33 @@ export const POST = apiHandler(async (req: NextRequest) => {
           },
         })
         replaced = updated.count
+        if (replaced !== replacement.lessonIds.length) {
+          throw new Error(`${group.name}的原排课状态已变化，本次补课调整已回滚，请刷新后重试`)
+        }
+      }
+
+      let groupNotifiedParents = 0
+      if (targetRows.length && (created > 0 || replaced > 0)) {
+        const lessonSubjects = new Set(targetRows.map((lesson) => lesson.subject))
+        const lessonDetails = slots
+          .filter((slot) => lessonSubjects.has(slot.subject))
+          .map((slot) => `${slot.startTime}-${slot.endTime} ${slot.subject}`)
+          .join('、')
+        const replacementDetail = replacement && replaced > 0
+          ? `；原${replacement.date.toISOString().slice(0, 10)}安排已调整`
+          : ''
+        const affectedStudentIds = [...new Set(rosterRows.map((row) => row.studentId))]
+        const event = await recordCourseChangeEvent(tx, {
+          eventType: replaced > 0 ? 'MAKEUP_REPLACEMENT' : 'LESSON_ADDED',
+          actorUserId: user.id,
+          groupId: group.id,
+          lessonIds: targetRows.map((lesson) => lesson.id),
+          studentIds: affectedStudentIds,
+          title: `${group.name}课程安排已更新`,
+          summary: `${date}新增${[...lessonSubjects].filter(Boolean).join('、')}课（${lessonDetails}）${replacementDetail}，请查看家长端课程表。`,
+          notifyParents: group.status === 'ACTIVE',
+        })
+        groupNotifiedParents = event.recipientCount
       }
 
       const nextTotal = await tx.classLesson.count({
@@ -252,11 +326,32 @@ export const POST = apiHandler(async (req: NextRequest) => {
         data: { totalLessons: nextTotal },
       })
 
-      return { created, replaced }
-    })
+      return { created, replaced, notifiedParents: groupNotifiedParents, alreadyExisted: false }
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }))
+    } catch (error) {
+      console.error('[class-lessons/add-day] group transaction failed', {
+        groupId: group.id,
+        message: error instanceof Error ? error.message : String(error),
+      })
+      failedGroups.push({
+        groupId: group.id,
+        groupName: group.name,
+        message: isSerializationConflict(error)
+          ? '课程安排正在被其他操作更新，请刷新后重试'
+          : error instanceof Error && error.message.includes(group.name)
+            ? error.message
+            : '处理失败，请核对课表状态后重试',
+      })
+      continue
+    }
 
+    if (result.alreadyExisted || (result.created === 0 && result.replaced === 0)) {
+      skipped++
+      continue
+    }
     createdLessons += result.created
     replacedLessons += result.replaced
+    notifiedParents += result.notifiedParents
     if (result.replaced > 0 && replacement) {
       replacedGroups++
       replacementDates.add(replacement.date.toISOString().slice(0, 10))
@@ -286,8 +381,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
     skippedNoReplacement,
     replacedGroups,
     replacedLessons,
+    notifiedParents,
     replacementDates: [...replacementDates].sort(),
     alreadyBalanced,
     keepPlannedTotal,
+    failedGroups,
+    partial: failedGroups.length > 0 && affectedGroups > 0,
   })
 })

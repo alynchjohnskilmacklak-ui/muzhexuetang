@@ -1,0 +1,198 @@
+﻿========================================================================
+DEPLOY.md
+========================================================================
+# 生产部署入口
+
+生产环境统一使用 Linux 预构建发布包。不要上传整个项目目录，也不要在服务器上执行 `npm install`、`npm run build`、`prisma db push` 或旧版源码部署脚本。
+
+当前阿里云 Workbench 单 `.tar` 总包流程见 [阿里云预构建部署说明.md](阿里云预构建部署说明.md)。底层预构建说明见 [docs/prebuilt-deployment.md](docs/prebuilt-deployment.md)，生产安全约束见 [docs/production-safety.md](docs/production-safety.md)。
+
+## 1. 本机构建
+
+先启动 Docker Desktop，然后在项目根目录执行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\build-linux-release.ps1 -Registry https://registry.npmmirror.com
+```
+
+脚本会在 Linux Node 22 容器中安装依赖、构建、执行 `/login` 冒烟检查，并在 `release/` 生成且默认只保留最近两个版本：
+
+```text
+edu-manage-runtime-YYYYMMDD-HHMM.tar.gz
+edu-manage-runtime-YYYYMMDD-HHMM.tar.gz.sha256
+```
+
+## 2. 上传
+
+两个同名文件必须一起上传：
+
+```powershell
+scp ".\release\edu-manage-runtime-YYYYMMDD-HHMM.tar.gz" root@<服务器IP>:/tmp/
+scp ".\release\edu-manage-runtime-YYYYMMDD-HHMM.tar.gz.sha256" root@<服务器IP>:/tmp/
+```
+
+## 3. 部署
+
+```bash
+cd /opt/edu-manage
+bash scripts/deploy-prebuilt-tar.sh /tmp/edu-manage-runtime-YYYYMMDD-HHMM.tar.gz
+```
+
+第一次切换到该流程时，先按完整说明单独安装最新版 `scripts/deploy-prebuilt-tar.sh`。部署脚本会校验哈希、备份数据库、执行迁移、候选端口健康检查、切换 PM2，并在失败时保留或恢复旧版本。
+
+## 4. 验证
+
+```bash
+pm2 status edu-manage
+curl -fsS http://127.0.0.1:3000/login >/dev/null && echo OK
+readlink -f /opt/edu-manage/current
+pm2 logs edu-manage --lines 30 --nostream
+```
+
+发布包只含运行产物、静态资源、Prisma schema/migrations、独立迁移工具和三个生产脚本。`.env`、源码、测试、文档、缓存、旧发布包以及服务器共享上传目录都不会打入包内。
+
+========================================================================
+AGENTS.md
+========================================================================
+<!-- BEGIN:nextjs-agent-rules -->
+
+
+
+# This is NOT the Next.js you know
+
+
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+
+
+<!-- END:nextjs-agent-rules -->
+
+# DESIGN.md — UI Design System
+
+Before building or modifying any UI, read `DESIGN.md` at the project root. It defines the complete visual design system: colors, typography, spacing, components, and guardrails. All UI must follow the design tokens and patterns defined there.
+
+## Design System Summary
+
+- **Style**: Warm light education platform (牧哲学堂)
+- **Canvas**: `#faf8f5` (warm cream)
+- **Primary accent**: `#E8784A` (warm orange) — use for CTAs, focus rings, selected states
+- **Text**: `#1a1201` (warm near-black)
+- **Font**: Geist Sans (--font-geist-sans) + Geist Mono (--font-geist-mono)
+- **Border radius**: 10px interactive, 14px containers
+- **Component library**: Ant Design v5 with custom warm-light tokens
+- **CSS framework**: Tailwind CSS v4 with @theme tokens matching DESIGN.md
+
+## Quick Rules
+
+1. Always use the warm light theme (#faf8f5 canvas).
+2. Cards use `#ffffff` background with `1px solid rgba(0,0,0,.06)` border and 14px border-radius.
+3. Primary buttons use `#E8784A` background with white text.
+4. Use design tokens from globals.css or Ant Design ConfigProvider; do not hardcode colors.
+5. Login page is the exception: dark-themed left panel with photo grid, warm-light right form.
+
+
+## Project Safety Rules
+
+
+
+- Before frontend changes, read docs/frontend-rules.md and DESIGN.md.
+
+- Before production/deployment changes, read docs/production-safety.md.
+
+========================================================================
+scripts 目录
+========================================================================
+total 408
+drwxrwxrwx 3 root root  4096 Sep 12 14:15 .
+drwxr-x--- 9 root root  4096 Sep 12 16:53 ..
+-rw-rw-rw- 1 root root  2001 Jun 30 16:41 audit-highschool-info.ts
+-rw-rw-rw- 1 root root  5555 Jul 25 21:16 backfill-teacher-account-bindings.ts
+-rw-rw-rw- 1 root root  2863 Jun 24 14:43 backup-db-dump.sh
+-rw-r--r-- 1 root root  3238 Sep 11 22:53 backup-db.sh
+-rw-r--r-- 1 root root  1976 Sep 12 12:56 backup-now.sh
+-rw-r--r-- 1 root root  2481 Sep 11 22:53 backup-uploads.sh
+-rw-rw-rw- 1 root root  1523 Jun 10 20:21 bind-teacher-users.ts
+-rw-rw-rw- 1 root root  1317 Sep 11 21:54 bootstrap-docker-host.sh
+-rw-rw-rw- 1 root root 13209 Sep  6 23:07 build-linux-release.ps1
+-rw-rw-rw- 1 root root 10646 Aug 20 22:29 build_marketing_posters.py
+-rw-rw-rw- 1 root root  1397 Jun 10 22:02 check-account.ts
+-rw-rw-rw- 1 root root  1434 Jun 17 09:48 check-data-integrity.ts
+-rw-rw-rw- 1 root root  1171 Jun 19 20:00 check-garbled-text.ts
+-rw-rw-rw- 1 root root  1447 Jun 25 16:00 check-prisma-usage.sh
+-rw-rw-rw- 1 root root   796 Jun 26 09:19 check-roles.sh
+-rw-rw-rw- 1 root root  4170 Jun 16 17:53 check-school-info-missing.ts
+-rw-rw-rw- 1 root root  2876 May 18 15:17 cleanup-deleted-business-data.ts
+-rw-rw-rw- 1 root root  9754 May 24 18:28 cleanup-residual-data.ts
+-rw-rw-rw- 1 root root  3988 Jul  3 00:37 convert-yifenyidang-csv.ts
+-rw-rw-rw- 1 root root  1661 May 27 13:31 create-admin.ts
+-rw-rw-rw- 1 root root  1744 Jun 25 14:54 db-sync-all.sh
+-rw-rw-rw- 1 root root  2521 Jul  6 00:10 dedupe-high-schools.ts
+-rw-rw-rw- 1 root root  2706 Aug 23 17:13 deploy-from-tar.sh
+-rw-rw-rw- 1 root root 11051 Sep  1 12:09 deploy-prebuilt-tar.sh
+-rw-rw-rw- 1 root root  2862 Jun 17 09:48 export-business-data.ts
+-rw-rw-rw- 1 root root  2530 May 24 18:27 fix-duplicate-attendance.ts
+-rw-rw-rw- 1 root root  5814 Jul 10 00:30 fix-enrollment-hours.ts
+-rw-rw-rw- 1 root root  3064 Jul  9 12:58 fix-group-lesson-count.ts
+-rw-rw-rw- 1 root root  1583 May 22 14:42 fix-parent-binding.ts
+-rw-rw-rw- 1 root root  8331 Jun 30 15:55 fix-schools-data.sql
+-rw-rw-rw- 1 root root  3276 Jul 18 21:25 generate-image-preview.ts
+-rw-rw-rw- 1 root root   789 Jul  5 23:37 gen-pwa-icons.mjs
+-rw-rw-rw- 1 root root   577 May 22 13:58 hash-existing-passwords.ts
+-rw-rw-rw- 1 root root 46093 Jun 30 16:45 highschool-seed-details.ts
+-rw-rw-rw- 1 root root  2302 Jul  5 00:13 import-allocation.ts
+-rw-rw-rw- 1 root root   731 Jun 28 11:31 import-enrollment.ts
+-rw-rw-rw- 1 root root  3681 Jun 28 11:31 import-master-schools.ts
+-rw-rw-rw- 1 root root  2082 Jul  3 00:38 import-yifenyidang.ts
+drwxrwxrwx 2 root root  4096 Sep 11 21:57 lib
+-rw-rw-rw- 1 root root  4334 Aug 27 19:01 migrate-all.sh
+-rw-rw-rw- 1 root root  3391 Jun 19 14:09 migrate-schedule-to-class-lesson.ts
+-rw-rw-rw- 1 root root  3578 May 24 18:26 normalize-hours.ts
+-rw-rw-rw- 1 root root  1383 Sep 12 14:12 optimize-public-images.mjs
+-rw-rw-rw- 1 root root  1302 Jun 24 16:09 promote-super-admin.sh
+-rw-rw-rw- 1 root root   802 Jun  8 09:51 query-latest-record.ts
+-rw-rw-rw- 1 root root  3073 Jul 21 11:02 replay-feedback-bonus.ts
+-rw-rw-rw- 1 root root  1412 Aug 15 21:02 reset-password.ts
+-rw-rw-rw- 1 root root  9929 Jun 30 16:55 restore-highschool-details-from-seed.ts
+-rw-rw-rw- 1 root root  6478 Aug  1 20:45 security-check.mjs
+-rw-rw-rw- 1 root root   708 Jun 30 16:45 seed-schools.ts
+-rw-rw-rw- 1 root root 20814 Aug 16 20:07 seed-xinle-schools.ts
+-rw-rw-rw- 1 root root   326 Jun  8 10:12 test-visibility.ts
+-rw-rw-rw- 1 root root 29418 Jun 30 19:29 update-school-info-comprehensive.ts
+-rw-rw-rw- 1 root root 19690 Jun 16 17:58 update-school-info-verified.ts
+-rw-rw-rw- 1 root root  1000 Jun 28 11:31 volunteer-master-import-utils.ts
+
+========================================================================
+source/public 内容
+========================================================================
+total 1620
+drwxrwxrwx 9 root root    4096 Oct  3 15:20 .
+drwxr-x--- 9 root root    4096 Sep 12 16:53 ..
+-rw-rw-rw- 1 root root      41 Jul 20 21:03 0a039113432e6c816c8f59c7c6c7f211.txt
+-rw-rw-rw- 1 root root   59589 Oct  3 15:20 about.html
+-rw-rw-rw- 1 root root   57265 Sep 12 14:12 about.html.bak-20261003
+drwxrwxrwx 2 root root    4096 Sep 12 14:15 about-images
+-rw-rw-rw- 1 root root      33 Sep  6 21:03 baidu_verify_codeva-LcCyyIUZRF.html
+-rw-rw-rw- 1 root root      85 Sep  6 23:12 BingSiteAuth.xml
+-rw-rw-rw- 1 root root     391 May 15 12:25 file.svg
+-rw-rw-rw- 1 root root    1035 May 15 12:25 globe.svg
+-rw-r--r-- 1 root root   67044 Oct  3 15:20 home.html
+-rw-rw-rw- 1 root root   57265 Sep 12 14:12 home.html.bak-20261002
+-rw-r--r-- 1 root root   66295 Oct  2 22:28 home.html.bak-20261003
+drwxrwxrwx 2 root root    4096 Sep 11 21:57 icons
+drwxrwxrwx 3 root root    4096 Sep 11 21:57 images
+-rw-rw-rw- 1 root root     344 Jul  5 23:37 manifest.json
+-rw-rw-rw- 1 root root    1375 May 15 12:25 next.svg
+-rw-rw-rw- 1 root root 1265413 Sep  1 15:51 pdf.worker.min.mjs
+drwxrwxrwx 2 root root    4096 Sep 11 21:57 people
+drwxrwxrwx 2 root root    4096 Sep 11 21:57 picture
+-rw-r--r-- 1 root root      43 Oct  2 22:28 shenma-site-verification.txt
+drwxrwxrwx 2 root root    4096 Sep 11 21:57 UI_picture
+-rw-rw-rw- 1 root root     128 May 15 12:25 vercel.svg
+drwxrwxrwx 3 root root    4096 Sep 11 21:57 volunteer
+-rw-rw-rw- 1 root root     385 May 15 12:25 window.svg
+

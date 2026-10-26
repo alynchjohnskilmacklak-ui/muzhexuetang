@@ -82,7 +82,7 @@ export function ScheduleDetailPanel({
                 options={teacherSubjectOptions} />
               <button onClick={onSave} disabled={savingLesson} style={{
                 width: '100%', padding: '8px 0', borderRadius: 6,
-                background: '#E8784A', color: '#fff', border: 'none', fontSize: 14, cursor: 'pointer', fontWeight: 500,
+                background: 'var(--color-primary)', color: 'var(--color-on-primary)', border: 'none', fontSize: 14, cursor: 'pointer', fontWeight: 500,
               }}>{savingLesson ? '保存中...' : '保存本次课'}</button>
             </Space>
           </div> : <Alert type="info" showIcon message="历史或已开始的课次只读" description="涉及考勤和结算的修正请使用专门的业务纠错流程。" />}
@@ -91,11 +91,11 @@ export function ScheduleDetailPanel({
             <Space direction="vertical" style={{ width: '100%' }}>
               <button onClick={() => { router.push(`/courses/${selectedGroup.id}`) }} style={{
                 width: '100%', padding: '8px 0', borderRadius: 6,
-                background: '#E8784A', color: '#fff', border: 'none', fontSize: 14, cursor: 'pointer', fontWeight: 500,
+                background: 'var(--color-primary)', color: 'var(--color-on-primary)', border: 'none', fontSize: 14, cursor: 'pointer', fontWeight: 500,
               }}><CalendarOutlined /> 进入班级管理</button>
               <button onClick={() => { message.info('复制新建请在课程管理中使用批量复制'); router.push('/courses') }} style={{
                 width: '100%', padding: '8px 0', borderRadius: 6,
-                background: 'transparent', color: '#E8784A', border: '1px solid #E8784A', fontSize: 14, cursor: 'pointer',
+                background: 'transparent', color: 'var(--color-primary)', border: '1px solid var(--color-primary)', fontSize: 14, cursor: 'pointer',
               }}>复制新建</button>
               {canEdit && <button onClick={() => onCancel(selectedLesson.id as string)} style={{
                 width: '100%', padding: '8px 0', borderRadius: 6,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { parseUserAgent } from '@/lib/device'
 import { getRequestPrisma } from '@/lib/prisma'
+import { getTrustedClientIp } from '@/lib/request-ip'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,10 +15,7 @@ export async function POST(req: NextRequest) {
     const prisma = await getRequestPrisma()
   const userId = (session.user as { id: string }).id
     const ua = req.headers.get('user-agent') || ''
-    const ip =
-      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-      req.headers.get('x-real-ip') ||
-      '未知'
+    const ip = getTrustedClientIp(req.headers)
     const { device, os, browser } = parseUserAgent(ua)
 
     const latest = await prisma.loginRecord.findFirst({

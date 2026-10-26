@@ -20,21 +20,24 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const from = new Date(to)
   from.setMonth(from.getMonth() - months)
 
-  const [students, gradeRecords, feedbacks, summaries] = await Promise.all([
-    prisma.student.findMany({
-      where: {
-        division,
-        status: { not: 'INACTIVE' },
-        termMemberships: { some: { termId } },
-      },
-      select: {
-        id: true,
-        name: true,
-        grade: true,
-        mainTeacher: { select: { name: true } },
-      },
-      orderBy: [{ grade: 'asc' }, { createdAt: 'asc' }],
-    }),
+  const students = await prisma.student.findMany({
+    where: {
+      division,
+      status: { not: 'INACTIVE' },
+      termMemberships: { some: { termId } },
+    },
+    select: {
+      id: true,
+      name: true,
+      grade: true,
+      gender: true,
+      mainTeacher: { select: { name: true } },
+    },
+    orderBy: [{ grade: 'asc' }, { createdAt: 'asc' }],
+  })
+  const studentIds = students.map((student) => student.id)
+
+  const [gradeRecords, feedbacks, summaries, practiceAttempts] = await Promise.all([
     prisma.gradeRecord.findMany({
       where: { termId, assessment: { assessDate: { gte: from, lte: to } } },
       select: { studentId: true },
@@ -53,24 +56,31 @@ export const GET = apiHandler(async (req: NextRequest) => {
       select: { studentId: true },
       distinct: ['studentId'],
     }),
+    prisma.practiceAttempt.findMany({
+      where: { studentId: { in: studentIds }, finishedAt: { gte: from, lte: to } },
+      select: { studentId: true },
+      distinct: ['studentId'],
+    }),
   ])
 
   const gradeStudentIds = new Set(gradeRecords.map((item) => item.studentId))
   const feedbackStudentIds = new Set(feedbacks.flatMap((item) => item.studentIds))
   const summaryStudentIds = new Set(summaries.map((item) => item.studentId))
+  const practiceStudentIds = new Set(practiceAttempts.map((item) => item.studentId))
 
   const items = students
     .map((student) => {
-      const hasGrade = gradeStudentIds.has(student.id)
+      const hasPractice = practiceStudentIds.has(student.id)
       const hasFeedback = feedbackStudentIds.has(student.id)
       const hasSummary = summaryStudentIds.has(student.id)
-      const missingCount = [hasGrade, hasFeedback, hasSummary].filter((flag) => !flag).length
+      const missingCount = [hasPractice, hasFeedback, hasSummary].filter((flag) => !flag).length
       return {
         studentId: student.id,
         name: student.name,
         grade: student.grade,
+        gender: student.gender,
         mainTeacherName: student.mainTeacher?.name || null,
-        hasGrade,
+        hasPractice,
         hasFeedback,
         hasSummary,
         missingCount,
@@ -81,7 +91,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   return NextResponse.json({
     range: { from, to, months },
     summary: {
-      noGrade: items.filter((item) => !item.hasGrade).length,
+      noPractice: items.filter((item) => !item.hasPractice).length,
       noFeedback: items.filter((item) => !item.hasFeedback).length,
       noSummary: items.filter((item) => !item.hasSummary).length,
     },

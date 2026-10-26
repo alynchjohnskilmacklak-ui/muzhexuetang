@@ -1,5 +1,6 @@
 import type { FeedbackArchiveItem, FeedbackArchiveResult } from './archive'
 import type { AdminLearningReport } from '@/lib/student-growth/admin-report'
+import { applyWatermark, drawBrandHeader } from '@/lib/export-brand'
 import {
   getParentFeedbackSections,
   parentRatingLabel,
@@ -8,6 +9,7 @@ import {
 
 const PAGE_WIDTH = 1240
 const PAGE_HEIGHT = 1754
+const BRAND_BAR_HEIGHT = 74
 const PAGE_MARGIN = 76
 const CONTENT_WIDTH = PAGE_WIDTH - PAGE_MARGIN * 2
 const CONTENT_BOTTOM = PAGE_HEIGHT - 92
@@ -356,12 +358,29 @@ export async function renderParentFeedbackPdf(
   let embeddedImages = 0
   let skippedImages = 0
 
-  const commitPage = () => {
+  const commitPage = async () => {
     context.fillStyle = COLORS.subtle
     context.font = '400 20px "Noto Sans SC", "Microsoft YaHei", sans-serif'
     context.textAlign = 'center'
     context.fillText(`牧哲学堂 · 第 ${pageNumber} 页`, PAGE_WIDTH / 2, PAGE_HEIGHT - 42)
-    const pageImage = canvas.toDataURL('image/jpeg', 0.86)
+    // 每页烤入低透明度斜向水印（整页图片型 PDF，需直接作用于画布才能全页可见）
+    applyWatermark(context, PAGE_WIDTH, PAGE_HEIGHT)
+    // 首页在顶部叠加深绿品牌条（Logo + 标题 + 品牌名），内容整体下移 BRAND_BAR_HEIGHT
+    let exportCanvas: HTMLCanvasElement = canvas
+    if (pageNumber === 1) {
+      const brandCanvas = document.createElement('canvas')
+      brandCanvas.width = PAGE_WIDTH
+      brandCanvas.height = PAGE_HEIGHT + BRAND_BAR_HEIGHT
+      const bctx = brandCanvas.getContext('2d')!
+      await drawBrandHeader(
+        bctx,
+        brandCanvas.width,
+        options.learningReport ? '完整学情报告' : '课堂学习反馈',
+      )
+      bctx.drawImage(canvas, 0, BRAND_BAR_HEIGHT)
+      exportCanvas = brandCanvas
+    }
+    const pageImage = exportCanvas.toDataURL('image/jpeg', 0.86)
     options.onPageRendered?.(pageImage, pageNumber)
     if (pdfHasPage) pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT], 'portrait')
     pdf.addImage(pageImage, 'JPEG', 0, 0, PAGE_WIDTH, PAGE_HEIGHT, undefined, 'FAST')
@@ -440,7 +459,7 @@ export async function renderParentFeedbackPdf(
   drawCover(context, archive, days.length, options.learningReport)
   pageNumber = 1
   pageOpen = true
-  commitPage()
+  await commitPage()
 
   if (options.learningReport) {
     pageHeading = '学情概览'
@@ -465,7 +484,7 @@ export async function renderParentFeedbackPdf(
       }
       y += 25
     }
-    if (pageOpen) commitPage()
+    if (pageOpen) await commitPage()
     pageHeading = '课堂学习反馈'
   }
 
@@ -598,6 +617,6 @@ export async function renderParentFeedbackPdf(
     }
   }
 
-  if (pageOpen) commitPage()
+  if (pageOpen) await commitPage()
   return { blob: pdf.output('blob'), embeddedImages, skippedImages }
 }

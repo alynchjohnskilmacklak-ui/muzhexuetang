@@ -1,6 +1,7 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import useSWR from 'swr'
 import {
   Button,
@@ -9,7 +10,6 @@ import {
   Input,
   Modal,
   Popconfirm,
-  Select,
   Space,
   Table,
   Tabs,
@@ -28,6 +28,7 @@ type AccountStatus = 'active' | 'disabled' | string
 interface UserAccount {
   id: string
   email: string
+  phone?: string | null
   name: string
   role: 'admin' | 'teacher' | 'parent' | string
   status: AccountStatus
@@ -76,7 +77,7 @@ interface AccountsResponse {
   studentsWithoutParent: StudentLite[]
 }
 
-type ModalMode = 'admin' | 'teacher' | 'parent' | 'edit' | 'reset' | 'bind'
+type ModalMode = 'admin' | 'teacher' | 'parent' | 'edit' | 'phone' | 'reset' | 'bind'
 const fetcher = async (url: string) => {
   const res = await fetch(url)
   const data = await res.json().catch(() => ({}))
@@ -88,9 +89,10 @@ function statusTag(status: AccountStatus) {
   return <Tag color={isUserActive(status) ? 'green' : 'red'}>{isUserActive(status) ? '正常' : '已停用'}</Tag>
 }
 
-export function AdminsTab({ currentUserId }: { currentUserId: string }) {
-  const { data, isLoading, mutate } = useSWR<AccountsResponse>('/api/settings/accounts', fetcher)
-  const [activeRole, setActiveRole] = useState('admin')
+export function AdminsTab({ currentUserId, initialRole = 'admin' }: { currentUserId: string; initialRole?: string }) {
+  const { data, error, isLoading, mutate } = useSWR<AccountsResponse>('/api/settings/accounts', fetcher)
+  const [activeRole, setActiveRole] = useState(initialRole)
+  useEffect(() => { setActiveRole(initialRole) }, [initialRole])
   const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [mode, setMode] = useState<ModalMode | null>(null)
@@ -117,7 +119,14 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
     setTarget(nextTarget)
     form.resetFields()
     if (nextMode === 'edit' && nextTarget && 'email' in nextTarget) {
-      form.setFieldsValue({ name: nextTarget.name, email: nextTarget.email })
+      form.setFieldsValue({
+        name: nextTarget.name,
+        email: nextTarget.email,
+        ...('role' in nextTarget && nextTarget.role === 'admin' ? { phone: nextTarget.phone || '' } : {}),
+      })
+    }
+    if (nextMode === 'phone' && nextTarget && 'role' in nextTarget && nextTarget.role === 'admin') {
+      form.setFieldsValue({ phone: nextTarget.phone || '' })
     }
   }
 
@@ -184,6 +193,13 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
         })
         message.success('账号已更新')
       }
+      if (mode === 'phone' && target && 'id' in target) {
+        await runJson('/api/settings/accounts', {
+          method: 'PATCH',
+          body: JSON.stringify({ action: 'update-login-phone', userId: target.id, phone: values.phone || '' }),
+        })
+        message.success(values.phone ? '登录手机号已绑定' : '登录手机号已解除绑定')
+      }
       if (mode === 'reset' && target && 'id' in target) {
         await runJson('/api/settings/accounts', {
           method: 'PATCH',
@@ -208,7 +224,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
   }
 
   const filterUsers = <T extends UserAccount>(items: T[]) => items.filter((item) => {
-    const text = `${item.name}${item.email}${item.role}`.toLowerCase()
+    const text = [item.name, item.email, item.phone || '', item.role].join('').toLowerCase()
     return (!keyword || text.includes(keyword.toLowerCase())) && (!statusFilter || item.status === statusFilter)
   })
 
@@ -277,6 +293,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
   const adminColumns = [
     { title: '姓名', dataIndex: 'name', key: 'name', width: 140 },
     { title: '邮箱', dataIndex: 'email', key: 'email', width: 220 },
+    { title: '登录手机号', dataIndex: 'phone', key: 'phone', width: 150, render: (value: string | null | undefined) => value || '-' },
     { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: statusTag },
     { title: '密码状态', key: 'passwordSecurity', width: 210, render: passwordSecurity },
     { title: '最近登录', dataIndex: 'lastLoginAt', key: 'lastLoginAt', width: 180, render: (value: string | null) => formatLocaleDateTime(value) },
@@ -285,7 +302,16 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
       key: 'action',
       width: 360,
       render: (_: unknown, record: UserAccount) => {
-        if (record.id === currentUserId) return <Typography.Text type="secondary">当前账号</Typography.Text>
+        if (record.id === currentUserId) {
+          return (
+            <Space wrap>
+              <Typography.Text type="secondary">当前账号</Typography.Text>
+              <Button size="small" icon={<EditOutlined />} onClick={() => openModal('phone', record)}>
+                {record.phone ? '修改登录手机号' : '绑定登录手机号'}
+              </Button>
+            </Space>
+          )
+        }
         if (record.isSuperAdmin && !currentIsSuperAdmin) {
           return <Typography.Text type="secondary">最高权益管理员</Typography.Text>
         }
@@ -296,7 +322,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
 
   const teacherColumns = [
     { title: '教师', dataIndex: 'name', key: 'name', width: 120 },
-    { title: '手机号', dataIndex: 'phone', key: 'phone', width: 140 },
+    { title: '手机号（登录）', dataIndex: 'phone', key: 'phone', width: 140 },
     { title: '教师邮箱', dataIndex: 'email', key: 'email', width: 200, render: (value: string | null) => value || '-' },
     { title: '登录账号', key: 'account', width: 240, render: (_: unknown, record: TeacherAccount) => record.account?.email || <Tag>未创建</Tag> },
     { title: '状态', key: 'status', width: 100, render: (_: unknown, record: TeacherAccount) => record.account ? statusTag(record.account.status) : '-' },
@@ -356,7 +382,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
           onChange={(event) => setKeyword(event.target.value)}
           style={{ width: 260 }}
         />
-        <Select
+        <AdaptiveSelect
           placeholder="状态筛选"
           allowClear
           value={statusFilter}
@@ -369,14 +395,15 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
         />
       </Space>
       <Space wrap>
-        {activeRole === 'admin' && <Button type="primary" icon={<PlusOutlined />} style={{ background: '#E8784A' }} onClick={() => openModal('admin')}>新增管理员</Button>}
-        {activeRole === 'parent' && <Button type="primary" icon={<PlusOutlined />} style={{ background: '#E8784A' }} onClick={() => openModal('parent')}>新增家长账号</Button>}
+        {activeRole === 'admin' && <Button type="primary" icon={<PlusOutlined />} style={{ background: 'var(--color-primary)' }} onClick={() => openModal('admin')}>新增管理员</Button>}
+        {activeRole === 'parent' && <Button type="primary" icon={<PlusOutlined />} style={{ background: 'var(--color-primary)' }} onClick={() => openModal('parent')}>新增家长账号</Button>}
       </Space>
     </Space>
   )
 
   return (
     <Card bordered={false} style={{ borderRadius: 10 }}>
+      {error && <Alert type="error" showIcon message="账号与绑定数据加载失败" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 16 }} />}
       {toolbar}
       <Tabs
         activeKey={activeRole}
@@ -385,7 +412,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
           {
             key: 'admin',
             label: '管理员管理',
-            children: <Table columns={adminColumns} dataSource={admins} rowKey="id" loading={isLoading} pagination={{ pageSize: 10 }} scroll={{ x: 1000 }} />,
+            children: <Table columns={adminColumns} dataSource={admins} rowKey="id" loading={isLoading} pagination={{ pageSize: 10 }} scroll={{ x: 'max-content' }} />,
           },
           {
             key: 'teacher',
@@ -401,7 +428,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
       />
 
       <Modal
-        title={mode === 'admin' ? '新增管理员' : mode === 'teacher' ? '创建教师登录账号' : mode === 'parent' ? '新增家长账号' : mode === 'reset' ? '重置密码' : mode === 'bind' ? '绑定学员' : '编辑账号'}
+        title={mode === 'admin' ? '新增管理员' : mode === 'teacher' ? '创建教师登录账号' : mode === 'parent' ? '新增家长账号' : mode === 'reset' ? '重置密码' : mode === 'bind' ? '绑定学员' : mode === 'phone' ? '设置登录手机号' : '编辑账号'}
         open={Boolean(mode)}
         onCancel={closeModal}
         onOk={() => form.submit()}
@@ -411,7 +438,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           {mode === 'teacher' && target && 'phone' in target && (
             <>
-              <Form.Item label="教师"><Input value={target.name} disabled /></Form.Item>
+              <Form.Item label="教师（使用档案手机号登录）"><Input value={target.name} disabled /></Form.Item>
               <Form.Item name="teacherId" initialValue={target.id} hidden><Input /></Form.Item>
               <Form.Item name="email" label="登录邮箱" tooltip="留空时优先使用教师邮箱，没有教师邮箱则使用手机号生成 @tea.com 账号">
                 <Input placeholder={target.email || `${target.phone}@tea.com`} />
@@ -420,6 +447,26 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
                 <Input.Password placeholder="留空自动生成强密码" autoComplete="new-password" />
               </Form.Item>
             </>
+          )}
+
+          {(mode === 'admin' || (mode === 'edit' && target && 'role' in target && target.role === 'admin')) && (
+            <Form.Item
+              name="phone"
+              label="登录手机号"
+              extra="教师档案手机号不会自动绑定到管理员账号；绑定后可用原账号密码登录管理端，同一手机号不能重复绑定。"
+            >
+              <Input type="tel" inputMode="tel" placeholder="请输入11位中国大陆手机号" autoComplete="tel" />
+            </Form.Item>
+          )}
+
+          {mode === 'phone' && (
+            <Form.Item
+              name="phone"
+              label="登录手机号"
+              extra="教师档案手机号不会自动绑定到管理员账号；绑定后可用原账号密码登录管理端，同一手机号不能重复绑定。留空可解除绑定。"
+            >
+              <Input type="tel" inputMode="tel" placeholder="请输入11位中国大陆手机号" autoComplete="tel" />
+            </Form.Item>
           )}
 
           {(mode === 'admin' || mode === 'parent' || mode === 'edit') && (
@@ -446,7 +493,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
                 <Input type="tel" inputMode="numeric" />
               </Form.Item>
               <Form.Item name="studentIds" label="绑定学员">
-                <Select
+                <AdaptiveSelect
                   mode="multiple"
                   placeholder="选择需要绑定的学员"
                   options={studentsWithoutParent.map((student) => ({ label: `${student.name}${student.grade ? ` / ${student.grade}` : ''}`, value: student.id }))}
@@ -479,7 +526,7 @@ export function AdminsTab({ currentUserId }: { currentUserId: string }) {
 
           {mode === 'bind' && (
             <Form.Item name="studentIds" label="绑定学员" rules={[{ required: true, message: '请选择学员' }]}>
-              <Select
+              <AdaptiveSelect
                 mode="multiple"
                 placeholder="选择需要绑定的学员"
                 options={studentsWithoutParent.map((student) => ({ label: `${student.name}${student.grade ? ` / ${student.grade}` : ''}`, value: student.id }))}

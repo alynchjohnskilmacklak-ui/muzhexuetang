@@ -10,6 +10,7 @@ export async function getStudentProfile(
   studentId: string,
   range: ProfileRange,
   historicalStudentIds: string[] = [studentId],
+  options: { includeReport?: boolean } = {},
 ) {
   const { from, to } = range
   const studentIds = [...new Set([studentId, ...historicalStudentIds])]
@@ -59,7 +60,7 @@ export async function getStudentProfile(
         orderBy: { earnedAt: 'desc' },
       }),
       prisma.classroomFeedback.findMany({
-        where: { studentIds: { hasSome: studentIds }, status: 'PUBLISHED', createdAt: { gte: from, lte: to } },
+        where: { studentIds: { hasSome: studentIds }, status: 'PUBLISHED', deletedAt: null, createdAt: { gte: from, lte: to } },
         select: { id: true, mood: true, tags: true, lessonContent: true, knowledgePoints: true, knowledgeCard: true, summary: true, overallComment: true,
           feedbackGroupId: true,
           homework: true, badge: true,
@@ -67,7 +68,7 @@ export async function getStudentProfile(
           homeworkDone: true, inClassRating: true,
           createdAt: true, teacher: { select: { id: true, name: true, subjects: true } },
           classLesson: { select: { subject: true, actualMinutes: true, intensiveReviewStatus: true, group: { select: { intensiveMode: true, course: { select: { subject: true } }, teacherAssignments: { select: { teacherId: true, subject: true } } } } } } },
-        orderBy: { createdAt: 'desc' }, take: 50,
+        orderBy: { createdAt: 'desc' }, ...(options.includeReport ? {} : { take: 50 }),
       }),
       prisma.performancePost.findMany({
         where: { ...linkedStudentWhere, ...visiblePerformancePostWhere, teacher: visibleTeacherWhere, createdAt: { gte: from, lte: to } },
@@ -333,6 +334,7 @@ export async function getStudentProfile(
     record: {
       trendBySubject: Object.entries(trendBySubject).map(([subject, points]) => ({ subject, points })),
       timeline: timeline.slice(0, 40),
+      reportFeedbacks: options.includeReport ? timeline.filter((item) => item.type === 'feedback') : [],
       weeklyHours,
     },
     profileCase: {

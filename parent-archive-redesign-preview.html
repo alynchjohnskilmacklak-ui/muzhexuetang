@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家长端成长档案合并设计稿 · 牧哲学堂</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --card:#ffffff; --hairline:#ece9e1; --ink:#241a10; --muted:#8a8175;
+    --accent:#E8784A; --accent-bg:rgba(232,120,74,.10); --accent-soft:rgba(232,120,74,.16);
+    --blue:#534AB7; --blue-bg:rgba(83,74,183,.08);
+    --green:#1D9E75; --green-bg:rgba(29,158,117,.10);
+    --gold:#C98717; --gold-bg:rgba(201,135,23,.12);
+    --red:#D95B5B; --red-bg:rgba(217,91,91,.10);
+    --radius:16px; --shadow:0 2px 10px rgba(36,24,16,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;}
+  .doc-note{max-width:1080px;margin:0 auto;padding:18px 16px 6px;font-size:13px;color:var(--muted);}
+  .doc-note b{color:var(--accent);}
+  .stage{max-width:1080px;margin:0 auto;padding:16px;display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;}
+
+  /* ===== 手机框 ===== */
+  .phone{width:400px;flex:0 0 400px;background:var(--bg);border:1px solid var(--hairline);border-radius:28px;overflow:hidden;box-shadow:0 8px 30px rgba(36,24,16,.10);}
+  .phone-status{display:flex;justify-content:space-between;padding:8px 18px;font-size:11px;color:var(--muted);background:var(--bg);}
+  .app-head{position:sticky;top:0;z-index:5;background:rgba(246,244,239,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--hairline);}
+  .app-head-row{display:flex;align-items:center;gap:10px;padding:12px 14px;}
+  .back-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--hairline);background:#fff;color:var(--ink);font-size:15px;cursor:pointer;flex-shrink:0;}
+  .app-title{font-size:16px;font-weight:700;flex:1;text-align:center;}
+  .app-title small{display:block;font-size:10px;color:var(--muted);font-weight:400;}
+  .child-switch{display:flex;gap:6px;padding:0 14px 10px;}
+  .child-switch button{flex:1;border:1px solid var(--hairline);background:#fff;border-radius:10px;padding:7px 8px;font-size:12px;color:var(--muted);cursor:pointer;}
+  .child-switch button.on{border-color:var(--accent);background:var(--accent-bg);color:var(--accent);font-weight:600;}
+
+  /* Tab 栏 */
+  .tabs{display:flex;gap:2px;padding:0 10px 8px;overflow-x:auto;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex-shrink:0;border:none;background:transparent;padding:8px 12px;font-size:13px;color:var(--muted);border-radius:10px;cursor:pointer;position:relative;}
+  .tab.on{background:#fff;color:var(--accent);font-weight:600;box-shadow:var(--shadow);}
+  .tab .dot{width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;margin-left:4px;}
+
+  .phone-body{padding:10px 14px 26px;overflow-y:auto;max-height:760px;scrollbar-width:none;}
+  .phone-body::-webkit-scrollbar{display:none;}
+
+  /* 通用卡片 */
+  .card{background:var(--card);border:1px solid var(--hairline);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow);}
+  .card h3{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+  .card h3 .more{margin-left:auto;font-size:11px;color:var(--muted);font-weight:400;cursor:pointer;}
+
+  /* 学习概况 4 卡 */
+  .kpi4{display:flex;flex-wrap:wrap;gap:8px;}
+  .kpi4 .k{flex:1 1 46%;min-width:0;background:var(--bg);border:1px solid var(--hairline);border-radius:12px;padding:10px;}
+  .kpi4 .k b{font-size:17px;display:block;}
+  .kpi4 .k span{font-size:11px;color:var(--muted);}
+
+  .trend-line{display:flex;align-items:flex-end;gap:6px;height:52px;margin-top:4px;}
+  .trend-line i{flex:1;border-radius:5px 5px 2px 2px;background:var(--blue-bg);}
+  .trend-line i.hl{background:var(--blue);}
+  .trend-line i:nth-child(1){height:35%}.trend-line i:nth-child(2){height:48%}.trend-line i:nth-child(3){height:42%}
+  .trend-line i:nth-child(4){height:58%}.trend-line i:nth-child(5){height:52%}.trend-line i:nth-child(6){height:66%}
+  .trend-line i:nth-child(7){height:74%}.trend-line i:nth-child(8){height:62%}.trend-line i:nth-child(9){height:70%}
+  .trend-line i:nth-child(10){height:80%}.trend-line i:nth-child(11){height:88%}.trend-line i:nth-child(12){height:95%}
+  .trend-note{font-size:11px;color:var(--green);margin-top:6px;}
+
+  /* 课时领先榜 */
+  .lb-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .lb-head .tag{font-size:11px;background:var(--accent-bg);color:var(--accent);border-radius:8px;padding:3px 8px;font-weight:600;}
+  .lb-msg{font-size:13px;background:linear-gradient(135deg,var(--accent-soft),rgba(232,120,74,.05));border:1px solid rgba(232,120,74,.25);border-radius:12px;padding:11px 12px;color:#7c3d1c;line-height:1.7;margin-bottom:10px;}
+  .lb-kpi{display:flex;gap:8px;}
+  .lb-kpi .k{flex:1;text-align:center;background:var(--bg);border:1px solid var(--hairline);border-radius:12px;padding:9px 4px;}
+  .lb-kpi .k b{font-size:16px;display:block;}
+  .lb-kpi .k b small{font-size:10px;color:var(--muted);font-weight:400;}
+  .lb-kpi .k span{font-size:10px;color:var(--muted);}
+  .lb-bar{margin-top:12px;}
+  .lb-bar .row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+  .lb-bar .row .nm{width:56px;font-size:11px;color:var(--muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lb-bar .row .track{flex:1;height:10px;background:var(--bg);border-radius:6px;overflow:hidden;position:relative;}
+  .lb-bar .row .track i{display:block;height:100%;border-radius:6px;}
+  .lb-bar .row .v{width:52px;font-size:11px;color:var(--ink);text-align:right;flex-shrink:0;}
+  .lb-foot{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6;}
+
+  /* 阶段总结 */
+  .stage-sum{font-size:12px;color:#574b3d;background:var(--bg);border:1px solid var(--hairline);border-radius:12px;padding:10px 12px;line-height:1.7;}
+  .warn-item{display:flex;gap:10px;font-size:12px;padding:9px 0;border-top:1px dashed var(--hairline);}
+  .warn-item:first-of-type{border-top:none;}
+  .warn-item b{font-size:11px;flex-shrink:0;color:var(--muted);font-weight:600;width:60px;}
+  .warn-item .c{color:#574b3d;}
+
+  /* 时间线 */
+  .tl-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--hairline);}
+  .tl-item:last-child{border-bottom:none;}
+  .tl-ico{width:30px;height:30px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;font-size:13px;}
+  .tl-body{flex:1;min-width:0;}
+  .tl-body .h{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;}
+  .tl-body .h time{margin-left:auto;font-size:10px;color:var(--muted);font-weight:400;}
+  .tl-body p{font-size:12px;color:#574b3d;margin-top:3px;}
+  .tl-body .tag{font-size:10px;border-radius:6px;padding:1px 6px;margin-left:4px;}
+
+  /* 成绩 */
+  .g-mastery{display:flex;gap:8px;margin-bottom:10px;}
+  .g-mastery .m{flex:1;text-align:center;border-radius:12px;padding:9px 4px;}
+  .g-mastery .m b{font-size:15px;display:block;}
+  .g-mastery .m span{font-size:10px;}
+  .m1{background:var(--green-bg);color:var(--green);} .m2{background:var(--gold-bg);color:var(--gold);} .m3{background:var(--red-bg);color:var(--red);}
+  .g-row{display:flex;align-items:center;gap:10px;font-size:12px;padding:9px 0;border-bottom:1px dashed var(--hairline);}
+  .g-row:last-child{border-bottom:none;}
+  .g-row .sub{width:44px;font-weight:600;flex-shrink:0;}
+  .g-row .track{flex:1;height:8px;background:var(--bg);border-radius:5px;overflow:hidden;}
+  .g-row .track i{display:block;height:100%;border-radius:5px;}
+  .g-row .pct{width:42px;text-align:right;color:var(--muted);}
+
+  /* 出勤课时 */
+  .att-stat{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  .att-stat .s{flex:1 1 30%;text-align:center;background:var(--bg);border:1px solid var(--hairline);border-radius:12px;padding:8px 4px;}
+  .att-stat .s b{font-size:15px;display:block;}
+  .att-stat .s span{font-size:10px;color:var(--muted);}
+  .hr-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:9px 0;border-bottom:1px dashed var(--hairline);}
+  .hr-row:last-child{border-bottom:none;}
+  .hr-row .dt{width:74px;color:var(--muted);flex-shrink:0;}
+  .hr-row .cs{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .hr-row .st{font-size:10px;border-radius:6px;padding:2px 7px;flex-shrink:0;}
+
+  /* 资料 */
+  .mat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--hairline);}
+  .mat-row:last-child{border-bottom:none;}
+  .mat-ico{width:32px;height:32px;border-radius:10px;background:var(--accent-bg);color:var(--accent);display:grid;place-items:center;font-size:13px;flex-shrink:0;}
+  .mat-body{flex:1;min-width:0;}
+  .mat-body b{font-size:12px;display:block;}
+  .mat-body span{font-size:10px;color:var(--muted);}
+
+  /* 成长动态 + 情绪日历 */
+  .mood-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .mood-grid .d{aspect-ratio:1;border-radius:8px;font-size:9px;color:var(--muted);display:grid;place-items:center;background:var(--bg);}
+  .mood-grid .d.good{background:var(--blue-bg);color:var(--blue);}
+  .mood-grid .d.great{background:var(--green-bg);color:var(--green);}
+  .mood-grid .d.ok{background:var(--gold-bg);color:var(--gold);}
+  .mood-grid .d.low{background:var(--red-bg);color:var(--red);}
+  .mood-grid .d.today{outline:2px solid var(--accent);}
+  .badge-row{display:flex;gap:8px;margin-top:10px;}
+  .badge{width:44px;height:44px;border-radius:50%;background:var(--gold-bg);color:var(--gold);display:grid;place-items:center;font-size:17px;border:1px dashed rgba(201,135,23,.4);}
+  .badge.off{opacity:.35;}
+
+  /* ===== 右侧说明 ===== */
+  .right{flex:1 1 560px;min-width:0;}
+  .panel{background:#fff;border:1px solid var(--hairline);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow);}
+  .panel h2{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+  .panel h2 .no{width:22px;height:22px;border-radius:7px;background:var(--accent);color:#fff;font-size:12px;display:grid;place-items:center;flex-shrink:0;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th{text-align:left;color:var(--muted);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--hairline);}
+  td{padding:8px;border-bottom:1px dashed var(--hairline);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .st-new{color:var(--green);font-weight:600;}
+  .st-del{color:var(--red);}
+  .st-keep{color:var(--muted);}
+  .badge2{display:inline-block;font-size:10px;border-radius:6px;padding:2px 7px;margin-left:6px;}
+  .b-merge{background:var(--gold-bg);color:var(--gold);}
+  .b-new{background:var(--green-bg);color:var(--green);}
+  .b-del{background:var(--red-bg);color:var(--red);}
+  .b-keep{background:var(--bg);color:var(--muted);}
+  .note{font-size:12px;color:var(--muted);line-height:1.7;}
+  .note b{color:var(--ink);}
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;background:var(--accent-bg);color:var(--accent);border:1px solid rgba(232,120,74,.25);border-radius:9px;padding:4px 10px;margin:3px 4px 3px 0;}
+</style>
+</head>
+<body>
+
+<div class="doc-note">
+  <b>家长端改造设计稿 v1</b> · 供 UI 审查 · 全部为模拟数据，非真实线上数据 · 手机框内可点击 Tab 体验页面结构
+</div>
+
+<div class="stage">
+
+  <!-- ================= 手机演示 ================= -->
+  <div class="phone">
+    <div class="phone-status"><span>9:41</span><span>📶</span></div>
+    <div class="app-head">
+      <div class="app-head-row">
+        <button class="back-btn">←</button>
+        <div class="app-title">学生成长档案<small>牧哲学堂 · 家长端</small></div>
+        <button class="back-btn" style="opacity:0">←</button>
+      </div>
+      <div class="child-switch">
+        <button class="on">马紫晨 · 初三</button>
+        <button>马子墨 · 初一</button>
+      </div>
+      <div class="tabs">
+        <button class="tab on" data-tab="overview">概览</button>
+        <button class="tab" data-tab="timeline">时间线</button>
+        <button class="tab" data-tab="grades">成绩分析</button>
+        <button class="tab" data-tab="hours">出勤课时</button>
+        <button class="tab" data-tab="materials">资料文件</button>
+        <button class="tab" data-tab="growth">成长动态</button>
+      </div>
+    </div>
+
+    <div class="phone-body">
+
+      <!-- 概览 -->
+      <section data-pane="overview">
+        <div class="card">
+          <h3>📈 学习趋势 <span class="more">近 3 个月</span></h3>
+          <div class="trend-line">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="hl"></i>
+          </div>
+          <div class="trend-note">✓ 保持稳定 · 近期学习表现保持稳定</div>
+        </div>
+
+        <div class="card">
+          <h3>📊 学习概况</h3>
+          <div class="kpi4">
+            <div class="k"><b>1</b><span>累计课堂反馈</span></div>
+            <div class="k"><b>75%</b><span>出勤率</span></div>
+            <div class="k"><b>314.6h</b><span>剩余课时</span></div>
+            <div class="k"><b>9/26-9/26</b><span>学习周期</span></div>
+          </div>
+        </div>
+
+        <!-- 课时领先榜（新档案页核心保留位） -->
+        <div class="card" style="border-color:rgba(232,120,74,.35)">
+          <div class="lb-head">
+            <h3 style="margin:0">⏱ 上课时长，谁在领先？</h3>
+            <span class="tag">本月</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">马紫晨 · 与同班同学对比</div>
+          <div class="lb-msg">✨ <b>鼓励 · 已超过班级一半</b><br>马紫晨同学，最近状态不错，课堂上总能看到你踏实学习的样子，节奏保持得很好。照这个势头走下去，理想的高中离你越来越近——要是再使一分劲，就更稳了。加油！</div>
+          <div class="lb-kpi">
+            <div class="k"><b>4.2<small>小时</small></b><span>我的课时</span></div>
+            <div class="k"><b>3.6<small>小时</small></b><span>班级平均</span></div>
+            <div class="k"><b>55%</b><span>领先比例</span></div>
+          </div>
+          <div class="lb-bar">
+            <div class="row"><span class="nm">同学A</span><span class="track"><i style="width:88%;background:var(--blue)"></i></span><span class="v">5.6h</span></div>
+            <div class="row"><span class="nm">马紫晨</span><span class="track"><i style="width:66%;background:var(--accent)"></i></span><span class="v">4.2h</span></div>
+            <div class="row"><span class="nm">同学B</span><span class="track"><i style="width:66%;background:var(--blue)"></i></span><span class="v">4.2h</span></div>
+            <div class="row"><span class="nm">同学C</span><span class="track"><i style="width:44%;background:var(--blue)"></i></span><span class="v">2.8h</span></div>
+          </div>
+          <div class="lb-foot">* 课时按本月考勤结算口径累计，同学姓名已脱敏；对比结果仅供参考，请结合孩子实际情况看待。</div>
+        </div>
+
+        <div class="card">
+          <h3>📝 阶段总结</h3>
+          <div class="stage-sum">马紫晨同学本阶段共收到 1 条课堂反馈。近期学习表现保持稳定。阶段出勤率为 75%。当前未发现重复出现的重点问题。</div>
+        </div>
+
+        <div class="card">
+          <h3>🌟 近期成长表现 & 需要提升</h3>
+          <div class="warn-item"><b>成长表现</b><div class="c">暂无足够的正向课堂记录</div></div>
+          <div class="warn-item"><b>需要提升</b><div class="c">暂无明显薄弱项记录，请继续保持。</div></div>
+        </div>
+
+        <div class="card">
+          <h3>💬 教师反馈精选</h3>
+          <div class="warn-item"><b>数学</b><div class="c">2026/9/26 · 胡思同<br>孩子理解能力不错，继续加强理解！</div></div>
+        </div>
+      </section>
+
+      <!-- 时间线 -->
+      <section data-pane="timeline" hidden>
+        <div class="card">
+          <h3>🗓 成长记录时间线 <span class="more">筛选：全部</span></h3>
+          <div class="tl-item">
+            <div class="tl-ico" style="background:var(--blue-bg);color:var(--blue)">📝</div>
+            <div class="tl-body"><div class="h">课堂反馈 <span class="tag" style="background:var(--blue-bg);color:var(--blue)">学习</span><time>2026/9/26</time></div><p>孩子理解能力不错，继续加强理解！</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-ico" style="background:var(--accent-bg);color:var(--accent)">📄</div>
+            <div class="tl-body"><div class="h">试卷 <span class="tag" style="background:var(--accent-bg);color:var(--accent)">学习</span><time>2026/9/20</time></div><p>数学单元测试卷 · 掌握率 72%</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-ico" style="background:var(--gold-bg);color:var(--gold)">🏅</div>
+            <div class="tl-body"><div class="h">徽章 <span class="tag" style="background:var(--gold-bg);color:var(--gold)">目标</span><time>2026/9/12</time></div><p>「全勤之星」</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-ico" style="background:var(--green-bg);color:var(--green)">📈</div>
+            <div class="tl-body"><div class="h">成绩 <span class="tag" style="background:var(--green-bg);color:var(--green)">成长</span><time>2026/9/5</time></div><p>阶段成绩 · 数学 86 / 语文 78</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 成绩分析 -->
+      <section data-pane="grades" hidden>
+        <div class="card">
+          <h3>🎯 成绩分析（原「成绩分析」页并入）</h3>
+          <div class="g-mastery">
+            <div class="m m1"><b>2</b><span>已掌握</span></div>
+            <div class="m m2"><b>3</b><span>需巩固</span></div>
+            <div class="m m3"><b>1</b><span>需重点练习</span></div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">试卷数 3 · 掌握率 72% · 待突破 1 项</div>
+          <div class="g-row"><span class="sub">数学</span><span class="track"><i style="width:72%;background:var(--accent)"></i></span><span class="pct">72%</span></div>
+          <div class="g-row"><span class="sub">语文</span><span class="track"><i style="width:68%;background:var(--gold)"></i></span><span class="pct">68%</span></div>
+          <div class="g-row"><span class="sub">英语</span><span class="track"><i style="width:55%;background:var(--red)"></i></span><span class="pct">55%</span></div>
+        </div>
+      </section>
+
+      <!-- 出勤课时 -->
+      <section data-pane="hours" hidden>
+        <div class="card">
+          <h3>🕐 出勤与课时（原「课时明细」+「考勤记录」合并）</h3>
+          <div class="att-stat">
+            <div class="s"><b>8</b><span>出勤</span></div>
+            <div class="s"><b>1</b><span>请假</span></div>
+            <div class="s"><b>0</b><span>旷课</span></div>
+            <div class="s"><b>1</b><span>补课</span></div>
+            <div class="s"><b>0</b><span>扣课</span></div>
+            <div class="s"><b>314.6h</b><span>当前课时</span></div>
+          </div>
+          <div class="hr-row"><span class="dt">2026/9/26</span><span class="cs">初三数学 · 周六冲刺班</span><span class="st" style="background:var(--green-bg);color:var(--green)">出勤 · +1.4h</span></div>
+          <div class="hr-row"><span class="dt">2026/9/24</span><span class="cs">一对一冲刺 · 英语</span><span class="st" style="background:var(--green-bg);color:var(--green)">出勤 · +1h</span></div>
+          <div class="hr-row"><span class="dt">2026/9/22</span><span class="cs">初三数学 · 周六冲刺班</span><span class="st" style="background:var(--gold-bg);color:var(--gold)">请假 · 0</span></div>
+          <div class="hr-row"><span class="dt">2026/9/20</span><span class="cs">初三语文 · 周六冲刺班</span><span class="st" style="background:var(--blue-bg);color:var(--blue)">补课 · +1h</span></div>
+          <div class="hr-row"><span class="dt">2026/9/19</span><span class="cs">初三数学 · 周六冲刺班</span><span class="st" style="background:var(--green-bg);color:var(--green)">出勤 · +1.4h</span></div>
+        </div>
+      </section>
+
+      <!-- 资料文件 -->
+      <section data-pane="materials" hidden>
+        <div class="card">
+          <h3>📁 资料文件（原「学习资料」+「讲义预告」归位）</h3>
+          <div class="mat-row"><div class="mat-ico">📄</div><div class="mat-body"><b>初三数学 · 二次函数讲义</b><span>2026/9/26 · 周六冲刺班</span></div></div>
+          <div class="mat-row"><div class="mat-ico">📑</div><div class="mat-body"><b>英语 Unit3 词汇清单</b><span>2026/9/24 · 一对一冲刺</span></div></div>
+          <div class="mat-row"><div class="mat-ico">📊</div><div class="mat-body"><b>本周学情报告 PDF</b><span>2026/9/26 · 系统生成</span></div></div>
+        </div>
+      </section>
+
+      <!-- 成长动态 -->
+      <section data-pane="growth" hidden>
+        <div class="card">
+          <h3>📅 情绪日历（原「成长动态」页并入）</h3>
+          <div class="mood-grid">
+            <div class="d">一</div><div class="d">二</div><div class="d">三</div><div class="d">四</div><div class="d">五</div><div class="d">六</div><div class="d">日</div>
+            <div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d low">1</div>
+            <div class="d ok">2</div><div class="d good">3</div><div class="d great">4</div><div class="d"></div><div class="d good">6</div><div class="d great today">7</div><div class="d"></div>
+            <div class="d"></div><div class="d good">9</div><div class="d"></div><div class="d ok">11</div><div class="d great">12</div><div class="d"></div><div class="d"></div>
+            <div class="d"></div><div class="d great">15</div><div class="d"></div><div class="d"></div><div class="d good">18</div><div class="d"></div><div class="d"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>🏆 成就徽章墙</h3>
+          <div class="badge-row">
+            <div class="badge">🥇</div><div class="badge">📖</div><div class="badge off">✏️</div><div class="badge off">🎯</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>✨ 成长动态</h3>
+          <div class="tl-item">
+            <div class="tl-ico" style="background:var(--gold-bg);color:var(--gold)">⭐</div>
+            <div class="tl-body"><div class="h">表现反馈 · 胡思同<time>2026/9/26</time></div><p>课堂专注度提升，作业完成质量好。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 底部导航示意 -->
+      <div style="margin-top:14px;font-size:11px;color:var(--muted);text-align:center;border-top:1px dashed var(--hairline);padding-top:12px;">
+        底部Tab保持不变：首页 · 课堂反馈 · 晚托作业 · 通知 · 更多
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 右侧说明 ================= -->
+  <div class="right">
+
+    <div class="panel">
+      <h2><span class="no">1</span> 本次改造范围（家长端）</h2>
+      <table>
+        <tr><th>页面</th><th>处理</th><th>去向</th></tr>
+        <tr><td>成长档案 archive <span class="badge2 b-keep">保留</span></td><td>重构为 6 Tab 总档案页</td><td class="st-new">导航「成长档案」→ 新页</td></tr>
+        <tr><td>学生成长报告 growth-report <span class="badge2 b-merge">合并</span></td><td>并入新档案页「概览」Tab</td><td class="st-del">删除独立页，首页按钮改指向新页</td></tr>
+        <tr><td>学生档案 students/[id]/archive <span class="badge2 b-merge">合并</span></td><td>内容并入各 Tab</td><td class="st-del">删除独立页</td></tr>
+        <tr><td>成长动态 performance <span class="badge2 b-merge">合并</span></td><td>情绪日历/徽章/动态 → 「成长动态」Tab</td><td class="st-del">删除独立页</td></tr>
+        <tr><td>成绩分析 grades <span class="badge2 b-merge">合并</span></td><td>→ 「成绩分析」Tab</td><td class="st-del">删除独立页</td></tr>
+        <tr><td>考勤记录 attendance <span class="badge2 b-merge">合并</span></td><td>→ 「出勤课时」Tab（与课时明细合并）</td><td class="st-del">删除独立页</td></tr>
+        <tr><td>课时明细 hour-records <span class="badge2 b-keep">保留</span></td><td>纳入「出勤课时」Tab（导航入口改为档案Tab直达）</td><td class="st-new">导航保留快捷入口</td></tr>
+        <tr><td>讲义预告 lesson-previews <span class="badge2 b-del">删除</span></td><td>首页已有组件 + 资料Tab覆盖</td><td class="st-del">删除独立页</td></tr>
+        <tr><td>缴费账单 fees <span class="badge2 b-new">补入口</span></td><td>页面保留</td><td class="st-new">导航「家校服务」新增入口</td></tr>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2><span class="no">2</span> 导航变化（家长端侧边栏/更多菜单）</h2>
+      <div style="font-size:12px;line-height:2;color:#574b3d;">
+        <b>孩子学习</b>：课程表 · 课堂反馈 · 晚托作业 · <span style="color:var(--green);font-weight:600">成长档案（新6Tab页）</span> · 教师信息<br>
+        <b>家校服务</b>：通知 · 我的留言 · 请假 · 就餐安排 · <span style="color:var(--green);font-weight:600">课时与考勤（Tab直达）</span> · <span style="color:var(--green);font-weight:600">缴费账单（新增）</span><br>
+        <b>其余组不变</b>：升学服务 / 学习工具 / 账户与服务
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--muted);">
+        <span class="pill">统一入口：首页「查看成长档案」与导航「成长档案」→ 同一新页面</span>
+        <span class="pill">课时领先榜：保留在新档案页「概览」Tab（学习概况之后）</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="no">3</span> 性能优化（随本次一起部署）</h2>
+      <div class="note">
+        <b>已生效（上轮）</b>：nginx HTTP/2、连接复用、微信缓存修复。<br>
+        <b>本次代码</b>：未读通知轮询 5s→30s、教师端留言未读轮询 5s→30s、档案页合并后减少重复取数。<br>
+        <b>说明</b>：服务端实测 <15ms，瓶颈在移动端弱网与请求频次，轮询降频对微信内打开有明显改善。
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="no">4</span> 需你确认的 3 个决策点</h2>
+      <table>
+        <tr><th>#</th><th>问题</th><th>我的建议</th></tr>
+        <tr><td>1</td><td>原「课时明细」页是否保留为独立导航入口（同时档案Tab也有）？</td><td class="st-new">保留导航直达（家长已习惯），档案内 Tab 同步包含</td></tr>
+        <tr><td>2</td><td>缴费账单入口放在「家校服务」组是否合适？</td><td class="st-new">合适，与课时/就餐并列</td></tr>
+        <tr><td>3</td><td>「成长动态」Tab 是否也包含情绪日历？</td><td class="st-new">包含（原 performance 页整体迁入）</td></tr>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var tabs = document.querySelectorAll('.tab');
+  var panes = document.querySelectorAll('[data-pane]');
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      tabs.forEach(function(t){ t.classList.remove('on'); });
+      tab.classList.add('on');
+      var key = tab.getAttribute('data-tab');
+      panes.forEach(function(p){
+        p.hidden = p.getAttribute('data-pane') !== key;
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,13 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { Avatar, Badge, Drawer, Dropdown } from 'antd'
-import { CloseOutlined, DownOutlined, LogoutOutlined, MenuOutlined, RightOutlined, UserOutlined } from '@ant-design/icons'
+import { Badge, Drawer, Dropdown } from 'antd'
+import { CloseOutlined, DownOutlined, LogoutOutlined, MenuOutlined, RightOutlined } from '@ant-design/icons'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { isNavigationActive } from '@/lib/navigation-active'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 import { getDefaultTeacherAvatar } from '@/lib/default-avatar'
+import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
 
 const TAB_BAR_HEIGHT = 60
 
@@ -68,7 +70,18 @@ export function MobileLayout({
   const userAvatar = (session?.user as { avatar?: string })?.avatar
   const defaultAvatarSrc = userAvatar
     ? userAvatar
-    : getDefaultTeacherAvatar(userRole === 'teacher' || userRole === 'admin' ? userGender : null, userRole === 'teacher' || userRole === 'admin' ? userId : null)
+    : userRole === 'teacher' || userRole === 'admin'
+      ? getDefaultTeacherAvatar(userGender, userId)
+      : (() => {
+          // 家长端：根据当前学生性别显示学生默认头像
+          if (typeof window !== 'undefined') {
+            const match = document.cookie.match(/(?:^|;\s*)current-student-gender=([^;]+)/)
+            const g = match ? decodeURIComponent(match[1]) : ''
+            const isFemale = g === 'F' || g === '女' || g === 'female'
+            return isFemale ? '/avatars/student-female.png' : '/avatars/student-male.png'
+          }
+          return '/avatars/student-male.png'
+        })()
   const effectiveTabBackground = tabBackground ?? (headerTheme?.dark ? 'rgba(14,46,42,.98)' : '#ffffff')
   const effectiveTabBorderTop = tabBorderTop ?? (headerTheme?.dark ? '1px solid rgba(201,164,92,.30)' : '1px solid rgba(0,0,0,.06)')
   const effectiveTabInactive = tabInactiveColor ?? (headerTheme?.dark ? 'rgba(246,233,200,.78)' : 'var(--color-ink-subtle)')
@@ -92,7 +105,8 @@ export function MobileLayout({
     }],
   }
 
-  const isActive = (key: string) => pathname === key || pathname.startsWith(`${key}/`)
+  const searchParams = useSearchParams()
+  const isActive = (key: string) => isNavigationActive(pathname, searchParams.toString(), key)
   const [expandedGroupKeys, setExpandedGroupKeys] = useState<string[]>(() =>
     drawerItems.filter(item => item.children?.some(child => isActive(child.key))).map(item => item.key),
   )
@@ -191,7 +205,7 @@ export function MobileLayout({
               position: 'relative',
               zIndex: 1,
             }}>
-              <Avatar size={32} src={defaultAvatarSrc} icon={<UserOutlined />} style={{ flexShrink: 0, objectFit: 'cover' }} />
+              <CachedAvatarImage src={defaultAvatarSrc} fallbackSrc={defaultAvatarSrc} alt={name} loading="eager" style={{ width: 32, height: 32, flexShrink: 0, borderRadius: '50%', objectFit: 'cover' }} />
             </button>
           </Dropdown>
         </div>
@@ -257,7 +271,7 @@ export function MobileLayout({
           borderBottom: '1px solid rgba(0,0,0,.05)',
           backgroundColor: '#faf8f5',
         }}>
-          <Avatar size={40} src={defaultAvatarSrc} icon={<UserOutlined />} style={{ flexShrink: 0, objectFit: 'cover' }} />
+          <CachedAvatarImage src={defaultAvatarSrc} fallbackSrc={defaultAvatarSrc} alt={name} loading="eager" style={{ width: 40, height: 40, flexShrink: 0, borderRadius: '50%', objectFit: 'cover' }} />
           <div style={{ minWidth: 0 }}>
             <div style={{
               fontSize: 15,

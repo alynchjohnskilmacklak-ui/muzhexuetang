@@ -69,7 +69,7 @@ export default function ParentActivationPage({ params }: { params: Promise<{ tok
         ) : (
           <Space direction="vertical" size={20} style={{ width: '100%' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ width: 64, height: 64, margin: '0 auto 14px', borderRadius: 18, background: '#fff2eb', display: 'grid', placeItems: 'center', color: '#E8784A', fontSize: 30 }}><SafetyCertificateOutlined /></div>
+              <div style={{ width: 64, height: 64, margin: '0 auto 14px', borderRadius: 18, background: '#fff2eb', display: 'grid', placeItems: 'center', color: 'var(--color-primary)', fontSize: 30 }}><SafetyCertificateOutlined /></div>
               <Title level={2} style={{ margin: 0 }}>欢迎加入牧哲学堂</Title>
               <Paragraph type="secondary" style={{ marginTop: 8 }}>首次只需核对孩子并设置密码，以后使用账号即可直接登录。</Paragraph>
             </div>

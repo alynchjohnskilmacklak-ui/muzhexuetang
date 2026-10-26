@@ -56,6 +56,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
     dinner: clean(body.dinner),
     snack: clean(body.snack),
     note: clean(body.note),
+    image: clean(body.image),
+    description: clean(body.description),
     allowDouble: body.allowDouble !== false,
     startDate: body.startDate ? new Date(body.startDate) : null,
     endDate: body.endDate ? new Date(body.endDate) : null,

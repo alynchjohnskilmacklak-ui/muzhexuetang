@@ -41,9 +41,9 @@ Read this before changing edu-manage UI.
 
 - Lists that must feel realtime should use SWR with `refreshInterval: 5000`, `revalidateOnFocus: true`, and `revalidateOnReconnect: true`.
 
-## Merged schedule data
+## Schedule data
 
-- When merging old `Schedule` data with new `ClassLesson` data, sort by displayed time of day such as `HH:mm`. Do not rely on ISO string `localeCompare`, because timezone offsets can scramble same-day ordering.
+- `ClassLesson` is the only lesson source. Sort displayed lessons by local date and `HH:mm`; do not compare mixed ISO strings because timezone offsets can scramble same-day ordering.
 
 ## Brand role colors
 

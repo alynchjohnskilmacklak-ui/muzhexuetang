@@ -25,6 +25,6 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const from = new Date(to)
   from.setMonth(from.getMonth() - months)
 
-  const profile = await getStudentProfile(prisma, target.id, { from, to }, target.recordIds)
+  const profile = await getStudentProfile(prisma, target.id, { from, to }, target.recordIds, { includeReport: req.nextUrl.searchParams.get('includeReport') === '1' })
   return NextResponse.json({ children, activeStudentId: target.id, profile })
 })

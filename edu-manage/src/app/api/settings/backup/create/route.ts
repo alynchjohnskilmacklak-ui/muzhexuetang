@@ -25,6 +25,9 @@ export const POST = apiHandler(async () => {
     ])
 
   const backup = {
+    format: 'edu-business-export-v1',
+    restorable: false,
+    limitations: ['此文件仅用于核对业务数据，不是数据库恢复备份', '最多导出5000条考勤和1000份试卷', '不包含账号、完整课堂反馈、上传照片文件和全部关联表'],
     exportedAt: new Date().toISOString(),
     exportedBy: user.name,
     summary: {
@@ -42,7 +45,7 @@ export const POST = apiHandler(async () => {
   }
 
   await prisma.activityLog.create({
-    data: { userId: user.id, action: '执行了数据备份', detail: `备份了 ${backup.summary.students} 名学员等数据` },
+    data: { userId: user.id, action: '导出了业务数据', detail: `导出了 ${backup.summary.students} 名学员等数据（非恢复备份）` },
   })
 
   return NextResponse.json(backup)

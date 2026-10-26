@@ -130,7 +130,7 @@ export function BindWxClient({ bound }: { bound: boolean; userName: string }) {
                 block
                 loading={loading}
                 onClick={getQrcode}
-                style={{ background: '#E8784A', borderColor: '#E8784A', height: 42 }}
+                style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', height: 42 }}
               >
                 立即绑定
               </Button>
@@ -144,7 +144,7 @@ export function BindWxClient({ bound }: { bound: boolean; userName: string }) {
                   二维码有效期30分钟，过期请刷新页面重新获取
                 </Text>
                 <Button block loading={checking} onClick={checkBound}
-                  style={{ borderColor: '#E8784A', color: '#E8784A' }}>
+                  style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}>
                   已完成扫码，检查绑定状态
                 </Button>
                 <Button type="link" block style={{ marginTop: 8, color: '#8a8f98' }}

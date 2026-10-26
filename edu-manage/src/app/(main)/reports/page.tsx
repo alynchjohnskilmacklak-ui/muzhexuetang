@@ -66,7 +66,7 @@ async function downloadExcel(chartKey: string, period: string, from?: string, to
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${chartKey}-${new Date().toISOString().slice(0, 10)}.xlsx`
+  a.download = `牧哲学堂_${chartKey}-${new Date().toISOString().slice(0, 10)}.xlsx`
   a.click()
   URL.revokeObjectURL(url)
   message.success('导出成功')

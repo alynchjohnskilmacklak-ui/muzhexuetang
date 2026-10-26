@@ -1,15 +1,21 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Card, Empty, Segmented, Space, Table, Tag, Typography } from 'antd'
+import { Alert, Button, Card, Empty, Pagination, Segmented, Space, Table, Tag, Typography } from 'antd'
+import { CheckCircleOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { TeacherTrendCharts } from '@/components/teacher/TeacherTrendCharts'
 
 const { Text, Title } = Typography
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = async (url: string) => {
+  const response = await fetch(url)
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(payload.error || '薪资加载失败，请稍后重试')
+  return payload
+}
 
 const PERIOD_OPTIONS = [
   { label: '本月', value: 'month' },
@@ -23,7 +29,8 @@ const TYPE_META: Record<string, { color: string; label: string }> = {
   FEEDBACK_BONUS: { color: '#E8784A', label: '反馈奖励' },
   STUDY_HALL_BONUS: { color: '#C6821E', label: '作业登记奖励' },
   STUDY_HALL_ATTENDANCE: { color: '#1D9E75', label: '晚托考勤奖励' },
-  manual_adjust: { color: '#7A6F5F', label: '薪资调整' },
+  SALARY_SETTLEMENT: { color: '#C9A45C', label: '工资结算' },
+  manual_adjust: { color: '#7A6F5F', label: '月结调整' },
 }
 
 interface SalaryTransaction {
@@ -34,6 +41,7 @@ interface SalaryTransaction {
   amount: number
   description?: string | null
   lessonDate?: string | null
+  settledAt?: string | null
   createdAt: string
 }
 
@@ -44,6 +52,7 @@ interface SalaryPayload {
   totalLesson: number
   totalFeedback: number
   totalAdjustment: number
+  settled?: { amount: number; at: string; description?: string | null } | null
   transactions: SalaryTransaction[]
 }
 
@@ -51,14 +60,17 @@ export default function TeacherSalaryPage() {
   const isMobile = useIsMobile() ?? false
   const [period, setPeriod] = useState('month')
   const [salaryBucket, setSalaryBucket] = useState<'ALL' | 'SMALL_CLASS' | 'INTENSIVE'>('ALL')
-  const { data, isLoading } = useSWR<SalaryPayload>(`/api/teacher/salary?period=${period}`, fetcher)
+  const [mobilePage, setMobilePage] = useState(1)
+  const MOBILE_PAGE_SIZE = 4
+  const { data, error, isLoading, mutate } = useSWR<SalaryPayload>(`/api/teacher/salary?period=${period}`, fetcher, { refreshInterval: 30_000, revalidateOnFocus: true, revalidateOnReconnect: true })
   // 教学与收入趋势（到课率 + 近 6 月课时/课时费），口径与教师首页一致
   const { data: trendData } = useSWR<{ attendanceWeekTrend: Array<{ label: string; rate: number }>; salaryTrend: Array<{ label: string; hours: number; pay: number }> }>('/api/teacher/trends', fetcher)
   const transactions = (data?.transactions ?? []).filter((item) => (
-    salaryBucket === 'ALL' || item.salaryBucket === salaryBucket
+    item.type !== 'SALARY_SETTLEMENT' && (salaryBucket === 'ALL' || item.salaryBucket === salaryBucket)
   ))
   const todayKey = new Date().toLocaleDateString('sv-SE')
   const todayIncome = useMemo(() => (data?.transactions ?? []).reduce((sum, item) => {
+    if (item.type === 'SALARY_SETTLEMENT') return sum
     const source = item.lessonDate || item.createdAt
     return new Date(source).toLocaleDateString('sv-SE') === todayKey ? sum + item.amount : sum
   }, 0), [data?.transactions, todayKey])
@@ -71,10 +83,24 @@ export default function TeacherSalaryPage() {
     return [...groups.entries()].sort(([a], [b]) => b.localeCompare(a))
   }, [transactions])
 
-  const renderAmount = (value: number) => (
-    <Text strong style={{ color: value >= 0 ? '#1D9E75' : '#C0392B', whiteSpace: 'nowrap', flexShrink: 0, display: 'inline-block' }}>
-      {value >= 0 ? '+' : ''}¥{value.toFixed(2)}
-    </Text>
+  const mobilePageGroups = useMemo(() => {
+    const start = (mobilePage - 1) * MOBILE_PAGE_SIZE
+    return mobileGroups.slice(start, start + MOBILE_PAGE_SIZE)
+  }, [mobileGroups, mobilePage])
+
+  useEffect(() => {
+    setMobilePage(1)
+  }, [transactions.length, period, salaryBucket])
+
+  const renderAmount = (value: number, showHint = true) => (
+    <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, lineHeight: 1.35 }}>
+      <Text strong style={{ color: value >= 0 ? '#1D9E75' : '#C0392B', whiteSpace: 'nowrap' }}>
+        {value >= 0 ? '+' : '−'}¥{Math.abs(value).toFixed(2)}
+      </Text>
+      {value < 0 && showHint && (
+        <Text style={{ fontSize: 10.5, color: '#C0392B', lineHeight: 1.4, whiteSpace: 'nowrap' }}>月结扣回</Text>
+      )}
+    </span>
   )
 
   const columns = [
@@ -118,15 +144,16 @@ export default function TeacherSalaryPage() {
       title: '金额',
       dataIndex: 'amount',
       key: 'amount',
-      width: 100,
+      width: 110,
       align: 'right' as const,
-      render: renderAmount,
+      render: (value: number) => renderAmount(value, true),
     },
   ]
 
   return (
     <div>
       <Title level={4} style={{ marginTop: 0 }}>我的薪资</Title>
+      {error && <Alert type="error" showIcon message="薪资数据加载失败" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 12 }} />}
 
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
         <Space wrap>
@@ -143,7 +170,7 @@ export default function TeacherSalaryPage() {
         </Space>
 
         <Card className="teacher-salary-today" styles={{ body: { padding: isMobile ? 18 : 22 } }}>
-          <Text style={{ color: 'var(--color-ink-subtle)', fontSize: 13 }}>今日收入</Text>
+          <Text style={{ color: 'var(--color-ink-subtle)', fontSize: 13 }}>今日产生（含已结算）</Text>
           <div style={{ marginTop: 4, color: 'var(--color-ink)', fontSize: isMobile ? 30 : 34, lineHeight: 1.2, fontWeight: 760 }}>
             ¥{todayIncome.toFixed(2)}
           </div>
@@ -152,35 +179,58 @@ export default function TeacherSalaryPage() {
 
         <div className="teacher-salary-summary-strip">
           {[
-            ['当前筛选合计', data?.total ?? 0],
+             ['当前待结算余额', data?.total ?? 0],
             ['小班课', data?.totalSmallClass ?? 0],
             ['一对一/二/三', data?.totalIntensive ?? 0],
           ].map(([label, value]) => (
             <div key={String(label)}>
               <Text>{label}</Text>
-              <strong>¥{Number(value).toFixed(2)}</strong>
+              <strong style={{ color: Number(value) < 0 ? '#C0392B' : undefined }}>
+                {Number(value) < 0 ? `−¥${Math.abs(Number(value)).toFixed(2)}` : `¥${Number(value).toFixed(2)}`}
+              </strong>
             </div>
           ))}
         </div>
+        {(data?.total ?? 0) < 0 && (
+          <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+            当前待结算余额为负数，请在薪资明细中核对调整记录，并联系管理员确认原因。
+          </Text>
+        )}
+
+        {data?.settled ? (
+          <div style={{ borderRadius: 12, padding: '11px 14px', background: 'rgba(201,164,92,.1)', border: '1px solid rgba(201,164,92,.4)', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <CheckCircleOutlined style={{ color: '#B98A2F', fontSize: 17, marginTop: 1 }} />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 750, color: '#8A6B2F' }}>最近结算 ¥{data.settled.amount.toFixed(2)}</div>
+              <div style={{ fontSize: 11.5, color: '#A08A5C', marginTop: 2 }}>
+                {new Date(data.settled.at).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })} · {data.settled.description || '工资结算'}
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <TeacherTrendCharts attendanceWeekTrend={trendData?.attendanceWeekTrend} salaryTrend={trendData?.salaryTrend} />
 
-        <Card title="薪资明细" bordered={false} style={{ borderRadius: 8 }} extra={<Text type="secondary" style={{ fontSize: 12 }}>考勤和课堂反馈自动结算</Text>}>
+        <Card className="teacher-salary-detail-card" title="薪资明细" bordered={false} style={{ borderRadius: 8, minWidth: 0 }} extra={<Text type="secondary" style={{ fontSize: 12 }}>考勤和课堂反馈自动结算</Text>}>
           {isMobile ? (
             isLoading ? <CardSkeleton rows={3} /> : (
               <div style={{ display: 'grid', gap: 16 }}>
-                {mobileGroups.map(([dateKey, dayTransactions]) => (
-                  <section key={dateKey}>
+                {mobilePageGroups.map(([dateKey, dayTransactions]) => (
+                  <section key={dateKey} style={{ minWidth: 0 }}>
                     <div className="teacher-salary-date-heading">
                       <strong>{new Date(`${dateKey}T00:00:00`).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })}</strong>
-                      <span>¥{dayTransactions.reduce((sum, item) => sum + item.amount, 0).toFixed(2)}</span>
+                      <span style={{ color: dayTransactions.reduce((sum, item) => sum + item.amount, 0) < 0 ? '#C0392B' : undefined }}>
+                        ¥{dayTransactions.reduce((sum, item) => sum + item.amount, 0).toFixed(2)}
+                      </span>
                     </div>
                     <div className="teacher-salary-mobile-list">
                       {dayTransactions.map((transaction) => (
                         <div key={transaction.id}>
-                          <div style={{ minWidth: 0 }}>
+                          <div style={{ minWidth: 0, flex: 1 }}>
                             <Text strong>{TYPE_META[transaction.type]?.label ?? transaction.typeLabel ?? '其他调整'}</Text>
-                            <Text type="secondary" ellipsis style={{ display: 'block', fontSize: 12 }}>{transaction.description || '-'}</Text>
+                            <Text type="secondary" ellipsis style={{ display: 'block', fontSize: 12 }}>
+                              {transaction.description || (transaction.amount < 0 ? '本月结算扣回，冲抵上月多发部分' : '-')}
+                            </Text>
                           </div>
                           {renderAmount(transaction.amount)}
                         </div>
@@ -189,6 +239,18 @@ export default function TeacherSalaryPage() {
                   </section>
                 ))}
                 {!transactions.length && <Empty description="暂无薪资记录" />}
+                {transactions.length > 0 && mobileGroups.length > MOBILE_PAGE_SIZE && (
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <Pagination
+                      simple
+                      size="small"
+                      current={mobilePage}
+                      pageSize={MOBILE_PAGE_SIZE}
+                      total={mobileGroups.length}
+                      onChange={setMobilePage}
+                    />
+                  </div>
+                )}
               </div>
             )
           ) : (

@@ -1,0 +1,58 @@
+FROM public.ecr.aws/docker/library/node:22-bookworm-slim AS base
+RUN sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources
+
+FROM base AS deps
+WORKDIR /app
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates openssl \
+  && rm -rf /var/lib/apt/lists/*
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+COPY package.json package-lock.json ./
+RUN npm config set registry "${NPM_REGISTRY}" \
+  && npm ci --no-audit --no-fund
+
+FROM deps AS builder
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1 \
+  NODE_OPTIONS=--max-old-space-size=2048 \
+  NEXT_BUILD_WORKERS=1 \
+  DATABASE_URL=postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder \
+  DATABASE_URL_JUNIOR=postgresql://placeholder:placeholder@127.0.0.1:5432/junior \
+  DATABASE_URL_SENIOR=postgresql://placeholder:placeholder@127.0.0.1:5432/senior
+COPY . .
+RUN npx prisma generate
+RUN npm run build
+
+FROM base AS migrator
+WORKDIR /app
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates openssl postgresql-client \
+  && rm -rf /var/lib/apt/lists/*
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+COPY prisma ./prisma
+COPY scripts/migrate-all.sh ./scripts/migrate-all.sh
+ENV NODE_ENV=production \
+  SKIP_PRISMA_GENERATE=1
+CMD ["bash", "scripts/migrate-all.sh"]
+
+FROM base AS runner
+WORKDIR /app
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates jq openssl postgresql-client \
+  && rm -rf /var/lib/apt/lists/*
+ENV NODE_ENV=production \
+  NEXT_TELEMETRY_DISABLED=1 \
+  HOSTNAME=0.0.0.0 \
+  PORT=3000 \
+  NODE_OPTIONS=--max-old-space-size=640
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+COPY --from=builder --chown=node:node /app/public ./public
+COPY --from=builder --chown=node:node /app/scripts/backup-now.sh ./scripts/backup-now.sh
+COPY --from=builder --chown=node:node /app/scripts/backup-db.sh ./scripts/backup-db.sh
+COPY --from=builder --chown=node:node /app/scripts/backup-uploads.sh ./scripts/backup-uploads.sh
+RUN mkdir -p /app/.next/cache && chown -R node:node /app/.next/cache
+USER node
+EXPOSE 3000
+CMD ["node", "server.js"]

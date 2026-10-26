@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { anonymizeText, buildChatSystemPrompt, parsePerStudentArticles, resolveAIProvider } from './ai-chat'
+import { anonymizeAndRedactContacts, anonymizeText, buildArticleSystemPrompt, buildCardSystemPrompt, buildChatSystemPrompt, parsePerStudentArticles, parseSingleArticle, resolveAIProvider } from './ai-chat'
 
 const students = [
   { id: 'a', name: '张三', observation: '移项练习计算快且准确' },
@@ -44,15 +44,15 @@ describe('AI feedback chat parser', () => {
     expect(result.failed[0].error).toContain('内容为空')
   })
 
-  it('rewrites another student marker to XX同学 instead of blocking the body', () => {
+  it('drops sentences that reference another student marker', () => {
     const response = JSON.stringify({ topic: card.topic, card, articles: [
       { key: 'S1', article: article('S1', '看到S2完成了练习') },
       { key: 'S2', article: article('S2', '本次尚未记录具体课堂表现') },
     ] })
     const result = parsePerStudentArticles(response, students, context)
     expect(result.ok).toHaveLength(2)
-    expect(result.ok[0].article).toContain('XX同学')
     expect(result.ok[0].article).not.toContain('S2')
+    expect(result.ok[0].article).not.toContain('看到S2')
     expect(result.failed).toHaveLength(0)
   })
 
@@ -95,6 +95,11 @@ describe('AI feedback chat parser', () => {
     expect(anonymizeText('张三今天练了移项，李四也练了', students)).toBe('S1今天练了移项，S2也练了')
   })
 
+  it('redacts student names, phone numbers, and email addresses in model-bound notes and tags', () => {
+    expect(anonymizeAndRedactContacts('张三今天专注，联系 13812345678 或 parent@example.com', students))
+      .toBe('S1今天专注，联系 [联系方式已隐藏] 或 [联系方式已隐藏]')
+  })
+
   it('followup prompt restricts edits to targeted students only', () => {
     const system = buildChatSystemPrompt({
       mode: 'followup',
@@ -107,6 +112,75 @@ describe('AI feedback chat parser', () => {
     })
     expect(system).toContain('[S1]')
     expect(system).toContain('只修改')
+  })
+
+  it('creates a neutral parent-facing lesson draft when student performance evidence is missing', () => {
+    const system = buildArticleSystemPrompt({
+      mode: 'generate',
+      subject: '物理',
+      grade: '初三',
+      edition: '人教版',
+      lessonNote: '本节课学习串联电路和并联电路的电流、电压规律。',
+      students: [{ key: 'S1', level: '未评', observation: '教师未提供个人课堂观察' }],
+    }, { key: 'S1', level: '未评', observation: '教师未提供个人课堂观察', tags: [] }, { classroomOnly: true })
+
+    expect(system).toContain('只写课堂内容')
+    expect(system).toContain('不得描述或推断任何学生的参与、表现、掌握程度')
+    expect(system).toContain('串联电路和并联电路的电流、电压规律')
+    expect(system).not.toContain('【该生观察】')
+    expect(system).not.toContain('【该生表现档位】')
+  })
+
+  it('adds selected textbook references while preserving the existing card output contract', () => {
+    const system = buildCardSystemPrompt({
+      mode: 'generate',
+      subject: '数学',
+      grade: '初一',
+      edition: '冀教版',
+      lessonNote: '本节练习有理数的减法，重点是减去负数。',
+      students: [],
+      selectedTextbookChapters: ['七年级上册 · 一 有理数 › 6 有理数的减法'],
+      textbookKnowledgeReferences: [{
+        chapterTitle: '6 有理数的减法',
+        reviewStatus: 'DRAFT_NEEDS_SUBJECT_REVIEW',
+        sourceReference: '牧哲学堂教师资料：有理数章节',
+        knowledgePoints: [{ title: '减法转化', content: '减去一个数，等于加上这个数的相反数。' }],
+      }],
+    })
+
+    expect(system).toContain('减法转化')
+    expect(system).toContain('待学科复核')
+    expect(system).toContain('仅挑选课堂要点明确涉及的内容')
+    expect(system).toContain('输出纯 JSON，不要用 Markdown')
+    expect(system).toContain('"topic"')
+    expect(system).toContain('"card"')
+  })
+
+  it('includes published question-bank explanations as scoped reference clues', () => {
+    const system = buildCardSystemPrompt({
+      mode: 'generate',
+      subject: '语文',
+      grade: '初二',
+      edition: '统编版',
+      lessonNote: '本节区分月球起源的两种假说。',
+      students: [],
+      selectedTextbookChapters: ['八年级下册 · 月球起源'],
+      textbookKnowledgeReferences: [{
+        chapterTitle: '月亮是从哪里来的',
+        reviewStatus: 'PUBLISHED_QUESTION_BANK_DERIVED',
+        sourceReference: '已发布题库：chinese-8b-2-7',
+        knowledgePoints: [{
+          title: '月球起源假说',
+          content: '区分各假说描述的形成过程。',
+          practiceNotes: [{ content: '大撞击说认为抛射物质聚合形成月球。' }],
+        }],
+      }],
+    })
+
+    expect(system).toContain('已发布题库衍生')
+    expect(system).toContain('题库解析线索：大撞击说认为抛射物质聚合形成月球。')
+    expect(system).not.toContain('这些摘要仍待学科复核')
+    expect(system).toContain('输出纯 JSON，不要用 Markdown')
   })
 
   it('resolves provider from env without leaking key values', () => {
@@ -133,7 +207,7 @@ describe('AI feedback chat parser', () => {
         {
           key: 'S1',
           article: '这节课围绕内能的利用展开，核心是热机把内能转化为机械能。'
-            + '从课堂整体情况看，有同学听讲认真，也有同学能主动举手发言，还有同学上课容易走神。S1同学听讲认真，能跟上课堂节奏。'
+            + '从课堂整体情况看，有同学听讲认真，也有同学能主动举手发言，还有同学上课容易走神。孩子们都参与了讨论。S1同学听讲认真，能跟上课堂节奏。'
             + '结合该生积极发言、偶有粗心、需要多鼓励的特点，可以判断其对内能的利用已基本掌握。'
             + '建议课后先回顾热值、Q放=mq和热机效率的公式含义，再练习几道计算题。',
         },
@@ -145,9 +219,21 @@ describe('AI feedback chat parser', () => {
     expect(result.ok[0].article).not.toContain('有同学')
     expect(result.ok[0].article).not.toContain('也有同学')
     expect(result.ok[0].article).not.toContain('还有同学')
+    expect(result.ok[0].article).not.toContain('孩子们')
+    expect(result.ok[0].article).not.toContain('课堂整体')
     expect(result.ok[0].article).not.toContain('结合该生')
     expect(result.ok[0].article).not.toContain('可以判断')
     expect(result.ok[0].article).toContain('Q放=mq')
     expect(result.ok[0].article).toContain('建议课后')
+  })
+
+  it('removes group-level wording from the active single-student parser but preserves individual observations', () => {
+    const result = parseSingleArticle(JSON.stringify({
+      article: '本节课学习了代数式。孩子们都很认真，有的孩子发言积极，还有的孩子需要提醒\n张三同学能独立列出代数式，步骤也比较清楚。',
+    }), students[0])
+
+    expect(result.article).toContain('本节课学习了代数式')
+    expect(result.article).toContain('张三同学能独立列出代数式')
+    expect(result.article).not.toMatch(/孩子们|有的孩子|还有的孩子/)
   })
 })

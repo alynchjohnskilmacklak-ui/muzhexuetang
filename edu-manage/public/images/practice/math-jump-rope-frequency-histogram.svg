@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="450" viewBox="0 0 900 450" role="img" aria-labelledby="title desc">
+  <title id="title">一分钟跳绳次数频数分布直方图</title>
+  <desc id="desc">六组频数依次为6、12、51、45、27、9人，组距均为20次，100次及以上共132人。</desc>
+  <rect width="900" height="450" fill="#fff"/>
+  <style>
+    .axis{fill:none;stroke:#222;stroke-width:3;stroke-linecap:round}
+    .grid{stroke:#e5e1dc;stroke-width:1.5}
+    .bar{fill:#fbe0d2;stroke:#e8784a;stroke-width:2}
+    .title{font:23px sans-serif;font-weight:700;fill:#171717}
+    .label{font:17px sans-serif;fill:#333}
+    .count{font:17px sans-serif;font-weight:700;fill:#7c3b20}
+    .small{font:15px sans-serif;fill:#555}
+  </style>
+  <text x="450" y="36" text-anchor="middle" class="title">一分钟跳绳次数频数分布直方图（150人）</text>
+  <g class="grid">
+    <path d="M110 290 H830 M110 250 H830 M110 210 H830 M110 170 H830 M110 130 H830 M110 90 H830"/>
+  </g>
+  <path class="axis" d="M110 330 H838 M110 330 V70"/>
+  <path d="M838 330 l-11 -6 v12 z M110 70 l-6 11 h12 z" fill="#222"/>
+  <g class="small" text-anchor="end">
+    <text x="98" y="335">0</text><text x="98" y="295">10</text><text x="98" y="255">20</text><text x="98" y="215">30</text><text x="98" y="175">40</text><text x="98" y="135">50</text><text x="98" y="95">60</text>
+  </g>
+  <g class="bar">
+    <rect x="110" y="306" width="120" height="24"/>
+    <rect x="230" y="282" width="120" height="48"/>
+    <rect x="350" y="126" width="120" height="204"/>
+    <rect x="470" y="150" width="120" height="180"/>
+    <rect x="590" y="222" width="120" height="108"/>
+    <rect x="710" y="294" width="120" height="36"/>
+  </g>
+  <g class="count" text-anchor="middle">
+    <text x="170" y="299">6</text><text x="290" y="275">12</text><text x="410" y="119">51</text><text x="530" y="143">45</text><text x="650" y="215">27</text><text x="770" y="287">9</text>
+  </g>
+  <g class="small" text-anchor="middle">
+    <text x="170" y="355">[60,80)</text><text x="290" y="355">[80,100)</text><text x="410" y="355">[100,120)</text><text x="530" y="355">[120,140)</text><text x="650" y="355">[140,160)</text><text x="770" y="355">[160,180)</text>
+  </g>
+  <text x="860" y="337" class="label">次数</text>
+  <text x="72" y="62" class="label">频数/人</text>
+</svg>

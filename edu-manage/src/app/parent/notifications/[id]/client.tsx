@@ -184,7 +184,7 @@ export function NotificationDetailClient({
           <div style={{ marginTop: 16 }}>
             <Button
               type="primary"
-              style={{ background: '#E8784A', borderColor: '#E8784A', borderRadius: 8 }}
+              style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', borderRadius: 8 }}
               onClick={() => router.push(notification.href!)}
             >
               查看完整内容

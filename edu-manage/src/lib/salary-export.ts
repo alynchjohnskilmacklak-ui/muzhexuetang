@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx'
 import { salaryBucketLabel, type SalaryBucket } from './salary-bucket'
+import { brandAoaHeader } from './export-brand'
 
 export type SalaryExportRow = {
   id: string
@@ -24,6 +25,9 @@ export type SalaryExportRow = {
   unitAmount?: number | null
   lessonId: string
   feedbackId: string
+  pending?: boolean
+  settledAt?: Date | null
+  settlementBatchId?: string | null
 }
 
 export type SalaryPayCategory =
@@ -31,6 +35,7 @@ export type SalaryPayCategory =
   | 'SMALL_CLASS_FEEDBACK'
   | 'INTENSIVE_LESSON'
   | 'INTENSIVE_FEEDBACK'
+  | 'SALARY_SETTLEMENT'
   | 'MANAGEMENT_ADJUSTMENT'
 
 const PAY_CATEGORY_ORDER: SalaryPayCategory[] = [
@@ -42,6 +47,7 @@ const PAY_CATEGORY_ORDER: SalaryPayCategory[] = [
 ]
 
 export function classifySalaryPayCategory(row: Pick<SalaryExportRow, 'type' | 'salaryBucket'>): SalaryPayCategory {
+  if (row.type === 'SALARY_SETTLEMENT') return 'SALARY_SETTLEMENT'
   if (row.type === 'FEEDBACK_BONUS') {
     return row.salaryBucket === 'INTENSIVE' ? 'INTENSIVE_FEEDBACK' : 'SMALL_CLASS_FEEDBACK'
   }
@@ -57,6 +63,7 @@ export function salaryPayCategoryLabel(category: SalaryPayCategory) {
     SMALL_CLASS_FEEDBACK: '小班课反馈奖励',
     INTENSIVE_LESSON: '个性化课程课时工资',
     INTENSIVE_FEEDBACK: '个性化课程反馈奖励',
+    SALARY_SETTLEMENT: '工资结算',
     MANAGEMENT_ADJUSTMENT: '管理调整工资',
   }[category]
 }
@@ -80,6 +87,7 @@ export type SalaryExportInput = {
   rangeLabel: string
   exportedAt: Date
   rows: SalaryExportRow[]
+  settlements?: Array<{ at: Date; amount: number; description?: string | null; batchId?: string | null }>
 }
 
 function sum(values: number[]) {
@@ -132,14 +140,18 @@ function buildSummarySheet(input: SalaryExportInput) {
     ['汇总项目', '核对数量', '金额（元）', '金额占比'],
     ...typeRows.map((item) => [item.label, item.quantity, item.amount, totalAmount === 0 ? 0 : item.amount / totalAmount]),
     ['合计', `${rows.length}笔流水`, totalAmount, 1],
+    [],
+    ['待结算金额', '与网页待结算余额一致', sum(rows.filter(row => row.pending !== false).map(row => row.amount)), ''],
+    ['已结算应发金额', '历史应发流水，保留核对', sum(rows.filter(row => row.pending === false).map(row => row.amount)), ''],
   ]
-  const sheet = XLSX.utils.aoa_to_sheet(data, { cellDates: true })
-  sheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }]
-  sheet['!autofilter'] = { ref: `A5:D${data.length}` }
+  const aoa = [...brandAoaHeader('工资总览'), ...data]
+  const sheet = XLSX.utils.aoa_to_sheet(aoa, { cellDates: true })
+  sheet['!merges'] = [{ s: { r: 3, c: 0 }, e: { r: 3, c: 3 } }]
+  sheet['!autofilter'] = { ref: `A8:D${aoa.length}` }
   setColumnWidths(sheet, [22, 16, 18, 16])
-  setDateTimeFormat(sheet, 1, 3, 3)
-  setCurrencyFormat(sheet, 2, 6, data.length)
-  for (let row = 6; row <= data.length; row += 1) {
+  setDateTimeFormat(sheet, 1, 6, 6)
+  setCurrencyFormat(sheet, 2, 9, aoa.length)
+  for (let row = 9; row <= aoa.length; row += 1) {
     const cell = sheet[`D${row}`]
     if (cell) cell.z = '0.00%'
   }
@@ -167,11 +179,12 @@ function buildSubjectSheet(input: SalaryExportInput) {
     ...rows,
     ['合计', sum(rows.map((row) => Number(row[1]))), sum(rows.map((row) => Number(row[2]))), sum(rows.map((row) => Number(row[3]))), sum(rows.map((row) => Number(row[4])))],
   ]
-  const sheet = XLSX.utils.aoa_to_sheet(data)
-  sheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }]
-  sheet['!autofilter'] = { ref: `A2:E${Math.max(2, data.length)}` }
+  const aoa = [...brandAoaHeader('按科目汇总'), ...data]
+  const sheet = XLSX.utils.aoa_to_sheet(aoa)
+  sheet['!merges'] = [{ s: { r: 3, c: 0 }, e: { r: 3, c: 4 } }]
+  sheet['!autofilter'] = { ref: `A5:E${Math.max(5, aoa.length)}` }
   setColumnWidths(sheet, [20, 16, 16, 14, 18])
-  setCurrencyFormat(sheet, 4, 3, data.length)
+  setCurrencyFormat(sheet, 4, 6, aoa.length)
   return sheet
 }
 
@@ -181,6 +194,7 @@ function buildDetailSheet(input: SalaryExportInput, category?: SalaryPayCategory
   const headers = [
     '序号', '计薪日期', '记录时间', '工资分类', '工资归属', '流水类型', '金额（元）', '课程', '班级', '科目', '课程类型', '年级',
     '上课时间', '计薪分钟', '计薪小时', '关联学生', '有效反馈数', '单价（元）', '详细说明', '课次ID', '反馈ID', '流水ID',
+    '结算状态', '结算时间', '结算批次ID',
   ]
   const rows = sourceRows.map((row, index) => [
     index + 1,
@@ -205,6 +219,9 @@ function buildDetailSheet(input: SalaryExportInput, category?: SalaryPayCategory
     row.lessonId,
     row.feedbackId,
     row.id,
+    row.type === 'SALARY_SETTLEMENT' ? '结算凭证' : row.pending === false ? '已结算' : '待结算',
+    row.settledAt || null,
+    row.settlementBatchId || '',
   ])
   const data: Array<Array<string | number | Date | null>> = [
     [`${input.teacherName}老师${category ? salaryPayCategoryLabel(category) : '全部薪资'}明细`, ...Array(headers.length - 1).fill('')],
@@ -213,22 +230,58 @@ function buildDetailSheet(input: SalaryExportInput, category?: SalaryPayCategory
     headers,
     ...rows,
   ]
-  const sheet = XLSX.utils.aoa_to_sheet(data, { cellDates: true })
+  const aoa = [...brandAoaHeader(category ? salaryPayCategoryLabel(category) : '全部薪资'), ...data]
+  const sheet = XLSX.utils.aoa_to_sheet(aoa, { cellDates: true })
   sheet['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } },
-    { s: { r: 1, c: 0 }, e: { r: 1, c: headers.length - 1 } },
+    { s: { r: 3, c: 0 }, e: { r: 3, c: headers.length - 1 } },
+    { s: { r: 4, c: 0 }, e: { r: 4, c: headers.length - 1 } },
   ]
-  sheet['!autofilter'] = { ref: `A4:${XLSX.utils.encode_col(headers.length - 1)}${Math.max(4, data.length)}` }
-  setColumnWidths(sheet, [8, 18, 20, 24, 18, 18, 14, 20, 20, 12, 14, 10, 18, 12, 12, 28, 14, 12, 54, 24, 24, 24])
-  setDateTimeFormat(sheet, 1, 5, data.length)
-  setDateTimeFormat(sheet, 2, 5, data.length)
-  setCurrencyFormat(sheet, 6, 5, data.length)
-  setCurrencyFormat(sheet, 17, 5, data.length)
+  sheet['!autofilter'] = { ref: `A7:${XLSX.utils.encode_col(headers.length - 1)}${Math.max(7, aoa.length)}` }
+  setColumnWidths(sheet, [8, 18, 20, 24, 18, 18, 14, 20, 20, 12, 14, 10, 18, 12, 12, 28, 14, 12, 54, 24, 24, 24, 12, 20, 38])
+  setDateTimeFormat(sheet, 1, 8, aoa.length)
+  setDateTimeFormat(sheet, 2, 8, aoa.length)
+  setDateTimeFormat(sheet, 23, 8, aoa.length)
+  setCurrencyFormat(sheet, 6, 8, aoa.length)
+  setCurrencyFormat(sheet, 17, 8, aoa.length)
+  return sheet
+}
+
+function buildSettlementSheet(input: SalaryExportInput) {
+  const settlements = input.settlements ?? []
+  const headers = ['结算时间', '结算金额（元）', '结算说明', '结算批次ID']
+  const rows = settlements.map((item, index) => [
+    index + 1,
+    item.at,
+    item.amount,
+    item.description || '工资结算',
+    item.batchId || '',
+  ])
+  const data: Array<Array<string | number | Date | null>> = [
+    [`${input.teacherName}老师工资结算记录`, '', ''],
+    [`统计范围：${input.periodLabel}（${input.rangeLabel}）`, '', ''],
+    [],
+    ['序号', ...headers],
+    ...rows,
+    [],
+    ['结算笔数', settlements.length, ''],
+    ['结算金额合计', sum(settlements.map((item) => item.amount)), ''],
+  ]
+  const aoa = [...brandAoaHeader('工资结算记录'), ...data]
+  const sheet = XLSX.utils.aoa_to_sheet(aoa, { cellDates: true })
+  sheet['!merges'] = [
+    { s: { r: 3, c: 0 }, e: { r: 3, c: 2 } },
+    { s: { r: 4, c: 0 }, e: { r: 4, c: 2 } },
+  ]
+  sheet['!autofilter'] = { ref: `A7:E${Math.max(7, aoa.length - 2)}` }
+  setColumnWidths(sheet, [10, 22, 18, 54, 38])
+  setDateTimeFormat(sheet, 1, 8, aoa.length - 2)
+  setCurrencyFormat(sheet, 2, 8, aoa.length - 2)
   return sheet
 }
 
 export function buildSalaryExportWorkbook(input: SalaryExportInput) {
-  const cleanInput = { ...input, rows: dedupeSalaryExportRows(input.rows) }
+  const regularRows = dedupeSalaryExportRows(input.rows).filter((row) => row.type !== 'SALARY_SETTLEMENT')
+  const cleanInput = { ...input, rows: regularRows }
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, buildSummarySheet(cleanInput), '工资总览')
   XLSX.utils.book_append_sheet(workbook, buildDetailSheet(cleanInput, 'SMALL_CLASS_LESSON'), '小班课时明细')
@@ -237,7 +290,10 @@ export function buildSalaryExportWorkbook(input: SalaryExportInput) {
   XLSX.utils.book_append_sheet(workbook, buildDetailSheet(cleanInput, 'INTENSIVE_FEEDBACK'), '个性化反馈明细')
   XLSX.utils.book_append_sheet(workbook, buildDetailSheet(cleanInput, 'MANAGEMENT_ADJUSTMENT'), '管理调整明细')
   XLSX.utils.book_append_sheet(workbook, buildSubjectSheet(cleanInput), '按科目汇总')
-  XLSX.utils.book_append_sheet(workbook, buildDetailSheet(cleanInput), '全部流水审计')
+  if ((input.settlements ?? []).length) {
+    XLSX.utils.book_append_sheet(workbook, buildSettlementSheet(input), '工资结算记录')
+  }
+  XLSX.utils.book_append_sheet(workbook, buildDetailSheet(input), '全部流水审计')
   workbook.Props = {
     Title: `${input.teacherName}老师薪资流水`,
     Subject: `${input.periodLabel}薪资汇总及明细`,

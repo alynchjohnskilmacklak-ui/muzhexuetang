@@ -1,5 +1,6 @@
 import { articleSections } from './ai-article'
 import { findSimilarComments } from './comment-similarity'
+import { isGroupNarrativeSentence } from './feedback-quality'
 import { parseGeneratedKnowledgeCard, type KnowledgePointCard } from './knowledge-point-cards'
 
 /**
@@ -46,13 +47,59 @@ export type ChatModelInput = {
   correction?: string
   /** 该年级该学科的候选知识点词表（帮助 AI 严格识别上课内容） */
   knowledgeCandidates?: string[]
+  /** 教师从教材目录选择的册次与章节，作为本次详解的范围约束 */
+  selectedTextbookChapters?: string[]
+  /** 与所选目录条目精确对应的本地知识参考；保留审核状态供 prompt 约束使用 */
+  textbookKnowledgeReferences?: Array<{
+    chapterTitle: string
+    reviewStatus: string
+    sourceReference: string
+    knowledgePoints: Array<{
+      title: string
+      content: string
+      practiceNotes?: Array<{ content: string; questionId?: string; setId?: string; sourceRef?: string }>
+    }>
+  }>
+}
+
+function textbookChapterScopePrompt(input: ChatModelInput) {
+  const chapters = input.selectedTextbookChapters?.filter(Boolean) || []
+  const references = input.textbookKnowledgeReferences || []
+  const lines = chapters.length ? [
+    `【教师选定的教材册次与章节】${chapters.join('；')}`,
+    '本次知识点、讲解、方法和示例必须限定在选定范围内，不要引入相邻章节或其他册内容；课堂要点用于确认本节实际讲授内容。',
+  ] : []
+  if (references.length) {
+    const hasDraftReferences = references.some((reference) => reference.reviewStatus === 'DRAFT_NEEDS_SUBJECT_REVIEW')
+    const hasPublishedBankReferences = references.some((reference) => reference.reviewStatus === 'PUBLISHED_QUESTION_BANK_DERIVED')
+    const statusLabel = (status: string) => {
+      if (status === 'DRAFT_NEEDS_SUBJECT_REVIEW') return '待学科复核'
+      if (status === 'PUBLISHED_QUESTION_BANK_DERIVED') return '已发布题库衍生'
+      return status
+    }
+    const referenceLines = references.flatMap((reference) => [
+      `【${reference.chapterTitle}｜${statusLabel(reference.reviewStatus)}｜来源：${reference.sourceReference}】`,
+      ...reference.knowledgePoints.flatMap((point) => [
+        `- ${point.title}：${point.content}`,
+        ...(point.practiceNotes || []).map((note) => `  题库解析线索：${note.content}`),
+      ]),
+    ])
+    lines.push(
+      '【本地教材知识参考】以下是与所选教材目录对应的内部知识摘要。仅挑选课堂要点明确涉及的内容，不能把整章知识都写成已经讲过；老师明确输入的知识点优先。',
+      ...(hasPublishedBankReferences ? ['“已发布题库衍生”内容来自通过题库发布审核的本地题组及其解析，仅作为知识参考，不是教材原文。'] : []),
+      ...(hasDraftReferences ? ['“待学科复核”内容只作候选线索；除非教师课堂要点明确印证，否则不要将其写成已讲授的知识事实。'] : []),
+      '所有参考都必须与教师本次输入和课堂记录一致；不确定或不匹配的内容不要使用。',
+      ...referenceLines,
+    )
+  }
+  return lines
 }
 
 export function buildChatSystemPrompt(input: ChatModelInput) {
   const lines = [
     '你是一位资深学科老师，正在帮任课老师给家长写真实、具体的课堂反馈。语气像当面聊学生，避免工作报告和模板腔。',
     '只可使用教师输入的课堂要点、每名学生自己对应的观察与表现档位；知识概念可客观解释。不得编造任何课堂事件、分数、名次、答题数量、进步、作业或掌握程度。档位只定语气，不证明具体事实。',
-    '学生之间严格隔离，绝不能挪用另一名学生的观察。教师输入中明确提到某学生姓名的表现（如“步骤清楚”“计算粗心”“变号出错”“很积极”等）必须原样写入该生自己的反馈。',
+    '学生之间严格隔离，绝不能挪用另一名学生的观察。教师输入中明确提到某学生的表现（如“步骤清楚”“计算粗心”“变号出错”“很积极”等）必须保留事实，可以改写成自然、完整的家长沟通语句，不要照搬残句。',
     `【学生信息】以下每名学生一行、严格对应自己的素材，写反馈时只能使用该生自己那一行的内容，禁止混用或张冠李戴：${input.students.map((s) => `${s.key}同学｜档位 ${s.level}；${s.observation.includes('教师未提供') ? '个人观察 无' : `个人观察 ${s.observation}`}${s.mastery ? `；掌握程度 ${s.mastery}` : ''}${s.tags?.length ? `；课堂表现标签 ${s.tags.join('、')}` : ''}`).join('\n')}`,
     '【补充说明优先】某生有"个人观察"文字时，该生反馈的个人表现段必须主要依据这段原话展开，标签与档位只作补充印证；没有个人观察时才按表现档位与标签生成。',
     '【禁串学生】课堂要点中提到的学生表现严格按姓名归属（脱敏名如 S1同学 即第一名学生），只写入对应学生的反馈，任何学生的反馈都不得出现其他学生的表现细节（如把 S1 的低烧、S2 的超纲题写进 S3 的文章）。某学生既没有个人观察也没有表现标签时，第二段直接跳过个人表现，从知识点过渡到建议，宁可段落短，严禁借用、改写或虚构其他学生的表现来填充。',
@@ -62,14 +109,16 @@ export function buildChatSystemPrompt(input: ChatModelInput) {
     '【禁串学生】课堂要点（【本课内容】）中提到的学生表现严格按姓名归属，只写入对应学生的反馈，严禁借用其他学生的表现（如把另一名同学的低烧、走神、超纲题写进本文）。该学生没有个人观察与表现标签时，第二段直接跳过个人表现，从知识点过渡到建议，宁可段落短，严禁借用或虚构表现填充。',,
     '【硬性禁止】全文任何位置都不得出现“没有观察记录”“暂无观察”“尚未观察”“未提供观察”“本次未记录”“未记录”“无法判断”“暂无法”“没有记录”“未能观察”“未能记录”“暂不展开”“先不展开”“不展开个人表现”“个人表现方面的描述”等任何回避性表述。若某名学生确实没有个人观察：不要声明“没有记录”，直接基于该生的掌握程度与课堂练习完成情况写实（如“从课堂练习完成情况看，孩子对…已基本掌握”），或省略个人表现段落、直接从知识点过渡到建议段落，用引导性口吻（如“建议课后先回顾…，再练习…，遇到问题随时找老师”）给出具体复习建议，不得声称已了解其掌握程度。',
     '每份 article 是一篇连贯流畅的反馈文章（250-450字），写成 2-4 个自然段，禁止使用“本节课学习内容：”“课堂反馈：”“孩子掌握情况：”等小标题或标签。第一段讲本节课的知识点与公式（把关键公式、方法步骤直接写进正文，如“配方法：把方程配成完全平方式后直接开平方”“ax²+bx+c=0（a≠0）”），第二段写该生有证据的个人表现（来自老师输入），第三段给谨慎的掌握判断与具体建议；信息少时宁可短，不凑字数。',
-    '正文第一次提到学生用匿名代号加“同学”（如 S1同学）。不要输出真实姓名。禁用孩子同学、这位同学、该同学、宝贝、小朋友，以及最好、第一、保证提分等夸大词。',
+    'S1/S2 等匿名代号只用于区分 JSON 中的学生条目，正文不得出现任何匿名代号或数据库信息；正文用“孩子”称呼。不要输出真实姓名。禁用孩子同学、这位同学、该同学、宝贝、小朋友，以及最好、第一、保证提分等夸大词。',
     '输出纯 JSON，不要用 Markdown：topic（给家长的知识点概述）、intro（1-3句概述）、card（topic、definition、formulas字符串数组、可选example含question/steps/answer）、articles数组（每项含 key 与 article）。',
     '【知识点识别】topic 必须与课堂要点讲的内容严格一致，识别输入中最核心的知识点术语，使用规范学科名称（如“代数式”“一元二次方程”“细胞结构”“时态变化”）。输入明确讲的是哪个知识点，topic 就必须是它，绝不能发散成后续章节或邻近知识点（例如输入讲“代数式”，topic 必须是“代数式”，绝不能写成“一元一次方程”）；输入提到多个时取最重要的一个；输入没有明确术语时，结合学科与候选列表推断，不能留空、不能把整句话当 topic。',
     ...(input.knowledgeCandidates?.length
-      ? [`【候选知识点】以下是从该年级该学科知识库提取的候选，选择最贴合输入的一个作为 topic，不要自创与候选无关的冷僻术语：${input.knowledgeCandidates.join('、')}`]
+      ? [`【相关知识点参考】以下是基于本课文字和已选教材章节匹配出的参考项，不是完整教材目录。若老师明确说出了知识点，topic 必须保留老师说的规范名称；只有课堂要点表达含糊时才从这些参考项中选择最贴合的一项，不要为了匹配列表而改成其他章节：${input.knowledgeCandidates.join('、')}`]
       : []),
+    ...textbookChapterScopePrompt(input),
     '【内容充实】definition 用 2-3 句话讲清概念、适用条件与常见易错点。formulas 按学科输出：数学、物理、化学等理科写 2-4 条关键公式或解题步骤；语文、英语等语言与文科类写 2-4 条核心方法要点（如句式结构、时态变化规则、表现手法、答题框架）。example 给出完整题干、3-6 步解答步骤与最终答案，内容具体充实。',
     '【篇幅】每份 article 全文 250-450 字：第一段知识点与公式 90-150 字，第二段个人表现 60-130 字，第三段掌握判断与建议 60-130 字；写实、具体、可读，不要两三行敷衍。',
+    '【观察只写一次】老师提供的个人表现（如“上课认真听讲”）只在个人表现段自然表达一次。不要把老师原句单独放在文章开头，也不要在开头和个人表现段重复同一事实；如需改写，保留原意即可。',
     input.verifiedCard
       ? '输入附有人工核实卡片。必须原样使用其定义、公式与例题，不改写卡片，不生成额外教材原文。'
       : `没有人工核实卡片。生成的是参考讲解，不得声称来自${input.edition}教材原文，不编页码、章号或来源。例题如果生成，应是明确的示例，不冒充教材例题；不确定的公式和例题可留空。`,
@@ -94,27 +143,43 @@ export function buildChatSystemPrompt(input: ChatModelInput) {
 export function buildArticleSystemPrompt(
   input: ChatModelInput,
   student: { key: string; level: string; observation: string; mastery?: string; tags?: string[] },
+  options: { classroomOnly?: boolean } = {},
 ) {
+  const classroomOnly = options.classroomOnly === true
   const lines = [
-    '你是一位资深学科老师，正在帮任课老师给一位学生的家长写真实、具体的课堂反馈。语气像当面聊学生，避免工作报告和模板腔。',
-    '只可使用下面教师输入的课堂要点与该学生的个人观察、表现档位、掌握程度、课堂表现标签；知识概念可客观解释。不得编造任何课堂事件、分数、名次、答题数量、进步、作业或掌握程度。档位只定语气，不证明具体事实。',
-    '【补充说明优先】该生有"个人观察"文字时，个人表现段必须主要依据这段原话展开，掌握程度与标签只作补充印证；没有个人观察时才按表现档位与标签生成，且不得编造具体表现。',
-    '【禁群体指代】这篇反馈只写该学生本人的表现，以“孩子”为主语。全文任何位置不得出现“有同学”“也有同学”“还有同学”“部分同学”“有些同学”“大多数同学”“个别同学”“其他同学”等群体泛指句式，不得用“从课堂整体情况看，有同学…也有同学…”的罗列写法；若老师未提供该生个人表现，不写个人表现段落，直接从知识点过渡到建议。',
-    '【禁推测口吻】掌握判断必须用教师确定的语气直接陈述（如“目前对…已基本掌握”“总体掌握不错”），不得用“结合该生…特点，可以判断/推测/可能…”“从该生表现来看，或许/可能掌握…”等推测句式；老师对学生的掌握情况是已知事实，不需要 AI 推断。',
-    '输出一篇连贯流畅的反馈文章（250-450字），写成 2-4 个自然段，禁止使用“本节课学习内容：”“课堂反馈：”“孩子掌握情况：”等小标题或标签，直接写成给家长看的自然段落。',
-    '第一段讲本节课的知识点与公式（把关键公式、方法步骤直接写进正文，如“配方法：把方程配成完全平方式后直接开平方”“ax²+bx+c=0（a≠0）”；语文英语等文科写核心方法要点）；第二段写该学生有证据的个人表现（来自老师输入，明确提到的表现必须原样写入）；第三段给谨慎的掌握判断与具体建议。',
-    '【硬性禁止】全文任何位置都不得出现“没有观察记录”“暂无观察”“尚未观察”“未提供观察”“本次未记录”“未记录”“无法判断”“暂无法”“没有记录”“未能观察”“未能记录”“暂不展开”“先不展开”“不展开个人表现”“个人表现方面的描述”等任何回避性表述。若老师未提供该生个人观察：不要声明“没有记录”，直接基于该生掌握程度与课堂练习完成情况写实（如“从课堂练习完成情况看，孩子对…已部分掌握”），或省略个人表现段落、直接从知识点过渡到建议段落；可以写“老师会在后续课堂继续关注孩子的掌握情况”，但不得声称已了解其掌握程度。',
+    classroomOnly
+      ? '你是一位资深学科老师，正在帮任课老师把本节课的课堂内容整理成给家长看的中性反馈草稿。此模式没有个人表现依据，只能总结课程内容和练习建议。'
+      : '你是一位资深学科老师，正在帮任课老师给一位学生的家长写真实、具体的课堂反馈。语气像当面聊学生，避免工作报告和模板腔。',
+    ...(classroomOnly ? [
+      '【只写课堂内容】只可使用老师输入的课堂要点与客观知识概念；不得描述或推断任何学生的参与、表现、掌握程度、进步、分数、作业完成情况或课堂事件。不要用学生姓名、代号、孩子或该生作为主语。',
+      '围绕本课主题用 1-2 个自然段概括学到的核心内容和关键方法，并给出具体、可执行的课后复习或练习建议。不要照抄知识详解卡，也不要添加输入中没有的知识点。',
+      '反馈应简洁完整，约 120-240 字；不使用小标题或标签，直接写成家长可读的自然段。',
+    ] : [
+      '只可使用下面教师输入的课堂要点与该学生的个人观察、表现档位、掌握程度、课堂表现标签；知识概念可客观解释。不得编造任何课堂事件、分数、名次、答题数量、进步、作业或掌握程度。档位只定语气，不证明具体事实。',
+      '【补充说明优先】该生有"个人观察"文字时，个人表现段必须主要依据这段原话展开，掌握程度与标签只作补充印证；没有个人观察时才按表现档位与标签生成，且不得编造具体表现。',
+      '【只写当前学生】这篇反馈只针对当前这一个学生，以“孩子”或“该生”为主语；严禁出现“孩子们”“同学们”“学生们”“全班”“大家”“有的孩子/同学……还有的孩子/同学……”以及“从课堂整体情况看……”等群体描述或多名学生并列表现。其他已勾选学生必须分别生成，不能把他们的情况合并到当前文章。若老师没有提供该生个人表现，不要编造或写群体替代内容，直接从本课知识点过渡到建议。',
+      '【禁推测口吻】掌握判断必须用教师确定的语气直接陈述（如“目前对…已基本掌握”“总体掌握不错”），不得用“结合该生…特点，可以判断/推测/可能…”“从该生表现来看，或许/可能掌握…”等推测句式；老师对学生的掌握情况是已知事实，不需要 AI 推断。',
+      '输出一篇连贯流畅的反馈文章（250-450字），写成 2-4 个自然段，禁止使用“本节课学习内容：”“课堂反馈：”“孩子掌握情况：”等小标题或标签，直接写成给家长看的自然段落。',
+      '第一段讲本节课的知识点与公式（把关键公式、方法步骤直接写进正文，如“配方法：把方程配成完全平方式后直接开平方”“ax²+bx+c=0（a≠0）”；语文英语等文科写核心方法要点）；第二段写该学生有证据的个人表现（事实完整保留，口语、残句可自然改写）；第三段给谨慎的掌握判断与具体建议。',
+      '【硬性禁止】全文任何位置都不得出现“没有观察记录”“暂无观察”“尚未观察”“未提供观察”“本次未记录”“未记录”“无法判断”“暂无法”“没有记录”“未能观察”“未能记录”“暂不展开”“先不展开”“不展开个人表现”“个人表现方面的描述”等任何回避性表述。若老师未提供该生个人观察：不要声明“没有记录”，直接基于该生掌握程度与课堂练习完成情况写实（如“从课堂练习完成情况看，孩子对…已部分掌握”），或省略个人表现段落、直接从知识点过渡到建议段落；可以写“老师会在后续课堂继续关注孩子的掌握情况”，但不得声称已了解其掌握程度。',
+    ]),
+    '【教师短句自然整合】老师输入的口语、残句或简短提醒（例如“但是还是课下多背背”）只作为意思参考，不要原句照搬，也不要单独放在扩写文章前面。学生表现观察只在个人表现段自然表达一次；不得先把老师的原句放在文章开头，再在后文用近义句重复。先围绕本课知识写清完整反馈，再把有用的表现和复习建议自然整合进对应段落；只保留原意，不补造学生事实。',
     `【本课内容】${input.lessonNote}`,
-    `【该生观察】${student.observation || '（老师未填写该生个人观察；不要声明“没有记录”，直接基于掌握程度与课堂表现标签写实，或省略个人表现段）'}`,
-    `【该生表现档位】${student.level}`,
-    ...(student.mastery ? [`【该生掌握程度】${student.mastery}`] : []),
-    ...(student.tags?.length ? [`【该生课堂表现标签】${student.tags.join('、')}`] : []),
+    ...textbookChapterScopePrompt(input),
+    ...(!classroomOnly ? [
+      `【该生观察】${student.observation || '（老师未填写该生个人观察；不要声明“没有记录”，直接基于掌握程度与课堂表现标签写实，或省略个人表现段）'}`,
+      `【该生表现档位】${student.level}`,
+      ...(student.mastery ? [`【该生掌握程度】${student.mastery}`] : []),
+      ...(student.tags?.length ? [`【该生课堂表现标签】${student.tags.join('、')}`] : []),
+    ] : []),
     ...(input.knowledgeCandidates?.length
-      ? [`【候选知识点】以下是从该年级该学科知识库提取的候选，识别本课内容时优先选择最贴合的一个：${input.knowledgeCandidates.join('、')}`]
+      ? [`【相关知识点参考】以下是基于本课文字和已选教材章节匹配出的参考项，不是完整教材目录。若老师明确说出了知识点，topic 必须保留老师说的规范名称；只有课堂要点表达含糊时才从这些参考项中选择最贴合的一项，不要为了匹配列表而改成其他章节：${input.knowledgeCandidates.join('、')}`]
       : []),
-    '【知识点识别】输入讲的是课本章节/单元大类名时，正文第一段就以该章节名为纲展开（如“这节课围绕几何图形的初步认识展开”），不要改写成子知识点名称。',
-    '正文用“孩子”或“该生”称呼即可（家长阅读视角），不要输出姓名、不要用代号；禁用孩子同学、这位同学、该同学、宝贝、小朋友，以及最好、第一、保证提分等夸大词。',
-    `输出纯 JSON，不要用 Markdown：{"key": "${student.key}", "article": "整篇文章"}。article 必须是一段连续的中文文章，不能拆成带标签的分段。`,
+    ...(!classroomOnly ? [
+      '【知识点识别】输入讲的是课本章节/单元大类名时，正文第一段就以该章节名为纲展开（如“这节课围绕几何图形的初步认识展开”），不要改写成子知识点名称。',
+      '正文用单数的“孩子”或“该生”称呼即可（家长阅读视角），不要输出姓名、不要用 S1/S2 等代号；代号仅用于 JSON key，严禁写入 article 正文。禁用“孩子们/同学们/学生们”、孩子同学、这位同学、该同学、宝贝、小朋友，以及最好、第一、保证提分等夸大词。',
+    ] : []),
+    `输出纯 JSON，不要用 Markdown：{"key": "${student.key}", "article": "整篇文章"}。article 必须包含自然段，段落之间用换行分隔；不加小标题、不使用“课堂反馈”等标签。`,
     '不声称实时联网查阅资料。',
   ]
   if (input.mode === 'followup') {
@@ -137,8 +202,9 @@ export function buildCardSystemPrompt(input: ChatModelInput) {
     '若输入提到的是课本章节/单元大类名（如“几何图形的初步认识”“图形的相似”“解直角三角形”“透镜及其应用”“动物的运动和行为”），topic 必须原样取该章节名，不能换成章节下的子知识点（如“直线、射线、线段”“相似三角形”“锐角三角函数”“凸透镜成像规律”）。输入同时提到章节名与子知识点时，以章节名为准。',
     '若输入中出现明确的教学单元专名——语文课文名（如《藤野先生》《背影》《雨的四季》）、英语单元名（如 Unit 3 My School）、生物或文科的章节名（如“生物的遗传与变异”）——topic 必须原样取该专名，绝不能改用该课下的具体知识点/手法/语法点/子概念（如“人物形象分析”“名词”“there be 句型”）。',
     `【课堂要点】${input.lessonNote}`,
+    ...textbookChapterScopePrompt(input),
     ...(input.knowledgeCandidates?.length
-      ? [`【候选知识点】仅用于没有明确术语时参考，优先选择最贴合输入的一个：${input.knowledgeCandidates.join('、')}`]
+      ? [`【候选知识点】这是基于本课文字和已选教材章节匹配出的参考项，不是完整教材目录；仅用于没有明确术语时参考，优先选择最贴合输入的一个：${input.knowledgeCandidates.join('、')}`]
       : []),
     '数学、物理、化学等理科 formulas 写 2-4 条关键公式或解题步骤；语文、英语等语言与文科类写 2-4 条核心方法要点（如句式结构、时态变化规则、表现手法、答题框架）。example 给出完整题干、3-6 步解答步骤与最终答案，内容具体充实。tips 写 2-4 条该知识点常见的易错点与课后练习建议，让家长知道孩子容易错在哪、回家怎么练。',
     '不编造教材页码或来源；例题明确是示例，不冒充教材例题。不确定的公式和例题可留空。',
@@ -152,7 +218,7 @@ const cleanValue = (value: unknown, max: number) => (typeof value === 'string' ?
 /**
  * 并发模式：解析单篇文章输出 {"key","article"}，并完成称呼/禁词/诚实性校验。
  */
-export function parseSingleArticle(raw: string, student: ChatStudent): ChatArticleItem {
+export function parseSingleArticle(raw: string, student: ChatStudent, studentKey = 'S1'): ChatArticleItem {
   const start = raw.indexOf('{')
   const end = raw.lastIndexOf('}')
   if (start < 0 || end <= start) throw new Error('AI 未返回可识别的反馈内容，请重试')
@@ -166,18 +232,36 @@ export function parseSingleArticle(raw: string, student: ChatStudent): ChatArtic
   const record = data as { article?: unknown }
   let body = cleanValue(record.article, 1400)
   if (!body) throw new Error('AI 返回内容为空，请重试')
-  // 兜底清洗：删除任何含"未记录/无法判断/暂无法/群体指代/推测句式"的整句（prompt 已禁止，此处双保险）
-  const GROUP_REF = /(有同学|也有同学|还有同学|部分同学|有些同学|大多数同学|个别同学|其他同学)/
+  // 兜底清洗：删除任何含"未记录/无法判断/暂无法/群体指代/推测句式"的整句（prompt 已禁止，此处双保险）；
+  // 同时保留并规范段落，避免把模型生成的三段反馈压成一整段。
   const GUESS_TONE = /(结合该生|结合其特点|可以判断|推测|可能掌握|或许掌握|表明其|说明其)/
-  body = body
-    .split(/(?<=[。！？])/g)
-    .filter((sentence) => !/(本次未记录|未记录|无法判断|暂无法|没有记录|未能观察|未能记录|没有.{0,8}观察记录|暂无.{0,8}观察|尚未.{0,6}观察|未提供.{0,4}观察|暂不展开|先不展开|不展开个人表现|个人表现方面.{0,6}描述)/.test(sentence))
-    .filter((sentence) => !GROUP_REF.test(sentence))
-    .filter((sentence) => !GUESS_TONE.test(sentence))
-    .join('')
-    .trim()
+  const rejectedSentence = (sentence: string) =>
+    /(本次未记录|未记录|无法判断|暂无法|没有记录|未能观察|未能记录|没有.{0,8}观察记录|暂无.{0,8}观察|尚未.{0,6}观察|未提供.{0,4}观察|暂不展开|先不展开|不展开个人表现|个人表现方面.{0,6}描述)/.test(sentence)
+    || isGroupNarrativeSentence(sentence)
+    || GUESS_TONE.test(sentence)
+    || [...sentence.matchAll(/S\d+(?:同学)?/g)].some((match) => match[0].replace(/同学$/, '') !== studentKey)
+  const sourceParagraphs = body
+    .replace(/\r\n?/g, '\n')
+    .split(/\n+/)
+    .map((paragraph) => paragraph.split(/(?<=[。！？])\s*/g).map((sentence) => sentence.trim()).filter(Boolean))
+    .filter((paragraph) => paragraph.length)
+  const keptParagraphs = sourceParagraphs.map((paragraph) => paragraph.filter((sentence) => !rejectedSentence(sentence))).filter((paragraph) => paragraph.length)
+  const keptSentences = keptParagraphs.flat()
+  const groupSentences = (sentences: string[], groupCount: number) => {
+    const groups = Array.from({ length: groupCount }, () => [] as string[])
+    sentences.forEach((sentence, index) => groups[Math.floor(index * groupCount / sentences.length)].push(sentence))
+    return groups.filter((group) => group.length).map((group) => group.join(''))
+  }
+  const paragraphs = keptParagraphs.length === 1 && keptSentences.length > 1
+    ? groupSentences(keptSentences, Math.min(3, keptSentences.length))
+    : keptParagraphs.length > 4
+      ? groupSentences(keptSentences, Math.min(3, keptSentences.length))
+      : keptParagraphs.map((paragraph) => paragraph.join(''))
+  body = paragraphs.join('\n\n').trim()
   if (!body) throw new Error('AI 返回内容为空，请重试')
-  let named = body.replaceAll('这位同学', `${student.name}同学`).replaceAll('该同学', `${student.name}同学`)
+  const ownAlias = new RegExp(`${studentKey}(?!\\d)(?:同学)?`, 'g')
+  let named = body.replace(ownAlias, `${student.name}同学`)
+    .replaceAll('这位同学', `${student.name}同学`).replaceAll('该同学', `${student.name}同学`)
   named = named.replaceAll('孩子同学', `${student.name}同学`)
   named = named.replace(/孩子(?![们])/g, `${student.name}同学`)
   if (forbidden.test(named)) {
@@ -214,6 +298,12 @@ export function anonymizeText(value: string, students: ChatStudent[]) {
     (current, student, index) => student.name.length >= 2 ? current.replaceAll(student.name, `S${index + 1}`) : current,
     value,
   )
+}
+
+export function anonymizeAndRedactContacts(value: string, students: ChatStudent[]) {
+  return anonymizeText(value, students)
+    .replace(/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/g, '[联系方式已隐藏]')
+    .replace(/(^|[^\d])((?:\+?86[-\s]?)?1[3-9]\d{9})(?!\d)/g, '$1[联系方式已隐藏]')
 }
 
 const forbidden = /孩子同学|宝贝|小朋友|保证提分|全班最强|望再接再厉|表现不错.{0,8}继续加油/
@@ -273,29 +363,23 @@ export function parsePerStudentArticles(
     const row = rowMap.get(key)
     const rawBody = clean(row?.article, 1400)
     // 兜底清洗：删除"未记录/群体指代/推测句式"整句（prompt 已禁止，此处双保险）
-    const GROUP_REF = /(有同学|也有同学|还有同学|部分同学|有些同学|大多数同学|个别同学|其他同学)/
     const GUESS_TONE = /(结合该生|结合其特点|可以判断|推测|可能掌握|或许掌握|表明其|说明其)/
     const body = rawBody
-      .split(/(?<=[。！？])/g)
+      .split(/(?<=[。！？])|\r?\n+/g)
       .filter((sentence) => !/(本次未记录|未记录|无法判断|暂无法|没有记录|未能观察|未能记录|没有.{0,8}观察记录|暂无.{0,8}观察|尚未.{0,6}观察|未提供.{0,4}观察|暂不展开|先不展开|不展开个人表现|个人表现方面.{0,6}描述)/.test(sentence))
-      .filter((sentence) => !GROUP_REF.test(sentence))
+      .filter((sentence) => !isGroupNarrativeSentence(sentence))
       .filter((sentence) => !GUESS_TONE.test(sentence))
+      .filter((sentence) => ![...sentence.matchAll(/S\d+(?:同学)?/g)].some((match) => match[0].replace(/同学$/, '') !== key))
       .join('')
       .trim()
     // 先替换当前学生的代号与老师输入中常见的“这位同学/该同学”为本名，再做校验
     // （“这位同学”是老师输入原文，模型复述时不应触发禁词）
-    // 其他学生代号统一替换为“XX同学”，不泄露他人姓名、也不阻断生成
+    // 含其他学生代号（S2/S3…）的整句已在上方按句过滤移除，避免把他人信息混入本篇反馈
     let named = body.replaceAll(`${key}同学`, `${student.name}同学`)
       .replaceAll('这位同学', `${student.name}同学`)
       .replaceAll('该同学', `${student.name}同学`)
     named = named.replace(new RegExp(`${key}(?!\\d)`, 'g'), `${student.name}同学`)
-    for (let otherIndex = 1; otherIndex <= 5; otherIndex += 1) {
-      if (`S${otherIndex}` !== key) {
-        named = named.replaceAll(`S${otherIndex}同学`, 'XX同学')
-        named = named.replace(new RegExp(`S${otherIndex}(?!\\d)`, 'g'), 'XX同学')
-      }
-    }
-    // “孩子”→真实姓名（家长看到自己孩子名字，避免群发感）；“孩子们”保持原样
+    // “孩子”→真实姓名（家长看到自己孩子名字，避免群发感）；群体句已在前面整句移除
     named = named.replaceAll('孩子同学', `${student.name}同学`)
     named = named.replace(/孩子(?![们])/g, `${student.name}同学`)
     if (!named) {

@@ -63,7 +63,7 @@
 
 ## 四、其余冗余点（数据层，非页面）
 
-1. **排课双轨**：`Schedule`（legacy）与 `ClassGroup/ClassLesson` 并存，代码双读双写（`teacher-busy.ts`、`parent-dashboard.ts`、`admin/cleanup` 等）。→ P4 单独迁移。
+1. **排课单轨**：`ClassGroup/ClassLesson` 已成为唯一数据源；旧 `Schedule/ScheduleStudent` 在生产零数据审计后由保护迁移删除。✅
 2. **消息多轨**：`Notification`（系统通知）、`ParentMessage`（人工对话）、`ClassroomFeedback.parentReply`（反馈内嵌回复）。→ P3 统一「消息中心」界面，但不合并表。
 3. **资源三件套**：`materials/phet/ai` 三端各一份页面，但三端权限与操作能力不同，保留角色路由，仅抽共享组件/服务。
 
@@ -73,7 +73,7 @@
 - **P1**：统一三端导航 + 成长时间线。**已基本完成**（student-profile.ts + archive + 教师 feedback 单入口）；剩余仅需确认 `(main)/grades|performance|communications` 三个未挂导航的管理页是「深链详情」还是「废弃」。
 - **P2**：统一推送/已读/附件/家长互动服务（抽公共 service，不改 schema）。
 - **P3**：反馈回复接入统一消息中心（`ClassroomFeedback.parentReply` → `ParentMessage`）。
-- **P4**：`Schedule → ClassLesson` 迁移（分阶段，不直接删表）。
+- **P4**：`Schedule → ClassLesson` 收尾。✅ 已完成生产零数据审计、代码退役与拒绝非空旧数据的保护迁移。
 - **P5**：删除兼容跳转与确认无调用的死代码（含空目录 `(main)/feedback`、根 `src/app/{students,teachers,...}` 空目录）。
 
 ## 六、待确认项（需要你拍板）

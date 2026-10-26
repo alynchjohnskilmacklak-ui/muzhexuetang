@@ -5,6 +5,7 @@ import { createClassroomFeedbackWithSideEffects } from './create'
 function transactionDouble() {
   return {
     classroomFeedback: { create: vi.fn().mockResolvedValue({ id: 'feedback-1' }) },
+    feedbackParentReadReceipt: { createMany: vi.fn().mockResolvedValue({ count: 1 }) },
     achievementBadge: { create: vi.fn().mockResolvedValue({ id: 'badge-1' }) },
     notification: { create: vi.fn().mockResolvedValue({ id: 'notification-1' }) },
     activityLog: { create: vi.fn().mockResolvedValue({ id: 'log-1' }) },
@@ -43,6 +44,10 @@ describe('createClassroomFeedbackWithSideEffects', () => {
     expect(tx.classroomFeedback.create).toHaveBeenCalledOnce()
     expect(tx.achievementBadge.create).toHaveBeenCalledOnce()
     expect(tx.notification.create).toHaveBeenCalledOnce()
+    expect(tx.feedbackParentReadReceipt.createMany).toHaveBeenCalledWith({
+      data: [{ feedbackId: 'feedback-1', parentUserId: 'parent-1' }],
+      skipDuplicates: true,
+    })
     expect(tx.activityLog.create).toHaveBeenCalledOnce()
   })
 
@@ -54,5 +59,26 @@ describe('createClassroomFeedbackWithSideEffects', () => {
     expect(tx.achievementBadge.create).not.toHaveBeenCalled()
     expect(tx.notification.create).not.toHaveBeenCalled()
     expect(tx.activityLog.create).toHaveBeenCalledOnce()
+  })
+
+  it('sends one feedback notice to a parent who has multiple students in the same feedback', async () => {
+    const tx = transactionDouble()
+    const sharedInput = input('PUBLISHED')
+    sharedInput.data.studentIds = ['student-1', 'student-2']
+    sharedInput.students = [
+      { id: 'student-1', name: '小牧', parentId: 'parent-1', parentUserId: null },
+      { id: 'student-2', name: '小禾', parentId: 'parent-1', parentUserId: null },
+    ]
+
+    await createClassroomFeedbackWithSideEffects(tx as unknown as Prisma.TransactionClient, sharedInput)
+
+    expect(tx.notification.create).toHaveBeenCalledOnce()
+    expect(tx.notification.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        userId: 'parent-1',
+        studentId: null,
+        content: expect.stringContaining('小牧、小禾'),
+      }),
+    }))
   })
 })

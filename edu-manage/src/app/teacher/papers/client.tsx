@@ -112,7 +112,7 @@ export function TeacherPapersClient() {
           <Text type="secondary" style={{ fontSize: 13 }}>上传批改后的试卷，推送给家长查看</Text>
         </div>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}
-          style={{ background: '#E8784A', borderColor: '#E8784A', borderRadius: 8 }}>
+          style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', borderRadius: 8 }}>
           新建试卷
         </Button>
       </div>

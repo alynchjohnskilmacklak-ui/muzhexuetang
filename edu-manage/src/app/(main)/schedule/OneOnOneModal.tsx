@@ -125,7 +125,7 @@ export function OneOnOneModal({
       okText="保存排课"
       cancelText="取消"
       width={480}
-      okButtonProps={{ style: { background: '#E8784A', borderColor: '#E8784A' } }}
+      okButtonProps={{ style: { background: 'var(--color-primary)', borderColor: 'var(--color-primary)' } }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 8 }}>
         {/* Teacher */}

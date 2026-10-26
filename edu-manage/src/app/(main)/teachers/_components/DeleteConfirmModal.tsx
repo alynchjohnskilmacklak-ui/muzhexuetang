@@ -1,4 +1,5 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useState, useEffect } from 'react'
 import { Modal, Spin, Select, message, Divider } from 'antd'
@@ -67,7 +68,7 @@ export function DeleteConfirmModal({
 
           <Divider style={{ margin: '12px 0' }} />
           <div style={{ marginBottom: 8, fontWeight: 600, color: '#1F2329' }}>选择接替教师（可选）</div>
-          <Select
+          <AdaptiveSelect
             showSearch
             allowClear
             placeholder="不选择则自动清理所有关联数据"

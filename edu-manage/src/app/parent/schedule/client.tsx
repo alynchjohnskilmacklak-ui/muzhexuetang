@@ -6,6 +6,8 @@ import {
   CheckCircleOutlined,
   CalendarOutlined,
   ClockCircleOutlined,
+  CrownFilled,
+  CrownOutlined,
   DownOutlined,
   EnvironmentOutlined,
   MessageOutlined,
@@ -22,7 +24,12 @@ import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { ParentCard } from '@/components/Parent/ParentCard'
 import { PullToRefresh } from '@/components/PullToRefresh'
 import { useRouter } from 'next/navigation'
+import { rememberParentChild } from '@/lib/parent-child-preference'
+import { resolveParentChildId } from '@/lib/parent-child-selection'
 import { isParentStudentInLesson } from '@/lib/parent-lesson-visibility'
+import { getTeacherAvatarUrl } from '@/lib/teacher-avatars'
+import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
+import { resolveTier, TIER_THEME } from '@/constants/teacher-tier'
 import {
   calculateIntensiveDeductHours,
   intensiveTeachingTypeLabel,
@@ -30,24 +37,32 @@ import {
 
 const { Title, Text } = Typography
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-
-type ScheduledStudent = { id: string; name: string; enrollments?: ScheduleEnrollment[] }
-type ScheduleEnrollment = { id: string; group?: ScheduleGroup | null }
+type ScheduledStudent = { id: string; name: string; recordIds?: string[]; currentTermRecordIds?: string[]; currentTermId?: string | null; membershipLevel?: string | null; enrollments?: ScheduleEnrollment[] }
+type ScheduleEnrollment = {
+  id: string
+  totalHours?: number | null
+  usedHours?: number | null
+  remainHours?: number | null
+  group?: ScheduleGroup | null
+}
 type ScheduleGroup = {
-  id?: string; name?: string; intensiveMode?: string | null; teachingType?: string | null
+  id?: string; name?: string; termId?: string | null; intensiveMode?: string | null; teachingType?: string | null
   room?: { name?: string | null } | null
+  recurringDays?: number[] | null
+  lessonStartTime?: string | null
+  status?: string | null
   course?: { name?: string | null; subject?: string | null } | null
-  teacher?: { id?: string; name?: string | null } | null
+  teacher?: { id?: string; name?: string | null; avatar?: string | null; gender?: string | null; tierLevel?: string | null; bio?: string | null; education?: string | null; university?: string | null; major?: string | null; subjects?: string | null } | null
   teacherAssignments?: Array<{ teacherId?: string; subject?: string | null }>
   enrollments?: Array<{ studentId?: string; subjects?: string[]; student?: { id?: string; name?: string | null } | null }>
 }
 type ScheduleLesson = {
   id: string; lessonDate: string | Date; startTime: string; endTime: string; subject?: string | null; isManual?: boolean; cancelReason?: string | null; _count?: { lessonStudents?: number }
-  attendanceSubmittedAt?: string | null; actualMinutes?: number | null; intensiveReviewStatus?: string | null
+  groupId?: string | null; attendanceSubmittedAt?: string | null; actualMinutes?: number | null; intensiveReviewStatus?: string | null
   teacher?: { id?: string; name?: string | null } | null; group?: ScheduleGroup | null
   lessonStudents?: Array<{ studentId: string; student?: { name?: string | null } | null }>
   attendances?: Array<{ studentId: string; status?: string | null; actualMinutes?: number | null }>
-  classroomFeedbacks?: Array<{ id: string; studentIds?: string[] }>
+  classroomFeedbacks?: Array<{ id: string; studentIds?: string[]; summary?: string | null; overallComment?: string | null }>
   intensiveReviews?: Array<{ status?: string | null; actualMinutes?: number | null }>
 }
 
@@ -86,6 +101,7 @@ function getLessonStatus(lesson: ScheduleLesson): { text: string; color: string;
 
 export function ParentScheduleClient({
   students,
+  initialSelectedStudentId,
   lessons,
   cancelledLessons,
   weekStart,
@@ -94,6 +110,7 @@ export function ParentScheduleClient({
   periods,
 }: {
   students: ScheduledStudent[]
+  initialSelectedStudentId: string
   lessons: ScheduleLesson[]
   cancelledLessons: ScheduleLesson[]
   weekStart: string
@@ -110,8 +127,19 @@ export function ParentScheduleClient({
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
   const isTablet = useIsMobile(1025) ?? false
-  const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || '')
+  const [selectedStudentId, setSelectedStudentId] = useState<string>(() =>
+    resolveParentChildId(students, [initialSelectedStudentId]),
+  )
   const [today] = useState(() => new Date())
+
+  const handleSelectStudent = (studentId: string) => {
+    setSelectedStudentId(studentId)
+    const student = students.find((item) => item.id === studentId)
+    rememberParentChild(studentId, student?.membershipLevel)
+    const params = new URLSearchParams(window.location.search)
+    params.set('childId', studentId)
+    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`)
+  }
 
   const monday = useMemo(() => new Date(`${weekStart}T00:00:00`), [weekStart])
   const canChangeWeek = (offset: number) => {
@@ -131,13 +159,25 @@ export function ParentScheduleClient({
     const d = new Date(monday); d.setDate(monday.getDate() + i); return d
   }), [monday])
 
+  const selectedStudent = students.find(s => s.id === selectedStudentId)
+  const selectedStudentRecordIds = useMemo(
+    () => new Set(selectedStudent?.recordIds?.length ? selectedStudent.recordIds : selectedStudent ? [selectedStudent.id] : []),
+    [selectedStudent],
+  )
+  const selectedStudentCurrentTermRecordIds = useMemo(
+    () => new Set(selectedStudent?.currentTermRecordIds?.length ? selectedStudent.currentTermRecordIds : selectedStudent ? [selectedStudent.id] : []),
+    [selectedStudent],
+  )
+
   // Filter lessons for selected child
   const childLessons = useMemo(() => lessons.filter((lesson) =>
-    isParentStudentInLesson(lesson, selectedStudentId)
-  ), [lessons, selectedStudentId])
+    (!selectedStudent?.currentTermId || lesson.group?.termId === selectedStudent.currentTermId)
+      && [...selectedStudentCurrentTermRecordIds].some((studentId) => isParentStudentInLesson(lesson, studentId))
+  ), [lessons, selectedStudent, selectedStudentCurrentTermRecordIds])
   const childCancelledLessons = useMemo(() => cancelledLessons.filter((lesson) =>
-    isParentStudentInLesson(lesson, selectedStudentId)
-  ), [cancelledLessons, selectedStudentId])
+    (!selectedStudent?.currentTermId || lesson.group?.termId === selectedStudent.currentTermId)
+      && [...selectedStudentCurrentTermRecordIds].some((studentId) => isParentStudentInLesson(lesson, studentId))
+  ), [cancelledLessons, selectedStudent, selectedStudentCurrentTermRecordIds])
 
   // Build day × period grid
   const grid = useMemo(() => {
@@ -154,25 +194,26 @@ export function ParentScheduleClient({
     return map
   }, [childLessons, periods])
 
-  const selectedStudent = students.find(s => s.id === selectedStudentId)
-  const intensiveEnrollments = useMemo(() => selectedStudent?.enrollments || [], [selectedStudent?.enrollments])
+  const allEnrollments = useMemo(() => selectedStudent?.enrollments || [], [selectedStudent?.enrollments])
+  const intensiveEnrollments = useMemo(() => allEnrollments.filter((enrollment) => enrollment.group?.intensiveMode === 'INTENSIVE'), [allEnrollments])
+  const normalEnrollments = useMemo(() => allEnrollments.filter((enrollment) => (enrollment.group?.intensiveMode ?? null) !== 'INTENSIVE'), [allEnrollments])
   const childHistoryLessons = useMemo(() => (
     historyLessons.filter((lesson) => (
-      lesson.lessonStudents?.some((item) => item.studentId === selectedStudentId)
+      lesson.lessonStudents?.some((item) => selectedStudentRecordIds.has(item.studentId))
     ))
-  ), [historyLessons, selectedStudentId])
+  ), [historyLessons, selectedStudentRecordIds])
   const intensiveStatsByGroup = useMemo(() => {
     const result = new Map<string, { approvedHours: number; pendingCount: number; bookedCount: number }>()
     for (const enrollment of intensiveEnrollments) {
       const groupId = enrollment.group?.id
       if (!groupId) continue
       const summary = intensiveSummary.find((item) => (
-        item.studentId === selectedStudentId && item.groupId === groupId
+        selectedStudentRecordIds.has(item.studentId) && item.groupId === groupId
       ))
       result.set(groupId, summary || { approvedHours: 0, pendingCount: 0, bookedCount: 0 })
     }
     return result
-  }, [intensiveEnrollments, intensiveSummary, selectedStudentId])
+  }, [intensiveEnrollments, intensiveSummary, selectedStudentRecordIds])
   const mobileLessons = useMemo(() => [...childLessons].sort((a, b) =>
     String(a.lessonDate).localeCompare(String(b.lessonDate)) || String(a.startTime).localeCompare(String(b.startTime))
   ), [childLessons])
@@ -209,7 +250,7 @@ export function ParentScheduleClient({
           style={{ width: 108, flexShrink: 0 }}
           size="small"
           getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
-          onChange={v => setSelectedStudentId(v)}
+          onChange={handleSelectStudent}
           options={students.map((student) => ({ label: student.name, value: student.id }))}
         />
       </div>
@@ -229,37 +270,111 @@ export function ParentScheduleClient({
       </div>
 
       {intensiveEnrollments.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 10, marginBottom: 16 }}>
-          {intensiveEnrollments.map((enrollment) => (
-            <ParentCard key={enrollment.id} style={{ padding: 14, width: '100%', maxWidth: '100%' }}>
-              {(() => {
-                const stats = intensiveStatsByGroup.get(enrollment.group?.id || '') || {
-                  approvedHours: 0,
-                  pendingCount: 0,
-                  bookedCount: 0,
-                }
-                return (
-                  <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
-                <div>
-                  <Text strong>{enrollment.group?.course?.subject || enrollment.group?.course?.name}突击全能班</Text>
-                  <div style={{ color: '#5a4e3a', fontSize: 12, marginTop: 3 }}>
-                    {enrollment.group?.teacher?.name || '-'}老师 · {intensiveTeachingTypeLabel(enrollment.group?.teachingType)}
-                  </div>
-                </div>
-                <Tag color="orange">突击全能班</Tag>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginTop: 12, fontSize: 12 }}>
-                <span>已审核授课<br /><strong>{stats.approvedHours.toFixed(1)}小时</strong></span>
-                <span>待审核授课<br /><strong>{stats.pendingCount}节</strong></span>
-                <span>本周已约<br /><strong>{stats.bookedCount}节</strong></span>
-              </div>
-                  </>
-                )
-              })()}
-            </ParentCard>
-          ))}
-        </div>
+        <>
+          {/* 尊享 VIP 情绪价值 Banner */}
+          <div style={{
+            background: 'linear-gradient(135deg, #0E5E4E 0%, #123C35 100%)',
+            borderRadius: 16, padding: '16px 16px 14px', marginBottom: 14,
+            border: '1px solid rgba(201,164,92,.45)',
+            boxShadow: '0 10px 28px rgba(18,60,53,.28)',
+            color: '#F6E9C8', position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', right: -18, top: -22, fontSize: 96, opacity: .10, color: '#F2E3B6' }}><CrownFilled /></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 30, height: 30, borderRadius: 9, background: 'linear-gradient(135deg,#C9A45C,#F2E3B6)', color: '#123C35', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}><CrownOutlined /></span>
+              <Text strong style={{ color: '#F6E9C8', fontSize: 15, letterSpacing: .5 }}>尊享一对一 · 贵宾课程</Text>
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(246,233,200,.86)', lineHeight: 1.55, marginTop: 9 }}>
+              您为孩子报名了牧哲学堂 VIP 课程，专属教师一对一授课。每一分钟学习都被认真记录，每一次成长都被细心看见。
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 11 }}>
+              {['专属一对一教学', '灵活约课优先安排', '专属课堂反馈', '课时透明结算'].map((perk) => (
+                <span key={perk} style={{ fontSize: 11, padding: '3px 9px', borderRadius: 999, background: 'rgba(201,164,92,.16)', border: '1px solid rgba(201,164,92,.38)', color: '#F2E3B6' }}>
+                  {perk}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 10, marginBottom: 16 }}>
+            {intensiveEnrollments.map((enrollment) => {
+              const group = enrollment.group
+              const teacher = group?.teacher
+              const tier = teacher ? resolveTier(teacher.tierLevel) : null
+              const tierTheme = tier ? TIER_THEME[tier] : null
+              const avatarSrc = getTeacherAvatarUrl(teacher?.avatar, teacher?.gender, teacher?.id)
+              const stats = intensiveStatsByGroup.get(group?.id || '') || { approvedHours: 0, pendingCount: 0, bookedCount: 0 }
+              const remain = Number(enrollment.remainHours || 0)
+              const latestFeedback = historyLessons
+                .filter((lesson) => lesson.groupId === group?.id)
+                .flatMap((lesson) => lesson.classroomFeedbacks || [])
+                .find((feedback) => feedback.summary)
+              return (
+                <button
+                  key={enrollment.id}
+                  type="button"
+                  onClick={() => router.push(`/parent/intensive?groupId=${group?.id || ''}&studentId=${selectedStudentId}`)}
+                  style={{
+                    textAlign: 'left', padding: 0, border: 'none', background: 'transparent', width: '100%', maxWidth: '100%', cursor: 'pointer',
+                  }}
+                >
+                  <ParentCard style={{ padding: 14, width: '100%', maxWidth: '100%', border: '1px solid rgba(201,164,92,.30)', boxShadow: '0 4px 16px rgba(18,60,53,.10)' }}>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                      <CachedAvatarImage
+                        src={avatarSrc}
+                        fallbackSrc={getTeacherAvatarUrl(null, teacher?.gender, teacher?.id)}
+                        alt={teacher?.name || '老师'}
+                        style={{ width: 44, height: 44, borderRadius: 22, objectFit: 'cover', border: '1px solid rgba(201,164,92,.5)', background: '#F8F3E7' }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                          <Text strong style={{ fontSize: 14 }}>{group?.course?.subject || group?.course?.name} · 一对一</Text>
+                          {tierTheme && (
+                            <span style={{
+                              fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 999,
+                              background: tierTheme.bg, border: `1px solid ${tierTheme.border}`, color: tierTheme.accent,
+                            }}>
+                              {tierTheme.label}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ color: '#5a4e3a', fontSize: 12, marginTop: 3, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <span>{teacher?.name || '-'}老师</span>
+                          <span style={{ color: '#C9A45C' }}>·</span>
+                          <span>{intensiveTeachingTypeLabel(group?.teachingType)}</span>
+                        </div>
+                      </div>
+                      <CrownOutlined style={{ color: '#C9A45C', fontSize: 18 }} />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 6, marginTop: 12, fontSize: 12, textAlign: 'center' }}>
+                      <span style={{ background: '#0E5E4E', borderRadius: 10, padding: '7px 2px', color: '#F2E3B6' }}>
+                        剩余课时<br /><strong style={{ fontSize: 14, color: '#F6E9C8' }}>{remain.toFixed(1)}h</strong>
+                      </span>
+                      <span style={{ background: '#F8F3E7', borderRadius: 10, padding: '7px 2px', color: '#123C35' }}>
+                        已审核授课<br /><strong style={{ fontSize: 14, color: '#123C35' }}>{stats.approvedHours.toFixed(1)}h</strong>
+                      </span>
+                      <span style={{ background: '#F8F3E7', borderRadius: 10, padding: '7px 2px', color: '#123C35' }}>
+                        待审核授课<br /><strong style={{ fontSize: 14, color: '#123C35' }}>{stats.pendingCount}节</strong>
+                      </span>
+                      <span style={{ background: '#F8F3E7', borderRadius: 10, padding: '7px 2px', color: '#123C35' }}>
+                        本周已约<br /><strong style={{ fontSize: 14, color: '#123C35' }}>{stats.bookedCount}节</strong>
+                      </span>
+                    </div>
+                    {latestFeedback && (
+                      <div style={{ marginTop: 10, fontSize: 12, color: '#7A6A45', background: 'rgba(201,164,92,.10)', borderRadius: 10, padding: '8px 10px', display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+                        <ReadOutlined style={{ color: '#C9A45C', marginTop: 2 }} />
+                        <span style={{ lineHeight: 1.5 }}>{String(latestFeedback.summary).slice(0, 56)}…</span>
+                      </div>
+                    )}
+                    <div style={{ marginTop: 10, fontSize: 12, color: '#C9A45C', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 3 }}>
+                      查看课程详情 <RightOutlined style={{ fontSize: 10 }} />
+                    </div>
+                  </ParentCard>
+                </button>
+              )
+            })}
+          </div>
+        </>
       )}
 
       {!students.length ? (
@@ -267,9 +382,51 @@ export function ParentScheduleClient({
           <BrandEmpty title="暂未绑定学员" hint="绑定孩子后即可查看课程安排" icon={<LinkOutlined />} />
         </ParentCard>
       ) : childLessons.length === 0 ? (
-        <ParentCard style={{ minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <BrandEmpty title="所选周暂无课程" hint="可切换其他周查看；临时加课后会出现在对应日期" icon={<CalendarOutlined />} />
-        </ParentCard>
+        <div style={{ display: 'grid', gap: 10 }}>
+          <ParentCard style={{ minHeight: 220, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <BrandEmpty title="所选周暂无课程" hint="本周该同学没有小班课程安排，可切换其他周查看；已报名班级如下" icon={<CalendarOutlined />} />
+          </ParentCard>
+
+          {normalEnrollments.length > 0 && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
+                <Text strong style={{ fontSize: 14 }}>已报名小班课程</Text>
+                <Text type="secondary" style={{ fontSize: 11.5 }}>{normalEnrollments.length} 个班级</Text>
+              </div>
+              <div style={{ display: 'grid', gap: 8 }}>
+                {normalEnrollments.map((enrollment) => {
+                  const group = enrollment.group
+                  const days = (group?.recurringDays || [])
+                    .slice()
+                    .sort((a, b) => a - b)
+                    .map((day) => WEEKDAYS[day])
+                    .join('、')
+                  return (
+                    <ParentCard key={enrollment.id} style={{ padding: 13, borderLeft: '3px solid #E8784A' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                        <div style={{ minWidth: 0 }}>
+                          <Text strong style={{ fontSize: 13.5, display: 'block', overflowWrap: 'anywhere' }}>
+                            {group?.course?.name || group?.name || '小班课程'}
+                          </Text>
+                          <div style={{ fontSize: 12, color: '#5a4e3a', marginTop: 3, display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                            <span>{group?.course?.subject || '学科'}</span>
+                            {days && <span>· 每周{days} {group?.lessonStartTime || ''}</span>}
+                          </div>
+                        </div>
+                        <Tag color={group?.status === 'PAUSED' ? 'orange' : 'green'} style={{ margin: 0, borderRadius: 999, flexShrink: 0 }}>
+                          {group?.status === 'PAUSED' ? '暂停中' : '在读'}
+                        </Tag>
+                      </div>
+                      <div style={{ marginTop: 9, fontSize: 11.5, color: '#98A2B3', lineHeight: 1.55 }}>
+                        该班本周无排课（可能处于结课、停课或跨批次状态），如临时加课会显示在上方课表中。
+                      </div>
+                    </ParentCard>
+                  )
+                })}
+              </div>
+            </>
+          )}
+        </div>
       ) : isMobile ? (
         <div style={{ display: 'grid', gap: 10 }}>
           {mobileLessonGroups.map((group, groupIndex) => {
@@ -428,9 +585,9 @@ export function ParentScheduleClient({
           ) : (
             <div style={{ display: 'grid', gap: 10 }}>
               {childHistoryLessons.slice(0, 10).map((lesson) => {
-                const attendance = lesson.attendances?.find((item) => item.studentId === selectedStudentId)
+    const attendance = lesson.attendances?.find((item) => selectedStudentRecordIds.has(item.studentId))
                 const review = lesson.intensiveReviews?.[0]
-                const feedback = lesson.classroomFeedbacks?.find((item) => item.studentIds?.includes(selectedStudentId))
+    const feedback = lesson.classroomFeedbacks?.find((item) => item.studentIds?.some((studentId) => selectedStudentRecordIds.has(studentId)))
                 const reviewStatus = lesson.intensiveReviewStatus || review?.status
                 const statusMeta = reviewStatus === 'APPROVED'
                   ? { label: '已审核', color: 'green' }
@@ -495,7 +652,7 @@ export function ParentScheduleClient({
                       {feedback ? (
                         <button
                           type="button"
-                          onClick={() => router.push(`/parent/class-feedback?childId=${encodeURIComponent(selectedStudentId)}&feedbackId=${encodeURIComponent(feedback.id)}`)}
+                          onClick={() => router.push(`/parent/class-feedback/${feedback.id}?childId=${encodeURIComponent(selectedStudentId)}`)}
                           style={{
                             minHeight: 44,
                             border: '1px solid rgba(232,120,74,.24)',

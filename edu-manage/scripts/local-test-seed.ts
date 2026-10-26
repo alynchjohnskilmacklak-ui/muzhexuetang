@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { assertLocalTestSeedEnvironment } from '../src/lib/local-test-seed-guard'
 
+assertLocalTestSeedEnvironment(process.env)
 const prisma = new PrismaClient()
 
 async function main() {

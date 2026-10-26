@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import useSWR from 'swr'
 import {
+  Alert,
   Button,
   Card,
   Col,
@@ -22,11 +23,19 @@ import {
   Tag,
   Typography,
 } from 'antd'
-import { DeleteOutlined, DollarOutlined, DownloadOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
+import { CheckCircleOutlined, DeleteOutlined, DollarOutlined, DownloadOutlined, EditOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { submitSalarySettlement, SalarySubmissionError } from '@/lib/salary-settlement-client'
+import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
+import { getTeacherAvatarUrl } from '@/lib/teacher-avatars'
 
 const { Text, Title } = Typography
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = async (url: string) => {
+  const response = await fetch(url)
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(payload.error || '薪资数据加载失败，请重试')
+  return payload
+}
 
 const PERIOD_OPTIONS = [
   { label: '本月', value: 'month' },
@@ -42,6 +51,7 @@ const TYPE_META: Record<string, { color: string; label: string }> = {
   FEEDBACK_BONUS: { color: '#E8784A', label: '反馈奖励' },
   STUDY_HALL_BONUS: { color: '#C6821E', label: '作业登记奖励' },
   STUDY_HALL_ATTENDANCE: { color: '#1D9E75', label: '晚托考勤奖励' },
+  SALARY_SETTLEMENT: { color: '#C9A45C', label: '工资结算' },
   manual_adjust: { color: '#534AB7', label: '手动调整' },
 }
 
@@ -53,6 +63,8 @@ interface TeacherOption {
 interface SalarySummary {
   teacherId: string
   name: string
+  avatar?: string | null
+  gender?: string | null
   lesson: number
   feedback: number
   adjustment: number
@@ -60,7 +72,11 @@ interface SalarySummary {
   intensive: number
   feedbackCount: number
   rewardCount: number
+  recordCount: number
+  pendingCount: number
   total: number
+  settledAt?: string | null
+  settledTotal?: number
 }
 
 interface SalaryTransaction {
@@ -71,6 +87,7 @@ interface SalaryTransaction {
   salaryBucket: 'SMALL_CLASS' | 'INTENSIVE'
   amount: number
   description?: string | null
+  settledAt?: string | null
   createdAt: string
 }
 
@@ -166,17 +183,6 @@ interface SalaryPayload {
   limit: number
 }
 
-interface FeedbackRecord {
-  id: string
-  lessonName: string
-  status: string
-  isValid: boolean
-  studentCount: number
-  knowledgePoints: string[]
-  summary?: string | null
-  createdAt: string
-}
-
 function SalaryConfigDrawer({ teacherId, teacherName, open, onClose, onSaved }: {
   teacherId: string
   teacherName: string
@@ -231,7 +237,7 @@ function SalaryConfigDrawer({ teacherId, teacherName, open, onClose, onSaved }: 
       onClose={onClose}
       title={`薪资配置 · ${teacherName}`}
       width={420}
-      footer={<Space><Button type="primary" loading={saving} onClick={handleSave} style={{ background: '#E8784A' }}>保存</Button><Button onClick={onClose}>取消</Button></Space>}
+      footer={<Space><Button type="primary" loading={saving} onClick={handleSave} style={{ background: 'var(--color-primary)' }}>保存</Button><Button onClick={onClose}>取消</Button></Space>}
     >
       <Form form={form} layout="vertical" size="small">
         <Title level={5} style={{ marginTop: 0 }}>班课底薪（元/小时）</Title>
@@ -256,29 +262,18 @@ function SalaryConfigDrawer({ teacherId, teacherName, open, onClose, onSaved }: 
   )
 }
 
-function FeedbackTab({ teacherId }: { teacherId: string }) {
-  const { data, isLoading } = useSWR<{ feedbacks: FeedbackRecord[] }>(`/api/admin/classroom-feedback?teacherId=${teacherId}&limit=50`, fetcher)
-  const feedbacks = data?.feedbacks ?? []
-  const columns = [
-    { title: '时间', dataIndex: 'createdAt', key: 'createdAt', width: 140, render: (value: string) => new Date(value).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) },
-    { title: '班级', dataIndex: 'lessonName', key: 'lessonName', width: 140, render: (value: string) => value || '-' },
-    { title: '状态', dataIndex: 'status', key: 'status', width: 90, render: (value: string) => <Tag color={value === 'PUBLISHED' ? 'green' : 'orange'} style={{ borderRadius: 999 }}>{value === 'PUBLISHED' ? '已发布' : '草稿'}</Tag> },
-    { title: '有效', dataIndex: 'isValid', key: 'isValid', width: 80, render: (value: boolean) => <Tag color={value ? 'green' : 'red'} style={{ borderRadius: 999 }}>{value ? '有效' : '无效'}</Tag> },
-    { title: '学员数', dataIndex: 'studentCount', key: 'studentCount', width: 80, align: 'right' as const },
-    { title: '知识点', dataIndex: 'knowledgePoints', key: 'knowledgePoints', render: (value: string[]) => (value ?? []).slice(0, 3).map((item) => <Tag key={item}>{item}</Tag>) },
-    { title: '课堂小结', dataIndex: 'summary', key: 'summary', ellipsis: true, render: (value?: string | null) => value || '-' },
-  ]
-  return <Table dataSource={feedbacks} columns={columns} rowKey="id" loading={isLoading} size="small" pagination={{ pageSize: 20, hideOnSinglePage: true }} scroll={{ x: 860 }} locale={{ emptyText: '暂无反馈记录' }} />
-}
-
 export default function TeacherSalaryAdminPage() {
   const isMobile = useIsMobile() ?? false
   const [period, setPeriod] = useState('month')
   const [filterTeacher, setFilterTeacher] = useState('')
   const [salaryBucket, setSalaryBucket] = useState<'ALL' | 'SMALL_CLASS' | 'INTENSIVE'>('ALL')
   const [configDrawer, setConfigDrawer] = useState({ open: false, teacherId: '', teacherName: '' })
-  const [feedbackDrawer, setFeedbackDrawer] = useState({ open: false, teacherId: '', teacherName: '' })
   const [adjustmentModal, setAdjustmentModal] = useState({ open: false, teacherId: '', teacherName: '' })
+  const [settleTarget, setSettleTarget] = useState({ open: false, teacherId: '', teacherName: '', total: 0, count: 0 })
+  const settlementLock = useRef(false)
+  const [settling, setSettling] = useState(false)
+  const [settlementError, setSettlementError] = useState('')
+  const [settlementUncertain, setSettlementUncertain] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<SalaryTransaction | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [transactionPage, setTransactionPage] = useState(1)
@@ -287,7 +282,7 @@ export default function TeacherSalaryAdminPage() {
   const query = new URLSearchParams({ period, page: String(transactionPage), limit: String(transactionPageSize) })
   if (filterTeacher) query.set('teacherId', filterTeacher)
   if (salaryBucket !== 'ALL') query.set('bucket', salaryBucket)
-  const { data, isLoading, mutate } = useSWR<SalaryPayload>(`/api/admin/salary?${query.toString()}`, fetcher)
+  const { data, error, isLoading, mutate } = useSWR<SalaryPayload>(`/api/admin/salary?${query.toString()}`, fetcher, { refreshInterval: 30_000, revalidateOnFocus: true, revalidateOnReconnect: true })
 
   useEffect(() => {
     setTransactionPage(1)
@@ -349,30 +344,29 @@ export default function TeacherSalaryAdminPage() {
     }
   }
 
-  const summaryColumns = [
-    { title: '教师', dataIndex: 'name', key: 'name', render: (name: string) => <Text strong>{name}</Text> },
-    { title: '小班课薪资', dataIndex: 'smallClass', key: 'smallClass', width: 120, align: 'right' as const, render: (value: number) => <Text style={{ color: '#1D9E75' }}>¥{value.toFixed(2)}</Text> },
-    { title: '个性化课程薪资', dataIndex: 'intensive', key: 'intensive', width: 145, align: 'right' as const, render: (value: number) => <Text style={{ color: '#534AB7' }}>¥{value.toFixed(2)}</Text> },
-    { title: '课时工资', dataIndex: 'lesson', key: 'lesson', width: 110, align: 'right' as const, render: (value: number) => `¥${value.toFixed(2)}` },
-    { title: '反馈奖励', dataIndex: 'feedback', key: 'feedback', width: 110, align: 'right' as const, render: (value: number) => `¥${value.toFixed(2)}` },
-    { title: '管理调整', dataIndex: 'adjustment', key: 'adjustment', width: 110, align: 'right' as const, render: (value: number) => `¥${value.toFixed(2)}` },
-    { title: '反馈次数', dataIndex: 'feedbackCount', key: 'feedbackCount', width: 90, align: 'right' as const },
-    { title: '奖励次数', dataIndex: 'rewardCount', key: 'rewardCount', width: 90, align: 'right' as const },
-    { title: '合计', dataIndex: 'total', key: 'total', width: 110, align: 'right' as const, render: (value: number) => <Text strong>¥{value.toFixed(2)}</Text> },
-    {
-      title: '操作',
-      key: 'action',
-      width: 300,
-      render: (_: unknown, row: SalarySummary) => (
-        <Space size={6}>
-          <Button size="small" icon={<EditOutlined />} onClick={() => setConfigDrawer({ open: true, teacherId: row.teacherId, teacherName: row.name })}>配置</Button>
-          <Button size="small" icon={<EyeOutlined />} onClick={() => setFeedbackDrawer({ open: true, teacherId: row.teacherId, teacherName: row.name })}>反馈</Button>
-          <Button size="small" icon={<DollarOutlined />} disabled={readOnly} onClick={() => setAdjustmentModal({ open: true, teacherId: row.teacherId, teacherName: row.name })}>调整</Button>
-          <Button size="small" icon={<DownloadOutlined />} loading={exportingTeacherId === row.teacherId} disabled={Boolean(exportingTeacherId) && exportingTeacherId !== row.teacherId} onClick={() => exportTeacherSalary(row.teacherId, row.name)}>导出</Button>
-        </Space>
-      ),
-    },
-  ]
+  const settleSalary = async () => {
+    if (!settleTarget.teacherId || settlementLock.current || settlementUncertain) return
+    settlementLock.current = true
+    const termId = data?.term?.id
+    setSettling(true)
+    setSettlementError('')
+    try {
+      const receipt = await submitSalarySettlement({ teacherId: settleTarget.teacherId, period, termId, expectedTotal: settleTarget.total })
+      setSettleTarget((prev) => ({ ...prev, open: false }))
+      message.success(`已登记结算 ¥${receipt.total.toFixed(2)}，${receipt.count}笔流水已结清`)
+      await mutate().catch(() => message.warning('结算已登记，但页面刷新失败，请刷新后核对，不要重复操作'))
+    } catch (error) {
+      const text = error instanceof Error ? error.message : '结算失败，请刷新核对后重试'
+      setSettlementError(text)
+      setSettlementUncertain(error instanceof SalarySubmissionError && error.outcomeUncertain)
+      message.error(text)
+    } finally {
+      settlementLock.current = false
+      setSettling(false)
+    }
+  }
+
+  const summaryColumns: never[] = []
 
   const detailColumns = [
     { title: '时间', dataIndex: 'createdAt', key: 'createdAt', width: 140, render: (value: string) => new Date(value).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) },
@@ -402,9 +396,113 @@ export default function TeacherSalaryAdminPage() {
     },
   ]
 
+  const renderSummaryCards = () => {
+    const sorted = [...summary].sort((a, b) => b.recordCount - a.recordCount || b.total - a.total || a.name.localeCompare(b.name, 'zh-Hans-CN'))
+    const activeTeachers = sorted.filter((item) => item.recordCount > 0)
+    const idleTeachers = sorted.filter((item) => item.recordCount === 0)
+    const renderCard = (row: SalarySummary, active: boolean) => {
+      return (
+        <div
+          key={row.teacherId}
+          style={{
+            borderRadius: 16, overflow: 'hidden',
+            background: active ? '#fff' : 'rgba(255,255,255,.72)',
+            border: active ? '1px solid rgba(201,164,92,.5)' : '1px dashed #E0DAD0',
+            boxShadow: active ? '0 4px 14px rgba(58,50,39,.07)' : 'none',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px 10px' }}>
+            <CachedAvatarImage
+              src={getTeacherAvatarUrl(row.avatar, row.gender, row.teacherId)}
+              fallbackSrc={getTeacherAvatarUrl(null, row.gender, row.teacherId)}
+              alt={row.name}
+              style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(201,164,92,.4)' }}
+            />
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 14.5, fontWeight: 800, color: '#1F2329' }}>{row.name}</span>
+                <span style={{
+                  fontSize: 10.5, fontWeight: 700, padding: '1px 7px', borderRadius: 999,
+                  color: active ? '#8A6B2F' : '#98A2B3',
+                  background: active ? 'rgba(201,164,92,.14)' : 'rgba(152,162,179,.12)',
+                  border: `1px solid ${active ? 'rgba(201,164,92,.4)' : 'rgba(152,162,179,.3)'}`,
+                }}>{active ? `${row.recordCount} 条记录` : '暂无记录'}</span>
+                {row.settledAt ? (
+                  <span style={{ fontSize: 10.5, fontWeight: 700, padding: '1px 7px', borderRadius: 999, color: '#0E5E4E', background: 'rgba(29,158,117,.12)', border: '1px solid rgba(29,158,117,.35)' }}>
+                    已结算 ¥{Number(row.settledTotal ?? 0).toFixed(2)}
+                  </span>
+                ) : null}
+              </div>
+              <div style={{ fontSize: 11.5, color: '#98A2B3', marginTop: 2 }}>
+                反馈 {row.feedbackCount} 次 · 奖励 {row.rewardCount} 次
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ fontSize: 11, color: '#98A2B3' }}>待结算</div>
+              <div style={{ fontSize: 17, fontWeight: 800, color: active ? '#0E5E4E' : '#B8B2A8', fontVariantNumeric: 'tabular-nums' }}>
+                ¥{row.total.toFixed(2)}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 6, padding: '0 14px 12px' }}>
+            {([
+              ['小班课', row.smallClass, '#1D9E75'],
+              ['个性化', row.intensive, '#7C5CFF'],
+              ['课时工资', row.lesson, '#0E5E4E'],
+              ['反馈奖励', row.feedback, '#E8784A'],
+              ['管理调整', row.adjustment, '#C77F00'],
+            ] as Array<[string, number, string]>).map(([label, value, color]) => (
+              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 8px', borderRadius: 9, background: active ? '#F7F5F1' : 'rgba(247,245,241,.5)', gap: 8 }}>
+                <span style={{ fontSize: 11, color: '#98A2B3', whiteSpace: 'nowrap' }}>{label}</span>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>¥{Number(value).toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 6, padding: '8px 14px', borderTop: '1px solid #F4EFE8', background: 'rgba(247,245,241,.55)' }}>
+            <Button size="small" icon={<EditOutlined />} onClick={() => setConfigDrawer({ open: true, teacherId: row.teacherId, teacherName: row.name })}>配置</Button>
+            <Button
+              size="small"
+              icon={<CheckCircleOutlined />}
+              disabled={readOnly || Boolean(error) || settling || row.pendingCount === 0}
+              loading={settling && settleTarget.teacherId === row.teacherId}
+              onClick={() => { setSettlementError(''); setSettlementUncertain(false); setSettleTarget({ open: true, teacherId: row.teacherId, teacherName: row.name, total: row.total, count: row.pendingCount }) }}
+              style={{ background: 'linear-gradient(135deg,#C9A45C,#B98A2F)', borderColor: 'transparent', color: '#fff', fontWeight: 700 }}
+            >{row.pendingCount === 0 ? '已结清' : '结算'}</Button>
+            <Button size="small" icon={<DollarOutlined />} disabled={readOnly} onClick={() => setAdjustmentModal({ open: true, teacherId: row.teacherId, teacherName: row.name })}>调整</Button>
+            <Button size="small" icon={<DownloadOutlined />} style={{ marginLeft: 'auto' }} loading={exportingTeacherId === row.teacherId} disabled={Boolean(exportingTeacherId) && exportingTeacherId !== row.teacherId} onClick={() => exportTeacherSalary(row.teacherId, row.name)}>导出</Button>
+          </div>
+        </div>
+      )
+    }
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {activeTeachers.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0,1fr))', gap: 10 }}>
+            {activeTeachers.map((row) => renderCard(row, true))}
+          </div>
+        )}
+        {idleTeachers.length > 0 && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+              <span style={{ fontSize: 12.5, fontWeight: 800, color: '#98A2B3' }}>暂无薪资记录 · {idleTeachers.length} 位教师</span>
+              <div style={{ flex: 1, height: 1, background: '#EEE8DF' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0,1fr))', gap: 10, opacity: .9 }}>
+              {idleTeachers.map((row) => renderCard(row, false))}
+            </div>
+          </>
+        )}
+        {sorted.length === 0 && <div style={{ textAlign: 'center', color: '#98A2B3', padding: 30 }}>暂无教师数据</div>}
+      </div>
+    )
+  }
+
   return (
     <div>
       <Title level={4} style={{ marginTop: 0 }}>教师薪资管理</Title>
+      {error && <Alert type="error" showIcon message="薪资加载失败，请勿根据当前空白数据结算" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 12 }} />}
       <Space direction="vertical" size={16} style={{ width: '100%' }}>
         <Card size="small" bordered={false} style={{ borderRadius: 14 }}>
           <Space wrap>
@@ -434,31 +532,36 @@ export default function TeacherSalaryAdminPage() {
           />
         </Space>
 
-        <Row gutter={[12, 12]}>
-          <Col xs={24} md={8}>
-            <Card bordered={false} style={{ height: '100%', borderRadius: 14, background: 'linear-gradient(135deg,#E8784A,#f0976a)' }}>
-              <Statistic title={<span style={{ color: 'rgba(255,255,255,.82)' }}>教师工资总和</span>} value={totalAll} precision={2} prefix="¥" valueStyle={{ color: '#fff', fontWeight: 800 }} loading={isLoading} />
-              <Text style={{ color: 'rgba(255,255,255,.82)', fontSize: 12 }}>小班课＋个性化课程</Text>
-            </Card>
-          </Col>
-          <Col xs={12} md={8}>
-            <Card bordered={false} style={{ height: '100%', borderRadius: 14 }}>
-              <Statistic title="小班课薪资" value={totalSmallClass} precision={2} prefix="¥" valueStyle={{ color: '#1D9E75' }} loading={isLoading} />
-            </Card>
-          </Col>
-          <Col xs={12} md={8}>
-            <Card bordered={false} style={{ height: '100%', borderRadius: 14 }}>
-              <Statistic title="一对一/二/三薪资" value={totalIntensive} precision={2} prefix="¥" valueStyle={{ color: '#534AB7' }} loading={isLoading} />
-            </Card>
-          </Col>
-        </Row>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(3, minmax(0,1fr))', gap: 10 }}>
+          <div style={{
+            gridColumn: isMobile ? '1 / -1' : undefined,
+            borderRadius: 16, padding: '16px 16px', position: 'relative', overflow: 'hidden',
+            background: 'linear-gradient(150deg,#17352F,#0E5E4E 65%,#0B4B40)',
+            border: '1px solid rgba(201,164,92,.5)', boxShadow: '0 8px 20px rgba(18,60,53,.18)',
+          }}>
+            <div style={{ position: 'absolute', top: -40, right: -24, width: 150, height: 150, borderRadius: '50%', background: 'radial-gradient(circle, rgba(242,227,182,.28), transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ fontSize: 12.5, color: 'rgba(245,241,232,.7)' }}>教师待结算工资总和</div>
+            <div style={{ fontSize: isMobile ? 28 : 34, fontWeight: 800, color: '#F2E3B6', marginTop: 4, fontVariantNumeric: 'tabular-nums', lineHeight: 1.15 }}>¥{totalAll.toFixed(2)}</div>
+            <div style={{ fontSize: 11.5, color: 'rgba(242,227,182,.7)', marginTop: 4 }}>小班课 ＋ 个性化课程 · 共 {summary.length} 位教师</div>
+          </div>
+          <div style={{ borderRadius: 16, padding: '14px 14px', background: '#fff', border: '1px solid #F0E9DF', boxShadow: '0 4px 14px rgba(58,50,39,.05)' }}>
+            <div style={{ fontSize: 12, color: '#98A2B3' }}>小班课薪资</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#1D9E75', marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>¥{totalSmallClass.toFixed(2)}</div>
+            <div style={{ fontSize: 11, color: '#B8B2A8', marginTop: 4 }}>课时/反馈/调整合计</div>
+          </div>
+          <div style={{ borderRadius: 16, padding: '14px 14px', background: '#fff', border: '1px solid #F0E9DF', boxShadow: '0 4px 14px rgba(58,50,39,.05)' }}>
+            <div style={{ fontSize: 12, color: '#98A2B3' }}>一对一/二/三薪资</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#7C5CFF', marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>¥{totalIntensive.toFixed(2)}</div>
+            <div style={{ fontSize: 11, color: '#B8B2A8', marginTop: 4 }}>个性化课程合计</div>
+          </div>
+        </div>
 
         <Tabs
           items={[
             {
               key: 'summary',
               label: '按教师汇总',
-              children: <Table dataSource={summary} columns={summaryColumns} rowKey="teacherId" loading={isLoading} pagination={false} size="small" scroll={{ x: isMobile ? 680 : undefined }} locale={{ emptyText: '暂无数据' }} />,
+              children: isLoading ? <div style={{ textAlign: 'center', padding: 40 }}>加载中...</div> : renderSummaryCards(),
             },
             {
               key: 'detail',
@@ -472,6 +575,32 @@ export default function TeacherSalaryAdminPage() {
       <SalaryConfigDrawer {...configDrawer} onClose={() => setConfigDrawer((prev) => ({ ...prev, open: false }))} onSaved={() => mutate()} />
       {!readOnly && <SalaryAdjustmentModal {...adjustmentModal} onClose={() => setAdjustmentModal((prev) => ({ ...prev, open: false }))} onSaved={() => mutate()} />}
       <Modal
+        title={`结算工资 · ${settleTarget.teacherName}`}
+        open={settleTarget.open}
+        onCancel={() => { if (!settling) setSettleTarget((prev) => ({ ...prev, open: false })) }}
+        centered
+        zIndex={1100}
+        width={isMobile ? 'calc(100vw - 24px)' : 440}
+        maskClosable={!settling}
+        keyboard={!settling}
+        onOk={settleSalary}
+        okText={settling ? '正在结算…' : settlementUncertain ? '请先核对结果' : '确认结算'}
+        okButtonProps={{ disabled: settlementUncertain }}
+        cancelText="取消"
+        confirmLoading={settling}
+        destroyOnHidden
+      >
+        <div style={{ padding: '6px 0' }}>
+          {settling && <Alert type="info" showIcon message="正在核对并提交结算，请勿重复点击" style={{ marginBottom: 12 }} />}
+          {settlementError && <Alert type={settlementUncertain ? 'warning' : 'error'} showIcon message={settlementUncertain ? '结算结果尚未确认' : '结算没有完成'} description={settlementError} action={<Button onClick={async () => { try { await fetcher(`/api/admin/salary?${query.toString()}`); await mutate(); message.success('余额已刷新，请关闭窗口后核对余额与流水') } catch (error) { message.error(error instanceof Error ? error.message : '余额刷新失败') } }}>刷新余额</Button>} style={{ marginBottom: 12 }} />}
+          <Text>确认结清 <Text strong>{settleTarget.teacherName}</Text> 老师{PERIOD_OPTIONS.find(option => option.value === period)?.label}的 <Text strong>{settleTarget.count} 笔</Text>待结算流水，共 <Text strong>¥{settleTarget.total.toFixed(2)}</Text>？</Text>
+          <div style={{ marginTop: 10, padding: '10px 12px', borderRadius: 10, background: 'rgba(201,164,92,.1)', border: '1px solid rgba(201,164,92,.35)', fontSize: 12.5, color: '#8A6B2F' }}>
+            仅结清该教师，其他教师余额不受影响。结算后该范围待结算余额归零，历史明细与批次仍保留并可导出。这是账目结算登记，不会自动转账；新流水需要另行核对。
+          </div>
+          {settleTarget.total < 0 && <Alert type="warning" showIcon message="当前是负数余额。确认后登记账目结清，不代表向教师实际付款；请先核对管理调整流水。" style={{ marginTop: 12 }} />}
+        </div>
+      </Modal>
+      <Modal
         title="删除手动调整"
         open={Boolean(pendingDelete)}
         onCancel={() => setPendingDelete(null)}
@@ -484,9 +613,6 @@ export default function TeacherSalaryAdminPage() {
       >
         <Text>确定删除“{pendingDelete?.description || '手动调整'}”这条流水吗？删除后工资合计会同步变化。</Text>
       </Modal>
-      <Drawer open={feedbackDrawer.open} onClose={() => setFeedbackDrawer((prev) => ({ ...prev, open: false }))} title={`课堂反馈 · ${feedbackDrawer.teacherName}`} width={isMobile ? '100%' : 860}>
-        {feedbackDrawer.open && <FeedbackTab teacherId={feedbackDrawer.teacherId} />}
-      </Drawer>
     </div>
   )
 }

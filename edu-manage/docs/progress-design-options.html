@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学员进步展示方案对比 - 牧哲学堂</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f1ea;color:#1a1201;line-height:1.6}
+
+  /* 顶部方案切换 */
+  .tabs{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid #e8dfd3;padding:12px 16px;display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tabs button{flex:none;padding:8px 18px;border-radius:999px;border:1.5px solid #e0d5c5;background:#fff;color:#7a6e60;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+  .tabs button.active{background:#E8784A;color:#fff;border-color:#E8784A;box-shadow:0 4px 12px rgba(232,120,74,.3)}
+  .panel{display:none;padding:24px 16px 60px;max-width:480px;margin:0 auto}
+  .panel.active{display:block}
+  .panel-title{text-align:center;margin-bottom:20px}
+  .panel-title h2{font-size:20px;font-weight:800;color:#1a1201}
+  .panel-title p{font-size:13px;color:#9a8e7a;margin-top:4px}
+
+  /* ========== 方案A：大数字轮播 ========== */
+  .carousel-hero{background:linear-gradient(160deg,#1a1108,#2e2113);border-radius:24px;padding:32px 24px;color:#f5ede2;overflow:hidden;position:relative;box-shadow:0 20px 50px rgba(26,18,8,.3)}
+  .carousel-hero::before{content:"";position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(232,160,90,.2),transparent)}
+  .ch-tag{display:inline-block;font-size:11px;letter-spacing:.2em;color:#E8A05A;margin-bottom:12px}
+  .ch-name{font-size:22px;font-weight:800;margin-bottom:4px}
+  .ch-exam{font-size:12px;color:#b9a996;margin-bottom:24px}
+  .ch-scores{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .ch-score{text-align:center;flex:1}
+  .ch-score .label{font-size:11px;color:#b9a996;margin-bottom:4px}
+  .ch-score .num{font-size:36px;font-weight:800;font-variant-numeric:tabular-nums}
+  .ch-score.start .num{color:#b9a996}
+  .ch-score.end .num{color:#E8A05A}
+  .ch-arrow{font-size:24px;color:#E8784A;flex:none}
+  .ch-gain{text-align:center;margin-top:20px;padding:12px;background:rgba(232,120,74,.15);border:1px solid rgba(232,120,74,.3);border-radius:14px;font-size:14px}
+  .ch-gain b{font-size:24px;color:#E8784A;display:block}
+  .ch-dots{display:flex;justify-content:center;gap:6px;margin-top:20px}
+  .ch-dots span{width:6px;height:6px;border-radius:50%;background:rgba(245,237,226,.3);transition:all .3s}
+  .ch-dots span.on{background:#E8A05A;width:18px;border-radius:3px}
+  .ch-progress{height:3px;background:rgba(245,237,226,.15);border-radius:3px;margin-top:16px;overflow:hidden}
+  .ch-progress i{display:block;height:100%;background:linear-gradient(90deg,#E8A05A,#E8784A);width:0;transition:width .1s linear}
+
+  /* ========== 方案B：横向滚动条 ========== */
+  .h-scroll{display:flex;gap:12px;overflow-x:auto;padding:8px 0 16px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .h-scroll::-webkit-scrollbar{display:none}
+  .h-card{flex:0 0 260px;background:#fff;border-radius:18px;padding:20px;border:1px solid #eee5d8;box-shadow:0 4px 16px rgba(26,18,8,.06)}
+  .h-card .h-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .h-avatar{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:16px;font-weight:800}
+  .h-head .h-name{font-size:15px;font-weight:700}
+  .h-head .h-exam{font-size:11px;color:#9a8e7a}
+  .h-bar{position:relative;height:8px;background:#f0e9de;border-radius:99px;margin:12px 0 8px}
+  .h-bar .fill{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,#F2A05E,#E8784A);width:0;transition:width 1.2s cubic-bezier(.22,.61,.36,1)}
+  .h-bar .tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:#cbbba5;border-radius:2px}
+  .h-nums{display:flex;justify-content:space-between;font-size:12px;color:#9a8e7a}
+  .h-nums b{color:#1a1201;font-size:14px}
+  .h-gain{display:inline-block;margin-top:10px;background:linear-gradient(135deg,#27a644,#1e8b3a);color:#fff;font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px}
+  .h-gain.big{background:linear-gradient(135deg,#E8A05A,#D9783C)}
+
+  /* ========== 方案C：数字滚动统计卡 ========== */
+  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .stat-card{background:linear-gradient(160deg,#fff,#fdf8f2);border:1px solid #f0e6d8;border-radius:18px;padding:20px;text-align:center;box-shadow:0 4px 16px rgba(232,120,74,.06)}
+  .stat-card.big{grid-column:span 2;background:linear-gradient(135deg,#E8784A,#D9643C);color:#fff;border:none}
+  .stat-card .s-label{font-size:12px;opacity:.8;margin-bottom:6px}
+  .stat-card .s-num{font-size:32px;font-weight:800;font-variant-numeric:tabular-nums}
+  .stat-card.big .s-num{font-size:48px}
+  .stat-card .s-sub{font-size:11px;opacity:.7;margin-top:4px}
+  .chart-box{background:#fff;border-radius:18px;padding:20px;border:1px solid #f0e6d8;margin-top:12px}
+  .chart-box h4{font-size:14px;font-weight:700;margin-bottom:16px}
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px}
+  .bar-row .b-label{width:50px;flex:none;color:#7a6e60}
+  .bar-row .b-track{flex:1;height:10px;background:#f5efe5;border-radius:99px;overflow:hidden}
+  .bar-row .b-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#F2A05E,#E8784A);width:0;transition:width 1s ease}
+  .bar-row .b-val{width:36px;flex:none;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+
+  /* ========== 方案D：全屏故事放映 ========== */
+  .story-stage{position:relative;height:420px;border-radius:24px;overflow:hidden;background:linear-gradient(180deg,#1a1108,#2e2113);color:#f5ede2;box-shadow:0 20px 50px rgba(26,18,8,.3)}
+  .story-slide{position:absolute;inset:0;padding:36px 28px;opacity:0;transform:translateY(20px);transition:all .6s ease;display:flex;flex-direction:column;justify-content:center}
+  .story-slide.on{opacity:1;transform:translateY(0)}
+  .story-slide .st-exam{font-size:12px;color:#E8A05A;letter-spacing:.15em;margin-bottom:8px}
+  .story-slide .st-name{font-size:32px;font-weight:800;margin-bottom:20px}
+  .story-slide .st-compare{display:flex;align-items:baseline;gap:12px;margin-bottom:8px}
+  .story-slide .st-from{font-size:18px;color:#b9a996}
+  .story-slide .st-arrow{font-size:20px;color:#E8784A}
+  .story-slide .st-to{font-size:48px;font-weight:800;color:#E8A05A;font-variant-numeric:tabular-nums}
+  .story-slide .st-gain{margin-top:16px;display:inline-block;background:rgba(232,120,74,.2);border:1px solid rgba(232,120,74,.4);color:#E8A05A;font-size:15px;font-weight:700;padding:6px 16px;border-radius:99px}
+  .story-slide .st-course{font-size:12px;color:#b9a996;margin-top:14px}
+  .story-indicator{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+  .story-indicator span{width:24px;height:3px;border-radius:2px;background:rgba(245,237,226,.25);transition:all .3s}
+  .story-indicator span.on{background:#E8A05A;width:36px}
+  .story-progress{position:absolute;bottom:0;left:0;height:3px;background:#E8784A;transition:width linear}
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <button class="active" onclick="show(0)">A · 深色大卡轮播</button>
+  <button onclick="show(1)">B · 横滑卡片流</button>
+  <button onclick="show(2)">C · 数据看板</button>
+  <button onclick="show(3)">D · 全屏故事放映</button>
+</div>
+
+<!-- 方案A：深色大卡轮播 -->
+<div class="panel active" id="p0">
+  <div class="panel-title">
+    <h2>方案 A · 深色大卡轮播</h2>
+    <p>单张大卡片，大字展示学生成绩变化，自动切换，有进度条</p>
+  </div>
+  <div class="carousel-hero">
+    <span class="ch-tag">REAL PROGRESS</span>
+    <div class="ch-name" id="chName">杜*诺</div>
+    <div class="ch-exam" id="chExam">2026 地生会考 · 地生一对三冲刺班</div>
+    <div class="ch-scores">
+      <div class="ch-score start"><div class="label">入学</div><div class="num" id="chStart">112</div></div>
+      <div class="ch-arrow">→</div>
+      <div class="ch-score end"><div class="label">期末</div><div class="num" id="chEnd">120</div></div>
+    </div>
+    <div class="ch-gain"><b id="chGain">+8 分</b>地生会考满分 120</div>
+    <div class="ch-dots" id="chDots"></div>
+    <div class="ch-progress"><i id="chBar"></i></div>
+  </div>
+</div>
+
+<!-- 方案B：横滑卡片流 -->
+<div class="panel" id="p1">
+  <div class="panel-title">
+    <h2>方案 B · 横滑卡片流</h2>
+    <p>横向滑动浏览，进度条动画，适合快速浏览多个案例</p>
+  </div>
+  <div class="h-scroll" id="hScroll"></div>
+</div>
+
+<!-- 方案C：数据看板 -->
+<div class="panel" id="p2">
+  <div class="panel-title">
+    <h2>方案 C · 数据看板</h2>
+    <p>先看总览数据，再看分科对比柱状图，专业感强</p>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card big">
+      <div class="s-label">平均提升分数</div>
+      <div class="s-num" id="avgNum">+18</div>
+      <div class="s-sub">126 位学员真实记录</div>
+    </div>
+    <div class="stat-card">
+      <div class="s-label">最高提升</div>
+      <div class="s-num" style="color:#E8784A">+35</div>
+      <div class="s-sub">分</div>
+    </div>
+    <div class="stat-card">
+      <div class="s-label">覆盖班型</div>
+      <div class="s-num" style="color:#E8784A">3</div>
+      <div class="s-sub">一对一 / 一对三 / 小班</div>
+    </div>
+  </div>
+  <div class="chart-box">
+    <h4>各学科平均提分对比</h4>
+    <div id="chartBars"></div>
+  </div>
+</div>
+
+<!-- 方案D：全屏故事放映 -->
+<div class="panel" id="p3">
+  <div class="panel-title">
+    <h2>方案 D · 全屏故事放映</h2>
+    <p>沉浸式全屏大字，每3秒自动切换一个学生，适合首页视觉焦点</p>
+  </div>
+  <div class="story-stage" id="storyStage"></div>
+</div>
+
+<script>
+const DATA = [
+  {name:"杜*诺", exam:"2026 地生会考", course:"地生一对三冲刺班", from:112, to:120, full:120},
+  {name:"马*晨", exam:"2026 地生会考", course:"地生一对三冲刺班", from:108, to:114, full:120},
+  {name:"刘*宇", exam:"2026 地生会考", course:"地生一对三冲刺班", from:82, to:108, full:120},
+  {name:"王*涵", exam:"2026 中考数学", course:"数学一对一", from:78, to:108, full:120},
+  {name:"李*轩", exam:"2026 中考英语", course:"英语一对三", from:85, to:112, full:120},
+  {name:"张*雨", exam:"2026 上学期期末", course:"物理小班冲刺", from:42, to:56, full:60},
+];
+const AVG_GAIN = 18;
+
+function show(i){
+  document.querySelectorAll('.panel').forEach((p,idx)=>p.classList.toggle('active',idx===i));
+  document.querySelectorAll('.tabs button').forEach((b,idx)=>b.classList.toggle('active',idx===i));
+  if(i===0) startCarousel();
+  if(i===1) renderHScroll();
+  if(i===2) renderChart();
+  if(i===3) renderStory();
+}
+
+// 方案A
+let chIdx=0,chTimer=null;
+function renderDots(){
+  const d=document.getElementById('chDots');d.innerHTML='';
+  DATA.forEach((_,i)=>{const s=document.createElement('span');if(i===chIdx)s.className='on';d.appendChild(s)});
+}
+function setSlide(i){
+  chIdx=i;const d=DATA[i];
+  document.getElementById('chName').textContent=d.name;
+  document.getElementById('chExam').textContent=d.exam+' · '+d.course;
+  document.getElementById('chStart').textContent=d.from;
+  document.getElementById('chEnd').textContent=d.to;
+  document.getElementById('chGain').textContent='+'+(d.to-d.from)+' 分';
+  renderDots();
+  const bar=document.getElementById('chBar');bar.style.width='0';
+  requestAnimationFrame(()=>{bar.style.width='100%'});
+}
+function startCarousel(){
+  clearInterval(chTimer);setSlide(0);
+  let t=0;
+  chTimer=setInterval(()=>{t+=100;
+    if(t>=3000){t=0;chIdx=(chIdx+1)%DATA.length;setSlide(chIdx)}
+    document.getElementById('chBar').style.width=(t/3000*100)+'%';
+  },100);
+}
+
+// 方案B
+const COLORS=['#E8784A','#27a644','#185FA5','#b7791f','#7c5cd6','#d4537e'];
+function renderHScroll(){
+  const box=document.getElementById('hScroll');
+  box.innerHTML=DATA.map((d,i)=>{
+    const pctStart=Math.round(d.from/d.full*100),pctEnd=Math.round(d.to/d.full*100);
+    const gain=d.to-d.from;
+    return `<div class="h-card">
+      <div class="h-head">
+        <div class="h-avatar" style="background:${COLORS[i%COLORS.length]}">${d.name[0]}</div>
+        <div><div class="h-name">${d.name}</div><div class="h-exam">${d.exam}</div></div>
+      </div>
+      <div style="font-size:11px;color:#9a8e7a">${d.course}</div>
+      <div class="h-bar">
+        <div class="fill" data-w="${pctEnd}"></div>
+        <div class="tick" style="left:${pctStart}%"></div>
+      </div>
+      <div class="h-nums"><span>入学 <b>${d.from}</b></span><span>期末 <b>${d.to}</b></span></div>
+      <span class="h-gain ${gain>=20?'big':''}">+${gain} 分</span>
+    </div>`;
+  }).join('');
+  requestAnimationFrame(()=>{
+    box.querySelectorAll('.fill').forEach(f=>f.style.width=f.dataset.w+'%');
+  });
+}
+
+// 方案C
+function renderChart(){
+  const bars=[
+    {label:'数学',val:24},{label:'英语',val:18},{label:'语文',val:12},
+    {label:'物理',val:15},{label:'化学',val:13},{label:'地生',val:11},
+  ];
+  const max=30;
+  document.getElementById('chartBars').innerHTML=bars.map(b=>`
+    <div class="bar-row">
+      <div class="b-label">${b.label}</div>
+      <div class="b-track"><div class="b-fill" data-w="${Math.round(b.val/max*100)}"></div></div>
+      <div class="b-val">+${b.val}</div>
+    </div>`).join('');
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.b-fill').forEach(f=>f.style.width=f.dataset.w+'%');
+  });
+}
+
+// 方案D
+let stIdx=0,stTimer=null;
+function renderStory(){
+  const stage=document.getElementById('storyStage');
+  stage.innerHTML=DATA.map((d,i)=>`
+    <div class="story-slide ${i===0?'on':''}" data-i="${i}">
+      <div class="st-exam">${d.exam}</div>
+      <div class="st-name">${d.name}</div>
+      <div class="st-compare">
+        <span class="st-from">${d.from} 分</span>
+        <span class="st-arrow">→</span>
+        <span class="st-to">${d.to}</span>
+      </div>
+      <div class="st-gain">提升 +${d.to-d.from} 分</div>
+      <div class="st-course">${d.course}</div>
+    </div>`).join('')+
+    '<div class="story-indicator" id="stInd"></div>'+
+    '<div class="story-progress" id="stProg"></div>';
+  const ind=document.getElementById('stInd');
+  DATA.forEach((_,i)=>{const s=document.createElement('span');if(i===0)s.className='on';ind.appendChild(s)});
+  clearInterval(stTimer);stIdx=0;let t=0;
+  stTimer=setInterval(()=>{t+=100;
+    if(t>=3000){
+      t=0;stIdx=(stIdx+1)%DATA.length;
+      stage.querySelectorAll('.story-slide').forEach((s,i)=>s.classList.toggle('on',i===stIdx));
+      ind.querySelectorAll('span').forEach((s,i)=>s.classList.toggle('on',i===stIdx));
+    }
+    document.getElementById('stProg').style.width=(t/3000*100)+'%';
+  },100);
+}
+
+// 初始化方案A
+startCarousel();
+</script>
+</body>
+</html>

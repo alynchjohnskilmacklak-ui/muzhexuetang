@@ -1,0 +1,45 @@
+﻿=== ��̬�����붯̬���ɰ汾�Ƿ�����һ�£���ֹ�Ժ� sitemap ���˲�ͬ����===
+  robots.txt     http=7d7c01ab5b1bf3dd  https=7d7c01ab5b1bf3dd  һ�� OK
+  sitemap.xml    http=57c1bc83f6f57fe8  https=57c1bc83f6f57fe8  һ�� OK
+
+=== ���� nginx ���õ� 80 �˿� server �飨����״̬��===
+server {
+    listen 80;
+    server_name muzhexuetang.xyz www.muzhexuetang.xyz;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # ����ض��ļ� + վ��ƽ̨��֤�ļ���HTTP ֱ������ 301 ��ת
+    # ԭ��������֤��/������ http �����Ҳ����� 301���ᵼ����֤ʧ�ܡ�sitemap �� robots ������
+    location = /shenma-site-verification.txt {
+        alias /var/www/verify/shenma-site-verification.txt;
+        default_type text/plain;
+        add_header Cache-Control "no-store" always;
+    }
+
+    location = /robots.txt {
+        alias /var/www/verify/robots.txt;
+        default_type text/plain;
+        add_header Cache-Control "no-store" always;
+    }
+
+    location = /sitemap.xml {
+        alias /var/www/verify/sitemap.xml;
+        default_type application/xml;
+        add_header Cache-Control "no-store" always;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+
+=== nginx ���ñ����嵥 ===
+2197 /etc/nginx/sites-available/edu-manage.conf.bak-20261003
+2811 /etc/nginx/sites-available/edu-manage.conf.bak-crawler-20261003
+2643 /etc/nginx/sites-available/edu-manage.conf.bak-perf-20261003
+2458 /etc/nginx/sites-available/edu-manage.conf.bak-shenma-http-20261003
+
+=== �����Ƿ�����ץ sitemap ===
+  ��ûץ���ύ��������Լ�����ͨ����Сʱ�� 1 �죩

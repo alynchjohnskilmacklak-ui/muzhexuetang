@@ -4,14 +4,11 @@ import { writeSalaryExportWorkbook, type SalaryExportRow } from '@/lib/salary-ex
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { classifySalaryBucket } from '@/lib/salary-bucket'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { salaryPeriodStart, pendingSalaryTransactions } from '@/lib/salary-settlement'
+import { brandXlsxBufferOnServer } from '@/lib/export-xlsx-brand-server'
 
 export const dynamic = 'force-dynamic'
 
-function salaryPeriodStart(period: string, now: Date) {
-  if (period === 'week') return new Date(now.getTime() - 7 * 86400000)
-  if (period === 'all') return new Date(0)
-  return new Date(now.getFullYear(), now.getMonth(), 1)
-}
 
 function periodLabel(period: string) {
   if (period === 'week') return '本周（近7天）'
@@ -25,6 +22,7 @@ function typeLabel(type: string) {
   if (type === 'FEEDBACK_BONUS') return '反馈奖励'
   if (type === 'STUDY_HALL_BONUS') return '作业登记奖励'
   if (type === 'STUDY_HALL_ATTENDANCE') return '晚托考勤奖励'
+  if (type === 'SALARY_SETTLEMENT') return '工资结算'
   if (type === 'manual_adjust') return '手动调整'
   return '其他调整'
 }
@@ -127,6 +125,7 @@ export async function GET(req: NextRequest) {
       rewardsByFeedback.set(reward.feedbackId, current)
     }
 
+    const pendingIds = new Set(pendingSalaryTransactions(transactions).map(item => item.id))
     const rows: SalaryExportRow[] = transactions.map((transaction) => {
       const lesson = transaction.lessonId ? lessonMap.get(transaction.lessonId) : null
       const feedback = transaction.feedbackId ? feedbackMap.get(transaction.feedbackId) : null
@@ -160,6 +159,9 @@ export async function GET(req: NextRequest) {
       return {
         id: transaction.id,
         type: transaction.type,
+        pending: pendingIds.has(transaction.id),
+        settledAt: transaction.settledAt,
+        settlementBatchId: transaction.settlementBatchId,
         typeLabel: typeLabel(transaction.type),
         salaryBucket,
         amount: transaction.amount,
@@ -186,14 +188,20 @@ export async function GET(req: NextRequest) {
       ? transactions.reduce<Date | null>((earliest, item) => !earliest || item.createdAt < earliest ? item.createdAt : earliest, null)
       : since
     const rangeLabel = actualStart ? `${formatDate(actualStart)} 至 ${formatDate(now)}` : '暂无流水'
-    const buffer = writeSalaryExportWorkbook({
+    const settlements = transactions
+      .filter((item) => item.type === 'SALARY_SETTLEMENT')
+      .map((item) => ({ at: item.createdAt, amount: item.amount, description: item.description, batchId: item.settlementBatchId }))
+      .sort((a, b) => a.at.getTime() - b.at.getTime())
+    const workbookBuffer = writeSalaryExportWorkbook({
       teacherName: teacher.name,
       periodLabel: periodLabel(period),
       rangeLabel,
       exportedAt: now,
       rows,
+      settlements,
     })
-    const filename = `${safeFilenamePart(teacher.name)}老师薪资流水_${periodLabel(period).replace(/[（）]/g, '')}_${formatDate(now)}.xlsx`
+    const buffer = await brandXlsxBufferOnServer(new Uint8Array(workbookBuffer))
+    const filename = `牧哲学堂_${safeFilenamePart(teacher.name)}老师薪资流水_${periodLabel(period).replace(/[（）]/g, '')}_${formatDate(now)}.xlsx`
 
     return new NextResponse(new Uint8Array(buffer), {
       headers: {

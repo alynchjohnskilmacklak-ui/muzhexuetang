@@ -3,6 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { apiHandler } from '@/lib/api-handler'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +36,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
         where: { studentId: id, status: 'ACTIVE' },
         data: { status: 'WITHDRAWN', remainHours: 0 },
       })
+      await syncStudentHourSnapshot(tx, id)
       await tx.performancePost.updateMany({
         where: { studentId: id, deletedAt: null },
         data: { deletedAt: new Date(), isReadByParent: true },

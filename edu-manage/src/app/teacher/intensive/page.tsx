@@ -1,4 +1,5 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -8,7 +9,6 @@ import {
   Button,
   Card,
   Drawer,
-  Empty,
   Input,
   Modal,
   Select,
@@ -21,6 +21,7 @@ import {
   CalendarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
+  CrownOutlined,
   EditOutlined,
   PlusOutlined,
   TeamOutlined,
@@ -30,10 +31,24 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 
 const { Title, Text } = Typography
 const fetcher = async (url: string) => {
-  const response = await fetch(url)
-  const payload = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(payload.error || '加载失败')
-  return payload
+  const controller = new AbortController()
+  let timedOut = false
+  const timeout = window.setTimeout(() => {
+    timedOut = true
+    controller.abort()
+  }, 15_000)
+
+  try {
+    const response = await fetch(url, { signal: controller.signal })
+    const payload = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(payload.error || '加载失败')
+    return payload
+  } catch (fetchError) {
+    if (timedOut) throw new Error('加载超时，请检查网络后重试')
+    throw fetchError
+  } finally {
+    window.clearTimeout(timeout)
+  }
 }
 
 type TeachingType = 'ONE_ON_ONE' | 'ONE_ON_TWO' | 'ONE_ON_THREE'
@@ -156,10 +171,10 @@ function statusLabel(lesson: IntensiveLesson) {
 export default function TeacherIntensivePage() {
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
-  const { data, error, isLoading, mutate } = useSWR<IntensivePayload>(
+  const { data, error, isLoading, isValidating, mutate } = useSWR<IntensivePayload>(
     '/api/teacher/intensive-lessons',
     fetcher,
-    { refreshInterval: 5000, revalidateOnFocus: true, revalidateOnReconnect: true },
+    { refreshInterval: 15_000, revalidateOnFocus: true, revalidateOnReconnect: true },
   )
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [scheduleMode, setScheduleMode] = useState<ScheduleMode>('schedule')
@@ -243,6 +258,27 @@ export default function TeacherIntensivePage() {
     }))
   }
 
+  // 本次上课时长（按开始/结束时间实时计算，支持学生提前结束的按实际时长预约）
+  const durationMin = useMemo(() => {
+    if (!draft.startTime || !draft.endTime) return 0
+    const [sh, sm] = draft.startTime.split(':').map(Number)
+    const [eh, em] = draft.endTime.split(':').map(Number)
+    const diff = (eh * 60 + em) - (sh * 60 + sm)
+    return diff > 0 ? diff : 0
+  }, [draft.startTime, draft.endTime])
+
+  const shiftEndTime = (minutes: number) => {
+    if (!draft.startTime) return
+    const [h, m] = draft.startTime.split(':').map(Number)
+    const total = (h * 60 + m) + minutes
+    const nh = Math.floor(total / 60) % 24
+    const nm = total % 60
+    setDraft((current) => ({
+      ...current,
+      endTime: `${String(nh).padStart(2, '0')}:${String(nm).padStart(2, '0')}`,
+    }))
+  }
+
   const saveSchedule = async () => {
     if (!selectedGroup) return toast.error('请选择个性化课程')
     const limit = expectedStudents(selectedGroup.teachingType)
@@ -311,8 +347,22 @@ export default function TeacherIntensivePage() {
     })
   }
 
-  if (isLoading) {
-    return <div style={{ padding: isMobile ? 12 : 24 }}><Skeleton active paragraph={{ rows: 10 }} /></div>
+  if (error && !data) {
+    return (
+      <div style={{ padding: isMobile ? 12 : 24 }}>
+        <Alert
+          type="error"
+          showIcon
+          message={error.message || '个性化课程加载失败'}
+          description="页面加载未完成，可以检查网络后重新尝试。"
+          action={<Button onClick={() => void mutate()} loading={isValidating}>重新加载</Button>}
+        />
+      </div>
+    )
+  }
+
+  if (isLoading && !data) {
+    return <div role="status" aria-live="polite" aria-busy="true" style={{ minHeight: '40vh', padding: isMobile ? 12 : 24 }}><Skeleton active paragraph={{ rows: 8 }} /></div>
   }
 
   return (
@@ -330,52 +380,90 @@ export default function TeacherIntensivePage() {
         flexDirection: 'column',
         gap: isMobile ? 12 : 18,
       }}>
+        {/* Hero：VIP 课程预约 · 贵宾服务（深墨绿鎏金） */}
         <div style={{
-          display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          alignItems: isMobile ? 'stretch' : 'center',
-          justifyContent: 'space-between',
-          gap: 12,
+          borderRadius: 18, overflow: 'hidden',
+          border: '1px solid #C9A45C',
+          boxShadow: '0 10px 26px rgba(18,60,53,.25)',
+          background: 'linear-gradient(150deg,#17352F 0%,#0E5E4E 55%,#0B4B40 100%)',
+          padding: 16, color: '#F5F1E8',
         }}>
-          <div>
-            <Text style={{ color: 'var(--color-success)', fontSize: 13, fontWeight: 700 }}>教师工作台</Text>
-            <Title level={isMobile ? 3 : 2} style={{ margin: '4px 0 2px', color: 'var(--color-ink)' }}>
-              我的个性化课程
-            </Title>
-            <Text style={{ color: 'var(--color-ink-muted)' }}>
-              为已分配的一对一、一对二或一对三课程自主安排单次上课时间。
-            </Text>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              fontSize: 11, fontWeight: 700, letterSpacing: 1,
+              color: '#F2E3B6', background: 'rgba(201,164,92,.16)',
+              border: '1px solid rgba(201,164,92,.5)',
+              padding: '3px 10px', borderRadius: 999, whiteSpace: 'nowrap',
+            }}>
+              <CrownOutlined /> VIP 课程预约 · 贵宾服务
+            </span>
+            <Button
+              icon={<CalendarOutlined />}
+              onClick={() => router.push('/teacher/schedule')}
+              style={{
+                minHeight: 34, borderRadius: 999, fontSize: 12, fontWeight: 600,
+                color: '#F2E3B6', background: 'rgba(201,164,92,.12)',
+                border: '1px solid rgba(201,164,92,.55)',
+              }}
+            >
+              查看课表
+            </Button>
           </div>
-          <Space wrap style={{ width: isMobile ? '100%' : undefined }}>
-            {!!groups.length && (
+          <div style={{ marginTop: 12, fontSize: 17, fontWeight: 800, color: '#F5F1E8', lineHeight: 1.4 }}>
+            {groups.length ? `${groups.length} 门个性化课程待安排` : '我的个性化课程'}
+          </div>
+          <div style={{ marginTop: 4, fontSize: 11.5, color: 'rgba(245,241,232,.72)', lineHeight: 1.6 }}>
+            预约提交后管理端可查看，课程完成并提交考勤后再审核结算课时与工资
+          </div>
+          <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+            {[
+              { label: '个性化课程', value: groups.length, suffix: '门', icon: <TeamOutlined />, highlight: groups.length > 0 },
+              { label: '已审核授课', value: approvedHours.toFixed(1), suffix: '小时', icon: <CheckCircleOutlined />, highlight: false },
+              { label: '待审核授课', value: pendingReviewHours.toFixed(1), suffix: '小时', icon: <ClockCircleOutlined />, highlight: pendingReviewHours > 0 },
+            ].map((item) => (
+              <div key={item.label} style={{
+                textAlign: 'center', padding: '10px 2px', borderRadius: 12,
+                background: item.highlight ? 'linear-gradient(135deg,#F2E3B6,#D8BC7C)' : 'rgba(255,255,255,.08)',
+                border: item.highlight ? '1px solid rgba(242,227,182,.7)' : '1px solid rgba(242,227,182,.18)',
+              }}>
+                <div style={{ fontSize: 17, fontWeight: 800, color: item.highlight ? '#123C35' : '#F5F1E8', fontVariantNumeric: 'tabular-nums' }}>
+                  {item.value}<span style={{ fontSize: 10.5, fontWeight: 600 }}> {item.suffix}</span>
+                </div>
+                <div style={{ marginTop: 2, fontSize: 10, color: item.highlight ? 'rgba(18,60,53,.7)' : 'rgba(245,241,232,.6)' }}>{item.label}</div>
+              </div>
+            ))}
+          </div>
+          {!!groups.length && (
+            <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => openCreate(visibleGroups[0] || groups[0])}
-                style={{ minHeight: 44, borderRadius: 10, flex: isMobile ? 1 : undefined }}
+                style={{
+                  minHeight: 40, borderRadius: 10, fontWeight: 600, fontSize: 13,
+                  background: 'linear-gradient(135deg,#F2E3B6,#D8BC7C)', color: '#123C35', border: 'none',
+                  boxShadow: '0 4px 12px rgba(18,60,53,.3)',
+                }}
               >
-                安排课程
+                约个性化课程
               </Button>
-            )}
-            {!!groups.length && (
               <Button
+                icon={<ClockCircleOutlined />}
                 onClick={() => openHistory(visibleGroups[0] || groups[0])}
-                style={{ minHeight: 44, borderRadius: 10, flex: isMobile ? 1 : undefined }}
+                style={{
+                  minHeight: 40, borderRadius: 10, fontWeight: 600, fontSize: 13,
+                  color: '#F2E3B6', background: 'rgba(201,164,92,.12)',
+                  border: '1px solid rgba(201,164,92,.55)',
+                }}
               >
                 补录历史课次
               </Button>
-            )}
-            <Button
-              icon={<CalendarOutlined />}
-              onClick={() => router.push('/teacher/schedule')}
-              style={{ minHeight: 44, borderRadius: 10, flex: isMobile ? 1 : undefined }}
-            >
-              课表
-            </Button>
-          </Space>
+            </div>
+          )}
         </div>
 
-        {error && <Alert type="error" showIcon message={error.message || '个性化课程加载失败'} />}
+        {error && <Alert type="error" showIcon message={error.message || '个性化课程刷新失败'} action={<Button onClick={() => void mutate()} loading={isValidating}>重新加载</Button>} />}
         {!!data?.unclassifiedLessonCount && (
           <Alert
             type="warning"
@@ -384,43 +472,6 @@ export default function TeacherIntensivePage() {
             description="请联系管理员补齐历史课次学科，避免数学、英语、物理等数据混合。"
           />
         )}
-
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-          gap: isMobile ? 6 : 12,
-        }}>
-          {[
-            { label: '个性化课程', value: groups.length, suffix: '门', icon: <TeamOutlined /> },
-            { label: '已审核授课', value: approvedHours.toFixed(1), suffix: '小时', icon: <CheckCircleOutlined /> },
-            { label: '待审核授课', value: pendingReviewHours.toFixed(1), suffix: '小时', icon: <ClockCircleOutlined /> },
-          ].map((item) => (
-            <Card key={item.label} styles={{ body: { padding: isMobile ? '10px 6px' : 16 } }} style={{ borderRadius: 14 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'center' : undefined, gap: 12 }}>
-                {!isMobile && (
-                <div style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 10,
-                  display: 'grid',
-                  placeItems: 'center',
-                  color: 'var(--color-success)',
-                  background: 'var(--color-success-bg)',
-                  fontSize: 18,
-                }}>
-                  {item.icon}
-                </div>
-                )}
-                <div>
-                  <div style={{ color: 'var(--color-ink-subtle)', fontSize: isMobile ? 11 : 12, whiteSpace: 'nowrap' }}>{item.label}</div>
-                  <div style={{ color: 'var(--color-ink)', fontSize: isMobile ? 16 : 20, fontWeight: 700, whiteSpace: 'nowrap' }}>
-                    {item.value}{item.suffix}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
 
         {!!subjects.length && (
           <div style={{ overflowX: 'auto', paddingBottom: 2 }}>
@@ -440,9 +491,23 @@ export default function TeacherIntensivePage() {
         )}
 
         {!groups.length ? (
-          <Card style={{ borderRadius: 14 }}>
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="管理员尚未为你分配个性化课程" />
-          </Card>
+          <div style={{
+            borderRadius: 14, padding: '30px 18px', textAlign: 'center',
+            background: 'linear-gradient(150deg,#FFFDF7,#FBF3E4)',
+            border: '1px dashed rgba(201,164,92,.5)',
+          }}>
+            <div style={{
+              width: 48, height: 48, margin: '0 auto 10px', borderRadius: 999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'linear-gradient(135deg,#F2E3B6,#D8BC7C)', color: '#123C35', fontSize: 21,
+            }}>
+              <CrownOutlined />
+            </div>
+            <div style={{ color: '#2B2110', fontSize: 14, fontWeight: 700 }}>暂无 VIP 个性化课程</div>
+            <div style={{ marginTop: 6, color: '#9A8E7A', fontSize: 12, lineHeight: 1.7, maxWidth: 320, margin: '6px auto 0' }}>
+              管理员为一对一 / 一对二 / 一对三学员分配课程后，会第一时间出现在这里，届时即可自主预约上课时段。
+            </div>
+          </div>
         ) : (
           <div style={{
             display: 'grid',
@@ -461,20 +526,25 @@ export default function TeacherIntensivePage() {
               return (
                 <Card
                   key={group.id}
-                  style={{ borderRadius: 14, border: '1px solid var(--color-hairline)' }}
+                  style={{
+                    borderRadius: 16,
+                    border: '1px solid rgba(201,164,92,.4)',
+                    boxShadow: '0 3px 12px rgba(58,50,39,.07)',
+                    background: 'linear-gradient(160deg,#FFFDF7,#FDF6E9)',
+                  }}
                   styles={{ body: { padding: isMobile ? 14 : 18 } }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
                     <div style={{ minWidth: 0 }}>
                       <Space size={6} wrap>
-                        <Tag color="green" style={{ borderRadius: 999 }}>{group.teachingTypeLabel}</Tag>
-                        <Tag style={{ borderRadius: 999 }}>{group.subject}</Tag>
+                        <Tag color="gold" style={{ borderRadius: 999, fontWeight: 600 }}>{group.teachingTypeLabel}</Tag>
+                        <Tag color="green" style={{ borderRadius: 999 }}>{group.subject}</Tag>
                         {group.grade && <Tag style={{ borderRadius: 999 }}>{group.grade}</Tag>}
                       </Space>
-                      <Title level={4} style={{ margin: '8px 0 2px', color: 'var(--color-ink)' }}>
+                      <Title level={4} style={{ margin: '8px 0 2px', color: '#2B2110' }}>
                         {group.students.map((student) => student.name).join('、')}
                       </Title>
-                      <Text style={{ color: 'var(--color-ink-subtle)', fontSize: 12 }}>
+                      <Text style={{ color: '#9A8E7A', fontSize: 12 }}>
                         {group.name} · 上课地点灵活安排 · 默认{group.defaultMinutes || 60}分钟
                       </Text>
                     </div>
@@ -483,9 +553,12 @@ export default function TeacherIntensivePage() {
                         type="primary"
                         icon={<PlusOutlined />}
                         onClick={() => openCreate(group)}
-                        style={{ minHeight: 40, borderRadius: 10, flexShrink: 0 }}
+                        style={{
+                          minHeight: 40, borderRadius: 10, flexShrink: 0, fontWeight: 600,
+                          background: 'linear-gradient(135deg,#123C35,#0E5E4E)', border: '1px solid rgba(201,164,92,.55)',
+                        }}
                       >
-                        安排新课
+                        约新课
                       </Button>
                     )}
                   </div>
@@ -500,14 +573,17 @@ export default function TeacherIntensivePage() {
                       type="primary"
                       icon={<PlusOutlined />}
                       onClick={() => openCreate(group)}
-                      style={{ minHeight: 44, borderRadius: 10 }}
+                      style={{
+                        minHeight: 44, borderRadius: 10, fontWeight: 600,
+                        background: 'linear-gradient(135deg,#123C35,#0E5E4E)', border: '1px solid rgba(201,164,92,.55)',
+                      }}
                     >
-                      安排课程
+                      约个性化课程
                     </Button>
                     <Button
                       icon={<ClockCircleOutlined />}
                       onClick={() => openHistory(group)}
-                      style={{ minHeight: 44, borderRadius: 10 }}
+                      style={{ minHeight: 44, borderRadius: 10, fontWeight: 600, color: '#A06E0B', border: '1px solid rgba(201,164,92,.5)' }}
                     >
                       补录历史课次
                     </Button>
@@ -517,7 +593,8 @@ export default function TeacherIntensivePage() {
                     marginTop: 14,
                     padding: 12,
                     borderRadius: 12,
-                    background: 'var(--color-surface-3)',
+                    background: 'linear-gradient(135deg,#FFF9EF,#FDF1DE)',
+                    border: '1px solid rgba(232,120,74,.18)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 8,
@@ -528,7 +605,7 @@ export default function TeacherIntensivePage() {
                       gap: 8,
                       paddingBottom: 10,
                       marginBottom: 2,
-                      borderBottom: '1px solid var(--color-hairline)',
+                      borderBottom: '1px solid rgba(201,164,92,.3)',
                     }}>
                       <div>
                         <Text style={{ display: 'block', color: 'var(--color-ink-subtle)', fontSize: 12 }}>已审核授课</Text>
@@ -636,7 +713,7 @@ export default function TeacherIntensivePage() {
           ? '调整上课时间'
           : scheduleMode === 'history'
             ? '补录历史课次'
-            : '安排课程'}
+            : '预约个性化课程'}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         placement={isMobile ? 'bottom' : 'right'}
@@ -650,7 +727,7 @@ export default function TeacherIntensivePage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <Button onClick={() => setDrawerOpen(false)} style={{ minHeight: 46, borderRadius: 10 }}>取消</Button>
             <Button type="primary" loading={saving} onClick={saveSchedule} style={{ minHeight: 46, borderRadius: 10 }}>
-              {scheduleMode === 'edit' ? '保存调整' : scheduleMode === 'history' ? '确认补录' : '确认安排'}
+              {scheduleMode === 'edit' ? '保存调整' : scheduleMode === 'history' ? '确认补录' : '确认预约'}
             </Button>
           </div>
         )}
@@ -661,12 +738,14 @@ export default function TeacherIntensivePage() {
             showIcon
             message={scheduleMode === 'history' || draft.lessonDate < localDateInput()
               ? '这是历史补录：建立课次后还需填写实际时长和考勤，管理员审核通过后才累计课时和工资。'
-              : '未来课次可提前60天安排；未开始且未结算的课次可由教师调整。'}
+              : scheduleMode === 'edit'
+                ? '保存后会同步更新管理端约课记录。课程完成并提交考勤和实际时长后，才进入管理员审核与课时、工资结算。'
+                : '预约提交后会列入管理端约课记录。课程完成并提交考勤和实际时长后，才进入管理员审核；审核通过后结算学生课时与教师工资。'}
           />
 
           <div>
             <Text strong>学生与授课学科</Text>
-            <Select
+            <AdaptiveSelect
               disabled={Boolean(draft.lessonId)}
               value={draft.scopeId || undefined}
               onChange={selectScope}
@@ -736,9 +815,37 @@ export default function TeacherIntensivePage() {
             </div>
           </div>
 
+          {/* 时长辅助：人性化快速调整 */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+            padding: '10px 12px', borderRadius: 10,
+            background: 'linear-gradient(135deg,#FFF9EF,#FDF1DE)',
+            border: '1px solid rgba(232,120,74,.25)',
+          }}>
+            <Text strong style={{ fontSize: 12, color: '#8A5B00' }}>本次时长</Text>
+            <Tag color="gold" style={{ borderRadius: 999, margin: 0, fontWeight: 700 }}>
+              {durationMin ? `${durationMin} 分钟` : '请选择时间'}
+            </Tag>
+            <Space size={4} wrap>
+              {[30, 60, 90, 120].map((minutes) => (
+                <Button
+                  key={minutes}
+                  size="small"
+                  onClick={() => shiftEndTime(minutes)}
+                  style={{ borderRadius: 999, fontSize: 11 }}
+                >
+                  {minutes}分钟
+                </Button>
+              ))}
+            </Space>
+            <Text style={{ color: '#B07A3C', fontSize: 11, width: '100%' }}>
+              若学生提前结束（如原报2小时、实际只上1小时），按实际结束时间调整即可，管理员会按审核通过的时长结算。
+            </Text>
+          </div>
+
           <div>
             <Text strong>上课学生</Text>
-            <Select
+            <AdaptiveSelect
               mode="multiple"
               disabled={Boolean(draft.lessonId)}
               value={draft.studentIds}

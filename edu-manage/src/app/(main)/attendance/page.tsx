@@ -368,7 +368,7 @@ export default function AttendancePage() {
                             {STATUS_TAG[attStatus]?.label || attStatus}
                           </Tag>
                           <Button size="small" type="primary"
-                            style={{ background: '#E8784A', borderColor: '#E8784A', borderRadius: 6, fontSize: 11 }}
+                            style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', borderRadius: 6, fontSize: 11 }}
                             onClick={() => handleSelectSchedule(s)}>
                             {isSelected ? '考勤中' : '去考勤'}
                           </Button>
@@ -488,7 +488,7 @@ export default function AttendancePage() {
                       </Space>
                       <Button type="primary" loading={submitting} onClick={handleSubmit}
                         disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}
-                        style={{ background: '#E8784A', borderColor: '#E8784A', minWidth: 120 }}
+                        style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', minWidth: 120 }}
                         icon={<CheckCircleOutlined />}>提交考勤</Button>
                     </div>
                   </Card>
@@ -662,7 +662,7 @@ export default function AttendancePage() {
                     <Button type="primary" loading={submitting} size="large"
                       disabled={selectedSchedule.intensiveMode === 'INTENSIVE' && selectedSchedule.settlementStatus !== 'UNSETTLED'}
                       onClick={async () => { await handleSubmit(); setAttendanceDrawerOpen(false) }}
-                      style={{ background: '#E8784A', borderColor: '#E8784A', height: 44, borderRadius: 8, padding: '0 24px' }}
+                      style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', height: 44, borderRadius: 8, padding: '0 24px' }}
                       icon={<CheckCircleOutlined />}>
                       提交考勤
                     </Button>

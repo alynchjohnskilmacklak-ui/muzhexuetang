@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>牧哲学堂 · 系统登录（手机端高级版预览）</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:
+      radial-gradient(520px 260px at 88% -6%, rgba(232,160,90,.18), transparent 60%),
+      radial-gradient(420px 240px at -10% 24%, rgba(232,120,74,.10), transparent 55%),
+      linear-gradient(180deg,#FDF9F1 0%,#F7EEDF 55%,#F3E7D6 100%);
+    min-height:100vh;color:#2B1E10;
+  }
+  /* —— 顶部品牌条 + 轮播 —— */
+  .brand-bar{
+    position:relative;width:100%;height:312px;overflow:hidden;
+    background:linear-gradient(160deg,#1A1107,#2E2113);
+    box-shadow:0 10px 26px rgba(43,30,16,.26);
+  }
+  .stage{
+    position:absolute;inset:12px 12px 64px;border-radius:16px;overflow:hidden;
+    border:1px solid rgba(232,160,90,.25);
+    background:#f5eee5;box-shadow:0 16px 30px rgba(0,0,0,.24);
+    touch-action:pan-y;cursor:grab;user-select:none;
+  }
+  .slide-track{position:absolute;inset:0;display:flex;transition:transform .55s cubic-bezier(.22,1,.36,1)}
+  .slide{position:relative;flex:0 0 100%;overflow:hidden}
+  .slide .poster{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+  .slide .poster .ph{
+    width:64px;height:64px;border-radius:18px;display:grid;place-items:center;
+    font-size:26px;font-weight:800;color:#fff;letter-spacing:2px;
+    background:linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,.06));
+    border:1px solid rgba(255,255,255,.35);box-shadow:0 10px 24px rgba(0,0,0,.18);
+  }
+  .slide .poster .pt{font-size:15px;font-weight:800;color:#2B1E10;letter-spacing:2px}
+  .slide .poster .pk{font-size:11px;color:#8a7c68;letter-spacing:1px}
+  .slide .poster .note{position:absolute;bottom:10px;font-size:9.5px;color:#b3a68f}
+  .brand-bar .shade{position:absolute;inset:0;z-index:2;pointer-events:none;
+    background:linear-gradient(180deg,rgba(24,13,7,.55) 0%,transparent 28%,transparent 60%,rgba(24,13,7,.86) 100%)}
+  .brand-bar .logo{position:absolute;top:18px;left:20px;z-index:3;color:#fff;font-weight:800;font-size:16px;letter-spacing:2px;text-shadow:0 1px 4px rgba(0,0,0,.3)}
+  .brand-bar .logo small{display:block;font-size:8.5px;font-weight:600;letter-spacing:2.5px;color:rgba(255,255,255,.72);margin-top:2px}
+  .caption{position:absolute;left:18px;right:18px;bottom:12px;z-index:3;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;color:#fff}
+  .caption .t span{display:block;font-size:9px;font-weight:700;letter-spacing:1.5px;color:#ffc39f;margin-bottom:2px}
+  .caption .t h2{font-size:18px;font-weight:800;white-space:nowrap}
+  .dots{display:flex;align-items:center;gap:4px}
+  .dots i{width:5px;height:5px;border-radius:99px;background:rgba(255,255,255,.35);transition:all .3s}
+  .dots i.on{width:16px;background:#ffc39f}
+  .hint{position:absolute;top:16px;right:16px;z-index:3;font-size:9px;color:rgba(255,255,255,.6);letter-spacing:1px}
+
+  /* —— 表单区 —— */
+  .form-zone{padding:20px 16px 40px}
+  .form-head{text-align:center;margin-bottom:18px}
+  .form-head .en{font-size:10px;letter-spacing:3.5px;color:#b3a68f}
+  .form-head h1{font-size:21px;font-weight:800;color:#2B1E10;margin-top:6px;letter-spacing:1px}
+  .form-head .sub{font-size:12.5px;color:#9a8e7a;margin-top:6px}
+  .card{
+    background:rgba(255,255,255,.94);border-radius:22px;padding:24px 20px;
+    border:1px solid rgba(232,150,90,.28);
+    box-shadow:0 18px 44px rgba(200,150,90,.18),0 2px 8px rgba(0,0,0,.03);
+  }
+  .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:22px}
+  .role{
+    height:62px;border-radius:15px;border:1px solid rgba(232,120,74,.16);cursor:pointer;
+    background:rgba(255,255,255,.85);color:#8a7c68;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    transition:all .22s ease;
+  }
+  .role b{font-size:14px}
+  .role span{font-size:10.5px;color:#b8b0a5}
+  .role.on{background:linear-gradient(135deg,#EE8B5C,#D96438);color:#fff;border:none;box-shadow:0 8px 18px rgba(232,120,74,.30)}
+  .role.on span{color:rgba(255,255,255,.85)}
+  .field{margin-bottom:8px}
+  .field label{display:block;font-size:12.5px;color:#9a8e7a;margin:12px 0 7px;letter-spacing:1px}
+  .input{
+    display:flex;align-items:center;gap:9px;height:50px;padding:0 14px;border-radius:14px;
+    background:rgba(250,245,237,.85);border:1px solid rgba(200,150,90,.24);
+    transition:border-color .2s,box-shadow .2s,background .2s;
+  }
+  .input:focus-within{border-color:rgba(232,120,74,.55);box-shadow:0 0 0 3px rgba(232,120,74,.12);background:#fff}
+  .input .ic{color:#C5A28A;font-size:15px;flex:none}
+  .input input{flex:1;border:0;outline:0;background:transparent;font-size:14.5px;color:#2B1E10;height:100%}
+  .input input::placeholder{color:#c2b6a6}
+  .divs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+  .div{
+    height:46px;border-radius:13px;border:1px solid rgba(232,120,74,.16);cursor:pointer;
+    background:rgba(255,255,255,.85);color:#8a7c68;font-size:14px;display:grid;place-items:center;
+    transition:all .2s ease;
+  }
+  .div.on{background:linear-gradient(135deg,#EE8B5C,#D96438);color:#fff;border:none;box-shadow:0 6px 14px rgba(232,120,74,.24);font-weight:600}
+  .row{display:flex;align-items:center;justify-content:space-between;margin:14px 0 18px;gap:10px}
+  .ck{display:flex;align-items:center;gap:7px;font-size:13px;color:#8a7c68}
+  .ck i{width:17px;height:17px;border-radius:5px;border:1.5px solid rgba(232,120,74,.45);display:grid;place-items:center;font-size:11px;color:#fff;font-style:normal}
+  .ck i.on{background:linear-gradient(135deg,#EE8B5C,#D96438);border-color:transparent}
+  .ck em{font-style:normal;color:#9a8e7a;font-size:11.5px}
+  .btn{
+    width:100%;height:50px;border:0;border-radius:15px;cursor:pointer;
+    background:linear-gradient(135deg,#EE8B5C,#D96438);color:#fff;
+    font-size:16px;font-weight:800;letter-spacing:6px;
+    box-shadow:0 8px 22px rgba(232,120,74,.38),inset 0 1px 0 rgba(255,255,255,.35);
+    transition:transform .15s;
+  }
+  .btn:active{transform:scale(.97)}
+  .foot{text-align:center;font-size:10.5px;color:#c8c4be;margin-top:16px}
+  .preview-tip{margin:0 16px 14px;padding:10px 14px;border-radius:12px;background:rgba(232,160,90,.12);border:1px dashed rgba(232,120,74,.4);font-size:11px;color:#a06a3f;line-height:1.7}
+</style>
+</head>
+<body>
+
+<!-- 顶部品牌条 + 可滑动轮播 -->
+<div class="brand-bar">
+  <div class="hint">左右滑动 · 自动轮播</div>
+  <div class="logo">牧哲学堂<small>MOREJOY · 河北新乐</small></div>
+  <div class="stage" id="stage">
+    <div class="slide-track" id="track" style="transform:translateX(0)">
+      <!-- 轮播占位：线上为真实业务海报，此处为预览渐变 -->
+      <div class="slide" style="background:linear-gradient(150deg,#F7E4CE,#F0CDA8)"><div class="poster"><div class="ph" style="background:linear-gradient(135deg,#E8A05A,#D96438)">寒</div><div class="pt">寒暑假冲刺预备课</div><div class="pk">集中学习 · 系统复习 · 查漏补缺 · 专项训练</div><div class="note">预览占位 · 线上为真实海报</div></div></div>
+      <div class="slide" style="background:linear-gradient(150deg,#FBE8D8,#F2CBB0)"><div class="poster"><div class="ph" style="background:linear-gradient(135deg,#EE8B5C,#C95F36)">一</div><div class="pt">各年级一对一冲刺</div><div class="pk">个性化定制 · 及时反馈 · 学情可视化</div><div class="note">预览占位 · 线上为真实海报</div></div></div>
+      <div class="slide" style="background:linear-gradient(150deg,#F5E6CE,#ECD0A9)"><div class="poster"><div class="ph" style="background:linear-gradient(135deg,#D9A05B,#B97A3C)">晚</div><div class="pt">晚间课业辅导营</div><div class="pk">当天问题当天解决，学习过程看得见</div><div class="note">预览占位 · 线上为真实海报</div></div></div>
+      <div class="slide" style="background:linear-gradient(150deg,#FBEBD9,#F0D2B2)"><div class="poster"><div class="ph" style="background:linear-gradient(135deg,#EE8B5C,#D96438)">周</div><div class="pt">周末先锋营</div><div class="pk">一周一清，周周领先</div><div class="note">预览占位 · 线上为真实海报</div></div></div>
+      <div class="slide" style="background:linear-gradient(150deg,#F6E6D0,#EDCDA6)"><div class="poster"><div class="ph" style="background:linear-gradient(135deg,#E8A05A,#C95F36)">中</div><div class="pt">中考升学规划</div><div class="pk">提前了解 · 科学定位 · 从容选择</div><div class="note">预览占位 · 线上为真实海报</div></div></div>
+      <div class="slide" style="background:linear-gradient(150deg,#FBE9D6,#F1CFB2)"><div class="poster"><div class="ph" style="background:linear-gradient(135deg,#D98B4A,#B96E34)">高</div><div class="pt">高考志愿咨询</div><div class="pk">专业规划 · 多重审核 · 家庭放心</div><div class="note">预览占位 · 线上为真实海报</div></div></div>
+      <div class="slide" style="background:linear-gradient(150deg,#F5E4CB,#ECC9A1)"><div class="poster"><div class="ph" style="background:linear-gradient(135deg,#E8985A,#C96136)">单</div><div class="pt">单招文化课辅导</div><div class="pk">小班精讲 · 高频考点 · 稳步提升</div><div class="note">预览占位 · 线上为真实海报</div></div></div>
+      <div class="slide" style="background:linear-gradient(150deg,#FBE8D3,#F2C9A8)"><div class="poster"><div class="ph" style="background:linear-gradient(135deg,#E8A05A,#D96438)">研</div><div class="pt">考研公共课辅导</div><div class="pk">系统精讲 · 真题训练 · 少走弯路</div><div class="note">预览占位 · 线上为真实海报</div></div></div>
+    </div>
+  </div>
+  <div class="shade"></div>
+  <div class="caption">
+    <div class="t"><span>八类业务服务</span><h2 id="capTitle">寒暑假冲刺预备课</h2></div>
+    <div class="dots" id="dots"></div>
+  </div>
+</div>
+
+<div class="preview-tip">这是一份手机端登录页的<b>静态设计预览</b>：顶部海报区支持<b>左右滑动 + 3.5 秒自动轮播</b>（8 张业务图，线上为真实海报）；表单为暖金轻奢风格。最终以部署后的真实页面为准。</div>
+
+<!-- 表单区 -->
+<div class="form-zone">
+  <div class="form-head">
+    <div class="en">MOREJOY EDUCATION · MANAGEMENT</div>
+    <h1>欢迎回来</h1>
+    <div class="sub">请选择对应身份入口，再输入账号密码。</div>
+  </div>
+
+  <div class="card">
+    <div class="roles" id="roles">
+      <button class="role on" data-r="管理者"><b>管理者</b><span>掌舵全局</span></button>
+      <button class="role" data-r="教师端"><b>教师端</b><span>点燃思想</span></button>
+      <button class="role" data-r="家长端"><b>家长端</b><span>查看记录</span></button>
+    </div>
+
+    <label style="font-size:12.5px;color:#9a8e7a;margin-bottom:8px;display:block">选择学部</label>
+    <div class="divs">
+      <button class="div on">初中部</button>
+      <button class="div">高中部</button>
+    </div>
+
+    <div class="field">
+      <label>账号</label>
+      <div class="input"><span class="ic">👤</span><input type="text" placeholder="请输入账号"/></div>
+    </div>
+    <div class="field">
+      <label>密码</label>
+      <div class="input"><span class="ic">🔒</span><input type="password" placeholder="请输入密码"/></div>
+    </div>
+
+    <div class="row">
+      <span class="ck"><i class="on">✓</i>记住账号</span>
+      <em style="font-style:normal;color:#9a8e7a;font-size:11.5px">密码由手机或浏览器安全保存</em>
+    </div>
+
+    <button class="btn">登 录</button>
+  </div>
+
+  <div class="foot">牧哲学堂 · 教学记录与家校沟通平台</div>
+</div>
+
+<script>
+(function(){
+  var track = document.getElementById('track');
+  var slides = track.children.length;
+  var capTitle = document.getElementById('capTitle');
+  var dotsEl = document.getElementById('dots');
+  var titles = ['寒暑假冲刺预备课','各年级一对一冲刺','晚间课业辅导营','周末先锋营','中考升学规划','高考志愿咨询','单招文化课辅导','考研公共课辅导'];
+  var cur = 0, timer = null, down = null;
+
+  for (var i = 0; i < slides; i++){ var d = document.createElement('i'); if(i===0)d.className='on'; dotsEl.appendChild(d); }
+
+  function go(n){
+    cur = (n + slides) % slides;
+    track.style.transform = 'translateX(-' + (cur * 100) + '%)';
+    capTitle.textContent = titles[cur];
+    var ds = dotsEl.children;
+    for (var k = 0; k < ds.length; k++) ds[k].className = k === cur ? 'on' : '';
+  }
+
+  function start(){ stop(); timer = setInterval(function(){ go(cur + 1); }, 3500); }
+  function stop(){ if (timer){ clearInterval(timer); timer = null; } }
+
+  var stage = document.getElementById('stage');
+  stage.addEventListener('pointerdown', function(e){ down = { x: e.clientX, y: e.clientY }; stop(); });
+  stage.addEventListener('pointerup', function(e){
+    if (!down) return;
+    var dx = e.clientX - down.x, dy = e.clientY - down.y;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+    down = null; start();
+  });
+  stage.addEventListener('pointercancel', function(){ down = null; start(); });
+  stage.addEventListener('pointerleave', function(e){
+    if (!down) return;
+    var dx = e.clientX - down.x;
+    if (Math.abs(dx) > 40) go(cur + (dx < 0 ? 1 : -1));
+    down = null; start();
+  });
+
+  var roles = document.getElementById('roles');
+  roles.addEventListener('click', function(e){
+    var b = e.target.closest('.role'); if (!b) return;
+    roles.querySelectorAll('.role').forEach(function(r){ r.className = 'role'; });
+    b.className = 'role on';
+  });
+
+  start();
+})();
+</script>
+</body>
+</html>

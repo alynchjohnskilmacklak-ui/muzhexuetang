@@ -14,7 +14,7 @@
  */
 
 import { writeFile, mkdir, unlink, readFile, open, stat } from 'fs/promises'
-import { join, extname } from 'path'
+import { join, extname, dirname } from 'path'
 import crypto from 'crypto'
 
 // ---- types ----
@@ -141,7 +141,7 @@ class LocalStorageDriver implements StorageDriver {
 
   async putBuffer(key: string, buffer: Buffer, _mimeType: string): Promise<UploadResult> {
     const filePath = join(UPLOAD_ROOT, key)
-    const dir = filePath.substring(0, filePath.lastIndexOf('/'))
+    const dir = dirname(filePath)
     await mkdir(dir, { recursive: true })
     await writeFile(filePath, buffer)
     return {

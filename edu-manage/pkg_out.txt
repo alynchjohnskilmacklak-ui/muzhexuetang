@@ -1,0 +1,450 @@
+﻿
+================================================================
+ edu-manage Linux 预构建（Docker 容器内）
+ 项目: D:\01muzhexuetang\muzhexuetang\coding\edu-manage
+================================================================
+
+==> [1/4] 检查 Docker 引擎
+   Docker 引擎 v29.4.0 就绪
+   Docker CLI: C:\Users\Administrator\AppData\Local\Programs\DockerDesktop\resources\bin\docker.exe
+==> [2/4] 准备输出目录 D:\01muzhexuetang\muzhexuetang\coding\edu-manage\release
+==> [3/4] 容器内构建（Linux Node 22，首次约 8-15 分钟）
+   npm registry: https://registry.npmmirror.com
+== [1/8] 容器准备：安装 openssl（Prisma 引擎 libssl 绑定需要）==
+== [2/8] 复制源码到容器工作区 ==
+== [3/8] npm ci ==
+added 1105 packages in 2m
+== [4/8] prisma generate + next build ==
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 705ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Help us improve the Prisma ORM for everyone. Share your feedback in a short 2-min survey: https://pris.ly/orm/survey/release-5-22
+
+
+> edu-manage@0.1.0 build
+> next build --webpack
+
+▲ Next.js 16.3.4 (webpack)
+✓ Running next.config.ts took 37ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+- Experiments (use with caution):
+  · cpus: 2
+  · optimizePackageImports
+  · proxyClientMaxBodySize: "210mb"
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 70s
+  Running TypeScript ...
+  Finished TypeScript in 23.6s ...
+  Collecting page data using 2 workers ...
+  Generating static pages using 2 workers (0/117) ...
+  Generating static pages using 2 workers (29/117) 
+  Generating static pages using 2 workers (58/117) 
+  Generating static pages using 2 workers (87/117) 
+✓ Generating static pages using 2 workers (117/117) in 1212ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /academic-terms
+├ ƒ /activate/[token]
+├ ƒ /ai
+├ ƒ /api/admin/academic-terms
+├ ƒ /api/admin/academic-terms/[id]
+├ ƒ /api/admin/academic-terms/scope
+├ ƒ /api/admin/attendance/submit
+├ ƒ /api/admin/classroom-feedback
+├ ƒ /api/admin/classroom-feedback/[id]/detail
+├ ƒ /api/admin/classroom-feedback/[id]/image
+├ ƒ /api/admin/classroom-feedback/image-download
+├ ƒ /api/admin/cleanup
+├ ƒ /api/admin/data-admin/[entity]
+├ ƒ /api/admin/data-admin/[entity]/[id]
+├ ƒ /api/admin/data-admin/[entity]/batch
+├ ƒ /api/admin/data-admin/backup
+├ ƒ /api/admin/data-admin/reset
+├ ƒ /api/admin/data-admin/reset/preview
+├ ƒ /api/admin/data-admin/restore
+├ ƒ /api/admin/data-health
+├ ƒ /api/admin/global-search
+├ ƒ /api/admin/import
+├ ƒ /api/admin/intensive-appointments
+├ ƒ /api/admin/intensive-history
+├ ƒ /api/admin/intensive-reviews
+├ ƒ /api/admin/intensive-reviews/[id]
+├ ƒ /api/admin/intensive-settlement/adjust
+├ ƒ /api/admin/materials/lesson-previews
+├ ƒ /api/admin/meal-attendance
+├ ƒ /api/admin/meal-templates
+├ ƒ /api/admin/meal-templates/[id]
+├ ƒ /api/admin/parent-activation
+├ ƒ /api/admin/profile-completeness
+├ ƒ /api/admin/salary
+├ ƒ /api/admin/salary/config
+├ ƒ /api/admin/salary/export
+├ ƒ /api/admin/student-profile
+├ ƒ /api/admin/students/[id]/feedback-archive
+├ ƒ /api/admin/students/[id]/feedback-export
+├ ƒ /api/admin/students/[id]/growth-archive
+├ ƒ /api/admin/trash
+├ ƒ /api/admin/trash/[id]
+├ ƒ /api/admin/trash/preview
+├ ƒ /api/admin/volunteer-data-health
+├ ƒ /api/ai/chat
+├ ƒ /api/assessments
+├ ƒ /api/attendance
+├ ƒ /api/attendance/[lessonId]
+├ ƒ /api/attendance/calendar
+├ ƒ /api/attendance/export
+├ ƒ /api/attendance/history
+├ ƒ /api/attendance/today
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/auth/activate/[token]
+├ ƒ /api/auth/change-password
+├ ƒ /api/auth/check-role
+├ ƒ /api/auth/detect-role
+├ ƒ /api/auth/forgot-password
+├ ƒ /api/auth/kick-events
+├ ƒ /api/auth/log-device
+├ ƒ /api/auth/login-check
+├ ƒ /api/auth/login-status
+├ ƒ /api/auth/reset-password
+├ ƒ /api/auth/session-ping
+├ ƒ /api/class-groups
+├ ƒ /api/class-groups/[id]
+├ ƒ /api/class-groups/[id]/add-teacher
+├ ƒ /api/class-groups/[id]/copy
+├ ƒ /api/class-groups/[id]/enrollments
+├ ƒ /api/class-groups/[id]/enrollments/[studentId]
+├ ƒ /api/class-groups/[id]/generate-lessons
+├ ƒ /api/class-groups/[id]/lessons
+├ ƒ /api/class-groups/[id]/replace-teacher
+├ ƒ /api/class-groups/[id]/start
+├ ƒ /api/class-groups/[id]/sync-hours
+├ ƒ /api/class-groups/check-teacher-conflict
+├ ƒ /api/class-groups/check-teacher-conflict/batch
+├ ƒ /api/class-lessons
+├ ƒ /api/class-lessons/[id]
+├ ƒ /api/class-lessons/add-day
+├ ƒ /api/class-lessons/copy-friday-to-saturday
+├ ƒ /api/class-lessons/postpone-all
+├ ƒ /api/courses
+├ ƒ /api/cron/daily-ops-report
+├ ƒ /api/cron/retry-notifications
+├ ƒ /api/cron/trash-cleanup
+├ ƒ /api/dashboard
+├ ƒ /api/exam-papers
+├ ƒ /api/exam-papers/[id]
+├ ƒ /api/exam-papers/[id]/comment
+├ ƒ /api/exam-papers/[id]/publish
+├ ƒ /api/exam-papers/[id]/questions
+├ ƒ /api/exam-papers/[id]/react
+├ ƒ /api/exam-papers/recognize
+├ ƒ /api/exam-papers/stats
+├ ƒ /api/feedback
+├ ƒ /api/feedback/[id]/messages
+├ ƒ /api/feedback/bonus-preview
+├ ƒ /api/fees
+├ ƒ /api/fees/[id]
+├ ƒ /api/fees/fee-types
+├ ƒ /api/fees/students
+├ ƒ /api/files/[id]
+├ ƒ /api/files/view
+├ ƒ /api/grade-records
+├ ƒ /api/grade-records/[id]/push-to-parent
+├ ƒ /api/grade-records/trend
+├ ƒ /api/health
+├ ƒ /api/highlights
+├ ƒ /api/highlights/[id]/push
+├ ƒ /api/leave-requests
+├ ƒ /api/leave-requests/[id]
+├ ƒ /api/login-records
+├ ƒ /api/makeup-requests
+├ ƒ /api/makeup-requests/[id]
+├ ƒ /api/materials
+├ ƒ /api/materials/[id]/view
+├ ƒ /api/materials/oss-signature
+├ ƒ /api/materials/upload
+├ ƒ /api/meals/menu
+├ ƒ /api/meals/menu/[id]
+├ ƒ /api/meals/report
+├ ƒ /api/meals/report/[id]
+├ ƒ /api/meals/summary
+├ ƒ /api/messages
+├ ƒ /api/messages/[id]
+├ ƒ /api/messages/[id]/remind
+├ ƒ /api/messages/[id]/reply
+├ ƒ /api/messages/read-all
+├ ƒ /api/messages/unread-count
+├ ƒ /api/notifications
+├ ƒ /api/notifications/[id]/resend
+├ ƒ /api/notifications/stats
+├ ƒ /api/notifications/students
+├ ƒ /api/parent-communications
+├ ƒ /api/parent/leave
+├ ƒ /api/parent/materials
+├ ƒ /api/parent/materials/lesson-previews
+├ ƒ /api/parent/meal-choice
+├ ƒ /api/parent/notifications/[id]/read
+├ ƒ /api/parent/notifications/mark-read
+├ ƒ /api/parent/notifications/read-all
+├ ƒ /api/parent/notifications/unread-count
+├ ƒ /api/parent/profile
+├ ƒ /api/parent/students/[id]/archive
+├ ƒ /api/parent/students/[id]/growth-report
+├ ƒ /api/parent/study-hall
+├ ƒ /api/parent/today
+├ ƒ /api/parent/unread-counts
+├ ƒ /api/parent/wechat/unbind
+├ ƒ /api/parent/weekly-report
+├ ƒ /api/performance
+├ ƒ /api/performance/[id]
+├ ƒ /api/performance/[id]/comment
+├ ƒ /api/performance/[id]/react
+├ ƒ /api/performance/badges
+├ ƒ /api/reports/attendance-stats
+├ ƒ /api/reports/export/[chartKey]
+├ ƒ /api/reports/paper-stats
+├ ƒ /api/reports/parent-engagement
+├ ƒ /api/reports/summary
+├ ƒ /api/reports/volunteer-stats
+├ ƒ /api/rooms
+├ ƒ /api/rooms/[id]
+├ ƒ /api/schedules
+├ ƒ /api/schedules/[id]
+├ ƒ /api/schedules/check-conflict
+├ ƒ /api/schedules/daily
+├ ƒ /api/schedules/one-on-one
+├ ƒ /api/schedules/teacher-week
+├ ƒ /api/schools
+├ ƒ /api/schools/[id]
+├ ƒ /api/settings
+├ ƒ /api/settings/accounts
+├ ƒ /api/settings/admins
+├ ƒ /api/settings/backup/create
+├ ƒ /api/settings/export/finance
+├ ƒ /api/settings/export/students
+├ ƒ /api/settings/fee-types
+├ ƒ /api/settings/fee-types/[id]
+├ ƒ /api/settings/logs
+├ ƒ /api/settings/notify
+├ ƒ /api/settings/parent-accounts
+├ ƒ /api/settings/roles
+├ ƒ /api/settings/schedule-periods
+├ ƒ /api/settings/subjects
+├ ƒ /api/settings/subjects/[id]
+├ ƒ /api/settings/subjects/reorder
+├ ƒ /api/settings/teacher-accounts
+├ ƒ /api/setup
+├ ƒ /api/students
+├ ƒ /api/students/[id]
+├ ƒ /api/students/[id]/link-parent
+├ ƒ /api/students/[id]/parent
+├ ƒ /api/students/[id]/status
+├ ƒ /api/students/grade-counts
+├ ƒ /api/study-hall
+├ ƒ /api/study-hall/closures
+├ ƒ /api/teacher-logs
+├ ƒ /api/teacher-logs/[teacherId]
+├ ƒ /api/teacher-logs/alerts
+├ ƒ /api/teacher-logs/check-alerts
+├ ƒ /api/teacher-photos
+├ ƒ /api/teacher/ai-feedback
+├ ƒ /api/teacher/attendance
+├ ƒ /api/teacher/classroom-feedback
+├ ƒ /api/teacher/classroom-feedback/[id]
+├ ƒ /api/teacher/classroom-feedback/today-status
+├ ƒ /api/teacher/dashboard
+├ ƒ /api/teacher/feedback-context
+├ ƒ /api/teacher/intensive-lessons
+├ ƒ /api/teacher/intensive-lessons/[id]
+├ ƒ /api/teacher/learning-goals
+├ ƒ /api/teacher/lessons
+├ ƒ /api/teacher/materials
+├ ƒ /api/teacher/materials/[id]
+├ ƒ /api/teacher/materials/lesson-previews
+├ ƒ /api/teacher/papers
+├ ƒ /api/teacher/performance-posts
+├ ƒ /api/teacher/salary
+├ ƒ /api/teacher/schedule
+├ ƒ /api/teacher/stage-summary
+├ ƒ /api/teacher/stats
+├ ƒ /api/teacher/students
+├ ƒ /api/teacher/students/[id]/context
+├ ƒ /api/teacher/weaknesses
+├ ƒ /api/teachers
+├ ƒ /api/teachers/[id]
+├ ƒ /api/teachers/stats
+├ ƒ /api/upload
+├ ƒ /api/uploads/[filename]
+├ ƒ /api/uploads/sign
+├ ƒ /api/users/[id]/status
+├ ƒ /api/volunteer
+├ ƒ /api/volunteer/consultation
+├ ƒ /api/volunteer/consultation/[id]
+├ ƒ /api/volunteer/consultation/[id]/reply
+├ ƒ /api/volunteer/documents
+├ ƒ /api/volunteer/documents/[id]
+├ ƒ /api/volunteer/documents/[id]/download
+├ ƒ /api/volunteer/quota
+├ ƒ /api/volunteer/quota/import
+├ ƒ /api/volunteer/schools
+├ ƒ /api/volunteer/steps
+├ ƒ /api/volunteer/steps/[id]
+├ ƒ /api/volunteer/steps/reorder
+├ ƒ /api/volunteer/yifenyidang
+├ ƒ /api/wxpusher/callback
+├ ƒ /api/wxpusher/qrcode
+├ ƒ /api/wxpusher/unbind
+├ ƒ /attendance
+├ ƒ /classroom-feedback
+├ ƒ /communications
+├ ƒ /courses
+├ ƒ /courses/[id]
+├ ƒ /dashboard
+├ ƒ /data-admin
+├ ƒ /fees
+├ ƒ /grades
+├ ƒ /lesson-previews/bulk
+├ ○ /login
+├ ƒ /login-records
+├ ƒ /materials
+├ ƒ /meals
+├ ƒ /notifications
+├ ƒ /parent-access
+├ ƒ /parent-messages
+├ ƒ /parent/ai
+├ ƒ /parent/archive
+├ ƒ /parent/archive/[id]
+├ ƒ /parent/attendance
+├ ƒ /parent/benefits
+├ ƒ /parent/bind
+├ ƒ /parent/class-feedback
+├ ƒ /parent/class-feedback/[id]
+├ ƒ /parent/dashboard
+├ ƒ /parent/fees
+├ ƒ /parent/grades
+├ ƒ /parent/growth
+├ ƒ /parent/hour-records
+├ ƒ /parent/leave
+├ ƒ /parent/lesson-previews
+├ ƒ /parent/materials
+├ ƒ /parent/meals
+├ ƒ /parent/messages
+├ ƒ /parent/notifications
+├ ƒ /parent/notifications/[id]
+├ ƒ /parent/performance
+├ ƒ /parent/phet
+├ ƒ /parent/profile
+├ ƒ /parent/schedule
+├ ƒ /parent/services
+├ ƒ /parent/services/[slug]
+├ ƒ /parent/students/[id]/archive
+├ ƒ /parent/students/[id]/growth-report
+├ ƒ /parent/study-hall
+├ ƒ /parent/teachers
+├ ƒ /parent/volunteer
+├ ƒ /parent/volunteer/guide
+├ ƒ /parent/volunteer/rank-query
+├ ƒ /parent/volunteer/schools
+├ ƒ /performance
+├ ƒ /performance/[id]
+├ ƒ /phet
+├ ƒ /reports
+├ ƒ /reset-password
+├ ○ /robots.txt
+├ ƒ /schedule
+├ ƒ /schedule/intensive
+├ ○ /services
+├   /services/[slug]
+│ ├ ● /services/seasonal-bootcamp
+│ ├ ● /services/one-to-one
+│ ├ ● /services/evening-study
+│ └ ● [+6 more paths]
+├ ƒ /settings
+├ ○ /sitemap.xml
+├ ƒ /student-archive
+├ ƒ /student-archive/[id]
+├ ƒ /students
+├ ƒ /students/[id]
+├ ƒ /students/[id]/feedback-archive
+├ ƒ /study-hall
+├ ƒ /teacher-logs
+├ ƒ /teacher-logs/[teacherId]
+├ ƒ /teacher-salary
+├ ƒ /teacher/ai
+├ ƒ /teacher/attendance
+├ ƒ /teacher/benefits
+├ ƒ /teacher/classroom-feedback
+├ ƒ /teacher/dashboard
+├ ƒ /teacher/feedback
+├ ƒ /teacher/intensive
+├ ƒ /teacher/leave
+├ ƒ /teacher/lesson-previews
+├ ƒ /teacher/materials
+├ ƒ /teacher/meals
+├ ƒ /teacher/messages
+├ ƒ /teacher/papers
+├ ƒ /teacher/performance
+├ ƒ /teacher/phet
+├ ƒ /teacher/salary
+├ ƒ /teacher/schedule
+├ ƒ /teacher/services
+├ ƒ /teacher/services/[slug]
+├ ƒ /teacher/student-profile/[id]
+├ ƒ /teacher/student/[id]
+├ ƒ /teacher/students
+├ ƒ /teacher/students/[id]
+├ ƒ /teacher/study-hall
+├ ƒ /teachers
+├ ƒ /teachers/[id]
+├ ƒ /trash
+├ ƒ /volunteer
+├ ƒ /volunteer-sim
+├ ƒ /volunteer-sim/official-form
+├ ƒ /volunteer-sim/rank-query
+├ ƒ /volunteer-sim/schools
+├ ƒ /volunteer/guide
+└ ƒ /volunteer/quota
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+== [5/8] 准备独立 Prisma 迁移工具 ==
+== [6/8] 组装精简 standalone 运行目录 ==
+== [7/8] Linux 容器内启动冒烟检查 ==
+   /login health check passed
+== [8/8] 打包 ==
+-rw-r--r-- 1 root root 123M Sep 20 05:44 /out/edu-manage-runtime-20260920-1339.tar.gz
+BUILD_OK
+
+================================================================
+ 构建完成 ✓
+  产物: release\edu-manage-runtime-20260920-1339.tar.gz  (123 MB)
+  校验: release\edu-manage-runtime-20260920-1339.tar.gz.sha256
+  SHA256: 208c290b689bda6c260c6821903799dd101e756cb1b1dd82632ca38fff40c373
+  本地保留: 最近 2 个完整发布包
+================================================================
+
+下一步上传:
+  scp ".\release\edu-manage-runtime-20260920-1339.tar.gz" root@<服务器IP>:/tmp/
+  scp ".\release\edu-manage-runtime-20260920-1339.tar.gz.sha256" root@<服务器IP>:/tmp/
+
+服务器部署（免安装、免构建）:
+  cd /opt/edu-manage
+  bash scripts/deploy-prebuilt-tar.sh /tmp/edu-manage-runtime-20260920-1339.tar.gz
+

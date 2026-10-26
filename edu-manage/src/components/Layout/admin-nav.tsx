@@ -1,6 +1,6 @@
 import type { MobileNavItem } from './MobileLayout'
 import {
-  AppstoreOutlined, BarChartOutlined, BellOutlined, BookOutlined, CalendarOutlined, CheckSquareOutlined,
+  AppstoreOutlined, AuditOutlined, BarChartOutlined, BellOutlined, BookOutlined, CalendarOutlined, CheckSquareOutlined,
   CoffeeOutlined, CommentOutlined, DashboardOutlined, DatabaseOutlined,
   DollarOutlined, ExperimentOutlined, FileTextOutlined, MessageFilled, MessageOutlined,
   ReadOutlined, RestOutlined, SafetyOutlined, SettingOutlined, TeamOutlined, UploadOutlined, UserOutlined,
@@ -8,6 +8,7 @@ import {
 
 export const adminNavItems: MobileNavItem[] = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: '数据总览' },
+  { key: '/daily-class', icon: <AuditOutlined />, label: '今日课堂' },
   { key: '/services', icon: <AppstoreOutlined />, label: '业务总览' },
   { key: 'academic-group', icon: <BookOutlined />, label: '学员与课程', children: [
     { key: '/students', icon: <UserOutlined />, label: '学员管理' },
@@ -15,7 +16,7 @@ export const adminNavItems: MobileNavItem[] = [
     { key: '/academic-terms', icon: <CalendarOutlined />, label: '运营批次' },
     { key: '/attendance', icon: <CheckSquareOutlined />, label: '考勤管理' },
     { key: '/feedback-performance', icon: <MessageOutlined />, label: '反馈与表现' },
-    { key: '/grades', icon: <FileTextOutlined />, label: '试卷管理' },
+    { key: '/grades', icon: <FileTextOutlined />, label: '题库统计' },
     { key: '/study-hall', icon: <ReadOutlined />, label: '作业班管理' },
     { key: '/student-archive', icon: <FileTextOutlined />, label: '学情资料检查' },
   ] },

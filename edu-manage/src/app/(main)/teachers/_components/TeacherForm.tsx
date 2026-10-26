@@ -1,14 +1,14 @@
-﻿'use client'
+'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useEffect, useState } from 'react'
-import NextImage from 'next/image'
 import { Alert, Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, DatePicker, Upload } from 'antd'
 import { UserOutlined, BookOutlined, IdcardOutlined, UploadOutlined } from '@ant-design/icons'
 import type { UploadProps } from 'antd'
 import dayjs from 'dayjs'
 import { ALL_SUBJECTS } from '@/constants/subjects'
-import { normalizeAvatarUrl } from '@/lib/upload-url'
-import { femaleDefaultAvatar } from '@/lib/teacher-avatars'
+import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
+import { DEFAULT_TEACHER_AVATAR, getTeacherAvatarUrl } from '@/lib/teacher-avatars'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { TIER_OPTIONS } from '@/constants/teacher-tier'
 
@@ -24,6 +24,7 @@ export function TeacherForm({
   const [photoOptions, setPhotoOptions] = useState<{ label: string; value: string }[]>([])
   const avatar = Form.useWatch('avatar', form)
   const gender = Form.useWatch('gender', form)
+  const rotationKey = String(initialData?.id || form.getFieldValue('name') || '')
   const isMobile = useIsMobile() ?? false
 
   useEffect(() => {
@@ -172,8 +173,8 @@ export function TeacherForm({
         <Space>
           <Button onClick={onClose}>取消</Button>
           {current > 0 && <Button onClick={() => setCurrent(value => value - 1)}>上一步</Button>}
-          {current < 2 && <Button type="primary" onClick={handleNext} style={{ background: '#E8784A', borderColor: '#E8784A' }}>下一步</Button>}
-          {current === 2 && <Button type="primary" onClick={handleFinish} loading={loading} style={{ background: '#E8784A', borderColor: '#E8784A' }}>{mode === 'edit' ? '保存' : '添加教师'}</Button>}
+          {current < 2 && <Button type="primary" onClick={handleNext} style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>下一步</Button>}
+          {current === 2 && <Button type="primary" onClick={handleFinish} loading={loading} style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>{mode === 'edit' ? '保存' : '添加教师'}</Button>}
         </Space>
       }
     >
@@ -205,11 +206,15 @@ export function TeacherForm({
               <Form.Item name="avatar" label="教师照片">
                 <Space align="start" size={16} style={{ width: '100%' }}>
                   <div style={{ width: 104, height: 132, position: 'relative', borderRadius: 10, overflow: 'hidden', border: '1px solid #30333a', background: '#0f1011', display: 'grid', placeItems: 'center', color: '#8a8f98' }}>
-                    {avatar ? <NextImage src={normalizeAvatarUrl(avatar)} alt="教师照片" fill sizes="104px" unoptimized style={{ objectFit: 'cover', objectPosition: 'center top' }} /> :
-                      <img src={gender === '男' ? '/avatars/teacher-male.png' : femaleDefaultAvatar('')} alt="默认头像" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    <CachedAvatarImage
+                      src={getTeacherAvatarUrl(avatar, gender, rotationKey)}
+                      fallbackSrc={getTeacherAvatarUrl(null, gender, rotationKey) || DEFAULT_TEACHER_AVATAR}
+                      alt="教师照片"
+                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
+                    />
                   </div>
                   <Space direction="vertical" style={{ flex: 1 }}>
-                    <Select
+                    <AdaptiveSelect
                       allowClear
                       showSearch
                       placeholder="从 public/people 选择已有教师照片"
@@ -226,18 +231,18 @@ export function TeacherForm({
               </Form.Item>
             </Col>
             <Col span={12}><Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入姓名' }]}><Input placeholder="教师姓名" /></Form.Item></Col>
-            <Col span={12}><Form.Item name="gender" label="性别"><Select options={[{ label: '男', value: '男' }, { label: '女', value: '女' }]} placeholder="选填" allowClear /></Form.Item></Col>
+            <Col span={12}><Form.Item name="gender" label="性别"><AdaptiveSelect options={[{ label: '男', value: '男' }, { label: '女', value: '女' }]} placeholder="选填" allowClear /></Form.Item></Col>
             <Col span={12}><Form.Item name="phone" label="手机" rules={[{ required: true, message: '请输入手机号' }, { pattern: /^1[3-9]\d{9}$/, message: '请输入正确手机号' }]}><Input type="tel" inputMode="numeric" placeholder="必填" /></Form.Item></Col>
             <Col span={12}><Form.Item name="email" label="邮箱"><Input placeholder="选填" /></Form.Item></Col>
-            <Col span={12}><Form.Item name="employmentType" label="任职类型" initialValue="FULL_TIME"><Select options={[{ label: '全职', value: 'FULL_TIME' }, { label: '兼职', value: 'PART_TIME' }]} /></Form.Item></Col>
-            <Col span={12}><Form.Item name="tierLevel" label="教师等级" initialValue="NEW"><Select options={TIER_OPTIONS} /></Form.Item></Col>
+            <Col span={12}><Form.Item name="employmentType" label="任职类型" initialValue="FULL_TIME"><AdaptiveSelect options={[{ label: '全职', value: 'FULL_TIME' }, { label: '兼职', value: 'PART_TIME' }]} /></Form.Item></Col>
+            <Col span={12}><Form.Item name="tierLevel" label="教师等级" initialValue="NEW"><AdaptiveSelect options={TIER_OPTIONS} /></Form.Item></Col>
             <Col span={12}><Form.Item name="joinedAt" label="入职日期"><DatePicker style={{ width: '100%' }} placeholder="选择日期" /></Form.Item></Col>
             <Col span={12}><Form.Item name="contractEnd" label="合同到期日"><DatePicker style={{ width: '100%' }} placeholder="选择日期" /></Form.Item></Col>
           </Row>
         )}
         {current === 1 && (
           <Row gutter={16}>
-            <Col span={12}><Form.Item name="education" label="最高学历"><Select options={EDU_OPTIONS} placeholder="选填" allowClear /></Form.Item></Col>
+            <Col span={12}><Form.Item name="education" label="最高学历"><AdaptiveSelect options={EDU_OPTIONS} placeholder="选填" allowClear /></Form.Item></Col>
             <Col span={12}><Form.Item name="university" label="毕业院校"><Input placeholder="选填" /></Form.Item></Col>
             <Col span={12}><Form.Item name="major" label="专业方向"><Input placeholder="选填" /></Form.Item></Col>
             <Col span={12}><Form.Item name="graduationYear" label="毕业年份"><InputNumber min={1970} max={new Date().getFullYear()} style={{ width: '100%' }} placeholder="选填" /></Form.Item></Col>
@@ -246,7 +251,7 @@ export function TeacherForm({
         )}
         {current === 2 && (
           <Row gutter={16}>
-            <Col span={24}><Form.Item name="subjects" label="授课科目" rules={[{ required: true, message: '至少选择一个科目' }]}><Select mode="multiple" placeholder="选择授课科目" options={ALL_SUBJECTS.map(subject => ({ label: subject, value: subject }))} /></Form.Item></Col>
+            <Col span={24}><Form.Item name="subjects" label="授课科目" rules={[{ required: true, message: '至少选择一个科目' }]}><AdaptiveSelect mode="multiple" placeholder="选择授课科目" options={ALL_SUBJECTS.map(subject => ({ label: subject, value: subject }))} /></Form.Item></Col>
             <Col span={12}><Form.Item name="monthlyHours" label="月课时目标"><InputNumber min={0} style={{ width: '100%' }} placeholder="40" /></Form.Item></Col>
             <Col span={24}><Form.Item name="bio" label="个人介绍"><Input.TextArea rows={6} placeholder="写明授课方向、教学方法与学生可获得的具体帮助，500字以内" maxLength={500} showCount /></Form.Item></Col>
           </Row>

@@ -102,3 +102,35 @@ export function summarizeParentMessageWorkflow(
     },
   )
 }
+
+/**
+ * Returns one response duration for each parent turn that receives a teacher
+ * reply. Consecutive parent replies form one turn, and only the first teacher
+ * reply answers it. Sorting here makes the metric independent of DB row order.
+ */
+export function getTeacherResponseMinutes(
+  replies: readonly ParentMessageWorkflowReply[],
+) {
+  const orderedReplies = [...replies].sort(
+    (left, right) => timestamp(left.createdAt) - timestamp(right.createdAt),
+  )
+  const responseMinutes: number[] = []
+  let waitingParentAt: number | null = null
+  let hasTeacherReplied = false
+
+  for (const reply of orderedReplies) {
+    const createdAt = timestamp(reply.createdAt)
+    if (reply.role === 'parent') {
+      waitingParentAt = createdAt
+      hasTeacherReplied = false
+      continue
+    }
+
+    if (reply.role === 'teacher' && waitingParentAt !== null && !hasTeacherReplied) {
+      responseMinutes.push(Math.max(0, (createdAt - waitingParentAt) / 60_000))
+      hasTeacherReplied = true
+    }
+  }
+
+  return responseMinutes
+}

@@ -16,8 +16,8 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
     where: { id },
     include: {
       parent: { select: { id: true, name: true } },
-      student: { select: { id: true, name: true } },
-      teacher: { select: { id: true, name: true } },
+      student: { select: { id: true, name: true, grade: true, gender: true } },
+      teacher: { select: { id: true, name: true, avatar: true, gender: true } },
       feedback: {
         select: {
           id: true,
@@ -65,7 +65,16 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
     }
   }
 
-  return NextResponse.json(message)
+  const readAwareReplies = message.replies.map((reply) => ({
+    ...reply,
+    ...(user.role === 'parent' ? { isReadByParent: true } : {}),
+    ...(user.role === 'teacher' ? { isReadByTeacher: true } : {}),
+  }))
+  return NextResponse.json({
+    ...message,
+    status: user.role === 'teacher' && message.status === 'OPEN' ? 'READ' : message.status,
+    replies: readAwareReplies,
+  })
 })
 
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {

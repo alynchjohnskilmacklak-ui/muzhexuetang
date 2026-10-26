@@ -32,7 +32,7 @@ function pruneExpired(map: Map<string, Bucket>, now: number) {
   }
 }
 
-/** Authoritative in-process rate limit for the NextAuth credentials endpoint. */
+/** Local secondary limiter; shared IP limiting and persisted account lockout run in credential-auth. */
 export function checkCredentialRateLimit(ip: string, accountKey: string, now = Date.now()): LoginRateLimitResult {
   const ipBucket = ipBuckets.get(ip)
   if (!ipBucket || now >= ipBucket.resetAt) {

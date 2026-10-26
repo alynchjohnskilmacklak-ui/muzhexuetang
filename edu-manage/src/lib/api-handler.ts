@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { checkRateLimit } from './rate-limit'
+import { getTrustedClientIp } from './request-ip'
 import { ValidationError } from './api-validate'
 import { AuthError } from './auth/guards'
 
@@ -26,9 +27,7 @@ export function apiHandler<Args extends unknown[]>(handler: (...args: Args) => P
     try {
       const req = args[0] as NextRequest | undefined
       if (req?.url) {
-        const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-          || req.headers.get('x-real-ip')
-          || '0.0.0.0'
+        const ip = getTrustedClientIp(req.headers)
         const url = new URL(req.url)
         const path = url.pathname
 

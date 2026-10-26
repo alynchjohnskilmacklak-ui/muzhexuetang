@@ -6,6 +6,7 @@ import { Layout, Spin } from 'antd'
 import { Sidebar } from './Sidebar'
 import { TopNav } from './TopNav'
 import { MobileLayout } from './MobileLayout'
+import { LayoutHydrationFallback } from './LayoutHydrationFallback'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
@@ -32,7 +33,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     if (saved !== null) setCollapsed(saved === 'true')
   }, [])
 
-  if (isMobile === null) return null
+  if (isMobile === null) return <LayoutHydrationFallback />
 
   if (isMobile) {
     return (

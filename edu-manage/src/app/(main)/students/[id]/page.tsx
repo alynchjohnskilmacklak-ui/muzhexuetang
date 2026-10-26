@@ -1,11 +1,13 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useState } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
-import { Avatar, Button, Card, Checkbox, Col, DatePicker, Descriptions, Empty, Form, Input, Modal, Progress, Radio, Row, Select, Space, Spin, Statistic, Table, Tag, message } from 'antd'
-import { ArrowLeftOutlined, BookOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DisconnectOutlined, DownloadOutlined, HeartOutlined, HistoryOutlined, LinkOutlined, MessageOutlined, PlusOutlined, TeamOutlined, UserAddOutlined } from '@ant-design/icons'
+import { Alert, Avatar, Button, Card, Checkbox, Col, DatePicker, Descriptions, Empty, Form, Input, Modal, Progress, Radio, Row, Select, Skeleton, Space, Spin, Table, Tag, message } from 'antd'
+import { ArrowLeftOutlined, BookOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, DisconnectOutlined, DownloadOutlined, HeartOutlined, HistoryOutlined, LinkOutlined, MessageOutlined, PlusOutlined, ReadOutlined, TeamOutlined, UserAddOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
+import { StudentAvatar } from '@/components/Common/StudentAvatar'
 import { ImageUploader } from '@/app/(main)/performance/_components/ImageUploader'
 import { formatDeducted } from '@/lib/lesson-units'
 import { formatLocaleDate } from '@/lib/format-date'
@@ -16,6 +18,7 @@ import type { StudentGrowthArchive } from '@/lib/student-growth/archive'
 import type { StudentProfile } from '@/lib/student-profile'
 import type { AdminReportStudent, AdminReportStageSummary } from '@/lib/student-growth/admin-report'
 import { SubjectChangeModal } from '@/components/Enrollment/SubjectChangeModal'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const StudentLearningRecord = dynamic(
   () => import('../../student-archive/[id]/client').then((module) => module.StudentLearningRecord),
@@ -123,7 +126,7 @@ export default function StudentDetailPage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
   const isMobile = useIsMobile() ?? false
-  const { data: student, isLoading, mutate } = useSWR(params.id ? `/api/students/${params.id}` : null, fetcher)
+  const { data: student, isLoading, error: studentError, mutate } = useSWR(params.id ? `/api/students/${params.id}` : null, fetcher)
   const { data: growthArchive, isLoading: growthLoading, error: growthError } = useSWR<StudentGrowthArchive>(
     params.id ? `/api/admin/students/${params.id}/growth-archive` : null,
     fetcher,
@@ -251,7 +254,8 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
   }
 
 
-  if (isLoading) return <PageLayout title="学员详情"><div style={{ textAlign: 'center', padding: 80 }}><Spin size="large" /></div></PageLayout>
+  if (isLoading) return <PageLayout title="学员详情"><div role="status" aria-live="polite" style={{ padding: 24, maxWidth: 760, margin: '0 auto' }}><Skeleton active paragraph={{ rows: 5 }} /></div></PageLayout>
+  if (studentError) return <PageLayout title="学员详情"><div style={{ padding: 24, maxWidth: 760, margin: '0 auto' }}><Alert type="error" showIcon message="学员详情暂时无法加载" description="请检查网络连接后重试。" action={<Button onClick={() => void mutate()}>重新加载</Button>} /></div></PageLayout>
   if (!student) return <PageLayout title="学员详情"><Empty description="学员不存在" /></PageLayout>
 
   const remainHours = Number(student.remainHours || 0)
@@ -536,16 +540,21 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
     }
   }
 
+  const studentStatusLabel: Record<string, string> = {
+    ACTIVE: '在读', TRIAL: '试听', INACTIVE: '已停用', GRADUATED: '已结业',
+    RESIGNED: '已离职', WAITING: '待开班', ARCHIVED: '已归档',
+  }
+
   return (
     <PageLayout
       title={student.name}
-      subtitle={`${student.grade || '未设年级'} · ${student.school || '未填写学校'} · ${student.status || '-'}`}
+      subtitle={`${student.grade || '未设年级'} · ${student.school || '学校待补充'} · ${studentStatusLabel[student.status || ''] || student.status || '-'}`}
       actions={<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <Button type="primary" icon={<DownloadOutlined />} onClick={() => setReportModalOpen(true)}>导出学情报告</Button>
-        <Button icon={<HistoryOutlined />} onClick={() => router.push(`/students/${student.id}/feedback-archive`)}>课堂反馈档案</Button>
-        <Button icon={<HeartOutlined />} style={{ background: '#1D9E75', borderColor: '#1D9E75', color: '#ffffff' }} onClick={() => setQuickPraiseOpen(true)}>快速表扬</Button>
-        <Button icon={<MessageOutlined />} style={{ background: '#534AB7', borderColor: '#534AB7', color: '#ffffff' }} onClick={() => setGrowthFeedbackOpen(true)}>成长反馈</Button>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/students')}>返回学员管理</Button>
+        <Button type="primary" shape="round" icon={<DownloadOutlined />} onClick={() => setReportModalOpen(true)} style={{ background: '#0E5E4E', borderColor: '#0E5E4E', boxShadow: '0 3px 10px rgba(14,94,78,.25)' }}>导出学情报告</Button>
+        <Button shape="round" icon={<HistoryOutlined />} onClick={() => router.push(`/students/${student.id}/feedback-archive`)}>课堂反馈档案</Button>
+        <Button shape="round" icon={<HeartOutlined />} style={{ background: '#1D9E75', borderColor: '#1D9E75', color: '#ffffff' }} onClick={() => setQuickPraiseOpen(true)}>快速表扬</Button>
+        <Button shape="round" icon={<MessageOutlined />} style={{ background: '#534AB7', borderColor: '#534AB7', color: '#ffffff' }} onClick={() => setGrowthFeedbackOpen(true)}>成长反馈</Button>
+        <Button shape="round" icon={<ArrowLeftOutlined />} onClick={() => router.push('/students')}>返回学员管理</Button>
       </div>}
     >
       <section id="learning" style={{ scrollMarginTop: 90 }}>
@@ -559,34 +568,36 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         <StudentLearningRecord studentId={student.id} />
       </section>
 
-      <Card bordered={false} style={{ borderRadius: 8, marginBottom: 16, background: '#ffffff', border: '1px solid #EEE7E1' }}>
-        <Descriptions column={2} size="small" labelStyle={{ color: '#98A2B3' }} contentStyle={{ color: '#1F2329' }}>
+      <Card bordered={false} style={{ borderRadius: 14, marginBottom: 16, background: '#ffffff', border: '1px solid #EDE9E1', boxShadow: '0 2px 8px rgba(23,47,41,.05)' }}>
+        <Descriptions column={isMobile ? 1 : 2} size="small" labelStyle={{ color: '#98A2B3' }} contentStyle={{ color: '#1F2329' }}>
           <Descriptions.Item label="姓名">{student.name}</Descriptions.Item>
-          <Descriptions.Item label="状态"><Tag>{student.status}</Tag></Descriptions.Item>
+          <Descriptions.Item label="状态"><span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 999, background: student.status === 'ACTIVE' ? 'rgba(29,158,117,.12)' : 'rgba(152,162,179,.15)', color: student.status === 'ACTIVE' ? '#1D9E75' : '#667085', fontSize: 12, fontWeight: 700 }}>{studentStatusLabel[student.status || ''] || student.status || '-'}</span></Descriptions.Item>
           <Descriptions.Item label="电话">{student.phone || '-'}</Descriptions.Item>
-          <Descriptions.Item label="家长账号" span={2}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <Descriptions.Item label="家长账号" span={isMobile ? 1 : 2}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start', width: '100%' }}>
               {student.parent ? (
-                <>
-                  <Tag color="green" icon={<LinkOutlined />}>
-                    {student.parent.name || '家长'}（{student.parent.email}）
-                  </Tag>
-                  <Button size="small" danger icon={<DisconnectOutlined />} onClick={unlinkParent}>解绑</Button>
-                </>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, maxWidth: '100%', padding: '3px 10px', borderRadius: 999, background: 'rgba(29,158,117,.1)', color: '#1D9E75', fontSize: 12, fontWeight: 600 }}>
+                  <LinkOutlined /> <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{student.parent.name || '家长'}（{student.parent.email}）</span>
+                </span>
               ) : (
-                <Tag color="orange">未绑定家长账号</Tag>
+                <span style={{ padding: '3px 10px', borderRadius: 999, background: 'rgba(232,120,74,.1)', color: '#C2541F', fontSize: 12, fontWeight: 600 }}>未绑定家长账号</span>
               )}
-              <Button
-                size="small"
-                icon={<UserAddOutlined />}
-                onClick={() => {
-                  setParentMode('existing')
-                  setParentModalOpen(true)
-                  parentForm.resetFields()
-                }}
-              >
-                {student.parent ? '更换/合并家长账号' : '绑定家长账号'}
-              </Button>
+              <span style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {student.parent && (
+                  <Button size="small" danger icon={<DisconnectOutlined />} onClick={unlinkParent}>解绑</Button>
+                )}
+                <Button
+                  size="small"
+                  icon={<UserAddOutlined />}
+                  onClick={() => {
+                    setParentMode('existing')
+                    setParentModalOpen(true)
+                    parentForm.resetFields()
+                  }}
+                >
+                  {student.parent ? '更换/合并家长账号' : '绑定家长账号'}
+                </Button>
+              </span>
             </div>
           </Descriptions.Item>
           <Descriptions.Item label="家长电话">{student.parentPhone || '-'}</Descriptions.Item>
@@ -594,30 +605,32 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         </Descriptions>
         <div style={{ marginTop: 18 }}>
           <div style={{ color: '#98A2B3', marginBottom: 6 }}>课时进度</div>
-          <Progress percent={totalHours ? Math.round((prepaidUsedHours / totalHours) * 100) : 0} strokeColor="#E8784A" />
+          <Progress percent={totalHours ? Math.round((prepaidUsedHours / totalHours) * 100) : 0} strokeColor={{ '0%': '#C9A45C', '100%': '#0E5E4E' }} />
         </div>
       </Card>
 
       {/* 同父母孩子 · 家庭账号关联模块 */}
       <Card
         title={
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <TeamOutlined /> 同父母孩子
-            <span style={{ color: '#98A2B3', fontSize: 12, fontWeight: 400 }}>同一家长账号下的孩子，家长登录后可切换查看各孩子的档案</span>
+            <span style={{ color: '#98A2B3', fontSize: 12, fontWeight: 400 }}>家长登录后可切换查看各孩子档案</span>
           </span>
         }
         extra={
           student.parent ? (
-            <Space>
-              <Tag color="green" icon={<LinkOutlined />}>{student.parent.name || '家长'}（{student.parent.email}）</Tag>
-              <Button size="small" type="primary" icon={<PlusOutlined />} onClick={openFamilyModal} style={{ background: '#E87545', borderColor: '#E8784A' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, maxWidth: isMobile ? 170 : 280, padding: '3px 10px', borderRadius: 999, background: 'rgba(29,158,117,.1)', color: '#1D9E75', fontSize: 12, fontWeight: 600 }}>
+                <LinkOutlined /> <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{student.parent.name || '家长'}（{student.parent.email}）</span>
+              </span>
+              <Button size="small" type="primary" icon={<PlusOutlined />} onClick={openFamilyModal} style={{ background: 'linear-gradient(135deg,#0E5E4E,#0B4B40)', borderColor: '#0E5E4E', boxShadow: '0 2px 8px rgba(14,94,78,.2)' }}>
                 关联其他孩子
               </Button>
-            </Space>
+            </div>
           ) : undefined
         }
         bordered={false}
-        style={{ borderRadius: 8, marginBottom: 16, background: '#ffffff', border: '1px solid #EEE7E1' }}
+        style={{ borderRadius: 14, marginBottom: 16, background: '#ffffff', border: '1px solid #EDE9E1', boxShadow: '0 2px 8px rgba(23,47,41,.05)' }}
       >
         {!student.parent ? (
           <Empty
@@ -629,37 +642,44 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
             rowKey="id"
             size="small"
             pagination={false}
+            scroll={{ x: isMobile ? 320 : undefined }}
             dataSource={familyChildren}
             columns={[
               {
                 title: '学员',
                 render: (_: unknown, record: FamilyChild) => (
-                  <Space>
-                    <span style={{ fontWeight: 600 }}>{record.name}</span>
-                    {record.isCurrent && <Tag color="orange">当前学员</Tag>}
-                  </Space>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                    <span style={{ fontWeight: 700, color: '#17352F' }}>{record.name}</span>
+                    {record.isCurrent && <span style={{ padding: '1px 7px', borderRadius: 999, background: 'rgba(201,164,92,.16)', color: '#8A6B2F', fontSize: 10.5, fontWeight: 700, whiteSpace: 'nowrap' }}>当前学员</span>}
+                  </span>
                 ),
               },
-              { title: '年级', render: (_: unknown, record: FamilyChild) => record.grade || '-' },
-              {
-                title: '班级',
-                render: (_: unknown, record: FamilyChild) => record.enrollments?.[0]?.group?.name || '-',
-              },
-              { title: '累计课时', render: (_: unknown, record: FamilyChild) => `${Number(record.totalHours || 0).toFixed(1)}h` },
-              { title: '剩余课时', render: (_: unknown, record: FamilyChild) => `${Number(record.remainHours || 0).toFixed(1)}h` },
+              ...(isMobile ? [] : [
+                { title: '年级', key: 'grade', render: (_: unknown, record: FamilyChild) => record.grade || '-' },
+                {
+                  title: '班级', key: 'className', render: (_: unknown, record: FamilyChild) => record.enrollments?.[0]?.group?.name || '-',
+                },
+                { title: '累计课时', key: 'total', render: (_: unknown, record: FamilyChild) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{Number(record.totalHours || 0).toFixed(1)}h</span> },
+                { title: '剩余课时', key: 'remain', render: (_: unknown, record: FamilyChild) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{Number(record.remainHours || 0).toFixed(1)}h</span> },
+              ]),
               {
                 title: '状态',
-                render: (_: unknown, record: FamilyChild) => <Tag color={record.status === 'ACTIVE' ? 'green' : 'default'}>{record.status}</Tag>,
+                render: (_: unknown, record: FamilyChild) => {
+                  const map: Record<string, string> = { ACTIVE: '在读', TRIAL: '试听', INACTIVE: '已停用', STUDYING: '学习中', GRADUATED: '已结业' }
+                  const label = map[record.status] || record.status
+                  const ok = record.status === 'ACTIVE' || record.status === 'STUDYING'
+                  return <span style={{ padding: '1px 8px', borderRadius: 999, background: ok ? 'rgba(29,158,117,.1)' : 'rgba(152,162,179,.15)', color: ok ? '#1D9E75' : '#667085', fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>{label}</span>
+                },
               },
               {
                 title: '操作',
                 render: (_: unknown, record: FamilyChild) => (
-                  <Space>
+                  <span style={{ display: 'inline-flex', gap: 4, whiteSpace: 'nowrap' }}>
                     <Button size="small" type="link" onClick={() => router.push(`/students/${record.id}`)}>查看档案</Button>
                     {!record.isCurrent && (
                       <Button size="small" type="link" danger onClick={() => setUnlinkTarget({ id: record.id, name: record.name })}>解除关联</Button>
                     )}
-                  </Space>
+                  </span>
                 ),
               },
             ]}
@@ -669,7 +689,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
             description="该家长账号下暂无其他孩子，可点击右上角「关联其他孩子」把同父母的兄弟姐妹关联进来"
             image={Empty.PRESENTED_IMAGE_SIMPLE}
           >
-            <Button type="primary" size="small" icon={<PlusOutlined />} onClick={openFamilyModal} style={{ background: '#E87545', borderColor: '#E8784A' }}>
+            <Button type="primary" size="small" icon={<PlusOutlined />} onClick={openFamilyModal} style={{ background: 'linear-gradient(135deg,#0E5E4E,#0B4B40)', borderColor: '#0E5E4E' }}>
               关联其他孩子
             </Button>
           </Empty>
@@ -687,7 +707,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
           </span>
         }
         extra={
-          <Button size="small" type="primary" icon={<PlusOutlined />} onClick={openEnrollModal} style={{ background: '#E87545', borderColor: '#E8784A' }}>
+          <Button size="small" type="primary" icon={<PlusOutlined />} onClick={openEnrollModal} style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>
             添加学科
           </Button>
         }
@@ -740,7 +760,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
           />
         ) : (
           <Empty description="暂未报名任何学科" image={Empty.PRESENTED_IMAGE_SIMPLE}>
-            <Button type="primary" onClick={openEnrollModal} style={{ background: '#E87545', borderColor: '#E8784A' }}>
+            <Button type="primary" onClick={openEnrollModal} style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>
               添加首个学科
             </Button>
           </Empty>
@@ -757,7 +777,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
             </Button>
           )}
           bordered={false}
-          style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}
+          style={{ borderRadius: 14, background: '#ffffff', border: '1px solid #EDE9E1', boxShadow: '0 2px 8px rgba(23,47,41,.05)' }}
         >
             <Table
               rowKey="id"
@@ -765,7 +785,14 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
               pagination={{ pageSize: 8 }}
               dataSource={student.attendances || []}
               columns={[
-                { title: '状态', dataIndex: 'status', render: (value: string) => <Tag>{value}</Tag> },
+                {
+                  title: '状态',
+                  dataIndex: 'status',
+                  render: (value: string) => {
+                    const ok = value === 'PRESENT' || value === 'MAKEUP'
+                    return <span style={{ padding: '2px 10px', borderRadius: 999, background: ok ? 'rgba(29,158,117,.12)' : value === 'LEAVE' ? 'rgba(201,164,92,.14)' : 'rgba(232,120,74,.12)', color: ok ? '#1D9E75' : value === 'LEAVE' ? '#8A6B2F' : '#C2541F', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>{attendanceLabel(value)}</span>
+                  },
+                },
                 { title: '扣课时', key: 'hoursDeducted', render: (_: unknown, record: AttendanceDeductionRecord) => attendanceDeductedText(record) },
                 { title: '日期', dataIndex: 'createdAt', render: (value: string) => new Date(value).toLocaleDateString('zh-CN') },
               ]}
@@ -773,7 +800,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="缴费记录" bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
+          <Card title="缴费记录" bordered={false} style={{ borderRadius: 14, background: '#ffffff', border: '1px solid #EDE9E1', boxShadow: '0 2px 8px rgba(23,47,41,.05)' }}>
             <Table
               rowKey="id"
               size="small"
@@ -782,14 +809,22 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
               columns={[
                 { title: '类型', dataIndex: 'type' },
                 { title: '金额', dataIndex: 'amount' },
-                { title: '状态', dataIndex: 'status', render: (value: string) => <Tag>{value}</Tag> },
+                {
+                  title: '状态',
+                  dataIndex: 'status',
+                  render: (value: string) => {
+                    const map: Record<string, { label: string; ok: boolean }> = { PAID: { label: '已缴费', ok: true }, PENDING: { label: '待缴费', ok: false }, REFUNDED: { label: '已退款', ok: false }, PARTIAL: { label: '部分缴费', ok: false } }
+                    const item = map[value] || { label: value, ok: false }
+                    return <span style={{ padding: '2px 10px', borderRadius: 999, background: item.ok ? 'rgba(29,158,117,.12)' : 'rgba(152,162,179,.15)', color: item.ok ? '#1D9E75' : '#667085', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap' }}>{item.label}</span>
+                  },
+                },
               ]}
             />
           </Card>
         </Col>
       </Row>
 
-      <Modal
+      <BrandModal
         title={`快速表扬 · ${student.name}`}
         open={quickPraiseOpen}
         onCancel={() => setQuickPraiseOpen(false)}
@@ -800,12 +835,13 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         okButtonProps={{ style: { background: '#1D9E75', borderColor: '#1D9E75' } }}
       >
         <Input.TextArea value={quickPraise} onChange={event => setQuickPraise(event.target.value)} maxLength={300} showCount rows={4} placeholder="如：今天主动帮同学讲题，很棒！" />
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title={`导出给家长的报告 · ${student.name}`}
         open={reportModalOpen}
         onCancel={() => { if (!exportingFullReport && !exportingFeedback) setReportModalOpen(false) }}
+        confirmLoading={exportingFullReport || exportingFeedback}
         width={isMobile ? 'calc(100vw - 24px)' : 520}
         footer={<Space wrap style={{ width: '100%', justifyContent: 'flex-end' }}>
           <Button onClick={() => setReportModalOpen(false)} disabled={exportingFullReport || exportingFeedback}>取消</Button>
@@ -817,7 +853,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
           完整报告包含学生信息、在读课程、成绩与知识点、考勤概况、学习目标、阶段小结，以及所选期间全部已发布的课堂反馈和可读取的课堂照片。
         </p>
         <div style={{ marginBottom: 8, color: 'var(--color-ink)', fontWeight: 600 }}>报告时间范围</div>
-        <Select
+        <AdaptiveSelect
           value={reportMonths}
           onChange={setReportMonths}
           style={{ width: '100%' }}
@@ -829,7 +865,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
           导出前请核对学员和时间范围。完整报告只在所选期间的课堂照片全部读取成功时下载；若有照片失效，请先到课堂反馈档案核对。仅课堂反馈 PDF 为全部历史记录。
         </p>
         {reportProgress && <p role="status" aria-live="polite" style={{ color: 'var(--color-primary)', fontSize: 13 }}>{reportProgress}</p>}
-      </Modal>
+      </BrandModal>
 
       <Modal
         title={`查询上课时长 · ${student.name}`}
@@ -888,7 +924,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         <div style={{ display: 'grid', gap: 16 }}>
           <div><div style={{ marginBottom: 6 }}>反馈内容</div><Input.TextArea value={feedbackContent} onChange={event => setFeedbackContent(event.target.value)} maxLength={300} showCount rows={5} placeholder="记录孩子今天的课堂表现与成长变化" /></div>
           <div><div style={{ marginBottom: 6 }}>课堂状态</div><Radio.Group value={feedbackMood} onChange={event => setFeedbackMood(event.target.value)} optionType="button" buttonStyle="solid" options={[{ label: '很棒', value: 'GREAT' }, { label: '良好', value: 'GOOD' }, { label: '一般', value: 'OKAY' }, { label: '需关注', value: 'NEEDS_ATTENTION' }]} /></div>
-          <div><div style={{ marginBottom: 6 }}>表现标签</div><Select mode="tags" value={feedbackTags} onChange={setFeedbackTags} maxCount={20} maxTagCount="responsive" tokenSeparators={[',', '，', '、']} placeholder="输入标签后回车，如：主动提问" style={{ width: '100%' }} /></div>
+          <div><div style={{ marginBottom: 6 }}>表现标签</div><AdaptiveSelect mode="tags" value={feedbackTags} onChange={setFeedbackTags} maxCount={20} maxTagCount="responsive" tokenSeparators={[',', '，', '、']} placeholder="输入标签后回车，如：主动提问" style={{ width: '100%' }} /></div>
           <div><div style={{ marginBottom: 6 }}>课堂图片（可选）</div><ImageUploader value={feedbackImages} onChange={setFeedbackImages} /></div>
         </div>
       </Modal>
@@ -919,7 +955,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         <Form form={parentForm} layout="vertical">
           {parentMode === 'existing' ? (
             <Form.Item name="existingParentUserId" label="选择家长账号" rules={[{ required: true, message: '请选择家长账号' }]}>
-              <Select
+              <AdaptiveSelect
                 showSearch
                 placeholder="搜索家长姓名或邮箱"
                 filterOption={(input, option) => String(option?.label || '').toLowerCase().includes(input.toLowerCase())}
@@ -1008,7 +1044,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         <div style={{ marginTop: 12, textAlign: 'right' }}>
           <Space>
             <Button onClick={() => setFamilyModalOpen(false)}>取消</Button>
-            <Button type="primary" loading={linkingFamily} onClick={linkFamilyChildren} style={{ background: '#E87545', borderColor: '#E8784A' }}>
+            <Button type="primary" loading={linkingFamily} onClick={linkFamilyChildren} style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>
               确认关联{selectedFamilyIds.length ? `（${selectedFamilyIds.length} 人）` : ''}
             </Button>
           </Space>
@@ -1147,80 +1183,153 @@ function StudentGrowthArchivePanel({
     return <Card bordered={false} style={{ marginBottom: 16, border: '1px solid var(--color-hairline)', borderRadius: 14 }}><Empty description={error?.message || '成长档案暂时无法加载'} /></Card>
   }
 
+  const totalUsedHours = Number(archive.overview.usedHours || 0) + Number(archive.overview.approvedIntensiveHours || 0)
+  const attendanceRate = archive.attendance.summary.rate ?? 0
+  const rateColor = attendanceRate >= 90 ? '#1D9E75' : attendanceRate >= 75 ? '#C9A45C' : '#C0392B'
+
   const overviewItems = [
-    { label: '累计反馈', value: `${archive.overview.feedbackCount} 次`, icon: <MessageOutlined /> },
-    { label: '累计上课', value: `${Number(archive.overview.usedHours || 0) + Number(archive.overview.approvedIntensiveHours || 0)} 小时`, icon: <BookOutlined /> },
-    { label: '剩余课时', value: `${archive.overview.remainingHours} 小时`, icon: <CheckCircleOutlined /> },
-    { label: '最近反馈', value: formatLocaleDate(archive.overview.latestFeedbackDate), icon: <CalendarOutlined /> },
+    { label: '累计反馈', value: `${archive.overview.feedbackCount} 次`, icon: <MessageOutlined />, accent: '#4E7FC7' },
+    { label: '累计上课', value: `${totalUsedHours} 小时`, icon: <BookOutlined />, accent: '#1D9E75' },
+    { label: '剩余课时', value: `${archive.overview.remainingHours} 小时`, icon: <CheckCircleOutlined />, accent: '#C9A45C' },
+    { label: '最近反馈', value: formatLocaleDate(archive.overview.latestFeedbackDate), icon: <CalendarOutlined />, accent: '#E8784A' },
   ]
+
+  const feedbackList = archive.feedback.items || []
 
   return (
     <section style={{ marginBottom: 24, maxWidth: '100%', overflow: 'hidden' }}>
-      <Card bordered={false} style={{ marginBottom: 12, border: '1px solid var(--color-hairline)', borderRadius: 14 }}>
+      {/* Hero 卡 */}
+      <Card bordered={false} style={{ marginBottom: 12, borderRadius: 16, border: '1px solid rgba(201,164,92,.4)', background: 'linear-gradient(135deg,#123C35 0%,#0E5E4E 55%,#0B4B40 100%)', overflow: 'hidden', boxShadow: '0 8px 24px rgba(14,94,78,.18)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-          <Avatar size={isMobile ? 52 : 64} style={{ background: 'var(--color-primary)', color: 'var(--color-surface-1)', fontWeight: 700 }}>
-            {archive.student.name.slice(0, 1)}
-          </Avatar>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ color: 'var(--color-ink)', fontSize: isMobile ? 18 : 22, fontWeight: 700 }}>{archive.student.name}</div>
-            <div style={{ color: 'var(--color-ink-muted)', marginTop: 4 }}>{archive.student.grade || '未设置年级'} · {archive.student.className || '未加入班级'}</div>
+          <div style={{ position: 'relative' }}>
+            <div style={{ border: '2px solid rgba(201,164,92,.7)', borderRadius: '50%', padding: 2 }}>
+              <StudentAvatar name={archive.student.name} size={isMobile ? 48 : 60} />
+            </div>
           </div>
-          <Tag icon={<TeamOutlined />} style={{ marginLeft: isMobile ? 0 : 'auto', borderRadius: 9999 }}>{archive.attendance.summary.total} 条考勤记录</Tag>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ color: '#F7F3E8', fontSize: isMobile ? 19 : 23, fontWeight: 800, letterSpacing: .3 }}>{archive.student.name}</div>
+            <div style={{ color: 'rgba(242,227,182,.75)', marginTop: 3, fontSize: 12.5 }}>
+              {archive.student.grade || '未设置年级'} · {archive.student.className || '未加入班级'}
+            </div>
+          </div>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999,
+            background: 'rgba(201,164,92,.18)', border: '1px solid rgba(201,164,92,.55)', color: '#F2E3B6',
+            fontSize: 12, fontWeight: 700, marginLeft: isMobile ? 0 : 'auto',
+          }}>
+            <TeamOutlined /> {archive.attendance.summary.total} 条考勤记录
+          </span>
         </div>
       </Card>
 
-      <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
+      {/* 核心统计卡 */}
+      <Row gutter={[10, 10]} style={{ marginBottom: 12 }}>
         {overviewItems.map((item) => (
           <Col xs={12} lg={6} key={item.label}>
-            <Card bordered={false} style={{ height: '100%', border: '1px solid var(--color-hairline)', borderRadius: 14 }} styles={{ body: { padding: isMobile ? 12 : 16 } }}>
-              <div style={{ color: 'var(--color-primary)', fontSize: 18 }}>{item.icon}</div>
-              <div style={{ color: 'var(--color-ink-subtle)', fontSize: 12, marginTop: 8 }}>{item.label}</div>
-              <div style={{ color: 'var(--color-ink)', fontSize: isMobile ? 16 : 20, fontWeight: 700, marginTop: 2 }}>{item.value}</div>
+            <Card bordered={false} style={{ height: '100%', borderRadius: 14, border: '1px solid #EDE9E1', background: '#fff', boxShadow: '0 2px 8px rgba(23,47,41,.05)' }} styles={{ body: { padding: isMobile ? 12 : 14 } }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                <span style={{ width: 34, height: 34, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `${item.accent}18`, color: item.accent, fontSize: 16 }}>{item.icon}</span>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ color: '#98A2B3', fontSize: 11.5 }}>{item.label}</div>
+                  <div style={{ color: '#17352F', fontSize: isMobile ? 16 : 19, fontWeight: 800, marginTop: 1, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{item.value}</div>
+                </div>
+              </div>
             </Card>
           </Col>
         ))}
       </Row>
 
+      {/* 课堂反馈：卡片列表 */}
       <Card
-        title="课堂反馈"
+        title={<span style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}><MessageOutlined style={{ color: '#0E5E4E' }} /> 课堂反馈</span>}
         extra={<Button type="link" onClick={onViewAllFeedback}>查看全部反馈</Button>}
         bordered={false}
-        style={{ marginBottom: 12, border: '1px solid var(--color-hairline)', borderRadius: 14 }}
+        style={{ marginBottom: 12, borderRadius: 14, border: '1px solid #EDE9E1' }}
       >
-        <Table
-          rowKey="id"
-          size="small"
-          pagination={false}
-          scroll={{ x: 'max-content' }}
-          dataSource={archive.feedback.items}
-          columns={[
-            { title: '日期', dataIndex: 'date', width: 120, render: (value: string | null) => formatLocaleDate(value) },
-            { title: '学科', dataIndex: 'subject', width: 100, render: (value: string) => <Tag color="orange">{value}</Tag> },
-            { title: '教师', dataIndex: ['teacher', 'name'], width: 100 },
-            { title: '课堂标签', dataIndex: 'tags', width: 180, render: (tags: string[]) => tags.length ? tags.map((tag) => <Tag key={tag}>{tag}</Tag>) : '-' },
-            { title: '简评', key: 'summary', width: 280, ellipsis: true, render: (_value, record) => record.summary || record.overallComment || '-' },
-          ]}
-          locale={{ emptyText: <Empty description="暂无课堂反馈" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
-        />
+        {feedbackList.length ? (
+          <div style={{ display: 'grid', gap: 8 }}>
+            {feedbackList.map((item) => (
+              <div key={item.id} style={{ display: 'flex', gap: 10, padding: '10px 12px', borderRadius: 12, background: '#FAF8F4', border: '1px solid #F0EBE2', alignItems: 'flex-start' }}>
+                <div style={{ flexShrink: 0, width: 44, textAlign: 'center', borderRadius: 10, background: 'rgba(14,94,78,.08)', padding: '4px 2px' }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#0E5E4E', fontVariantNumeric: 'tabular-nums' }}>{item.date ? item.date.slice(8, 10) : '--'}</div>
+                  <div style={{ fontSize: 9.5, color: '#98A2B3' }}>{item.date ? item.date.slice(5, 7) : ''}月</div>
+                </div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ display: 'inline-block', padding: '1px 8px', borderRadius: 999, background: 'rgba(232,120,74,.12)', color: '#C2541F', fontSize: 11.5, fontWeight: 700 }}>{item.subject || '综合'}</span>
+                    <span style={{ color: '#667085', fontSize: 12.5, fontWeight: 600 }}>{item.teacher?.name || '教师'}</span>
+                    {Array.isArray(item.tags) && item.tags.length > 0 && (
+                      <span style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                        {item.tags.slice(0, 3).map((tag) => (
+                          <span key={tag} style={{ display: 'inline-block', padding: '1px 7px', borderRadius: 999, background: 'rgba(78,127,199,.1)', color: '#3A5E8F', fontSize: 10.5 }}>{tag}</span>
+                        ))}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ color: '#4B5563', fontSize: 12.5, marginTop: 4, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {item.summary || item.overallComment || '暂无简评'}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Empty description="暂无课堂反馈" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        )}
       </Card>
 
       <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
         <Col xs={24} lg={10}>
-          <Card title="考勤情况" bordered={false} style={{ height: '100%', border: '1px solid var(--color-hairline)', borderRadius: 14 }}>
-            <Row gutter={[8, 12]}>
-              <Col span={12}><Statistic title="总课次" value={archive.attendance.summary.total} /></Col>
-              <Col span={12}><Statistic title="出勤率" value={archive.attendance.summary.rate ?? 0} suffix="%" /></Col>
-              <Col span={12}><Statistic title="请假次数" value={archive.attendance.summary.leave} /></Col>
-              <Col span={12}><Statistic title="缺勤次数" value={archive.attendance.summary.absent} /></Col>
+          <Card title={<span style={{ fontWeight: 700 }}><CalendarOutlined style={{ color: '#0E5E4E', marginRight: 6 }} />考勤情况</span>} bordered={false} style={{ height: '100%', borderRadius: 14, border: '1px solid #EDE9E1' }}>
+            <Row gutter={[8, 10]}>
+              <Col span={12}>
+                <div style={{ borderRadius: 12, background: 'rgba(14,94,78,.06)', padding: '10px 12px' }}>
+                  <div style={{ color: '#98A2B3', fontSize: 11.5 }}>总课次</div>
+                  <div style={{ color: '#17352F', fontSize: 20, fontWeight: 800, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>{archive.attendance.summary.total}</div>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div style={{ borderRadius: 12, background: 'rgba(29,158,117,.07)', padding: '10px 12px' }}>
+                  <div style={{ color: '#98A2B3', fontSize: 11.5 }}>出勤率</div>
+                  <div style={{ color: rateColor, fontSize: 20, fontWeight: 800, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>{attendanceRate}%</div>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div style={{ borderRadius: 12, background: 'rgba(232,120,74,.07)', padding: '10px 12px' }}>
+                  <div style={{ color: '#98A2B3', fontSize: 11.5 }}>请假次数</div>
+                  <div style={{ color: '#C2541F', fontSize: 18, fontWeight: 700, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>{archive.attendance.summary.leave}</div>
+                </div>
+              </Col>
+              <Col span={12}>
+                <div style={{ borderRadius: 12, background: 'rgba(192,57,43,.07)', padding: '10px 12px' }}>
+                  <div style={{ color: '#98A2B3', fontSize: 11.5 }}>缺勤次数</div>
+                  <div style={{ color: '#C0392B', fontSize: 18, fontWeight: 700, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>{archive.attendance.summary.absent}</div>
+                </div>
+              </Col>
             </Row>
           </Card>
         </Col>
         <Col xs={24} lg={14}>
-          <Card title="课时情况" bordered={false} style={{ height: '100%', border: '1px solid var(--color-hairline)', borderRadius: 14 }}>
-            <Row gutter={[8, 12]} style={{ marginBottom: 12 }}>
-              <Col span={8}><Statistic title="购买课时" value={archive.hours.totalHours} /></Col>
-              <Col span={8}><Statistic title="已消耗" value={archive.hours.usedHours} /></Col>
-              <Col span={8}><Statistic title="剩余" value={archive.hours.remainingHours} /></Col>
+          <Card title={<span style={{ fontWeight: 700 }}><BookOutlined style={{ color: '#0E5E4E', marginRight: 6 }} />课时情况</span>} bordered={false} style={{ height: '100%', borderRadius: 14, border: '1px solid #EDE9E1' }}>
+            <Row gutter={[8, 10]} style={{ marginBottom: 12 }}>
+              <Col span={8}>
+                <div style={{ borderRadius: 12, background: 'rgba(201,164,92,.1)', padding: '10px 12px', textAlign: 'center' }}>
+                  <div style={{ color: '#98A2B3', fontSize: 11.5 }}>购买课时</div>
+                  <div style={{ color: '#8A6B2F', fontSize: 18, fontWeight: 800, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>{archive.hours.totalHours}</div>
+                </div>
+              </Col>
+              <Col span={8}>
+                <div style={{ borderRadius: 12, background: 'rgba(78,127,199,.08)', padding: '10px 12px', textAlign: 'center' }}>
+                  <div style={{ color: '#98A2B3', fontSize: 11.5 }}>已消耗</div>
+                  <div style={{ color: '#3A5E8F', fontSize: 18, fontWeight: 800, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>{archive.hours.usedHours}</div>
+                </div>
+              </Col>
+              <Col span={8}>
+                <div style={{ borderRadius: 12, background: 'rgba(29,158,117,.08)', padding: '10px 12px', textAlign: 'center' }}>
+                  <div style={{ color: '#98A2B3', fontSize: 11.5 }}>剩余</div>
+                  <div style={{ color: '#1D9E75', fontSize: 18, fontWeight: 800, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>{archive.hours.remainingHours}</div>
+                </div>
+              </Col>
             </Row>
             <Table
               rowKey="id"
@@ -1230,8 +1339,11 @@ function StudentGrowthArchivePanel({
               dataSource={archive.hours.transactions}
               columns={[
                 { title: '日期', dataIndex: 'createdAt', width: 110, render: (value: string | null) => formatLocaleDate(value) },
-                { title: '类型', dataIndex: 'type', width: 130 },
-                { title: '变动', dataIndex: 'amount', width: 90 },
+                { title: '类型', dataIndex: 'type', width: 130, render: (value: string | null) => <span style={{ fontWeight: 600, fontSize: 12.5 }}>{( { ATTENDANCE_DEDUCT: '考勤扣课时', ENROLL_PACKAGE: '报名课时包', MANUAL_ADJUST: '人工调整', INTENSIVE_DEDUCT: '一对一扣课时', REFUND: '退费', TRANSFER: '转班调整', MAKEUP_GRANT: '补课发放', EXPIRY: '到期清零' } as Record<string, string>)[value || ''] || value || '-'}</span> },
+                { title: '变动', dataIndex: 'amount', width: 90, render: (value: unknown) => {
+                  const num = Number(value || 0)
+                  return <span style={{ color: num < 0 ? '#C0392B' : '#1D9E75', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{num > 0 ? `+${num}` : num}</span>
+                } },
                 { title: '原因', dataIndex: 'reason', width: 200, render: (value: string | null) => value || '-' },
               ]}
               locale={{ emptyText: <Empty description="暂无课时流水" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
@@ -1240,7 +1352,7 @@ function StudentGrowthArchivePanel({
         </Col>
       </Row>
 
-      <Card title="成绩变化" bordered={false} style={{ border: '1px solid var(--color-hairline)', borderRadius: 14 }}>
+      <Card title={<span style={{ fontWeight: 700 }}><ReadOutlined style={{ color: '#0E5E4E', marginRight: 6 }} />成绩变化</span>} bordered={false} style={{ borderRadius: 14, border: '1px solid #EDE9E1' }}>
         {archive.grades.trend.length ? (
           <Table
             rowKey="id"

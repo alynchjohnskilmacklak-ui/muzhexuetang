@@ -1,13 +1,12 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import NextImage from 'next/image'
 import { Image as AntImage, Input, Tag, Typography } from 'antd'
 import { SearchOutlined, TeamOutlined } from '@ant-design/icons'
-import { normalizeAvatarUrl } from '@/lib/upload-url'
-import { femaleDefaultAvatar } from '@/lib/teacher-avatars'
+import { DEFAULT_TEACHER_AVATAR, getTeacherAvatarUrl } from '@/lib/teacher-avatars'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
-import { ResponsiveDialog } from '@/components/Common/ResponsiveDialog'
+import { BrandModal } from '@/components/Common/BrandModal'
+import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
 import { resolveTier, TIER_THEME, TIER_RANK } from '@/constants/teacher-tier'
 
 const { Title, Text, Paragraph } = Typography
@@ -39,7 +38,6 @@ function teacherSubjects(teacher: TeacherInfo) {
 }
 
 function TeacherGridCard({ teacher, onSelect }: { teacher: TeacherInfo; onSelect: () => void }) {
-  const [imageFailed, setImageFailed] = useState(false)
   const subjects = teacherSubjects(teacher)
   const firstStyle = SUBJECT_STYLES[subjects[0]] || DEFAULT_STYLE
   const tier = resolveTier(teacher.tierLevel)
@@ -47,9 +45,13 @@ function TeacherGridCard({ teacher, onSelect }: { teacher: TeacherInfo; onSelect
 
   return <button type="button" className={`parent-teacher-card parent-teacher-card--${tier.toLowerCase()}`} onClick={onSelect}>
     <span className="parent-teacher-avatar" style={{ background: firstStyle.bg, color: firstStyle.color }}>
-      {teacher.avatar && !imageFailed
-        ? <NextImage fill src={normalizeAvatarUrl(teacher.avatar)} alt={teacher.name} sizes="(max-width: 768px) 38vw, 180px" unoptimized onError={() => setImageFailed(true)} />
-        : <img src={teacher.gender === '男' ? '/avatars/teacher-male.png' : femaleDefaultAvatar(teacher.name)} alt={teacher.name} className="parent-teacher-avatar-img" />}
+      <CachedAvatarImage
+        src={getTeacherAvatarUrl(teacher.avatar, teacher.gender, teacher.id)}
+        fallbackSrc={getTeacherAvatarUrl(null, teacher.gender, teacher.id) || DEFAULT_TEACHER_AVATAR}
+        alt={teacher.name}
+        className="parent-teacher-avatar-img"
+        style={{ objectPosition: 'center top' }}
+      />
     </span>
     <span className="parent-teacher-name">
       <strong>{teacher.name}</strong>
@@ -105,11 +107,12 @@ export function ParentTeachersClient({ teachers }: { teachers: TeacherInfo[] }) 
       </div> : <div className="parent-teachers-empty"><BrandEmpty title="没有找到符合条件的老师" hint="可以更换姓名或学科筛选条件。" /></div>}
     </>}
 
-    <ResponsiveDialog open={Boolean(selectedTeacher)} onClose={() => setSelectedTeacher(null)} title={selectedTeacher?.name || '教师详情'} width={620} mobileHeight="88dvh" footer={null}>
+    <BrandModal open={Boolean(selectedTeacher)} onClose={() => setSelectedTeacher(null)} title={selectedTeacher?.name || '教师详情'} width={620} mobileHeight="88dvh" footer={null}>
       {selectedTeacher && <div className="parent-teacher-detail">
         <div className="parent-teacher-detail-head">
           <AntImage
-            src={selectedTeacher.avatar ? normalizeAvatarUrl(selectedTeacher.avatar) : (selectedTeacher.gender === '男' ? '/avatars/teacher-male.png' : femaleDefaultAvatar(selectedTeacher.name))}
+            src={getTeacherAvatarUrl(selectedTeacher.avatar, selectedTeacher.gender, selectedTeacher.id)}
+            fallback={getTeacherAvatarUrl(null, selectedTeacher.gender, selectedTeacher.id) || DEFAULT_TEACHER_AVATAR}
             alt={selectedTeacher.name}
             width={96} height={120}
             style={{ objectFit: 'cover', borderRadius: 12 }}
@@ -141,6 +144,6 @@ export function ParentTeachersClient({ teachers }: { teachers: TeacherInfo[] }) 
           {selectedTeacher.studyMaterials.map(material => <div key={material.id}><span>{material.title}</span><small>{material.grade} · {material.subject} · {material.fileType}</small></div>)}
         </section>}
       </div>}
-    </ResponsiveDialog>
+    </BrandModal>
   </div>
 }

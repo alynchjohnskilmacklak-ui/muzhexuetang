@@ -1,7 +1,6 @@
 import type { Prisma } from '@prisma/client'
 
 type AccessClient = Pick<Prisma.TransactionClient, 'classroomFeedback' | 'enrollment'>
-type ScopeClient = Pick<Prisma.TransactionClient, 'enrollment'>
 
 export type ParentMessageActor = {
   id: string
@@ -47,11 +46,10 @@ export async function teacherCanAccessParentMessage(
   return taught > 0
 }
 
-export async function getAccessibleParentMessageWhere(
-  prisma: ScopeClient,
+export function getAccessibleParentMessageWhere(
   actor: ParentMessageActor,
   division: string,
-): Promise<Prisma.ParentMessageWhereInput | null> {
+): Prisma.ParentMessageWhereInput | null {
   if (actor.role === 'parent') {
     return { parentId: actor.id }
   }
@@ -64,20 +62,6 @@ export async function getAccessibleParentMessageWhere(
     return null
   }
 
-  const enrollments = await prisma.enrollment.findMany({
-    where: {
-      status: 'ACTIVE',
-      group: {
-        OR: [
-          { teacherId: actor.teacherId },
-          { teacherAssignments: { some: { teacherId: actor.teacherId } } },
-        ],
-      },
-    },
-    select: { studentId: true },
-  })
-  const studentIds = Array.from(new Set(enrollments.map((enrollment) => enrollment.studentId)))
-
   return {
     OR: [
       {
@@ -86,8 +70,24 @@ export async function getAccessibleParentMessageWhere(
       },
       {
         feedbackId: null,
-        studentId: { in: studentIds.length > 0 ? studentIds : ['__none__'] },
-        OR: [{ teacherId: actor.teacherId }, { teacherId: null }],
+        AND: [
+          {
+            student: {
+              enrollments: {
+                some: {
+                  status: 'ACTIVE',
+                  group: {
+                    OR: [
+                      { teacherId: actor.teacherId },
+                      { teacherAssignments: { some: { teacherId: actor.teacherId } } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          { OR: [{ teacherId: actor.teacherId }, { teacherId: null }] },
+        ],
       },
     ],
   }

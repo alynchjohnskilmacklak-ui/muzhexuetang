@@ -1,0 +1,39 @@
+﻿=== 1) app 容器的挂载 (Mounts) ===
+bind | /srv/edu-manage/shared/public/marketing -> /app/public/marketing | RW=true
+bind | /srv/edu-manage/shared/public/business-assets -> /app/public/business-assets | RW=true
+bind | /srv/edu-manage/shared/public/volunteer/docs -> /app/public/volunteer/docs | RW=true
+bind | /data/backups/edu-manage -> /data/backups/edu-manage | RW=true
+volume | /var/lib/docker/volumes/edu-manage_next_cache/_data -> /app/.next/cache | RW=true
+bind | /srv/edu-manage/shared/public/uploads -> /app/public/uploads | RW=true
+bind | /srv/edu-manage/shared/public/services -> /app/public/services | RW=true
+
+=== 2) app 容器的启动命令 / 工作目录 ===
+Cmd=[node server.js]  Entrypoint=[docker-entrypoint.sh]  WorkDir=/app
+
+=== 3) 容器内 /app/public/home.html 的 sha256 ===
+54deeb292962be2fe4788053612b8b1124177fb9ebb52d2c3bbd633f5140dc53  /app/public/home.html
+1968d74824444874189b118a3dddabe666907879a0384b6850f00d80de12222c  /app/public/about.html
+
+=== 4) 容器内找 home.html ===
+/app/public/home.html
+
+=== 5) 宿主机上 source/public 现在的 sha256 ===
+5dd81479b6aa0bfa1c66619384f5d8748d7547a8e4481b25f865db904052ce66  /opt/edu-manage-docker/source/public/home.html
+f3f2ab6d21c323512816b294d10f255b76363d1961b4888b295675e845c45e4e  /opt/edu-manage-docker/source/public/about.html
+
+=== 6) docker-compose 里 app 的定义 ===
+(未找到 docker-compose.yml)
+
+=== 7) nginx 站点配置文件清单 ===
+/etc/nginx/conf.d/:
+total 0
+
+/etc/nginx/sites-enabled/:
+total 0
+lrwxrwxrwx 1 root root 42 Sep 12 13:00 edu-manage.conf -> /etc/nginx/sites-available/edu-manage.conf
+
+=== 8) nginx 配置中的 server_name muzhexuetang ===
+/etc/nginx/sites-available/edu-manage.conf.bak-20261003
+/etc/nginx/sites-available/edu-manage.conf.pre-image-cache-20260912
+/etc/nginx/sites-available/edu-manage.conf
+/etc/nginx/sites-available/edu-manage.conf.bak-perf-20261003

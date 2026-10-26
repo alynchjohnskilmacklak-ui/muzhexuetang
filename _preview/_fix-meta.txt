@@ -1,0 +1,15 @@
+﻿本地当前 meta: 3f17ed1785b9a82fd4176b64ecffb169_1791013602
+  已替换为 : 3f17ed1785b9a82fd4176b64ecffb169_1791014088
+  本地 65612 B  sha=8304e355271463e6
+
+=== 部署 ===
+  已写入 shared + source，65612 B 
+
+=== 即时校验（home.html 已挂载，无需重建容器）===
+  线上 meta : <meta name="shenma-site-verification" content="3f17ed1785b9a82fd4176b64ecffb169_1791014088"/>
+  是否最新  : ✓
+  容器内    : content="3f17ed1785b9a82fd4176b64ecffb169_1791014088"
+  首页 HTTP 200  65612 B  <title>新乐牧哲学堂｜河北新乐文化课辅导</title>
+  .txt 仍在 : shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_1791013955
+
+★★ 现在立刻回神马后台点「验证」——不要刷新页面！

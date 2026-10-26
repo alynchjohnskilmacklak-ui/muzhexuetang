@@ -1,7 +1,8 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Table, Input, Space, Typography, Tag } from 'antd'
+import { Alert, Button, Card, Table, Input, Space, Typography, Tag } from 'antd'
+import { fetchJson } from '@/lib/fetch-json'
 import { SearchOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 
@@ -17,7 +18,7 @@ export function LogsTab() {
   const params = new URLSearchParams({ page: String(page), pageSize: '20' })
   if (search) params.set('search', search)
 
-  const { data, isLoading } = useSWR(`/api/settings/logs?${params}`, (url: string) => fetch(url).then((r) => r.json()))
+  const { data, error, isLoading, mutate } = useSWR(`/api/settings/logs?${params}`, (url: string) => fetchJson<{ data: Record<string, unknown>[]; total: number }>(url))
 
   const columns = [
     { title: '时间', dataIndex: 'createdAt', key: 'createdAt', width: 160, render: (v: string) => new Date(v).toLocaleString('zh-CN') },
@@ -29,6 +30,7 @@ export function LogsTab() {
 
   return (
     <Card bordered={false} style={{ borderRadius: 10 }}>
+      {error && <Alert type="error" showIcon message="操作日志加载失败" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 16 }} />}
       <Space style={{ marginBottom: 16 }}>
         <Input
           prefix={<SearchOutlined />}

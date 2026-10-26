@@ -5,17 +5,35 @@ import { Card, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { fmtDate } from '@/lib/format-date'
-import { CalendarOutlined } from '@ant-design/icons'
+import {
+  ArrowRightOutlined,
+  CheckCircleOutlined,
+  SafetyCertificateOutlined,
+  CoffeeOutlined,
+  HeartOutlined,
+  CalendarOutlined,
+} from '@ant-design/icons'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { useRouter } from 'next/navigation'
 
 const { Text } = Typography
 const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六']
 
-type Menu = { id: string; dayOfWeek: number; mainDish: string; sideDish: string | null }
+type Menu = {
+  id: string | null
+  dayOfWeek: number
+  mainDish: string
+  sideDish: string | null
+  notes: string | null
+  image: string | null
+  description: string | null
+  source: 'date' | 'template'
+}
 type TodayMenu = { id: string; mainDish: string; sideDish: string | null; allowDouble: boolean }
 type StudentOption = { id: string; name: string }
 
 export function ParentMealsClient({ weekStart, menus }: { weekStart: string; menus: Menu[] }) {
+  const router = useRouter()
   const monday = dayjs(weekStart)
   const menuMap = new Map(menus.map(m => [m.dayOfWeek, m]))
   const currentDayOfWeek = dayjs().day()
@@ -60,62 +78,79 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
         </div>
       )}
 
-      {/* Promise banner */}
-      <div style={{ position: 'relative', marginBottom: 16, borderRadius: 14, overflow: 'hidden', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #E87545 100%)', boxShadow: '0 6px 24px rgba(102,126,234,.25)' }}>
-        <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,.08)' }} />
-        <div style={{ position: 'absolute', bottom: -60, left: -20, width: 160, height: 160, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,.05)' }} />
-        <div style={{ position: 'relative', padding: '22px 22px 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-            <div style={{ width: 4, height: 28, borderRadius: 2, backgroundColor: 'rgba(255,255,255,.8)' }} />
-            <div style={{ fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: 1 }}>牧哲学堂 · 就餐承诺</div>
+      {/* 就餐承诺（精简版） */}
+      <div style={{
+        position: 'relative',
+        marginBottom: 16,
+        borderRadius: 16,
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg, #16392A 0%, #1E4D3A 55%, #2E6B50 100%)',
+        boxShadow: '0 8px 24px rgba(22, 57, 42, 0.25)',
+      }}>
+        {/* 装饰 */}
+        <div style={{ position: 'absolute', right: -30, top: -40, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+        <div style={{ position: 'absolute', right: 20, bottom: -50, width: 100, height: 100, borderRadius: '50%', background: 'rgba(217,179,106,0.12)' }} />
+
+        <div style={{ position: 'relative', padding: '18px 18px 16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <div style={{ width: 4, height: 24, borderRadius: 2, backgroundColor: '#D9B36A' }} />
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#F3D98F', letterSpacing: 1 }}>牧哲学堂 · 就餐保障</div>
           </div>
-          <div style={{ fontSize: 13, lineHeight: 2, color: 'rgba(255,255,255,.92)' }}>
-            <p style={{ margin: '0 0 10px' }}>
-              牧哲学堂始终坚持以学生为中心，以服务家长为宗旨，重视孩子在校期间的饮食安全与用餐保障。
-              <span style={{ fontWeight: 600, color: '#fff' }}>我们郑重承诺：绝不会赚取孩子一分钱饭钱</span>，
-              所有就餐安排均以保障孩子吃饱、吃好、吃得安全为基本原则。
-            </p>
-            <p style={{ margin: '0 0 10px' }}>
-              在订餐过程中，如遇到饭菜份数不足等特殊情况，我们会优先保障孩子用餐。
-              即使孩子只订了一份饭但没有吃饱，机构负责人也会及时关注，并根据实际情况带孩子再次购买饭食，
-              <span style={{ fontWeight: 600, color: '#fff' }}>直到孩子吃饱为止</span>。
-            </p>
-            <p style={{ margin: '0 0 10px' }}>
-              为保障食品安全，牧哲学堂每日饭菜均会按要求进行留样。
-              如家长对饭菜质量、食品安全或孩子用餐情况有任何疑问，请及时联系负责人，
-              我们一定会积极沟通、认真处理，并全力配合家长做好相关工作。
-            </p>
-            <p style={{ margin: '0' }}>
-              牧哲学堂不仅关注孩子的学习，也关心每一个家庭的实际情况。
-              <span style={{ fontWeight: 600, color: '#fff' }}>对于品学兼优、积极上进且家庭确有困难的学生，
-              我们也会根据实际情况提供力所能及的支持，尽可能帮助孩子顺利完成学业，直至高中毕业。</span>
-            </p>
-          </div>
-          <div style={{ marginTop: 14, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {['吃饱吃好', '食品安全', '用心服务', '尽职担当'].map(item => (
-              <span key={item} style={{ padding: '4px 12px', borderRadius: 16, background: 'rgba(255,255,255,.15)', fontSize: 11, color: '#fff' }}>{item}</span>
-            ))}
+
+          {/* 四个核心承诺，用图标+短句，不用大段文字 */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: '9px 10px' }}>
+              <CoffeeOutlined style={{ color: '#F3D98F', fontSize: 16 }} />
+              <div>
+                <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>吃饱吃好</div>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10.5 }}>不赚饭钱，不够免费续</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: '9px 10px' }}>
+              <SafetyCertificateOutlined style={{ color: '#F3D98F', fontSize: 16 }} />
+              <div>
+                <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>食品安全</div>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10.5 }}>每日留样，安全可追溯</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: '9px 10px' }}>
+              <CheckCircleOutlined style={{ color: '#F3D98F', fontSize: 16 }} />
+              <div>
+                <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>用心服务</div>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10.5 }}>随时沟通，及时响应</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: '9px 10px' }}>
+              <HeartOutlined style={{ color: '#F3D98F', fontSize: 16 }} />
+              <div>
+                <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>困难帮扶</div>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10.5 }}>家庭困难学生可申请支持</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Today lunch card (lightweight) */}
+      {/* 今日午餐卡片 */}
       {todayMenu ? (
-        <Card style={{ marginBottom: 14, borderRadius: 14, border: '2px solid #E87545', background: 'rgba(232,117,69,.03)' }} styles={{ body: { padding: '14px 16px' } }}>
-          <Text type="secondary" style={{ fontSize: 11 }}>今日午餐</Text>
-          <div style={{ fontSize: 20, fontWeight: 700, margin: '4px 0' }}>{todayMenu.mainDish}</div>
-          <Text type="secondary" style={{ fontSize: 13 }}>{todayMenu.sideDish || '菜品待补充'}</Text>
+        <Card style={{ marginBottom: 14, borderRadius: 16, border: '2px solid rgba(217,179,106,0.5)', background: 'rgba(217,179,106,0.05)', boxShadow: '0 4px 12px rgba(217,179,106,0.12)' }} styles={{ body: { padding: '16px 18px' } }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <CoffeeOutlined style={{ color: '#A6781F', fontSize: 13 }} />
+            <Text style={{ color: '#A6781F', fontSize: 12, fontWeight: 700, letterSpacing: 1 }}>今日午餐</Text>
+          </div>
+          <div style={{ fontSize: 21, fontWeight: 700, color: '#111827', margin: '4px 0' }}>{todayMenu.mainDish}</div>
+          <Text style={{ fontSize: 13, color: '#4B5563' }}>{todayMenu.sideDish || '菜品新鲜搭配，营养均衡'}</Text>
         </Card>
       ) : (
-        <Card style={{ marginBottom: 14, borderRadius: 14, border: '1px solid rgba(0,0,0,.08)' }} styles={{ body: { padding: '14px 16px' } }}>
-          <Text type="secondary" style={{ fontSize: 13 }}>今日菜单待公布</Text>
-          <div style={{ fontSize: 11, color: '#98A2B3', marginTop: 4 }}>老师/管理员发布后，家长可在这里确认是否用餐</div>
+        <Card style={{ marginBottom: 14, borderRadius: 16, border: '1px solid #EDE5DA' }} styles={{ body: { padding: '16px 18px' } }}>
+          <Text style={{ fontSize: 14, color: '#4B5563', fontWeight: 500 }}>今日菜单待公布</Text>
+          <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>老师/管理员发布后，家长可在这里确认是否用餐</div>
         </Card>
       )}
 
       {/* Student meal choices (compact inline rows) */}
       {students.length > 0 && todayMenu && (
-        <Card title="孩子用餐选择" style={{ marginBottom: 14, borderRadius: 14 }} styles={{ body: { padding: '0 16px 12px' }, header: { borderBottom: 'none', paddingBottom: 0 } }}>
+        <Card title="孩子用餐选择" style={{ marginBottom: 14, borderRadius: 16 }} styles={{ body: { padding: '0 16px 12px' }, header: { borderBottom: 'none', paddingBottom: 0 } }}>
           {students.map(student => (
             <div key={student.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,.04)' }}>
               <div>
@@ -134,7 +169,7 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
                 }}>不用餐</button>
                 <button onClick={() => handleChoice(student.id, true)} disabled={submitting} style={{
                   padding: '6px 16px', fontSize: 13, border: 'none', borderLeft: '1px solid #E8E2DA', cursor: 'pointer',
-                  background: choices[student.id] === true ? '#E8784A' : '#fff', color: choices[student.id] === true ? '#fff' : '#7A869A',
+                  background: choices[student.id] === true ? 'var(--color-primary)' : '#fff', color: choices[student.id] === true ? 'var(--color-on-primary)' : 'var(--color-ink-subtle)',
                   fontWeight: choices[student.id] === true ? 600 : 400,
                 }}>用餐</button>
               </div>
@@ -157,28 +192,107 @@ export function ParentMealsClient({ weekStart, menus }: { weekStart: string; men
         </Card>
       )}
 
-      {/* Weekly menu (compact list on mobile) */}
-      <Card title={<span><CalendarOutlined style={{ marginRight: 8 }} />本周菜单</span>} style={{ borderRadius: 14 }} styles={{ header: { borderBottom: 'none' }, body: { padding: '0 16px 12px' } }}>
-        {WEEKDAYS.map((day, i) => {
-          const dow = i + 1
-          const menu = menuMap.get(dow)
-          const isToday = dow === currentDayOfWeek
-          return (
-            <div key={day} style={{
-              display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: '1px solid rgba(0,0,0,.04)',
-              background: isToday ? 'rgba(232,117,69,.06)' : 'transparent', borderRadius: isToday ? 8 : 0, margin: isToday ? '4px -8px' : 0, paddingLeft: isToday ? 8 : 0, paddingRight: isToday ? 8 : 0,
-            }}>
-              <Text strong style={{ fontSize: 13, minWidth: 32 }}>{day}</Text>
-              <Text type="secondary" style={{ fontSize: 11, minWidth: 52 }}>{fmtDate(monday.add(i, 'day').toDate())}</Text>
-              <div style={{ flex: 1 }}>
-                {menu ? <Text style={{ fontSize: 13 }}>{menu.mainDish}</Text> : <Text type="secondary" style={{ fontSize: 12 }}>菜单待公布</Text>}
-                {menu?.sideDish && <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>{menu.sideDish}</Text>}
+      {/* ===== 本周菜单（卡片式，可点击查看详情） ===== */}
+      <div style={{
+        borderRadius: 16, background: 'rgba(255,255,255,0.95)',
+        border: '1px solid #EDE5DA', boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+        padding: '16px 16px 14px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <CalendarOutlined style={{ color: '#1E4D3A', fontSize: 16 }} />
+          <Text style={{ fontSize: 16, fontWeight: 700, color: '#111827' }}>本周菜单</Text>
+        </div>
+        {/* 注释：提示可以点击查看详情 */}
+        <Text style={{ display: 'block', fontSize: 12, color: '#6B7280', marginBottom: 12 }}>
+          点击任意菜品卡片，可查看菜品照片与详细介绍
+        </Text>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {WEEKDAYS.map((day, i) => {
+            const dow = i + 1
+            const menu = menuMap.get(dow)
+            const isToday = dow === currentDayOfWeek
+            const hasMenu = !!menu && menu.mainDish && menu.mainDish !== '菜单待公布'
+            const canOpen = hasMenu && menu?.id
+
+            const card = (
+              <div style={{
+                position: 'relative', display: 'flex', alignItems: 'center', gap: 12,
+                borderRadius: 14, padding: '10px 12px',
+                background: isToday ? 'rgba(217,179,106,0.10)' : '#FAF7F1',
+                border: isToday ? '1.5px solid rgba(217,179,106,0.55)' : '1px solid #F0E9DD',
+                cursor: canOpen ? 'pointer' : 'default',
+                transition: 'all .18s ease',
+                overflow: 'hidden',
+              }}>
+                {/* 菜品缩略图 */}
+                <div style={{
+                  width: 52, height: 52, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: menu?.image ? '#eee' : 'linear-gradient(135deg, #1E4D3A, #2E6B50)',
+                }}>
+                  {menu?.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={menu.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <CoffeeOutlined style={{ fontSize: 22, color: hasMenu ? 'rgba(243,217,143,0.9)' : 'rgba(255,255,255,0.35)' }} />
+                  )}
+                </div>
+
+                {/* 文字信息 */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Text strong style={{ fontSize: 14, color: '#111827', minWidth: 30 }}>{day}</Text>
+                    <Text style={{ fontSize: 11, color: '#6B7280' }}>{fmtDate(monday.add(i, 'day').toDate())}</Text>
+                    {isToday && (
+                      <span style={{
+                        fontSize: 10, color: '#fff', background: '#A6781F',
+                        padding: '1px 7px', borderRadius: 8, fontWeight: 600,
+                      }}>今日</span>
+                    )}
+                  </div>
+                  {hasMenu ? (
+                    <>
+                      <Text style={{ fontSize: 14, color: '#1F2937', fontWeight: 600, display: 'block', marginTop: 2 }}>
+                        {menu!.mainDish}
+                      </Text>
+                      {menu!.sideDish && (
+                        <Text style={{ fontSize: 11.5, color: '#6B7280', display: 'block', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {menu!.sideDish}
+                        </Text>
+                      )}
+                    </>
+                  ) : (
+                    <Text style={{ fontSize: 12.5, color: '#9CA3AF', display: 'block', marginTop: 2 }}>
+                      菜单待公布
+                    </Text>
+                  )}
+                </div>
+
+                {/* 右侧箭头 / 查看详情 */}
+                {canOpen ? (
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 4, flexShrink: 0,
+                    fontSize: 11, fontWeight: 600, color: '#A6781F',
+                    background: 'rgba(217,179,106,0.18)', borderRadius: 999, padding: '5px 9px',
+                  }}>
+                    详情 <ArrowRightOutlined style={{ fontSize: 10 }} />
+                  </span>
+                ) : null}
               </div>
-              {isToday && <span style={{ fontSize: 10, color: '#fff', background: '#E87545', padding: '1px 6px', borderRadius: 8 }}>今日</span>}
-            </div>
-          )
-        })}
-      </Card>
+            )
+
+            if (canOpen) {
+              return (
+                <div key={day} onClick={() => router.push(`/parent/meals/${menu!.id}`)} className="pressable">
+                  {card}
+                </div>
+              )
+            }
+            return <div key={day}>{card}</div>
+          })}
+        </div>
+      </div>
     </div>
   )
 }

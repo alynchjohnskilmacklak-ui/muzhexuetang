@@ -1,0 +1,2495 @@
+{
+ "year": 2025,
+ "note": "石家庄全市高中总表(修正新乐一中分配生)",
+ "total": 128,
+ "data": [
+  {
+   "schoolName": "一中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 765,
+     "yiTong": 776
+    },
+    {
+     "scope": "新三区",
+     "tongZhao": 760,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 765,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "矿区中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 540,
+     "yiTong": 623
+    }
+   ],
+   "xinleLine": 540,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "十六中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 647,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 647,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "高新区国杰学校",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 540,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 547,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 547,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "藁城区第一中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 709,
+     "yiTong": 727
+    }
+   ],
+   "xinleLine": 709,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二十五中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 643,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 643,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "一中滨河校区",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 749,
+     "yiTong": 756
+    },
+    {
+     "scope": "新三区",
+     "tongZhao": 751,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 749,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "藁城区第九中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 687,
+     "yiTong": 689
+    }
+   ],
+   "xinleLine": 687,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "四十九中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 639,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 639,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "河北外国语学院附属中学有限公司",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 540,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 540,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 540,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "鹿泉区第一中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 678,
+     "yiTong": 724
+    }
+   ],
+   "xinleLine": 678,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "藁城区第二中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 593,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 593,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 765,
+     "yiTong": 785
+    },
+    {
+     "scope": "新三区",
+     "tongZhao": 751,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 765,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "栾城中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 651,
+     "yiTong": 724
+    }
+   ],
+   "xinleLine": 651,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "藁城区第三中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 554,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 554,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "麒麟私立中学",
+   "allLines": [
+    {
+     "scope": "正定",
+     "tongZhao": 654,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 422,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 422,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "井陉县第一中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 606,
+     "yiTong": 705
+    }
+   ],
+   "xinleLine": 606,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "鹿泉区第二中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 619,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 619,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二中铭德校区",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 752,
+     "yiTong": 761
+    },
+    {
+     "scope": "新三区",
+     "tongZhao": 747,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 752,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "正定县第一中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 689,
+     "yiTong": 721
+    }
+   ],
+   "xinleLine": 689,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "鹿泉区第三中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 589,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 589,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "精英未来高级中学有限公司",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 540,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 662,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 662,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "行唐县第一中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 657,
+     "yiTong": 720
+    }
+   ],
+   "xinleLine": 657,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "鹿泉区实验高级中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 558,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 558,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "河北辛集中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 743,
+     "yiTong": 749
+    },
+    {
+     "scope": "市内五区",
+     "tongZhao": 725,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 743,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 54
+  },
+  {
+   "schoolName": "灵寿中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 638,
+     "yiTong": 713
+    }
+   ],
+   "xinleLine": 638,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "栾城区第二中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 587,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 587,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "新星学校",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 540,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 544,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 544,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "高邑一中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 603,
+     "yiTong": 700
+    }
+   ],
+   "xinleLine": 603,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "井陉县第二中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 516,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 516,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "河北正定中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 769,
+     "yiTong": 770
+    },
+    {
+     "scope": "市内五区",
+     "tongZhao": 724,
+     "yiTong": null
+    },
+    {
+     "scope": "正定",
+     "tongZhao": 760,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 769,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 67
+  },
+  {
+   "schoolName": "深泽县中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 540,
+     "yiTong": 662
+    }
+   ],
+   "xinleLine": 540,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "正定县第三中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 613,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 613,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "云臻实验高级中学有限公司",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 561,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 591,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 591,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "赞皇中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 571,
+     "yiTong": 688
+    }
+   ],
+   "xinleLine": 571,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "正定县第五中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 529,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 529,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "无极中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 666,
+     "yiTong": 720
+    }
+   ],
+   "xinleLine": 666,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "正定县第七中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 501,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 501,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "藁城区新冀明中学",
+   "allLines": [
+    {
+     "scope": "藁城",
+     "tongZhao": 420,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 421,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 421,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "石家庄实验中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 759,
+     "yiTong": 761
+    },
+    {
+     "scope": "市内五区",
+     "tongZhao": 740,
+     "yiTong": null
+    },
+    {
+     "scope": "无极",
+     "tongZhao": 750,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 759,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 50
+  },
+  {
+   "schoolName": "无极县第二中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 575,
+     "yiTong": 652
+    }
+   ],
+   "xinleLine": 575,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "行唐县第三中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 581,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 581,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "平山中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 683,
+     "yiTong": 720
+    }
+   ],
+   "xinleLine": 683,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "灵寿县陈庄中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 480,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 480,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "藁城区府兴中学",
+   "allLines": [
+    {
+     "scope": "藁城",
+     "tongZhao": 420,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 524,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 524,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "元氏县第一中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 633,
+     "yiTong": 705
+    }
+   ],
+   "xinleLine": 633,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "平山实验中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 613,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 613,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "石家庄第二实验中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 746,
+     "yiTong": 752
+    },
+    {
+     "scope": "市内五区",
+     "tongZhao": 727,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 746,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 51
+  },
+  {
+   "schoolName": "赵县中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 668,
+     "yiTong": 722
+    }
+   ],
+   "xinleLine": 668,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "平山回舍中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 441,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 441,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "弘文中学",
+   "allLines": [
+    {
+     "scope": "正定",
+     "tongZhao": 621,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 593,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 593,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "晋州市第一中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 609,
+     "yiTong": 711
+    }
+   ],
+   "xinleLine": 609,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "平山外国语中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 516,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 516,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "十五中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 734,
+     "yiTong": 736
+    },
+    {
+     "scope": "新三区",
+     "tongZhao": 738,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 734,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "晋州市第二中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 574,
+     "yiTong": 647
+    }
+   ],
+   "xinleLine": 574,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "元氏县第三中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 519,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 519,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "自立高级中学有限公司",
+   "allLines": [
+    {
+     "scope": "正定",
+     "tongZhao": 424,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 422,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 422,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "新乐市第一中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 678,
+     "yiTong": 725
+    }
+   ],
+   "xinleLine": 678,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 1130
+  },
+  {
+   "schoolName": "元氏县第四中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 574,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 574,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二十四中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 742,
+     "yiTong": 757
+    },
+    {
+     "scope": "新三区",
+     "tongZhao": 744,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 742,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "赵县实验中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 607,
+     "yiTong": 663
+    }
+   ],
+   "xinleLine": 607,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "元氏县音体美学校",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 460,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 460,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "同济中学",
+   "allLines": [
+    {
+     "scope": "行唐",
+     "tongZhao": 522,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 458,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 458,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "一中实验学校",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 741,
+     "yiTong": 742
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 741,
+     "yiTong": 744
+    },
+    {
+     "scope": "高新区",
+     "tongZhao": 709,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 741,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 17
+  },
+  {
+   "schoolName": "赵县第六中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 527,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 527,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二中西校区",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 743,
+     "yiTong": 757
+    },
+    {
+     "scope": "新三区",
+     "tongZhao": 743,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 743,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "赵县石塔中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 401,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 401,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "行唐县龙州中学",
+   "allLines": [
+    {
+     "scope": "行唐",
+     "tongZhao": 434,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 423,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 423,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "新乐市第二中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 624,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 624,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "师大附中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 724,
+     "yiTong": 733
+    }
+   ],
+   "xinleLine": 724,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二中实验学校",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 755,
+     "yiTong": 773
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 750,
+     "yiTong": 763
+    }
+   ],
+   "xinleLine": 750,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 33
+  },
+  {
+   "schoolName": "新乐市第三中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 489,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 489,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "行唐县曙光中学",
+   "allLines": [
+    {
+     "scope": "行唐",
+     "tongZhao": 400,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 420,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 420,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "师大附中中加班",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 543,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 543,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "新乐市第四中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 583,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 583,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "四中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 686,
+     "yiTong": 697
+    }
+   ],
+   "xinleLine": 686,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "河北正中实验中学",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 745,
+     "yiTong": 749
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 746,
+     "yiTong": 755
+    }
+   ],
+   "xinleLine": 746,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 76
+  },
+  {
+   "schoolName": "赵县庆阳中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 416,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 416,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "正泽高级中学",
+   "allLines": [
+    {
+     "scope": "灵寿",
+     "tongZhao": 451,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 451,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 451,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "六中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 665,
+     "yiTong": 680
+    }
+   ],
+   "xinleLine": 665,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "华英外国语学校",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 653,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 630,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 630,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "九中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 706,
+     "yiTong": 730
+    }
+   ],
+   "xinleLine": 706,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "润德学校",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 743,
+     "yiTong": 759
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 752,
+     "yiTong": 759
+    }
+   ],
+   "xinleLine": 752,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 20
+  },
+  {
+   "schoolName": "龙凤中学",
+   "allLines": [
+    {
+     "scope": "高邑",
+     "tongZhao": 460,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 507,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 507,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "十中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 689,
+     "yiTong": 695
+    }
+   ],
+   "xinleLine": 689,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "耀华中学",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 664,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 632,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 632,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "十七中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 738,
+     "yiTong": 741
+    }
+   ],
+   "xinleLine": 738,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "精英中学",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 747,
+     "yiTong": 778
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 743,
+     "yiTong": 775
+    }
+   ],
+   "xinleLine": 743,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 33
+  },
+  {
+   "schoolName": "无极县文苑中学",
+   "allLines": [
+    {
+     "scope": "无极",
+     "tongZhao": 500,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 504,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 504,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "十八中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 705,
+     "yiTong": 712
+    }
+   ],
+   "xinleLine": 705,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "高新区精英中学",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 548,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 547,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 547,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二十二中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 707,
+     "yiTong": 732
+    }
+   ],
+   "xinleLine": 707,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "河北联邦外国语学校",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 540,
+     "yiTong": 634
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 540,
+     "yiTong": 713
+    }
+   ],
+   "xinleLine": 540,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 37
+  },
+  {
+   "schoolName": "新乐市新伏羲中学",
+   "allLines": [
+    {
+     "scope": "新乐",
+     "tongZhao": 660,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 474,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 474,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二十三中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 696,
+     "yiTong": 738
+    }
+   ],
+   "xinleLine": 696,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "华西高级中学",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 664,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 666,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 666,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二十七中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 728,
+     "yiTong": 740
+    }
+   ],
+   "xinleLine": 728,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "精英新华中学",
+   "allLines": [
+    {
+     "scope": "鹿泉",
+     "tongZhao": 639,
+     "yiTong": 717
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 695,
+     "yiTong": 735
+    }
+   ],
+   "xinleLine": 695,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 24
+  },
+  {
+   "schoolName": "润文高级中学有限公司",
+   "allLines": [
+    {
+     "scope": "赞皇",
+     "tongZhao": 463,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 467,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 467,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二十七中实验班",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 711,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 711,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "北华中学",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 540,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 540,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 540,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "四十一中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 705,
+     "yiTong": 708
+    }
+   ],
+   "xinleLine": 705,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "卓越中学西校区",
+   "allLines": [
+    {
+     "scope": "鹿泉",
+     "tongZhao": 650,
+     "yiTong": 738
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 672,
+     "yiTong": 717
+    }
+   ],
+   "xinleLine": 672,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 75
+  },
+  {
+   "schoolName": "鹿鸣高级中学有限公司",
+   "allLines": [
+    {
+     "scope": "鹿泉",
+     "tongZhao": 627,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 471,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 471,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "四十二中",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 747,
+     "yiTong": 770
+    },
+    {
+     "scope": "县",
+     "tongZhao": 751,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": null,
+   "xinleLineScope": null,
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "私立第一中学",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 698,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 710,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 710,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "卓越中学东校区",
+   "allLines": [
+    {
+     "scope": "鹿泉",
+     "tongZhao": 548,
+     "yiTong": 650
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 624,
+     "yiTong": 663
+    }
+   ],
+   "xinleLine": 624,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 56
+  },
+  {
+   "schoolName": "云臻高级中学有限责任公司",
+   "allLines": [
+    {
+     "scope": "高邑",
+     "tongZhao": 494,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 466,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 466,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "四十三中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 746,
+     "yiTong": 774
+    }
+   ],
+   "xinleLine": 746,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "同文中学",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 540,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 540,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 540,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "一中东校区",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 746,
+     "yiTong": 756
+    }
+   ],
+   "xinleLine": 746,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "金石高级中学有限公司",
+   "allLines": [
+    {
+     "scope": "鹿泉",
+     "tongZhao": 422,
+     "yiTong": 640
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 608,
+     "yiTong": 666
+    }
+   ],
+   "xinleLine": 608,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 75
+  },
+  {
+   "schoolName": "习德高级中学有限公司",
+   "allLines": [
+    {
+     "scope": "正定",
+     "tongZhao": 641,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 560,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 560,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "师大实验中学",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 676,
+     "yiTong": 698
+    }
+   ],
+   "xinleLine": 676,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "新世纪外国语学校",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 704,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 700,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 700,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "十二中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 674,
+     "yiTong": 693
+    }
+   ],
+   "xinleLine": 674,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "行唐启明中学",
+   "allLines": [
+    {
+     "scope": "行唐",
+     "tongZhao": 644,
+     "yiTong": 713
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 674,
+     "yiTong": 699
+    }
+   ],
+   "xinleLine": 674,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 11
+  },
+  {
+   "schoolName": "十九中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 691,
+     "yiTong": 703
+    }
+   ],
+   "xinleLine": 691,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "西山学校",
+   "allLines": [
+    {
+     "scope": "鹿泉",
+     "tongZhao": 682,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 718,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 718,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "四十四中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 721,
+     "yiTong": 731
+    }
+   ],
+   "xinleLine": 721,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "敬业中学",
+   "allLines": [
+    {
+     "scope": "平山",
+     "tongZhao": 677,
+     "yiTong": 729
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 698,
+     "yiTong": 732
+    }
+   ],
+   "xinleLine": 698,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报",
+    "分配生可报"
+   ],
+   "isProvincialDemo": true,
+   "xinleFenpeiQuota": 21
+  },
+  {
+   "schoolName": "十三中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 691,
+     "yiTong": 705
+    }
+   ],
+   "xinleLine": 691,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "创新天卉学校",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 540,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 541,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 541,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "三十八中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 663,
+     "yiTong": 708
+    }
+   ],
+   "xinleLine": 663,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二十一中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 663,
+     "yiTong": 694
+    }
+   ],
+   "xinleLine": 663,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "瀚林学校",
+   "allLines": [
+    {
+     "scope": "市内五区",
+     "tongZhao": 669,
+     "yiTong": null
+    },
+    {
+     "scope": "其他县区",
+     "tongZhao": 695,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": 695,
+   "xinleLineScope": "其他县区",
+   "xinleStatus": [
+    "统招可报"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "二十八中",
+   "allLines": [
+    {
+     "scope": "默认",
+     "tongZhao": 700,
+     "yiTong": 707
+    }
+   ],
+   "xinleLine": 700,
+   "xinleLineScope": "默认",
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  },
+  {
+   "schoolName": "四十五中",
+   "allLines": [
+    {
+     "scope": "综合高中",
+     "tongZhao": 665,
+     "yiTong": null
+    }
+   ],
+   "xinleLine": null,
+   "xinleLineScope": null,
+   "xinleStatus": [
+    "仅供参考"
+   ],
+   "isProvincialDemo": false,
+   "xinleFenpeiQuota": null
+  }
+ ]
+}

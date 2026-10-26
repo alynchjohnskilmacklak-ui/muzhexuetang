@@ -1,0 +1,21 @@
+﻿=== 部署前状态 ===
+5dd81479b6aa0bfa /opt/edu-manage-docker/source/public/home.html
+f3f2ab6d21c32351 /opt/edu-manage-docker/source/public/about.html
+
+=== 从镜像重建权威回滚备份（.orig-20261003）===
+  home.html.orig-20261003  sha=54deeb292962be2f  期望=54deeb292962be2f  ✓  
+  about.html.orig-20261003  sha=1968d74824444874  期望=1968d74824444874  ✓  
+
+=== 备份清单 ===
+57265 /opt/edu-manage-docker/source/public/about.html.bak-20261003
+58940 /opt/edu-manage-docker/source/public/about.html.orig-20261003
+57265 /opt/edu-manage-docker/source/public/home.html.bak-20261002
+66295 /opt/edu-manage-docker/source/public/home.html.bak-20261003
+66295 /opt/edu-manage-docker/source/public/home.html.orig-20261003
+
+=== 确认当前线上仍为旧版（未生效）===
+  /      sha=54deeb292962be2f  (旧版 54deeb292962be2f)
+  /about sha=1968d74824444874  (旧版 1968d74824444874)
+
+=== shared 目录准备 ===
+drwxr-xr-x 7 1000 1000 4096 Sep  1 15:03 /srv/edu-manage/shared/public 

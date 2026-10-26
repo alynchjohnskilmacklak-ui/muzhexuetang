@@ -6,8 +6,14 @@ describe('enrollment subjects', () => {
     expect(normalizeEnrollmentSubjects([' 数学 ', '数学', '', null])).toEqual(['数学'])
   })
 
-  it('keeps legacy empty arrays compatible with all subjects', () => {
-    expect(enrollmentIncludesSubject([], '英语')).toBe(true)
+  it('subjects 为空 = 未报名任何学科（不再兼容放行全部学科，历史数据已 backfill）', () => {
+    expect(enrollmentIncludesSubject([], '英语')).toBe(false)
+    expect(enrollmentIncludesSubject([], null)).toBe(false)
+    expect(enrollmentIncludesSubject([], undefined)).toBe(false)
+  })
+
+  it('只有显式报名的学科才匹配', () => {
+    expect(enrollmentIncludesSubject(['数学'], '数学')).toBe(true)
     expect(enrollmentIncludesSubject(['数学'], '英语')).toBe(false)
   })
 

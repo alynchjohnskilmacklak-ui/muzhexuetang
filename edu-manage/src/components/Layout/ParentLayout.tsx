@@ -14,7 +14,9 @@ import {
   ClockCircleOutlined,
   CoffeeOutlined,
   CommentOutlined,
+  CrownFilled,
   CrownOutlined,
+  EditOutlined,
   ExperimentOutlined,
   FileTextOutlined,
   HomeOutlined,
@@ -30,7 +32,9 @@ import {
   WechatOutlined,
 } from '@ant-design/icons'
 import { signOut, useSession } from 'next-auth/react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { fetchJson } from '@/lib/fetch-json'
+import { isNavigationActive } from '@/lib/navigation-active'
 import useSWR from 'swr'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -39,21 +43,19 @@ import { useSessionPing } from '@/hooks/useSessionPing'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 import { ParentUsageGuideDrawerExtra } from '@/components/Parent/ParentUsageGuide'
 import { MobileLayout, type MobileNavItem } from './MobileLayout'
+import { LayoutHydrationFallback } from './LayoutHydrationFallback'
 import type { MembershipLevel } from '@/constants/membership'
 
 const { Sider, Content, Header } = Layout
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = (url: string) => fetchJson<Record<string, number>>(url)
 
 function flattenNavItems(items: MobileNavItem[]): MobileNavItem[] {
   return items.flatMap(item => item.children ? flattenNavItems(item.children) : [item])
 }
 
-function resolveActiveKey(pathname: string, items: MobileNavItem[], fallback: string) {
-  const exact = items.find(item => item.key === pathname)
-  if (exact) return exact.key
-
+function resolveActiveKey(pathname: string, search: string, items: MobileNavItem[], fallback: string) {
   const match = items
-    .filter(item => pathname.startsWith(`${item.key}/`))
+    .filter(item => isNavigationActive(pathname, search, item.key))
     .sort((a, b) => b.key.length - a.key.length)[0]
 
   return match?.key || fallback
@@ -62,12 +64,14 @@ function resolveActiveKey(pathname: string, items: MobileNavItem[], fallback: st
 export function ParentLayout({ children, initialMembershipLevel }: { children: React.ReactNode; initialMembershipLevel: MembershipLevel }) {
   const { data: session } = useSession()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const router = useRouter()
-  const isMobile = useIsMobile()
+  // 手机横屏时视口宽度可能超过 768px，仍应保持家长端的触控导航。
+  const isMobile = useIsMobile(768, true)
   const [collapsed, setCollapsed] = useState(false)
   const [backgroundReady, setBackgroundReady] = useState(false)
   const [parentTheme, setParentTheme] = useState<'normal' | 'vip' | 'svip'>(() => initialMembershipLevel.toLowerCase() as 'normal' | 'vip' | 'svip')
-  const { data: unreadData, mutate: mutateUnread } = useSWR(
+  const { data: unreadData, error: unreadError, mutate: mutateUnread } = useSWR(
     backgroundReady ? '/api/parent/unread-counts' : null,
     fetcher,
     { refreshInterval: 30_000, revalidateOnFocus: true, revalidateOnReconnect: true },
@@ -140,6 +144,7 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     { key: '/parent/services', icon: <AppstoreOutlined />, label: '业务总览' },
     { key: 'growth-group', icon: <HomeOutlined />, label: '孩子学习', children: [
       { key: '/parent/schedule', icon: <CalendarOutlined />, label: '课程表' },
+      { key: '/parent/vip', icon: <CrownFilled />, label: 'VIP课程' },
       { key: '/parent/class-feedback', icon: <BookOutlined />, label: '课堂反馈', badge: unread.feedbacks },
       { key: '/parent/study-hall', icon: <ReadOutlined />, label: '晚托作业', badge: unread.studyHallHomework },
       { key: '/parent/archive', icon: <FileTextOutlined />, label: '成长档案', badge: unread.papers + unread.posts },
@@ -147,7 +152,7 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     ] },
     { key: 'family-group', icon: <CommentOutlined />, label: '家校服务', children: [
       { key: '/parent/notifications', icon: <BellOutlined />, label: '通知', badge: unread.notifications },
-      { key: '/parent/messages', icon: <CommentOutlined />, label: '我的留言', badge: unread.messages },
+      { key: '/parent/messages', icon: <CommentOutlined />, label: '家校沟通', badge: unread.messages },
       { key: '/parent/leave', icon: <CalendarOutlined />, label: '请假' },
       { key: '/parent/meals', icon: <CoffeeOutlined />, label: '就餐安排' },
       { key: '/parent/archive?tab=hours', icon: <ClockCircleOutlined />, label: '课时与考勤' },
@@ -160,6 +165,7 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     ] },
     { key: 'resource-group', icon: <ReadOutlined />, label: '学习工具', children: [
       { key: '/parent/materials', icon: <ReadOutlined />, label: '学习资料' },
+      { key: '/parent/practice', icon: <EditOutlined />, label: '题库练习' },
       { key: '/parent/phet', icon: <ExperimentOutlined />, label: '仿真教学' },
       { key: '/parent/ai', icon: <MessageFilled />, label: 'AI 助手' },
     ] },
@@ -178,7 +184,7 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     { key: '/parent/notifications', icon: <BellOutlined />, label: '通知', badge: unread.notifications },
     { key: '__more', icon: <MenuOutlined />, label: '更多' },
   ]
-  const currentKey = resolveActiveKey(pathname, leafItems, '/parent/dashboard')
+  const currentKey = resolveActiveKey(pathname, searchParams.toString(), leafItems, '/parent/dashboard')
   const defaultOpenKeys = navItems.filter(item => item.children?.some(child => child.key === currentKey)).map(item => item.key)
 
   const markAllRead = async () => {
@@ -208,7 +214,7 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     })),
   }))
 
-  if (isMobile === null) return <div aria-hidden="true" style={{ minHeight: '100dvh', background: parentTheme === 'svip' ? '#F6F2E9' : parentTheme === 'vip' ? '#FFF7F1' : 'var(--color-canvas)' }} />
+  if (isMobile === null) return <LayoutHydrationFallback />
 
   if (isMobile) {
     return (
@@ -224,13 +230,14 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
         accentBackground={navTheme.accentBg}
         tabBackground={navTheme.tabBg}
         tabBorderTop={navTheme.tabBorder}
-        tabActiveColor={(navTheme as any).tabActive}
-        tabInactiveColor={(navTheme as any).tabInactive}
+        tabActiveColor={'tabActive' in navTheme ? navTheme.tabActive : undefined}
+        tabInactiveColor={'tabInactive' in navTheme ? navTheme.tabInactive : undefined}
         headerTheme={headerTheme}
         pageTheme={parentTheme}
         drawerHeaderExtra={(
           <Space direction="vertical" size={8} style={{ width: '100%' }}>
             <ParentUsageGuideDrawerExtra parentUserId={session?.user?.id} />
+            {unreadError && <button type="button" onClick={() => void mutateUnread()} style={{ minHeight: 44, color: 'var(--color-ink)', background: 'var(--color-surface-1)', border: '1px solid var(--color-hairline-strong)', borderRadius: 10 }}>未读信息加载失败，点击重试</button>}
             {totalUnread > 0 && (
               <button type="button" onClick={markAllRead} style={{
                 width: '100%', padding: '10px 14px', borderRadius: 10,

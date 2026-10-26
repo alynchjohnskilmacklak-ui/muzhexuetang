@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import {
@@ -30,6 +31,8 @@ import {
   CheckOutlined,
   ClockCircleOutlined,
   CopyOutlined,
+  CrownOutlined,
+  AlertOutlined,
   DeleteOutlined,
   EnvironmentOutlined,
   MoreOutlined,
@@ -91,6 +94,8 @@ const GROUP_STATUS_MAP: Record<string, { color: string; label: string }> = {
   COMPLETED: { color: 'blue', label: '已结束' },
   ARCHIVED: { color: 'default', label: '已归档' },
 }
+
+
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
@@ -220,6 +225,9 @@ export default function CoursesPage() {
     if (courseTab === 'SMALL') return type === 'ONE_ON_ONE' || type === 'SMALL_GROUP'
     return true
   })
+
+  const { data: smallStatsData, error: smallStatsError, mutate: mutateSmallStats } = useSWR<{ vipStudents: number; weekAppointments: number; pendingLessons: number; monthHours: number }>('/api/admin/intensive-summary', fetcher, { refreshInterval: 30_000, revalidateOnFocus: true })
+  const smallStats = smallStatsData || { vipStudents: 0, weekAppointments: 0, pendingLessons: 0, monthHours: 0 }
   const teacherList = Array.isArray(teachers?.teachers) ? teachers.teachers : Array.isArray(teachers) ? teachers : []
   const roomList = Array.isArray(rooms) ? rooms : []
   const academicTerms = Array.isArray(academicTermData?.terms) ? academicTermData.terms : []
@@ -782,7 +790,15 @@ export default function CoursesPage() {
       if (payload.skippedNoTemplate > 0) msg += `，${payload.skippedNoTemplate} 个班无样板可复制`
       if (payload.skippedNoReplacement > 0) msg += `，${payload.skippedNoReplacement} 个班找不到可安全替换的未来教学日`
       if (payload.alreadyBalanced > 0) msg += `，${payload.alreadyBalanced} 个班计划课次已经平衡`
-      toast.success(msg)
+      if (Array.isArray(payload.failedGroups) && payload.failedGroups.length) {
+        const failureDetails = payload.failedGroups.slice(0, 3)
+          .map((item: { groupName?: string; message?: string }) => `${item.groupName || '班级'}：${item.message || '处理失败'}`)
+          .join('；')
+        const remaining = payload.failedGroups.length > 3 ? `；另有 ${payload.failedGroups.length - 3} 个班级失败` : ''
+        toast.warning(`${msg}。部分班级未完成：${failureDetails}${remaining}`)
+      } else {
+        toast.success(msg)
+      }
       setAddDayOpen(false)
       mutateGroups()
       mutateDashboard()
@@ -821,49 +837,162 @@ export default function CoursesPage() {
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, auto)', gap: 8, width: isMobile ? '100%' : 'auto' }}>
           <Button block={isMobile} disabled={isHistoricalTerm} icon={<CalendarOutlined />} onClick={() => { setAddDayDate(dayjs().format('YYYY-MM-DD')); setAddDayOpen(true) }}>调整上课日</Button>
           <Button block={isMobile} disabled={isHistoricalTerm} icon={<CopyOutlined />} onClick={() => setCopyOpen(true)}>批量复制</Button>
-          <Button block={isMobile} disabled={isHistoricalTerm} type="primary" icon={<PlusOutlined />} onClick={openCreate} style={{ background: '#e8784a', gridColumn: isMobile ? '1 / -1' : undefined }}>
+          <Button block={isMobile} disabled={isHistoricalTerm} type="primary" icon={<PlusOutlined />} onClick={openCreate} style={{ background: 'var(--color-primary)', gridColumn: isMobile ? '1 / -1' : undefined }}>
             新建班级
           </Button>
         </div>
       }
     >
-      <Alert
-        showIcon
-        type={isHistoricalTerm ? 'info' : 'success'}
-        message={`${selectedAcademicTerm?.name || '尚未启用运营批次'}${isHistoricalTerm ? '（历史只读）' : '（当前运营）'}`}
-        description={isHistoricalTerm ? '当前展示历史课程、班级和课表；为避免串期，新增、调整、复制、开班和删除已停用。' : '本页课程、班级、排课和课次均归属于当前运营批次。'}
-        style={{ marginBottom: 16 }}
-      />
+      {smallStatsError && courseTab === 'SMALL' && <Alert type="error" showIcon message="个性化课程统计加载失败" description="下方统计暂不可用，未使用演示数据填充。" action={<Button onClick={() => mutateSmallStats()}>重试</Button>} style={{ marginBottom: 12 }} />}
+      <div style={{
+        borderRadius: 16, padding: '13px 16px', marginBottom: 16,
+        background: isHistoricalTerm
+          ? 'linear-gradient(120deg,#F7F5F1,#EFE8DD)'
+          : 'linear-gradient(120deg,#123C35,#0E5E4E)',
+        border: isHistoricalTerm ? '1px solid #E5DCCB' : '1px solid rgba(201,164,92,.5)',
+        display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+        boxShadow: isHistoricalTerm ? 'none' : '0 6px 16px rgba(18,60,53,.14)',
+      }}>
+        <span style={{
+          flexShrink: 0, width: 34, height: 34, borderRadius: 10,
+          display: 'grid', placeItems: 'center', fontSize: 15,
+          color: isHistoricalTerm ? '#8A6B2F' : '#F2E3B6',
+          background: isHistoricalTerm ? 'rgba(201,164,92,.18)' : 'rgba(201,164,92,.16)',
+          border: isHistoricalTerm ? '1px solid rgba(201,164,92,.4)' : '1px solid rgba(201,164,92,.5)',
+        }}><CalendarOutlined /></span>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{
+            fontSize: 13.5, fontWeight: 800,
+            color: isHistoricalTerm ? '#3A4A40' : '#F5F1E8',
+          }}>
+            {selectedAcademicTerm?.name || '尚未启用运营批次'}{isHistoricalTerm ? ' · 历史只读' : ''}
+          </div>
+          <div style={{
+            fontSize: 11.5, marginTop: 2,
+            color: isHistoricalTerm ? '#8A8F98' : 'rgba(245,241,232,.72)',
+          }}>
+            {isHistoricalTerm
+              ? '当前展示历史课程、班级和课表；为避免串期，新增、调整、复制、开班和删除已停用。'
+              : '本页课程、班级、排课和课次均归属于当前运营批次。'}
+          </div>
+        </div>
+        <span style={{
+          flexShrink: 0, fontSize: 11, fontWeight: 700, letterSpacing: 1,
+          padding: '3px 10px', borderRadius: 999,
+          color: isHistoricalTerm ? '#8A6B2F' : '#123C35',
+          background: isHistoricalTerm ? 'rgba(201,164,92,.18)' : 'linear-gradient(135deg,#F2E3B6,#D8BC7C)',
+          border: isHistoricalTerm ? '1px solid rgba(201,164,92,.4)' : '1px solid rgba(242,227,182,.7)',
+          whiteSpace: 'nowrap',
+        }}>
+          {isHistoricalTerm ? '只读模式' : '当前运营'}
+        </span>
+      </div>
+
+      {/* 个性化排课驾驶舱（深墨绿鎏金 · 贵宾服务） */}
+      {courseTab === 'SMALL' && (
+        <div style={{
+          borderRadius: 18, overflow: 'hidden', marginBottom: 14,
+          border: '1px solid #C9A45C',
+          boxShadow: '0 10px 26px rgba(18,60,53,.25)',
+          background: 'linear-gradient(150deg,#17352F 0%,#0E5E4E 55%,#0B4B40 100%)',
+          padding: 16, color: '#F5F1E8',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              fontSize: 11, fontWeight: 700, letterSpacing: 1,
+              color: '#F2E3B6',
+              background: 'rgba(201,164,92,.16)',
+              border: '1px solid rgba(201,164,92,.5)',
+              padding: '3px 10px', borderRadius: 999, whiteSpace: 'nowrap',
+            }}>
+              <CrownOutlined /> 尊享个性化 · 贵宾服务
+            </span>
+            <span style={{ fontSize: 10.5, color: 'rgba(242,227,182,.7)', whiteSpace: 'nowrap' }}>{selectedAcademicTerm?.name || '当前运营批次'}</span>
+          </div>
+          <div style={{ marginTop: 12, fontSize: 16, fontWeight: 800, color: '#F5F1E8', lineHeight: 1.4 }}>
+            每一位个性化学员，都是牧哲学堂的贵宾
+          </div>
+          <div style={{ marginTop: 4, fontSize: 11.5, color: 'rgba(245,241,232,.72)', lineHeight: 1.6 }}>
+            一对一专属排课 · 资深教师优先匹配 · 课时进度透明可见
+          </div>
+          <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
+            {[
+              { label: '在读学员', value: smallStats.vipStudents, unit: '位' },
+              { label: '本周约课', value: smallStats.weekAppointments, unit: '节' },
+              { label: '待上课', value: smallStats.pendingLessons, unit: '节', highlight: true },
+              { label: '本月课耗', value: smallStats.monthHours, unit: '节' },
+            ].map((it) => (
+              <div key={it.label} style={{
+                textAlign: 'center', padding: '9px 2px', borderRadius: 12,
+                background: it.highlight ? 'linear-gradient(135deg,#F2E3B6,#D8BC7C)' : 'rgba(255,255,255,.08)',
+                border: it.highlight ? '1px solid rgba(242,227,182,.7)' : '1px solid rgba(242,227,182,.18)',
+              }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: it.highlight ? '#123C35' : '#F5F1E8', fontVariantNumeric: 'tabular-nums' }}>
+                  {it.value}<span style={{ fontSize: 10.5, fontWeight: 600 }}> {it.unit}</span>
+                </div>
+                <div style={{ marginTop: 2, fontSize: 10, color: it.highlight ? 'rgba(18,60,53,.7)' : 'rgba(245,241,232,.6)' }}>{it.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        {[
-          { label: '进行中班级', value: stats.activeGroups, color: '#27a644' },
-          { label: '待开班', value: stats.waitingGroups, color: '#f5a623' },
-          { label: '本月课耗', value: stats.monthlyHours, color: '#E8784A' },
-          { label: '续报预警', value: stats.renewalWarnings, color: '#e03e2d' },
-        ].map((item) => (
+        {(courseTab === 'SMALL' ? [
+          { label: '在读学员', value: smallStats.vipStudents, color: '#F2E3B6', desc: '一对一/小课在读', icon: <CrownOutlined />, grad: 'linear-gradient(145deg,#C9A45C,#8A6B2F)' },
+          { label: '本周约课', value: smallStats.weekAppointments, color: '#F2E3B6', desc: '本周有效课次', icon: <CalendarOutlined />, grad: 'linear-gradient(145deg,#0E5E4E,#17352F)' },
+          { label: '待上课', value: smallStats.pendingLessons, color: '#FFD58A', desc: '已确认待上课', icon: <ClockCircleOutlined />, grad: 'linear-gradient(145deg,#FFB84D,#E8784A)' },
+          { label: '本月课耗', value: smallStats.monthHours, color: '#F2E3B6', desc: '已消耗课次', icon: <CheckOutlined />, grad: 'linear-gradient(145deg,#27a644,#1D9E75)' },
+        ] : [
+          { label: '进行中', value: stats.activeGroups, color: '#1D9E75', desc: '当前运营批次', icon: <TeamOutlined />, grad: 'linear-gradient(145deg,#27a644,#15804F)' },
+          { label: '待开班', value: stats.waitingGroups, color: '#E8784A', desc: '已排课未开班', icon: <ClockCircleOutlined />, grad: 'linear-gradient(145deg,#FFB84D,#E8784A)' },
+          { label: '本月课耗', value: stats.monthlyHours, color: '#2f6fdb', desc: '本月已扣课时', icon: <BookOutlined />, grad: 'linear-gradient(145deg,#4C8DFF,#2f6fdb)' },
+          { label: '续报预警', value: stats.renewalWarnings, color: '#e03e2d', desc: '剩余课次不足', icon: <AlertOutlined />, grad: 'linear-gradient(145deg,#F6654F,#e03e2d)' },
+        ]).map((item) => (
           <Col xs={12} lg={6} key={item.label}>
-            <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
-              <div style={{ color: '#98A2B3', fontSize: 13 }}>{item.label}</div>
-              <div style={{ color: item.color, fontSize: 28, fontWeight: 700 }}>{item.value}</div>
+            <Card bordered={false} style={{
+              borderRadius: 16, background: courseTab === 'SMALL' ? 'linear-gradient(150deg,#123C35,#0E5E4E)' : '#ffffff',
+              border: courseTab === 'SMALL' ? '1px solid rgba(201,164,92,.45)' : '1px solid #F0E9DF',
+              boxShadow: courseTab === 'SMALL' ? '0 6px 16px rgba(18,60,53,.16)' : '0 4px 14px rgba(58,50,39,.05)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 42, height: 42, borderRadius: 13, flexShrink: 0,
+                  background: courseTab === 'SMALL' ? 'rgba(201,164,92,.16)' : item.grad,
+                  border: courseTab === 'SMALL' ? '1px solid rgba(201,164,92,.5)' : 'none',
+                  color: courseTab === 'SMALL' ? '#F2E3B6' : '#fff',
+                  display: 'grid', placeItems: 'center', fontSize: 17,
+                  boxShadow: courseTab === 'SMALL' ? 'none' : '0 4px 10px rgba(58,50,39,.12)',
+                }}>{item.icon}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                    <span style={{ color: item.color, fontSize: 24, fontWeight: 800, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{item.value}</span>
+                    <span style={{ color: courseTab === 'SMALL' ? 'rgba(245,241,232,.68)' : '#98A2B3', fontSize: 12 }}>{item.label}</span>
+                  </div>
+                  <div style={{ color: courseTab === 'SMALL' ? 'rgba(242,227,182,.6)' : '#B8B0A2', fontSize: 11, marginTop: 2 }}>{item.desc}</div>
+                </div>
+              </div>
             </Card>
           </Col>
         ))}
       </Row>
 
       {/* Type tabs */}
-      <div style={{ display: 'flex', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 8, overflow: 'hidden', width: isMobile ? '100%' : 'fit-content', marginBottom: 12 }}>
+      <div style={{ display: 'flex', border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 12, overflow: 'hidden', width: isMobile ? '100%' : 'fit-content', marginBottom: 12, boxShadow: '0 2px 8px rgba(58,50,39,.05)' }}>
         <button onClick={() => selectCourseTab('GROUP')} style={{
-          padding: '7px 18px', background: courseTab === 'GROUP' ? '#E8784A' : 'transparent',
+                padding: '8px 18px', background: courseTab === 'GROUP' ? 'var(--color-primary)' : 'transparent',
           color: courseTab === 'GROUP' ? '#fff' : 'var(--color-text-secondary, #666)',
-          border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: courseTab === 'GROUP' ? 500 : 400,
+          border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: courseTab === 'GROUP' ? 600 : 400,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, flex: isMobile ? 1 : undefined, minWidth: 0,
         }}><TeamOutlined /> 精品班课（{courseTabCounts.GROUP}）</button>
         <button onClick={() => selectCourseTab('SMALL')} style={{
-          padding: '7px 18px', background: courseTab === 'SMALL' ? '#534AB7' : 'transparent',
-          color: courseTab === 'SMALL' ? '#fff' : 'var(--color-text-secondary, #666)',
-          border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: courseTab === 'SMALL' ? 500 : 400,
+          padding: '8px 18px', background: courseTab === 'SMALL' ? 'linear-gradient(135deg,#123C35,#0E5E4E)' : 'transparent',
+          color: courseTab === 'SMALL' ? '#F2E3B6' : 'var(--color-text-secondary, #666)',
+          border: courseTab === 'SMALL' ? '1px solid rgba(201,164,92,.55)' : 'none',
+          cursor: 'pointer', fontSize: 12, fontWeight: courseTab === 'SMALL' ? 600 : 400,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, flex: isMobile ? 1 : undefined, minWidth: 0,
-        }}><BookOutlined /> {isMobile ? `个性化课程（${courseTabCounts.SMALL}）` : `突击全能班（1对1/2/3，共 ${courseTabCounts.SMALL} 个）`}</button>
+        }}><CrownOutlined /> {isMobile ? `个性化课程（${courseTabCounts.SMALL}）` : `突击全能班（1对1/2/3，共 ${courseTabCounts.SMALL} 个）`}</button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : '128px 128px 128px auto', gap: 8, marginBottom: 16, width: '100%' }}>
@@ -915,39 +1044,39 @@ export default function CoursesPage() {
           action={<Button danger icon={<ReloadOutlined />} onClick={() => void mutateGroups()}>重新加载</Button>}
         />
       ) : filteredGroups.length === 0 ? (
-        <Card bordered={false} style={{ borderRadius: 8, minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <GuidedEmpty
-            title={filterType || filterGrade || filterStatus
-              ? '没有符合条件的班级'
-              : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
-                ? '精品班课中暂无班级'
-                : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
-                  ? '个性化课程中暂无班级'
-                  : isHistoricalTerm ? '这个历史批次没有班级记录' : '还没有班级'}
-            description={filterType || filterGrade || filterStatus
-              ? '可以清除班型、年级或状态筛选，查看当前运营批次的全部班级。'
-              : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
-                ? `当前运营批次另有 ${courseTabCounts.SMALL} 个一对一、小组课或突击班，切换标签即可查看。`
-                : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
-                  ? `当前运营批次另有 ${courseTabCounts.GROUP} 个精品班课，切换标签即可查看。`
-                  : isHistoricalTerm ? '历史批次只用于查看，请切换到当前运营批次后再建班。' : '创建班级后可以分配老师和学员，并继续生成课表。'}
-            actionLabel={filterType || filterGrade || filterStatus
-              ? '清除筛选'
-              : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
-                ? '查看个性化课程'
-                : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
-                  ? '查看精品班课'
-                  : isHistoricalTerm ? undefined : '创建第一个班级'}
-            actionIcon={!filterType && !filterGrade && !filterStatus && courseTabCounts.GROUP === 0 && courseTabCounts.SMALL === 0 && !isHistoricalTerm ? <PlusOutlined /> : undefined}
-            onAction={filterType || filterGrade || filterStatus
-              ? () => { setFilterType(''); setFilterGrade(''); setFilterStatus('') }
-              : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
-                ? () => selectCourseTab('SMALL')
-                : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
-                  ? () => selectCourseTab('GROUP')
-                  : isHistoricalTerm ? undefined : openCreate}
-          />
-        </Card>
+          <Card bordered={false} style={{ borderRadius: 14, minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <GuidedEmpty
+              title={filterType || filterGrade || filterStatus
+                ? '没有符合条件的班级'
+                : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
+                  ? '精品班课中暂无班级'
+                  : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
+                    ? '个性化课程中暂无班级'
+                    : isHistoricalTerm ? '这个历史批次没有班级记录' : '还没有班级'}
+              description={filterType || filterGrade || filterStatus
+                ? '可以清除班型、年级或状态筛选，查看当前运营批次的全部班级。'
+                : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
+                  ? `当前运营批次另有 ${courseTabCounts.SMALL} 个一对一、小组课或突击班，切换标签即可查看。`
+                  : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
+                    ? `当前运营批次另有 ${courseTabCounts.GROUP} 个精品班课，切换标签即可查看。`
+                    : isHistoricalTerm ? '历史批次只用于查看，请切换到当前运营批次后再建班。' : '创建班级后可以分配老师和学员，并继续生成课表。'}
+              actionLabel={filterType || filterGrade || filterStatus
+                ? '清除筛选'
+                : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
+                  ? '查看个性化课程'
+                  : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
+                    ? '查看精品班课'
+                    : isHistoricalTerm ? undefined : '创建第一个班级'}
+              actionIcon={!filterType && !filterGrade && !filterStatus && courseTabCounts.GROUP === 0 && courseTabCounts.SMALL === 0 && !isHistoricalTerm ? <PlusOutlined /> : undefined}
+              onAction={filterType || filterGrade || filterStatus
+                ? () => { setFilterType(''); setFilterGrade(''); setFilterStatus('') }
+                : courseTab === 'GROUP' && courseTabCounts.SMALL > 0
+                  ? () => selectCourseTab('SMALL')
+                  : courseTab === 'SMALL' && courseTabCounts.GROUP > 0
+                    ? () => selectCourseTab('GROUP')
+                    : isHistoricalTerm ? undefined : openCreate}
+            />
+          </Card>
       ) : (
         <Row gutter={[16, 16]}>
           {filteredGroups.map((group: Record<string, unknown>) => {
@@ -972,53 +1101,127 @@ export default function CoursesPage() {
             const realLessonCount = Number((group._count as Record<string, number> | undefined)?.classLessons ?? 0)
             const total = realLessonCount || Number(group.totalLessons || 0)
             const progress = total > 0 ? Math.round((completed / total) * 100) : 0
+            const nextLesson = Array.isArray(group.classLessons) && group.classLessons.length
+              ? group.classLessons[0] as { lessonDate?: string | Date; startTime?: string | null }
+              : null
+            const nextLessonLabel = nextLesson
+              ? (() => {
+                  const d = new Date(nextLesson.lessonDate as string | Date)
+                  if (Number.isNaN(d.getTime())) return '待定'
+                  return `${d.getMonth() + 1}月${d.getDate()}日${nextLesson.startTime ? ` ${nextLesson.startTime}` : ''}`
+                })()
+              : null
+            const tagColorMap: Record<string, string> = { orange: '#E8590C', green: '#1D9E75', blue: '#2f6fdb', default: '#98A2B3' }
+            const tagBgMap: Record<string, string> = { orange: 'rgba(232,89,12,.1)', green: 'rgba(29,158,117,.1)', blue: 'rgba(47,111,219,.1)', default: 'rgba(152,162,179,.1)' }
+            const statusColor = tagColorMap[statusInfo.color] || '#98A2B3'
+            const statusBg = tagBgMap[statusInfo.color] || 'rgba(152,162,179,.1)'
 
             return (
               <Col xs={24} lg={12} key={group.id as string}>
-                <Card
-                  bordered={false}
-                  style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
-                    <div style={{ display: 'flex', gap: 10, minWidth: 0 }}>
-                      <div style={{ width: 38, height: 38, borderRadius: 8, background: `${color}22`, color, display: 'grid', placeItems: 'center', fontWeight: 700 }}>
-                        {String(course?.subject || '?')[0]}
+                <div style={{
+                  borderRadius: 16, background: '#ffffff', border: '1px solid #F0E9DF',
+                  boxShadow: '0 4px 16px rgba(58,50,39,.06)', overflow: 'hidden',
+                  position: 'relative',
+                }}>
+                  {/* 学科渐变顶条 */}
+                  <div style={{ height: 4, background: `linear-gradient(90deg, ${color}, ${color}CC 60%, ${color}66)` }} />
+
+                  <div style={{ padding: '16px 16px 12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
+                      <div style={{ display: 'flex', gap: 12, minWidth: 0, alignItems: 'center' }}>
+                        <div style={{
+                          width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+                          background: `linear-gradient(145deg, ${color}26, ${color}0D)`,
+                          border: `1px solid ${color}40`,
+                          color, display: 'grid', placeItems: 'center',
+                          fontSize: 20, fontWeight: 800, letterSpacing: 1,
+                          boxShadow: `inset 0 1px 0 ${color}1A`,
+                        }}>
+                          {String(course?.subject || '?')[0]}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ color: '#1F2329', fontWeight: 800, fontSize: 15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{group.name as string}</div>
+                          <div style={{ color: '#98A2B3', fontSize: 12, marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {course?.name as string}{course?.grade ? ` · ${course.grade}` : ''}
+                          </div>
+                        </div>
                       </div>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ color: '#1F2329', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{group.name as string}</div>
-                        <div style={{ color: '#98A2B3', fontSize: 12 }}>{course?.name as string}</div>
-                      </div>
+                      <span style={{
+                        flexShrink: 0, height: 'fit-content',
+                        color: statusColor, background: statusBg,
+                        border: `1px solid ${statusColor}33`, borderRadius: 999,
+                        padding: '2px 10px', fontSize: 11.5, fontWeight: 700,
+                      }}>{statusInfo.label}</span>
                     </div>
-                    <Tag color={statusInfo.color} style={{ borderRadius: 999 }}>{statusInfo.label}</Tag>
+
+                    {/* 老师团队 */}
+                    {teacherTeam && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+                        <span style={{ fontSize: 11, color: '#98A2B3', flexShrink: 0 }}>授课团队</span>
+                        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', minWidth: 0 }}>
+                          {teacherAssignments.map((item: Record<string, unknown>, i: number) => {
+                            const t = item.teacher as Record<string, unknown> | undefined
+                            const subject = item.subject as string | undefined
+                            const subColor = SUBJECT_COLOR[subject || ''] || '#5a4e3a'
+                            return (
+                              <span key={i} style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 4,
+                                padding: '3px 9px', borderRadius: 999,
+                                background: '#F7F5F1', border: '1px solid #EFE8DD',
+                                fontSize: 11.5, color: '#3A4A40', fontWeight: 600, whiteSpace: 'nowrap',
+                              }}>
+                                {t?.name as string || '未分配'}
+                                {subject && <span style={{ color: subColor, fontWeight: 700 }}>{subject}</span>}
+                              </span>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 班型/时间/教室/下次上课 */}
+                    <div style={{
+                      display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(4, minmax(0,1fr))',
+                      gap: 6, marginBottom: 12,
+                    }}>
+                      <InfoChip icon={<BookOutlined />} text={isIntensive ? teachingTypeLabel : course?.type === 'ONE_ON_ONE' ? '1对1' : course?.type === 'SMALL_GROUP' ? '小组课' : '班课'} />
+                      <InfoChip icon={<ClockCircleOutlined />} text={group.lessonStartTime as string || '—'} />
+                      <InfoChip icon={<EnvironmentOutlined />} text={isIntensive ? '地点灵活' : room?.name as string || '未分配'} />
+                      <InfoChip icon={<CalendarOutlined />} text={nextLessonLabel ? `下次 ${nextLessonLabel}` : '暂无排课'} highlight={Boolean(nextLesson)} compact={Boolean(nextLesson)} />
+                    </div>
+
+                    {/* 进度 */}
+                    {isIntensive ? (
+                      <div style={{ padding: '9px 11px', borderRadius: 10, background: 'linear-gradient(135deg,#0E5E4E,#123C35)', color: 'rgba(245,241,232,.85)', fontSize: 12, marginBottom: 12 }}>
+                        教师约课后立即计入「已安排课次」；完成考勤后进入管理员审核。
+                      </div>
+                    ) : (
+                      <div style={{ marginBottom: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                          <span style={{ fontSize: 11, color: '#98A2B3' }}>课次进度</span>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: '#3A4A40' }}>{completed}/{total} · {progress}%</span>
+                        </div>
+                        <div style={{ height: 7, borderRadius: 999, background: '#F0EBE3', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${progress}%`, borderRadius: 999, background: `linear-gradient(90deg, ${color}, ${color}AA)`, transition: 'width .3s' }} />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 数据网格 */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 6, marginBottom: 4 }}>
+                      <SmallMetric label="在读/限额" value={`${count?.enrollments ?? 0}/${group.maxStudents || 0}`} />
+                      <SmallMetric label={isIntensive ? '已安排课次' : '剩余课次'} value={String(isIntensive ? realLessonCount : Math.max(0, total - completed))} />
+                      <SmallMetric label={isIntensive ? '已完成课次' : '总课次'} value={String(isIntensive ? completed : total)} />
+                    </div>
                   </div>
 
-                  <Space size={14} wrap style={{ marginBottom: 12 }}>
-                    <span style={{ color: '#98A2B3', fontSize: 12 }}><TeamOutlined /> {teacherTeam || teacher?.name as string || '-'}</span>
-                    <span style={{ color: '#98A2B3', fontSize: 12 }}><BookOutlined /> {isIntensive ? teachingTypeLabel : course?.type === 'ONE_ON_ONE' ? '1对1' : course?.type === 'SMALL_GROUP' ? '小组课' : '班课'}</span>
-                    <span style={{ color: '#98A2B3', fontSize: 12 }}><ClockCircleOutlined /> {group.lessonStartTime as string}</span>
-                    <span style={{ color: '#98A2B3', fontSize: 12 }}><EnvironmentOutlined /> {isIntensive ? '地点灵活安排' : room?.name as string || '未分配'}</span>
-                  </Space>
-
-                  <Row gutter={12} style={{ marginBottom: 12 }}>
-                    <Col span={8}><SmallMetric label="在读/限额" value={`${count?.enrollments ?? 0}/${group.maxStudents || 0}`} /></Col>
-                    <Col span={8}><SmallMetric label={isIntensive ? '已安排课次' : '剩余课次'} value={String(isIntensive ? realLessonCount : Math.max(0, total - completed))} /></Col>
-                    <Col span={8}><SmallMetric label={isIntensive ? '已完成课次' : '总课次'} value={String(isIntensive ? completed : total)} /></Col>
-                  </Row>
-
-                  {isIntensive ? (
-                    <div style={{ padding: '8px 10px', borderRadius: 10, background: 'var(--color-primary-bg)', color: 'var(--color-ink-muted)', fontSize: 12 }}>
-                      教师约课后立即计入“已安排课次”；完成考勤后进入管理员审核。
-                    </div>
-                  ) : (
-                    <Progress percent={progress} size="small" strokeColor={color} format={() => `已上 ${completed}/${total}`} />
-                  )}
-
-                  <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+                  {/* 操作区 */}
+                  <div style={{ display: 'flex', gap: 8, padding: '10px 16px 14px', borderTop: '1px solid #F5F0E8', background: '#FCFAF7' }}>
                     <Button size="small" icon={<CalendarOutlined />} onClick={(e) => { e.stopPropagation(); setDrawerGroupId(group.id as string); setDrawerOpen(true) }}>课表</Button>
                     {group.status === 'WAITING' && (
-                      <Button size="small" disabled={isHistoricalTerm} icon={<ReloadOutlined />} loading={regeneratingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleRegenerateLessons(group.id as string) }}>重新生成</Button>
+                      <Button size="small" icon={<ReloadOutlined />} loading={regeneratingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleRegenerateLessons(group.id as string) }}>重新生成</Button>
                     )}
-                    <Button size="small" icon={<TeamOutlined />} onClick={(e) => { e.stopPropagation(); router.push(`/courses/${group.id}`) }}>管理</Button>
+                    <Button size="small" type="primary" icon={<TeamOutlined />} onClick={(e) => { e.stopPropagation(); router.push(`/courses/${group.id}`) }} style={{ background: '#0E5E4E', borderColor: '#0E5E4E' }}>管理班级</Button>
                     <Button size="small" danger disabled={isHistoricalTerm} loading={deletingGroupId === group.id} onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group.id as string, group.name as string) }}>删除</Button>
                   </div>
 
@@ -1029,12 +1232,12 @@ export default function CoursesPage() {
                       disabled={isHistoricalTerm}
                       loading={startingGroupId === group.id}
                       onClick={() => handleStartGroup(group.id as string)}
-                      style={{ marginTop: 14, background: '#27a644', borderColor: '#27a644' }}
+                      style={{ margin: '0 16px 14px', width: 'calc(100% - 32px)', background: '#27a644', borderColor: '#27a644', borderRadius: 10 }}
                     >
                       开班并通知家长
                     </Button>
                   )}
-                </Card>
+                </div>
               </Col>
             )
           })}
@@ -1454,7 +1657,7 @@ export default function CoursesPage() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 8, paddingTop: 12, borderTop: '1px solid #EEE7E1' }}>
                   <Button onClick={() => setCreateStep(1)}>上一步</Button>
-                  <Button type="primary" loading={createLoading} onClick={handleCreate} style={{ background: '#E8784A' }}>
+                  <Button type="primary" loading={createLoading} onClick={handleCreate} style={{ background: 'var(--color-primary)' }}>
                     {createLoading ? '正在创建...' : '确认创建课程'}
                   </Button>
                 </div>
@@ -1676,7 +1879,7 @@ export default function CoursesPage() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16, paddingTop: 12, borderTop: '1px solid #EEE7E1' }}>
               <Button onClick={() => setCreateStep(1)}>上一步</Button>
-              <Button type="primary" loading={createLoading} onClick={handleCreate} style={{ background: '#e8784a' }}>
+              <Button type="primary" loading={createLoading} onClick={handleCreate} style={{ background: 'var(--color-primary)' }}>
                 {createLoading ? '正在创建...' : '确认创建并生成课表'}
               </Button>
             </div>
@@ -1803,6 +2006,23 @@ function SmallMetric({ label, value }: { label: string; value: string }) {
     <div>
       <div style={{ color: '#98A2B3', fontSize: 11 }}>{label}</div>
       <div style={{ color: '#1F2329', fontSize: 15, fontWeight: 700 }}>{value}</div>
+    </div>
+  )
+}
+
+function InfoChip({ icon, text, highlight, compact }: { icon: ReactNode; text: string; highlight?: boolean; compact?: boolean }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 5, minWidth: 0,
+      padding: '6px 9px', borderRadius: 10,
+      background: highlight ? 'linear-gradient(135deg,#0E5E4E,#123C35)' : '#F7F5F1',
+      border: highlight ? '1px solid rgba(201,164,92,.55)' : '1px solid #EFE8DD',
+    }}>
+      <span style={{ color: highlight ? '#F2E3B6' : '#8A8F98', fontSize: 11, flexShrink: 0 }}>{icon}</span>
+      <span style={{
+        fontSize: highlight && !compact ? 11.5 : 11, fontWeight: highlight ? 700 : 500, color: highlight ? '#F5F1E8' : '#3A4A40',
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+      }}>{text}</span>
     </div>
   )
 }

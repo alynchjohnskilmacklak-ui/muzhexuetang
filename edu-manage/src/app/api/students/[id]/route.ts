@@ -233,10 +233,8 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   if (typeof body.notes === 'string') data.notes = body.notes
   if (body.tags !== undefined) data.tags = JSON.stringify(body.tags)
   if (body.mainTeacherId === null || typeof body.mainTeacherId === 'string') data.mainTeacherId = body.mainTeacherId
-  if (body.remainHours !== undefined && body.remainHours !== '') {
-    const remainHours = Number(body.remainHours)
-    if (!Number.isFinite(remainHours)) return NextResponse.json({ error: '剩余课时必须为数字' }, { status: 400 })
-    data.remainHours = remainHours
+  if (body.remainHours !== undefined) {
+    return NextResponse.json({ error: '课时余额请通过报名记录或课时调整账本修改' }, { status: 400 })
   }
   if (typeof body.status === 'string') data.status = body.status
   if (typeof body.membershipLevel === 'string') data.membershipLevel = body.membershipLevel

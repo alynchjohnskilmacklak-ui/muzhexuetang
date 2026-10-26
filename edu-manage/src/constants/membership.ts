@@ -64,11 +64,13 @@ export function resolveMembership(level?: string | null): MembershipLevel {
 }
 
 /** A stored child ID is only a preference, never proof that the parent may see that child. */
-export function selectParentMembership<T extends { id: string; name: string; membershipLevel?: string | null }>(
+export function selectParentMembership<T extends { id: string; name: string; membershipLevel?: string | null; recordIds?: readonly string[] }>(
   linkedStudents: T[],
   preferredChildId?: string | null,
 ) {
-  const activeStudent = linkedStudents.find((student) => student.id === preferredChildId) ?? linkedStudents[0]
+  const activeStudent = linkedStudents.find((student) =>
+    student.id === preferredChildId || student.recordIds?.includes(preferredChildId || ''),
+  ) ?? linkedStudents[0]
   return {
     activeChildId: activeStudent?.id ?? '',
     studentName: activeStudent?.name ?? '',

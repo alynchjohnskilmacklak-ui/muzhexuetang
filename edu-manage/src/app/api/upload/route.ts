@@ -21,6 +21,7 @@ function getSizeLimit(uploadType: string | null): number {
     case 'parent-upload':   return 10 * 1024 * 1024   // 10MB
     case 'admin-material':  return 50 * 1024 * 1024   // 50MB
     case 'avatar':          return 5 * 1024 * 1024    // 5MB
+    case 'parent-message':  return 10 * 1024 * 1024   // 10MB
     default:                return 10 * 1024 * 1024   // 10MB
   }
 }
@@ -71,6 +72,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const feedbackId = (formData.get('feedbackId') as string) || null
   const postId = (formData.get('postId') as string) || null
 
+  if (uploadType === 'parent-message' && !studentId) {
+    return NextResponse.json({ error: '沟通图片必须关联学生' }, { status: 400 })
+  }
+
   await validateUploadAssociations(user, { studentId, lessonId, feedbackId, postId })
 
   // Size check
@@ -81,7 +86,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   const ownerType = ownerTypeForUpload(uploadType, user.role)
-  const visibility = user.role === 'parent' ? 'PARENT_VISIBLE'
+  // 菜品图片专门面向家长展示，无论谁上传都设为家长可见
+  const visibility = uploadType === 'parent-message' ? 'MESSAGE_PARTICIPANTS'
+    : uploadType === 'meal-image' ? 'PARENT_VISIBLE'
+    : user.role === 'parent' ? 'PARENT_VISIBLE'
     : user.role === 'admin' ? 'ADMIN_ONLY'
     : 'TEACHER_VISIBLE'
 
@@ -168,7 +176,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         size: file.size,
         storageDriver: result.storageDriver,
         storageKey: result.storageKey,
-        url: result.url,
+        url: uploadType === 'parent-message' ? `/api/uploads/${encodeURIComponent(result.storageKey)}` : result.url,
         ownerType,
         studentId,
         lessonId,
@@ -200,23 +208,31 @@ export const POST = apiHandler(async (req: NextRequest) => {
       return NextResponse.json({ error: '文件记录保存失败，请重试' }, { status: 500 })
     }
 
+    const responseUrl = uploadType === 'parent-message'
+      ? `/api/uploads/${encodeURIComponent(result.storageKey)}`
+      : result.url
+
+    const isMessageUpload = uploadType === 'parent-message'
+
     return NextResponse.json({
-      url: result.url,
-      previewUrl: preview?.url ?? null,
-      thumbnailUrl: thumbnail?.url ?? null,
+      url: responseUrl,
+      previewUrl: isMessageUpload ? null : preview?.url ?? null,
+      thumbnailUrl: isMessageUpload ? null : thumbnail?.url ?? null,
       assetPersisted: true,
-      legacyUrl: result.url.replace('/api/uploads/', '/uploads/'),
+      legacyUrl: uploadType === 'parent-message'
+        ? responseUrl
+        : result.url.replace('/api/uploads/', '/uploads/'),
       file: {
-        storageKey: result.storageKey,
+        ...(!isMessageUpload ? { storageKey: result.storageKey } : {}),
         filename: file.name,
         mimeType: file.type,
         size: file.size,
         width,
         height,
-        previewUrl: preview?.url ?? null,
-        previewStorageKey: preview?.storageKey ?? null,
-        thumbnailUrl: thumbnail?.url ?? null,
-        thumbnailStorageKey: thumbnail?.storageKey ?? null,
+        previewUrl: isMessageUpload ? null : preview?.url ?? null,
+        ...(!isMessageUpload ? { previewStorageKey: preview?.storageKey ?? null } : {}),
+        thumbnailUrl: isMessageUpload ? null : thumbnail?.url ?? null,
+        ...(!isMessageUpload ? { thumbnailStorageKey: thumbnail?.storageKey ?? null } : {}),
         visibility,
       },
     })

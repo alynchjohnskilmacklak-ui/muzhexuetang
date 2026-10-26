@@ -35,6 +35,8 @@ export const GET = apiHandler(async (request: NextRequest) => {
     sideDish: menu.sideDish,
     allowDouble: menu.allowDouble,
     notes: menu.notes,
+    image: menu.image ?? null,
+    description: menu.description ?? null,
     source: 'date',
   }]))
   for (const template of templates) {

@@ -19,7 +19,7 @@ export const POST = apiHandler(async (
 
   const prisma = await getRequestPrisma()
   const { id } = await params
-  const accessWhere = await getAccessibleParentMessageWhere(prisma, user, user.division)
+  const accessWhere = getAccessibleParentMessageWhere(user, user.division)
   if (!accessWhere) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const message = await prisma.parentMessage.findFirst({

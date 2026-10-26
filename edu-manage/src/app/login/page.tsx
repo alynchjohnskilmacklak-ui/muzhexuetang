@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { signIn } from 'next-auth/react'
-import { Button, Checkbox, Input, Tag, Typography } from 'antd'
+import { Button, Checkbox, Input, Typography } from 'antd'
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
@@ -25,16 +25,24 @@ const { Text } = Typography
 
 type LoginRole = 'admin' | 'teacher' | 'parent'
 type LoginDivision = 'JUNIOR' | 'SENIOR'
+type LoginIdentifierType = 'email' | 'phone'
+
+function inferLoginIdentifierType(value: string): LoginIdentifierType {
+  let digits = value.trim().replace(/\D/g, '')
+  if (digits.startsWith('0086') && digits.length === 15) digits = digits.slice(4)
+  else if (digits.startsWith('86') && digits.length === 13) digits = digits.slice(2)
+  return /^1[3-9]\d{9}$/.test(digits) ? 'phone' : 'email'
+}
 
 const DIVISION_OPTIONS: Array<{ value: LoginDivision; label: string }> = [
   { value: 'JUNIOR', label: '初中部' },
   { value: 'SENIOR', label: '高中部' },
 ]
 
-const ROLE_OPTIONS: Array<{ value: LoginRole; label: string; hint: string }> = [
-  { value: 'admin', label: '管理者', hint: '掌舵全局，服务每一个家庭' },
-  { value: 'teacher', label: '教师端', hint: '点燃思想，照亮成长之路' },
-  { value: 'parent', label: '家长端', hint: '查看孩子的课程与学习记录' },
+const ROLE_OPTIONS: Array<{ value: LoginRole; label: string }> = [
+  { value: 'admin', label: '管理者' },
+  { value: 'teacher', label: '教师端' },
+  { value: 'parent', label: '家长端' },
 ]
 
 const PLACEHOLDER_MAP: Record<LoginRole, { email: string; pwd: string }> = {
@@ -67,6 +75,11 @@ const ERROR_MESSAGES: Record<string, string> = {
   RATE_LIMITED: '登录请求过于频繁，请稍后再试',
   uninitialized: '账号未初始化，请联系管理员创建账号',
   PARENT_TERM_EXPIRED: '登录信息已过期，请联系管理员',
+  CredentialsSignin: '账号或密码不正确，请重新尝试',
+  DB_UNAVAILABLE: '登录服务暂时不可用，可能是数据库连接中断，请稍后重试',
+  Configuration: '登录服务暂时不可用，请稍后重试',
+  INVALID_PHONE: '请输入有效的11位中国大陆手机号',
+  AMBIGUOUS_PHONE: '该手机号关联多个账号，请使用邮箱/账号登录并联系管理员核对手机号绑定',
 }
 
 /* ── Module-level components ── */
@@ -138,9 +151,6 @@ function BrandLeft({ activeSlide, onSlideChange, onSwipe }: { activeSlide: numbe
       <BusinessSlide activeSlide={activeSlide} onSwipe={onSwipe} />
       <div className="login-business-shade" aria-hidden="true" />
       <div className="login-business-brand">
-        <div style={{ width: 196, height: 54, position: 'relative', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,.26))' }}>
-          <Image src="/images/logo.jpg" alt="牧哲学堂 MOREJOY" fill sizes="220px" style={{ objectFit: 'contain', objectPosition: 'left center', opacity: 0.9 }} priority />
-        </div>
         <div className="login-business-eyebrow">八类业务 · 专业教育服务</div>
       </div>
       <div className="login-business-caption">
@@ -154,29 +164,47 @@ function BrandLeft({ activeSlide, onSlideChange, onSwipe }: { activeSlide: numbe
 }
 
 function RightForm({
-  role, setRole, division, setDivision, loading, formError, setFormError, onFinish, showPwd, setShowPwd,
-  detectedRole, onEmailBlur, isMobile, reason, initialEmail, rememberAccount, setRememberAccount,
+  role, division, setDivision, loading, formError, setFormError, onFinish, showPwd, setShowPwd,
+  autoDetectRole, onResolveRole, onEmailEdit, onManualRoleSelect,
+  isMobile, reason, initialEmail, rememberAccount, setRememberAccount, identifierType, onIdentifierTypeChange,
 }: {
-  role: LoginRole; setRole: (r: LoginRole) => void
+  role: LoginRole
   division: LoginDivision; setDivision: (d: LoginDivision) => void
   loading: boolean
   formError: string; setFormError: (msg: string) => void
-  onFinish: (values: { email: string; password: string }) => Promise<void>
+  onFinish: (values: { email: string; password: string }, loginRole: LoginRole, identifierType: LoginIdentifierType) => Promise<void>
   showPwd: boolean; setShowPwd: (v: boolean) => void
-  detectedRole: LoginRole | null
-  onEmailBlur: (email: string) => void
+  autoDetectRole: boolean
+  onResolveRole: (identifier: string, identifierType: LoginIdentifierType) => Promise<LoginRole | null>
+  onEmailEdit: () => void
+  onManualRoleSelect: (role: LoginRole) => void
   isMobile: boolean
   reason?: string | null
   initialEmail: string
   rememberAccount: boolean
   setRememberAccount: (remember: boolean) => void
+  identifierType: LoginIdentifierType
+  onIdentifierTypeChange: (identifierType: LoginIdentifierType) => void
 }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [resolvingRole, setResolvingRole] = useState(false)
+  const loginInFlight = useRef(false)
 
   useEffect(() => {
     if (initialEmail) setEmail((current) => current || initialEmail)
   }, [initialEmail])
+
+  useEffect(() => {
+    const candidate = email.trim()
+    if (!autoDetectRole || candidate.length < 3) return
+    const candidateType = inferLoginIdentifierType(candidate)
+    const normalizedDigits = candidate.replace(/\D/g, '')
+    if (candidateType === 'phone' && normalizedDigits.length < 11) return
+    if (candidateType === 'email' && candidate.length < 5) return
+    const timer = window.setTimeout(() => { void onResolveRole(candidate, candidateType) }, 450)
+    return () => window.clearTimeout(timer)
+  }, [email, identifierType, autoDetectRole, onResolveRole])
 
   const handleLogin = async () => {
     setFormError('')
@@ -184,8 +212,19 @@ function RightForm({
       setFormError('请填写账号和密码')
       return
     }
-    if (loading) return
-    await onFinish({ email, password })
+    if (loading || loginInFlight.current) return
+    loginInFlight.current = true
+    const shouldDetectRole = autoDetectRole
+    setResolvingRole(shouldDetectRole)
+    try {
+      const detected = shouldDetectRole ? await onResolveRole(email, identifierType) : null
+      setResolvingRole(false)
+      const resolvedRole = detected === 'teacher' || detected === 'parent' ? detected : role
+      await onFinish({ email, password }, resolvedRole, identifierType)
+    } finally {
+      loginInFlight.current = false
+      setResolvingRole(false)
+    }
   }
 
   return (
@@ -220,13 +259,13 @@ function RightForm({
             {ROLE_OPTIONS.map((item) => {
               const active = role === item.value
               return (
-                <button key={item.value} type="button" aria-pressed={active} onClick={() => setRole(item.value)} style={{ height: 60, borderRadius: 'var(--radius-interactive)', cursor: 'pointer', border: `1px solid ${active ? 'var(--color-primary)' : 'var(--color-hairline-strong)'}`, background: active ? 'var(--color-primary-bg)' : 'var(--color-surface-1)', color: active ? 'var(--color-primary-focus)' : 'var(--color-ink-muted)', boxShadow: active ? '0 1px 2px rgba(26,18,1,.04)' : 'none', transition: 'background-color var(--motion-standard) ease, border-color var(--motion-standard) ease, color var(--motion-standard) ease', padding: '6px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <button key={item.value} type="button" aria-pressed={active} disabled={loading || resolvingRole} onClick={() => onManualRoleSelect(item.value)} style={{ height: 60, borderRadius: 'var(--radius-interactive)', cursor: loading || resolvingRole ? 'not-allowed' : 'pointer', border: `1px solid ${active ? 'var(--color-primary)' : 'var(--color-hairline-strong)'}`, background: active ? 'var(--color-primary-bg)' : 'var(--color-surface-1)', color: active ? 'var(--color-primary-focus)' : 'var(--color-ink-muted)', boxShadow: active ? '0 1px 2px rgba(26,18,1,.04)' : 'none', transition: 'background-color var(--motion-standard) ease, border-color var(--motion-standard) ease, color var(--motion-standard) ease', padding: '6px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ fontSize: 14, fontWeight: 700 }}>{item.label}</div>
-                  <div style={{ fontSize: 11, marginTop: 2, color: active ? 'var(--color-ink-muted)' : 'var(--color-ink-subtle)' }}>{item.hint}</div>
                 </button>
               )
             })}
           </div>
+
 
           {(role === 'admin' || role === 'teacher') && (
             <div style={{ marginBottom: 20 }}>
@@ -239,6 +278,7 @@ function RightForm({
                       key={item.value}
                       type="button"
                       aria-pressed={active}
+                      disabled={loading || resolvingRole}
                       onClick={() => setDivision(item.value)}
                       style={{
                         height: 46,
@@ -262,8 +302,6 @@ function RightForm({
           )}
 
           <div style={{ fontSize: 22, fontWeight: 800, color: '#1a1201', marginBottom: 4 }}>欢迎回来</div>
-          <Text style={{ color: '#9a8e7a', display: 'block', marginBottom: 26, fontSize: 14 }}>请选择对应身份入口，再输入账号密码。</Text>
-
           <form
             autoComplete="on"
             onSubmit={(event) => {
@@ -277,14 +315,19 @@ function RightForm({
               name="username"
               aria-label="登录账号"
               prefix={<UserOutlined style={{ color: '#C5A28A' }} />}
-              placeholder={PLACEHOLDER_MAP[role].email}
+              type="text"
+              placeholder="请输入邮箱、账号或手机号"
               autoComplete="username"
+              disabled={loading || resolvingRole}
               autoCapitalize="none"
               spellCheck={false}
               value={email}
-              onChange={(e) => { setEmail(e.target.value); setFormError('') }}
-              onBlur={(e) => { const v = e.target.value.trim(); if (v) onEmailBlur(v) }}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleLogin() }}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                onIdentifierTypeChange(inferLoginIdentifierType(e.target.value))
+                onEmailEdit()
+                setFormError('')
+              }}
               status={formError ? 'error' : undefined}
               style={{ borderRadius: isMobile ? 12 : 10, height: isMobile ? 48 : 46, background: '#FAFAFA' }}
             />
@@ -298,9 +341,9 @@ function RightForm({
               type={showPwd ? 'text' : 'password'}
               placeholder={PLACEHOLDER_MAP[role].pwd}
               autoComplete="current-password"
+              disabled={loading || resolvingRole}
               value={password}
               onChange={(e) => { setPassword(e.target.value); setFormError('') }}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleLogin() }}
               status={formError ? 'error' : undefined}
               suffix={(
                 <button
@@ -324,11 +367,6 @@ function RightForm({
             </Checkbox>
             <Text style={{ color: '#9a8e7a', fontSize: 12 }}>密码由手机或浏览器安全保存</Text>
           </div>
-          {detectedRole && (
-            <div style={{ marginBottom: 16, fontSize: 11, color: '#E87545' }}>
-              检测到身份：<Tag color="orange" style={{ borderRadius: 9999 }}>{ROLE_OPTIONS.find(r => r.value === detectedRole)?.label || detectedRole}</Tag>
-            </div>
-          )}
           {/* ── Error banner ── */}
           {formError ? (
             <div style={{ marginBottom: 14, padding: '12px 14px', borderRadius: 10, background: '#fff2f0', border: '1px solid #ffccc7', fontSize: 14, color: '#cf1322', lineHeight: 1.6, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
@@ -336,7 +374,7 @@ function RightForm({
               <span style={{ flex: 1 }}>{formError}</span>
             </div>
           ) : null}
-          <Button type="primary" htmlType="submit" loading={loading} block style={{ height: isMobile ? 48 : 46, borderRadius: isMobile ? 12 : 10, fontSize: 16, fontWeight: 700, background: 'linear-gradient(135deg, #E87545, #F09A5B)', border: 'none', boxShadow: '0 6px 18px rgba(232,117,69,.3)' }}>登录</Button>
+          <Button type="primary" htmlType="submit" loading={loading || resolvingRole} block style={{ height: isMobile ? 48 : 46, borderRadius: isMobile ? 12 : 10, fontSize: 16, fontWeight: 700, background: 'var(--color-primary)', border: 'none', boxShadow: '0 6px 18px rgba(182,79,40,.3)' }}>登录</Button>
           </form>
         </div>
 
@@ -352,11 +390,6 @@ function MobileBrandBar({ activeSlide, onSlideChange, onSwipe }: { activeSlide: 
     <section className="mobile-brand-bar login-mobile-business">
       <BusinessSlide activeSlide={activeSlide} mobile onSwipe={onSwipe} />
       <div className="login-mobile-business-shade" aria-hidden="true" />
-      <div className="login-mobile-brand">
-        <div style={{ width: 150, height: 38, position: 'relative', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,.2))' }}>
-          <Image src="/images/logo.jpg" alt="牧哲学堂" fill sizes="150px" style={{ objectFit: 'contain', objectPosition: 'left center' }} priority />
-        </div>
-      </div>
       <div className="login-mobile-caption">
         <div>
           <span>八类业务服务</span>
@@ -374,14 +407,22 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [showPwd, setShowPwd] = useState(false)
   const [role, setRole] = useState<LoginRole>('admin')
+  const [identifierType, setIdentifierType] = useState<LoginIdentifierType>('email')
   const [division, setDivision] = useState<LoginDivision>('JUNIOR')
-  const [detectedRole, setDetectedRole] = useState<LoginRole | null>(null)
+  const divisionRef = useRef<LoginDivision>('JUNIOR')
+  const [autoDetectRole, setAutoDetectRole] = useState(true)
   const [reason, setReason] = useState<string | null>(null)
   const [formError, setFormError] = useState('')
   const [initialEmail, setInitialEmail] = useState('')
   const [rememberAccount, setRememberAccount] = useState(true)
   const [activeSlide, setActiveSlide] = useState(0)
   const isMobile = useIsMobile() ?? false
+  const autoDetectRoleRef = useRef(true)
+  const roleDetectionSequence = useRef(0)
+  const roleDetectionController = useRef<AbortController | null>(null)
+  const roleDetectionPending = useRef<{ identifier: string; identifierType: LoginIdentifierType; division: LoginDivision; promise: Promise<LoginRole | null> } | null>(null)
+  const roleDetectionResult = useRef<{ identifier: string; identifierType: LoginIdentifierType; division: LoginDivision; role: LoginRole | null; checkedAt: number } | null>(null)
+  const adminRolePinned = useRef(false)
 
   const handleSplashDone = useCallback(() => {
     setShowSplash(false)
@@ -395,6 +436,8 @@ export default function LoginPage() {
     if (preference) {
       setInitialEmail(preference.email)
       setRole(preference.role)
+      setIdentifierType(inferLoginIdentifierType(preference.email))
+      divisionRef.current = preference.division
       setDivision(preference.division)
     }
     const errorCode = searchParams.get('error')
@@ -418,37 +461,113 @@ export default function LoginPage() {
     setActiveSlide((current) => (current + dir + BUSINESS_SLIDES.length) % BUSINESS_SLIDES.length)
   }, [])
 
+  const changeDivision = useCallback((nextDivision: LoginDivision) => {
+    divisionRef.current = nextDivision
+    setDivision(nextDivision)
+  }, [])
+
   const updateRememberAccount = (remember: boolean) => {
     setRememberAccount(remember)
     if (!remember) clearLoginPreference()
   }
 
-  const detectRole = async (email: string) => {
-    const trimmed = email.trim().toLowerCase()
-    if (!trimmed || !trimmed.includes('@')) return
+  const resetRoleDetection = useCallback(() => {
+    roleDetectionSequence.current += 1
+    roleDetectionController.current?.abort()
+    roleDetectionController.current = null
+    roleDetectionPending.current = null
+    roleDetectionResult.current = null
+    if (adminRolePinned.current) return
+    autoDetectRoleRef.current = true
+    setAutoDetectRole(true)
+  }, [])
+
+  const selectRoleManually = useCallback((nextRole: LoginRole) => {
+    roleDetectionSequence.current += 1
+    roleDetectionController.current?.abort()
+    roleDetectionController.current = null
+    roleDetectionPending.current = null
+    roleDetectionResult.current = null
+    adminRolePinned.current = nextRole === 'admin'
+    autoDetectRoleRef.current = false
+    setAutoDetectRole(false)
+    setRole(nextRole)
+  }, [])
+
+  const detectRole = useCallback(async (identifier: string, identifierType: LoginIdentifierType): Promise<LoginRole | null> => {
+    const trimmed = identifier.trim()
+    if (!trimmed || trimmed.length > 254) return null
+    if (
+      roleDetectionResult.current?.identifier === trimmed
+      && roleDetectionResult.current.identifierType === identifierType
+      && roleDetectionResult.current.division === division
+      && Date.now() - roleDetectionResult.current.checkedAt < 15_000
+    ) {
+      return roleDetectionResult.current.role
+    }
+    if (
+      roleDetectionPending.current?.identifier === trimmed
+      && roleDetectionPending.current.identifierType === identifierType
+      && roleDetectionPending.current.division === division
+    ) {
+      return roleDetectionPending.current.promise
+    }
+
+    roleDetectionController.current?.abort()
+    const controller = new AbortController()
+    roleDetectionController.current = controller
+    const requestId = ++roleDetectionSequence.current
+    const promise = (async () => {
     try {
       const res = await fetch('/api/auth/detect-role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: trimmed, division }),
+        body: JSON.stringify({ identifier: trimmed, identifierType, division }),
+        signal: controller.signal,
       })
+      if (!res.ok) {
+        return null
+      }
       const data = await res.json()
-      if (data.role) { setDetectedRole(data.role as LoginRole); setRole(data.role as LoginRole) }
-    } catch { /* ignore */ }
-  }
+      const matchedRole = ['admin', 'teacher', 'parent'].includes(data.role) ? data.role as LoginRole : null
+      if (requestId !== roleDetectionSequence.current) return null
+      roleDetectionResult.current = { identifier: trimmed, identifierType, division, role: matchedRole, checkedAt: Date.now() }
+      if ((matchedRole === 'teacher' || matchedRole === 'parent') && autoDetectRoleRef.current) {
+        setRole(matchedRole)
+        if (data.division === 'JUNIOR' || data.division === 'SENIOR') {
+          changeDivision(data.division)
+        }
+      }
+      return matchedRole
+    } catch {
+      return null
+    } finally {
+      if (requestId === roleDetectionSequence.current) {
+        roleDetectionController.current = null
+        roleDetectionPending.current = null
+      }
+    }
+    })()
+    roleDetectionPending.current = { identifier: trimmed, identifierType, division, promise }
+    return promise
+  }, [division, changeDivision])
 
-  const handleLogin = async (values: { email: string; password: string }) => {
+  const handleLogin = async (values: { email: string; password: string }, loginRole: LoginRole, loginIdentifierType: LoginIdentifierType) => {
     setFormError('')
     setLoading(true)
+    const loginDivision = divisionRef.current
     try {
       const email = values.email.trim().toLowerCase()
       const result = await signIn('credentials', {
-        email, password: values.password, loginRole: role, division, redirect: false,
+        email, password: values.password, loginRole, identifierType: loginIdentifierType, division: loginDivision, redirect: false,
       })
 
       if (!result || result.error) {
-        const code = result?.code || ''
-        const msg = ERROR_MESSAGES[code] || '账号或密码不正确，请重新尝试'
+        const code = result?.code || result?.error || ''
+        const fallback = result?.error === 'CredentialsSignin'
+          ? ERROR_MESSAGES.CredentialsSignin
+          : '登录服务暂时不可用，请检查网络后稍后重试'
+        const msg = ERROR_MESSAGES[code] || fallback
         setFormError(msg)
         toast.error(msg, { duration: code === 'LOCKED' || code === 'ACCOUNT_LOCKED' ? 8000 : 5000 })
         setLoading(false)
@@ -457,21 +576,21 @@ export default function LoginPage() {
 
       setFormError('')
       if (rememberAccount) {
-        writeLoginPreference({ email, role, division })
+        writeLoginPreference({ email, role: loginRole, division: loginDivision })
         await offerPasswordManagerSave(email, values.password)
       } else {
         clearLoginPreference()
       }
       toast.success('登录成功，正在跳转...', { duration: 2000 })
 
-      const destination = role === 'parent'
+      const destination = loginRole === 'parent'
         ? '/parent/dashboard'
-        : role === 'teacher'
-          ? `/teacher/dashboard?division=${division}`
-          : `/dashboard?division=${division}`
+        : loginRole === 'teacher'
+          ? `/teacher/dashboard?division=${loginDivision}`
+          : `/dashboard?division=${loginDivision}`
       window.location.replace(destination)
     } catch {
-      const msg = '网络异常，请检查网络连接后重试'
+      const msg = '登录请求未完成，请检查网络或稍后重试'
       setFormError(msg)
       toast.error(msg, { duration: 5000 })
     } finally {
@@ -486,16 +605,18 @@ export default function LoginPage() {
       <div className="login-shell" style={{ display: 'flex', minHeight: '100vh', background: '#faf8f5' }}>
         <BrandLeft activeSlide={activeSlide} onSlideChange={setActiveSlide} onSwipe={handleSwipe} />
         <RightForm
-          role={role} setRole={setRole}
-          division={division} setDivision={setDivision}
+          role={role}
+          division={division} setDivision={changeDivision}
           loading={loading}
           formError={formError} setFormError={setFormError}
           onFinish={handleLogin}
           showPwd={showPwd} setShowPwd={setShowPwd}
-          detectedRole={detectedRole} onEmailBlur={detectRole}
+          autoDetectRole={autoDetectRole}
+          onResolveRole={detectRole} onEmailEdit={resetRoleDetection} onManualRoleSelect={selectRoleManually}
           isMobile={isMobile} reason={reason}
           initialEmail={initialEmail}
           rememberAccount={rememberAccount} setRememberAccount={updateRememberAccount}
+          identifierType={identifierType} onIdentifierTypeChange={setIdentifierType}
         />
       </div>
     </>

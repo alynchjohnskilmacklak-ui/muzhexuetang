@@ -329,7 +329,7 @@ export async function getFeedbackArchive(
       parentRepliedAt: true,
       createdAt: true,
       status: true,
-      teacher: { select: { id: true, name: true } },
+      teacher: { select: { id: true, name: true, gender: true, tierLevel: true, avatar: true, subjects: true } },
       classLesson: contextSelect.classLesson,
       parentMessages: {
         where: { studentId: query.studentId },
@@ -449,7 +449,7 @@ export async function getFeedbackArchiveDetail(
       adminReply: true,
       status: true,
       createdAt: true,
-      teacher: { select: { id: true, name: true } },
+      teacher: { select: { id: true, name: true, gender: true, tierLevel: true, avatar: true, subjects: true } },
       classLesson: {
         select: {
           id: true,

@@ -1,9 +1,12 @@
 'use client'
 
+import { clearCachedAvatarImages } from '@/lib/avatar-image-cache'
+
 const SENSITIVE_PREFIXES = [
   'muzhe_ai_conversations_',
   'performance:draft:',
   'teacher-feedback-draft:',
+  'parent-practice-draft:',
 ]
 
 const LEGACY_KEYS = [
@@ -66,6 +69,7 @@ export function removeLegacySensitiveStorage(): void {
 
 export function clearSensitiveBrowserStorage(): void {
   if (!isBrowser()) return
+  clearCachedAvatarImages()
   removeLegacySensitiveStorage()
   for (let index = window.sessionStorage.length - 1; index >= 0; index -= 1) {
     const key = window.sessionStorage.key(index)

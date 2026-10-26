@@ -7,6 +7,7 @@ import { isSuperAdminEmail } from '@/lib/super-admin'
 import type { Prisma, PrismaClient } from '@prisma/client'
 import { getPasswordPolicyError } from '@/lib/password-policy'
 import { generateTemporaryPassword } from '@/lib/temporary-password'
+import { normalizeLoginPhone } from '@/lib/login-accounts'
 import {
   isSupportedUserStatus,
   isUserActive,
@@ -113,8 +114,10 @@ export const GET = apiHandler(async () => {
       select: {
         id: true,
         email: true,
+        phone: true,
         name: true,
         role: true,
+        teacherId: true,
         status: true,
         lastLoginAt: true,
         lastLoginIp: true,
@@ -129,6 +132,7 @@ export const GET = apiHandler(async () => {
       orderBy: { createdAt: 'asc' },
     }),
     prisma.student.findMany({
+      where: { deletedAt: null },
       select: { id: true, name: true, grade: true, parentName: true, parentPhone: true, parentId: true, parentUserId: true, status: true },
       orderBy: { createdAt: 'desc' },
     }),
@@ -181,7 +185,7 @@ export const GET = apiHandler(async () => {
     }
   }
 
-  const userByEmail = new Map(users.map((user) => [user.email.toLowerCase(), user]))
+  const userByEmail = new Map(users.filter(user => user.role === 'teacher' && !user.teacherId).map((user) => [user.email.toLowerCase(), user]))
   const teacherUsers = users.filter((user) => user.role === 'teacher')
   const usersByRole = {
     admins: users.filter((user) => user.role === 'admin' || user.role === 'SUPER_ADMIN'),
@@ -190,9 +194,9 @@ export const GET = apiHandler(async () => {
 
   const teacherAccounts = teachers.map((teacher) => {
     const generatedEmail = `${teacher.phone.replace(/\D/g, '')}@tea.com`
-    const account = (teacher.email ? userByEmail.get(teacher.email.toLowerCase()) : undefined)
+    const account = teacherUsers.find(user => user.teacherId === teacher.id)
+      || (teacher.email ? userByEmail.get(teacher.email.toLowerCase()) : undefined)
       || userByEmail.get(generatedEmail)
-      || teacherUsers.find((user) => user.name === teacher.name)
     return { ...teacher, account: account ? toAccountDto(account) : null }
   })
 
@@ -308,9 +312,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   const email = normalizeEmail(body.email)
+  const rawAdminPhone = normalizeText(body.phone)
+  const adminPhone = rawAdminPhone ? normalizeLoginPhone(rawAdminPhone) : null
   if (!name) return NextResponse.json({ error: '姓名不能为空' }, { status: 400 })
   if (!emailPattern.test(email)) return NextResponse.json({ error: '邮箱格式不正确' }, { status: 400 })
-  const adminPasswordError = getPasswordPolicyError(explicitPassword, { identifiers: [email, name] })
+  if (rawAdminPhone && !adminPhone) return NextResponse.json({ error: '请输入有效的11位中国大陆手机号' }, { status: 400 })
+  if (adminPhone && await prisma.user.findUnique({ where: { phone: adminPhone }, select: { id: true } })) {
+    return NextResponse.json({ error: '该手机号已绑定其他管理账号' }, { status: 409 })
+  }
+  const adminPasswordError = getPasswordPolicyError(explicitPassword, { identifiers: [email, name, adminPhone || ''] })
   if (adminPasswordError) return NextResponse.json({ error: adminPasswordError }, { status: 400 })
 
   const existing = await prisma.user.findUnique({ where: { email } })
@@ -325,8 +335,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
         role: 'admin',
         status: 'active',
         division: currentUser.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR',
+        phone: adminPhone,
       },
-      select: { id: true, email: true, name: true, role: true, status: true },
+      select: { id: true, email: true, phone: true, name: true, role: true, status: true },
     })
     await writePasswordLog(tx, currentUser.id, created.id, 'PASSWORD_INITIALIZED', `创建管理员账号：${created.name}（${created.email}）`)
     return created
@@ -398,12 +409,56 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
     if (!name) return NextResponse.json({ error: '姓名不能为空' }, { status: 400 })
     if (!emailPattern.test(email)) return NextResponse.json({ error: '邮箱格式不正确' }, { status: 400 })
 
+    const target = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true },
+    })
+    if (!target) return NextResponse.json({ error: '账号不存在' }, { status: 404 })
+
+    const hasPhone = Object.prototype.hasOwnProperty.call(body, 'phone')
+    let phone: string | null | undefined
+    if (hasPhone) {
+      if (target.role !== 'admin') return NextResponse.json({ error: '仅管理账号可在此绑定手机号' }, { status: 400 })
+      const rawPhone = normalizeText(body.phone)
+      phone = rawPhone ? normalizeLoginPhone(rawPhone) : null
+      if (rawPhone && !phone) return NextResponse.json({ error: '请输入有效的11位中国大陆手机号' }, { status: 400 })
+      if (phone && await prisma.user.findFirst({ where: { phone, id: { not: userId } }, select: { id: true } })) {
+        return NextResponse.json({ error: '该手机号已绑定其他管理账号' }, { status: 409 })
+      }
+    }
+
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { name, email },
-      select: { id: true, email: true, name: true, role: true, status: true },
+      data: { name, email, ...(phone !== undefined ? { phone } : {}) },
+      select: { id: true, email: true, phone: true, name: true, role: true, status: true },
     })
     await writeLog(prisma, currentUser.id, '编辑账号', `${user.name}（${user.email}）`)
+    return NextResponse.json({ ok: true, user })
+  }
+
+  if (action === 'update-login-phone') {
+    if (userId !== currentUser.id) {
+      return NextResponse.json({ error: '只能修改当前管理员自己的登录手机号' }, { status: 403 })
+    }
+    const target = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, role: true },
+    })
+    if (!target || target.role !== 'admin') {
+      return NextResponse.json({ error: '管理账号不存在' }, { status: 404 })
+    }
+    const rawPhone = normalizeText(body.phone)
+    const phone = rawPhone ? normalizeLoginPhone(rawPhone) : null
+    if (rawPhone && !phone) return NextResponse.json({ error: '请输入有效的11位中国大陆手机号' }, { status: 400 })
+    if (phone && await prisma.user.findFirst({ where: { phone, id: { not: userId } }, select: { id: true } })) {
+      return NextResponse.json({ error: '该手机号已绑定其他管理账号' }, { status: 409 })
+    }
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { phone },
+      select: { id: true, email: true, phone: true, role: true },
+    })
+    await writeLog(prisma, currentUser.id, '修改管理账号手机号', user.phone ? user.phone : '已解除手机号绑定')
     return NextResponse.json({ ok: true, user })
   }
 

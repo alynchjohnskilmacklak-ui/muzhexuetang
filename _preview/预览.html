@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>牧哲学堂 · 首页与关于页 SEO 改动预览</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --ink:#1A1201; --ink-soft:#7A6E60; --line:#E8E1D6; --bg:#FBFAF7; --card:#fff;
+    --primary:#E8784A; --primary-deep:#C2541F; --green:#1E7A33; --red:#B3261E; --amber:#B06A1F;
+  }
+  body{font:14px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  header.top{padding:12px 20px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;flex-wrap:wrap;flex-shrink:0}
+  header.top h1{font-size:15px;font-weight:700}
+  header.top .meta{font-size:12px;color:var(--ink-soft)}
+  .tabs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+  .tabs button{border:1px solid var(--line);background:#fff;color:var(--ink-soft);padding:6px 14px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
+  .tabs button:hover{border-color:var(--primary);color:var(--primary-deep)}
+  .tabs button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+  .main{flex:1;display:flex;min-height:0}
+  aside{width:330px;flex-shrink:0;border-right:1px solid var(--line);background:var(--card);overflow-y:auto;padding:14px}
+  aside h2{font-size:12px;letter-spacing:.08em;color:var(--ink-soft);text-transform:uppercase;margin:14px 0 8px}
+  aside h2:first-child{margin-top:0}
+  .item{padding:9px 11px;border-radius:10px;border:1px solid transparent;cursor:pointer;font-size:13px;line-height:1.5;display:flex;gap:9px;align-items:flex-start;transition:.12s}
+  .item:hover{background:#FFF6F0;border-color:#F5D9C8}
+  .item.on{background:#FFF1E8;border-color:var(--primary)}
+  .item .no{flex-shrink:0;width:19px;height:19px;border-radius:6px;background:#F2ECE3;color:var(--ink-soft);font-size:11px;font-weight:700;display:grid;place-items:center;margin-top:1px}
+  .item.on .no{background:var(--primary);color:#fff}
+  .stage{flex:1;min-width:0;display:flex;flex-direction:column;background:#EFEAE2}
+  .bar{padding:8px 14px;background:var(--card);border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-soft);display:flex;gap:14px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+  .bar b{color:var(--ink)}
+  iframe{flex:1;width:100%;border:0;background:#fff}
+  .diffWrap{flex:1;overflow-y:auto;padding:16px;display:none}
+  .hunk{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden;scroll-margin-top:12px}
+  .hunk.flash{box-shadow:0 0 0 3px rgba(232,120,74,.35)}
+  .hunk-head{padding:7px 13px;background:#F7F3EC;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--ink-soft);font-weight:600}
+  .hunk-body{font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,"Courier New",monospace}
+  .dl{display:flex;gap:10px;padding:1px 13px;white-space:pre-wrap;word-break:break-all}
+  .dl.add{background:#E9F6EC}
+  .dl.del{background:#FDECEA}
+  .dl.ctx{color:#9A9086}
+  .sign{flex-shrink:0;width:10px;color:#A79C90;user-select:none}
+  .dl.add .sign{color:var(--green);font-weight:700}
+  .dl.del .sign{color:var(--red);font-weight:700}
+  .dl.add .code{color:#14532D}
+  .dl.del .code{color:#7F1D1D;text-decoration:line-through;text-decoration-color:rgba(179,38,30,.35)}
+  .note{margin:0 0 14px;padding:11px 14px;background:#FFF8E9;border:1px solid #F0DFB8;border-radius:11px;font-size:12.5px;color:#6B5423;line-height:1.7}
+  .note b{color:#4A3A15}
+  .stat{font-weight:700;color:var(--ink)}
+  .legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink-soft)}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+  @media(max-width:900px){aside{width:230px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>牧哲学堂 · 首页 / 关于页 SEO 改动预览</h1>
+  <span class="meta">共 <b>22</b> 处改动 · 只读预览，线上文件未被修改</span>
+  <div class="tabs">
+    <button data-tab="before">改动前</button>
+    <button data-tab="after" class="on">改动后</button>
+    <button data-tab="diff">差异对照</button>
+  </div>
+</header>
+
+<div class="main">
+  <aside>
+    <h2>首页 home.html · 13 处</h2>
+    <div class="item" data-page="home" data-idx="0"><span class="no">1</span><span>标题：18字 → 16字，品牌词改「新乐牧哲学堂」</span></div>
+    <div class="item" data-page="home" data-idx="1"><span class="no">2</span><span>描述：删掉「中考高考志愿填报」等表述</span></div>
+    <div class="item" data-page="home" data-idx="2"><span class="no">3</span><span>关键词：清掉硬营销词</span></div>
+    <div class="item" data-page="home" data-idx="3"><span class="no">4</span><span>og:title 同步</span></div>
+    <div class="item" data-page="home" data-idx="4"><span class="no">5</span><span>新增 hreflang 声明</span></div>
+    <div class="item" data-page="home" data-idx="5"><span class="no">6</span><span>JSON-LD：品牌主名「新乐牧哲学堂」+ 短品牌别名</span></div>
+    <div class="item" data-page="home" data-idx="6"><span class="no">7</span><span>JSON-LD：修复坏 URL（多一个点 + 指向不存在的文件）</span></div>
+    <div class="item" data-page="home" data-idx="7"><span class="no">8</span><span>JSON-LD：补 sameAs 指向抖音官方号</span></div>
+    <div class="item" data-page="home" data-idx="8"><span class="no">9</span><span>导航：锚点 → /about 真实内链（权重传递的关键）</span></div>
+    <div class="item" data-page="home" data-idx="9"><span class="no">10</span><span>首页 H1：改成品牌 + 业务（纯文字替换，不动布局）</span></div>
+    <div class="item" data-page="home" data-idx="10"><span class="no">11</span><span>统计数字：0 → 22（爬虫视图不再看到「0 分」）</span></div>
+    <div class="item" data-page="home" data-idx="11"><span class="no">12</span><span>统计数字：0 → 45</span></div>
+    <div class="item" data-page="home" data-idx="12"><span class="no">13</span><span>数字动画：改成「值不同才覆盖」，不闪回 0（动画保留）</span></div>
+    <h2>关于页 about.html · 9 处</h2>
+    <div class="item" data-page="about" data-idx="0"><span class="no">1</span><span>标题：22字 → 17字，品牌词前置</span></div>
+    <div class="item" data-page="about" data-idx="1"><span class="no">2</span><span>描述：删掉页面上并不存在的「家长评价」</span></div>
+    <div class="item" data-page="about" data-idx="2"><span class="no">3</span><span>关键词：品牌词前置</span></div>
+    <div class="item" data-page="about" data-idx="3"><span class="no">4</span><span>og 标题与描述同步</span></div>
+    <div class="item" data-page="about" data-idx="4"><span class="no">5</span><span>JSON-LD：品牌主名 + 别名数组 + sameAs（本次核心）</span></div>
+    <div class="item" data-page="about" data-idx="5"><span class="no">6</span><span>hero 品牌串：正文可见文字里也出现完整品牌词</span></div>
+    <div class="item" data-page="about" data-idx="6"><span class="no">7</span><span>统计数字：0人 / +0分 → 126人 / +18分</span></div>
+    <div class="item" data-page="about" data-idx="7"><span class="no">8</span><span>统计动画：值相同则不覆盖（动画保留，不闪回 0）</span></div>
+    <div class="item" data-page="about" data-idx="8"><span class="no">9</span><span>备案号：补上 -1（与首页、与 360 抓取结果一致）</span></div>
+  </aside>
+
+  <div class="stage">
+    <div class="bar">
+      <span>当前查看：<b id="curName">首页 home.html · 改动后</b></span>
+      <span id="sizeInfo" class="meta"></span>
+      <span class="legend"><span><i style="background:#E9F6EC;border:1px solid #BFE3C8"></i>新增</span><span><i style="background:#FDECEA;border:1px solid #F3C9C4"></i>删除</span></span>
+    </div>
+    <iframe id="frame" src="home-after.html"></iframe>
+    <div class="diffWrap" id="diffWrap">
+      <div class="note">
+        <b>怎么看这份差异：</b>下面按「处」列出所有变动，<span style="color:#14532D;font-weight:700">绿色 = 新增</span>，<span style="color:#7F1D1D;font-weight:700">红色删除线 = 删除</span>。
+        左侧点任意一条会跳到对应位置。标注「需你拍板」的项我还没有最终决定。右侧 iframe 里可以直接操作，<b>滚动、轮播、点击切换、数字动画都保持原样</b>。
+      </div>
+      <div class="note" style="background:#EAF6EC;border-color:#BFE3C8;color:#1E4A22">
+        <b>本版已按「不动 UI + 保留动态效果」收窄：</b>只改 <b>文字 / meta / JSON-LD / 链接目标</b>，不改任何样式、布局、图片与 DOM 结构。
+        已实测证明：<b>结构指纹（标签+class+id+内联样式）改动前后 0 差异</b>，所有动画元素与动画 JS 数量 0 差异。
+        <br>为守这条约束，以下 5 项已从方案中<b>移除</b>：
+        ① 页脚新增导航块（会新增视觉元素）
+        ② logo 图片路径修正（动资源）
+        ③ 首页学员卡静态预渲染 6 条（<code>.ph-scroller</code> 高度写死 420px，多出的卡会在 JS 接管前露出）
+        ④ about 学员卡静态预渲染 3 条（同上）
+        ⑤ about 八类服务胶囊静态化（动列表结构与外观）
+        <br><b>代价要说清楚：</b>撤掉 ③④⑤ 后，<b>爬虫在不执行 JS 时看到的学员数据与服务清单会变少</b>（回到现状）。这次的收益集中在标题、描述、结构化数据、内链与统计数字这五项上。
+      </div>
+      <div class="note" style="background:#EEF5FB;border-color:#C8DEF0;color:#1E4A6E">
+        <b>两个页面换行符不一样（实测）：</b>home.html 是 CRLF，about.html 是 LF。这本身不是错误，但意味着<b>不能对两个文件用同一套替换规则</b>——我第一次生成预览时就因此漏改了 about 的 4 处，已修正。
+      </div>
+      <h2 style="font-size:14px;margin:18px 0 10px">首页 home.html <span style="font-weight:400;color:var(--ink-soft);font-size:12px">66295 → 67044 字节 · 6 处变动</span></h2><div class="hunk" id="home-h1">
+      <div class="hunk-head">第 1 处 · +10 行 / −4 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;head&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta name="shenma-site-verification" content="3f17ed1785b9a82fd4176b64ecffb169_1790929806"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta charset="utf-8"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">&lt;title&gt;牧哲学堂｜新乐文化课辅导与升学规划&lt;/title&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">&lt;meta name="description" content="牧哲学堂2016年成立于河北新乐，专注文化课辅导、中考高考志愿填报、寒暑假冲刺与一对一教学，提供课程安排、考勤记录、课堂反馈与家校沟通服务。"/&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">&lt;meta name="keywords" content="牧哲学堂,新乐牧哲学堂,新乐辅导机构,新乐文化课辅导,中考志愿填报,高考志愿咨询,寒暑假冲刺,一对一辅导,MOREJOY"/&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;title&gt;新乐牧哲学堂｜河北新乐文化课辅导&lt;/title&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;span id="chg-home-1"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;meta name="description" content="新乐牧哲学堂2016年成立于河北新乐，专注文化课辅导与升学规划，提供课程安排、考勤记录、课堂反馈与家校沟通服务。"/&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;span id="chg-home-2"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;meta name="keywords" content="新乐牧哲学堂,牧哲学堂,河北新乐文化课辅导,牧哲学堂机构信息,家校沟通,MOREJOY"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta name="robots" content="index, follow"/&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;span id="chg-home-4"&gt;&lt;/span&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;link rel="canonical" href="https://muzhexuetang.xyz/"/&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">&lt;meta property="og:title" content="牧哲学堂｜新乐文化课辅导与升学规划"/&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;link rel="alternate" hreflang="zh-CN" href="https://muzhexuetang.xyz/"/&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;link rel="alternate" hreflang="x-default" href="https://muzhexuetang.xyz/"/&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;span id="chg-home-3"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;meta property="og:title" content="新乐牧哲学堂｜河北新乐文化课辅导"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta property="og:description" content="河北新乐文化课辅导品牌，专注中高考文化课与升学规划。"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta property="og:url" content="https://muzhexuetang.xyz/"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta property="og:site_name" content="牧哲学堂"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta property="og:locale" content="zh_CN"/&gt;</span></div></div>
+    </div>
+<div class="hunk" id="home-h2">
+      <div class="hunk-head">第 2 处 · +5 行 / −4 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;script type="application/ld+json"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">{</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "@context": "https://schema.org",</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "@type": "EducationalOrganization",</span></div><div class="dl del"><span class="sign">-</span><span class="code">  "name": "牧哲学堂",</span></div><div class="dl del"><span class="sign">-</span><span class="code">  "alternateName": "MOREJOY Education",</span></div><div class="dl add"><span class="sign">+</span><span class="code">  "name": "新乐牧哲学堂",</span></div><div class="dl add"><span class="sign">+</span><span class="code">  "alternateName": ["牧哲学堂", "MOREJOY Education"],</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "url": "https://muzhexuetang.xyz",</span></div><div class="dl del"><span class="sign">-</span><span class="code">  "logo": "https://muzhexuetang.xyz./about-images/new-logo.jpg",</span></div><div class="dl add"><span class="sign">+</span><span class="code">  "logo": "https://muzhexuetang.xyz/images/logo.jpg",</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "image": "https://muzhexuetang.xyz/images/muzhe-brand-banner.png",</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "description": "牧哲学堂机构信息、教学记录与家校沟通服务平台。",</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "foundingDate": "2016",</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "areaServed": { "@type": "City", "name": "新乐市" },</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "address": { "@type": "PostalAddress", "addressRegion": "河北省", "addressLocality": "新乐市" },</span></div><div class="dl del"><span class="sign">-</span><span class="code">  "telephone": "15930114500"</span></div><div class="dl add"><span class="sign">+</span><span class="code">  "telephone": "15930114500",</span></div><div class="dl add"><span class="sign">+</span><span class="code">  "sameAs": ["https://www.douyin.com/user/MS4wLjABAAAArmoJSReGP-p1WGr1CZpich255GQvTAh7aalAXx_KC2pxQQU26fJmwiw0FccrPT9"]</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">}</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;/script&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;style&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  :root{</span></div></div>
+    </div>
+<div class="hunk" id="home-h3">
+      <div class="hunk-head">第 3 处 · +3 行 / −2 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;img src="./about-images/new-logo.jpg" alt="牧哲学堂 MOREJOY"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;/a&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;nav class="nav" aria-label="主导航"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;a class="link" href="/"&gt;首页&lt;/a&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">      &lt;a class="link" href="#about"&gt;关于我们&lt;/a&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">      &lt;a class="link" href="#services"&gt;服务范围&lt;/a&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;span id="chg-home-8"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">      &lt;a class="link" href="/about"&gt;关于我们&lt;/a&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">      &lt;a class="link" href="/about#services"&gt;服务范围&lt;/a&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;a class="link" href="#contact"&gt;到访联系&lt;/a&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;a class="login" href="/login"&gt;进入系统&lt;/a&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;/nav&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;/div&gt;</span></div></div>
+    </div>
+<div class="hunk" id="home-h4">
+      <div class="hunk-head">第 4 处 · +2 行 / −1 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">&nbsp;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;!-- ================= Hero ================= --&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;div class="hero wrap"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;span class="eyebrow"&gt;ABOUT MOREJOY EDUCATION&lt;/span&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">  &lt;h1&gt;关于牧哲学堂&lt;/h1&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">  &lt;span id="chg-home-9"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;h1&gt;新乐牧哲学堂 · 文化课辅导与升学规划&lt;/h1&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;p class="hero-brand" aria-label="牧哲学堂"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;i&gt;牧&lt;/i&gt;&lt;i&gt;哲&lt;/i&gt;&lt;i&gt;学&lt;/i&gt;&lt;i&gt;堂&lt;/i&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;/p&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;p class="hero-tag"&gt;MOREJOY EDUCATION · 河北 · 新乐&lt;/p&gt;</span></div></div>
+    </div>
+<div class="hunk" id="home-h5">
+      <div class="hunk-head">第 5 处 · +4 行 / −2 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;div class="ph-title"&gt;分数，自己会说话&lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;div class="ph-sub"&gt;入学多少分，期末多少分 —— 不靠宣传，靠数据&lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;div class="ph-stats"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;div class="ph-stat ph-main-stat"&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">        &lt;div class="ph-num"&gt;&lt;span id="statAvg"&gt;0&lt;/span&gt;&lt;span class="ph-unit"&gt;分&lt;/span&gt;&lt;/div&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">        &lt;span id="chg-home-10"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;div class="ph-num"&gt;&lt;span id="statAvg"&gt;22&lt;/span&gt;&lt;span class="ph-unit"&gt;分&lt;/span&gt;&lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">        &lt;div class="ph-label"&gt;平均提升（&lt;span id="statCountNum"&gt;208&lt;/span&gt; 位学员）&lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;div class="ph-stat"&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">        &lt;div class="ph-num" style="color:#E8A05A"&gt;&lt;span id="statMax"&gt;0&lt;/span&gt;&lt;span class="ph-unit"&gt;分&lt;/span&gt;&lt;/div&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">        &lt;span id="chg-home-11"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;div class="ph-num" style="color:#E8A05A"&gt;&lt;span id="statMax"&gt;45&lt;/span&gt;&lt;span class="ph-unit"&gt;分&lt;/span&gt;&lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">        &lt;div class="ph-label"&gt;最高提升&lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;div class="ph-stat"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">        &lt;div class="ph-num" style="color:#E8A05A"&gt;&lt;span id="statTypes"&gt;3&lt;/span&gt;&lt;span class="ph-unit"&gt;类&lt;/span&gt;&lt;/div&gt;</span></div></div>
+    </div>
+<div class="hunk" id="home-h6">
+      <div class="hunk-head">第 6 处 · +5 行 / −2 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">    dur = dur || 1500; const start = performance.now();</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    function tick(now){ const p = Math.min(1, (now - start) / dur); const e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(target * e); if (p &lt; 1) requestAnimationFrame(tick); }</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    requestAnimationFrame(tick);</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  }</span></div><div class="dl del"><span class="sign">-</span><span class="code">  animateNum(document.getElementById("statAvg"), avgGain);</span></div><div class="dl del"><span class="sign">-</span><span class="code">  animateNum(document.getElementById("statMax"), maxGain);</span></div><div class="dl add"><span class="sign">+</span><span class="code">  // 静态 HTML 已预渲染真实值（22 / 45），仅在数值不同时才覆盖，避免闪回 0</span></div><div class="dl add"><span class="sign">+</span><span class="code">  const statAvgEl = document.getElementById("statAvg");</span></div><div class="dl add"><span class="sign">+</span><span class="code">  const statMaxEl = document.getElementById("statMax");</span></div><div class="dl add"><span class="sign">+</span><span class="code">  if (statAvgEl.textContent !== String(avgGain)) animateNum(statAvgEl, avgGain);</span></div><div class="dl add"><span class="sign">+</span><span class="code">  if (statMaxEl.textContent !== String(maxGain)) animateNum(statMaxEl, maxGain);</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&nbsp;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  // 渲染6宫格（复制两份实现无缝滚动）</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  const scroller = document.getElementById("progressGrid");</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  const allItems = [...DATA, ...DATA];</span></div></div>
+    </div>
+<h2 style="font-size:14px;margin:18px 0 10px">关于页 about.html <span style="font-weight:400;color:var(--ink-soft);font-size:12px">58940 → 59589 字节 · 6 处变动</span></h2><div class="hunk" id="about-h1">
+      <div class="hunk-head">第 1 处 · +8 行 / −5 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;html lang="zh-CN"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;head&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta charset="utf-8"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">&lt;title&gt;关于牧哲学堂｜牧哲学堂机构介绍 - 河北新乐&lt;/title&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">&lt;meta name="description" content="牧哲学堂（MOREJOY Education）2016年成立于河北新乐，提供寒暑假冲刺预备课、一对一冲刺、晚间课业辅导、周末先锋营、中考升学规划、高考志愿咨询、单招文化课辅导、考研公共课辅导等服务。了解牧哲学堂的办学理念、服务范围、教学环境与家长评价。"/&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">&lt;meta name="keywords" content="牧哲学堂,新乐牧哲学堂,牧哲学堂教育,新乐辅导机构,新乐文化课辅导,中考志愿填报,高考志愿咨询,单招文化课,考研公共课,家校沟通平台,MOREJOY"/&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;title&gt;新乐牧哲学堂｜机构介绍 - 河北新乐&lt;/title&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;span id="chg-about-1"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;meta name="description" content="新乐牧哲学堂（MOREJOY Education）2016年成立于河北新乐，提供寒暑假冲刺、一对一辅导、晚间课业辅导、周末先锋营、中考升学规划、高考志愿咨询、单招文化课辅导、考研公共课辅导，以及课程安排、考勤记录、课堂反馈与家校沟通服务。"/&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;span id="chg-about-2"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;meta name="keywords" content="新乐牧哲学堂,牧哲学堂,河北新乐文化课辅导,新乐中考升学规划,新乐高考志愿咨询,新乐单招文化课,新乐考研公共课,家校沟通平台,MOREJOY"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta name="robots" content="index, follow"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;link rel="canonical" href="https://muzhexuetang.xyz/about"/&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">&lt;meta property="og:title" content="关于牧哲学堂｜牧哲学堂机构介绍 - 河北新乐"/&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">&lt;meta property="og:description" content="牧哲学堂（MOREJOY Education）2016年成立于河北新乐，专注文化课辅导与升学规划服务。"/&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;span id="chg-about-3"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;meta property="og:title" content="新乐牧哲学堂｜机构介绍 - 河北新乐"/&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;meta property="og:description" content="新乐牧哲学堂（MOREJOY Education）2016年成立于河北新乐，专注文化课辅导与升学规划服务。"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta property="og:url" content="https://muzhexuetang.xyz/about"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta property="og:site_name" content="牧哲学堂"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta property="og:locale" content="zh_CN"/&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;meta property="og:image" content="https://muzhexuetang.xyz/images/muzhe-brand-banner.png"/&gt;</span></div></div>
+    </div>
+<div class="hunk" id="about-h2">
+      <div class="hunk-head">第 2 处 · +5 行 / −4 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;script type="application/ld+json"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">{</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "@context": "https://schema.org",</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "@type": "EducationalOrganization",</span></div><div class="dl del"><span class="sign">-</span><span class="code">  "name": "牧哲学堂",</span></div><div class="dl del"><span class="sign">-</span><span class="code">  "alternateName": "MOREJOY Education",</span></div><div class="dl add"><span class="sign">+</span><span class="code">  "name": "新乐牧哲学堂",</span></div><div class="dl add"><span class="sign">+</span><span class="code">  "alternateName": ["牧哲学堂", "MOREJOY Education"],</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "url": "https://muzhexuetang.xyz",</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "logo": "https://muzhexuetang.xyz/images/logo.jpg",</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "image": "https://muzhexuetang.xyz/images/muzhe-brand-banner.png",</span></div><div class="dl del"><span class="sign">-</span><span class="code">  "description": "牧哲学堂机构信息、教学记录与家校沟通服务平台。",</span></div><div class="dl add"><span class="sign">+</span><span class="code">  "description": "新乐牧哲学堂2016年成立于河北新乐，专注文化课辅导与升学规划，提供课程安排、考勤记录、课堂反馈与家校沟通服务。",</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "foundingDate": "2016",</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "areaServed": { "@type": "City", "name": "新乐市" },</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  "address": { "@type": "PostalAddress", "addressRegion": "河北省", "addressLocality": "新乐市" },</span></div><div class="dl del"><span class="sign">-</span><span class="code">  "telephone": "15930114500"</span></div><div class="dl add"><span class="sign">+</span><span class="code">  "telephone": "15930114500",</span></div><div class="dl add"><span class="sign">+</span><span class="code">  "sameAs": ["https://www.douyin.com/user/MS4wLjABAAAArmoJSReGP-p1WGr1CZpich255GQvTAh7aalAXx_KC2pxQQU26fJmwiw0FccrPT9"]</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">}</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;/script&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;style&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  :root{</span></div></div>
+    </div>
+<div class="hunk" id="about-h3">
+      <div class="hunk-head">第 3 处 · +2 行 / −1 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;h1&gt;关于牧哲学堂&lt;/h1&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;p class="hero-brand" aria-label="牧哲学堂"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;i&gt;牧&lt;/i&gt;&lt;i&gt;哲&lt;/i&gt;&lt;i&gt;学&lt;/i&gt;&lt;i&gt;堂&lt;/i&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;/p&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">  &lt;p class="hero-tag"&gt;MOREJOY EDUCATION · 河北 · 新乐&lt;/p&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">  &lt;span id="chg-about-5"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;p class="hero-tag"&gt;新乐牧哲学堂 · MOREJOY EDUCATION · 河北新乐&lt;/p&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;p class="hero-lead"&gt;专注文化课辅导与升学规划，为家长与教师提供课程安排、考勤记录、课堂反馈与家校沟通的一体化服务。&lt;/p&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;div class="hero-chips"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;span&gt;课程安排&lt;/span&gt;&lt;span&gt;考勤记录&lt;/span&gt;&lt;span&gt;课堂反馈&lt;/span&gt;&lt;span&gt;家校沟通&lt;/span&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;/div&gt;</span></div></div>
+    </div>
+<div class="hunk" id="about-h4">
+      <div class="hunk-head">第 4 处 · +3 行 / −2 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;h2&gt;学员进步对比&lt;/h2&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;p class="p-sub"&gt;入学多少分，提升多少分 —— 分数，自己会说话&lt;/p&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;div class="p-stats"&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">      &lt;div class="p-stat"&gt;&lt;div class="v" id="statCount"&gt;0&lt;small&gt; 人&lt;/small&gt;&lt;/div&gt;&lt;div class="k"&gt;进步记录学员&lt;/div&gt;&lt;/div&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">      &lt;div class="p-stat"&gt;&lt;div class="v" id="statAvg"&gt;+0&lt;small&gt; 分&lt;/small&gt;&lt;/div&gt;&lt;div class="k"&gt;平均提升分数&lt;/div&gt;&lt;/div&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">      &lt;span id="chg-about-6"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;div class="p-stat"&gt;&lt;div class="v" id="statCount"&gt;126&lt;small&gt; 人&lt;/small&gt;&lt;/div&gt;&lt;div class="k"&gt;进步记录学员&lt;/div&gt;&lt;/div&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">      &lt;div class="p-stat"&gt;&lt;div class="v" id="statAvg"&gt;+18&lt;small&gt; 分&lt;/small&gt;&lt;/div&gt;&lt;div class="k"&gt;平均提升分数&lt;/div&gt;&lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;div class="p-stat"&gt;&lt;div class="v" id="statType"&gt;3&lt;small&gt; 类&lt;/small&gt;&lt;/div&gt;&lt;div class="k"&gt;覆盖班型&lt;/div&gt;&lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;div class="p-tabs" id="pTabs"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">      &lt;button class="p-tab active" data-filter="all"&gt;全部&lt;/button&gt;</span></div></div>
+    </div>
+<div class="hunk" id="about-h5">
+      <div class="hunk-head">第 5 处 · +2 行 / −1 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">&nbsp;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;!-- ================= 页脚 ================= --&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;footer class="footer"&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;div class="wrap"&gt;</span></div><div class="dl del"><span class="sign">-</span><span class="code">    &lt;p&gt;© 2026 牧哲学堂 · &lt;a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"&gt;冀ICP备2026028285号&lt;/a&gt;&lt;/p&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">    &lt;p&gt;© 2026 牧哲学堂 · &lt;span id="chg-about-8"&gt;&lt;/span&gt;</span></div><div class="dl add"><span class="sign">+</span><span class="code">&lt;a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"&gt;冀ICP备2026028285号-1&lt;/a&gt;&lt;/p&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">    &lt;p style="margin-top:6px"&gt;页面内容不构成升学、考试结果或学习效果承诺，具体服务以实际备案、许可范围及书面约定为准。&lt;/p&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  &lt;/div&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;/footer&gt;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&nbsp;</span></div></div>
+    </div>
+<div class="hunk" id="about-h6">
+      <div class="hunk-head">第 6 处 · +5 行 / −2 行</div>
+      <div class="hunk-body"><div class="dl ctx"><span class="sign"> </span><span class="code">  });</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&nbsp;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  moreBtn.addEventListener("click", () =&gt; { expanded = !expanded; render(); });</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&nbsp;</span></div><div class="dl del"><span class="sign">-</span><span class="code">  document.getElementById("statCount").innerHTML = DATA.length + "&lt;small&gt; 人&lt;/small&gt;";</span></div><div class="dl del"><span class="sign">-</span><span class="code">  document.getElementById("statAvg").innerHTML = "+" + avgGain + "&lt;small&gt; 分&lt;/small&gt;";</span></div><div class="dl add"><span class="sign">+</span><span class="code">  // 静态 HTML 已预渲染真实值（126 / +18），仅在数值不同时才覆盖</span></div><div class="dl add"><span class="sign">+</span><span class="code">  const statCountEl = document.getElementById("statCount");</span></div><div class="dl add"><span class="sign">+</span><span class="code">  const statAvgEl = document.getElementById("statAvg");</span></div><div class="dl add"><span class="sign">+</span><span class="code">  if (statCountEl.textContent !== String(DATA.length)) statCountEl.innerHTML = DATA.length + "&lt;small&gt; 人&lt;/small&gt;";</span></div><div class="dl add"><span class="sign">+</span><span class="code">  if (statAvgEl.textContent !== "+" + avgGain) statAvgEl.innerHTML = "+" + avgGain + "&lt;small&gt; 分&lt;/small&gt;";</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&nbsp;</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">  render();</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">})();</span></div><div class="dl ctx"><span class="sign"> </span><span class="code">&lt;/script&gt;</span></div></div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const files = [{"key":"home","label":"首页 home.html","before":"home-before.html","after":"home-after.html","beforeLen":66295,"afterLen":67044,"meta":[{"id":"home-h1","addedCount":10,"removedCount":4,"firstPlusLine":6},{"id":"home-h2","addedCount":5,"removedCount":4,"firstPlusLine":28},{"id":"home-h3","addedCount":3,"removedCount":2,"firstPlusLine":861},{"id":"home-h4","addedCount":2,"removedCount":1,"firstPlusLine":873},{"id":"home-h5","addedCount":4,"removedCount":2,"firstPlusLine":889},{"id":"home-h6","addedCount":5,"removedCount":2,"firstPlusLine":1120}]},{"key":"about","label":"关于页 about.html","before":"about-before.html","after":"about-after.html","beforeLen":58940,"afterLen":59589,"meta":[{"id":"about-h1","addedCount":8,"removedCount":5,"firstPlusLine":5},{"id":"about-h2","addedCount":5,"removedCount":4,"firstPlusLine":24},{"id":"about-h3","addedCount":2,"removedCount":1,"firstPlusLine":848},{"id":"about-h4","addedCount":3,"removedCount":2,"firstPlusLine":861},{"id":"about-h5","addedCount":2,"removedCount":1,"firstPlusLine":980},{"id":"about-h6","addedCount":5,"removedCount":2,"firstPlusLine":1143}]}];
+const changes = {"home":[{"name":"标题：18字 → 16字，品牌词改「新乐牧哲学堂」","before":"<title>牧哲学堂｜新乐文化课辅导与升学规划</title>","after":"<title>新乐牧哲学堂｜河北新乐文化课辅导</title>"},{"name":"描述：删掉「中考高考志愿填报」等表述","before":"<meta name=\"description\" content=\"牧哲学堂2016年成立于河北新乐，专注文化课辅导、中考高考志愿填报、寒暑假冲刺与一对一教学，提供课程安排、考勤记录、课堂反馈与家校沟通服务。\"/>","after":"<meta name=\"description\" content=\"新乐牧哲学堂2016年成立于河北新乐，专注文化课辅导与升学规划，提供课程安排、考勤记录、课堂反馈与家校沟通服务。\"/>"},{"name":"关键词：清掉硬营销词","before":"<meta name=\"keywords\" content=\"牧哲学堂,新乐牧哲学堂,新乐辅导机构,新乐文化课辅导,中考志愿填报,高考志愿咨询,寒暑假冲刺,一对一辅导,MOREJOY\"/>","after":"<meta name=\"keywords\" content=\"新乐牧哲学堂,牧哲学堂,河北新乐文化课辅导,牧哲学堂机构信息,家校沟通,MOREJOY\"/>"},{"name":"og:title 同步","before":"<meta property=\"og:title\" content=\"牧哲学堂｜新乐文化课辅导与升学规划\"/>","after":"<meta property=\"og:title\" content=\"新乐牧哲学堂｜河北新乐文化课辅导\"/>"},{"name":"新增 hreflang 声明","before":"<link rel=\"canonical\" href=\"https://muzhexuetang.xyz/\"/>","after":"<link rel=\"canonical\" href=\"https://muzhexuetang.xyz/\"/>\r\n<link rel=\"alternate\" hreflang=\"zh-CN\" href=\"https://muzhexuetang.xyz/\"/>\r\n<link rel=\"alternate\" hreflang=\"x-default\" href=\"https://muzhexuetang.xyz/\"/>"},{"name":"JSON-LD：品牌主名「新乐牧哲学堂」+ 短品牌别名","before":"  \"name\": \"牧哲学堂\",\r\n  \"alternateName\": \"MOREJOY Education\",","after":"  \"name\": \"新乐牧哲学堂\",\r\n  \"alternateName\": [\"牧哲学堂\", \"MOREJOY Education\"],"},{"name":"JSON-LD：修复坏 URL（多一个点 + 指向不存在的文件）","before":"\"logo\": \"https://muzhexuetang.xyz./about-images/new-logo.jpg\"","after":"\"logo\": \"https://muzhexuetang.xyz/images/logo.jpg\""},{"name":"JSON-LD：补 sameAs 指向抖音官方号","before":"  \"telephone\": \"15930114500\"\r\n}","after":"  \"telephone\": \"15930114500\",\r\n  \"sameAs\": [\"https://www.douyin.com/user/MS4wLjABAAAArmoJSReGP-p1WGr1CZpich255GQvTAh7aalAXx_KC2pxQQU26fJmwiw0FccrPT9\"]\r\n}"},{"name":"导航：锚点 → /about 真实内链（权重传递的关键）","before":"      <a class=\"link\" href=\"#about\">关于我们</a>\r\n      <a class=\"link\" href=\"#services\">服务范围</a>","after":"      <a class=\"link\" href=\"/about\">关于我们</a>\r\n      <a class=\"link\" href=\"/about#services\">服务范围</a>"},{"name":"首页 H1：改成品牌 + 业务（纯文字替换，不动布局）","before":"<h1>关于牧哲学堂</h1>","after":"<h1>新乐牧哲学堂 · 文化课辅导与升学规划</h1>"},{"name":"统计数字：0 → 22（爬虫视图不再看到「0 分」）","before":"<div class=\"ph-num\"><span id=\"statAvg\">0</span><span class=\"ph-unit\">分</span></div>","after":"<div class=\"ph-num\"><span id=\"statAvg\">22</span><span class=\"ph-unit\">分</span></div>"},{"name":"统计数字：0 → 45","before":"<div class=\"ph-num\" style=\"color:#E8A05A\"><span id=\"statMax\">0</span><span class=\"ph-unit\">分</span></div>","after":"<div class=\"ph-num\" style=\"color:#E8A05A\"><span id=\"statMax\">45</span><span class=\"ph-unit\">分</span></div>"},{"name":"数字动画：改成「值不同才覆盖」，不闪回 0（动画保留）","before":"  animateNum(document.getElementById(\"statAvg\"), avgGain);\r\n  animateNum(document.getElementById(\"statMax\"), maxGain);","after":"  // 静态 HTML 已预渲染真实值（22 / 45），仅在数值不同时才覆盖，避免闪回 0\r\n  const statAvgEl = document.getElementById(\"statAvg\");\r\n  const statMaxEl = document.getElementById(\"statMax\");\r\n  if (statAvgEl.textContent !== String(avgGain)) animateNum(statAvgEl, avgGain);\r\n  if (statMaxEl.textContent !== String(maxGain)) animateNum(statMaxEl, maxGain);"}],"about":[{"name":"标题：22字 → 17字，品牌词前置","before":"<title>关于牧哲学堂｜牧哲学堂机构介绍 - 河北新乐</title>","after":"<title>新乐牧哲学堂｜机构介绍 - 河北新乐</title>"},{"name":"描述：删掉页面上并不存在的「家长评价」","before":"<meta name=\"description\" content=\"牧哲学堂（MOREJOY Education）2016年成立于河北新乐，提供寒暑假冲刺预备课、一对一冲刺、晚间课业辅导、周末先锋营、中考升学规划、高考志愿咨询、单招文化课辅导、考研公共课辅导等服务。了解牧哲学堂的办学理念、服务范围、教学环境与家长评价。\"/>","after":"<meta name=\"description\" content=\"新乐牧哲学堂（MOREJOY Education）2016年成立于河北新乐，提供寒暑假冲刺、一对一辅导、晚间课业辅导、周末先锋营、中考升学规划、高考志愿咨询、单招文化课辅导、考研公共课辅导，以及课程安排、考勤记录、课堂反馈与家校沟通服务。\"/>"},{"name":"关键词：品牌词前置","before":"<meta name=\"keywords\" content=\"牧哲学堂,新乐牧哲学堂,牧哲学堂教育,新乐辅导机构,新乐文化课辅导,中考志愿填报,高考志愿咨询,单招文化课,考研公共课,家校沟通平台,MOREJOY\"/>","after":"<meta name=\"keywords\" content=\"新乐牧哲学堂,牧哲学堂,河北新乐文化课辅导,新乐中考升学规划,新乐高考志愿咨询,新乐单招文化课,新乐考研公共课,家校沟通平台,MOREJOY\"/>"},{"name":"og 标题与描述同步","before":"<meta property=\"og:title\" content=\"关于牧哲学堂｜牧哲学堂机构介绍 - 河北新乐\"/>\n<meta property=\"og:description\" content=\"牧哲学堂（MOREJOY Education）2016年成立于河北新乐，专注文化课辅导与升学规划服务。\"/>","after":"<meta property=\"og:title\" content=\"新乐牧哲学堂｜机构介绍 - 河北新乐\"/>\n<meta property=\"og:description\" content=\"新乐牧哲学堂（MOREJOY Education）2016年成立于河北新乐，专注文化课辅导与升学规划服务。\"/>"},{"name":"JSON-LD：品牌主名 + 别名数组 + sameAs（本次核心）","before":"  \"name\": \"牧哲学堂\",\n  \"alternateName\": \"MOREJOY Education\",\n  \"url\": \"https://muzhexuetang.xyz\",\n  \"logo\": \"https://muzhexuetang.xyz/images/logo.jpg\",\n  \"image\": \"https://muzhexuetang.xyz/images/muzhe-brand-banner.png\",\n  \"description\": \"牧哲学堂机构信息、教学记录与家校沟通服务平台。\",\n  \"foundingDate\": \"2016\",\n  \"areaServed\": { \"@type\": \"City\", \"name\": \"新乐市\" },\n  \"address\": { \"@type\": \"PostalAddress\", \"addressRegion\": \"河北省\", \"addressLocality\": \"新乐市\" },\n  \"telephone\": \"15930114500\"","after":"  \"name\": \"新乐牧哲学堂\",\n  \"alternateName\": [\"牧哲学堂\", \"MOREJOY Education\"],\n  \"url\": \"https://muzhexuetang.xyz\",\n  \"logo\": \"https://muzhexuetang.xyz/images/logo.jpg\",\n  \"image\": \"https://muzhexuetang.xyz/images/muzhe-brand-banner.png\",\n  \"description\": \"新乐牧哲学堂2016年成立于河北新乐，专注文化课辅导与升学规划，提供课程安排、考勤记录、课堂反馈与家校沟通服务。\",\n  \"foundingDate\": \"2016\",\n  \"areaServed\": { \"@type\": \"City\", \"name\": \"新乐市\" },\n  \"address\": { \"@type\": \"PostalAddress\", \"addressRegion\": \"河北省\", \"addressLocality\": \"新乐市\" },\n  \"telephone\": \"15930114500\",\n  \"sameAs\": [\"https://www.douyin.com/user/MS4wLjABAAAArmoJSReGP-p1WGr1CZpich255GQvTAh7aalAXx_KC2pxQQU26fJmwiw0FccrPT9\"]"},{"name":"hero 品牌串：正文可见文字里也出现完整品牌词","before":"<p class=\"hero-tag\">MOREJOY EDUCATION · 河北 · 新乐</p>","after":"<p class=\"hero-tag\">新乐牧哲学堂 · MOREJOY EDUCATION · 河北新乐</p>"},{"name":"统计数字：0人 / +0分 → 126人 / +18分","before":"<div class=\"p-stat\"><div class=\"v\" id=\"statCount\">0<small> 人</small></div><div class=\"k\">进步记录学员</div></div>\n      <div class=\"p-stat\"><div class=\"v\" id=\"statAvg\">+0<small> 分</small></div><div class=\"k\">平均提升分数</div></div>","after":"<div class=\"p-stat\"><div class=\"v\" id=\"statCount\">126<small> 人</small></div><div class=\"k\">进步记录学员</div></div>\n      <div class=\"p-stat\"><div class=\"v\" id=\"statAvg\">+18<small> 分</small></div><div class=\"k\">平均提升分数</div></div>"},{"name":"统计动画：值相同则不覆盖（动画保留，不闪回 0）","before":"  document.getElementById(\"statCount\").innerHTML = DATA.length + \"<small> 人</small>\";\n  document.getElementById(\"statAvg\").innerHTML = \"+\" + avgGain + \"<small> 分</small>\";","after":"  // 静态 HTML 已预渲染真实值（126 / +18），仅在数值不同时才覆盖\n  const statCountEl = document.getElementById(\"statCount\");\n  const statAvgEl = document.getElementById(\"statAvg\");\n  if (statCountEl.textContent !== String(DATA.length)) statCountEl.innerHTML = DATA.length + \"<small> 人</small>\";\n  if (statAvgEl.textContent !== \"+\" + avgGain) statAvgEl.innerHTML = \"+\" + avgGain + \"<small> 分</small>\";"},{"name":"备案号：补上 -1（与首页、与 360 抓取结果一致）","before":"冀ICP备2026028285号</a>","after":"冀ICP备2026028285号-1</a>"}]};
+
+let tab = 'after';
+let page = 'home';
+let sel = null;
+
+const frame = document.getElementById('frame');
+const diffWrap = document.getElementById('diffWrap');
+const curName = document.getElementById('curName');
+const sizeInfo = document.getElementById('sizeInfo');
+
+function fileOf(p) { return files.find((f) => f.key === p); }
+
+function render() {
+  const f = fileOf(page);
+  if (tab === 'diff') {
+    frame.style.display = 'none';
+    diffWrap.style.display = 'block';
+  } else {
+    frame.style.display = 'block';
+    diffWrap.style.display = 'none';
+    frame.src = tab === 'before' ? f.before : f.after;
+  }
+  curName.textContent = f.label + ' · ' + (tab === 'before' ? '改动前' : tab === 'after' ? '改动后' : '差异对照');
+  sizeInfo.textContent = 'HTML 体积 ' + f.beforeLen + ' → ' + f.afterLen + ' 字节';
+  document.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
+}
+
+document.querySelectorAll('.tabs button').forEach((b) => {
+  b.onclick = () => { tab = b.dataset.tab; render(); };
+});
+
+document.querySelectorAll('.item').forEach((el) => {
+  el.onclick = () => {
+    page = el.dataset.page;
+    sel = Number(el.dataset.idx);
+    document.querySelectorAll('.item').forEach((x) => x.classList.remove('on'));
+    el.classList.add('on');
+    const f = fileOf(page);
+    const hunkId = f.key + '-h' + (sel + 1);
+    if (tab === 'diff') {
+      const target = document.getElementById(hunkId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        target.classList.add('flash');
+        setTimeout(() => target.classList.remove('flash'), 1400);
+      }
+      render();
+    } else {
+      // 在 iframe 里按文本定位：改动后页面里插入的锚点 span
+      tab = 'after';
+      frame.src = f.after;
+      frame.onload = () => {
+        try {
+          const a = frame.contentDocument.getElementById('chg-' + page + '-' + sel);
+          if (a) {
+            a.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const host = a.parentElement;
+            if (host) {
+              const old = host.style.boxShadow;
+              host.style.transition = 'box-shadow .25s';
+              host.style.boxShadow = '0 0 0 3px rgba(232,120,74,.55)';
+              setTimeout(() => { host.style.boxShadow = old; }, 1600);
+            }
+          }
+        } catch (e) { /* 忽略 */ }
+      };
+      render();
+    }
+  };
+});
+
+render();
+</script>
+</body>
+</html>

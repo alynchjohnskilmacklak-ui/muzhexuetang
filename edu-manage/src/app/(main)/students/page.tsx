@@ -311,7 +311,7 @@ export default function StudentsPage() {
             const active = filterGrade === value
             const count = value === 'all' ? Object.values(gradeCounts).reduce((sum, item) => sum + item, 0) : gradeCounts[value] || 0
             return (
-              <button key={value} onClick={() => handleGradeChange(value)} style={{ width: '100%', border: 0, borderRadius: 7, padding: '8px 10px', background: active ? '#E8784A14' : 'transparent', color: active ? '#E8784A' : '#4f5662', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', fontWeight: active ? 600 : 400 }}>
+              <button key={value} onClick={() => handleGradeChange(value)} style={{ width: '100%', border: 0, borderRadius: 7, padding: '8px 10px', background: active ? '#E8784A14' : 'transparent', color: active ? 'var(--color-primary)' : '#4f5662', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', fontWeight: active ? 600 : 400 }}>
                 <span>{grade}</span><span>{count}</span>
               </button>
             )
@@ -325,7 +325,7 @@ export default function StudentsPage() {
           {TYPE_FILTERS.map((item) => {
             const active = filterType === item.value
             return (
-              <button key={item.value} onClick={() => handleTypeChange(item.value)} style={{ width: '100%', border: 0, borderRadius: 7, padding: '8px 10px', background: active ? '#E8784A14' : 'transparent', color: active ? '#E8784A' : '#4f5662', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: active ? 600 : 400 }}>
+              <button key={item.value} onClick={() => handleTypeChange(item.value)} style={{ width: '100%', border: 0, borderRadius: 7, padding: '8px 10px', background: active ? '#E8784A14' : 'transparent', color: active ? 'var(--color-primary)' : '#4f5662', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: active ? 600 : 400 }}>
                 <span style={{ width: 8, height: 8, borderRadius: 99, background: item.color }} />
                 <span>{item.label}</span>
               </button>
@@ -453,7 +453,7 @@ export default function StudentsPage() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.35fr)', gap: 8, width: isMobile ? '100%' : 'auto' }}>
               <Button block={isMobile} icon={<ImportOutlined />} disabled={!canEditCurrentTerm} onClick={() => setImportOpen(true)}>导入</Button>
-              <Button block={isMobile} type="primary" icon={<PlusOutlined />} disabled={!canEditCurrentTerm} onClick={() => { setEditData(null); setFormOpen(true) }} style={{ background: '#E87545', borderColor: '#E8784A' }}>添加学员</Button>
+              <Button block={isMobile} type="primary" icon={<PlusOutlined />} disabled={!canEditCurrentTerm} onClick={() => { setEditData(null); setFormOpen(true) }} style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>添加学员</Button>
             </div>
           </div>
 

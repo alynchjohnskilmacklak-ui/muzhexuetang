@@ -1,4 +1,5 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useEffect, useMemo, useState } from 'react'
 import { format, addDays, startOfWeek } from 'date-fns'
@@ -232,7 +233,7 @@ export function TeacherWeekView({
         >本周</button>
 
         <div style={{ marginLeft: 'auto', width: 220 }}>
-          <Select
+          <AdaptiveSelect
             showSearch
             placeholder="选择教师"
             style={{ width: '100%' }}
@@ -432,7 +433,7 @@ export function TeacherWeekView({
           </label>
           <label style={{ display: 'grid', gap: 6 }}>
             <Text strong>目标节次</Text>
-            <Select
+            <AdaptiveSelect
               value={moveDialog?.periodId}
               onChange={(periodId) => setMoveDialog((current) => current ? { ...current, periodId } : current)}
               options={periods.filter((period) => period.type === 'CLASS').map((period) => ({

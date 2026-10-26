@@ -1,0 +1,53 @@
+﻿=== 1) 容器内 /app/public 是否为挂载点（查 mountinfo）===
+772 746 252:3 /srv/edu-manage/shared/public/uploads /app/public/uploads rw,relatime - ext4 /dev/vda3 rw
+783 746 252:3 /srv/edu-manage/shared/public/services /app/public/services rw,relatime - ext4 /dev/vda3 rw
+784 746 252:3 /srv/edu-manage/shared/public/marketing /app/public/marketing rw,relatime - ext4 /dev/vda3 rw
+785 746 252:3 /srv/edu-manage/shared/public/business-assets /app/public/business-assets rw,relatime - ext4 /dev/vda3 rw
+798 746 252:3 /srv/edu-manage/shared/public/volunteer/docs /app/public/volunteer/docs rw,relatime - ext4 /dev/vda3 rw
+---
+5
+
+=== 2) compose 配置解析后的实际 volumes（权威）===
+volumes:
+      - type: bind
+        source: /srv/edu-manage/shared/public/uploads
+        target: /app/public/uploads
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /srv/edu-manage/shared/public/services
+        target: /app/public/services
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /srv/edu-manage/shared/public/marketing
+        target: /app/public/marketing
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /srv/edu-manage/shared/public/business-assets
+        target: /app/public/business-assets
+        bind:
+          create_host_path: true
+
+=== 3) 现有两个 .bak 的来源核对（哪份等于旧的线上版本）===
+  home.html.bak-20261002       sha=76dbe860d81e38ce  size=57265
+  home.html.bak-20261003       sha=54deeb292962be2f  size=66295
+  about.html.bak-20261003      sha=d7c7cbbde1fa78f4  size=57265
+  参照：线上旧 home=54deeb292962be2f(66295)  about=1968d74824444874(58940)
+
+=== 4) 镜像里 public 的 home.html（容器当前真正在服务的）===
+54deeb292962be2fe4788053612b8b1124177fb9ebb52d2c3bbd633f5140dc53  /app/public/home.html
+1968d74824444874189b118a3dddabe666907879a0384b6850f00d80de12222c  /app/public/about.html
+
+=== 5) 该镜像 edu-manage-app:latest 的创建时间与 ID ===
+ID=sha256:7df7bfb91890acb52d5bd5b2aa7245f44082b99f7b236eae3f2a75b628bb46de  Created=2026-10-03T05:55:10.209889426Z  Size=359629761
+Image=sha256:7df7bfb91890acb52d5bd5b2aa7245f44082b99f7b236eae3f2a75b628bb46de  StartedAt=2026-10-03T05:59:14.051048286Z
+
+=== 6) docker compose 版本与可用性 ===
+Docker Compose version 2.40.3+ds1-0ubuntu1~22.04.1
+
+=== 7) /srv/edu-manage/shared/public 写入权限（node 用户 uid）===
+UNKNOWN:UNKNOWN 755 /srv/edu-manage/shared/public
+UNKNOWN:UNKNOWN 777 /srv/edu-manage/shared/public/marketing
+uid=1000(node) gid=1000(node) groups=1000(node)

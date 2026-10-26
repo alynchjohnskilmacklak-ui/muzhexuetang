@@ -1,0 +1,48 @@
+Browser tab: 3, Title: "牧哲学堂", URL: "http://localhost:3000/parent/vip".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+~					5 button (expanded) Description: 打开菜单, Secondary Actions: Collapse
++				46 container
++					47 container
++						48 text 家长端 · 功能导航
++						49 button 关闭导航
++							50 image close
++						51 image 马紫晨家长
++						52 text 马紫晨家长 mazichen@st.com
++						53 button 使用指南
++						54 button check 一键已读（91条未读）
++							55 image check
++							56 text 一键已读（
++							57 text 91
++							58 text 条未读）
++						59 link Description: home 首页, Value: localhost:3000/parent/dashboard
++						60 link Description: appstore 业务总览, Value: localhost:3000/parent/services
++						61 button home 孩子学习 down
++							62 image home
++							63 text 孩子学习
++							64 image down
++						65 link Description: calendar 课程表, Value: localhost:3000/parent/schedule
++						66 link Description: crown VIP课程, Value: localhost:3000/parent/vip
++						67 link Description: book 课堂反馈 9 1, Value: localhost:3000/parent/class-feedback
++						68 link Description: read 晚托作业, Value: localhost:3000/parent/study-hall
++						69 link Description: file-text 成长档案, Value: localhost:3000/parent/archive
++						70 link Description: team 教师信息, Value: localhost:3000/parent/teachers
++						71 button comment 家校服务 right
++							72 image comment
++							73 text 家校服务
++							74 image right
++						75 button bank 升学服务 right
++							76 image bank
++							77 text 升学服务
++							78 image right
++						79 button read 学习工具 right
++							80 image read
++							81 text 学习工具
++							82 image right
++						83 button idcard 账户与服务 right
++							84 image idcard
++							85 text 账户与服务
++							86 image right
++						87 button logout 退出登录
++							88 image logout
++							89 text 退出登录
+The focused UI element is 46 container

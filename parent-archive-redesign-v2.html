@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家长端档案合并设计稿 v2 · 牧哲学堂</title>
+<style>
+  :root{
+    --bg:#FAF8F5; --card:#FFFFFF; --line:#F0E7DE; --ink:#1A1201; --muted:#9A8E7A; --body:#5A4E3A;
+    --accent:#E8784A; --accent-deep:#C2541F; --accent-bg:#FFF0E6;
+    --blue:#534AB7; --blue-bg:#F0EEFF;
+    --green:#1D9E75; --green-bg:#E9F7F0;
+    --gold:#C77F00; --gold-bg:#FDF3E3;
+    --red:#D64545; --red-bg:#FCEBEB;
+    --radius:16px; --shadow:0 2px 12px rgba(26,18,1,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;}
+  .doc-note{max-width:1120px;margin:0 auto;padding:18px 16px 6px;font-size:13px;color:var(--muted);}
+  .doc-note b{color:var(--accent-deep);}
+  .stage{max-width:1120px;margin:0 auto;padding:16px;display:flex;gap:30px;flex-wrap:wrap;align-items:flex-start;}
+
+  /* ============ 手机框 ============ */
+  .phone{width:406px;flex:0 0 406px;background:var(--bg);border:1px solid var(--line);border-radius:30px;overflow:hidden;box-shadow:0 10px 34px rgba(26,18,1,.12);}
+  .phone-status{display:flex;justify-content:space-between;padding:8px 20px;font-size:11px;color:var(--muted);}
+  .app-head{position:sticky;top:0;z-index:5;background:rgba(250,248,245,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+  .app-head-row{display:flex;align-items:center;gap:8px;padding:12px 16px 6px;}
+  .back-btn{width:36px;height:36px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:15px;cursor:pointer;flex-shrink:0;}
+  .app-title{font-size:16.5px;font-weight:800;flex:1;text-align:center;letter-spacing:.2px;}
+  .app-title small{display:block;font-size:10px;color:var(--muted);font-weight:400;letter-spacing:1px;}
+  .child-switch{display:flex;gap:8px;padding:10px 16px 8px;}
+  .child-switch button{flex:1;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 8px;font-size:12.5px;color:var(--muted);cursor:pointer;font-weight:500;}
+  .child-switch button.on{border-color:var(--accent);background:var(--accent-bg);color:var(--accent-deep);font-weight:700;box-shadow:inset 0 0 0 1px rgba(232,120,74,.2);}
+
+  .tabs{display:flex;gap:4px;padding:6px 14px 10px;overflow-x:auto;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex-shrink:0;border:none;background:transparent;padding:8px 13px;font-size:13px;color:var(--muted);border-radius:12px;cursor:pointer;position:relative;transition:all .18s ease;}
+  .tab.on{background:var(--card);color:var(--accent-deep);font-weight:700;box-shadow:var(--shadow);}
+  .tab .dot{width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;margin-left:4px;vertical-align:2px;}
+
+  .phone-body{padding:12px 14px 28px;overflow-y:auto;max-height:780px;scrollbar-width:none;}
+  .phone-body::-webkit-scrollbar{display:none;}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px;margin-bottom:13px;box-shadow:var(--shadow);}
+  .card h3{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:7px;margin-bottom:11px;color:var(--ink);}
+  .card h3 .more{margin-left:auto;font-size:11px;color:var(--muted);font-weight:400;cursor:pointer;}
+
+  /* 学习概况 */
+  .kpi4{display:flex;gap:8px;}
+  .kpi4 .k{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:13px;padding:10px 8px;text-align:center;}
+  .kpi4 .k b{font-size:16px;display:block;color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums;}
+  .kpi4 .k b small{font-size:10px;color:var(--muted);font-weight:500;}
+  .kpi4 .k span{font-size:10.5px;color:var(--muted);display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* 学习趋势（线上样式） */
+  .trend-wrap{display:flex;align-items:center;gap:14px;}
+  .trend-chart{flex:1;display:flex;align-items:flex-end;gap:5px;height:58px;}
+  .trend-chart i{flex:1;border-radius:5px 5px 2px 2px;background:rgba(83,74,183,.16);}
+  .trend-chart i.hl{background:var(--blue);}
+  .trend-chart i:nth-child(1){height:32%}.trend-chart i:nth-child(2){height:45%}.trend-chart i:nth-child(3){height:40%}
+  .trend-chart i:nth-child(4){height:55%}.trend-chart i:nth-child(5){height:50%}.trend-chart i:nth-child(6){height:62%}
+  .trend-chart i:nth-child(7){height:70%}.trend-chart i:nth-child(8){height:60%}.trend-chart i:nth-child(9){height:68%}
+  .trend-chart i:nth-child(10){height:78%}.trend-chart i:nth-child(11){height:86%}.trend-chart i:nth-child(12){height:94%}
+  .trend-badge{flex-shrink:0;text-align:center;background:var(--green-bg);border:1px solid rgba(29,158,117,.3);border-radius:12px;padding:9px 11px;}
+  .trend-badge b{display:block;color:var(--green);font-size:13px;}
+  .trend-badge span{font-size:10px;color:var(--muted);}
+
+  /* ============ 课时领先榜（线上原版样式） ============ */
+  .lb-card{border-color:rgba(232,120,74,.28);}
+  .lb-head{display:flex;align-items:center;gap:10px;margin-bottom:2px;}
+  .lb-ico{width:32px;height:32px;border-radius:10px;background:var(--accent-bg);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+  .lb-title{font-size:15px;font-weight:700;}
+  .lb-tag{font-size:11px;font-weight:600;color:var(--accent-deep);background:var(--accent-bg);border-radius:20px;padding:2px 10px;margin-left:4px;}
+  .lb-sub{font-size:12px;color:var(--muted);margin:8px 0 12px;}
+  .lb-banner{display:flex;align-items:flex-start;gap:10px;border-radius:12px;padding:12px;margin-bottom:12px;background:var(--gold-bg);border:1px solid #F3D9A4;}
+  .lb-banner .ic{width:42px;height:42px;border-radius:12px;background:var(--gold);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 4px 10px rgba(199,127,0,.22);}
+  .lb-banner .tx{flex:1;min-width:0;}
+  .lb-banner .tx b{color:var(--gold);font-size:14.5px;}
+  .lb-banner .tx p{color:var(--body);font-size:13px;margin-top:3px;line-height:1.62;}
+  .lb-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+  .lb-kpi .k{border-radius:12px;padding:11px 4px;text-align:center;}
+  .lb-kpi .k.plain{background:var(--bg);border:1px solid var(--line);}
+  .lb-kpi .k.hot{background:linear-gradient(135deg,var(--accent-deep),var(--accent));}
+  .lb-kpi .k span{font-size:10.5px;display:block;}
+  .lb-kpi .k.plain span{color:var(--muted);}
+  .lb-kpi .k.hot span{color:rgba(255,255,255,.85);}
+  .lb-kpi .k b{font-size:20px;font-weight:800;display:block;margin-top:2px;font-variant-numeric:tabular-nums;}
+  .lb-kpi .k.plain b{color:var(--ink);}
+  .lb-kpi .k.hot b{color:#fff;}
+  .lb-kpi .k b small{font-size:11px;font-weight:500;opacity:.7;margin-left:2px;}
+  /* ECharts 风格横向条形图（模拟） */
+  .lb-chart{position:relative;height:184px;padding:6px 0 10px;}
+  .lb-chart .grid-lines{position:absolute;inset:0 44px 24px 0;}
+  .lb-chart .grid-lines i{position:absolute;left:0;right:0;border-top:1px dashed rgba(26,18,1,.07);}
+  .lb-chart .grid-lines i:nth-child(1){top:8%}.lb-chart .grid-lines i:nth-child(2){top:38%}.lb-chart .grid-lines i:nth-child(3){top:68%}.lb-chart .grid-lines i:nth-child(4){top:98%}
+  .lb-row{position:relative;height:40px;display:flex;align-items:center;margin-bottom:2px;}
+  .lb-row .nm{width:56px;flex-shrink:0;font-size:12px;color:var(--body);z-index:2;}
+  .lb-row .bar-wrap{flex:1;position:relative;height:100%;}
+  .lb-row .bar{position:absolute;left:0;top:50%;transform:translateY(-50%);height:13px;border-radius:4px;}
+  .lb-row .bar.me{height:15px;}
+  .lb-row .bar span{position:absolute;right:-4px;top:50%;transform:translate(100%,-50%);font-size:11px;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .avg-line{position:absolute;top:0;bottom:0;border-left:1.5px dashed #123C35;z-index:3;}
+  .avg-line i{position:absolute;top:4px;left:4px;font-style:normal;font-size:9.5px;color:#123C35;white-space:nowrap;}
+  .lb-foot{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.6;border-top:1px dashed var(--line);padding-top:8px;}
+
+  /* 阶段总结 */
+  .stage-sum{font-size:12.5px;color:var(--body);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 13px;line-height:1.7;}
+  .warn-item{display:flex;gap:10px;font-size:12.5px;padding:10px 0;border-top:1px dashed var(--line);}
+  .warn-item:first-of-type{border-top:none;}
+  .warn-item b{font-size:11px;flex-shrink:0;color:var(--muted);font-weight:600;width:62px;}
+  .warn-item .c{color:var(--body);}
+
+  /* 时间线 */
+  .tl-item{display:flex;gap:11px;padding:11px 0;border-bottom:1px dashed var(--line);}
+  .tl-item:last-child{border-bottom:none;}
+  .tl-rail{position:relative;flex-shrink:0;}
+  .tl-ico{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;font-size:14px;}
+  .tl-rail::after{content:'';position:absolute;left:50%;top:38px;bottom:-12px;width:1px;background:var(--line);}
+  .tl-item:last-child .tl-rail::after{display:none;}
+  .tl-body{flex:1;min-width:0;padding-top:1px;}
+  .tl-body .h{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;}
+  .tl-body .h time{margin-left:auto;font-size:10px;color:var(--muted);font-weight:400;}
+  .tl-body .tag{font-size:10px;border-radius:6px;padding:1px 7px;margin-left:4px;}
+  .tl-body p{font-size:12px;color:var(--body);margin-top:4px;line-height:1.6;}
+  .tl-more{width:100%;border:none;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;color:var(--muted);cursor:pointer;margin-top:6px;}
+
+  /* 成绩 */
+  .g-mastery{display:flex;gap:8px;margin-bottom:12px;}
+  .g-mastery .m{flex:1;text-align:center;border-radius:13px;padding:11px 4px;}
+  .g-mastery .m b{font-size:17px;display:block;font-weight:800;}
+  .g-mastery .m span{font-size:10.5px;}
+  .m1{background:var(--green-bg);color:var(--green);} .m2{background:var(--gold-bg);color:var(--gold);} .m3{background:var(--red-bg);color:var(--red);}
+  .g-row{display:flex;align-items:center;gap:10px;font-size:12.5px;padding:10px 0;border-bottom:1px dashed var(--line);}
+  .g-row:last-child{border-bottom:none;}
+  .g-row .sub{width:46px;font-weight:600;flex-shrink:0;}
+  .g-row .track{flex:1;height:9px;background:var(--bg);border-radius:5px;overflow:hidden;}
+  .g-row .track i{display:block;height:100%;border-radius:5px;}
+  .g-row .pct{width:44px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+  /* 出勤课时 */
+  .att-stat{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .att-stat .s{flex:1 1 31%;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:13px;padding:10px 4px;}
+  .att-stat .s b{font-size:16px;display:block;font-weight:800;}
+  .att-stat .s span{font-size:10px;color:var(--muted);}
+  .hr-row{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:10px 0;border-bottom:1px dashed var(--line);}
+  .hr-row:last-child{border-bottom:none;}
+  .hr-row .dt{width:74px;color:var(--muted);flex-shrink:0;font-size:11.5px;}
+  .hr-row .cs{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--body);}
+  .hr-row .st{font-size:10.5px;border-radius:8px;padding:3px 8px;flex-shrink:0;font-weight:600;}
+  .hr-sum{font-size:11px;color:var(--muted);margin:10px 0 2px;}
+
+  /* 资料 */
+  .mat-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px dashed var(--line);}
+  .mat-row:last-child{border-bottom:none;}
+  .mat-ico{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:14px;flex-shrink:0;}
+  .mat-body{flex:1;min-width:0;}
+  .mat-body b{font-size:12.5px;display:block;}
+  .mat-body span{font-size:10.5px;color:var(--muted);}
+  .mat-dl{flex-shrink:0;font-size:10px;color:var(--accent-deep);background:var(--accent-bg);border:none;border-radius:8px;padding:5px 9px;cursor:pointer;font-weight:600;}
+
+  /* 成长动态 */
+  .mood-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .mood-grid .d{aspect-ratio:1;border-radius:9px;font-size:9.5px;color:var(--muted);display:grid;place-items:center;background:var(--bg);}
+  .mood-grid .d.good{background:var(--blue-bg);color:var(--blue);font-weight:600;}
+  .mood-grid .d.great{background:var(--green-bg);color:var(--green);font-weight:600;}
+  .mood-grid .d.ok{background:var(--gold-bg);color:var(--gold);font-weight:600;}
+  .mood-grid .d.low{background:var(--red-bg);color:var(--red);font-weight:600;}
+  .mood-grid .d.today{outline:2px solid var(--accent);}
+  .badge-row{display:flex;gap:10px;margin-top:4px;}
+  .badge{width:46px;height:46px;border-radius:50%;background:var(--gold-bg);color:var(--gold);display:grid;place-items:center;font-size:18px;border:1px dashed rgba(199,127,0,.4);}
+  .badge.off{opacity:.32;filter:grayscale(1);}
+
+  /* ============ 右侧说明 ============ */
+  .right{flex:1 1 580px;min-width:0;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow);}
+  .panel h2{font-size:15px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .panel h2 .no{width:22px;height:22px;border-radius:7px;background:var(--accent);color:#fff;font-size:12px;display:grid;place-items:center;flex-shrink:0;font-weight:700;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{text-align:left;color:var(--muted);font-weight:600;padding:7px 8px;border-bottom:1px solid var(--line);}
+  td{padding:8px;border-bottom:1px dashed var(--line);vertical-align:top;line-height:1.6;}
+  tr:last-child td{border-bottom:none;}
+  .st-new{color:var(--green);font-weight:700;}
+  .st-del{color:var(--red);}
+  .badge2{display:inline-block;font-size:10px;border-radius:6px;padding:2px 7px;margin-left:6px;font-weight:600;}
+  .b-merge{background:var(--gold-bg);color:var(--gold);}
+  .b-new{background:var(--green-bg);color:var(--green);}
+  .b-del{background:var(--red-bg);color:var(--red);}
+  .b-keep{background:var(--bg);color:var(--muted);}
+  .note{font-size:12.5px;color:var(--body);line-height:1.75;}
+  .note b{color:var(--ink);}
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;background:var(--accent-bg);color:var(--accent-deep);border:1px solid rgba(232,120,74,.25);border-radius:9px;padding:5px 11px;margin:3px 4px 3px 0;font-weight:600;}
+  .pill.g{background:var(--green-bg);color:var(--green);border-color:rgba(29,158,117,.3);}
+</style>
+</head>
+<body>
+
+<div class="doc-note">
+  <b>家长端改造设计稿 v2</b> · 供 UI 审查 · 模拟数据非真实 · 手机框可点击 6 个 Tab 体验 · <b>课时领先榜已按线上原版样式保留</b>
+</div>
+
+<div class="stage">
+
+  <!-- ============ 手机演示 ============ -->
+  <div class="phone">
+    <div class="phone-status"><span>9:41</span><span>5G · 100%</span></div>
+    <div class="app-head">
+      <div class="app-head-row">
+        <button class="back-btn">‹</button>
+        <div class="app-title">学生成长档案<small>牧哲学堂 · 家长端</small></div>
+        <button class="back-btn" style="opacity:0;pointer-events:none">‹</button>
+      </div>
+      <div class="child-switch">
+        <button class="on">马紫晨 · 初三</button>
+        <button>马子墨 · 初一</button>
+      </div>
+      <div class="tabs">
+        <button class="tab on" data-tab="overview">概览</button>
+        <button class="tab" data-tab="timeline">时间线</button>
+        <button class="tab" data-tab="grades">成绩分析</button>
+        <button class="tab" data-tab="hours">出勤课时</button>
+        <button class="tab" data-tab="materials">资料文件</button>
+        <button class="tab" data-tab="growth">成长动态</button>
+      </div>
+    </div>
+
+    <div class="phone-body">
+
+      <!-- ===== 概览 ===== -->
+      <section data-pane="overview">
+        <div class="card">
+          <h3>📊 学习概况</h3>
+          <div class="kpi4">
+            <div class="k"><b>1<small>次</small></b><span>累计课堂反馈</span></div>
+            <div class="k"><b>75<small>%</small></b><span>出勤率</span></div>
+            <div class="k"><b>314.6<small>h</small></b><span>剩余课时</span></div>
+            <div class="k"><b>9/26</b><span>学习周期</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📈 学习趋势 <span class="more">近 3 个月</span></h3>
+          <div class="trend-wrap">
+            <div class="trend-chart"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="hl"></i></div>
+            <div class="trend-badge"><b>保持稳定</b><span>近期表现稳定</span></div>
+          </div>
+        </div>
+
+        <!-- 课时领先榜 · 线上原版样式 -->
+        <div class="card lb-card">
+          <div class="lb-head">
+            <span class="lb-ico">↗</span>
+            <span class="lb-title">上课时长，谁在领先？</span>
+            <span class="lb-tag">马紫晨 · 本月</span>
+          </div>
+          <div class="lb-sub">与同班同学对比</div>
+
+          <div class="lb-banner">
+            <span class="ic">↑</span>
+            <div class="tx">
+              <b>鼓励 · 已超过班级一半</b>
+              <p>马紫晨同学，最近状态不错，课堂上总能看到你踏实学习的样子，节奏保持得很好。照这个势头走下去，理想的高中离你越来越近——要是再使一分劲，就更稳了。加油！</p>
+            </div>
+          </div>
+
+          <div class="lb-kpi">
+            <div class="k plain"><span>我的课时</span><b>4.2<small>小时</small></b></div>
+            <div class="k plain"><span>班级平均</span><b>3.6<small>小时</small></b></div>
+            <div class="k hot"><span>领先比例</span><b>55<small>%</small></b></div>
+          </div>
+
+          <div class="lb-chart">
+            <div class="grid-lines"><i></i><i></i><i></i><i></i></div>
+            <div style="position:relative;height:100%;">
+              <div class="lb-row"><span class="nm">同学A</span><div class="bar-wrap"><div class="bar" style="width:88%;background:rgba(232,120,74,.38)"><span>5.6h</span></div></div></div>
+              <div class="lb-row"><span class="nm">马紫晨</span><div class="bar-wrap"><div class="bar me" style="width:66%;background:#E8784A"><span>4.2h</span></div></div></div>
+              <div class="lb-row"><span class="nm">同学B</span><div class="bar-wrap"><div class="bar" style="width:66%;background:rgba(232,120,74,.22)"><span>4.2h</span></div></div></div>
+              <div class="lb-row"><span class="nm">同学C</span><div class="bar-wrap"><div class="bar" style="width:44%;background:rgba(232,120,74,.38)"><span>2.8h</span></div></div></div>
+              <div class="avg-line" style="left:55%;"><i>班级平均 3.6h</i></div>
+            </div>
+          </div>
+
+          <div class="lb-foot">* 课时按本月考勤结算口径累计，同学姓名已脱敏；对比结果仅供参考，请结合孩子实际情况看待。</div>
+        </div>
+
+        <div class="card">
+          <h3>📝 阶段总结</h3>
+          <div class="stage-sum">马紫晨同学本阶段共收到 1 条课堂反馈。近期学习表现保持稳定。阶段出勤率为 75%。当前未发现重复出现的重点问题。</div>
+        </div>
+
+        <div class="card">
+          <h3>🌟 近期成长表现</h3>
+          <div class="warn-item"><b>成长表现</b><div class="c">暂无足够的正向课堂记录</div></div>
+          <div class="warn-item"><b>需要提升</b><div class="c">暂无明显薄弱项记录，请继续保持。</div></div>
+        </div>
+
+        <div class="card">
+          <h3>💬 教师反馈精选</h3>
+          <div class="warn-item"><b>数学</b><div class="c">2026/9/26 · 胡思同<br>孩子理解能力不错，继续加强理解！</div></div>
+        </div>
+      </section>
+
+      <!-- ===== 时间线 ===== -->
+      <section data-pane="timeline" hidden>
+        <div class="card">
+          <h3>🗓 成长记录时间线 <span class="more">筛选 ▾</span></h3>
+          <div class="tl-item">
+            <div class="tl-rail"><div class="tl-ico" style="background:var(--blue-bg);color:var(--blue)">📝</div></div>
+            <div class="tl-body"><div class="h">课堂反馈 <span class="tag" style="background:var(--blue-bg);color:var(--blue)">课堂</span><time>2026/9/26</time></div><p>孩子理解能力不错，继续加强理解！</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-rail"><div class="tl-ico" style="background:var(--accent-bg);color:var(--accent-deep)">📄</div></div>
+            <div class="tl-body"><div class="h">试卷 <span class="tag" style="background:var(--accent-bg);color:var(--accent-deep)">学习</span><time>2026/9/20</time></div><p>数学单元测试卷 · 掌握率 72%</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-rail"><div class="tl-ico" style="background:var(--gold-bg);color:var(--gold)">🏅</div></div>
+            <div class="tl-body"><div class="h">徽章 <span class="tag" style="background:var(--gold-bg);color:var(--gold)">目标</span><time>2026/9/12</time></div><p>「全勤之星」</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-rail"><div class="tl-ico" style="background:var(--green-bg);color:var(--green)">📈</div></div>
+            <div class="tl-body"><div class="h">成绩 <span class="tag" style="background:var(--green-bg);color:var(--green)">成长</span><time>2026/9/5</time></div><p>阶段成绩 · 数学 86 / 语文 78</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-rail"><div class="tl-ico" style="background:var(--red-bg);color:var(--red)">❤️</div></div>
+            <div class="tl-body"><div class="h">成长反馈 <span class="tag" style="background:var(--red-bg);color:var(--red)">成长</span><time>2026/9/1</time></div><p>课堂专注度提升，作业完成质量好。</p></div>
+          </div>
+          <button class="tl-more">展开全部记录</button>
+        </div>
+      </section>
+
+      <!-- ===== 成绩分析 ===== -->
+      <section data-pane="grades" hidden>
+        <div class="card">
+          <h3>🎯 成绩分析 <span class="more">查看试卷</span></h3>
+          <div class="g-mastery">
+            <div class="m m1"><b>2</b><span>已掌握</span></div>
+            <div class="m m2"><b>3</b><span>需巩固</span></div>
+            <div class="m m3"><b>1</b><span>需重点练习</span></div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">试卷 3 份 · 掌握率 72% · 待突破 1 项</div>
+          <div class="g-row"><span class="sub">数学</span><span class="track"><i style="width:72%;background:var(--accent)"></i></span><span class="pct">72%</span></div>
+          <div class="g-row"><span class="sub">语文</span><span class="track"><i style="width:68%;background:var(--gold)"></i></span><span class="pct">68%</span></div>
+          <div class="g-row"><span class="sub">英语</span><span class="track"><i style="width:55%;background:var(--red)"></i></span><span class="pct">55%</span></div>
+        </div>
+      </section>
+
+      <!-- ===== 出勤课时 ===== -->
+      <section data-pane="hours" hidden>
+        <div class="card">
+          <h3>🕐 出勤与课时 <span class="more">本月</span></h3>
+          <div class="att-stat">
+            <div class="s"><b>8</b><span>出勤</span></div>
+            <div class="s"><b>1</b><span>请假</span></div>
+            <div class="s"><b>0</b><span>旷课</span></div>
+            <div class="s"><b>1</b><span>补课</span></div>
+            <div class="s"><b>0</b><span>扣课</span></div>
+            <div class="s"><b>314.6h</b><span>当前课时</span></div>
+          </div>
+          <div class="hr-sum">课时记录（按考勤结算口径）</div>
+          <div class="hr-row"><span class="dt">2026/9/26</span><span class="cs">初三数学 · 周六冲刺班</span><span class="st" style="background:var(--green-bg);color:var(--green)">出勤 +1.4h</span></div>
+          <div class="hr-row"><span class="dt">2026/9/24</span><span class="cs">一对一冲刺 · 英语</span><span class="st" style="background:var(--green-bg);color:var(--green)">出勤 +1h</span></div>
+          <div class="hr-row"><span class="dt">2026/9/22</span><span class="cs">初三数学 · 周六冲刺班</span><span class="st" style="background:var(--gold-bg);color:var(--gold)">请假 0</span></div>
+          <div class="hr-row"><span class="dt">2026/9/20</span><span class="cs">初三语文 · 周六冲刺班</span><span class="st" style="background:var(--blue-bg);color:var(--blue)">补课 +1h</span></div>
+          <div class="hr-row"><span class="dt">2026/9/19</span><span class="cs">初三数学 · 周六冲刺班</span><span class="st" style="background:var(--green-bg);color:var(--green)">出勤 +1.4h</span></div>
+        </div>
+      </section>
+
+      <!-- ===== 资料文件 ===== -->
+      <section data-pane="materials" hidden>
+        <div class="card">
+          <h3>📁 资料文件 <span class="more">按科目</span></h3>
+          <div class="mat-row"><div class="mat-ico" style="background:var(--accent-bg);color:var(--accent-deep)">📄</div><div class="mat-body"><b>初三数学 · 二次函数讲义</b><span>周六冲刺班 · 2026/9/26</span></div><button class="mat-dl">下载</button></div>
+          <div class="mat-row"><div class="mat-ico" style="background:var(--blue-bg);color:var(--blue)">📑</div><div class="mat-body"><b>英语 Unit3 词汇清单</b><span>一对一冲刺 · 2026/9/24</span></div><button class="mat-dl">下载</button></div>
+          <div class="mat-row"><div class="mat-ico" style="background:var(--green-bg);color:var(--green)">📊</div><div class="mat-body"><b>本周学情报告 PDF</b><span>系统生成 · 2026/9/26</span></div><button class="mat-dl">查看</button></div>
+          <div class="mat-row"><div class="mat-ico" style="background:var(--gold-bg);color:var(--gold)">📋</div><div class="mat-body"><b>下节课讲义预告</b><span>初三数学 · 2026/10/3</span></div><button class="mat-dl">预览</button></div>
+        </div>
+      </section>
+
+      <!-- ===== 成长动态 ===== -->
+      <section data-pane="growth" hidden>
+        <div class="card">
+          <h3>📅 情绪日历 <span class="more">本月</span></h3>
+          <div class="mood-grid">
+            <div class="d">一</div><div class="d">二</div><div class="d">三</div><div class="d">四</div><div class="d">五</div><div class="d">六</div><div class="d">日</div>
+            <div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d low">1</div>
+            <div class="d ok">2</div><div class="d good">3</div><div class="d great">4</div><div class="d"></div><div class="d good">6</div><div class="d great today">7</div><div class="d"></div>
+            <div class="d"></div><div class="d good">9</div><div class="d"></div><div class="d ok">11</div><div class="d great">12</div><div class="d"></div><div class="d"></div>
+            <div class="d"></div><div class="d great">15</div><div class="d"></div><div class="d"></div><div class="d good">18</div><div class="d"></div><div class="d"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>🏆 成就徽章墙</h3>
+          <div class="badge-row">
+            <div class="badge">🥇</div><div class="badge">📖</div><div class="badge off">✏️</div><div class="badge off">🎯</div><div class="badge off">⭐</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>✨ 成长动态</h3>
+          <div class="tl-item">
+            <div class="tl-rail"><div class="tl-ico" style="background:var(--gold-bg);color:var(--gold)">⭐</div></div>
+            <div class="tl-body"><div class="h">表现反馈 · 胡思同<time>2026/9/26</time></div><p>课堂专注度提升，作业完成质量好。</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-rail"><div class="tl-ico" style="background:var(--blue-bg);color:var(--blue)">💬</div></div>
+            <div class="tl-body"><div class="h">课堂反馈 · 胡思同<time>2026/9/26</time></div><p>孩子理解能力不错，继续加强理解！</p></div>
+          </div>
+        </div>
+      </section>
+
+      <div style="margin-top:14px;font-size:11px;color:var(--muted);text-align:center;border-top:1px dashed var(--line);padding-top:12px;">
+        底部 Tab 不变：首页 · 课堂反馈 · 晚托作业 · 通知 · 更多
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 右侧说明 ============ -->
+  <div class="right">
+
+    <div class="panel">
+      <h2><span class="no">1</span> 改造范围（家长端）· v2 修订</h2>
+      <table>
+        <tr><th>页面</th><th>处理</th><th>去向</th></tr>
+        <tr><td>成长档案 archive</td><td>重构为 6 Tab 总档案页</td><td class="st-new">导航「成长档案」→ 新页</td></tr>
+        <tr><td>课时领先榜 HoursLeaderboard</td><td><b>线上原版样式保留</b>（标题/鼓励横幅/KPI三卡/横向条形图+班级平均线）</td><td class="st-new">新档案页「概览」Tab 原样嵌入</td></tr>
+        <tr><td>首页讲义预告 ParentLessonPreview</td><td><b>保留不动</b>（首页逻辑不变）</td><td class="st-new">首页照常显示</td></tr>
+        <tr><td>学生成长报告 growth-report</td><td>并入「概览」Tab</td><td class="st-del">删除独立页，首页按钮改指新页</td></tr>
+        <tr><td>学生档案 students/[id]/archive</td><td>内容并入各 Tab</td><td class="st-del">删除独立页</td></tr>
+        <tr><td>成长动态 performance</td><td>→ 「成长动态」Tab</td><td class="st-del">删除独立页</td></tr>
+        <tr><td>成绩分析 grades</td><td>→ 「成绩分析」Tab</td><td class="st-del">删除独立页</td></tr>
+        <tr><td>考勤记录 attendance</td><td>→ 「出勤课时」Tab</td><td class="st-del">删除独立页</td></tr>
+        <tr><td>课时明细 hour-records</td><td>内容并入「出勤课时」Tab</td><td class="st-new">导航保留快捷入口</td></tr>
+        <tr><td>讲义预告独立页 lesson-previews</td><td>无入口孤儿页</td><td class="st-del">删除（首页组件保留）</td></tr>
+        <tr><td>缴费账单 fees</td><td>页面保留</td><td class="st-new">导航「家校服务」补入口</td></tr>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2><span class="no">2</span> 导航变化</h2>
+      <div style="font-size:12.5px;line-height:2.1;color:var(--body);">
+        <b>孩子学习</b>：课程表 · 课堂反馈 · 晚托作业 · <span style="color:var(--green);font-weight:700">成长档案（新 6 Tab 页）</span> · 教师信息<br>
+        <b>家校服务</b>：通知 · 我的留言 · 请假 · 就餐安排 · <span style="color:var(--green);font-weight:700">课时与考勤（直达档案 Tab）</span> · <span style="color:var(--green);font-weight:700">缴费账单（新增）</span><br>
+        <b>其余组不变</b>：升学服务 / 学习工具 / 账户与服务
+      </div>
+      <div style="margin-top:12px;">
+        <span class="pill g">统一入口：首页按钮与导航都指向新档案页</span>
+        <span class="pill">课时领先榜原版嵌入「概览」</span>
+        <span class="pill">首页讲义预告保留不动</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="no">3</span> 性能优化（随本次部署）</h2>
+      <div class="note">
+        <b>已生效</b>：nginx HTTP/2、连接复用、微信缓存修复。<br>
+        <b>本次代码</b>：未读通知轮询 5s→30s（家长端+教师端）、档案合并后减少重复取数、删除孤儿页减少路由体积。
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="no">4</span> 请确认</h2>
+      <table>
+        <tr><th>#</th><th>问题</th><th>建议</th></tr>
+        <tr><td>1</td><td>课时领先榜按线上原版嵌入「概览」，不再简化——是否OK？</td><td class="st-new">OK</td></tr>
+        <tr><td>2</td><td>首页讲义预告完全不动——是否OK？</td><td class="st-new">OK</td></tr>
+        <tr><td>3</td><td>导航保留「课时与考勤」快捷入口直达档案 Tab</td><td class="st-new">保留</td></tr>
+        <tr><td>4</td><td>缴费账单补入「家校服务」导航</td><td class="st-new">补入</td></tr>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var tabs = document.querySelectorAll('.tab');
+  var panes = document.querySelectorAll('[data-pane]');
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      tabs.forEach(function(t){ t.classList.remove('on'); });
+      tab.classList.add('on');
+      var key = tab.getAttribute('data-tab');
+      panes.forEach(function(p){ p.hidden = p.getAttribute('data-pane') !== key; });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

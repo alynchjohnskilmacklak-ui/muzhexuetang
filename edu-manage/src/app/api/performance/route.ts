@@ -25,7 +25,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   const user = session?.user as { id?: string; email?: string | null; name?: string | null; role?: string; division?: string | null } | undefined
   if (!user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
- 
+
   const prisma = await getRequestPrisma()
   if (!['admin', 'teacher', 'parent'].includes(user.role || '')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
@@ -81,7 +81,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       where,
       include: {
         student: { select: { id: true, name: true, grade: true, remainHours: true } },
-        teacher: { select: { id: true, name: true, avatar: true } },
+        teacher: { select: { id: true, name: true, avatar: true, gender: true } },
         reactions: true,
         comments: { include: { author: { select: { name: true, role: true } } }, orderBy: { createdAt: 'desc' } },
         badges: true,
@@ -93,15 +93,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
     prisma.performancePost.count({ where }),
   ])
 
-  if (user.role === 'parent') {
-    const unreadIds = posts.filter((post) => !post.isReadByParent).map((post) => post.id)
-    if (unreadIds.length) {
-      await prisma.performancePost.updateMany({ where: { id: { in: unreadIds } }, data: { isReadByParent: true } })
-    }
-  }
-
   return NextResponse.json({ posts, total, page, limit }, {
-    headers: { 'Cache-Control': 'private, max-age=60, stale-while-revalidate=120' },
+    headers: { 'Cache-Control': 'private, no-store, max-age=0' },
   })
 })
 

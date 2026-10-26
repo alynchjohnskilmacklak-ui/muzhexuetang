@@ -1,32 +1,45 @@
-/**
- * 教师默认头像轮询工具
- * - 男：固定 teacher-male.png
- * - 女：13 张女生头像按名单顺序轮询（avatar-f-01 .. avatar-f-13），超过 13 循环
- */
-export const FEMALE_AVATAR_COUNT = 13
+import { normalizeAvatarUrl } from '@/lib/upload-url'
 
-/** 无头像女生教师名单（按用户给定顺序，用于"前 13 人不重复"轮询） */
+/** 男教师使用固定照片，女教师在已放置的 12 张照片中稳定轮换。 */
+export const FEMALE_AVATAR_COUNT = 12
+export const DEFAULT_TEACHER_AVATAR = '/avatars/teacher-male.png'
+
 const FEMALE_ORDER = [
-  '张思雨', '白婼鑫', '徐家茹', '牛钰丹', '赵依梦', '李佳蕊', '范芳菲',
-  '张佳涵', '朱梦', '王怡烁', '陈佳丽', '苏琳曼', '任紫莹', '王田雪', '韩双双',
+  '张思雨', '白婼鑫', '徐家茹', '牛钰丹', '赵依梦', '李佳蕊',
+  '范芳菲', '张佳涵', '朱梦', '王怡烁', '陈佳丽', '苏琳曼',
 ]
 
-function nameHash(name: string): number {
-  let h = 0
-  for (let i = 0; i < name.length; i++) {
-    h = (h * 31 + name.charCodeAt(i)) >>> 0
+function stableHash(value: string): number {
+  let hash = 0
+  for (let index = 0; index < value.length; index++) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0
   }
-  return h
+  return hash
 }
 
-/** 无头像女教师的默认头像 URL（轮询） */
-export function femaleDefaultAvatar(name: string): string {
-  const idx = FEMALE_ORDER.indexOf(name)
-  const n = (idx >= 0 ? idx : nameHash(name)) % FEMALE_AVATAR_COUNT
-  return `/avatars/f/avatar-f-${String(n + 1).padStart(2, '0')}.png`
+function femaleAvatarByKey(key?: string | null): string {
+  const value = key?.trim() || ''
+  const listedIndex = FEMALE_ORDER.indexOf(value)
+  const index = (listedIndex >= 0 ? listedIndex : stableHash(value)) % FEMALE_AVATAR_COUNT
+  return `/avatars/f/avatar-f-${String(index + 1).padStart(2, '0')}.png`
 }
 
-/** 无头像教师按性别返回默认头像 URL */
-export function genderDefaultAvatar(gender: string | null | undefined, name: string): string {
-  return gender === '男' ? '/avatars/teacher-male.png' : femaleDefaultAvatar(name)
+/** Use the selected archive portrait first; otherwise keep the established gender rotation. */
+export function getTeacherAvatarUrl(
+  avatar?: string | null,
+  gender?: string | null,
+  rotationKey?: string | null,
+): string {
+  return normalizeAvatarUrl(avatar) || genderDefaultAvatar(gender, rotationKey)
+}
+
+/** @deprecated Use getTeacherAvatarUrl with the saved profile avatar. */
+export function femaleDefaultAvatar(key?: string): string {
+  return femaleAvatarByKey(key)
+}
+
+/** @deprecated Use getTeacherAvatarUrl with the saved profile avatar. */
+export function genderDefaultAvatar(gender?: string | null, key?: string | null): string {
+  const isFemale = gender === 'F' || gender === '女' || gender === 'female'
+  return isFemale ? femaleAvatarByKey(key) : DEFAULT_TEACHER_AVATAR
 }
