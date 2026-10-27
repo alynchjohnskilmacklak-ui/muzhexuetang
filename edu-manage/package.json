@@ -104,6 +104,9 @@
     "ui-skills": "^0.2.4",
     "vitest": "^4.1.8"
   },
+  "overrides": {
+    "wrangler": "4.152.0"
+  },
   "engines": {
     "node": ">=20.9.0"
   }

@@ -58,12 +58,15 @@ COPY --from=builder --chown=node:node /app/scripts/backup-db.sh ./scripts/backup
 COPY --from=builder --chown=node:node /app/scripts/backup-uploads.sh ./scripts/backup-uploads.sh
 COPY --from=builder --chown=node:node /app/scripts/compress-pdf.py ./scripts/compress-pdf.py
 # ali-oss / mammoth 在代码中为运行时动态 require/import，Next standalone 打包不会自动收录，
-# 需在 runner 镜像内显式补齐（版本与 package.json 保持一致）。standalone 内无 package-lock.json，
+# 需在 runner 镜像内补齐（版本与 package.json 保持一致）。standalone 内无 package-lock.json，
 # 需先从 deps 复制，否则 npm arborist 无法解析依赖树。
+# 注意：不能用 `npm install <pkg>` 追加——它会重解析依赖树，破坏 lock 中 wrangler 嵌套
+# esbuild 0.27.0 的锁定关系（被提升/替换为 0.28.0 触发 install.js 版本校验失败）。
+# npm ci --omit=dev 严格按 lockfile 安装全部 production 依赖（含 ali-oss/mammoth），确定性最高。
 COPY --from=deps --chown=node:node /app/package.json /app/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
   npm config set registry "${NPM_REGISTRY}" \
-  && unset NODE_OPTIONS && npm install --omit=dev --no-audit --no-fund ali-oss@^6.23.0 mammoth@^1.12.0
+  && unset NODE_OPTIONS && npm ci --omit=dev --no-audit --no-fund
 RUN mkdir -p /app/.next/cache && chown -R node:node /app/.next/cache
 USER node
 EXPOSE 3000
