@@ -900,7 +900,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                   {profile.study.mastery.reviewPct > 0 && <div style={{ width: `${profile.study.mastery.reviewPct}%`, background: '#EF9F27' }} />}
                   {profile.study.mastery.weakPct > 0 && <div style={{ width: `${profile.study.mastery.weakPct}%`, background: '#E24B4A' }} />}
                 </div>
-                <div style={{ fontSize: 10, color: '#7A869A', display: 'flex', gap: 16 }}>
+                <div style={{ fontSize: 12, color: '#7A869A', display: 'flex', gap: 16 }}>
                   <span>▪ 已掌握 {profile.study.mastery.masteredPct}%</span>
                   <span>▪ 需复习 {profile.study.mastery.reviewPct}%</span>
                   <span>▪ 薄弱 {profile.study.mastery.weakPct}%</span>

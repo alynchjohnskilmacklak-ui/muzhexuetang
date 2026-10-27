@@ -261,6 +261,7 @@ export default function TeacherSalaryPage() {
               loading={isLoading}
               pagination={{ pageSize: 20, hideOnSinglePage: true }}
               size="small"
+              scroll={{ x: 860 }}
               locale={{ emptyText: '暂无薪资记录' }}
             />
           )}

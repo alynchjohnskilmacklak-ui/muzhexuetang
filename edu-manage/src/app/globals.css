@@ -108,6 +108,11 @@
 
   /* ---- Spacing ---- */
   --spacing-section: 96px;
+  /* 家长端页面 padding 收敛刻度（12/14/16/24 四档） */
+  --spacing-xs: 12px;
+  --spacing-sm: 14px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
 }
 
 /* ---- Base Layer ---- */
@@ -338,7 +343,7 @@ body {
   .ant-drawer-close { padding: 12px !important; }
   .ant-statistic-content-value { font-size: 22px !important; }
   .ant-statistic-title { font-size: 12px !important; }
-  .ant-tag { font-size: 11px !important; }
+  .ant-tag { font-size: 12px !important; }
   .ant-list-item { padding: 10px 0 !important; }
 }
 

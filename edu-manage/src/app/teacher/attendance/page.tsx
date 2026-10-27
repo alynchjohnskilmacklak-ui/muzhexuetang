@@ -541,12 +541,15 @@ export default function TeacherAttendancePage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                           <span style={{ fontSize: 14, fontWeight: 600, color: '#1a1201', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
-                          {isSvip && <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 99, color: '#A8873D', background: '#FBF3DE' }}>SVIP</span>}
-                          {isVip && !isSvip && <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 99, color: '#D4622A', background: '#FFF1E8' }}>VIP</span>}
+                          {isSvip && <span style={{ fontSize: 12, fontWeight: 700, padding: '1px 6px', borderRadius: 99, color: '#A8873D', background: '#FBF3DE' }}>SVIP</span>}
+                          {isVip && !isSvip && <span style={{ fontSize: 12, fontWeight: 700, padding: '1px 6px', borderRadius: 99, color: '#D4622A', background: '#FFF1E8' }}>VIP</span>}
                         </div>
                         <div style={{ fontSize: 11, color: isLowRemaining ? '#E24B4A' : '#9a8e7a' }}>
                           {lessonDetail?.intensiveMode === 'INTENSIVE' ? '审核后按实际分钟计入' : `余${remaining.text}${isLowRemaining ? ' ⚠️' : ''}`}
                         </div>
+                        {s.status === 'ABSENT' && (
+                          <div style={{ fontSize: 11, color: '#B42318', marginTop: 2 }}>原记录：缺勤（按缺课处理，非请假）</div>
+                        )}
                       </div>
                       {/* Buttons */}
                       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
@@ -555,7 +558,7 @@ export default function TeacherAttendancePage() {
                           disabled={intensiveSettlementLocked}
                           onClick={() => setAttendance(s.studentId, 'PRESENT')}
                           style={{
-                            minWidth: 52, minHeight: 36, borderRadius: 8, border: '1px solid',
+                            minWidth: 52, minHeight: isMobile ? 44 : 36, borderRadius: 8, border: '1px solid',
                             borderColor: status === 'PRESENT' ? '#1D9E75' : '#e5e0d8',
                             background: status === 'PRESENT' ? '#1D9E75' : '#fff',
                             color: status === 'PRESENT' ? '#fff' : '#6b5d48',
@@ -569,7 +572,7 @@ export default function TeacherAttendancePage() {
                             if (!isLeave) toast.info(`${s.name} 已请假，自动排除就餐和反馈`)
                           }}
                           style={{
-                            minWidth: 52, minHeight: 36, borderRadius: 8, border: '1px solid',
+                            minWidth: 52, minHeight: isMobile ? 44 : 36, borderRadius: 8, border: '1px solid',
                             borderColor: status === 'LEAVE' ? '#BA7517' : '#e5e0d8',
                             background: status === 'LEAVE' ? '#BA7517' : '#fff',
                             color: status === 'LEAVE' ? '#fff' : '#6b5d48',
@@ -581,7 +584,7 @@ export default function TeacherAttendancePage() {
                             disabled={intensiveSettlementLocked || isLeave}
                             onClick={() => toggleMeal(s.studentId)}
                             style={{
-                              minWidth: 44, minHeight: 36, borderRadius: 8, border: '1px solid',
+                              minWidth: 44, minHeight: isMobile ? 44 : 36, borderRadius: 8, border: '1px solid',
                               borderColor: mealStudentIds.has(s.studentId) ? '#9A4622' : '#e5e0d8',
                               background: mealStudentIds.has(s.studentId) ? '#9A4622' : '#fff',
                               color: mealStudentIds.has(s.studentId) ? '#fff' : '#6b5d48',

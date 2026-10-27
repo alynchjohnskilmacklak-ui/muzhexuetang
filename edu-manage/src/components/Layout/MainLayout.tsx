@@ -16,6 +16,7 @@ const { Content } = Layout
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile()
+  const isNarrow = useIsMobile(1024)
   const [collapsed, setCollapsed] = useState(false)
   const { data: session } = useSession()
   useKickListener()
@@ -33,7 +34,10 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     if (saved !== null) setCollapsed(saved === 'true')
   }, [])
 
-  if (isMobile === null) return <LayoutHydrationFallback />
+  if (isMobile === null || isNarrow === null) return <LayoutHydrationFallback />
+
+  // 平板区间（768–1023px）强制 icon-only Sider，避免 220px 挤压内容
+  const effectiveCollapsed = isNarrow ? true : collapsed
 
   if (isMobile) {
     return (
@@ -54,9 +58,9 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Suspense fallback={<div style={{ width: 72, height: '100vh', position: 'fixed', left: 0, top: 0, background: '#fff', borderRight: '1px solid rgba(0,0,0,.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Spin /></div>}>
-        <Sidebar collapsed={collapsed} onCollapse={setCollapsed} />
+        <Sidebar collapsed={effectiveCollapsed} onCollapse={setCollapsed} />
       </Suspense>
-      <Layout style={{ marginLeft: collapsed ? 72 : 220, transition: 'margin-left 0.2s', background: 'var(--color-canvas)' }}>
+      <Layout style={{ marginLeft: effectiveCollapsed ? 72 : 220, transition: 'margin-left 0.2s', background: 'var(--color-canvas)' }}>
         <TopNav />
         <Content style={{ padding: 24, minHeight: 'calc(100vh - 56px)' }}>
           {children}

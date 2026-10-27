@@ -173,7 +173,7 @@ function SchoolDetailContent({ school, onClose }: { school: School; onClose: () 
             <Image src="/images/logo-small.png" alt="牧哲学堂" width={40} height={40} style={{ borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} preview={false} />
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.3 }}>{school.name}</div>
-              <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.72)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,.72)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {[school.category, school.location].filter(Boolean).join(' · ')}
               </div>
             </div>
