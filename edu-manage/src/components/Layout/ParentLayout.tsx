@@ -38,6 +38,7 @@ import { isNavigationActive } from '@/lib/navigation-active'
 import useSWR from 'swr'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { summarizeUnreadByType } from '@/constants/notification-types'
 import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
@@ -124,6 +125,9 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     messages: Number(unreadData?.messages || 0),
   }
   const totalUnread = unread.papers + unread.posts + unread.notifications + unread.feedbacks + unread.messages
+
+  // 未读通知按类型分组摘要（如：课堂反馈3·考勤2·试卷1…）
+  const notificationSummary = summarizeUnreadByType(unreadData?.notificationsByType as Record<string, number> | undefined)
 
   const userMenu = {
     items: [
@@ -247,9 +251,14 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
                 width: '100%', padding: '10px 14px', borderRadius: 10,
                 background: 'rgba(232,120,74,.08)', border: '1px solid rgba(232,120,74,.2)',
                 color: '#E8784A', fontWeight: 600, fontSize: 14, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap',
               }}>
                 <CheckOutlined /> 一键已读（{totalUnread}条未读）
+                {notificationSummary.parts.length > 0 && (
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(232,120,74,.75)', whiteSpace: 'nowrap' }}>
+                    {notificationSummary.parts.join(' · ')}
+                  </span>
+                )}
               </button>
             )}
           </Space>

@@ -18,6 +18,8 @@ model User {
   avatar              String?
   status              String    @default("active")
   wxpusherUid         String?
+  qywxUserId          String?
+  qywxExternalUserId  String?
   teacherId           String?   @unique
   currentSessionToken String?
   lastLoginAt         DateTime?

@@ -8,15 +8,19 @@ import {
 
 export const dynamic = 'force-dynamic'
 
-export default async function ParentNotificationsPage() {
+export default async function ParentNotificationsPage({ searchParams }: { searchParams?: Promise<{ archived?: string }> }) {
   const session = await auth()
   if (!session?.user) redirect('/login')
   const userId = (session.user as { id: string }).id
   const db = await getRequestPrisma()
+  const query = await searchParams
+  const archived = query?.archived === '1'
 
   const [notifications, unreadCount] = await Promise.all([
     db.notification.findMany({
-      where: { userId, ...visibleNotificationWhere },
+      where: archived
+        ? { userId, status: 'ARCHIVED', deletedAt: null }
+        : { userId, ...visibleNotificationWhere },
       orderBy: { createdAt: 'desc' },
       take: 100,
     }),
@@ -69,6 +73,7 @@ export default async function ParentNotificationsPage() {
       notifications={JSON.parse(JSON.stringify(enriched))}
       unreadCount={unreadCount}
       userId={userId}
+      archived={archived}
     />
   )
 }

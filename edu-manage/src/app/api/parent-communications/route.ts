@@ -4,6 +4,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { activeEnrollmentWhere, visibleClassGroupWhere, visibleStudentWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
+import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -214,18 +215,16 @@ export const POST = apiHandler(async (req: NextRequest) => {
       select: { userId: true, studentId: true, title: true },
     })
     if (!target) return NextResponse.json({ error: '通知不存在' }, { status: 404 })
-    const notification = await prisma.notification.create({
-      data: {
-        userId: target.userId,
-        studentId: target.studentId,
-        senderId: user.id,
-        type: 'INFO',
-        relatedType: 'ADMIN_REPLY',
-        relatedId: targetId,
-        title: `管理端回复：${target.title}`.slice(0, 80),
-        content,
-        href: '/parent/notifications',
-      },
+    const notification = await createNotification(prisma, {
+      userId: target.userId,
+      studentId: target.studentId,
+      senderId: user.id,
+      type: 'INFO',
+      relatedType: 'ADMIN_REPLY',
+      relatedId: targetId,
+      title: `管理端回复：${target.title}`.slice(0, 80),
+      content,
+      href: '/parent/notifications',
     })
     revalidatePath('/parent/notifications')
     return NextResponse.json(notification, { status: 201 })

@@ -9,6 +9,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
 import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
 import { createParentFeedbackMessage } from '@/lib/feedback-conversation'
+import { createNotification } from '@/lib/notifications'
 import {
   canViewFeedback,
   filterStudentRatingsForStudents,
@@ -458,17 +459,14 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
         const parentUserId = student.parentId || student.parentUserId
         if (!parentUserId || notifiedParentIds.has(parentUserId)) continue
         notifiedParentIds.add(parentUserId)
-        await prisma.notification.create({
-          data: {
-            userId: parentUserId,
-            type: 'CLASSROOM_FEEDBACK',
-            title: '老师回复了课堂反馈',
-            content: `${student.name}的课堂反馈有了新回复`,
-            link: `/parent/class-feedback/${id}`,
-            relatedType: 'CLASSROOM_FEEDBACK',
-            relatedId: id,
-            href: `/parent/class-feedback/${id}`,
-          },
+        await createNotification(prisma, {
+          userId: parentUserId,
+          type: 'CLASSROOM_FEEDBACK',
+          title: '老师回复了课堂反馈',
+          content: `${student.name}的课堂反馈有了新回复`,
+          relatedType: 'CLASSROOM_FEEDBACK',
+          relatedId: id,
+          href: `/parent/class-feedback/${id}`,
         })
       }
     }

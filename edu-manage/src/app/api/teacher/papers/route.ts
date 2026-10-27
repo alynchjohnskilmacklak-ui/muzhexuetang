@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,17 +73,15 @@ export const POST = apiHandler(async (request: NextRequest) => {
         created.push(paper)
 
         if (publish && (student.parentId || student.parentUserId)) {
-          await tx.notification.create({
-            data: {
-              userId: student.parentId || student.parentUserId!,
-              title: `${teacher.name}老师上传了新试卷`,
-              content: `${subject} · ${title}`,
-              type: 'PAPER_PUBLISHED',
-              link: '/parent/grades',
-              relatedType: 'EXAM_PAPER',
-              relatedId: paper.id,
-              href: `/parent/archive?paperId=${paper.id}`,
-            },
+          await createNotification(tx, {
+            userId: student.parentId || student.parentUserId!,
+            title: `${teacher.name}老师上传了新试卷`,
+            content: `${subject} · ${title}`,
+            type: 'PAPER_PUBLISHED',
+            link: '/parent/grades',
+            relatedType: 'EXAM_PAPER',
+            relatedId: paper.id,
+            href: `/parent/archive?paperId=${paper.id}`,
           })
         }
 

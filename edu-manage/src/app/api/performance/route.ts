@@ -10,6 +10,7 @@ import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
 import { resolveLearningRecordTermId } from '@/lib/learning-record-term'
+import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -180,15 +181,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
     const parentUserId = student.parentId || student.parentUserId
     if (parentUserId) {
-      await prisma.notification.create({
-        data: {
-          userId: parentUserId,
-          type: 'PERFORMANCE_UPDATE',
-          href: `/parent/archive?feedbackId=${post.id}`,
-          title: `${student.name}有新的课堂表现`,
-          content: content.slice(0, 60),
-          link: '/parent/archive',
-        },
+      await createNotification(prisma, {
+        userId: parentUserId,
+        type: 'PERFORMANCE_UPDATE',
+        href: `/parent/archive?feedbackId=${post.id}`,
+        title: `${student.name}有新的课堂表现`,
+        content: content.slice(0, 60),
+        link: '/parent/archive',
       })
       await prisma.performancePost.update({ where: { id: post.id }, data: { notifySent: true } })
     }

@@ -201,6 +201,10 @@ export function ParentDashboardClient({
     : todayFeedbacks.filter(feedback => feedback.studentIds?.includes(activeChildId))
   const visibleUnreadCount = activeNotifications.filter(notification => !notification.read).length
   const unreadCount = Number(unreadData?.notifications ?? visibleUnreadCount)
+  // 待处理通知 = 全类别未读合计（试卷+表现+通知+反馈+留言），与侧栏"一键已读"口径一致
+  const totalUnread = unreadData
+    ? Number(unreadData.papers ?? 0) + Number(unreadData.posts ?? 0) + Number(unreadData.notifications ?? 0) + Number(unreadData.feedbacks ?? 0) + Number(unreadData.messages ?? 0)
+    : unreadCount
   const activeLesson = todayLessons.find(lesson => lessonStatus(lesson) === '上课中')
   const pendingLesson = todayLessons.find(lesson => lessonStatus(lesson) === '待老师确认')
   const nextLesson = todayLessons.find(lesson => lessonStatus(lesson) === '待上课')
@@ -342,7 +346,7 @@ export function ParentDashboardClient({
         <div className="parent-dashboard-hero__stats">{[
           { value: todayLessons.length, label: '今日课次' },
           { value: activeAttendanceRate == null ? '暂无' : `${activeAttendanceRate}%`, label: '本月出勤' },
-          { value: unreadCount, label: '待处理通知' },
+          { value: totalUnread, label: '待处理通知' },
         ].map(item => <div key={item.label} style={{ background: heroTheme.statBg }}><strong>{item.value}</strong><span>{item.label}</span></div>)}</div>
         <div className="parent-dashboard-hero__status"><span>今日状态：<strong>{todayStatus}</strong></span><span>更新于 {latestUpdate}</span></div>
         {activeStudent?.id && <Button icon={<RiseOutlined />} onClick={() => router.push(`/parent/archive?studentId=${activeStudent.id}`)}>查看成长档案</Button>}

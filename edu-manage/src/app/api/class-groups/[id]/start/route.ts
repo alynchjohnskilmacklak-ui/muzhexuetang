@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
+import { createManyNotifications } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,15 +56,13 @@ export const POST = apiHandler(async (_req: NextRequest, { params }: { params: P
         .filter((parentId): parentId is string => Boolean(parentId)))]
 
       if (parentIds.length) {
-        await tx.notification.createMany({
-          data: parentIds.map((parentId) => ({
-            userId: parentId,
-            type: 'CLASS_START',
-            href: '/parent/schedule',
-            title: `${group.name} 已开班`,
-            content: `课程：${group.course.name}；首次上课：${firstLesson.lessonDate.toLocaleDateString('zh-CN')} ${firstLesson.startTime}-${firstLesson.endTime}；授课团队：${teacherNames}${group.room?.name ? `；教室：${group.room.name}` : ''}。`,
-          })),
-        })
+        await createManyNotifications(tx, parentIds.map((parentId) => ({
+          userId: parentId,
+          type: 'CLASS_START',
+          href: '/parent/schedule',
+          title: `${group.name} 已开班`,
+          content: `课程：${group.course.name}；首次上课：${firstLesson.lessonDate.toLocaleDateString('zh-CN')} ${firstLesson.startTime}-${firstLesson.endTime}；授课团队：${teacherNames}${group.room?.name ? `；教室：${group.room.name}` : ''}。`,
+        })))
       }
 
       await tx.activityLog.create({

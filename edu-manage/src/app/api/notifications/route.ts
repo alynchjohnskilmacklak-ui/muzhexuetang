@@ -5,6 +5,7 @@ import { sendWxMessage, buildFeedbackContent, buildSafeHomeContent, buildPushPay
 import { visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
+import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -101,16 +102,14 @@ export const POST = apiHandler(async (req: NextRequest) => {
       : content
 
   // Create notification record
-  const notification = await prisma.notification.create({
-    data: {
-      userId: parentUserId || senderId,
-      title: notificationTitle,
-      content: notificationContent,
-      type,
-      studentId: student.id,
-      senderId,
-      pushStatus: 'none',
-    },
+  const notification = await createNotification(prisma, {
+    userId: parentUserId || senderId,
+    title: notificationTitle,
+    content: notificationContent,
+    type,
+    studentId: student.id,
+    senderId,
+    pushStatus: 'none',
   })
 
   // Handle WxPusher push

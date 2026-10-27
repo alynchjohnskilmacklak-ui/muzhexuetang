@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client'
 import { TEACHER_LOG_ACTIONS } from '@/lib/teacher-log-actions'
 import { groupFeedbackNotificationRecipients } from './notifications'
+import { createNotification } from '@/lib/notifications'
 
 type FeedbackStudent = {
   id: string
@@ -87,18 +88,16 @@ export async function createClassroomFeedbackWithSideEffects(
       })
     }
     for (const { parentUserId, students } of recipients) {
-      await tx.notification.create({
-        data: {
-          userId: parentUserId,
-          type: 'CLASSROOM_FEEDBACK',
-          title: `${input.teacherName}老师发布了${input.notificationLabel || '课堂反馈'}`,
-          content: `${students.map((student) => student.name).join('、')}: ${input.notificationContent}`.slice(0, 80),
-          studentId: students.length === 1 ? students[0].id : null,
-          link: '/parent/class-feedback',
-          relatedType: 'CLASSROOM_FEEDBACK',
-          relatedId: created.id,
-          href: `/parent/class-feedback/${created.id}`,
-        },
+      await createNotification(tx, {
+        userId: parentUserId,
+        type: 'CLASSROOM_FEEDBACK',
+        title: `${input.teacherName}老师发布了${input.notificationLabel || '课堂反馈'}`,
+        content: `${students.map((student) => student.name).join('、')}: ${input.notificationContent}`.slice(0, 80),
+        studentId: students.length === 1 ? students[0].id : null,
+        link: '/parent/class-feedback',
+        relatedType: 'CLASSROOM_FEEDBACK',
+        relatedId: created.id,
+        href: `/parent/class-feedback/${created.id}`,
       })
     }
   }

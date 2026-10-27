@@ -1,4 +1,5 @@
 import type { Prisma } from '@prisma/client'
+import { createManyNotifications } from '@/lib/notifications'
 
 type CourseChangeInput = {
   eventType: string
@@ -43,20 +44,16 @@ export async function recordCourseChangeEvent(tx: Prisma.TransactionClient, inpu
   })
 
   if (recipients.size) {
-    await tx.notification.createMany({
-      data: [...recipients].map(([parentUserId, rows]) => ({
-        userId: parentUserId,
-        type: 'SCHEDULE_CHANGE',
-        title: input.title,
-        content: `${rows.map((student) => student.name).join('、')}：${input.summary}`.slice(0, 300),
-        studentId: rows.length === 1 ? rows[0].id : null,
-        href: input.href || '/parent/schedule',
-        link: input.href || '/parent/schedule',
-        relatedType: 'COURSE_CHANGE_EVENT',
-        relatedId: event.id,
-      })),
-      skipDuplicates: true,
-    })
+    await createManyNotifications(tx, [...recipients].map(([parentUserId, rows]) => ({
+      userId: parentUserId,
+      type: 'SCHEDULE_CHANGE',
+      title: input.title,
+      content: `${rows.map((student) => student.name).join('、')}：${input.summary}`.slice(0, 300),
+      studentId: rows.length === 1 ? rows[0].id : null,
+      href: input.href || '/parent/schedule',
+      relatedType: 'COURSE_CHANGE_EVENT',
+      relatedId: event.id,
+    })))
   }
 
   return { event, recipientCount: recipients.size, notificationCount: recipients.size }

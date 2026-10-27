@@ -5,6 +5,8 @@ import { AI_PROMPTS, SCIENCE_ANSWER_RULES, type AIRole, type ModelId } from '@/d
 import { AIProviderError, createSSEFromText, fetchWithTimeout } from '@/lib/ai/client'
 import { getModelCapability } from '@/lib/ai/models'
 import { normalizeAIAnswer } from '@/lib/ai/normalize-answer'
+import { getRequestPrisma } from '@/lib/prisma'
+import { buildSystemDigest } from '@/lib/ai/system-context'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
@@ -263,7 +265,21 @@ export const POST = apiHandler(async (req: NextRequest) => {
     })
   }
 
-  const systemPrompt = `${AI_PROMPTS[resolveAIRole(sessionUser.role)]}\n\n${SCIENCE_ANSWER_RULES}`
+  let digestText = ''
+  try {
+    if (sessionUser.id) {
+      const prisma = await getRequestPrisma()
+      const digest = await buildSystemDigest(
+        { id: sessionUser.id, role: sessionUser.role || 'other' },
+        prisma,
+      )
+      digestText = digest.text
+    }
+  } catch (error) {
+    console.error('[AI system digest]', error) // 摘要失败不阻塞对话
+  }
+
+  const systemPrompt = `${AI_PROMPTS[resolveAIRole(sessionUser.role)]}\n\n${SCIENCE_ANSWER_RULES}\n\n${digestText}`
   const endpoint = MODEL_ENDPOINTS[modelId]
 
   if (!endpoint?.apiKey || endpoint.apiKey.includes('你的') || endpoint.apiKey.includes('填入')) {

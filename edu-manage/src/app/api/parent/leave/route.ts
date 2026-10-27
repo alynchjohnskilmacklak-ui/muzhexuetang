@@ -5,6 +5,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { findParentChild, getParentChildren } from '@/lib/parent-children'
 import { isParentStudentInLesson } from '@/lib/parent-lesson-visibility'
 import { visibleClassLessonWhere } from '@/lib/business-visibility'
+import { createManyNotifications } from '@/lib/notifications'
 
 export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
@@ -89,36 +90,32 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const notificationContent = `${student.name} 于 ${new Date(leaveDate).toLocaleDateString('zh-CN')} 请假，原因：${reason}`
 
   if (admins.length > 0) {
-    await tx.notification.createMany({
-      data: admins.map((admin) => ({
-        userId: admin.id,
-        title: notificationTitle,
-        content: notificationContent,
-        type: 'leave',
-        href: '/leave-requests',
-        studentId,
-        senderId: userId,
-        pushStatus: 'none',
-      })),
-    })
+    await createManyNotifications(tx, admins.map((admin) => ({
+      userId: admin.id,
+      title: notificationTitle,
+      content: notificationContent,
+      type: 'leave',
+      href: '/leave-requests',
+      studentId,
+      senderId: userId,
+      pushStatus: 'none',
+    })))
   }
 
   const teacherUsers = teacherIds.length ? await tx.user.findMany({
     where: { teacherId: { in: teacherIds }, role: 'teacher', status: 'active' }, select: { id: true },
   }) : []
   if (teacherUsers.length) {
-      await tx.notification.createMany({
-        data: teacherUsers.map((teacherUser) => ({
-          userId: teacherUser.id,
-          title: notificationTitle,
-          content: notificationContent,
-          type: 'leave',
-          href: '/teacher/leave',
-          studentId,
-          senderId: userId,
-          pushStatus: 'none',
-        })),
-      })
+    await createManyNotifications(tx, teacherUsers.map((teacherUser) => ({
+      userId: teacherUser.id,
+      title: notificationTitle,
+      content: notificationContent,
+      type: 'leave',
+      href: '/teacher/leave',
+      studentId,
+      senderId: userId,
+      pushStatus: 'none',
+    })))
   }
 
   await tx.activityLog.create({

@@ -9,6 +9,7 @@ import { normalizeLessonContent } from '@/lib/classroom-feedback/access'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 import { apiHandler } from '@/lib/api-handler'
+import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -204,17 +205,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
         for (const student of studentsData) {
           const parentUserId = student.parentId || student.parentUserId
           if (!parentUserId) continue
-          await tx.notification.create({
-            data: {
-              userId: parentUserId,
-              type: 'CLASSROOM_FEEDBACK',
-              title: `${teacher.name.endsWith('老师') ? teacher.name : `${teacher.name}老师`}发布了课堂反馈`,
-              content: `${student.name}: ${summary || knowledgePoints?.join('、') || '课堂资料已更新'}`.slice(0, 80),
-              link: '/parent/class-feedback',
-              relatedType: 'CLASSROOM_FEEDBACK',
-              relatedId: created.id,
-              href: `/parent/class-feedback/${created.id}`,
-            },
+          await createNotification(tx, {
+            userId: parentUserId,
+            type: 'CLASSROOM_FEEDBACK',
+            title: `${teacher.name.endsWith('老师') ? teacher.name : `${teacher.name}老师`}发布了课堂反馈`,
+            content: `${student.name}: ${summary || knowledgePoints?.join('、') || '课堂资料已更新'}`.slice(0, 80),
+            link: '/parent/class-feedback',
+            relatedType: 'CLASSROOM_FEEDBACK',
+            relatedId: created.id,
+            href: `/parent/class-feedback/${created.id}`,
           })
         }
       }

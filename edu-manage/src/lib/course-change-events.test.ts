@@ -25,7 +25,6 @@ describe('recordCourseChangeEvent', () => {
     }) })
     expect(tx.notification.createMany).toHaveBeenCalledWith(expect.objectContaining({
       data: [expect.objectContaining({ userId: 'parent-1', relatedType: 'COURSE_CHANGE_EVENT', relatedId: 'event-1' })],
-      skipDuplicates: true,
     }))
   })
 

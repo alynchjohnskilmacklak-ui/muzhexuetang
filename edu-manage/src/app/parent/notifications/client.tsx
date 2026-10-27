@@ -110,6 +110,14 @@ const TYPE_META: Record<string, NotificationType> = {
     gradient: 'linear-gradient(135deg, #A99B8A, #7A6E60)',
     category: 'notice',
   },
+  WEEKLY_DIGEST: {
+    label: '学习周报',
+    icon: <FileTextOutlined />,
+    color: '#A6781F',
+    bg: '#F7EED8',
+    gradient: 'linear-gradient(135deg, #D9B36A, #A6781F)',
+    category: 'notice',
+  },
   leave: {
     label: '请假通知',
     icon: <ClockCircleOutlined />,
@@ -164,6 +172,22 @@ const SUBJECT_META: Record<string, { label: string; gradient: string; bg: string
 
 /** 反馈类通知类型 */
 const FEEDBACK_TYPES = new Set(['CLASSROOM_FEEDBACK', 'PERFORMANCE_FEEDBACK', 'PERFORMANCE_UPDATE'])
+
+/** 分类 → 相关类型集合（用于按分类批量已读） */
+const CATEGORY_RELATED_TYPES: Record<'feedback' | 'notice', string[]> = {
+  feedback: ['CLASSROOM_FEEDBACK', 'PERFORMANCE_FEEDBACK', 'PERFORMANCE_UPDATE'],
+  notice: [
+    'ATTENDANCE',
+    'leave',
+    'PAPER_PUBLISHED',
+    'EXAM_PAPER',
+    'STUDY_HALL_HOMEWORK',
+    'COURSE_CHANGE_EVENT',
+    'SCHEDULE_CHANGE',
+    'SYSTEM',
+    'INFO',
+  ],
+}
 
 /** 通知头像：反馈类优先显示老师照片，其次学科徽标，最后类型图标 */
 function NotificationAvatar({ n, isMobile }: { n: ParentNotification; isMobile: boolean }) {
@@ -294,10 +318,12 @@ const FILTER_TABS: { key: 'all' | 'feedback' | 'notice'; label: string; dot?: st
 export function ParentNotificationsClient({
   notifications: initialNotifications,
   unreadCount: initialUnread,
+  archived = false,
 }: {
   notifications: ParentNotification[]
   unreadCount: number
   userId: string
+  archived?: boolean
 }) {
   const router = useRouter()
   const { mutate } = useSWRConfig()
@@ -319,6 +345,8 @@ export function ParentNotificationsClient({
     }
     return notifications.filter((n) => getNotificationMeta(n).category === filter)
   }, [notifications, filter])
+
+  const filteredUnread = useMemo(() => filtered.filter((n) => !n.read).length, [filtered])
 
   const markAsRead = async (id: string) => {
     try {
@@ -348,6 +376,25 @@ export function ParentNotificationsClient({
       setUnreadCount(0)
       void mutate('/api/parent/unread-counts')
       toast.success('已全部标记为已读')
+    } catch {
+      toast.error('操作失败')
+    }
+  }
+
+  const markCategoryRead = async (category: 'feedback' | 'notice') => {
+    const relatedTypes = CATEGORY_RELATED_TYPES[category]
+    try {
+      const response = await fetch('/api/parent/notifications/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ relatedTypes }),
+      })
+      if (!response.ok) throw new Error('分类已读操作失败')
+      setNotifications((prev) => prev.map((n) => (relatedTypes.includes(n.relatedType || '') ? { ...n, read: true } : n)))
+      const readCount = filtered.filter((n) => !n.read && relatedTypes.includes(n.relatedType || '')).length
+      setUnreadCount((count) => Math.max(0, count - readCount))
+      void mutate('/api/parent/unread-counts')
+      toast.success('已将该分类全部标记为已读')
     } catch {
       toast.error('操作失败')
     }
@@ -390,10 +437,28 @@ export function ParentNotificationsClient({
                 <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 11, letterSpacing: 2 }}>NOTIFICATIONS · 家长端</Text>
               </div>
               <div style={{ color: '#F3D98F', margin: 0, fontSize: isMobile ? 26 : 30, fontWeight: 800, letterSpacing: 1.5, textShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
-                最新通知
+                {archived ? '历史通知' : '最新通知'}
               </div>
             </div>
-            {unreadCount > 0 && (
+            {archived ? (
+              <Button
+                icon={<ArrowRightOutlined style={{ transform: 'rotate(180deg)' }} />}
+                onClick={() => router.push('/parent/notifications')}
+                style={{
+                  borderRadius: 9999,
+                  minHeight: 34,
+                  paddingInline: 14,
+                  background: 'rgba(217,179,106,0.18)',
+                  border: '1px solid rgba(217,179,106,0.45)',
+                  color: '#F0D9A8',
+                  fontWeight: 600,
+                  fontSize: 13,
+                  flexShrink: 0,
+                }}
+              >
+                返回最新
+              </Button>
+            ) : unreadCount > 0 ? (
               <Button
                 icon={<CheckOutlined />}
                 onClick={markAllRead}
@@ -411,20 +476,40 @@ export function ParentNotificationsClient({
               >
                 全部已读
               </Button>
+            ) : (
+              <Button
+                icon={<FileTextOutlined />}
+                onClick={() => router.push('/parent/notifications?archived=1')}
+                style={{
+                  borderRadius: 9999,
+                  minHeight: 34,
+                  paddingInline: 14,
+                  background: 'rgba(217,179,106,0.14)',
+                  border: '1px solid rgba(217,179,106,0.35)',
+                  color: '#F0D9A8',
+                  fontWeight: 600,
+                  fontSize: 13,
+                  flexShrink: 0,
+                }}
+              >
+                历史通知
+              </Button>
             )}
           </div>
 
           {/* 统计胶囊 */}
           <div style={{ display: 'flex', gap: 10, marginTop: 16, position: 'relative', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 9999, padding: '6px 14px', backdropFilter: 'blur(4px)' }}>
-              <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>共 {notifications.length} 条</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12 }}>共 {notifications.length} 条{archived ? '（已归档）' : ''}</Text>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: unreadCount > 0 ? '#D9B36A' : 'rgba(255,255,255,0.1)', borderRadius: 9999, padding: '6px 14px' }}>
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: unreadCount > 0 ? '#7A5310' : 'rgba(255,255,255,0.4)' }} />
-              <Text style={{ color: unreadCount > 0 ? '#7A5310' : 'rgba(255,255,255,0.75)', fontSize: 12, fontWeight: unreadCount > 0 ? 700 : 500 }}>
-                {unreadCount} 条未读
-              </Text>
-            </div>
+            {!archived && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: unreadCount > 0 ? '#D9B36A' : 'rgba(255,255,255,0.1)', borderRadius: 9999, padding: '6px 14px' }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: unreadCount > 0 ? '#7A5310' : 'rgba(255,255,255,0.4)' }} />
+                <Text style={{ color: unreadCount > 0 ? '#7A5310' : 'rgba(255,255,255,0.75)', fontSize: 12, fontWeight: unreadCount > 0 ? 700 : 500 }}>
+                  {unreadCount} 条未读
+                </Text>
+              </div>
+            )}
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 9999, padding: '6px 12px' }}>
               <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 11 }}>按时间倒序</Text>
             </div>
@@ -464,6 +549,33 @@ export function ParentNotificationsClient({
                 </button>
               )
             })}
+          </div>
+        )}
+
+        {/* ===== 分类批量已读（非"全部"且有未读时） ===== */}
+        {filter !== 'all' && !archived && filteredUnread > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+            <button
+              type="button"
+              onClick={() => void markCategoryRead(filter === 'feedback' ? 'feedback' : 'notice')}
+              style={{
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '7px 14px',
+                borderRadius: 9999,
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: '#7A5310',
+                background: 'linear-gradient(135deg, #F3E3BC, #E9CD8F)',
+                border: '1px solid rgba(217,179,106,0.4)',
+                boxShadow: '0 2px 8px rgba(217,179,106,0.25)',
+              }}
+            >
+              <CheckOutlined style={{ fontSize: 11 }} />
+              将该分类 {filteredUnread} 条未读全部标为已读
+            </button>
           </div>
         )}
 

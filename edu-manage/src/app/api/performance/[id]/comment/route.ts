@@ -4,6 +4,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { resolveTeacherForUser } from '@/lib/performance'
 import { TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
+import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,15 +68,13 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     select: { id: true },
   })
   if (teacherUser) {
-    await prisma.notification.create({
-      data: {
-        userId: teacherUser.id,
-        type: 'PARENT_COMMENT',
-        href: '/teacher/students',
-        title: '家长回复了您的动态',
-        content: `${post.student.name}: ${content.slice(0, 50)}`,
-        link: `/performance/${id}`,
-      },
+    await createNotification(prisma, {
+      userId: teacherUser.id,
+      type: 'PARENT_COMMENT',
+      href: '/teacher/students',
+      title: '家长回复了您的动态',
+      content: `${post.student.name}: ${content.slice(0, 50)}`,
+      link: `/performance/${id}`,
     })
   }
 

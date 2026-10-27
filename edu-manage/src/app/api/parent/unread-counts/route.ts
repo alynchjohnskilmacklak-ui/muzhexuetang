@@ -23,7 +23,7 @@ export const GET = apiHandler(async () => {
     })
   ).map(student => student.id)
 
-  const [papers, posts, notifications, feedbacks, studyHallHomework, messageRows] = await Promise.all([
+  const [papers, posts, notifications, feedbacks, studyHallHomework, messageRows, notificationByType] = await Promise.all([
     prisma.examPaper.count({
       where: {
         ...parentVisibleExamPaperWhere(user.id),
@@ -69,11 +69,21 @@ export const GET = apiHandler(async () => {
         },
       },
     }),
+    prisma.notification.groupBy({
+      by: ['relatedType'],
+      where: { userId: user.id, ...unreadNotificationWhere, ...visibleNotificationWhere },
+      _count: { _all: true },
+    }),
   ])
 
   const messages = summarizeParentMessageWorkflow(messageRows).unreadForParent
 
-  return NextResponse.json({ papers, posts, notifications, feedbacks, studyHallHomework, messages }, {
+  // 未读通知按类型分组（key 为 relatedType 或 '__NONE__'，值为计数）
+  const notificationsByType = Object.fromEntries(
+    notificationByType.map((row) => [row.relatedType || '__NONE__', row._count._all]),
+  )
+
+  return NextResponse.json({ papers, posts, notifications, notificationsByType, feedbacks, studyHallHomework, messages }, {
     headers: { 'Cache-Control': 'private, no-store, max-age=0' },
   })
 })

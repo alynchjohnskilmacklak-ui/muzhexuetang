@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { PrismaClient } from '@prisma/client'
 import { getPrismaForDivision, isDualDbEnabled, prisma } from '@/lib/prisma'
 import { sendWxMessage, buildPushPayload } from '@/lib/wxpusher'
+import { qywxEnabled, sendQywxParentNotice } from '@/lib/qywx'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,7 +20,9 @@ async function retryForDb(db: PrismaClient, now: number) {
       attempts: { lt: MAX_RETRIES },
       type: { in: ['wxpusher_feedback', 'wxpusher_safe'] },
     },
-    include: { student: { include: { parent: { select: { wxpusherUid: true } } } } },
+    include: {
+      student: { include: { parent: { select: { wxpusherUid: true, qywxExternalUserId: true } } } },
+    },
     orderBy: { sentAt: { sort: 'asc', nulls: 'first' } },
     take: 20,
   })
@@ -33,21 +36,46 @@ async function retryForDb(db: PrismaClient, now: number) {
 
     if (nextAttemptAt.getTime() > now) continue
 
-    const wxpusherUid = n.student?.parent?.wxpusherUid
-    if (!wxpusherUid) {
+    const parent = n.student?.parent
+    const wxpusherUid = parent?.wxpusherUid
+    const qywxExternalUserId = parent?.qywxExternalUserId
+    if (!wxpusherUid && !(qywxEnabled() && qywxExternalUserId)) {
       await db.notification.update({
         where: { id: n.id },
-        data: { pushStatus: 'no_bind', pushError: '家长未绑定微信', lastError: '家长未绑定微信' },
+        data: { pushStatus: 'no_bind', pushError: '家长未绑定微信/企业微信', lastError: '家长未绑定微信/企业微信' },
       })
       results.push({ id: n.id, status: 'no_bind' })
       continue
     }
 
     const { content: msgContent, summary } = buildPushPayload(n.type, n.student?.name || '')
+    const studentName = n.student?.name || ''
+    // 家长通道 URL（微信内点开直达对应页面）
+    const parentUrl =
+      n.href && n.href.startsWith('/')
+        ? `https://muzhexuetang.xyz${n.href}`
+        : n.href || `https://muzhexuetang.xyz/parent/notifications`
 
-    const result = await sendWxMessage(wxpusherUid, msgContent, summary)
+    // 双通道并行：企业微信（学校通知） + 微信个人号（wxpusher），任一成功即视为已送达
+    const jobs: Promise<{ ok: boolean; error?: string }>[] = []
+    if (qywxEnabled() && qywxExternalUserId) {
+      jobs.push(
+        sendQywxParentNotice(qywxExternalUserId, {
+          title: `${summary}：${studentName}`,
+          desc: msgContent,
+          url: parentUrl,
+        }).then((r) => ({ ok: r.success, error: r.error })),
+      )
+    }
+    if (wxpusherUid) {
+      jobs.push(sendWxMessage(wxpusherUid, msgContent, summary).then((r) => ({ ok: r.success, error: r.error })))
+    }
 
-    if (result.success) {
+    const settled = await Promise.all(jobs)
+    const anyOk = settled.some((r) => r.ok)
+    const errors = settled.filter((r) => !r.ok).map((r) => r.error).filter(Boolean)
+
+    if (anyOk) {
       await db.notification.update({
         where: { id: n.id },
         data: {
@@ -61,16 +89,17 @@ async function retryForDb(db: PrismaClient, now: number) {
       results.push({ id: n.id, status: 'sent' })
     } else {
       const newAttempts = n.attempts + 1
+      const detail = errors.length ? errors.join('; ') : '发送失败'
       await db.notification.update({
         where: { id: n.id },
         data: {
           attempts: newAttempts,
-          lastError: result.error || null,
-          pushError: newAttempts >= MAX_RETRIES ? `已达最大重试次数(${MAX_RETRIES}): ${result.error || ''}` : result.error || null,
+          lastError: detail,
+          pushError: newAttempts >= MAX_RETRIES ? `已达最大重试次数(${MAX_RETRIES}): ${detail}` : detail,
           pushStatus: newAttempts >= MAX_RETRIES ? 'failed' : 'failed',
         },
       })
-      results.push({ id: n.id, status: 'failed', error: result.error })
+      results.push({ id: n.id, status: 'failed', error: detail })
     }
   }
 

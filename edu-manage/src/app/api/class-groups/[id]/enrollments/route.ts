@@ -8,6 +8,7 @@ import { hoursPerLesson } from '@/lib/lesson-units'
 import { apiHandler } from '@/lib/api-handler'
 import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
 import { normalizeEnrollmentSubjects, validateEnrollmentSubjects } from '@/lib/enrollment-subjects'
+import { createNotification } from '@/lib/notifications'
 import { chinaClock, isEditableSubjectRosterLesson } from '@/lib/enrollment-subject-change'
 import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
@@ -203,14 +204,12 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     const parentId = created.student.parentId || created.student.parentUserId
     const firstLesson = group.classLessons[0]
     if (group.status === 'ACTIVE' && parentId) {
-      await tx.notification.create({
-        data: {
-          userId: parentId,
-          type: 'CLASS_ENROLLMENT',
-          href: '/parent/schedule',
-          title: `${created.student.name} 已加入 ${group.name}`,
-          content: `课程：${group.course.name}；教师：${group.teacher.name}；首次课：${firstLesson ? `${firstLesson.lessonDate.toISOString().slice(0, 10)} ${firstLesson.startTime}` : '待通知'}；教室：${group.room?.name || '待分配'}。`,
-        },
+      await createNotification(tx, {
+        userId: parentId,
+        type: 'CLASS_ENROLLMENT',
+        href: '/parent/schedule',
+        title: `${created.student.name} 已加入 ${group.name}`,
+        content: `课程：${group.course.name}；教师：${group.teacher.name}；首次课：${firstLesson ? `${firstLesson.lessonDate.toISOString().slice(0, 10)} ${firstLesson.startTime}` : '待通知'}；教室：${group.room?.name || '待分配'}。`,
       })
     }
 
