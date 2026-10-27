@@ -98,7 +98,10 @@
     "vitest": "^4.1.8"
   },
   "overrides": {
-    "wrangler": "4.152.0"
+    "wrangler": "4.152.0",
+    "dompurify": "^3.4.17",
+    "@xmldom/xmldom": "^0.8.15",
+    "qs": "^6.17.0"
   },
   "engines": {
     "node": ">=20.9.0"
