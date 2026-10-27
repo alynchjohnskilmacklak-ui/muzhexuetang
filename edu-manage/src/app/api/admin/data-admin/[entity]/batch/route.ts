@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
@@ -21,10 +22,8 @@ function isBatchAction(action: unknown): action is BatchAction {
   return typeof action === 'string' && ALLOWED_ACTIONS.includes(action as BatchAction)
 }
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ entity: string }> },
-) {
+export const POST = apiHandler(async (req: NextRequest,
+  { params }: { params: Promise<{ entity: string }> },) => {
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
@@ -91,4 +90,4 @@ export async function POST(
     } catch (error) { failures.push({ id, error: error instanceof Error ? error.message : '操作失败' }) }
   }
   return NextResponse.json({ success: failures.length === 0, partial: succeededIds.length > 0 && failures.length > 0, count: succeededIds.length, succeededIds, failures, message: '已完成 ' + succeededIds.length + ' 条，失败 ' + failures.length + ' 条' })
-}
+})

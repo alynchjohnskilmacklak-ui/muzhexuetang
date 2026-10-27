@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic'
 const publishedById = new Map(PUBLISHED_PRACTICE_SETS.map((set) => [set.id, set]))
 
 /** Return only chapter metadata for the first screen; question bodies are fetched on demand. */
-export async function GET(request: Request) {
+export const GET = apiHandler(async (request: Request) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: '未登录' }, { status: 401 })
 
@@ -88,4 +89,4 @@ export async function GET(request: Request) {
     console.error('[parent-practice-bank] catalog load failed', error instanceof Error ? error.name : 'unknown')
     return NextResponse.json({ error: '教材目录暂时无法读取，请稍后重试' }, { status: 503 })
   }
-}
+})

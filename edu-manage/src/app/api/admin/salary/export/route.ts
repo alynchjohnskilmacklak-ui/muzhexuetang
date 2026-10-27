@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestDivision } from '@/lib/division'
 import { writeSalaryExportWorkbook, type SalaryExportRow } from '@/lib/salary-export'
@@ -47,7 +48,7 @@ function formatDate(value: Date) {
   return `${year}-${month}-${day}`
 }
 
-export async function GET(req: NextRequest) {
+export const GET = apiHandler(async (req: NextRequest) => {
   try {
     const admin = await requireAdminUser()
     const prisma = admin.prisma
@@ -217,4 +218,4 @@ export async function GET(req: NextRequest) {
     console.error('[admin:salary:export]', error)
     return NextResponse.json({ error: '导出失败，请稍后重试' }, { status: 500 })
   }
-}
+})

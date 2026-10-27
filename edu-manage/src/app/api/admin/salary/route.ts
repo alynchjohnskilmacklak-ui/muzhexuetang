@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import { requireAdminUser } from '@/lib/teacher-portal'
@@ -10,7 +11,7 @@ import { salaryPeriodStart, pendingSalaryTransactions } from '@/lib/salary-settl
 export const dynamic = 'force-dynamic'
 
 
-export async function GET(req: NextRequest) {
+export const GET = apiHandler(async (req: NextRequest) => {
   try {
     const adminUser = await requireAdminUser()
     const prisma = adminUser.prisma
@@ -212,9 +213,9 @@ export async function GET(req: NextRequest) {
     console.error('[admin:salary:get]', error)
     return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
-}
+})
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   try {
     const adminUser = await requireAdminUser()
     const division = getRequestDivision(adminUser, req.nextUrl.searchParams.get('division'))
@@ -259,9 +260,9 @@ export async function POST(req: NextRequest) {
     console.error('[admin:salary:post]', error)
     return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
-}
+})
 
-export async function DELETE(req: NextRequest) {
+export const DELETE = apiHandler(async (req: NextRequest) => {
   try {
     const adminUser = await requireAdminUser()
     const division = getRequestDivision(adminUser, req.nextUrl.searchParams.get('division'))
@@ -326,4 +327,4 @@ export async function DELETE(req: NextRequest) {
     console.error('[admin:salary:delete]', error)
     return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
-}
+})

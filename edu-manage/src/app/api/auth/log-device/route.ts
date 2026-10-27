@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { parseUserAgent } from '@/lib/device'
@@ -6,7 +7,7 @@ import { getTrustedClientIp } from '@/lib/request-ip'
 
 export const dynamic = 'force-dynamic'
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   try {
     const session = await auth()
     if (!session?.user) return NextResponse.json({ ok: false })
@@ -42,4 +43,4 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ ok: false })
   }
-}
+})

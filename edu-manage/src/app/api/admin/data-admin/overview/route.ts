@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
@@ -6,7 +7,7 @@ import { getDataAdminDivisionScope } from '@/lib/data-admin/division-scope'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest) {
+export const GET = apiHandler(async (req: NextRequest) => {
   try {
     const session = await auth()
     if (!session?.user || session.user.role !== 'admin') {
@@ -55,4 +56,4 @@ export async function GET(req: NextRequest) {
     console.error('data-admin overview error:', error)
     return NextResponse.json({ error: '概览统计失败' }, { status: 500 })
   }
-}
+})

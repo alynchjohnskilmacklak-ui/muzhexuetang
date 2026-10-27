@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { salaryPeriodStart, settleSalaryLedger, SalarySettlementError } from '@/lib/salary-settlement'
 import { requireAdminUser } from '@/lib/teacher-portal'
@@ -7,7 +8,7 @@ import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 export const dynamic = 'force-dynamic'
 
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   try {
     const adminUser = await requireAdminUser()
     const division = getRequestDivision(adminUser, req.nextUrl.searchParams.get('division'))
@@ -47,4 +48,4 @@ export async function POST(req: NextRequest) {
     console.error('[admin:salary:settle]', error)
     return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
-}
+})

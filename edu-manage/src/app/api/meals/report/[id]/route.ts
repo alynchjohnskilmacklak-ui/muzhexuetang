@@ -1,8 +1,9 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { mealCounts, parseMealDetails } from '@/lib/meals'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 
-export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export const PUT = apiHandler(async (request: NextRequest, context: { params: Promise<{ id: string }> }) => {
   try {
     const { teacher, prisma } = await requireCurrentTeacher()
     const { id } = await context.params
@@ -27,4 +28,4 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
   }
-}
+})

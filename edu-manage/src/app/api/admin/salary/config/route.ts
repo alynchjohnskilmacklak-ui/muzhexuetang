@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { getRequestDivision } from '@/lib/division'
@@ -25,7 +26,7 @@ function normalizeOneOnOneRates(value: unknown) {
   )
 }
 
-export async function GET(req: NextRequest) {
+export const GET = apiHandler(async (req: NextRequest) => {
   try {
     const admin = await requireAdminUser()
     const { prisma } = admin
@@ -49,9 +50,9 @@ export async function GET(req: NextRequest) {
     console.error('[admin:salary:config]', err instanceof Error ? err.message : err)
     return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
-}
+})
 
-export async function PUT(req: NextRequest) {
+export const PUT = apiHandler(async (req: NextRequest) => {
   try {
     const admin = await requireAdminUser()
     const { user, prisma } = admin
@@ -83,4 +84,4 @@ export async function PUT(req: NextRequest) {
     console.error('[admin:salary:config]', err instanceof Error ? err.message : err)
     return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
-}
+})

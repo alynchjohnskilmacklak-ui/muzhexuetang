@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextResponse } from 'next/server'
 import { getPrismaForDivision } from '@/lib/prisma'
 import admissionCutoffs2025 from '../../../../../data/volunteer/admission_cutoffs_2025.json'
@@ -12,7 +13,7 @@ export const dynamic = 'force-dynamic'
  * 高中部管理员菜单中不展示此入口，以避免误读/误改初中部数据。
  * 如需高中部使用类似功能，需单独创建模块和菜单。
  */
-export async function GET() {
+export const GET = apiHandler(async () => {
   const prisma = getPrismaForDivision('JUNIOR')
   const schoolRows = await prisma.highSchoolInfo.findMany({
     orderBy: [{ tongZhao: 'desc' }],
@@ -140,4 +141,4 @@ export async function GET() {
       'Cache-Control': 'no-store, max-age=0',
     },
   })
-}
+})

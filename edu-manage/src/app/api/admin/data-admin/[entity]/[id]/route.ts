@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
@@ -17,10 +18,8 @@ import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
 const ALLOWED_ENTITIES = Object.keys(DATA_ADMIN_ENTITIES)
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ entity: string; id: string }> },
-) {
+export const GET = apiHandler(async (req: NextRequest,
+  { params }: { params: Promise<{ entity: string; id: string }> },) => {
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
@@ -51,12 +50,10 @@ export async function GET(
     console.error('data-admin GET by id error:', error)
     return NextResponse.json({ error: '查询失败' }, { status: 500 })
   }
-}
+})
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ entity: string; id: string }> },
-) {
+export const PUT = apiHandler(async (req: NextRequest,
+  { params }: { params: Promise<{ entity: string; id: string }> },) => {
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
@@ -110,12 +107,10 @@ export async function PUT(
     console.error('data-admin PUT error:', error)
     return NextResponse.json({ error: '更新失败' }, { status: 500 })
   }
-}
+})
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ entity: string; id: string }> },
-) {
+export const DELETE = apiHandler(async (req: NextRequest,
+  { params }: { params: Promise<{ entity: string; id: string }> },) => {
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
@@ -154,12 +149,10 @@ export async function DELETE(
     console.error('data-admin DELETE error:', error)
     return NextResponse.json({ error: '删除失败' }, { status: 500 })
   }
-}
+})
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ entity: string; id: string }> },
-) {
+export const PATCH = apiHandler(async (req: NextRequest,
+  { params }: { params: Promise<{ entity: string; id: string }> },) => {
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
@@ -292,4 +285,4 @@ export async function PATCH(
   }
 
   return NextResponse.json({ error: '不支持的操作' }, { status: 400 })
-}
+})

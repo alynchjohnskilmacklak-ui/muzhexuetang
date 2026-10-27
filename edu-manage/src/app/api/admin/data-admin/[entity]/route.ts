@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
@@ -14,10 +15,8 @@ import { getDataAdminDivisionScope } from '@/lib/data-admin/division-scope'
 
 const ALLOWED_ENTITIES = Object.keys(DATA_ADMIN_ENTITIES)
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ entity: string }> },
-) {
+export const GET = apiHandler(async (req: NextRequest,
+  { params }: { params: Promise<{ entity: string }> },) => {
 
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') {
@@ -104,12 +103,10 @@ export async function GET(
     console.error('data-admin GET error:', error)
     return NextResponse.json({ error: '查询失败' }, { status: 500 })
   }
-}
+})
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ entity: string }> },
-) {
+export const POST = apiHandler(async (req: NextRequest,
+  { params }: { params: Promise<{ entity: string }> },) => {
 
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') {
@@ -141,4 +138,4 @@ export async function POST(
     console.error('data-admin POST error:', error)
     return NextResponse.json({ error: '创建失败' }, { status: 500 })
   }
-}
+})

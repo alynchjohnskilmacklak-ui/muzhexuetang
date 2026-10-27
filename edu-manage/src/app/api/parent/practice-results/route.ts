@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
@@ -89,7 +90,7 @@ function gradeSubmission(setId: string, requestedMode: unknown, submittedAnswers
 }
 
 // 获取某个学生的所有做题记录
-export async function GET(request: Request) {
+export const GET = apiHandler(async (request: Request) => {
   const session = await auth()
   if (!session?.user) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
@@ -183,10 +184,10 @@ export async function GET(request: Request) {
     nextPage: hasMoreAttempts ? page + 1 : null,
   }, { headers: { 'Cache-Control': 'private, no-store' } })
   } catch (error) { return storageError(error) }
-}
+})
 
 // 保存做题记录
-export async function POST(request: Request) {
+export const POST = apiHandler(async (request: Request) => {
   const session = await auth()
   if (!session?.user) {
     return NextResponse.json({ error: '未登录' }, { status: 401 })
@@ -304,4 +305,4 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ success: true, duplicate: outcome.kind === 'duplicate', result: outcome.result }, { headers: { 'Cache-Control': 'private, no-store' } })
   } catch (error) { return storageError(error) }
-}
+})
