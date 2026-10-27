@@ -3,7 +3,8 @@
 import useSWR from 'swr'
 import { fetchJson } from '@/lib/fetch-json'
 import { saveSettingsRequest } from '@/lib/settings-client'
-import { Alert, Card, Button, Input, Modal, Form, Popconfirm, Tag, Space, Spin, message, ColorPicker } from 'antd'
+import { Alert, Card, Button, Input, Form, Popconfirm, Tag, Space, Spin, message, ColorPicker } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import {
@@ -124,12 +125,12 @@ export function SubjectsTab() {
         )}
       </div>
 
-      <Modal title={editing ? '编辑学科' : '添加学科'} open={open} onCancel={() => { if (!saving) { setOpen(false); setEditing(null) } }} confirmLoading={saving} maskClosable={!saving} closable={!saving} onOk={() => form.submit()}>
+      <BrandModal title={editing ? '编辑学科' : '添加学科'} open={open} onCancel={() => { if (!saving) { setOpen(false); setEditing(null) } }} confirmLoading={saving} maskClosable={!saving} closable={!saving} onOk={() => form.submit()}>
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item name="name" label="学科名称" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="color" label="标签颜色" getValueFromEvent={(_, hex: string) => hex}><ColorPicker format="hex" /></Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
     </Card>
   )
 }

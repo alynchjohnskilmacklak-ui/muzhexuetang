@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Input, Modal, Spin } from 'antd'
+import { Input, Spin } from 'antd'
 import type { InputRef } from 'antd'
 import { SearchOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 type SearchItem = {
   id: string
@@ -118,7 +119,7 @@ export function GlobalSearch() {
         <span style={{ flex: 1, textAlign: 'left' }}>搜索学员、教师或班级</span>
         <kbd style={{ padding: '1px 6px', borderRadius: 5, background: '#F7F4EF', color: '#9a8e7a', fontSize: 11 }}>Ctrl K</kbd>
       </button>
-      <Modal open={open} onCancel={() => setOpen(false)} footer={null} width={620} destroyOnHidden>
+      <BrandModal open={open} onCancel={() => setOpen(false)} title={null} footer={null} width={620} destroyOnHidden>
         <Input
           ref={inputRef}
           size="large"
@@ -158,7 +159,7 @@ export function GlobalSearch() {
           ))}
           {!loading && query.trim() && allItems.length === 0 && <div style={{ padding: 48, textAlign: 'center', color: '#9a8e7a' }}>没有找到匹配结果</div>}
         </div>
-      </Modal>
+      </BrandModal>
     </>
   )
 }

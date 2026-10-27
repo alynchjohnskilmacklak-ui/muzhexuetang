@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from 'react'
 import useSWR from 'swr'
-import { Button, Card, Drawer, Modal, Select, Space, Tag, Typography, message, Input, InputNumber } from 'antd'
+import { Alert, Button, Card, Drawer, Select, Space, Tag, Typography, message, Input, InputNumber } from 'antd'
 import { CheckCircleOutlined, TeamOutlined, EnvironmentOutlined, ClockCircleOutlined, UserOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { format } from 'date-fns'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
@@ -76,7 +77,7 @@ export default function AttendancePage() {
   const [filterType, setFilterType] = useState('')
 
   const query = `/api/attendance/today?date=${selectedDate}&division=${division}${filterTeacherId ? `&teacherId=${filterTeacherId}` : ''}`
-  const { data: lessonsRaw, mutate: mutateData, isLoading } = useSWR(query, fetcher, { refreshInterval: 120_000 })
+  const { data: lessonsRaw, error: lessonsError, mutate: mutateData, isLoading } = useSWR(query, fetcher, { refreshInterval: 120_000 })
   const { data: teachersData } = useSWR('/api/teachers?status=ACTIVE&limit=100', fetcher)
 
   const [selectedSchedule, setSelectedSchedule] = useState<Record<string, unknown> | null>(null)
@@ -317,7 +318,15 @@ export default function AttendancePage() {
         </Space>
       </Card>
 
-      {isLoading ? (
+      {lessonsError ? (
+        <Alert
+          type="error"
+          showIcon
+          message={lessonsError instanceof Error ? lessonsError.message : '课程考勤数据加载失败'}
+          action={<Button size="small" onClick={() => void mutateData()}>重试</Button>}
+          style={{ borderRadius: 8 }}
+        />
+      ) : isLoading ? (
         <CardSkeleton rows={3} />
       ) : allSchedules.length === 0 ? (
         <Card bordered={false} style={{ borderRadius: 8, minHeight: 300, display: 'grid', placeItems: 'center', background: '#ffffff', border: '1px solid #EEE7E1' }}>
@@ -673,7 +682,7 @@ export default function AttendancePage() {
           })()}
         </Drawer>
       )}
-      <Modal
+      <BrandModal
         title="调整突击班结算"
         open={adjustmentOpen}
         confirmLoading={adjusting}
@@ -709,7 +718,7 @@ export default function AttendancePage() {
             />
           </div>
         </Space>
-      </Modal>
+      </BrandModal>
     </PageLayout>
   )
 }

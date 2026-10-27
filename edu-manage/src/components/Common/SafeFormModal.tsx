@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { Button, Modal, Typography } from 'antd'
+import { Button, Typography } from 'antd'
 import { ExclamationOutlined } from '@ant-design/icons'
 import { BrandModal, type BrandModalProps } from './BrandModal'
 
@@ -47,9 +47,9 @@ export function SafeFormModal({
         keyboard={!confirmLoading}
         closable={!confirmLoading}
       />
-      <Modal
+      <BrandModal
         open={discardOpen}
-        centered
+        title={null}
         footer={null}
         closable={false}
         width={420}
@@ -66,7 +66,7 @@ export function SafeFormModal({
             <Button type="primary" onClick={confirmDiscard}>放弃修改</Button>
           </div>
         </div>
-      </Modal>
+      </BrandModal>
     </>
   )
 }

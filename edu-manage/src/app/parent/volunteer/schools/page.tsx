@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import NextImage from 'next/image'
-import { Image, Input, Modal, Skeleton, Tag, Typography } from 'antd'
+import { Image, Input, Skeleton, Tag, Typography } from 'antd'
 import {
   BankOutlined, CloseOutlined, EnvironmentOutlined, HomeOutlined,
   SearchOutlined, WalletOutlined, TrophyOutlined, SafetyCertificateOutlined,
 } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const { Title, Text } = Typography
 
@@ -374,11 +375,11 @@ export default function ParentSchoolsPage() {
       </footer>}
 
       {/* 学校详情弹窗：居中 + logo 水印 */}
-      <Modal
+      <BrandModal
         open={!!detailSchool}
         onCancel={() => setDetailSchool(null)}
+        title={null}
         footer={null}
-        centered
         className="brand-centered-modal"
         width={isMobile ? '100vw' : 620}
         styles={{
@@ -391,7 +392,7 @@ export default function ParentSchoolsPage() {
         }}
       >
         {detailSchool && <SchoolDetailContent school={detailSchool} onClose={() => setDetailSchool(null)} />}
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

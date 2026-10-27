@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Modal, Button, Upload, Table, message, Alert, Typography } from 'antd'
+import { Button, Upload, Table, message, Alert, Typography } from 'antd'
 import { DownloadOutlined, InboxOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
+import { BrandModal } from '@/components/Common/BrandModal'
 import * as XLSX from 'xlsx'
 import { brandXlsxBufferInBrowser } from '@/lib/export-xlsx-brand'
 
@@ -135,7 +136,7 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
   }
 
   return (
-    <Modal
+    <BrandModal
       title={credentials.length ? '保存新建家长账号' : '批量导入学员'}
       open={open}
       onCancel={handleClose}
@@ -194,6 +195,6 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
       )}
         </>
       )}
-    </Modal>
+    </BrandModal>
   )
 }

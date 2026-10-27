@@ -4,8 +4,8 @@ import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import {
-  App, Button, Card, Col, DatePicker,
-  Form, Input, InputNumber, Modal, Popconfirm, Row, Select, Space,
+  Alert, App, Button, Card, Col, DatePicker,
+  Form, Input, InputNumber, Popconfirm, Row, Select, Space,
   Statistic, Table, Tag, Typography,
 } from 'antd'
 import {
@@ -16,6 +16,7 @@ import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSession } from 'next-auth/react'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const { Text } = Typography
 const { RangePicker } = DatePicker
@@ -120,7 +121,7 @@ export function FeesClient() {
   params.set('page', String(page))
   params.set('limit', String(pageSize))
 
-  const { data, isLoading, mutate } = useSWR<FeeListData>(
+  const { data, error: feesError, isLoading, mutate } = useSWR<FeeListData>(
     sessionStatus === 'authenticated' ? `/api/fees?${params.toString()}` : null,
     fetcher,
     { refreshInterval: 0, revalidateOnFocus: false },
@@ -395,6 +396,17 @@ export function FeesClient() {
         </Space>
       </Card>
 
+      {/* Error */}
+      {feesError && (
+        <Alert
+          type="error"
+          showIcon
+          message={feesError instanceof Error ? feesError.message : '收费数据加载失败'}
+          action={<Button size="small" onClick={() => void mutate()}>重试</Button>}
+          style={{ marginBottom: 12 }}
+        />
+      )}
+
       {/* Table */}
       <Card size="small">
         <Table<FeeRow>
@@ -434,7 +446,7 @@ export function FeesClient() {
       )}
 
       {/* Entry Modal */}
-      <Modal
+      <BrandModal
         title={editingId ? '编辑收费记录' : '录入收费'}
         open={modalOpen}
         onOk={handleSubmit}
@@ -496,10 +508,10 @@ export function FeesClient() {
             <Input.TextArea rows={2} placeholder="可选备注" />
           </Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
 
       {/* Student Aggregate Modal */}
-      <Modal
+      <BrandModal
         title={studentAgg ? `${studentAgg.student.name} — 收费汇总` : '学生收费汇总'}
         open={studentModalOpen}
         onCancel={() => { setStudentModalOpen(false); setSelectedStudent(null) }}
@@ -528,7 +540,7 @@ export function FeesClient() {
             />
           </>
         )}
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

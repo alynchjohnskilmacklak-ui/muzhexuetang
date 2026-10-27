@@ -4,7 +4,8 @@ import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 import { useEffect, useMemo, useState } from 'react'
 import { format, addDays, startOfWeek } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import { Spin, Empty, Input, Modal, Select, Typography, message } from 'antd'
+import { Spin, Empty, Input, Select, Typography, message } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { SwapOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
 import { findSchedulePeriod, PERIOD_HEIGHTS, PERIOD_BG, SchedulePeriod } from '@/lib/schedule-periods'
@@ -411,7 +412,7 @@ export function TeacherWeekView({
           )}
         </div>
       )}
-      <Modal
+      <BrandModal
         title="调整课次"
         open={!!moveDialog}
         onCancel={() => !moveBusy && setMoveDialog(null)}
@@ -443,7 +444,7 @@ export function TeacherWeekView({
             />
           </label>
         </div>
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

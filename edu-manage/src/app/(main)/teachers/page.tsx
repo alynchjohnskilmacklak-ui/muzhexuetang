@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Row, Col, Input, Select, Button, Space, Empty, Spin, Card, Pagination, Modal, Form, message } from 'antd'
+import { Row, Col, Input, Select, Button, Space, Empty, Spin, Card, Pagination, Form, message } from 'antd'
 import { PlusOutlined, SearchOutlined, TeamOutlined, TrophyOutlined, ClockCircleOutlined, CalendarOutlined, CrownOutlined, IdcardOutlined } from '@ant-design/icons'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { TeacherCard } from './_components/TeacherCard'
 import { TeacherForm } from './_components/TeacherForm'
@@ -193,7 +194,7 @@ export default function TeachersPage() {
 
       <TeacherForm open={formOpen} onClose={() => { setFormOpen(false); setEditData(null); fetchTeachers() }} initialData={editData} mode={editData ? 'edit' : 'create'} />
       <DeleteConfirmModal open={!!deleteTarget} teacherId={deleteTarget?.id || null} teacherName={deleteTarget?.name || ''} onClose={() => setDeleteTarget(null)} onDeleted={fetchTeachers} />
-      <Modal
+      <BrandModal
         title={messageTarget?.type === 'praise'
           ? `表扬 · ${String(messageTarget?.teacher?.name || '')}`
           : `提醒 · ${String(messageTarget?.teacher?.name || '')}`}
@@ -247,7 +248,7 @@ export default function TeachersPage() {
             />
           </Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
     </PageLayout>
   )
 }

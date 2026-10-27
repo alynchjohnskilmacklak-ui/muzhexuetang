@@ -2,8 +2,9 @@
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useState, useEffect } from 'react'
-import { Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, Typography } from 'antd'
+import { Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, Typography } from 'antd'
 import { UserOutlined, PhoneOutlined, BookOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
 import { MEMBERSHIP_OPTIONS } from '@/constants/membership'
@@ -165,7 +166,7 @@ export function StudentForm({
   )
 
   return (
-    <Modal
+    <BrandModal
       title={mode === 'edit' ? '编辑学员' : '新增学员'}
       open={open}
       onCancel={onClose}
@@ -326,6 +327,6 @@ export function StudentForm({
           </Row>
         )}
       </Form>
-    </Modal>
+    </BrandModal>
   )
 }

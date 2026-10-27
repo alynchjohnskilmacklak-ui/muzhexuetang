@@ -3,7 +3,8 @@
 import useSWR from 'swr'
 import { fetchJson } from '@/lib/fetch-json'
 import { saveSettingsRequest } from '@/lib/settings-client'
-import { Alert, Card, Table, Button, Modal, Form, Input, Switch, Space, Popconfirm, message } from 'antd'
+import { Alert, Card, Table, Button, Form, Input, Switch, Space, Popconfirm, message } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 
@@ -69,12 +70,12 @@ export function FeeTypesTab() {
       {error && <Alert type="error" showIcon message="加载失败，请重试" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 16 }} />}
       <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: 16,  }} onClick={() => { setEditing(null); form.resetFields(); setOpen(true) }}>添加类型</Button>
       <Table columns={columns} dataSource={Array.isArray(data) ? data : []} scroll={{ x: 480 }} rowKey="id" loading={isLoading} pagination={false} />
-      <Modal title={editing ? '编辑费用类型' : '添加费用类型'} open={open} onCancel={() => { if (!saving) { setOpen(false); setEditing(null) } }} confirmLoading={saving} maskClosable={!saving} closable={!saving} onOk={() => form.submit()}>
+      <BrandModal title={editing ? '编辑费用类型' : '添加费用类型'} open={open} onCancel={() => { if (!saving) { setOpen(false); setEditing(null) } }} confirmLoading={saving} maskClosable={!saving} closable={!saving} onOk={() => form.submit()}>
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item name="name" label="名称" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="description" label="描述"><Input.TextArea rows={2} /></Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
     </Card>
   )
 }

@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Alert, Button, Card, Col, DatePicker, Form, Input, Modal, Row, Statistic, Switch,
+  Alert, Button, Card, Col, DatePicker, Form, Input, Row, Statistic, Switch,
   Table, Tabs, Tag, Typography, Upload, message,
 } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import {
   DownOutlined, DownloadOutlined, EditOutlined, InboxOutlined, ReloadOutlined, UpOutlined,
 } from '@ant-design/icons'
@@ -541,7 +542,7 @@ export default function MealsPage() {
         },
       ]} />
 
-      <Modal title="设置周期菜单" open={!!templateEditing} onCancel={() => setTemplateEditing(null)} onOk={saveTemplate} confirmLoading={saving} width={isMobile ? 340 : 480}>
+      <BrandModal title="设置周期菜单" open={!!templateEditing} onCancel={() => setTemplateEditing(null)} onOk={saveTemplate} confirmLoading={saving} width={isMobile ? 340 : 480}>
         <Form form={templateForm} layout="vertical">
           <Form.Item name="lunch" label="午餐菜品（如：红烧肉）" rules={[{ required: true, message: '请填写午餐' }]}>
             <Input placeholder="填写今日菜品" />
@@ -570,7 +571,7 @@ export default function MealsPage() {
             <DatePicker.RangePicker style={{ width: '100%' }} />
           </Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

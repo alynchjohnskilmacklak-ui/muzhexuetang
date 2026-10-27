@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Badge, Button, Dropdown, Form, Input, Layout, Menu, Modal, Spin, Tooltip } from 'antd'
+import { Badge, Button, Dropdown, Form, Input, Layout, Menu, Spin, Tooltip } from 'antd'
 import useSWR from 'swr'
 import {
   CalendarOutlined,
@@ -35,6 +35,7 @@ import { signOut } from 'next-auth/react'
 import { toast } from 'sonner'
 import { DEFAULT_TEACHER_AVATAR, getTeacherAvatarUrl } from '@/lib/teacher-avatars'
 import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
@@ -349,13 +350,12 @@ export function TeacherLayout({ children, initialData }: { children: React.React
         </Content>
       </Layout>
 
-      <Modal
+      <BrandModal
         open={changingPwd}
         onCancel={() => { setChangingPwd(false); pwdForm.resetFields() }}
         title="修改密码"
         footer={null}
         width={400}
-        centered
         destroyOnClose
       >
         <Form form={pwdForm} layout="vertical" onFinish={handleChangePwd} style={{ marginTop: 16 }}>
@@ -382,7 +382,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
             </Button>
           </div>
         </Form>
-      </Modal>
+      </BrandModal>
     </Layout>
   )
 }

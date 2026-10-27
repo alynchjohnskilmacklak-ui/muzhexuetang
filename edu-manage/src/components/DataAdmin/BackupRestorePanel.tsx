@@ -13,7 +13,6 @@ import {
   DatePicker,
   Empty,
   Input,
-  Modal,
   Select,
   Space,
   Spin,
@@ -21,6 +20,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import {
   CloudUploadOutlined,
   DeleteOutlined,
@@ -59,7 +59,7 @@ function buildResetPhrase(division: string, selected: string[], cats: CleanupCat
   return `清空${scope}的${names}`
 }
 
-export default function BackupRestorePanel({ backupOnly = false }: { backupOnly?: boolean }) {
+export default function BackupRestorePanel({ backupOnly = false, isSuperAdmin = false }: { backupOnly?: boolean; isSuperAdmin?: boolean }) {
   const { message, modal } = App.useApp()
 
   // ---- Backup state ----
@@ -281,12 +281,26 @@ export default function BackupRestorePanel({ backupOnly = false }: { backupOnly?
     { title: '操作', key: 'actions', width: 190, render: (_: unknown, record: { id: string; name: string }) => <Space size={4}><Button size="small" icon={<EditOutlined />} onClick={() => { setRenameTarget(record); setRenameValue(record.name) }}>重命名</Button><Button size="small" danger icon={<DeleteOutlined />} onClick={() => handleDeleteBackup(record)}>删除</Button></Space> },
   ]
 
+  // 兜底：组件自身无法确认超级管理员身份时（含加载中/接口异常），按 403 语义只提示、不渲染任何操作按钮。
+  if (isSuperAdmin !== true) {
+    return (
+      <div style={{ maxWidth: 900 }}>
+        <Alert
+          type="error"
+          showIcon
+          message="仅限超级管理员"
+          description="备份与恢复为高危操作，当前账号无权访问。"
+        />
+      </div>
+    )
+  }
+
   return (
     <div style={{ maxWidth: 900 }}>
-      <Modal title="重命名备份" open={!!renameTarget} onCancel={() => setRenameTarget(null)} onOk={handleRename} confirmLoading={renaming} okText="保存名称" cancelText="取消">
+      <BrandModal title="重命名备份" open={!!renameTarget} onCancel={() => setRenameTarget(null)} onOk={handleRename} confirmLoading={renaming} okText="保存名称" cancelText="取消">
         <Text type="secondary">只修改列表显示名称，不会改变备份目录和备份内容。</Text>
         <Input value={renameValue} onChange={(event) => setRenameValue(event.target.value)} maxLength={80} showCount autoFocus style={{ marginTop: 12 }} />
-      </Modal>
+      </BrandModal>
       {/* ======== Backup Section ======== */}
       <Card
         title={<><CloudUploadOutlined /> 一键备份</>}

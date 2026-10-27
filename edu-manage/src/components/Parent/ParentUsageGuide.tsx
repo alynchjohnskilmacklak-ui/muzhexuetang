@@ -12,9 +12,10 @@ import {
   IdcardOutlined,
   RightOutlined,
 } from '@ant-design/icons'
-import { Button, Drawer, Modal, Progress, Typography } from 'antd'
+import { Button, Drawer, Progress, Typography } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const { Text, Title } = Typography
 const GUIDE_VERSION = 'v2'
@@ -271,7 +272,7 @@ export function ParentUsageGuideDrawerExtra({ parentUserId }: { parentUserId?: s
           {guideBody}
         </Drawer>
       ) : (
-        <Modal
+        <BrandModal
           title="牧哲学堂家长端使用指南"
           open
           onCancel={closeGuide}
@@ -280,7 +281,7 @@ export function ParentUsageGuideDrawerExtra({ parentUserId }: { parentUserId?: s
           destroyOnHidden
         >
           {guideBody}
-        </Modal>
+        </BrandModal>
       ))}
     </>
   )

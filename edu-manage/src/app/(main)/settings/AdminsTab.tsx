@@ -8,7 +8,6 @@ import {
   Card,
   Form,
   Input,
-  Modal,
   Popconfirm,
   Space,
   Table,
@@ -18,6 +17,7 @@ import {
   Alert,
   message,
 } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { EditOutlined, HistoryOutlined, KeyOutlined, LinkOutlined, PlusOutlined, StopOutlined } from '@ant-design/icons'
 import { isUserActive } from '@/lib/user-status'
 import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
@@ -427,7 +427,7 @@ export function AdminsTab({ currentUserId, initialRole = 'admin' }: { currentUse
         ]}
       />
 
-      <Modal
+      <BrandModal
         title={mode === 'admin' ? '新增管理员' : mode === 'teacher' ? '创建教师登录账号' : mode === 'parent' ? '新增家长账号' : mode === 'reset' ? '重置密码' : mode === 'bind' ? '绑定学员' : mode === 'phone' ? '设置登录手机号' : '编辑账号'}
         open={Boolean(mode)}
         onCancel={closeModal}
@@ -534,15 +534,14 @@ export function AdminsTab({ currentUserId, initialRole = 'admin' }: { currentUse
             </Form.Item>
           )}
         </Form>
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title="账号创建成功"
         open={Boolean(issuedCredential)}
         onCancel={() => setIssuedCredential(null)}
         footer={<Button type="primary" onClick={() => setIssuedCredential(null)}>我已安全保存</Button>}
         width={460}
-        centered
       >
         <Alert
           type="warning"
@@ -559,9 +558,9 @@ export function AdminsTab({ currentUserId, initialRole = 'admin' }: { currentUse
           <Typography.Text type="secondary">初始密码</Typography.Text><br />
           <Typography.Text strong copyable>{issuedCredential?.password}</Typography.Text>
         </Typography.Paragraph>
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title={`${passwordHistoryTarget?.name || ''} · 密码安全记录`}
         open={Boolean(passwordHistoryTarget)}
         onCancel={() => setPasswordHistoryTarget(null)}
@@ -587,7 +586,7 @@ export function AdminsTab({ currentUserId, initialRole = 'admin' }: { currentUse
           locale={{ emptyText: '暂无历史审计记录' }}
           scroll={{ x: 480 }}
         />
-      </Modal>
+      </BrandModal>
     </Card>
   )
 }

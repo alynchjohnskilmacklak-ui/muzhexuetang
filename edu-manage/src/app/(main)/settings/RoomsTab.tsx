@@ -3,7 +3,8 @@
 import useSWR from 'swr'
 import { fetchJson } from '@/lib/fetch-json'
 import { saveSettingsRequest } from '@/lib/settings-client'
-import { Alert, Card, Table, Button, Modal, Form, Input, InputNumber, Space, Popconfirm, message } from 'antd'
+import { Alert, Card, Table, Button, Form, Input, InputNumber, Space, Popconfirm, message } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 
@@ -74,7 +75,7 @@ export function RoomsTab() {
         onClick={() => { setEditing(null); form.resetFields(); setOpen(true) }}
       >添加教室</Button>
       <Table columns={columns} dataSource={Array.isArray(data) ? data : []} scroll={{ x: 480 }} rowKey="id" loading={isLoading} pagination={false} />
-      <Modal
+      <BrandModal
         title={editing ? '编辑教室' : '添加教室'}
         open={open}
         onCancel={() => { if (!saving) { setOpen(false); setEditing(null) } }}
@@ -85,7 +86,7 @@ export function RoomsTab() {
           <Form.Item name="capacity" label="容量"><InputNumber min={1} style={{ width: '100%' }} /></Form.Item>
           <Form.Item name="type" label="类型"><Input /></Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
     </Card>
   )
 }

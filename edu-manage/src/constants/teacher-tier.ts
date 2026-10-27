@@ -45,7 +45,7 @@ export const TIER_THEME: Record<TeacherTier, TeacherTierTheme> = {
     label: '经验教师',
     bg: '#FFF7F1',
     border: '#F2B58F',
-    accent: '#E8784A',
+    accent: '#B85C2E',
   },
   NEW: {
     label: '新晋教师',

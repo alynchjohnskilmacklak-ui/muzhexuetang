@@ -2,6 +2,7 @@ import { auth } from './auth'
 import { getPrismaForDivision } from './prisma'
 import { resolveTeacherForUser } from './teacher-account-binding'
 import { isSuperAdminEmail } from './super-admin'
+import { isUserActive } from './user-status'
 
 export async function getCurrentUser() {
   const session = await auth()
@@ -9,6 +10,28 @@ export async function getCurrentUser() {
 
   const u = session.user as Record<string, unknown>
   const division = (u.division as string) === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
+
+  // 会话吊销校验（与 guards.validateSessionMark 同款查库逻辑，但 fail closed 返回 null，
+  // 让既有调用点的 "!user → 401/跳转" 逻辑自然生效，不抛异常）。
+  const sessionMark = u.sessionMark as string | undefined
+  if (!sessionMark) return null
+  try {
+    const prisma = getPrismaForDivision(division)
+    const dbUser = await prisma.user.findUnique({
+      where: { id: u.id as string },
+      select: { currentSessionToken: true, status: true },
+    })
+    if (!dbUser || !isUserActive(dbUser.status)) return null
+    if (dbUser.currentSessionToken !== sessionMark) return null
+  } catch (error) {
+    console.error('[current-user:session-validation]', {
+      userId: u.id,
+      division,
+      message: error instanceof Error ? error.message : String(error),
+    })
+    return null
+  }
+
   let teacherId = (u.teacherId as string | null) ?? null
   if (String(u.role || '').toLowerCase() === 'teacher' && !teacherId && u.id) {
     try {

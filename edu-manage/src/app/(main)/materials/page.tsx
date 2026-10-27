@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import NextImage from 'next/image'
 import {
-  Button, Card, Col, Form, Input, Modal, Popconfirm, Row, Select, Space,
+  Button, Card, Col, Form, Input, Popconfirm, Row, Select, Space,
   Statistic, Switch, Table, Tag, Typography, Upload, message,
 } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import {
   DeleteOutlined, DownloadOutlined, EyeOutlined, FileTextOutlined, PlusOutlined, UploadOutlined,
 } from '@ant-design/icons'
@@ -389,7 +390,7 @@ export default function MaterialsPage() {
         </Row>
       </div>
 
-      <Modal title="上传学习资料" open={uploadOpen} onCancel={() => { setUploadOpen(false); form.resetFields(); setFileList([]) }} onOk={handleUpload} confirmLoading={uploading} okText="上传" width={640}>
+      <BrandModal title="上传学习资料" open={uploadOpen} onCancel={() => { setUploadOpen(false); form.resetFields(); setFileList([]) }} onOk={handleUpload} confirmLoading={uploading} okText="上传" width={640}>
         <Form form={form} layout="vertical" initialValues={{ audience: 'STUDENT', materialType: 'HANDOUT', isPinned: false }} style={{ marginTop: 16 }}>
           <Form.Item name="title" label="资料标题" rules={[{ required: true, message: '请输入资料标题' }]}>
             <Input maxLength={80} showCount />
@@ -435,13 +436,13 @@ export default function MaterialsPage() {
             </Upload>
           </Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
 
-      <Modal title="资料预览" open={!!previewUrl} footer={null} onCancel={() => setPreviewUrl(null)} width="90vw" style={{ top: 20 }} styles={{ body: { padding: 0 } }}>
+      <BrandModal title="资料预览" open={!!previewUrl} footer={null} onCancel={() => setPreviewUrl(null)} width="90vw" style={{ top: 20 }} styles={{ body: { padding: 0 } }}>
         {previewUrl && previewType === 'pdf' && <iframe src={previewUrl} title="PDF预览" style={{ width: '100%', height: '80vh', border: 0 }} />}
         {previewUrl && previewType === 'word' && <iframe src={previewUrl} title="Word预览" style={{ width: '100%', height: '80vh', border: 0 }} />}
         {previewUrl && previewType === 'image' && <div style={{ textAlign: 'center', padding: 16 }}><NextImage src={previewUrl} alt="资料预览" width={1200} height={800} unoptimized style={{ width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: '78vh', objectFit: 'contain' }} /></div>}
-      </Modal>
+      </BrandModal>
 
       <style jsx>{`
         .mobile-material-cards { display: none; }

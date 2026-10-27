@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import useSWR from 'swr'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Button, Card, Empty, message, Modal, Skeleton } from 'antd'
+import { Button, Card, Empty, message, Skeleton } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import {
   ArrowLeftOutlined, CalendarOutlined, CheckCircleOutlined,
   ClockCircleOutlined, EditOutlined, FileTextOutlined, TeamOutlined,
@@ -345,9 +346,9 @@ export default function TeacherCompliancePage() {
           </>
         )}
 
-        <Modal
+        <BrandModal
           open={!!adjustTarget}
-          centered
+          title={null}
           footer={null}
           onCancel={() => setAdjustTarget(null)}
           width={isMobile ? 'calc(100vw - 24px)' : 420}
@@ -382,11 +383,10 @@ export default function TeacherCompliancePage() {
               <p className={styles.attendanceWarning}>改为“缺勤”时，该生本节课已扣课时将全额退回其剩余课时。</p>
             </div>
           )}
-        </Modal>
+        </BrandModal>
 
-        <Modal
+        <BrandModal
           open={!!revokeTarget}
-          centered
           title={<span className={styles.revokeTitle}>撤销课堂反馈</span>}
           okText="确认撤销"
           cancelText="再想想"
@@ -403,7 +403,7 @@ export default function TeacherCompliancePage() {
             </p>
             <span>对应的教师奖励记录也会同步失效。</span>
           </div>
-        </Modal>
+        </BrandModal>
       </main>
     </PageLayout>
   )

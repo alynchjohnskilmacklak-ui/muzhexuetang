@@ -12,7 +12,6 @@ import {
   Input,
   InputNumber,
   message,
-  Modal,
   Row,
   Segmented,
   Select,
@@ -23,6 +22,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { CheckCircleOutlined, DeleteOutlined, DollarOutlined, DownloadOutlined, EditOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { submitSalarySettlement, SalarySubmissionError } from '@/lib/salary-settlement-client'
@@ -129,7 +129,7 @@ function SalaryAdjustmentModal({ teacherId, teacherName, open, onClose, onSaved 
   }
 
   return (
-    <Modal
+    <BrandModal
       title={`手动调整工资 · ${teacherName}`}
       open={open}
       onCancel={onClose}
@@ -168,7 +168,7 @@ function SalaryAdjustmentModal({ teacherId, teacherName, open, onClose, onSaved 
           <Input.TextArea rows={3} maxLength={200} showCount placeholder="例如：6月优势工资补差" />
         </Form.Item>
       </Form>
-    </Modal>
+    </BrandModal>
   )
 }
 
@@ -574,11 +574,10 @@ export default function TeacherSalaryAdminPage() {
 
       <SalaryConfigDrawer {...configDrawer} onClose={() => setConfigDrawer((prev) => ({ ...prev, open: false }))} onSaved={() => mutate()} />
       {!readOnly && <SalaryAdjustmentModal {...adjustmentModal} onClose={() => setAdjustmentModal((prev) => ({ ...prev, open: false }))} onSaved={() => mutate()} />}
-      <Modal
+      <BrandModal
         title={`结算工资 · ${settleTarget.teacherName}`}
         open={settleTarget.open}
         onCancel={() => { if (!settling) setSettleTarget((prev) => ({ ...prev, open: false })) }}
-        centered
         zIndex={1100}
         width={isMobile ? 'calc(100vw - 24px)' : 440}
         maskClosable={!settling}
@@ -599,8 +598,8 @@ export default function TeacherSalaryAdminPage() {
           </div>
           {settleTarget.total < 0 && <Alert type="warning" showIcon message="当前是负数余额。确认后登记账目结清，不代表向教师实际付款；请先核对管理调整流水。" style={{ marginTop: 12 }} />}
         </div>
-      </Modal>
-      <Modal
+      </BrandModal>
+      <BrandModal
         title="删除手动调整"
         open={Boolean(pendingDelete)}
         onCancel={() => setPendingDelete(null)}
@@ -612,7 +611,7 @@ export default function TeacherSalaryAdminPage() {
         destroyOnHidden
       >
         <Text>确定删除“{pendingDelete?.description || '手动调整'}”这条流水吗？删除后工资合计会同步变化。</Text>
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

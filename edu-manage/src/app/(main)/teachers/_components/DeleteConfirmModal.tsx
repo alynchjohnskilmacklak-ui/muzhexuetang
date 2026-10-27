@@ -2,7 +2,8 @@
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useState, useEffect } from 'react'
-import { Modal, Spin, Select, message, Divider } from 'antd'
+import { Spin, Select, message, Divider } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import useSWR from 'swr'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -56,7 +57,7 @@ export function DeleteConfirmModal({
   }
 
   return (
-    <Modal title="确认离职操作" open={open} onCancel={onClose} onOk={handleDelete} okText={transferTo ? '转交并离职' : '确认离职'} cancelText="取消" okButtonProps={{ danger: true, loading: deleting }}>
+    <BrandModal title="确认离职操作" open={open} onCancel={onClose} onOk={handleDelete} okText={transferTo ? '转交并离职' : '确认离职'} cancelText="取消" okButtonProps={{ danger: true, loading: deleting }}>
       {loading ? <Spin /> : impact ? (
         <>
           <p><strong style={{ color: '#e03e2d' }}>{impact.name}</strong> 老师名下有关联数据：</p>
@@ -90,6 +91,6 @@ export function DeleteConfirmModal({
       ) : (
         <p>确认将 <strong>{teacherName}</strong> 标记为离职？</p>
       )}
-    </Modal>
+    </BrandModal>
   )
 }

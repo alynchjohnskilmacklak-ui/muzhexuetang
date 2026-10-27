@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Alert, Button, Card, Input, Modal, Select, Space, Spin, Typography, message } from 'antd'
+import { Alert, Button, Card, Input, Select, Space, Spin, Typography, message } from 'antd'
 import { ImportOutlined, PlusOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons'
 import { StudentCard } from './_components/StudentCard'
 import { StudentForm } from './_components/StudentForm'
@@ -14,6 +14,7 @@ import useSWR, { useSWRConfig } from 'swr'
 import { useRouter } from 'next/navigation'
 import { isAdminTermScopedSWRKey } from '@/lib/admin-term-scope-client'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const ImportModal = dynamic(
   () => import('./_components/ImportModal').then((module) => module.ImportModal),
@@ -493,7 +494,7 @@ export default function StudentsPage() {
       <StudentForm open={formOpen} onClose={handleFormClose} initialData={editData} mode={editData ? 'edit' : 'create'} />
       {importOpen && <ImportModal open onClose={() => { setImportOpen(false); fetchStudents() }} />}
 
-      <Modal title="删除学员" open={!!deleting} onCancel={() => setDeleting(null)} onOk={handleDeleteConfirm}
+      <BrandModal title="删除学员" open={!!deleting} onCancel={() => setDeleting(null)} onOk={handleDeleteConfirm}
         okText="确认删除并移入回收站" cancelText="取消" okButtonProps={{ danger: true, disabled: deletePreviewLoading || !deleteImpact }}>
         <Space direction="vertical" size={14} style={{ width: '100%' }}>
           <Text>确认删除 <Text strong>{deleting?.name as string}</Text>？</Text>
@@ -508,7 +509,7 @@ export default function StudentsPage() {
           </Card>
           <Alert className="modal-note" type="info" showIcon message="学员档案会进入回收站，30 天内可恢复；关联的班级归属会同步退出。" />
         </Space>
-      </Modal>
+      </BrandModal>
     </PageLayout>
   )
 }

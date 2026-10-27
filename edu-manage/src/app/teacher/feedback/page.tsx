@@ -26,6 +26,7 @@ import { KnowledgePointDetail } from '@/components/Feedback/KnowledgePointDetail
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 import { StudentAvatar } from '@/components/Common/StudentAvatar'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { MobileSelect } from '@/components/MobileSelect'
 import {
   hasMeaningfulFeedbackContent,
@@ -2234,7 +2235,7 @@ function FeedbackPageInner() {
           {submitDone ? '已发布' : saving ? '发布中...' : uploadingCount > 0 ? '图片上传中...' : '发布反馈给家长'}
         </Button>
       </div>
-      <Modal title="家长端预览" open={previewOpen} onCancel={() => setPreviewOpen(false)} footer={null} width="min(560px, 92vw)">
+      <BrandModal title="家长端预览" open={previewOpen} onCancel={() => setPreviewOpen(false)} footer={null} width="min(560px, 92vw)">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, color: '#1a1201' }}>
           {selectedStudentIds.length > 1 && (
             <div style={{ borderRadius: 10, padding: '8px 10px', background: '#FFF6F1', color: '#B85B32', fontSize: 12 }}>
@@ -2261,7 +2262,7 @@ function FeedbackPageInner() {
           {stageSuggestions && <div><strong>后续建议</strong><div style={{ marginTop: 4, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{stageSuggestions}</div></div>}
           <div style={{ fontSize: 12, color: '#98A2B3' }}>发布时间：发布后实时显示 · 老师：当前登录教师</div>
         </div>
-      </Modal>
+      </BrandModal>
     </div>
   )
 
@@ -2633,12 +2634,11 @@ function FeedbackPageInner() {
         {formSection}
 
         {/* 自定义标签弹窗：仅本次使用 / 存入常用库 */}
-        <Modal
+        <BrandModal
           open={Boolean(addTagFor)}
           onCancel={cancelAddTag}
           footer={null}
           destroyOnClose
-          centered
           title={`为 ${groupStudents.find((s) => s.id === addTagFor)?.name || '学生'} 添加标签`}
           bodyStyle={{ paddingTop: 8 }}
         >
@@ -2661,7 +2661,7 @@ function FeedbackPageInner() {
           <div style={{ fontSize: 11, color: '#9AA3AD', marginTop: 8, lineHeight: 1.6 }}>
             「仅本次使用」只用于当前学生这次反馈；「存入常用库」会保存到本机，之后所有学生的标签栏都会出现它。
           </div>
-        </Modal>
+        </BrandModal>
 
       </div>
     </div>

@@ -52,6 +52,8 @@ import {
   WarningOutlined,
 } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
+import { BrandModal } from '@/components/Common/BrandModal'
+import { useSession } from 'next-auth/react'
 import { DATA_ADMIN_ENTITIES, DATA_ADMIN_TRASH_ENTITIES, DATA_ADMIN_BUSINESS_LINKS, type EntityKey } from '@/lib/data-admin/entities'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
@@ -409,7 +411,7 @@ function HourAdjustmentModal({
   }
 
   return (
-    <Modal title="课时调整" open={open} onOk={handleSubmit} onCancel={onClose} confirmLoading={loading} okText="确认调整" cancelText="取消">
+    <BrandModal title="课时调整" open={open} onOk={handleSubmit} onCancel={onClose} confirmLoading={loading} okText="确认调整" cancelText="取消">
       <Space direction="vertical" style={{ width: '100%' }} size={16}>
         <Alert type="warning" showIcon message="不要直接在数据库改课时数据，必须通过此入口调整以保证账目一致。" />
         <div>
@@ -469,7 +471,7 @@ function HourAdjustmentModal({
           <Input.TextArea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="请填写调整原因" rows={3} style={{ marginTop: 4 }} />
         </div>
       </Space>
-    </Modal>
+    </BrandModal>
   )
 }
 
@@ -510,12 +512,24 @@ export function DataAdminClient() {
   const [identitySelectedIds, setIdentitySelectedIds] = useState<string[]>([])
   const [identityMergeConfirmed, setIdentityMergeConfirmed] = useState(false)
 
-  const isHealthTab = activeTab === 'health'
-  const entityKey = activeTab as EntityKey
+  // 备份与恢复页签仅超级管理员可见：与 AdminsTab 同款，请求 /api/settings/accounts 后按 currentUserId 匹配 isSuperAdmin。
+  // 数据未返回前按非超级管理员处理（fail-closed），普通管理员永远拿不到入口；接口层 requireSuperAdmin 保持不变。
+  const { data: session, status: sessionStatus } = useSession()
+  const { data: accountsData } = useSWR<{ admins: Array<{ id: string; isSuperAdmin?: boolean }> }>(
+    sessionStatus === 'authenticated' ? '/api/settings/accounts' : null,
+    (url: string) => fetch(url).then((r) => r.json()),
+  )
+  const currentUserId = session?.user?.id
+  const currentIsSuperAdmin = (accountsData?.admins || []).find((admin) => admin.id === currentUserId)?.isSuperAdmin === true
+  const visibleTabs = ENTITY_TABS.filter((tab) => tab.key !== 'backup-restore' || currentIsSuperAdmin)
+  const gatedActiveTab: EntityKey | 'health' | 'backup-restore' = activeTab === 'backup-restore' && !currentIsSuperAdmin ? 'health' : activeTab
+
+  const isHealthTab = gatedActiveTab === 'health'
+  const entityKey = gatedActiveTab as EntityKey
   const def = isHealthTab ? null : DATA_ADMIN_ENTITIES[entityKey]
 
   const buildUrl = useCallback(() => {
-    if (isHealthTab || activeTab === 'backup-restore') return null
+    if (isHealthTab || gatedActiveTab === 'backup-restore') return null
     const params = new URLSearchParams()
     if (search) params.set('search', search)
     if (statusFilter) params.set('status', statusFilter)
@@ -523,7 +537,7 @@ export function DataAdminClient() {
     params.set('limit', String(limit))
     if (includeDeleted) params.set('includeDeleted', 'true')
     return `/api/admin/data-admin/${entityKey}?${params.toString()}`
-  }, [entityKey, search, statusFilter, page, limit, includeDeleted, isHealthTab, activeTab])
+  }, [entityKey, search, statusFilter, page, limit, includeDeleted, isHealthTab, gatedActiveTab])
 
   const { data, error: dataError, mutate, isLoading } = useSWR(buildUrl, async (url: string) => {
     const res = await fetch(url)
@@ -960,7 +974,7 @@ export function DataAdminClient() {
               <Button shape="round" icon={<ReloadOutlined />} onClick={() => healthMutate()}>刷新检查</Button>
               <Button shape="round" icon={<DownloadOutlined />} onClick={handleExportHealth}>导出问题</Button>
             </>
-          ) : activeTab === 'backup-restore' ? (
+          ) : gatedActiveTab === 'backup-restore' ? (
             <Button shape="round" icon={<RestOutlined />} onClick={() => router.push('/trash')}>查看回收站</Button>
           ) : (
             <>
@@ -989,7 +1003,7 @@ export function DataAdminClient() {
         gap: 10, marginBottom: 16,
       }}>
         {overviewItems.map((item) => {
-          const active = activeTab === item.key
+          const active = gatedActiveTab === item.key
           return (
             <button
               key={item.key}
@@ -1038,7 +1052,7 @@ export function DataAdminClient() {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
         <AdaptiveSelect
           aria-label="选择数据诊断模块"
-          value={activeTab}
+          value={gatedActiveTab}
           onChange={value => setActiveTab(value as EntityKey | 'health' | 'backup-restore')}
           style={{ width: isMobile ? '100%' : 360, minHeight: 44, maxWidth: '100%' }}
           options={[
@@ -1046,14 +1060,14 @@ export function DataAdminClient() {
             { label: '人员与报名', keys: ['students', 'teachers', 'enrollments'] },
             { label: '课程与教学', keys: ['class-groups', 'class-lessons', 'attendances', 'exam-papers', 'classroom-feedbacks', 'performance-posts', 'materials'] },
             { label: '通知与服务', keys: ['notifications', 'meals'] },
-          ].map(group => ({ label: group.label, options: ENTITY_TABS.filter(tab => group.keys.includes(tab.key)).map(tab => ({ value: tab.key, label: tab.label })) }))}
+          ].map(group => ({ label: group.label, options: visibleTabs.filter(tab => group.keys.includes(tab.key)).map(tab => ({ value: tab.key, label: tab.label })) }))}
         />
         <Button shape="round" icon={<RestOutlined />} onClick={() => router.push('/trash')}>回收站</Button>
         <Button shape="round" icon={<SettingOutlined />} onClick={() => router.push('/settings')}>系统设置</Button>
       </div>
 
-      {activeTab === 'backup-restore' ? (
-        <BackupRestorePanel />
+      {gatedActiveTab === 'backup-restore' ? (
+        <BackupRestorePanel isSuperAdmin={currentIsSuperAdmin} />
       ) : isHealthTab ? (
         <div>
           {healthData?.data ? (
@@ -1253,7 +1267,7 @@ export function DataAdminClient() {
 
       {/* Edit Modal */}
       {def && (
-        <Modal
+        <BrandModal
           title={`编辑${def.label}`}
           open={editModalOpen}
           onOk={handleEditSave}
@@ -1276,11 +1290,11 @@ export function DataAdminClient() {
               </div>
             ))}
           </Space>
-        </Modal>
+        </BrandModal>
       )}
 
       {/* Delete Confirmation Modal */}
-      <Modal
+      <BrandModal
         title="确认删除"
         open={deleteModalOpen}
         onOk={handleDeleteConfirm}
@@ -1305,9 +1319,9 @@ export function DataAdminClient() {
             />
           </div>
         </Space>
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title="核对并关联学员身份"
         open={identityReviewOpen}
         onCancel={() => setIdentityReviewOpen(false)}
@@ -1352,7 +1366,7 @@ export function DataAdminClient() {
             我已核实所选档案属于同一名学员
           </Checkbox>
         </Space>
-      </Modal>
+      </BrandModal>
 
       {/* Detail Drawer */}
       <DetailDrawer open={detailOpen} onClose={() => setDetailOpen(false)} entityKey={entityKey} record={detailRecord} />

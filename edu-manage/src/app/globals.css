@@ -9704,13 +9704,13 @@ button:focus:not(:focus-visible) {
   border: 1px solid #8F80D4;
 }
 .parent-teacher-tier-tag--senior {
-  background: linear-gradient(135deg, #C9A45C, #A8873D);
+  background: #F8F3E7;
   color: #123C35;
   border: 1px solid #D6B56A;
 }
 .parent-teacher-tier-tag--experienced {
-  background: var(--color-primary);
-  color: #fff;
+  background: #FFF7F1;
+  color: #B85C2E;
   border: 1px solid #F2B58F;
 }
 .parent-teacher-tier-tag--new {
@@ -9736,11 +9736,17 @@ button:focus:not(:focus-visible) {
 }
 
 /* ELITE 教师等级标签：高级金（浅色页面=金渐变白字，SVIP 深色页面=半透明金底金字） */
-.parent-hero-teacher-tag--elite,
-.parent-teacher-tier-tag--elite {
+.parent-hero-teacher-tag--elite {
   background: linear-gradient(135deg, #C9A45C, #A8873D) !important;
   color: #123C35 !important;
   border: 1px solid #D6B56A !important;
+  box-shadow: 0 0 8px rgba(201,164,92,.45);
+  letter-spacing: .3px;
+}
+.parent-teacher-tier-tag--elite {
+  background: #0E2E2A !important;
+  color: #C9A45C !important;
+  border: 1px solid #C9A45C !important;
   box-shadow: 0 0 8px rgba(201,164,92,.45);
   letter-spacing: .3px;
 }
@@ -9826,7 +9832,7 @@ button:focus:not(:focus-visible) {
 }
 .parent-dashboard-home--vip .parent-membership-benefits__head h2 { color: var(--color-primary); }
 .parent-dashboard-home--vip .parent-membership-badge {
-  background: var(--color-primary);
+  background: #F0875B;
   color: #fff;
   border: 1px solid rgba(255,255,255,.35);
 }

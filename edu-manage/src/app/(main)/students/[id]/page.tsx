@@ -867,7 +867,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         {reportProgress && <p role="status" aria-live="polite" style={{ color: 'var(--color-primary)', fontSize: 13 }}>{reportProgress}</p>}
       </BrandModal>
 
-      <Modal
+      <BrandModal
         title={`查询上课时长 · ${student.name}`}
         open={hoursModalOpen}
         onCancel={() => setHoursModalOpen(false)}
@@ -908,9 +908,9 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
             选择日期范围后，可查询该时间段内孩子实际上课的小时数
           </div>
         )}
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title={`成长反馈 · ${student.name}`}
         open={growthFeedbackOpen}
         onCancel={() => setGrowthFeedbackOpen(false)}
@@ -927,9 +927,9 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
           <div><div style={{ marginBottom: 6 }}>表现标签</div><AdaptiveSelect mode="tags" value={feedbackTags} onChange={setFeedbackTags} maxCount={20} maxTagCount="responsive" tokenSeparators={[',', '，', '、']} placeholder="输入标签后回车，如：主动提问" style={{ width: '100%' }} /></div>
           <div><div style={{ marginBottom: 6 }}>课堂图片（可选）</div><ImageUploader value={feedbackImages} onChange={setFeedbackImages} /></div>
         </div>
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title={student.parent ? '更换或合并家长账号' : '绑定家长账号'}
         open={parentModalOpen}
         onCancel={() => setParentModalOpen(false)}
@@ -988,10 +988,10 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
             选择已有家长账号后，这个孩子会直接出现在该家长端的孩子列表中。
           </div>
         )}
-      </Modal>
+      </BrandModal>
 
       {/* 关联其他孩子弹窗 */}
-      <Modal
+      <BrandModal
         title={`关联其他孩子到当前家长账号（${student.parent?.name || '家长'} · ${student.parent?.email || ''}）`}
         open={familyModalOpen}
         onCancel={() => setFamilyModalOpen(false)}
@@ -1049,10 +1049,10 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
             </Button>
           </Space>
         </div>
-      </Modal>
+      </BrandModal>
 
       {/* 解除关联确认弹窗（受控，避免静态 Modal.confirm 在部分环境不弹） */}
-      <Modal
+      <BrandModal
         title="解除关联"
         open={Boolean(unlinkTarget)}
         onCancel={() => setUnlinkTarget(null)}
@@ -1065,9 +1065,9 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         <p style={{ color: '#4B5563', margin: 0 }}>
           确定将 <b>{unlinkTarget?.name}</b> 从当前家长账号下移除吗？移除后家长端将看不到该孩子（学员数据不受影响，可重新关联）。
         </p>
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title={`为 ${student.name} 添加学科/班级`}
         open={enrollOpen}
         onCancel={() => setEnrollOpen(false)}
@@ -1141,7 +1141,7 @@ const [hoursRange, setHoursRange] = useState<[Dayjs, Dayjs] | null>(null)
         ) : (
           <Empty description="当前运营期没有可添加的班级" />
         )}
-      </Modal>
+      </BrandModal>
       {editingEnrollment?.groupId && (
         <SubjectChangeModal
           key={editingEnrollment.id}

@@ -2,7 +2,8 @@
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useEffect, useState } from 'react'
-import { Alert, DatePicker, Form, Input, Modal, Select, Tag, TimePicker, message } from 'antd'
+import { Alert, DatePicker, Form, Input, Select, Tag, TimePicker, message } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import dayjs from 'dayjs'
 import useSWR from 'swr'
 import { CLASS_TYPE_OPTIONS, TYPE_LABELS, USAGE_TYPE_LABELS } from '../_types'
@@ -127,7 +128,7 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
   }
 
   return (
-    <Modal
+    <BrandModal
       title={editData?.id ? '编辑排课' : '新建排课'}
       open={open}
       onCancel={onClose}
@@ -266,6 +267,6 @@ export function ScheduleFormModal({ open, editData, onClose, onSuccess }: Schedu
           )}
         </Form.Item>
       </Form>
-    </Modal>
+    </BrandModal>
   )
 }

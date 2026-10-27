@@ -3,9 +3,10 @@ import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Card, Table, Button, Modal, Form, Input, InputNumber,
+  Card, Table, Button, Form, Input, InputNumber,
   Select, Switch, Typography, Tag, message, Space, DatePicker,
 } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import type { ColumnsType } from 'antd/es/table'
 import { EditOutlined, ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/navigation'
@@ -379,7 +380,7 @@ export default function SchoolsManagePage() {
         />
       </Card>
 
-      <Modal
+      <BrandModal
         title={`编辑 — ${editModal.school?.name}`}
         open={editModal.open}
         onCancel={() => setEditModal({ open: false, school: null })}
@@ -506,7 +507,7 @@ export default function SchoolsManagePage() {
             </Form.Item>
           </div>
         </Form>
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

@@ -5,7 +5,8 @@ import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
-import { Alert, Button, Card, Checkbox, Col, Empty, Input, InputNumber, message, Modal, Popconfirm, Progress, Row, Select, Space, Table, Tag } from 'antd'
+import { Alert, Button, Card, Checkbox, Col, Empty, Input, InputNumber, message, Popconfirm, Progress, Row, Select, Space, Table, Tag } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { ArrowLeftOutlined, BookOutlined, CalendarOutlined, CheckOutlined, ClockCircleOutlined, DeleteOutlined, EnvironmentOutlined, PlusOutlined, ReloadOutlined, TeamOutlined, UserSwitchOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
@@ -750,7 +751,7 @@ export default function CourseGroupDetailPage() {
       {manualLessonOpen && (
         <ManualLessonModal initialGroupId={params.id} onClose={() => setManualLessonOpen(false)} onSuccess={() => mutate()} />
       )}
-      <Modal
+      <BrandModal
         title="取消本次课"
         open={Boolean(cancelLessonId)}
         onCancel={() => setCancelLessonId('')}
@@ -761,9 +762,9 @@ export default function CourseGroupDetailPage() {
       >
         <p>只能取消尚未开始且没有考勤、反馈或结算记录的课次。系统保留取消记录并通知相关家长。</p>
         <Input.TextArea aria-label="停课原因" placeholder="例如：国庆假期调整" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} maxLength={200} showCount rows={3} />
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title="审核个性化课程"
         open={Boolean(selectedReview)}
         onCancel={() => {
@@ -773,7 +774,6 @@ export default function CourseGroupDetailPage() {
         }}
         footer={null}
         width={isMobile ? 'calc(100vw - 24px)' : 620}
-        centered
         destroyOnHidden
       >
         {selectedReview && (
@@ -850,9 +850,9 @@ export default function CourseGroupDetailPage() {
             </Row>
           </Space>
         )}
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title="添加学员到班级"
         open={enrollOpen}
         onCancel={handleCloseEnrollModal}
@@ -925,8 +925,8 @@ export default function CourseGroupDetailPage() {
             style={{ width: '100%' }}
           />
         </Space>
-      </Modal>
-      <Modal
+      </BrandModal>
+      <BrandModal
         title="更换任课老师"
         open={replaceOpen}
         onCancel={() => setReplaceOpen(false)}
@@ -1010,9 +1010,9 @@ export default function CourseGroupDetailPage() {
             </Button>
           </div>
         </Space>
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title="添加任课老师"
         open={addTeacherOpen}
         onCancel={() => setAddTeacherOpen(false)}
@@ -1046,7 +1046,7 @@ export default function CourseGroupDetailPage() {
             仅补入对应表，不自动排课。排课请用&ldquo;新增上课日&rdquo;或重新生成课表。
           </div>
         </Space>
-      </Modal>
+      </BrandModal>
       {subjectTarget && (
         <SubjectChangeModal
           key={subjectTarget.studentId}

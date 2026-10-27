@@ -23,6 +23,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { toast } from 'sonner'
 import {
@@ -1888,13 +1889,13 @@ export default function CoursesPage() {
         })()}
       </SafeFormModal>
 
-      <Modal title="批量复制班次" open={copyOpen} onCancel={() => setCopyOpen(false)} onOk={handleCopy} confirmLoading={copyLoading} okText="确认复制">
+      <BrandModal title="批量复制班次" open={copyOpen} onCancel={() => setCopyOpen(false)} onOk={handleCopy} confirmLoading={copyLoading} okText="确认复制">
         <Space direction="vertical" style={{ width: '100%' }}>
           <MobileSelect placeholder="选择原班级" style={{ width: '100%' }} value={copySource || undefined} onChange={(value) => setCopySource(value)} options={filteredGroups.map((group: Record<string, unknown>) => ({ label: group.name as string, value: group.id as string }))} />
           <Input placeholder="新班级名称" value={copyName} onChange={(event) => setCopyName(event.target.value)} />
           <Input type="date" value={copyStartDate} onChange={(event) => setCopyStartDate(event.target.value)} />
         </Space>
-      </Modal>
+      </BrandModal>
 
       <Drawer title="课次管理" open={drawerOpen} onClose={() => setDrawerOpen(false)} width={isMobile ? '100%' : 420}>
         {drawerLessons ? (
@@ -1925,15 +1926,15 @@ export default function CoursesPage() {
         ) : <Spin />}
       </Drawer>
 
-      <Modal title="一键后移课次" open={postponeOpen} onCancel={() => setPostponeOpen(false)} onOk={handlePostpone} okText="确认后移">
+      <BrandModal title="一键后移课次" open={postponeOpen} onCancel={() => setPostponeOpen(false)} onOk={handlePostpone} okText="确认后移">
         <Space>
           <span>后移</span>
           <InputNumber min={1} max={90} value={postponeDays} onChange={(value) => setPostponeDays(value || 7)} />
           <span>天</span>
         </Space>
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title="删除班级"
         open={!!deleteTarget}
         okText="确认删除并移入回收站"
@@ -1970,9 +1971,9 @@ export default function CoursesPage() {
           </Card>
           <Alert className="modal-note" type="info" showIcon message="删除后会先进入回收站，30 天内可恢复；教师对应的时间段会立刻释放，不再显示课程冲突。" />
         </Space>
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title="计划内调整上课日"
         open={addDayOpen}
         onCancel={() => setAddDayOpen(false)}
@@ -1996,7 +1997,7 @@ export default function CoursesPage() {
             如果此前已经用“新增上课日”加入过该日期，可再次选择同一天执行一次，系统会校准多出的未来课次，不会重复创建。
           </div>
         </Space>
-      </Modal>
+      </BrandModal>
     </PageLayout>
   )
 }

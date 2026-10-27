@@ -14,12 +14,12 @@ import {
   Input,
   InputNumber,
   message,
-  Modal,
   Select,
   Spin,
   Tag,
   Typography,
 } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import useSWR from 'swr'
 import {
   CalendarOutlined,
@@ -956,7 +956,7 @@ export default function IntensiveSchedulePage() {
         )}
       </Card>
 
-      <Modal
+      <BrandModal
         title="历史课程补录"
         open={historyOpen}
         onCancel={() => setHistoryOpen(false)}
@@ -1221,10 +1221,10 @@ export default function IntensiveSchedulePage() {
             </>
           )}
         </div>
-      </Modal>
+      </BrandModal>
 
       {/* Create Modal */}
-      <Modal title="安排突击全能班课程" open={createOpen}
+      <BrandModal title="安排突击全能班课程" open={createOpen}
         onCancel={() => setCreateOpen(false)} onOk={handleCreate}
         confirmLoading={saving} okText="确认排课" cancelText="取消" width={440}
         okButtonProps={{ style: { background: INTENSIVE_COLOR, borderColor: INTENSIVE_COLOR } }}>
@@ -1308,7 +1308,7 @@ export default function IntensiveSchedulePage() {
             </div>
           )}
         </div>
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { Alert, Button, Card, Col, DatePicker, Drawer, Empty, Form, Input, Modal, Row, Select, Space, Typography } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { BookOutlined, CalendarOutlined, CheckCircleOutlined, CloudDownloadOutlined, DeleteOutlined, EyeOutlined, InboxOutlined, PlusOutlined, TeamOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import useSWR, { useSWRConfig } from 'swr'
@@ -431,7 +432,7 @@ export default function AcademicTermsPage() {
         )}
       </Space>
 
-      <Modal title="创建并进入新批次" open={createOpen} onCancel={() => setCreateOpen(false)} onOk={createTerm} confirmLoading={busy} width={620} okText="创建并进入">
+      <BrandModal title="创建并进入新批次" open={createOpen} onCancel={() => setCreateOpen(false)} onOk={createTerm} confirmLoading={busy} width={620} okText="创建并进入">
         <Alert type="info" showIcon message="新批次从空白名单开始" description="当前工作区会自动归档。旧学员、账号和全部业务记录不会删除，也不会自动复制到新批次。" style={{ marginBottom: 16 }} />
         <Form form={createForm} layout="vertical" initialValues={{ kind: 'WEEKEND' }}>
           <Form.Item name="name" label="批次名称" rules={[{ required: true, message: '请输入名称' }]}><Input placeholder="例如：牧哲学堂周末晚托班" maxLength={60} /></Form.Item>
@@ -439,7 +440,7 @@ export default function AcademicTermsPage() {
           <Form.Item name="period" label="起止日期" rules={[{ required: true, message: '请选择日期范围' }]}><DatePicker.RangePicker style={{ width: '100%' }} /></Form.Item>
           <Form.Item name="description" label="说明（可选）"><Input.TextArea rows={3} placeholder="记录本期课程安排或运营说明" maxLength={500} /></Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
 
       <Drawer title="备份与恢复" open={backupOpen} onClose={() => setBackupOpen(false)} width={isMobile ? '100%' : 760}>
         <Alert type="warning" showIcon message="归档前建议先创建完整备份" description="归档是系统内的逻辑隔离，不等于数据库备份。备份文件用于服务器故障或误操作后的恢复。" style={{ marginBottom: 16 }} />

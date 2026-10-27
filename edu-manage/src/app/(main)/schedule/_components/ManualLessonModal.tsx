@@ -4,7 +4,8 @@ import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 import { useState } from 'react'
 import useSWR from 'swr'
 import dayjs from 'dayjs'
-import { Alert, DatePicker, Input, Modal, Select, Space, Tag, message } from 'antd'
+import { Alert, DatePicker, Input, Select, Space, Tag, message } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 import { useDivision } from '@/contexts/DivisionContext'
@@ -80,7 +81,7 @@ export function ManualLessonModal({ initialGroupId, initialDate, onClose, onSucc
   }
 
   return (
-    <Modal
+    <BrandModal
       title="为现有班级临时加课"
       open
       onCancel={onClose}
@@ -151,6 +152,6 @@ export function ManualLessonModal({ initialGroupId, initialDate, onClose, onSucc
           </>
         )}
       </Space>
-    </Modal>
+    </BrandModal>
   )
 }

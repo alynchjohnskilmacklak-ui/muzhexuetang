@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Typography, Image, Button, Form, Input, Modal, Empty } from 'antd'
+import { Typography, Image, Button, Form, Input, Empty } from 'antd'
 import { useRouter } from 'next/navigation'
 import {
   MailOutlined, CalendarOutlined, LockOutlined, RightOutlined,
@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { signOut } from 'next-auth/react'
 import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const { Title, Text } = Typography
 type ParentUser = { name: string; role: string; email: string; createdAt: string }
@@ -177,12 +178,12 @@ export function ParentProfileClient({
       </div>
 
       {/* 修改密码弹窗 */}
-      <Modal
+      <BrandModal
         open={changingPwd}
         onCancel={() => { setChangingPwd(false); form.resetFields() }}
+        title={null}
         footer={null}
         width={420}
-        centered
         destroyOnClose
         className="safe-form-discard-modal"
         styles={{
@@ -228,7 +229,7 @@ export function ParentProfileClient({
             </div>
           </Form>
         </div>
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

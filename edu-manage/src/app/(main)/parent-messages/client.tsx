@@ -2,7 +2,8 @@
 import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { Avatar, Badge, Button, Empty, Input, Modal, Select, Tag, Typography } from 'antd'
+import { Avatar, Badge, Button, Empty, Input, Select, Tag, Typography } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import {
   CheckCircleOutlined, SendOutlined, SearchOutlined, BellOutlined,
   CloseOutlined, PictureOutlined, SmileOutlined, UserOutlined,
@@ -661,7 +662,7 @@ export function AdminMessagesClient() {
 
       {conversationList}
 
-      <Modal
+      <BrandModal
         open={Boolean(activeId)}
         onCancel={clearChatState}
         getContainer={() => document.body}
@@ -669,17 +670,17 @@ export function AdminMessagesClient() {
         footer={null}
         title={null}
         closable={false}
-        centered={false}
+        mobileFullHeight
         width="100vw"
         style={{ top: 0, maxWidth: 'none', paddingBottom: 0, margin: 0, width: '100vw' }}
         styles={{
           mask: { background: 'rgba(26,18,1,.46)' },
-          content: { padding: 0, borderRadius: 0, overflow: 'hidden', background: 'var(--color-surface-1)', height: '100dvh', display: 'flex', flexDirection: 'column' },
-          body: { padding: 0, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' },
+          content: { padding: 0, borderRadius: 0, overflow: 'hidden', background: 'var(--color-surface-1)', height: '100dvh', maxHeight: '100dvh', display: 'flex', flexDirection: 'column' },
+          body: { padding: 0, flex: 1, minHeight: 0, maxHeight: 'none', display: 'flex', flexDirection: 'column' },
         }}
       >
         {chatPanel}
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

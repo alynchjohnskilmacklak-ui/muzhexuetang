@@ -4,7 +4,8 @@ import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 import { useMemo, useState, useEffect, useRef } from 'react'
 import useSWR from 'swr'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Alert, Badge, Button, Card, Carousel, Drawer, Form, Input, Modal, Segmented, Select, Spin, Tag, Tooltip, Typography, Upload, message as antdMessage } from 'antd'
+import { Alert, Badge, Button, Card, Carousel, Drawer, Form, Input, Segmented, Select, Spin, Tag, Tooltip, Typography, Upload, message as antdMessage } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { ArrowLeftOutlined, CalendarOutlined, CheckCircleOutlined, DownloadOutlined, HistoryOutlined, InboxOutlined, PictureOutlined, PlusOutlined, ReloadOutlined, RightOutlined, SearchOutlined, SendOutlined, ShareAltOutlined, TeamOutlined, WarningOutlined, CameraOutlined } from '@ant-design/icons'
 import { Image as AntImage } from 'antd'
 import { PageLayout } from '@/components/Layout/PageLayout'
@@ -176,12 +177,11 @@ function FeedbackImageViewer({ images, initialIndex, onClose }: { images: AdminF
     : signedActiveOriginal[0]
 
   return (
-    <Modal
+    <BrandModal
       open
       onCancel={onClose}
       footer={null}
       width="min(960px, 100vw)"
-      centered
       styles={{ body: { padding: 0, maxWidth: '100%', overflow: 'hidden' } }}
       title={
         <span style={{ color: '#1A1201' }}>
@@ -218,7 +218,7 @@ function FeedbackImageViewer({ images, initialIndex, onClose }: { images: AdminF
           下载原图
         </Button>
       </div>
-    </Modal>
+    </BrandModal>
   )
 }
 
@@ -843,12 +843,11 @@ export default function ClassroomFeedbackAdminPage() {
       )}
 
       {/* 课堂反馈详情 - 居中 Modal，家长端预览样式 */}
-      <Modal
+      <BrandModal
         open={detailLoading || !!detailFeedback}
         onCancel={() => { setDetailFeedback(null); setAdminReply(''); setViewerIndex(null); setEditing(false) }}
         title={null}
         footer={null}
-        centered
         width={isMobile ? '100%' : 820}
         styles={{ body: { padding: 0, maxHeight: '90vh', overflow: 'hidden', borderRadius: 16 } }}
         closeIcon={<div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,.06)', display: 'grid', placeItems: 'center', fontSize: 16 }}>✕</div>}
@@ -1059,7 +1058,7 @@ export default function ClassroomFeedbackAdminPage() {
             </div>
           )
         })()}
-      </Modal>
+      </BrandModal>
 
       {/* 隐藏的分享卡（用于生成图片） */}
       {detailFeedback && (() => {

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import {
-  Avatar, Badge, Button, Drawer, Form, Input, Modal,
+  Avatar, Badge, Button, Drawer, Form, Input,
   Select, Tag, Typography,
 } from 'antd'
 import {
@@ -24,6 +24,7 @@ import { SUBJECT_COLORS } from '@/constants/subjects'
 import { TIER_THEME, resolveTier } from '@/constants/teacher-tier'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 import { SafeFormModal } from '@/components/Common/SafeFormModal'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { WorkspacePageHeader } from '@/components/Common/WorkspacePageHeader'
 import { STICKER_MARK, stickerPreview } from '@/constants/stickers'
 import { StickerPanel } from '@/components/Parent/StickerPanel'
@@ -931,11 +932,11 @@ export function ParentMessagesClient({
         </button>
 
         {/* 对话详情：居中弹窗 */}
-        <Modal
+        <BrandModal
           open={!!activeId}
           onCancel={() => setActiveId(null)}
+          title={null}
           footer={null}
-          centered
           width={560}
           closable={false}
           maskClosable
@@ -985,7 +986,7 @@ export function ParentMessagesClient({
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             {chatPanel}
           </div>
-        </Modal>
+        </BrandModal>
 
         {composeModal}
       </div>

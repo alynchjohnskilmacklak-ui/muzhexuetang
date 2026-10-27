@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Button, Card, Col, Empty, Input, Modal, Row, Select, Tag, Typography } from 'antd'
+import { Button, Card, Col, Empty, Input, Row, Select, Tag, Typography } from 'antd'
 import { ExperimentOutlined, FullscreenOutlined, PlayCircleOutlined, SearchOutlined } from '@ant-design/icons'
 import {
   PHET_SIMS,
@@ -16,6 +16,7 @@ import {
   type SimulationProvider,
 } from '@/data/phet-sims'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const { Title, Text } = Typography
 
@@ -209,7 +210,7 @@ export function PhETSimulator() {
       </Card>
 
       {activeSim && (
-        <Modal
+        <BrandModal
           title={(
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <ExperimentOutlined style={{ color: '#E87545' }} />
@@ -236,6 +237,7 @@ export function PhETSimulator() {
             </div>
           )}
           width={isMobile ? '100vw' : '90vw'}
+          mobileFullHeight
           style={{ top: isMobile ? 0 : 20, maxWidth: 1100 }}
           styles={{ body: { padding: 0, backgroundColor: '#000' }, content: isMobile ? { borderRadius: 0, minHeight: '100vh' } : {} }}
         >
@@ -268,7 +270,7 @@ export function PhETSimulator() {
               ))}
             </div>
           </div>
-        </Modal>
+        </BrandModal>
       )}
     </div>
   )

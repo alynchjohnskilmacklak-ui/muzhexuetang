@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { Card, Input, Modal, Spin, message } from 'antd'
+import { Card, Input, Spin, message } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { format, startOfWeek } from 'date-fns'
 import useSWR from 'swr'
 import { PageLayout } from '@/components/Layout/PageLayout'
@@ -327,7 +328,7 @@ function SchedulePageInner() {
         />
       )}
 
-      <Modal
+      <BrandModal
         title="取消本次课"
         open={Boolean(cancelLessonId)}
         onCancel={() => setCancelLessonId('')}
@@ -338,7 +339,7 @@ function SchedulePageInner() {
       >
         <p>仅能取消尚未开始、未产生考勤或结算的课次。取消后保留课次记录，并通知相关家长。</p>
         <Input.TextArea aria-label="停课原因" placeholder="请输入停课原因，例如：国庆假期调整" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} maxLength={200} showCount rows={3} />
-      </Modal>
+      </BrandModal>
 
       {oneOnOneOpen && <OneOnOneModal open={oneOnOneOpen} onClose={() => setOneOnOneOpen(false)}
         defaultDate={oneOnOneDate} onSuccess={() => setOneOnOneOpen(false)} />}

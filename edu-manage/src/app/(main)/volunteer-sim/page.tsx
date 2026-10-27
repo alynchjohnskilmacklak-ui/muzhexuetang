@@ -4,9 +4,10 @@ import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import NextImage from 'next/image'
 import {
-  Button, Checkbox, Collapse, Divider, Form, InputNumber, Modal, Select,
+  Button, Checkbox, Collapse, Divider, Form, InputNumber, Select,
   Spin, Switch, Tag, Tooltip, Typography,
 } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import {
   ArrowLeftOutlined, TrophyOutlined,
   CloseOutlined, FilePdfOutlined, FormOutlined, ShareAltOutlined, SwapOutlined,
@@ -1266,7 +1267,7 @@ export default function VolunteerSimPage() {
       )}
 
       {/* School Detail Modal */}
-      <Modal
+      <BrandModal
         title={null}
         open={!!detailSchool}
         onCancel={() => setDetailSchool(null)}
@@ -1488,7 +1489,7 @@ export default function VolunteerSimPage() {
             </div>
           )
         })()}
-      </Modal>
+      </BrandModal>
 
       {/* Bottom sticky volunteer basket — safe area for mobile */}
       {submitted && (

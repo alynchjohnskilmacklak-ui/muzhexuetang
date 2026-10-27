@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import NextImage from 'next/image'
-import { Button, Card, Select, Tag, Typography, Progress, Spin, Modal, Space } from 'antd'
+import { Button, Card, Select, Tag, Typography, Progress, Spin, Space } from 'antd'
 import {
   FileTextOutlined, MessageOutlined, HeartOutlined, TrophyOutlined,
   RiseOutlined, FlagOutlined, BookOutlined, CheckCircleOutlined,
@@ -27,6 +27,7 @@ import { MOOD_META, PERFORMANCE_BADGES } from '@/lib/mood-meta'
 import { formatRemaining } from '@/lib/lesson-units'
 import { exportReportPdf } from '@/lib/export-report-pdf'
 import { MathText } from '@/app/parent/materials/MathText'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), {
   ssr: false,
@@ -848,7 +849,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
       )}
 
       {/* C1+C2: Expanded report Modal with PDF download */}
-      <Modal open={reportOpen} onCancel={() => setReportOpen(false)} width="min(650px, 92vw)" title="本期学情报告"
+      <BrandModal open={reportOpen} onCancel={() => setReportOpen(false)} width="min(650px, 92vw)" title="本期学情报告"
         styles={{ body: { maxHeight: '68vh', overflowY: 'auto', padding: 16 } }}
         footer={<div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <Button onClick={() => setReportOpen(false)}>关闭</Button>
@@ -969,7 +970,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
             {profile.record.reportFeedbacks.map((item, index) => <ReportFeedback key={item.refId || index} item={item} />)}
           </div>
         )}
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

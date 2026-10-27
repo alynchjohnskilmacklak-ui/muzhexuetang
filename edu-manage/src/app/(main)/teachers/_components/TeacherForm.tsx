@@ -11,6 +11,7 @@ import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
 import { DEFAULT_TEACHER_AVATAR, getTeacherAvatarUrl } from '@/lib/teacher-avatars'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { TIER_OPTIONS } from '@/constants/teacher-tier'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const EDU_OPTIONS = ['本科', '硕士', '博士在读', '博士', '其他'].map(value => ({ label: value, value }))
 
@@ -160,7 +161,7 @@ export function TeacherForm({
   ]
 
   return (
-    <Modal
+    <BrandModal
       title={mode === 'edit' ? '编辑教师' : '添加教师'}
       open={open}
       onCancel={onClose}
@@ -257,6 +258,6 @@ export function TeacherForm({
           </Row>
         )}
       </Form>
-    </Modal>
+    </BrandModal>
   )
 }
