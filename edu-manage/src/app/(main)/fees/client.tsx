@@ -6,7 +6,7 @@ import useSWR from 'swr'
 import {
   Alert, App, Button, Card, Col, DatePicker,
   Form, Input, InputNumber, Popconfirm, Row, Select, Space,
-  Statistic, Table, Tag, Typography,
+  Spin, Statistic, Table, Tag, Typography,
 } from 'antd'
 import {
   DeleteOutlined, DownloadOutlined, EditOutlined,
@@ -128,7 +128,7 @@ export function FeesClient() {
   )
 
   // Student aggregate
-  const { data: studentAgg } = useSWR<StudentAggregate>(
+  const { data: studentAgg, isLoading: studentAggLoading } = useSWR<StudentAggregate>(
     selectedStudent ? `/api/fees?studentId=${selectedStudent}&aggregate=true&division=${selectedStudentDivision}` : null,
     fetcher,
   )
@@ -518,7 +518,7 @@ export function FeesClient() {
         footer={null}
         width={700}
       >
-        {studentAgg && (
+        {studentAgg ? (
           <>
             <Row gutter={12} style={{ marginBottom: 16 }}>
               <Col span={8}><Statistic title="累计金额" value={studentAgg.totalAmount} prefix="¥" /></Col>
@@ -539,7 +539,11 @@ export function FeesClient() {
               pagination={false}
             />
           </>
-        )}
+        ) : studentAggLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '56px 0' }}>
+            <Spin size="large" />
+          </div>
+        ) : null}
       </BrandModal>
     </div>
   )
