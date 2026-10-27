@@ -173,6 +173,8 @@ model Teacher {
   salaryConfigs      TeacherSalaryConfig[]
   salaryTransactions TeacherSalaryTransaction[]
   parentMessages     ParentMessage[]            @relation("TeacherMessages")
+  // 教师门户站内消息：教师被硬删除时 teacherId 置空，消息正文保留作历史记录。
+  portalMessages     TeacherMessage[]           @relation("TeacherPortalMessages")
 
   @@index([division])
   @@index([division, status])
@@ -2070,7 +2072,8 @@ model MasteryRecord {
 
 model TeacherMessage {
   id          String    @id @default(cuid())
-  teacherId   String
+  teacherId   String?
+  teacher     Teacher?  @relation("TeacherPortalMessages", fields: [teacherId], references: [id], onDelete: SetNull)
   type        String
   title       String
   content     String
