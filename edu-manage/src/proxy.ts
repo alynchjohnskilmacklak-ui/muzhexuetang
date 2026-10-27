@@ -68,8 +68,10 @@ export async function proxy(request: NextRequest) {
     shenmaVerificationRequest ||
     aboutRequest ||
     resetPasswordRequest ||
+    pathname.startsWith('/WW_verify') ||
     pathname === '/api/setup' ||
     pathname.startsWith('/api/wxpusher/callback') ||
+    pathname === '/api/qywx/event' ||
     pathname.startsWith('/people/') ||
     pathname.startsWith('/avatars/') ||
     pathname.startsWith('/images/') ||
@@ -179,5 +181,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|images|icons|picture|uploads|stickers|marketing|business-assets|services|people|avatars|UI_picture|volunteer|brand|about\.html|home\.html|manifest\.json|about-images|pdf\.worker\.min\.mjs|echarts\.min\.js|favicon\.ico|logo-export\.jpg|logo-small\.png|logo-banner\.jpg|file\.svg|globe\.svg|next\.svg|vercel\.svg|window\.svg|shenma-site-verification\.txt|ByteDanceVerify\.html|robots\.txt|sitemap\.xml).*)'],
+  matcher: ['/((?!_next/static|_next/image|images|icons|picture|uploads|stickers|marketing|business-assets|services|people|avatars|UI_picture|volunteer|brand|about\.html|home\.html|manifest\.json|about-images|pdf\.worker\.min\.mjs|echarts\.min\.js|favicon\.ico|logo-export\.jpg|logo-small\.png|logo-banner\.jpg|file\.svg|globe\.svg|next\.svg|vercel\.svg|window\.svg|shenma-site-verification\.txt|ByteDanceVerify\.html|robots\.txt|sitemap\.xml|WW_verify|0a039113432e6c816c8f59c7c6c7f211\.txt).*)'],
 }

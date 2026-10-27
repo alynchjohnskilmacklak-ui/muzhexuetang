@@ -30,7 +30,7 @@ HOST = "101.200.191.201"
 USER = "root"
 PWD = os.environ.get("EDU_DEPLOY_SSH_PASSWORD")
 COMPOSE_DIR = "/opt/edu-manage-docker/source"
-BUILDER = "mzt-release"
+BUILDER = os.environ.get("MZT_BUILDER", "mzt-release")
 NPM_REGISTRY = "https://registry.npmmirror.com"
 APP_IMAGE = "edu-manage-app"
 MIGRATOR_IMAGE = "edu-manage-migrator"
@@ -135,6 +135,24 @@ def wait_for_app(cli, expected_image_id, timeout=240, interval=5):
                     last_status = "无法解析容器状态"
         time.sleep(interval)
     raise RuntimeError("健康检查超时: " + last_status)
+
+
+def prune_old_backups(cli, image, img_type, timeout=300):
+    """清理该镜像上除最新一个之外的全部 pre-* 备份，只保留最近一次回滚点，避免旧镜像在磁盘上堆积。"""
+    code, out, _ = ssh_run(cli, "docker images %s --format '{{.Tag}}'" % image, timeout=timeout)
+    if code != 0:
+        return
+    tags = sorted(
+        t.strip()
+        for t in out.splitlines()
+        if t.strip().startswith("pre-") and t.strip().endswith("-backup-%s" % img_type)
+    )
+    for old in tags[:-1]:
+        try:
+            checked_remote(cli, "docker rmi %s:%s" % (image, old), "清理旧备份 %s" % old, timeout=timeout)
+            log("  已清理旧备份 %s:%s" % (image, old))
+        except RuntimeError:
+            log("  清理旧备份 %s:%s 失败（仍被引用，留待下次部署）" % (image, old))
 
 
 def ensure_builder(dry_run):
@@ -304,6 +322,7 @@ def deploy_remote(tars, tag, dry_run, skip_upload=False):
                 img = MIGRATOR_IMAGE
             else:
                 continue
+            prune_old_backups(cli, img, img.replace("edu-manage-", ""))
             backup = "pre-%s-backup-%s" % (tag, img.replace("edu-manage-", ""))
             code, existing_backup_id, _ = ssh_run(cli, "docker image inspect %s:%s --format '{{.Id}}'" % (img, backup))
             if code == 0 and existing_backup_id.strip():
@@ -440,6 +459,7 @@ def deploy_migrator_only(tars, tag, skip_upload=False):
                 checked_remote(cli, "rm -f " + remote, "清理已加载的远端发布 tar", timeout=30)
 
         t0 = time.time()
+        prune_old_backups(cli, MIGRATOR_IMAGE, "migrator")
         backup = "pre-%s-backup-migrator" % tag
         code, existing_backup_id, _ = ssh_run(
             cli, "docker image inspect %s:%s --format '{{.Id}}'" % (MIGRATOR_IMAGE, backup)
