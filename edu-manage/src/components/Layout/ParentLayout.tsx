@@ -176,7 +176,11 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     ] },
   ]
 
-  const leafItems = flattenNavItems(navItems)
+  // 升学服务（中考志愿）为初中部专属：高中部家长同步隐藏（对齐 Sidebar.tsx 管理端门控）
+  const isSenior = (session?.user as { division?: string } | undefined)?.division === 'SENIOR'
+  const visibleNavItems = navItems.filter((item) => !(isSenior && item.key === 'volunteer-group'))
+
+  const leafItems = flattenNavItems(visibleNavItems)
   const bottomTabs: MobileNavItem[] = [
     { key: '/parent/dashboard', icon: <HomeOutlined />, label: '首页' },
     { key: '/parent/class-feedback', icon: <BookOutlined />, label: '课堂反馈', badge: unread.feedbacks },
@@ -201,7 +205,7 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     }
   }
 
-  const menuItems = navItems.map(item => ({
+  const menuItems = visibleNavItems.map(item => ({
     key: item.key,
     icon: item.icon,
     label: item.label,
@@ -220,9 +224,9 @@ export function ParentLayout({ children, initialMembershipLevel }: { children: R
     return (
       <MobileLayout
         mode="tabs"
-        navItems={navItems}
+        navItems={visibleNavItems}
         bottomTabs={bottomTabs}
-        moreItems={navItems}
+        moreItems={visibleNavItems}
         title="牧哲学堂"
         roleLabel="家长端"
         menuLabel="菜单"

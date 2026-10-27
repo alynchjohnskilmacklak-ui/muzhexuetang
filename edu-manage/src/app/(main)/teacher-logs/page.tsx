@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Tag, Statistic, Row, Col, Button, Typography } from 'antd'
+import { Alert, Card, Tag, Statistic, Row, Col, Button, Typography } from 'antd'
 import { useRouter } from 'next/navigation'
 import { UserOutlined, CheckCircleOutlined, WarningOutlined, CloseCircleOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
@@ -10,7 +10,10 @@ import { useDivision } from '@/contexts/DivisionContext'
 
 const { Text } = Typography
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = (url: string) => fetch(url).then(async (r) => {
+  if (!r.ok) throw new Error(`教师日志加载失败（HTTP ${r.status}）`)
+  return r.json()
+})
 
 const STATUS_MAP: Record<string, { color: string; label: string }> = {
   ACTIVE: { color: 'green', label: '正常' },
@@ -44,7 +47,7 @@ type TeacherLogsData = {
 export default function TeacherLogsPage() {
   const router = useRouter()
   const { division } = useDivision()
-  const { data, isLoading } = useSWR<TeacherLogsData>(`/api/teacher-logs?division=${division}`, fetcher, { refreshInterval: 120_000 })
+  const { data, error, isLoading } = useSWR<TeacherLogsData>(`/api/teacher-logs?division=${division}`, fetcher, { refreshInterval: 120_000 })
 
   const columns = [
     { title: '教师', dataIndex: 'teacherName', key: 'teacherName', render: (name: string) => (
@@ -88,6 +91,10 @@ export default function TeacherLogsPage() {
         </Col>
       </Row>
       <Card bordered={false}>
+        {error && (
+          <Alert type="error" showIcon style={{ marginBottom: 12 }}
+            message="教师行为日志加载失败" description={error.message || '请稍后重试'} />
+        )}
         <ResponsiveTable
           columns={columns}
           dataSource={data?.teachers || []}
