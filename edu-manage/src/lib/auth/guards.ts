@@ -126,16 +126,6 @@ export async function getParentStudentIds(ctx: SessionUser, prisma: PrismaClient
   return students.map(s => s.id)
 }
 
-// ---- tenant / division context ----
-
-export async function requireTenantContext(): Promise<{ division: 'JUNIOR' | 'SENIOR'; prisma: PrismaClient }> {
-  const user = await getSessionUser()
-  await validateSessionMark(user)
-  const division = user.division as 'JUNIOR' | 'SENIOR'
-  const prisma = getPrismaForDivision(division)
-  return { division, prisma }
-}
-
 // ---- access assertions ----
 
 export async function assertCanAccessStudent(
@@ -183,58 +173,6 @@ export async function assertCanAccessStudent(
       select: { id: true },
     })
     if (!student) throw new AuthError('无权访问该学生数据')
-    return
-  }
-
-  throw new AuthError('无权限')
-}
-
-export async function assertCanAccessClassGroup(
-  ctx: SessionUser & { prisma?: PrismaClient },
-  classGroupId: string,
-): Promise<void> {
-  const prisma = ctx.prisma ?? getPrismaForDivision(ctx.division as 'JUNIOR' | 'SENIOR')
-
-  if (ctx.role === 'admin') {
-    const g = await prisma.classGroup.findUnique({ where: { id: classGroupId }, select: { division: true } })
-    if (!g) throw new AuthError('班级不存在', 404)
-    if (isDualDbEnabled() && g.division !== ctx.division) throw new AuthError('跨部数据不可访问')
-    return
-  }
-
-  if (ctx.role === 'teacher') {
-    const tid = ctx.teacherId
-    if (!tid) throw new AuthError('未绑定教师档案')
-    const g = await prisma.classGroup.findFirst({
-      where: {
-        id: classGroupId,
-        status: { not: 'ARCHIVED' },
-        OR: [
-          { teacherId: tid },
-          { teacherAssignments: { some: { teacherId: tid } } },
-        ],
-      },
-      select: { id: true },
-    })
-    if (!g) throw new AuthError('无权访问该班级数据')
-    return
-  }
-
-  if (ctx.role === 'parent') {
-    const g = await prisma.classGroup.findFirst({
-      where: {
-        id: classGroupId,
-        status: { not: 'ARCHIVED' },
-        enrollments: {
-          some: {
-            student: { parentUserId: ctx.id },
-            status: 'ACTIVE',
-          },
-        },
-      },
-      select: { id: true },
-    })
-    if (!g) throw new AuthError('无权访问该班级数据')
     return
   }
 
@@ -296,51 +234,6 @@ export async function assertCanAccessClassLesson(
   throw new AuthError('无权限')
 }
 
-export async function assertCanAccessAttendance(
-  ctx: SessionUser & { prisma?: PrismaClient },
-  attendanceId: string,
-): Promise<void> {
-  const prisma = ctx.prisma ?? getPrismaForDivision(ctx.division as 'JUNIOR' | 'SENIOR')
-
-  if (ctx.role === 'admin') {
-    const a = await prisma.attendance.findUnique({ where: { id: attendanceId }, select: { id: true } })
-    if (!a) throw new AuthError('考勤记录不存在', 404)
-    return
-  }
-
-  if (ctx.role === 'teacher') {
-    const tid = ctx.teacherId
-    if (!tid) throw new AuthError('未绑定教师档案')
-    const a = await prisma.attendance.findFirst({
-      where: {
-        id: attendanceId,
-        OR: [
-          { lesson: { teacherId: tid } },
-          { lesson: { teacherId: null, group: { teacherId: tid } } },
-          { lesson: { teacherId: null, group: { teacherAssignments: { some: { teacherId: tid } } } } },
-        ],
-      },
-      select: { id: true },
-    })
-    if (!a) throw new AuthError('无权访问该考勤数据')
-    return
-  }
-
-  if (ctx.role === 'parent') {
-    const a = await prisma.attendance.findFirst({
-      where: {
-        id: attendanceId,
-        student: { parentUserId: ctx.id },
-      },
-      select: { id: true },
-    })
-    if (!a) throw new AuthError('无权访问该考勤数据')
-    return
-  }
-
-  throw new AuthError('无权限')
-}
-
 export async function assertCanAccessFeedback(
   ctx: SessionUser & { prisma?: PrismaClient },
   feedbackId: string,
@@ -374,38 +267,6 @@ export async function assertCanAccessFeedback(
     })
     if (!f) throw new AuthError('无权访问该反馈数据')
     return
-  }
-
-  throw new AuthError('无权限')
-}
-
-/** 获取当前登录教师的 teacherId（从 session 推导，不信任前端传参） */
-export async function getCurrentTeacherId(): Promise<string> {
-  const user = await getSessionUser()
-  if (user.role !== 'teacher' || !user.teacherId) {
-    throw new AuthError('需要教师身份')
-  }
-  await validateSessionMark(user)
-  return user.teacherId
-}
-
-/** 管理员筛选教师时：允许传 targetTeacherId，但必须验证管理员身份 */
-export async function requireAdminOrOwnTeacher(targetTeacherId?: string | null): Promise<{ prisma: PrismaClient; division: string; filterTeacherId?: string }> {
-  const user = await getSessionUser()
-  await validateSessionMark(user)
-  const division = user.division as 'JUNIOR' | 'SENIOR'
-  const prisma = getPrismaForDivision(division)
-
-  if (user.role === 'admin') {
-    return { prisma, division, filterTeacherId: targetTeacherId ?? undefined }
-  }
-
-  if (user.role === 'teacher') {
-    const tid = user.teacherId
-    if (!tid) throw new AuthError('未绑定教师档案')
-    // 如果前端传了 targetTeacherId 且不一致，拒绝
-    if (targetTeacherId && targetTeacherId !== tid) throw new AuthError('无权查看其他教师的课程')
-    return { prisma, division, filterTeacherId: tid }
   }
 
   throw new AuthError('无权限')

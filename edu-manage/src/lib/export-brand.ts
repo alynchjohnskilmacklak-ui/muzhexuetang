@@ -135,62 +135,6 @@ export type BrandPdf = {
   internal: { pageSize: { getWidth: () => number } }
 }
 
-/** PDF 首页页眉：Logo + 标题 + 品牌条（调用方在生成内容前调用一次） */
-export async function stampPdfBrand(pdf: BrandPdf, title: string, subtitle?: string): Promise<void> {
-  const img = await loadBrandLogo()
-  const pageW = pdf.internal.pageSize.getWidth()
-  const headerH = 24
-  const logoH = 13
-  const ratio = img.naturalHeight / img.naturalWidth
-  const logoW = Math.round(logoH / ratio)
-
-  // 右侧品牌名
-  pdf.setTextColor(18, 60, 78)
-  pdf.setFontSize(11)
-  pdf.text(`${EXPORT_BRAND.orgName} · ${EXPORT_BRAND.orgEn}`, pageW - 8, 8.5, { align: 'right' })
-
-  const dataUrl = brandLogoDataUrl(img, 320)
-  if (dataUrl) {
-    pdf.addImage(dataUrl, 'JPEG', 8, 4, logoW, logoH)
-  }
-  pdf.setFontSize(14)
-  pdf.setTextColor(23, 47, 41)
-  pdf.text(title, 8 + logoW + 4, 8.5)
-  if (subtitle) {
-    pdf.setFontSize(9)
-    pdf.setTextColor(120, 130, 140)
-    pdf.text(subtitle, 8 + logoW + 4, 13.5)
-  }
-  pdf.setDrawColor(201, 164, 92)
-  pdf.setLineWidth(0.6)
-  pdf.line(8, headerH - 2, pageW - 8, headerH - 2)
-}
-
-/** PDF 每页斜向水印（生成完成后调用，作用于全部页） */
-export function stampPdfWatermark(
-  pdf: BrandPdf,
-  text: string = EXPORT_BRAND.watermark,
-  opacity = 0.08,
-): void {
-  const pageW = pdf.internal.pageSize.getWidth()
-  const GState = (pdf as { GState?: unknown }).GState
-  for (let page = 1; page <= pdf.getNumberOfPages(); page++) {
-    pdf.setPage(page)
-    pdf.setFontSize(14)
-    pdf.setTextColor(18, 60, 78)
-    if (pdf.setGState && GState) {
-      pdf.setGState(new (GState as new (opts: { opacity: number }) => unknown)({ opacity }))
-    }
-    const step = 70
-    for (let y = -40; y < 320; y += step) {
-      pdf.text(text, pageW / 2, y, { align: 'center', angle: 35 })
-    }
-    if (pdf.setGState && GState) {
-      pdf.setGState(new (GState as new (opts: { opacity: number }) => unknown)({ opacity: 1 }))
-    }
-  }
-}
-
 /* ---------------- DOM → Canvas（替代 html2canvas，兼容现代 CSS） ---------------- */
 
 export type DomToCanvasOptions = {
