@@ -31,6 +31,7 @@ USER = "root"
 PWD = os.environ.get("EDU_DEPLOY_SSH_PASSWORD")
 COMPOSE_DIR = "/opt/edu-manage-docker/source"
 BUILDER = os.environ.get("MZT_BUILDER", "mzt-release")
+USE_BUILDX = True
 NPM_REGISTRY = "https://registry.npmmirror.com"
 APP_IMAGE = "edu-manage-app"
 MIGRATOR_IMAGE = "edu-manage-migrator"
@@ -156,21 +157,33 @@ def prune_old_backups(cli, image, img_type, timeout=300):
 
 
 def ensure_builder(dry_run):
+    global USE_BUILDX
     if dry_run:
         return
     try:
-        run_local("docker buildx inspect %s" % BUILDER)
+        run_local("docker buildx version")
+        USE_BUILDX = True
+        return
     except RuntimeError:
-        log("  builder %s 不存在，创建..." % BUILDER)
-        run_local("docker buildx create --name %s --driver docker-container" % BUILDER)
+        USE_BUILDX = False
+        log("  ⚠ docker buildx 插件不可用，回退 Docker Desktop 内建构建（docker build）")
+        return
 
 
 def build_image(target, image, tag, dry_run, no_cache=False):
-    cmd = (
-        'docker buildx build --progress=plain --load --builder %s --target %s '
-        '%s--build-arg NPM_REGISTRY=%s -t %s:%s .'
-        % (BUILDER, target, '--no-cache ' if no_cache else '', NPM_REGISTRY, image, tag)
-    )
+    if USE_BUILDX:
+        cmd = (
+            'docker buildx build --progress=plain --load --builder %s --target %s '
+            '%s--build-arg NPM_REGISTRY=%s -t %s:%s .'
+            % (BUILDER, target, '--no-cache ' if no_cache else '', NPM_REGISTRY, image, tag)
+        )
+    else:
+        # Docker Desktop 内建构建：与 buildx 同产出本地镜像（legacy builder 走内置 BuildKit）
+        cmd = (
+            'docker build --progress=plain --load --target %s '
+            '%s--build-arg NPM_REGISTRY=%s -t %s:%s .'
+            % (target, '--no-cache ' if no_cache else '', NPM_REGISTRY, image, tag)
+        )
     if dry_run:
         log("  [dry-run] " + cmd)
         return
