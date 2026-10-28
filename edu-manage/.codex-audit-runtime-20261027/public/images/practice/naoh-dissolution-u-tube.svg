@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="330" viewBox="0 0 760 330" role="img" aria-labelledby="title desc">
+  <title id="title">溶解放热引起U形管液面变化</title>
+  <desc id="desc">盛水试管通过导管连接U形管左臂，右臂与大气相通。左臂红墨水液面较低，右臂较高，表示试管内气压较大。</desc>
+  <rect width="760" height="330" rx="18" fill="#fff"/>
+  <path d="M181 50H289M195 50V177Q195 198 216 198H254Q275 198 275 177V50" fill="#fff" stroke="#30343b" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M199 125H271V177Q271 194 254 194H216Q199 194 199 177Z" fill="#dcebf5"/>
+  <path d="M235 50V34H264V50" fill="#ece8e1" stroke="#30343b" stroke-width="4"/>
+  <circle cx="218" cy="143" r="8" fill="#e8784a"/><circle cx="237" cy="154" r="8" fill="#e8784a"/><circle cx="253" cy="136" r="8" fill="#e8784a"/>
+  <text x="234" y="225" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#333">试管中的水</text>
+  <text x="234" y="251" text-anchor="middle" font-family="sans-serif" font-size="17" fill="#8d4429">加入某种物质</text>
+  <path d="M260 42H425V92" fill="none" stroke="#30343b" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M425 92V225Q425 262 462 262H525Q562 262 562 225V86" fill="none" stroke="#30343b" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M427 174V225Q427 260 462 260H525Q560 260 560 225V118" fill="none" stroke="#c84e4e" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M560 84V118" stroke="#30343b" stroke-width="4"/>
+  <text x="425" y="157" text-anchor="end" font-family="sans-serif" font-size="18" fill="#333">左臂液面低</text>
+  <text x="578" y="107" font-family="sans-serif" font-size="18" fill="#333">右臂液面高</text>
+  <text x="562" y="63" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#555">与大气相通</text>
+  <path d="M330 73H399" stroke="#4376a8" stroke-width="3"/><path d="M389 64L402 73L389 82" fill="none" stroke="#4376a8" stroke-width="3"/>
+  <text x="364" y="57" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#315d84">导管</text>
+  <text x="380" y="307" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#777">红墨水液面变化为原创实验示意，不按比例</text>
+</svg>

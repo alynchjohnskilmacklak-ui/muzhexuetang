@@ -3,6 +3,8 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { revalidatePath } from 'next/cache'
 import { apiHandler } from '@/lib/api-handler'
+import { parentVisibleExamPaperWhere } from '@/lib/business-visibility'
+import { resolveTeacherForUser } from '@/lib/performance'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,10 +14,27 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
   const prisma = await getRequestPrisma()
 
   const { id } = await params
-  const paper = await prisma.examPaper.findUnique({
-    where: { id },
+  if (!['admin', 'teacher', 'parent'].includes(user.role)) {
+    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
+
+  const teacher = user.role === 'teacher'
+    ? await resolveTeacherForUser({ id: user.id, email: user.email, name: user.name, role: user.role }, prisma)
+    : null
+  if (user.role === 'teacher' && !teacher) {
+    return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
+  }
+
+  const scope = user.role === 'parent'
+    ? parentVisibleExamPaperWhere(user.id)
+    : user.role === 'teacher'
+      ? { teacherId: teacher!.id, status: { not: 'DELETED' as const }, deletedAt: null }
+      : { status: { not: 'DELETED' as const }, deletedAt: null }
+
+  const paper = await prisma.examPaper.findFirst({
+    where: { id, ...scope },
     include: {
-      student: { select: { id: true, name: true, grade: true, parentUserId: true } },
+      student: { select: { id: true, name: true, grade: true } },
       teacher: { select: { id: true, name: true } },
       questions: { orderBy: { order: 'asc' } },
       reactions: { select: { id: true, type: true, userId: true } },
@@ -25,15 +44,6 @@ export const GET = apiHandler(async (_req: NextRequest, { params }: { params: Pr
   })
 
   if (!paper) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
-  if (paper.status === 'DELETED') return NextResponse.json({ error: '试卷已删除' }, { status: 404 })
-
-  // Ownership check
-  if (user.role === 'parent' && paper.student.parentUserId !== user.id) {
-    return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
-  }
-  if (user.role === 'teacher' && paper.teacherId !== user.teacherId) {
-    return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
-  }
 
   return NextResponse.json(paper)
 })
@@ -46,26 +56,29 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const { id } = await params
   const body = await req.json()
 
+  if (user.role === 'parent') {
+    if (!body.isReadByParent) {
+      return NextResponse.json({ error: '无权限' }, { status: 403 })
+    }
+
+    const visibility = parentVisibleExamPaperWhere(user.id)
+    const result = await prisma.examPaper.updateMany({
+      where: { id, ...visibility },
+      data: { isReadByParent: true, readAt: new Date() },
+    })
+    if (!result.count) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
+
+    const updated = await prisma.examPaper.findFirst({ where: { id, ...visibility } })
+    if (!updated) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
+    revalidatePath('/parent/grades')
+    return NextResponse.json(updated)
+  }
+
   const existing = await prisma.examPaper.findUnique({
     where: { id },
-    select: { id: true, teacherId: true, student: { select: { parentId: true, parentUserId: true } } },
+    select: { id: true, teacherId: true },
   })
   if (!existing) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
-
-  // Parents can only mark their own child's paper as read
-  if (user.role === 'parent') {
-    const isOwnChild = existing.student?.parentUserId === user.id || existing.student?.parentId === user.id
-    if (!isOwnChild) return NextResponse.json({ error: '试卷不存在' }, { status: 404 })
-    if (body.isReadByParent) {
-      const updated = await prisma.examPaper.update({
-        where: { id },
-        data: { isReadByParent: true, readAt: new Date() },
-      })
-      revalidatePath('/parent/grades')
-      return NextResponse.json(updated)
-    }
-    return NextResponse.json({ error: '无权限' }, { status: 403 })
-  }
 
   if (user.role !== 'admin' && user.role !== 'teacher') {
     return NextResponse.json({ error: '无权限' }, { status: 403 })

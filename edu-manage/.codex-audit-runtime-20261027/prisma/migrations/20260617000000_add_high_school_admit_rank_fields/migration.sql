@@ -1,0 +1,2 @@
+ALTER TABLE "HighSchoolInfo" ADD COLUMN IF NOT EXISTS "admitRankByYear" JSONB;
+ALTER TABLE "HighSchoolInfo" ADD COLUMN IF NOT EXISTS "admitRankRef" INTEGER;

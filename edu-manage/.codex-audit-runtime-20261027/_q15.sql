@@ -1,0 +1,3 @@
+SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name='Student' AND column_name IN ('id','name','grade','parentId','parentUserId','status','createdAt','updatedAt') ORDER BY ordinal_position;
+SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name='Enrollment' AND column_name IN ('id','groupId','studentId','subjects','status','createdAt','updatedAt') ORDER BY ordinal_position;
+SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name='ClassGroup' AND column_name IN ('id','teacherId','termId') ORDER BY ordinal_position;

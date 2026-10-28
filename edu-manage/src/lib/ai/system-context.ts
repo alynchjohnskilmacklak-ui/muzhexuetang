@@ -5,18 +5,21 @@
  * 1. /api/ai/chat —— 把摘要注入 system prompt，让 AI 回答时能引用系统真实数据
  * 2. /api/ai/system-digest —— 悬浮球气泡提示
  *
- * 注意：此处 parent 未读统计与 /api/parent/unread-counts 逻辑并行（暂未抽公共函数，
- * 下阶段统一抽取避免漂移；两处口径一致：均为六类未读求和）。
+ * parent 汇总与 /api/parent/unread-counts 共用通知去重条件和总数函数，
+ * 避免试卷、表现、反馈通知与其对应业务记录重复计数。
  */
 import type { PrismaClient } from '@prisma/client'
 import {
   parentLinkedStudentWhere,
   parentVisibleExamPaperWhere,
   parentVisiblePerformancePostWhere,
+  visibleClassLessonWhere,
   visibleNotificationWhere,
 } from '@/lib/business-visibility'
 import { unreadNotificationWhere } from '@/lib/notification-read-state'
 import { summarizeParentMessageWorkflow } from '@/lib/parent-message-workflow'
+import { standaloneParentNotificationWhere, sumParentUnreadItems } from '@/lib/parent-unread'
+import { teacherLessonWhere } from '@/lib/teacher-portal'
 
 export interface SystemDigest {
   role: string
@@ -26,7 +29,7 @@ export interface SystemDigest {
   text: string
 }
 
-type UserLite = { id: string; role: string }
+type UserLite = { id: string; role: string; teacherId?: string | null }
 
 function startOfDay(d: Date): Date {
   const x = new Date(d)
@@ -64,7 +67,12 @@ export async function buildSystemDigest(user: UserLite, prisma: PrismaClient): P
         },
       }),
       prisma.notification.count({
-        where: { userId: user.id, ...unreadNotificationWhere, ...visibleNotificationWhere },
+        where: {
+          userId: user.id,
+          ...unreadNotificationWhere,
+          ...visibleNotificationWhere,
+          ...standaloneParentNotificationWhere,
+        },
       }),
       prisma.classroomFeedback.count({
         where: { status: 'PUBLISHED', parentReadAt: null, studentIds: { hasSome: activeStudentIds } },
@@ -93,17 +101,30 @@ export async function buildSystemDigest(user: UserLite, prisma: PrismaClient): P
     if (feedbacks > 0) lines.push(`课堂反馈有 ${feedbacks} 条未读，建议及时查看`)
     if (papers > 0) lines.push(`有 ${papers} 份新试卷未读`)
     if (posts > 0) lines.push(`学习动态有 ${posts} 条未读`)
-    if (notifications > 0) lines.push(`系统通知有 ${notifications} 条未读`)
+    if (notifications > 0) lines.push(`另有 ${notifications} 条其他通知未读`)
     if (messages > 0) lines.push(`家校留言有 ${messages} 条未读`)
-    const total = papers + posts + notifications + feedbacks + studyHallHomework + messages
+    const total = sumParentUnreadItems({ papers, posts, notifications, feedbacks, messages })
     counts.total = total
     if (total === 0) lines.push('当前没有未读动态，一切正常')
   } else {
     // teacher / admin：今日课程数 + 未读通知
     const today = startOfDay(new Date())
     const todayEnd = nextDay(today)
+    // getCurrentUser resolves legacy/unbound teacher accounts before calling
+    // this function. Reuse that scoped id instead of reading only User.teacherId.
+    const teacherId = user.role === 'teacher' ? user.teacherId ?? null : null
+    const lessonScope = user.role === 'teacher'
+      ? teacherId ? teacherLessonWhere(teacherId) : null
+      : visibleClassLessonWhere
     const [todayLessons, notifications] = await Promise.all([
-      prisma.classLesson.count({ where: { lessonDate: { gte: today, lt: todayEnd } } }),
+      !lessonScope
+        ? Promise.resolve(0)
+        : prisma.classLesson.count({
+            where: {
+              ...lessonScope,
+              lessonDate: { gte: today, lt: todayEnd },
+            },
+          }),
       prisma.notification.count({
         where: { userId: user.id, ...unreadNotificationWhere, ...visibleNotificationWhere },
       }),

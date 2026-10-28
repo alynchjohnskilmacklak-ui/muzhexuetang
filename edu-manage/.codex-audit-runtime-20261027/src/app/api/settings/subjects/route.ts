@@ -1,0 +1,47 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
+import { getCurrentUser } from '@/lib/get-user'
+import { apiHandler } from '@/lib/api-handler'
+import { parseSubjectSettings } from '@/lib/subject-settings'
+
+export const dynamic = 'force-dynamic'
+
+// GET /api/settings/subjects — 获取学科列表
+export const GET = apiHandler(async () => {
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+
+
+  const prisma = await getRequestPrisma()
+  const subjects = await prisma.subject.findMany({
+    where: { isActive: true },
+    orderBy: { order: 'asc' },
+  })
+  return NextResponse.json(subjects)
+})
+
+// POST /api/settings/subjects — 新增学科
+export const POST = apiHandler(async (request: NextRequest) => {
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
+
+  let body: ReturnType<typeof parseSubjectSettings>
+  try { body = parseSubjectSettings(await request.json(), true) }
+  catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : '学科内容无效' }, { status: 400 }) }
+  const { name, color, textColor } = body
+  if (!name) return NextResponse.json({ error: '学科名称不能为空' }, { status: 400 })
+  if (await prisma.subject.findUnique({ where: { name } })) return NextResponse.json({ error: '该学科名称已存在' }, { status: 409 })
+
+  const max = await prisma.subject.aggregate({ _max: { order: true } })
+  const subject = await prisma.subject.create({
+    data: { name, color: color || '#E8784A', textColor: textColor || '#ffffff', order: (max._max.order ?? -1) + 1 },
+  })
+
+  await prisma.activityLog.create({
+    data: { userId: user.id, action: '新增了学科', detail: `添加了「${name}」` },
+  })
+
+  return NextResponse.json(subject, { status: 201 })
+})

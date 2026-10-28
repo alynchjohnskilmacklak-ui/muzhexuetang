@@ -5,6 +5,8 @@ import { apiHandler } from '@/lib/api-handler'
 import { parentLinkedStudentWhere, visibleNotificationWhere } from '@/lib/business-visibility'
 import { unreadNotificationWhere } from '@/lib/notification-read-state'
 import { NOTIFICATION_TYPE_LABEL } from '@/constants/notification-types'
+import { parentUnreadClassroomFeedbackWhere } from '@/lib/parent-unread'
+import { requireParentUser } from '@/lib/auth/guards'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,19 +44,36 @@ const TEACHER_ROUTE_SEGS = [
   'teaching-schedule', 'today-lessons',
 ]
 
-function pathSeg(raw: string): string | null {
-  const p = raw.split('?')[0].replace(/\/+$/, '')
-  const m = p.match(/^\/([^/]+)/)
-  return m ? m[1] : null
+function routeSegments(raw: string): string[] | null {
+  const pathname = raw.split(/[?#]/, 1)[0]
+  if (!pathname.startsWith('/') || pathname.startsWith('//') || pathname.includes('\\')) return null
+
+  try {
+    const segments = pathname.split('/').filter(Boolean).map(decodeURIComponent)
+    if (segments.some((segment) => !segment || segment === '.' || segment === '..' || /[\\/]/.test(segment))) return null
+    return segments
+  } catch {
+    return null
+  }
+}
+
+function pathSeg(raw: string, namespace?: 'parent' | 'teacher'): string | null {
+  const segments = routeSegments(raw)
+  if (!segments) return null
+  if (namespace) {
+    if (segments[0] !== namespace) return null
+    return segments[1] || null
+  }
+  return segments[0] || null
 }
 
 function isParentRoute(raw: string): boolean {
-  const seg = pathSeg(raw)
+  const seg = pathSeg(raw, 'parent')
   return !!seg && PARENT_ROUTE_SEGS.includes(seg)
 }
 
 function isTeacherRoute(raw: string): boolean {
-  const seg = pathSeg(raw)
+  const seg = pathSeg(raw, 'teacher')
   return !!seg && TEACHER_ROUTE_SEGS.includes(seg)
 }
 
@@ -71,8 +90,8 @@ const ADMIN_ROUTE_PREFIXES = [
 ]
 
 function isAdminRoute(raw: string): boolean {
-  const p = raw.split('?')[0].replace(/\/+$/, '')
-  return ADMIN_ROUTE_PREFIXES.some((seg) => p === `/${seg}` || p.startsWith(`/${seg}/`))
+  const seg = pathSeg(raw)
+  return !!seg && ADMIN_ROUTE_PREFIXES.includes(seg)
 }
 
 /**
@@ -82,7 +101,7 @@ function isAdminRoute(raw: string): boolean {
 function safeHref(raw: string | null | undefined, role: Role, relatedType: string | null | undefined): string {
   const t = (relatedType || '').toUpperCase()
 
-  if (raw && raw.startsWith('/')) {
+  if (raw && routeSegments(raw)) {
     if (role === 'parent' && isParentRoute(raw)) return raw
     if (role === 'teacher' && isTeacherRoute(raw)) return raw
     if (role === 'admin' && isAdminRoute(raw)) return raw
@@ -130,6 +149,10 @@ export const GET = apiHandler(async () => {
   const alerts: RecentAlert[] = []
 
   if (role === 'parent') {
+    // Keep dashboard alerts behind the same current-term entitlement check as
+    // the parent portal APIs; getCurrentUser validates the session but not this
+    // eligibility window.
+    await requireParentUser()
     const activeStudentIds = (
       await prisma.student.findMany({
         where: parentLinkedStudentWhere(user.id),
@@ -140,7 +163,7 @@ export const GET = apiHandler(async () => {
     const [feedbacks, notifications, replyRows] = await Promise.all([
       // ① 未读课堂反馈
       prisma.classroomFeedback.findMany({
-        where: { status: 'PUBLISHED', parentReadAt: null, studentIds: { hasSome: activeStudentIds } },
+        where: parentUnreadClassroomFeedbackWhere(user.id, activeStudentIds),
         select: {
           id: true,
           summary: true,
@@ -152,7 +175,17 @@ export const GET = apiHandler(async () => {
       }),
       // ② 未读系统通知
       prisma.notification.findMany({
-        where: { userId: user.id, ...unreadNotificationWhere, ...visibleNotificationWhere },
+        where: {
+          userId: user.id,
+          ...unreadNotificationWhere,
+          ...visibleNotificationWhere,
+          NOT: {
+            OR: [
+              { relatedType: { in: ['CLASSROOM_FEEDBACK', 'PARENT_MESSAGE', 'PARENT_MESSAGE_REPLY'] } },
+              { relatedType: null, type: { in: ['CLASSROOM_FEEDBACK', 'PARENT_MESSAGE', 'PARENT_MESSAGE_REPLY'] } },
+            ],
+          },
+        },
         select: {
           id: true,
           title: true,

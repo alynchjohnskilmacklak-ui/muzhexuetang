@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>AI 扩写参考 · 交互设计稿</title>
+<style>
+  :root{
+    --paper:#FAF8F5; --card:#FFFFFF; --ink:#2A2520; --mute:#8D806F;
+    --deep:#123C35; --accent:#E8784A; --line:#EEE7E1; --soft:#F4EFE9;
+    --good:#3A7D5C;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  body{background:var(--paper); color:var(--ink); font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif; padding-bottom:96px;}
+  .wrap{max-width:520px; margin:0 auto; padding:0 16px;}
+
+  /* ===== 顶部示意 ===== */
+  .demo-head{display:flex; align-items:center; gap:10px; padding:14px 0 10px;}
+  .demo-head .dot{width:12px;height:12px;border-radius:50%;background:var(--accent);}
+  .demo-head .title{font-size:15px;font-weight:700;}
+  .demo-head .sub{font-size:12px;color:var(--mute);margin-left:auto;}
+
+  /* ===== 表单卡片（仿现有反馈编辑区） ===== */
+  .field{margin-top:14px;}
+  .field .lbl{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .field .lbl .tag{font-size:11px;font-weight:500;color:var(--deep);background:#E4EBE7;padding:2px 8px;border-radius:20px;}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.7;color:var(--ink);}
+  .box.placeholder{color:#B9AE9F;font-size:13px;}
+  .box .row{display:flex;gap:8px;padding:4px 0;}
+  .box .row .chip{flex:1;background:var(--soft);border-radius:8px;padding:8px 10px;font-size:12.5px;color:var(--ink);}
+  .box .row .chip b{display:block;font-size:13px;}
+  .box .row .chip small{color:var(--mute);}
+  .box .row .chip .ok{color:var(--good);font-size:12px;}
+
+  /* ===== AI 扩写按钮 ===== */
+  .ai-btn-wrap{display:flex;gap:10px;margin-top:10px;align-items:stretch;}
+  .ai-btn{flex:1;background:linear-gradient(135deg,#145049,#123C35);color:#fff;border:none;border-radius:10px;padding:12px 14px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;}
+  .ai-btn:active{transform:scale(0.98);}
+  .ai-btn .spark{width:16px;height:16px;}
+  .ai-hint{font-size:12px;color:var(--mute);text-align:center;margin-top:6px;}
+
+  /* ===== 弹出层 ===== */
+  .mask{position:fixed;inset:0;background:rgba(18,38,35,0.45);backdrop-filter:blur(2px);display:none;align-items:flex-end;justify-content:center;z-index:50;}
+  .mask.open{display:flex;}
+  .sheet{background:#FDFCFA;width:100%;max-width:520px;border-radius:20px 20px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,0.18);max-height:88vh;display:flex;flex-direction:column;animation:rise .26s cubic-bezier(.2,.8,.2,1);}
+  @keyframes rise{from{transform:translateY(48px);opacity:.6;}to{transform:translateY(0);opacity:1;}}
+  .sheet-head{padding:16px 18px 12px;border-bottom:1px solid var(--line);position:relative;}
+  .sheet-head .grab{width:40px;height:4px;border-radius:2px;background:#DDD4C8;margin:0 auto 12px;}
+  .sheet-head .ttl{display:flex;align-items:center;gap:8px;}
+  .sheet-head .ttl .ai-badge{background:var(--deep);color:#fff;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;letter-spacing:.5px;}
+  .sheet-head .ttl h2{font-size:16px;font-weight:800;}
+  .sheet-head .close{position:absolute;top:22px;right:16px;width:30px;height:30px;border-radius:50%;background:var(--soft);border:none;font-size:15px;color:var(--mute);cursor:pointer;}
+  .sheet-head .tip{font-size:12px;color:var(--mute);margin-top:8px;line-height:1.5;}
+
+  /* 学生 tab */
+  .stu-tabs{display:flex;gap:8px;padding:12px 18px 0;overflow-x:auto;scrollbar-width:none;}
+  .stu-tabs::-webkit-scrollbar{display:none;}
+  .stu-tab{flex:none;display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;background:#F1ECE4;border:1.5px solid transparent;font-size:13px;font-weight:600;color:var(--mute);cursor:pointer;}
+  .stu-tab .ava{width:22px;height:22px;border-radius:50%;background:var(--deep);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+  .stu-tab.active{background:#fff;border-color:var(--deep);color:var(--deep);box-shadow:0 2px 8px rgba(18,60,53,.12);}
+
+  /* 评语卡 */
+  .stu-body{flex:1;overflow-y:auto;padding:14px 18px 16px;}
+  .quote-card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:14px 14px 10px;box-shadow:0 3px 14px rgba(120,90,60,.07);}
+  .quote-card .q-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .quote-card .q-name{font-size:14px;font-weight:800;color:var(--deep);}
+  .quote-card .q-name em{font-style:normal;color:var(--accent);}
+  .quote-card .q-adopt{font-size:12px;font-weight:700;color:#fff;background:var(--deep);border:none;border-radius:8px;padding:6px 14px;cursor:pointer;}
+  .quote-card .q-adopt:active{transform:scale(.97);}
+  .seg{margin-top:8px;}
+  .seg .seg-t{font-size:12.5px;font-weight:700;color:var(--deep);margin-bottom:3px;}
+  .seg .seg-b{font-size:13.5px;line-height:1.75;color:#3D362E;}
+
+  .sheet-foot{padding:12px 18px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;gap:10px;background:#FDFCFA;}
+  .btn{flex:1;border-radius:10px;padding:13px;font-size:14.5px;font-weight:700;border:none;cursor:pointer;}
+  .btn.ghost{background:#F1ECE4;color:var(--ink);}
+  .btn.primary{background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(232,120,74,.3);}
+  .btn.primary:active{transform:scale(.98);}
+
+  /* toast */
+  .toast{position:fixed;left:50%;top:18px;transform:translateX(-50%) translateY(-80px);background:rgba(18,38,35,.94);color:#fff;padding:10px 18px;border-radius:24px;font-size:13.5px;z-index:60;transition:transform .3s;opacity:0;pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+  .note{background:#FBF3EC;border:1px dashed #E8C9B4;border-radius:10px;padding:10px 12px;font-size:12px;color:#8A5B3F;line-height:1.6;margin-top:12px;}
+  .note b{color:#B4532B;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- 顶部示意 -->
+  <div class="demo-head">
+    <span class="dot"></span>
+    <span class="title">教师端 · 课堂反馈</span>
+    <span class="sub">设计稿 v1</span>
+  </div>
+
+  <!-- 已勾选学生（示意：点击写评语的对象） -->
+  <div class="field">
+    <div class="lbl">已勾选学生 <span class="tag">3 人</span></div>
+    <div class="box">
+      <div class="row">
+        <div class="chip"><b>郝学文</b><small>初二 · 数学</small><span class="ok">✓</span></div>
+        <div class="chip"><b>马紫晨</b><small>初三 · 数学</small><span class="ok">✓</span></div>
+        <div class="chip"><b>默思涵</b><small>初二 · 数学</small><span class="ok">✓</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 本节课学习内容 -->
+  <div class="field">
+    <div class="lbl">本节课学习内容</div>
+    <div class="box">一元二次方程 · 根与系数的关系（韦达定理）</div>
+  </div>
+
+  <!-- 孩子掌握情况 -->
+  <div class="field">
+    <div class="lbl">孩子掌握情况</div>
+    <div class="box placeholder">请确认本节讲授的章节、知识点和练习</div>
+  </div>
+
+  <!-- 课堂反馈（老师写完 → AI 扩写） -->
+  <div class="field">
+    <div class="lbl">课堂反馈 <span style="font-weight:400;color:var(--mute);font-size:12px;">（先写几句，再让 AI 扩写成篇）</span></div>
+    <div class="box">同学上课认真，这节课主要讲的二元一次方程根与系数的关系，韦达定理</div>
+  </div>
+
+  <!-- AI 扩写按钮 -->
+  <div class="ai-btn-wrap">
+    <button class="ai-btn" onclick="openSheet()">
+      <svg class="spark" viewBox="0 0 24 24" fill="none"><path d="M12 2L14.2 9.8L22 12L14.2 14.2L12 22L9.8 14.2L2 12L9.8 9.8L12 2Z" fill="#fff"/></svg>
+      AI 扩写成一篇文章
+    </button>
+  </div>
+  <div class="ai-hint">按已勾选的 3 名学生分别生成，称呼自动带姓名</div>
+
+  <div class="note">
+    <b>本次交互改动：</b>1️⃣ 老师先写完课堂反馈要点 → 点「AI 扩写成一篇文章」；2️⃣ 底部弹出 AI 实例预览（每个勾选学生一张评语卡）；3️⃣ 点「采用此条」或「全部采用」→ 内容直接补进对应学生评语，弹窗关闭。
+  </div>
+</div>
+
+<!-- ===== 弹出层 ===== -->
+<div class="mask" id="mask">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div class="grab"></div>
+      <div class="ttl"><span class="ai-badge">AI</span><h2>AI 扩写参考</h2></div>
+      <button class="close" onclick="closeSheet()">✕</button>
+      <div class="tip">基于你的输入为 <b style="color:var(--deep)">3 名学生</b> 分别扩写，评语将自动带学生姓名；可逐条采用。</div>
+    </div>
+
+    <div class="stu-tabs" id="stuTabs"></div>
+
+    <div class="stu-body" id="stuBody"></div>
+
+    <div class="sheet-foot">
+      <button class="btn ghost" onclick="closeSheet()">取消</button>
+      <button class="btn primary" onclick="adoptAll()">全部采用 · 补进评语</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const students = [
+    { id:'s1', name:'郝学文', grade:'初二 · 数学', color:'#123C35' },
+    { id:'s2', name:'马紫晨', grade:'初三 · 数学', color:'#8A5B3F' },
+    { id:'s3', name:'默思涵', grade:'初二 · 数学', color:'#B4532B' },
+  ]
+  const quotes = {
+    s1: {
+      segs: [
+        ['课堂表现','郝学文同学，能够主动参与课堂互动，讲评韦达定理时能跟上思路，遇到不会的也及时问老师，状态在线。'],
+        ['知识掌握','本节课主要讲了一元二次方程根与系数的关系（韦达定理），郝学文同学对公式记忆和简单应用掌握得比较扎实，课后建议再独立做 2~3 道含“两根之和、两根之积”的题目巩固。'],
+        ['存在问题','目前主要是对含参数方程的变形还不够熟练，列式后偶尔会在符号上出错，稍加提醒即可纠正。'],
+        ['后续建议','课后及时复盘本节内容，把听懂的部分落实到练习中；有不会的及时问老师，继续保持课堂参与度。'],
+      ]
+    },
+    s2: {
+      segs: [
+        ['课堂表现','马紫晨同学，这节课讲一元二次方程根与系数的关系，她听讲专注，笔记完整，提问后能较快复述出韦达定理的要点。'],
+        ['知识掌握','对韦达定理的理解到位，能快速写出两根之和与两根之积，正确率较高；建议再把“已知一根求另一根”的题型练熟。'],
+        ['存在问题','个别综合题中忘记先判断判别式，导致列出方程后才发现无实根，做题顺序还需规范。'],
+        ['后续建议','做题时先看判别式再列关系式，养成固定步骤；课后做两道综合题巩固，有问题随时问老师。'],
+      ]
+    },
+    s3: {
+      segs: [
+        ['课堂表现','默思涵同学，课堂参与积极，韦达定理练习时主动上黑板演示，讲解思路清晰，受到同学认可。'],
+        ['知识掌握','本节课关于根与系数的关系掌握良好，能独立完成基础题，复杂一点的含参数题需要老师稍作提示。'],
+        ['存在问题','做题节奏偏快，个别题目没看清条件就下笔，导致漏写“两根之和”前的整理步骤。'],
+        ['后续建议','适当放慢审题速度，圈出关键条件再动笔；回家把今天的例题重新做一遍，巩固韦达定理的应用。'],
+      ]
+    },
+  }
+
+  let activeId = 's1'
+  const toastEl = document.getElementById('toast')
+
+  function renderTabs(){
+    const tabs = document.getElementById('stuTabs')
+    tabs.innerHTML = students.map(s => `
+      <div class="stu-tab ${s.id===activeId?'active':''}" onclick="switchStu('${s.id}')">
+        <span class="ava" style="background:${s.color}">${s.name[0]}</span>${s.name}
+      </div>`).join('')
+  }
+  function renderBody(){
+    const q = quotes[activeId]
+    const s = students.find(x => x.id === activeId)
+    document.getElementById('stuBody').innerHTML = `
+      <div class="quote-card">
+        <div class="q-head">
+          <div class="q-name"><em>${s.name}</em>同学 · 专属评语</div>
+          <button class="q-adopt" onclick="adoptOne('${activeId}')">采用此条</button>
+        </div>
+        ${q.segs.map(([t,b],i) => `<div class="seg"><div class="seg-t">${t}</div><div class="seg-b">${b}</div></div>`).join('')}
+      </div>`
+  }
+  function switchStu(id){ activeId = id; renderTabs(); renderBody(); }
+  function openSheet(){
+    document.getElementById('mask').classList.add('open')
+    renderTabs(); renderBody()
+  }
+  function closeSheet(){ document.getElementById('mask').classList.remove('open') }
+  function toast(msg){
+    toastEl.textContent = msg
+    toastEl.classList.add('show')
+    clearTimeout(window.__t)
+    window.__t = setTimeout(()=>toastEl.classList.remove('show'), 2200)
+  }
+  function adoptOne(id){
+    const s = students.find(x=>x.id===id)
+    toast(`已补进 ${s.name}同学 的课堂反馈 ✓`)
+    closeSheet()
+  }
+  function adoptAll(){
+    toast(`已按 3 名学生分别补进评语 ✓`)
+    closeSheet()
+  }
+  document.getElementById('mask').addEventListener('click', e=>{ if(e.target.id==='mask') closeSheet() })
+</script>
+</body>
+</html>

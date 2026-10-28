@@ -101,9 +101,14 @@ const STORAGE_KEY = 'muzhe-ai-launcher-v1'
 const PEEK_SIZE = 44 // 贴边时露出的宽度
 const EDGE_GAP = 24 // 展开时距边缘的间距（桌面）
 const BADGE_MAX = 99
-const TOP_SAFE = 16 // 垂直拖动时的顶部安全距离
+const TOP_SAFE = 72 // 留出顶部导航栏和间距，避免遮挡账号入口
 const BOTTOM_SAFE_MOBILE = 96 // 移动端底部安全距离（避开底部导航）
 const BOTTOM_SAFE_DESKTOP = 24
+
+function getVerticalBounds(viewportHeight: number, ballSize: number, bottomSafe: number) {
+  const maxTop = Math.max(4, viewportHeight - ballSize - bottomSafe)
+  return { minTop: Math.min(TOP_SAFE, maxTop), maxTop }
+}
 
 interface LauncherPref {
   side: 'left' | 'right'
@@ -116,7 +121,7 @@ function defaultTop(): number {
   try {
     const isMobile = window.innerWidth < 768
     const bottomSafe = isMobile ? BOTTOM_SAFE_MOBILE : BOTTOM_SAFE_DESKTOP
-    return Math.max(TOP_SAFE, window.innerHeight - 56 - bottomSafe)
+    return getVerticalBounds(window.innerHeight, 56, bottomSafe).maxTop
   } catch {
     return 400
   }
@@ -127,7 +132,24 @@ function loadPref(): LauncherPref {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as LauncherPref
-      if ((parsed.side === 'left' || parsed.side === 'right') && Number.isFinite(parsed.top)) return parsed
+      if ((parsed.side === 'left' || parsed.side === 'right') && Number.isFinite(parsed.top)) {
+        const mobile = window.innerWidth < 768
+        const ballSize = mobile ? 52 : 56
+        const bottomSafe = mobile ? BOTTOM_SAFE_MOBILE : BOTTOM_SAFE_DESKTOP
+        const maxX = Math.max(4, window.innerWidth - ballSize - 4)
+        const { minTop, maxTop } = getVerticalBounds(window.innerHeight, ballSize, bottomSafe)
+        const savedX = Number.isFinite(parsed.x) && parsed.x >= 0 ? parsed.x : EDGE_GAP
+        // Old versions allowed the launcher to be saved at the very top of
+        // the viewport. Clamping that legacy value to TOP_SAFE still leaves it
+        // over page content on mobile, so migrate it to the safe default spot.
+        const savedTop = Number.isFinite(parsed.top) ? parsed.top : defaultTop()
+        return {
+          side: parsed.side,
+          x: Math.min(maxX, Math.max(4, savedX)),
+          top: savedTop <= minTop ? defaultTop() : Math.min(maxTop, savedTop),
+          expanded: parsed.expanded === true,
+        }
+      }
     }
   } catch {}
   return { side: 'right', x: EDGE_GAP, top: defaultTop(), expanded: false }
@@ -139,6 +161,7 @@ export function AIFloatingLauncher() {
   const [open, setOpen] = useState(false)
   const [peeked, setPeeked] = useState(true)
   const [pref, setPref] = useState<LauncherPref>({ side: 'right', x: EDGE_GAP, top: 400 })
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null)
   const [unread, setUnread] = useState(0)
   // 最近通知预览（未展开时也常驻展示，点击可跳转）
   const [alerts, setAlerts] = useState<RecentAlert[]>([])
@@ -165,6 +188,24 @@ export function AIFloatingLauncher() {
     const loaded = loadPref()
     setPref(loaded)
     setPeeked(!(loaded.expanded ?? false))
+
+    const syncViewportBounds = () => {
+      const mobile = window.innerWidth < 768
+      const size = mobile ? 52 : 56
+      const bottomSafe = mobile ? BOTTOM_SAFE_MOBILE : BOTTOM_SAFE_DESKTOP
+      const maxX = Math.max(4, window.innerWidth - size - 4)
+      const { minTop, maxTop } = getVerticalBounds(window.innerHeight, size, bottomSafe)
+      setViewportHeight(window.innerHeight)
+      setPref((current) => ({
+        ...current,
+        x: Math.min(maxX, Math.max(4, current.x)),
+        top: Math.min(maxTop, Math.max(minTop, current.top)),
+      }))
+    }
+
+    syncViewportBounds()
+    window.addEventListener('resize', syncViewportBounds)
+    return () => window.removeEventListener('resize', syncViewportBounds)
   }, [])
 
   // 打开时锁定背景滚动
@@ -184,10 +225,8 @@ export function AIFloatingLauncher() {
       const res = await fetch('/api/parent/unread-counts', { cache: 'no-store' })
       if (!res.ok) return
       const data = await res.json()
-      const total = [data.papers, data.posts, data.notifications, data.feedbacks, data.studyHallHomework, data.messages]
-        .filter(Number.isFinite)
-        .reduce((sum: number, n: number) => sum + (n || 0), 0)
-      setUnread(total)
+      const total = Number(data.total)
+      if (Number.isFinite(total) && total >= 0) setUnread(Math.floor(total))
     } catch {}
   }, [role])
 
@@ -211,7 +250,7 @@ export function AIFloatingLauncher() {
 
   const ballSize = isMobile ? 52 : 56
   const panelWidth = isMobile ? 'calc(100vw - 20px)' : 420
-  const panelHeight = isMobile ? 'min(78vh, 680px)' : 640
+  const panelHeight = isMobile ? 'min(78vh, 680px)' : 'min(640px, calc(100vh - 24px))'
 
   const side = pref.side
 
@@ -255,8 +294,9 @@ export function AIFloatingLauncher() {
       if (!d.moved) return
       // 全屏自由跟随（clamp 防拖出屏幕）
       const bottomSafe = isMobile ? BOTTOM_SAFE_MOBILE : BOTTOM_SAFE_DESKTOP
+      const { minTop, maxTop } = getVerticalBounds(window.innerHeight, ballSize, bottomSafe)
       const left = Math.max(4, Math.min(e.clientX - ballSize / 2, window.innerWidth - ballSize - 4))
-      const top = Math.max(TOP_SAFE, Math.min(e.clientY - ballSize / 2, window.innerHeight - ballSize - bottomSafe))
+      const top = Math.max(minTop, Math.min(e.clientY - ballSize / 2, maxTop))
       setDragPos({ left, top })
     },
     [ballSize, isMobile],
@@ -274,12 +314,13 @@ export function AIFloatingLauncher() {
     }
     // 四边吸附：松手时收回离球最近的边，绝不停在屏幕中间
     const bottomSafe = isMobile ? BOTTOM_SAFE_MOBILE : BOTTOM_SAFE_DESKTOP
+    const { minTop, maxTop } = getVerticalBounds(window.innerHeight, ballSize, bottomSafe)
     const centerX = pos.left + ballSize / 2
     const centerY = pos.top + ballSize / 2
     const dist = {
       left: centerX,
       right: window.innerWidth - centerX,
-      top: centerY - TOP_SAFE,
+      top: centerY - minTop,
       bottom: window.innerHeight - centerY - bottomSafe,
     }
     const nearest = (Object.keys(dist) as Array<keyof typeof dist>).reduce((a, b) => (dist[a] <= dist[b] ? a : b))
@@ -291,16 +332,17 @@ export function AIFloatingLauncher() {
     if (nearest === 'left' || nearest === 'right') {
       // 左右边：贴边收起（露出一点 + 红点提示）
       nextSide = nearest === 'left' ? 'left' : 'right'
-      x = -(ballSize - PEEK_SIZE)
+      // x 始终保存展开态的正边距；收起时的负位置由 displayX 临时计算。
+      x = EDGE_GAP
       top = pos.top // 垂直位置保留
       expanded = false
     } else if (nearest === 'top') {
       // 上边：贴顶完整显示
-      top = TOP_SAFE
+      top = minTop
       expanded = true
     } else {
       // 下边：贴底完整显示
-      top = window.innerHeight - ballSize - bottomSafe
+      top = maxTop
       expanded = true
     }
     setPeeked(!expanded)
@@ -358,9 +400,11 @@ export function AIFloatingLauncher() {
   }
   if (side === 'left') panelStyle.left = isMobile ? 10 : 24
   else panelStyle.right = isMobile ? 10 : 24
-  if (!isMobile && !dragPos) {
+  if (!isMobile && !dragPos && viewportHeight !== null) {
     // 桌面端：面板在悬浮球附近垂直展开（不遮挡球）
-    const panelTop = Math.min(pref.top + ballSize + 10, window.innerHeight - 640 - 12)
+    const actualPanelHeight = Math.min(640, Math.max(0, viewportHeight - 24))
+    const maxPanelTop = Math.max(12, viewportHeight - actualPanelHeight - 12)
+    const panelTop = Math.min(pref.top + ballSize + 10, maxPanelTop)
     panelStyle.top = Math.max(12, panelTop)
     delete panelStyle.bottom
   }
@@ -373,7 +417,7 @@ export function AIFloatingLauncher() {
     zIndex: 1085,
     width: 'min(320px, calc(100vw - 20px))',
   }
-  if (alerts.length > 0 && !alertsDismissed && !open) {
+  if (!isMobile && alerts.length > 0 && !alertsDismissed && !open) {
     const vw = typeof window !== 'undefined' ? window.innerWidth : 800
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800
     const tipBallLeft = dragPos ? dragPos.left : side === 'right' ? vw - (displayX as number) - ballSize : (displayX as number)
@@ -418,8 +462,8 @@ export function AIFloatingLauncher() {
 
   return (
     <>
-      {/* 最近通知预览：登录后常驻展示，点击条目直达对应页面 */}
-      {alerts.length > 0 && !alertsDismissed && !open && (
+      {/* 桌面端显示最近通知预览；手机端使用导航和浮球未读标记，避免遮挡当前内容 */}
+      {!isMobile && alerts.length > 0 && !alertsDismissed && !open && (
         <div
           role="status"
           style={{

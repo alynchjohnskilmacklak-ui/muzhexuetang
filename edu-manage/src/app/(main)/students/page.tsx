@@ -398,7 +398,7 @@ export default function StudentsPage() {
                 aria-label="学员状态"
                 value={filterStatus || ''}
                 onChange={(event) => handleStatusChange(event.target.value || undefined)}
-                style={{ width: '100%', minWidth: 0, height: 40, padding: '0 10px', border: '1px solid #EFE3DC', borderRadius: 10, background: '#fff', color: '#1a1201' }}
+                style={{ width: '100%', minWidth: 0, height: 44, padding: '0 10px', border: '1px solid var(--color-hairline-strong)', borderRadius: 10, background: 'var(--color-surface-1)', color: 'var(--color-ink)', fontSize: 16 }}
               >
                 <option value="">全部状态</option>
                 <option value="LEAD">潜客</option><option value="TRIAL">试听</option><option value="ACTIVE">在读</option><option value="COMPLETED">结课</option><option value="INACTIVE">离校</option>
@@ -420,7 +420,7 @@ export default function StudentsPage() {
                 aria-label="年级筛选"
                 value={filterGrade === 'all' ? '' : filterGrade}
                 onChange={(event) => handleGradeChange(event.target.value || 'all')}
-                style={{ width: '100%', minWidth: 0, height: 40, padding: '0 10px', border: '1px solid #EFE3DC', borderRadius: 10, background: '#fff', color: '#1a1201' }}
+                style={{ width: '100%', minWidth: 0, height: 44, padding: '0 10px', border: '1px solid #EFE3DC', borderRadius: 10, background: '#fff', color: '#1a1201', fontSize: 16 }}
               >
                 <option value="">全部年级</option>
                 {GRADE_SELECT_OPTIONS.map((grade) => <option key={grade} value={grade}>{grade}</option>)}
@@ -433,10 +433,32 @@ export default function StudentsPage() {
                 options={GRADE_SELECT_OPTIONS.map((grade) => ({ label: grade, value: grade }))}
               />}
               {isMobile ? <select
+                aria-label="班型筛选"
+                value={filterType}
+                onChange={(event) => handleTypeChange(event.target.value)}
+                style={{ width: '100%', minWidth: 0, height: 44, padding: '0 10px', border: '1px solid var(--color-hairline-strong)', borderRadius: 10, background: 'var(--color-surface-1)', color: 'var(--color-ink)', fontSize: 16 }}
+              >
+                {TYPE_FILTERS.map((item) => <option key={item.value} value={item.value}>{item.value === 'all' ? '全部班型' : item.label}</option>)}
+              </select> : null}
+              {isMobile ? <Button
+                block
+                aria-label={`欠费预警筛选，${lowHourCount} 名学员剩余课时不超过 3 节`}
+                aria-pressed={lowHourOnly}
+                onClick={() => {
+                  const next = !lowHourOnly
+                  setLowHourOnly(next)
+                  updateUrl({ lowHour: next })
+                }}
+                icon={<WarningOutlined />}
+                style={{ minWidth: 0, minHeight: 44, paddingInline: 8, borderColor: lowHourOnly ? 'var(--color-warning)' : 'var(--color-hairline-strong)', background: lowHourOnly ? 'var(--color-warning-bg)' : 'var(--color-surface-1)', color: lowHourOnly ? 'var(--color-warning-text)' : 'var(--color-ink)' }}
+              >
+                欠费预警（{lowHourCount}）
+              </Button> : null}
+              {isMobile ? <select
                 aria-label="排序方式"
                 value={sortBy}
                 onChange={(event) => handleSortChange(event.target.value as StudentSortBy)}
-                style={{ width: '100%', minWidth: 0, height: 40, padding: '0 10px', border: '1px solid #EFE3DC', borderRadius: 10, background: '#fff', color: '#1a1201', gridColumn: '1 / -1' }}
+                style={{ width: '100%', minWidth: 0, height: 44, padding: '0 10px', border: '1px solid var(--color-hairline-strong)', borderRadius: 10, background: 'var(--color-surface-1)', color: 'var(--color-ink)', fontSize: 16, gridColumn: '1 / -1' }}
               >
                 <option value="createdAt">最近添加</option><option value="nameAsc">姓名 A-Z</option><option value="nameDesc">姓名 Z-A</option><option value="remainHoursAsc">已上课时升序</option><option value="remainHoursDesc">已上课时降序</option>
               </select> : <Select

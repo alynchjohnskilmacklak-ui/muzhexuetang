@@ -20,6 +20,7 @@ model User {
   wxpusherUid         String?
   qywxUserId          String?
   qywxExternalUserId  String?
+  qywxSenderUserId    String?
   teacherId           String?   @unique
   currentSessionToken String?
   lastLoginAt         DateTime?
@@ -716,6 +717,7 @@ model Notification {
   pushError       String?
   attempts        Int       @default(0)
   lastError       String?
+  qywxMsgId       String?
   sentAt          DateTime?
   createdAt       DateTime  @default(now())
   deletedAt       DateTime?
@@ -1759,7 +1761,7 @@ model StudyHallHomeworkEntry {
   student     Student              @relation(fields: [studentId], references: [id], onDelete: Restrict)
   session     StudyHallSession?    @relation(fields: [sessionId], references: [id], onDelete: Restrict)
 
-  @@unique([classRecordId, studentId, attendanceKey])
+  @@unique([classRecordId, studentId, attendanceKey], map: "StudyHallHomeworkEntry_classRecordId_studentId_attendanceKey_ke")
   @@index([studentId, checkedIn, updatedAt])
   @@index([sessionId, checkedIn])
 }

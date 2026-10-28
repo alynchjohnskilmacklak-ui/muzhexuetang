@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>教师端 · 学生标签升级预览</title>
+<style>
+  :root {
+    --ink: #2B2B2B;
+    --mute: #8A8F8A;
+    --line: #E8E6E0;
+    --paper: #F6F5F1;
+    --card: #FFFFFF;
+    --main: #D96A3B;   /* 暖橙主色 */
+    --main-deep: #C25A2E;
+    --main-soft: #FBEEE6;
+    --tag-bg: #F2F0EB;
+    --ok: #4A8B57;
+    --mid: #5B7A9A;
+    --warn: #C25A2E;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 16px 14px 40px;
+    max-width: 560px;
+    margin: 0 auto;
+    -webkit-text-size-adjust: 100%;
+  }
+  .top {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 4px 14px;
+  }
+  .top .back { font-size: 22px; color: var(--mute); }
+  .top h1 { font-size: 17px; font-weight: 600; flex: 1; }
+  .top .badge {
+    font-size: 11px; color: var(--main-deep); background: var(--main-soft);
+    padding: 4px 8px; border-radius: 20px; font-weight: 600;
+  }
+  .notice {
+    background: var(--main-soft); border: 1px solid #F3D9C6;
+    border-radius: 10px; padding: 10px 12px; font-size: 12.5px;
+    color: #8A4B24; line-height: 1.6; margin-bottom: 16px;
+  }
+  .notice b { color: var(--main-deep); }
+
+  /* 学生卡片 */
+  .stu {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 14px 14px 12px; margin-bottom: 14px;
+  }
+  .stu-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .stu-head .name { font-size: 15px; font-weight: 600; }
+  .stu-head .grade { font-size: 11px; color: var(--mute); margin-left: -4px; }
+  .stu-head .spacer { flex: 1; }
+  .level { display: flex; gap: 6px; }
+  .level button {
+    font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--line);
+    background: #FAF9F6; color: var(--mute); cursor: pointer;
+  }
+  .level button.on.pos { background: var(--ok); border-color: var(--ok); color: #fff; font-weight: 600; }
+  .level button.on.mid { background: var(--mid); border-color: var(--mid); color: #fff; font-weight: 600; }
+  .level button.on.neg { background: var(--warn); border-color: var(--warn); color: #fff; font-weight: 600; }
+  .stu-head .del { font-size: 15px; color: #C9C6BE; background: none; border: none; cursor: pointer; padding: 0 2px; }
+
+  .tags {
+    display: flex; flex-wrap: wrap; gap: 7px;
+    margin-bottom: 4px;
+  }
+  .tags .row-label {
+    font-size: 11px; color: var(--mute); flex-basis: 100%;
+    margin: 6px 0 -2px;
+  }
+  .tags .row-label:first-child { margin-top: 0; }
+  .tag {
+    font-size: 12px; padding: 5px 11px; border-radius: 16px;
+    background: var(--tag-bg); color: #5A5A55; border: 1px solid transparent;
+    cursor: pointer; transition: all .15s;
+  }
+  .tag.on { background: var(--main); border-color: var(--main); color: #fff; font-weight: 600; }
+  .tag.add {
+    background: transparent; border: 1px dashed #CFC9BE; color: var(--main-deep);
+    font-weight: 600; padding: 5px 10px;
+  }
+  .tag.add:hover { background: var(--main-soft); }
+  .tag.new-tag { border-color: var(--main); color: var(--main-deep); background: #fff; }
+
+  /* 补充说明 */
+  .extra {
+    margin-top: 12px; border-top: 1px dashed #EFE9E0; padding-top: 10px;
+  }
+  .extra .label { font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--ink); }
+  .extra .label .new {
+    display: inline-block; font-size: 10px; color: #fff; background: var(--main);
+    border-radius: 10px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px;
+  }
+  .extra textarea {
+    width: 100%; border: 1px solid var(--line); border-radius: 10px;
+    background: #FBFAF7; font-size: 13px; line-height: 1.7;
+    padding: 9px 11px; resize: none; height: 52px; color: var(--ink);
+    font-family: inherit;
+  }
+  .extra textarea:focus { outline: none; border-color: var(--main); background: #fff; }
+  .extra .hint { font-size: 11px; color: var(--mute); margin-top: 5px; line-height: 1.6; }
+  .extra .hint b { color: var(--main-deep); font-weight: 600; }
+
+  /* 底部说明 */
+  .how {
+    margin-top: 8px; background: #fff; border: 1px solid var(--line);
+    border-radius: 14px; padding: 14px;
+  }
+  .how h2 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .how .sub { font-size: 12px; color: var(--mute); margin-bottom: 10px; }
+  .how .step { display: flex; gap: 10px; margin-bottom: 10px; }
+  .how .step:last-child { margin-bottom: 0; }
+  .how .step .no {
+    width: 20px; height: 20px; border-radius: 50%; flex: none;
+    background: var(--main-soft); color: var(--main-deep);
+    font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .how .step .body { font-size: 12.5px; line-height: 1.65; color: #4A4A46; }
+  .how .step .body b { color: var(--ink); }
+
+  .foot {
+    text-align: center; font-size: 11px; color: #B5B2A9; margin-top: 16px;
+    padding-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="top">
+    <span class="back">‹</span>
+    <h1>课堂反馈 · 学生表现</h1>
+    <span class="badge">升级预览</span>
+  </div>
+
+  <div class="notice">
+    三层机制：<b>标签</b>保证反馈内容结构化不跑偏；<b>补充说明</b>让标签外的表现也能写进去（AI 优先按原话展开）；
+    多学生生成时 <b>AI 自动差异化</b>，不会千篇一律。
+  </div>
+
+  <!-- 牛博研 -->
+  <div class="stu">
+    <div class="stu-head">
+      <span class="name">牛博研</span><span class="grade">· 初一</span>
+      <span class="spacer"></span>
+      <div class="level">
+        <button class="pos">积极</button>
+        <button class="mid on">一般</button>
+        <button class="neg">需提升</button>
+      </div>
+      <button class="del">×</button>
+    </div>
+    <div class="tags">
+      <div class="row-label">掌握情况（选 1 个）</div>
+      <button class="tag">掌握</button>
+      <button class="tag">掌握扎实</button>
+      <button class="tag on">基本掌握</button>
+      <button class="tag">部分掌握</button>
+      <button class="tag">需巩固</button>
+      <div class="row-label">课堂表现（可多选）</div>
+      <button class="tag">专注听讲</button>
+      <button class="tag on">积极发言</button>
+      <button class="tag">书写认真</button>
+      <button class="tag on">练习完成</button>
+      <button class="tag">有进步</button>
+      <button class="tag">易走神</button>
+      <button class="tag">粗心出错</button>
+      <button class="tag">需多鼓励</button>
+      <button class="tag add" data-add>＋ 添加标签</button>
+    </div>
+    <div class="extra">
+      <div class="label">补充说明<span class="new">新增</span></div>
+      <textarea placeholder="标签里没有的表现写在这里，例如：今天有点低烧，但坚持完成了全部练习"></textarea>
+      <div class="hint">写了补充说明后，AI 会<b>优先按你的原话</b>展开；没写则按标签生成。</div>
+    </div>
+  </div>
+
+  <!-- 马子墨 -->
+  <div class="stu">
+    <div class="stu-head">
+      <span class="name">马子墨</span><span class="grade">· 初一</span>
+      <span class="spacer"></span>
+      <div class="level">
+        <button class="pos on">积极</button>
+        <button class="mid">一般</button>
+        <button class="neg">需提升</button>
+      </div>
+      <button class="del">×</button>
+    </div>
+    <div class="tags">
+      <div class="row-label">掌握情况（选 1 个）</div>
+      <button class="tag">掌握</button>
+      <button class="tag on">掌握扎实</button>
+      <button class="tag">基本掌握</button>
+      <button class="tag">部分掌握</button>
+      <button class="tag">需巩固</button>
+      <div class="row-label">课堂表现（可多选）</div>
+      <button class="tag on">专注听讲</button>
+      <button class="tag">积极发言</button>
+      <button class="tag">书写认真</button>
+      <button class="tag on">练习完成</button>
+      <button class="tag">有进步</button>
+      <button class="tag">易走神</button>
+      <button class="tag">粗心出错</button>
+      <button class="tag">需多鼓励</button>
+      <button class="tag add" data-add>＋ 添加标签</button>
+    </div>
+    <div class="extra">
+      <div class="label">补充说明<span class="new">新增</span></div>
+      <textarea placeholder="例如：今天主动帮同桌讲题，还问了一道超纲题"></textarea>
+      <div class="hint">写了补充说明后，AI 会<b>优先按你的原话</b>展开；没写则按标签生成。</div>
+    </div>
+  </div>
+
+  <!-- 李婉清 -->
+  <div class="stu">
+    <div class="stu-head">
+      <span class="name">李婉清</span><span class="grade">· 初一</span>
+      <span class="spacer"></span>
+      <div class="level">
+        <button class="pos">积极</button>
+        <button class="mid on">一般</button>
+        <button class="neg">需提升</button>
+      </div>
+      <button class="del">×</button>
+    </div>
+    <div class="tags">
+      <div class="row-label">掌握情况（选 1 个）</div>
+      <button class="tag">掌握</button>
+      <button class="tag">掌握扎实</button>
+      <button class="tag on">基本掌握</button>
+      <button class="tag">部分掌握</button>
+      <button class="tag">需巩固</button>
+      <div class="row-label">课堂表现（可多选）</div>
+      <button class="tag">专注听讲</button>
+      <button class="tag">积极发言</button>
+      <button class="tag">书写认真</button>
+      <button class="tag">练习完成</button>
+      <button class="tag">有进步</button>
+      <button class="tag on">易走神</button>
+      <button class="tag on">粗心出错</button>
+      <button class="tag">需多鼓励</button>
+      <button class="tag add" data-add>＋ 添加标签</button>
+    </div>
+    <div class="extra">
+      <div class="label">补充说明<span class="new">新增</span></div>
+      <textarea placeholder="例如：后半节课明显分心，需要提醒才回到题目上"></textarea>
+      <div class="hint">写了补充说明后，AI 会<b>优先按你的原话</b>展开；没写则按标签生成。</div>
+    </div>
+  </div>
+
+  <!-- 机制说明 -->
+  <div class="how">
+    <h2>为什么这样改</h2>
+    <div class="sub">解决「标签里没有的情况」与「反馈千篇一律」</div>
+    <div class="step">
+      <span class="no">1</span>
+      <div class="body"><b>补充说明自由写</b>——标签没覆盖的表现（生病坚持上课、答题卡填错、临时怯场等）都能用大白话写进去，AI 按原话展开，个性化由这里来。</div>
+    </div>
+    <div class="step">
+      <span class="no">2</span>
+      <div class="body"><b>标签库可扩充</b>——点「＋ 添加标签」输入新标签，本次使用；确认后也可加入常用库，下次直接点。</div>
+    </div>
+    <div class="step">
+      <span class="no">3</span>
+      <div class="body"><b>AI 输出差异化</b>——多学生一起生成时，模型按要求为每位学生用不同的角度、措辞和建议，避免读起来像群发。</div>
+    </div>
+  </div>
+
+  <div class="foot">牧哲学堂 · 教师端标签升级预览 · 交互示意，未接真实数据</div>
+
+<script>
+  // 标签选择（可多选）
+  document.querySelectorAll('.tag:not(.add)').forEach(function (t) {
+    t.addEventListener('click', function () { t.classList.toggle('on'); });
+  });
+  // 档位单选
+  document.querySelectorAll('.level').forEach(function (lv) {
+    lv.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        lv.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+      });
+    });
+  });
+  // 添加自定义标签：内联变成输入框
+  document.querySelectorAll('.tag.add').forEach(function (addBtn) {
+    addBtn.addEventListener('click', function () {
+      var card = addBtn.closest('.stu');
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.maxLength = 10;
+      input.placeholder = '输入新标签，回车确认';
+      input.style.cssText = 'font-size:12px;padding:5px 10px;border-radius:16px;border:1px solid var(--main);background:#fff;width:110px;outline:none;';
+      addBtn.replaceWith(input);
+      input.focus();
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && input.value.trim()) {
+          var btn = document.createElement('button');
+          btn.className = 'tag on new-tag';
+          btn.textContent = input.value.trim();
+          btn.addEventListener('click', function () { btn.classList.toggle('on'); });
+          input.replaceWith(btn);
+          // 尾部追加一个加号按钮
+          var container = card.querySelector('.tags');
+          var plus = document.createElement('button');
+          plus.className = 'tag add';
+          plus.textContent = '＋ 添加标签';
+          plus.addEventListener('click', arguments.callee);
+          container.appendChild(plus);
+        } else if (e.key === 'Escape') {
+          var c = document.createElement('button');
+          c.className = 'tag add';
+          c.textContent = '＋ 添加标签';
+          c.addEventListener('click', arguments.callee);
+          input.replaceWith(c);
+        }
+      });
+      input.addEventListener('blur', function () {
+        if (document.contains(input)) {
+          var c = document.createElement('button');
+          c.className = 'tag add';
+          c.textContent = '＋ 添加标签';
+          c.addEventListener('click', arguments.callee);
+          input.replaceWith(c);
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

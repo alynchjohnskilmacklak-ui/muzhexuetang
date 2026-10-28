@@ -6,6 +6,7 @@ import { isCleanupCategory, restoreCleanupBatch, type CleanupCategoryKey } from 
 import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
 export const TRASH_RETENTION_DAYS = Math.max(1, Number(process.env.TRASH_RETENTION_DAYS || 30))
+const CLASS_GROUP_DELETE_LESSON_CANCEL_REASON = '班级已删除并进入回收站'
 
 export type TrashEntityType = 'ClassGroup' | 'Student' | 'ClassLesson' | 'ExamPaper' | 'StudyMaterial' | 'FileAsset'
 
@@ -19,6 +20,21 @@ export interface DeleteImpact {
   files?: number
   parentAccount?: number
   summary: string
+}
+
+export interface TrashPurgeBlocker {
+  relation: string
+  count: number
+}
+
+export class TrashPurgeBlockedError extends Error {
+  readonly code = 'TRASH_PURGE_BLOCKED'
+  readonly status = 409
+
+  constructor(readonly blockers: TrashPurgeBlocker[]) {
+    super(`存在仍关联到该学员的历史记录，未执行永久删除：${blockers.map((item) => `${item.relation} ${item.count} 条`).join('、')}`)
+    this.name = 'TrashPurgeBlockedError'
+  }
 }
 
 const expiresAtFrom = (deletedAt: Date) => new Date(deletedAt.getTime() + TRASH_RETENTION_DAYS * 86_400_000)
@@ -126,13 +142,14 @@ export async function softDeleteEntity(
         ...payload,
         groupStatus: group.status,
         lessonStatuses: Object.fromEntries(group.classLessons.map((item) => [item.id, item.status])),
+        lessonCancelReasons: Object.fromEntries(group.classLessons.map((item) => [item.id, item.cancelReason])),
         enrollmentStatuses: Object.fromEntries(group.enrollments.map((item) => [item.id, item.status])),
         paperStatuses: Object.fromEntries(papers.map((item) => [item.id, item.status])),
         feedbackStatuses: Object.fromEntries(feedbacks.map((item) => [item.id, item.status])),
         materialStatuses: Object.fromEntries(materials.map((item) => [item.id, item.status])),
       }
       await tx.classGroup.update({ where: { id: entityId }, data: { deletedAt, deletedById: user.id, deletionBatchId, status: 'ARCHIVED' } })
-      await tx.classLesson.updateMany({ where: { groupId: entityId, deletedAt: null }, data: { deletedAt, deletedById: user.id, deletionBatchId, status: 'CANCELLED', cancelReason: '班级已删除并进入回收站' } })
+      await tx.classLesson.updateMany({ where: { groupId: entityId, deletedAt: null }, data: { deletedAt, deletedById: user.id, deletionBatchId, status: 'CANCELLED', cancelReason: CLASS_GROUP_DELETE_LESSON_CANCEL_REASON } })
       await tx.enrollment.updateMany({ where: { groupId: entityId, deletedAt: null }, data: { deletedAt, deletedById: user.id, deletionBatchId, status: 'WITHDRAWN' } })
       for (const studentId of new Set(group.enrollments.map((enrollment) => enrollment.studentId))) {
         await syncStudentHourSnapshot(tx, studentId)
@@ -225,12 +242,37 @@ export async function restoreTrashRecord(prisma: PrismaClient, recordId: string,
       await restoreCleanupBatch(tx, batchId, categories)
     } else if (record.entityType === 'ClassGroup') {
       const lessonStatuses = (payload.lessonStatuses || {}) as Record<string, string>
+      const lessonCancelReasons = (payload.lessonCancelReasons || {}) as Record<string, string | null>
       const enrollmentStatuses = (payload.enrollmentStatuses || {}) as Record<string, string>
       const paperStatuses = (payload.paperStatuses || {}) as Record<string, string>
       const feedbackStatuses = (payload.feedbackStatuses || {}) as Record<string, string>
       const materialStatuses = (payload.materialStatuses || {}) as Record<string, string>
       await tx.classGroup.update({ where: { id: record.entityId }, data: { deletedAt: null, deletedById: null, deletionBatchId: null, status: String(payload.groupStatus || 'ACTIVE') as never } })
-      for (const [id, status] of Object.entries(lessonStatuses)) await tx.classLesson.updateMany({ where: { id, deletionBatchId: batchId }, data: { deletedAt: null, deletedById: null, deletionBatchId: null, status: status as never, cancelReason: null } })
+      const lessonIds = Object.keys(lessonStatuses)
+      const currentLessons = lessonIds.length
+        ? await tx.classLesson.findMany({ where: { id: { in: lessonIds }, deletionBatchId: batchId, deletedAt: { not: null } }, select: { id: true, cancelReason: true } })
+        : []
+      const currentCancelReasons = new Map(currentLessons.map((lesson) => [lesson.id, lesson.cancelReason]))
+      for (const [id, status] of Object.entries(lessonStatuses)) {
+        const where = { id, deletionBatchId: batchId }
+        const data = {
+          deletedAt: null,
+          deletedById: null,
+          deletionBatchId: null,
+          status: status as never,
+        }
+        if (currentCancelReasons.get(id) === CLASS_GROUP_DELETE_LESSON_CANCEL_REASON) {
+          const originalCancelReason = Object.hasOwn(lessonCancelReasons, id) ? lessonCancelReasons[id] : null
+          const restored = await tx.classLesson.updateMany({
+            where: { ...where, cancelReason: CLASS_GROUP_DELETE_LESSON_CANCEL_REASON },
+            data: { ...data, cancelReason: originalCancelReason },
+          })
+          // Keep restore progress if the reason changed after the snapshot; preserve that newer value.
+          if (restored.count === 0) await tx.classLesson.updateMany({ where, data })
+        } else {
+          await tx.classLesson.updateMany({ where, data })
+        }
+      }
       for (const [id, status] of Object.entries(enrollmentStatuses)) await tx.enrollment.updateMany({ where: { id, deletionBatchId: batchId }, data: { deletedAt: null, deletedById: null, deletionBatchId: null, status: status as never } })
       const restoredEnrollments = await tx.enrollment.findMany({ where: { id: { in: Object.keys(enrollmentStatuses) } }, select: { studentId: true } })
       for (const studentId of new Set(restoredEnrollments.map((enrollment) => enrollment.studentId))) {
@@ -332,6 +374,55 @@ async function purgeCleanupBatch(tx: Prisma.TransactionClient, batchId: string, 
   }
 }
 
+async function assertStudentPurgeHasNoExternalReferences(tx: Prisma.TransactionClient, studentId: string) {
+  const countAll = async (
+    count: (args: never) => Promise<number>,
+    where: Record<string, unknown>,
+    hasSoftDelete: boolean,
+  ) => {
+    if (!hasSoftDelete) return count({ where } as never)
+    const [visible, trashed] = await Promise.all([
+      count({ where } as never),
+      count({ where: { ...where, deletedAt: { not: null } } } as never),
+    ])
+    return visible + trashed
+  }
+  const checks = await Promise.all([
+    tx.classLessonStudent.count({ where: { studentId } }).then((count) => ({ relation: '课次学员关联', count })),
+    countAll((args) => tx.enrollment.count(args), { studentId }, true).then((count) => ({ relation: '班级归属', count })),
+    countAll((args) => tx.hourTransaction.count(args), { studentId }, true).then((count) => ({ relation: '课时流水', count })),
+    countAll((args) => tx.attendance.count(args), { studentId }, true).then((count) => ({ relation: '考勤记录', count })),
+    tx.makeupRequest.count({ where: { studentId } }).then((count) => ({ relation: '补课申请', count })),
+    countAll((args) => tx.gradeRecord.count(args), { studentId }, true).then((count) => ({ relation: '成绩记录', count })),
+    tx.classHighlight.count({ where: { studentId } }).then((count) => ({ relation: '课堂表现记录', count })),
+    countAll((args) => tx.fee.count(args), { studentId }, true).then((count) => ({ relation: '收费记录', count })),
+    countAll((args) => tx.performancePost.count(args), { studentId }, true).then((count) => ({ relation: '学习动态', count })),
+    countAll((args) => tx.achievementBadge.count(args), { studentId }, true).then((count) => ({ relation: '成就记录', count })),
+    countAll((args) => tx.examPaper.count(args), { studentId }, true).then((count) => ({ relation: '试卷记录', count })),
+    countAll((args) => tx.learningGoal.count(args), { studentId }, true).then((count) => ({ relation: '学习目标', count })),
+    tx.weaknessRecord.count({ where: { studentId } }).then((count) => ({ relation: '薄弱项记录', count })),
+    countAll((args) => tx.stageSummary.count(args), { studentId }, true).then((count) => ({ relation: '阶段总结', count })),
+    countAll((args) => tx.leaveRequest.count(args), { studentId }, true).then((count) => ({ relation: '请假记录', count })),
+    tx.parentMealChoice.count({ where: { studentId } }).then((count) => ({ relation: '用餐选择记录', count })),
+    tx.studentMealAttendance.count({ where: { studentId } }).then((count) => ({ relation: '用餐考勤记录', count })),
+    tx.studentTermMembership.count({ where: { studentId } }).then((count) => ({ relation: '学期归属记录', count })),
+    tx.studyHallPlan.count({ where: { studentId } }).then((count) => ({ relation: '自习计划', count })),
+    tx.studyHallRecord.count({ where: { studentId } }).then((count) => ({ relation: '自习记录', count })),
+    tx.studyHallClassStudent.count({ where: { studentId } }).then((count) => ({ relation: '自习班级成员记录', count })),
+    tx.studyHallHomeworkEntry.count({ where: { studentId } }).then((count) => ({ relation: '自习作业记录', count })),
+    tx.feedbackRewardRecord.count({ where: { studentId } }).then((count) => ({ relation: '反馈奖励记录', count })),
+    tx.masteryRecord.count({ where: { studentId } }).then((count) => ({ relation: '知识点掌握记录', count })),
+    tx.practiceResult.count({ where: { studentId } }).then((count) => ({ relation: '练习结果', count })),
+    tx.practiceAttempt.count({ where: { studentId } }).then((count) => ({ relation: '练习作答记录', count })),
+    tx.parentMessage.count({ where: { studentId } }).then((count) => ({ relation: '家长消息关联', count })),
+    tx.courseChangeEvent.count({ where: { studentIds: { has: studentId } } }).then((count) => ({ relation: '课程变更历史', count })),
+    countAll((args) => tx.fileAsset.count(args), { studentId }, true).then((count) => ({ relation: '文件资源引用', count })),
+    countAll((args) => tx.classroomFeedback.count(args), { studentIds: { has: studentId } }, true).then((count) => ({ relation: '课堂反馈引用', count })),
+  ])
+  const blockers = checks.filter((item) => item.count > 0)
+  if (blockers.length > 0) throw new TrashPurgeBlockedError(blockers)
+}
+
 export async function purgeTrashRecord(prisma: PrismaClient, recordId: string, userId: string) {
   return prisma.$transaction(async (tx) => {
     const record = await tx.deletedRecord.findUniqueOrThrow({ where: { id: recordId } })
@@ -372,11 +463,7 @@ export async function purgeTrashRecord(prisma: PrismaClient, recordId: string, u
     } else if (record.entityType === 'FileAsset') {
       await tx.fileAsset.delete({ where: { id: record.entityId } })
     } else if (record.entityType === 'Student') {
-      await tx.makeupRequest.deleteMany({ where: { studentId: record.entityId } })
-      await tx.attendance.deleteMany({ where: { studentId: record.entityId } })
-      await tx.classLessonStudent.deleteMany({ where: { studentId: record.entityId } })
-      await tx.enrollment.deleteMany({ where: { studentId: record.entityId } })
-      await tx.student.update({ where: { id: record.entityId }, data: { parentId: null, parentUserId: null, mainTeacherId: null } })
+      await assertStudentPurgeHasNoExternalReferences(tx, record.entityId)
       await tx.student.delete({ where: { id: record.entityId } })
     } else {
       throw new Error('不支持彻底删除该类型')
@@ -390,13 +477,17 @@ export async function purgeTrashRecord(prisma: PrismaClient, recordId: string, u
 export async function cleanupExpiredTrash(prisma: PrismaClient, userId: string) {
   const records = await prisma.deletedRecord.findMany({ where: { expiresAt: { lte: new Date() } }, orderBy: { expiresAt: 'asc' }, take: 100 })
   let purged = 0
-  const errors: Array<{ id: string; error: string }> = []
+  const errors: Array<{ id: string; error: string; blocked?: boolean }> = []
   for (const record of records) {
     try {
       await purgeTrashRecord(prisma, record.id, userId)
       purged++
     } catch (error) {
-      errors.push({ id: record.id, error: error instanceof Error ? error.message : '清理失败' })
+      errors.push({
+        id: record.id,
+        error: error instanceof Error ? error.message : '清理失败',
+        ...(error instanceof TrashPurgeBlockedError ? { blocked: true } : {}),
+      })
     }
   }
   return { scanned: records.length, purged, errors }

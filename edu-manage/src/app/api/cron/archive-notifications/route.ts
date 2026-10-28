@@ -4,7 +4,7 @@ import { getPrismaForDivision, isDualDbEnabled, prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-// 通知自动归档：将超过 30 天仍未读的通知 status ACTIVE → ARCHIVED。
+// 通知自动归档：仅将超过 30 天仍未读的家长通知 status ACTIVE → ARCHIVED。
 // ARCHIVED 自动退出角标/未读计数（visibleNotificationWhere 要求 status=ACTIVE），
 // 数据保留不删除，列表页可通过 /parent/notifications?archived=1 查阅历史。
 const ARCHIVE_AFTER_DAYS = 30
@@ -14,11 +14,29 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (!process.env.CRON_SECRET || token !== process.env.CRON_SECRET) return NextResponse.json({ error: '无权限' }, { status: 401 })
 
   const cutoff = new Date(Date.now() - ARCHIVE_AFTER_DAYS * 24 * 60 * 60 * 1000)
-  const run = async (db: typeof prisma) =>
-    db.notification.updateMany({
-      where: { status: 'ACTIVE', read: false, createdAt: { lt: cutoff } },
+  const run = async (db: typeof prisma) => {
+    // 旧版归档任务曾影响所有角色；先恢复非家长的未读通知，避免历史记录继续藏在无入口的状态中。
+    await db.notification.updateMany({
+      where: {
+        user: { is: { role: { not: 'parent' } } },
+        status: 'ARCHIVED',
+        read: false,
+        deletedAt: null,
+      },
+      data: { status: 'ACTIVE' },
+    })
+
+    return db.notification.updateMany({
+      where: {
+        user: { is: { role: 'parent' } },
+        status: 'ACTIVE',
+        read: false,
+        deletedAt: null,
+        createdAt: { lt: cutoff },
+      },
       data: { status: 'ARCHIVED' },
     })
+  }
 
   const results = isDualDbEnabled()
     ? {

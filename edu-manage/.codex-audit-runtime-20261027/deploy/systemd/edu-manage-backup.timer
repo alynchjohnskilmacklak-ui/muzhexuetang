@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Edu Manage full backup every day
+
+[Timer]
+OnCalendar=*-*-* 02:15:00 Asia/Shanghai
+Persistent=true
+RandomizedDelaySec=5m
+Unit=edu-manage-backup.service
+
+[Install]
+WantedBy=timers.target

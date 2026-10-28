@@ -22,7 +22,7 @@ import { resolveTier, TIER_THEME, type TeacherTier } from '@/constants/teacher-t
 import { getTeacherAvatarUrl } from '@/lib/teacher-avatars'
 import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
 
-const { Title, Text, Paragraph } = Typography
+const { Text, Paragraph } = Typography
 
 type NotificationType = {
   label: string
@@ -186,6 +186,8 @@ const CATEGORY_RELATED_TYPES: Record<'feedback' | 'notice', string[]> = {
     'SCHEDULE_CHANGE',
     'SYSTEM',
     'INFO',
+    'PARENT_MESSAGE',
+    'PARENT_MESSAGE_REPLY',
   ],
 }
 
@@ -213,7 +215,6 @@ function NotificationAvatar({ n, isMobile }: { n: ParentNotification; isMobile: 
           border: n.read ? '1px solid #F0E9DD' : '2px solid rgba(201,164,92,0.55)',
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <CachedAvatarImage
           src={avatarSrc}
           fallbackSrc={getTeacherAvatarUrl(null, n.teacherGender, n.teacherName)}
@@ -356,8 +357,9 @@ export function ParentNotificationsClient({
         body: JSON.stringify({ id }),
       })
       if (!response.ok) throw new Error('通知标记失败')
+      const result = (await response.json()) as { unreadCount?: number }
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
-      setUnreadCount((count) => Math.max(0, count - 1))
+      if (!archived && typeof result.unreadCount === 'number') setUnreadCount(result.unreadCount)
       void mutate('/api/parent/unread-counts')
     } catch {
       toast.error('操作失败')
@@ -372,8 +374,9 @@ export function ParentNotificationsClient({
         body: JSON.stringify({ all: true }),
       })
       if (!response.ok) throw new Error('全部已读操作失败')
+      const result = (await response.json()) as { unreadCount?: number }
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-      setUnreadCount(0)
+      if (typeof result.unreadCount === 'number') setUnreadCount(result.unreadCount)
       void mutate('/api/parent/unread-counts')
       toast.success('已全部标记为已读')
     } catch {
@@ -390,9 +393,10 @@ export function ParentNotificationsClient({
         body: JSON.stringify({ relatedTypes }),
       })
       if (!response.ok) throw new Error('分类已读操作失败')
-      setNotifications((prev) => prev.map((n) => (relatedTypes.includes(n.relatedType || '') ? { ...n, read: true } : n)))
-      const readCount = filtered.filter((n) => !n.read && relatedTypes.includes(n.relatedType || '')).length
-      setUnreadCount((count) => Math.max(0, count - readCount))
+      const result = (await response.json()) as { unreadCount?: number }
+      const matchesCategory = (n: ParentNotification) => relatedTypes.includes(n.relatedType || n.type)
+      setNotifications((prev) => prev.map((n) => (matchesCategory(n) ? { ...n, read: true } : n)))
+      if (typeof result.unreadCount === 'number') setUnreadCount(result.unreadCount)
       void mutate('/api/parent/unread-counts')
       toast.success('已将该分类全部标记为已读')
     } catch {

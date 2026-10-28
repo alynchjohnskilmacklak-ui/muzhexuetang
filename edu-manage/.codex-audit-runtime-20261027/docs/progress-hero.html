@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学员进步展示 - 震撼版</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#0f0a05;color:#f5ede2;line-height:1.6;overflow-x:hidden}
+
+  .stage{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+  /* 第一屏：大数字冲击 */
+  .hero{padding:36px 20px 20px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(232,160,90,.15),transparent 70%)}
+  .hero-tag{font-size:11px;letter-spacing:.3em;color:#E8A05A;margin-bottom:12px}
+  .hero-title{font-size:26px;font-weight:800;margin-bottom:6px}
+  .hero-sub{font-size:12px;color:#b9a996;margin-bottom:24px}
+
+  .big-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .big-stat{background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(232,160,90,.2);border-radius:18px;padding:18px 12px;text-align:center}
+  .big-stat.hero-stat{grid-column:span 2;background:linear-gradient(135deg,#E8784A,#D9643C);border:none;box-shadow:0 12px 32px rgba(232,120,74,.3)}
+  .big-stat .num{font-size:38px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.1}
+  .big-stat.hero-stat .num{font-size:56px}
+  .big-stat .num .unit{font-size:.4em;font-weight:600;opacity:.8;margin-left:3px}
+  .big-stat .label{font-size:11px;color:#b9a996;margin-top:4px}
+  .big-stat.hero-stat .label{color:rgba(255,255,255,.9)}
+
+  /* 分隔线 */
+  .divider{display:flex;align-items:center;gap:12px;padding:20px 20px 6px}
+  .divider::before,.divider::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(232,160,90,.3),transparent)}
+  .divider span{font-size:11px;letter-spacing:.2em;color:#E8A05A}
+
+  /* 第二屏：6宫格滚动列表 */
+  .scroller-wrap{padding:10px 14px 10px;position:relative;flex:1}
+  .scroller{display:grid;grid-template-columns:1fr 1fr;gap:10px;height:420px;overflow:hidden;position:relative;
+    mask-image:linear-gradient(180deg,transparent 0,#000 24px,#000 calc(100% - 24px),transparent 100%);
+    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 24px,#000 calc(100% - 24px),transparent 100%);
+    touch-action:pan-y;cursor:grab}
+  .scroller.dragging{cursor:grabbing}
+
+  .s-card{background:linear-gradient(160deg,#1f1508,#2a1d0e);border:1px solid rgba(232,160,90,.2);border-radius:16px;padding:14px 12px;display:flex;flex-direction:column;gap:6px;min-height:120px}
+  .s-top{display:flex;align-items:center;gap:8px}
+  .s-av{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800;flex:none}
+  .s-name{font-size:14px;font-weight:700;line-height:1.2}
+  .s-exam{font-size:10px;color:#9a8e7a;line-height:1.2}
+  .s-scores{display:flex;align-items:baseline;gap:6px;margin-top:2px}
+  .s-from{font-size:16px;color:#b9a996;font-weight:700;font-variant-numeric:tabular-nums}
+  .s-arrow{font-size:12px;color:#E8784A}
+  .s-to{font-size:22px;color:#E8A05A;font-weight:800;font-variant-numeric:tabular-nums}
+  .s-gain{margin-top:auto;display:inline-block;width:fit-content;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff}
+  .s-gain.g{background:linear-gradient(135deg,#27a644,#1e8b3a)}
+  .s-gain.o{background:linear-gradient(135deg,#E8A05A,#D9783C)}
+
+  .scroller-progress{height:3px;background:rgba(245,237,226,.1);border-radius:3px;margin:8px 14px 0;overflow:hidden}
+  .scroller-progress i{display:block;height:100%;background:#E8A05A;width:0}
+  .scroller-hint{text-align:center;font-size:10px;color:#6b5e4e;padding:6px 0 10px}
+
+  /* 第三屏：班型分布 */
+  .type-row{display:flex;gap:8px;padding:0 14px 16px}
+  .type-card{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(232,160,90,.15);border-radius:14px;padding:14px 8px;text-align:center}
+  .type-card .t-name{font-size:11px;color:#b9a996;margin-bottom:4px}
+  .type-card .t-num{font-size:18px;font-weight:800;color:#E8A05A}
+  .type-card .t-gain{font-size:10px;color:#27a644;margin-top:2px}
+
+  .footer-note{text-align:center;padding:12px;font-size:10px;color:#6b5e4e}
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- 第一屏：大数字 -->
+  <div class="hero">
+    <div class="hero-tag">REAL RESULTS · 真实记录</div>
+    <div class="hero-title">分数，自己会说话</div>
+    <div class="hero-sub">入学多少分，期末多少分 —— 不靠宣传，靠数据</div>
+    <div class="big-stats">
+      <div class="big-stat hero-stat">
+        <div class="num"><span id="avgGain">0</span><span class="unit">分</span></div>
+        <div class="label">平均提升（126 位学员）</div>
+      </div>
+      <div class="big-stat">
+        <div class="num" style="color:#E8A05A"><span id="maxGain">0</span><span class="unit">分</span></div>
+        <div class="label">最高提升</div>
+      </div>
+      <div class="big-stat">
+        <div class="num" style="color:#E8A05A"><span id="studentCount">0</span><span class="unit">人</span></div>
+        <div class="label">进步记录学员</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分隔线 -->
+  <div class="divider"><span>学员进步记录</span></div>
+
+  <!-- 第二屏：6宫格滚动 -->
+  <div class="scroller-wrap">
+    <div class="scroller" id="scroller"></div>
+    <div class="scroller-progress"><i id="scrollBar"></i></div>
+    <div class="scroller-hint">↑ 自动滚动中 · 可上下滑动浏览 ↑</div>
+  </div>
+
+  <!-- 第三屏：班型分布 -->
+  <div class="divider"><span>班型覆盖</span></div>
+  <div class="type-row">
+    <div class="type-card"><div class="t-name">一对一</div><div class="t-num">42人</div><div class="t-gain">平均+22分</div></div>
+    <div class="type-card"><div class="t-name">一对三</div><div class="t-num">58人</div><div class="t-gain">平均+18分</div></div>
+    <div class="type-card"><div class="t-name">小班</div><div class="t-num">26人</div><div class="t-gain">平均+14分</div></div>
+  </div>
+
+  <div class="footer-note">* 学员姓名均已脱敏，成绩为真实教学记录</div>
+</div>
+
+<script>
+// ===== 生成126个学员数据（确定性伪随机） =====
+const SURS = "王李张刘陈杨黄赵周吴徐孙马朱胡郭林何高罗郑梁谢宋唐许韩冯邓曹彭曾萧田董袁潘蒋蔡余杜叶程苏魏吕丁任沈姚卢姜崔钟谭陆汪范金石廖贾夏韦付方白邹孟熊秦邱江尹薛闫段雷侯龙史陶黎贺顾毛郝龚邵万钱严覃武戴莫孔向汤".split("");
+const NAMES = "浩然,梓萱,雨欣,俊杰,欣怡,子涵,宇轩,晨曦,欣妍,铭泽,思远,嘉懿,雨桐,天佑,静姝,梦琪,俊驰,可馨,佳禾,亦凡,书瑶,睿哲,若彤,立诚,沐宸,芷晴,彦博,博文,雅宁,悦心,景行,嘉树,明宇,婉清,泽翰,星辰,语嫣,承恩,清雅,弘毅,瑞霖,诗颖,卓航,嘉乐,思齐,云帆,承睿,思源,子墨,安妮,俊朗,欣蕾,乐珊,思楠,可儿,梓瑞,若岚,宛瑜,允熙,瑾言".split(",");
+const SUBJECTS = [
+  {exam:"2026 地生会考", subject:"地生", full:120},
+  {exam:"2026 中考", subject:"数学", full:120},
+  {exam:"2026 中考", subject:"语文", full:120},
+  {exam:"2026 中考", subject:"英语", full:120},
+  {exam:"2026 中考", subject:"物理", full:60},
+  {exam:"2026 中考", subject:"化学", full:60},
+  {exam:"2026 上学期期末", subject:"数学", full:120},
+  {exam:"2026 上学期期末", subject:"英语", full:120},
+  {exam:"2026 上学期期末", subject:"物理", full:60},
+  {exam:"2026 高考", subject:"数学", full:150},
+  {exam:"2026 高考", subject:"语文", full:150},
+  {exam:"2026 高考", subject:"英语", full:150},
+];
+const TYPES = ["一对一","一对三","小班"];
+const AV_COLORS = ["#E8784A","#27a644","#185FA5","#b7791f","#7c5cd6","#d4537e"];
+
+let seed = 20260920;
+function rnd(){ seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }
+function pick(arr){ return arr[Math.floor(rnd() * arr.length)]; }
+
+const NAME_TAILS = (function(){
+  const seen = new Set(), out = [];
+  for (const n of NAMES){ const t = n[n.length - 1]; if (!seen.has(t)){ seen.add(t); out.push(n); } }
+  return out;
+})();
+const NAME_POOL = (function(){
+  const a = NAME_TAILS.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+})();
+let nameIdx = 0;
+function makeName(){ return pick(SURS) + "*" + NAME_POOL[nameIdx++ % NAME_POOL.length][NAME_POOL[nameIdx % NAME_POOL.length].length-1]; }
+
+const CASES = [];
+// 3条真实数据置顶
+CASES.push({name:"杜*诺", exam:"2026 地生会考", course:"地生一对三", from:112, to:120, full:120});
+CASES.push({name:"马*晨", exam:"2026 地生会考", course:"地生一对三", from:108, to:114, full:120});
+CASES.push({name:"刘*宇", exam:"2026 地生会考", course:"地生一对三", from:82, to:108, full:120});
+while (CASES.length < 126){
+  const s = pick(SUBJECTS);
+  const type = pick(TYPES);
+  const base = Math.round(s.full * (0.40 + rnd() * 0.38));
+  const gain = 6 + Math.floor(rnd() * 30);
+  const final = Math.min(Math.floor(s.full * 0.93), base + gain);
+  CASES.push({
+    name: makeName(),
+    exam: s.exam,
+    course: s.subject + (type === "一对一" ? "一对一" : type),
+    from: base, to: final, full: s.full
+  });
+}
+
+// ===== 数字滚动动画 =====
+function animateNum(el, target, duration=1500){
+  const start=performance.now();
+  function tick(now){
+    const p=Math.min(1,(now-start)/duration);
+    const eased=1-Math.pow(1-p,3);
+    el.textContent=Math.round(target*eased);
+    if(p<1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+animateNum(document.getElementById('avgGain'),18);
+animateNum(document.getElementById('maxGain'),35);
+animateNum(document.getElementById('studentCount'),126);
+
+// ===== 渲染6宫格 =====
+const scroller = document.getElementById('scroller');
+// 复制两组数据实现无缝循环
+const allItems = [...CASES, ...CASES];
+scroller.innerHTML = allItems.map((c,i)=>{
+  const gain = c.to - c.from;
+  const color = AV_COLORS[i % AV_COLORS.length];
+  return `<div class="s-card">
+    <div class="s-top">
+      <div class="s-av" style="background:${color}">${c.name[0]}</div>
+      <div><div class="s-name">${c.name}</div><div class="s-exam">${c.exam}</div></div>
+    </div>
+    <div class="s-scores">
+      <span class="s-from">${c.from}</span>
+      <span class="s-arrow">→</span>
+      <span class="s-to">${c.to}</span>
+    </div>
+    <span class="s-gain ${gain>=20?'o':'g'}">+${gain} 分 · ${c.course}</span>
+  </div>`;
+}).join('');
+
+// ===== 自动滚动 + 手动滑动 =====
+let offset = 0;
+let autoTimer = null;
+let isDragging = false;
+let startY = 0;
+let startOffset = 0;
+let pauseUntil = 0;
+
+function getCardH(){ return scroller.querySelector('.s-card').offsetHeight + 10; } // height + gap
+function scrollTo(off){
+  offset = Math.max(0, Math.min(off, CASES.length * getCardH()));
+  scroller.scrollTop = offset;
+}
+
+function tick(){
+  if (Date.now() < pauseUntil || isDragging) return;
+  offset += 1;
+  if (offset >= CASES.length * getCardH()) offset = 0;
+  scroller.scrollTop = offset;
+  // 进度条
+  document.getElementById('scrollBar').style.width = (offset / (CASES.length * getCardH()) * 100) + '%';
+}
+autoTimer = setInterval(tick, 30); // 平滑滚动
+
+// 手动滑动
+scroller.addEventListener('pointerdown', (e)=>{
+  isDragging = true;
+  startY = e.clientY;
+  startOffset = scroller.scrollTop;
+  scroller.classList.add('dragging');
+  scroller.setPointerCapture(e.pointerId);
+});
+scroller.addEventListener('pointermove', (e)=>{
+  if (!isDragging) return;
+  const dy = e.clientY - startY;
+  scroller.scrollTop = startOffset - dy;
+});
+scroller.addEventListener('pointerup', (e)=>{
+  isDragging = false;
+  scroller.classList.remove('dragging');
+  offset = scroller.scrollTop;
+  pauseUntil = Date.now() + 3000; // 滑动后暂停3秒
+});
+scroller.addEventListener('pointercancel', ()=>{ isDragging=false; scroller.classList.remove('dragging'); });
+</script>
+</body>
+</html>

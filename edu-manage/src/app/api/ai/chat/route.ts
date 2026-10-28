@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { AI_PROMPTS, SCIENCE_ANSWER_RULES, type AIRole, type ModelId } from '@/data/ai-prompts'
 import { AIProviderError, createSSEFromText, fetchWithTimeout } from '@/lib/ai/client'
@@ -208,12 +208,11 @@ function mapProviderError(modelId: ModelId, responseStatus: number, detail: stri
 }
 
 export const POST = apiHandler(async (req: NextRequest) => {
-  const session = await auth()
-  if (!session?.user) {
+  const sessionUser = await getCurrentUser()
+  if (!sessionUser) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const sessionUser = session.user as { id?: string | null; email?: string | null; role?: string | null }
   const rateLimitKey = sessionUser.id || sessionUser.email
   if (!rateLimitKey || !checkRateLimit(rateLimitKey)) {
     return NextResponse.json({ error: '请求过于频繁，请稍后再试' }, { status: 429 })
@@ -270,7 +269,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (sessionUser.id) {
       const prisma = await getRequestPrisma()
       const digest = await buildSystemDigest(
-        { id: sessionUser.id, role: sessionUser.role || 'other' },
+        { id: sessionUser.id, role: sessionUser.role || 'other', teacherId: sessionUser.teacherId },
         prisma,
       )
       digestText = digest.text

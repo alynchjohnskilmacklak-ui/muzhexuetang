@@ -8,6 +8,7 @@ import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
 import { resolveLearningRecordTermId } from '@/lib/learning-record-term'
+import { assertCanAccessClassLesson, assertCanAccessStudent } from '@/lib/auth/guards'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,26 +23,46 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const teacherId = searchParams.get('teacherId')
   const subject = searchParams.get('subject')
   const status = searchParams.get('status')
-  const mine = searchParams.get('mine')
   const division = getRequestDivision(user, searchParams.get('division'))
 
   const where: Record<string, unknown> = { deletedAt: null }
-  if (mine === 'true' && user.role === 'parent') {
+  if (user.role === 'parent') {
+    // Parent visibility is an authorization boundary, not an optional list mode.
+    // Client-supplied status/student filters may only narrow this scope.
     Object.assign(where, parentVisibleExamPaperWhere(user.id))
-  } else if (user.role === 'admin' || user.role === 'teacher') {
+    if (studentId) where.studentId = studentId
+  } else if (user.role === 'admin') {
     if (studentId) where.studentId = studentId
     if (teacherId) where.teacherId = teacherId
     if (subject) where.subject = subject
     if (status) where.status = status
     else where.status = { not: 'DELETED' }
-    if (user.role === 'admin') {
-      const term = await resolveAdminTermScope(prisma, division, req)
-      where.student = { division }
-      if (term) where.termId = term.id
-    } else {
-      const term = await getActiveAcademicTerm(prisma, division)
-      if (term) where.termId = term.id
+    const term = await resolveAdminTermScope(prisma, division, req)
+    where.student = { division }
+    if (term) where.termId = term.id
+  } else if (user.role === 'teacher') {
+    const teacher = await resolveTeacherForUser({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    }, prisma)
+    if (!teacher) return NextResponse.json({ error: '教师账号未绑定教师档案' }, { status: 403 })
+    if (teacherId && teacherId !== teacher.id) {
+      return NextResponse.json({ error: '无权访问其他教师的试卷' }, { status: 403 })
     }
+
+    // The authenticated teacher profile is the fixed authorization scope.
+    // Other query parameters can only narrow this set.
+    where.teacherId = teacher.id
+    if (studentId) where.studentId = studentId
+    if (subject) where.subject = subject
+    where.status = status || { not: 'DELETED' }
+
+    const term = await getActiveAcademicTerm(prisma, division)
+    if (term) where.termId = term.id
+  } else {
+    return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
   if (Object.keys(where).length === 1) {
     where.status = { not: 'DELETED' }
@@ -87,6 +108,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }, prisma)
   if (!teacher) {
     return NextResponse.json({ error: '没有匹配到教师档案，请先在教师管理中创建至少一位在职教师' }, { status: 400 })
+  }
+
+  if (user.role === 'teacher') {
+    const teacherContext = { ...user, teacherId: teacher.id, division: getRequestDivision(user), prisma }
+    if (classLessonId) {
+      await assertCanAccessClassLesson(teacherContext, classLessonId)
+    } else {
+      await assertCanAccessStudent(teacherContext, studentId)
+    }
   }
 
   const termId = await resolveLearningRecordTermId(prisma, {

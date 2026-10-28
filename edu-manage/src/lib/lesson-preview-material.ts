@@ -160,11 +160,12 @@ export async function persistPreparedLessonPreviewMaterial(
 
 export async function publishLessonPreviewMaterial(input: PublishLessonPreviewInput) {
   const prepared = await prepareLessonPreviewMaterial(input)
-  const main = await input.prisma.$transaction((tx) => persistPreparedLessonPreviewMaterial(tx, prepared))
+  return input.prisma.$transaction(async (tx) => {
+    const main = await persistPreparedLessonPreviewMaterial(tx, prepared)
 
-  // 连堂合并：同 group 当天其他节自动复用同一份讲义（不重复存文件）
-  try {
-    const siblingLessons = await input.prisma.classLesson.findMany({
+    // 连堂合并：同 group 当天其他节自动复用同一份讲义（不重复存文件）。
+    // 主课次和连堂课次在同一事务里写入，避免部分成功后页面仍报告完整成功。
+    const siblingLessons = await tx.classLesson.findMany({
       where: {
         lessonDate: prepared.lessonDate,
         groupId: prepared.groupId,
@@ -174,14 +175,13 @@ export async function publishLessonPreviewMaterial(input: PublishLessonPreviewIn
       },
       select: { id: true },
     })
-    for (const sib of siblingLessons) {
-      const existing = await input.prisma.studyMaterial.findUnique({ where: { classLessonId: sib.id }, select: { id: true } })
-      if (existing) continue
-      await input.prisma.studyMaterial.create({
-        data: { ...prepared.data, classLessonId: sib.id } as never,
+    if (siblingLessons.length > 0) {
+      await tx.studyMaterial.createMany({
+        data: siblingLessons.map((sibling) => ({ ...prepared.data, classLessonId: sibling.id })),
+        skipDuplicates: true,
       })
     }
-  } catch { /* 复制失败不阻断主流程 */ }
 
-  return main
+    return main
+  })
 }

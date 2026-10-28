@@ -72,6 +72,9 @@ export async function proxy(request: NextRequest) {
     pathname === '/api/setup' ||
     pathname.startsWith('/api/wxpusher/callback') ||
     pathname === '/api/qywx/event' ||
+    // Cron endpoints authenticate their own bearer token. Proxy only lets the
+    // request reach that handler; it does not authorize the operation.
+    pathname.startsWith('/api/cron/') ||
     pathname.startsWith('/people/') ||
     pathname.startsWith('/avatars/') ||
     pathname.startsWith('/images/') ||

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="360" viewBox="0 0 760 360" role="img" aria-labelledby="title desc">
+  <title id="title">10欧和40欧电阻并联接在6伏电源上</title>
+  <desc id="desc">电源接在两条并联支路两端，R1为10欧，R2为40欧。</desc>
+  <rect width="760" height="360" fill="#fff"/>
+  <style>
+    .wire{fill:none;stroke:#222;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+    .part{fill:#fff;stroke:#222;stroke-width:3}
+    .label{font:22px sans-serif;fill:#171717}
+    .small{font:18px sans-serif;fill:#555}
+  </style>
+  <path class="wire" d="M150 75 H610 V285 H150 V200 M150 147 V75"/>
+  <path class="wire" d="M150 120 H300 M430 120 H610 M150 240 H300 M430 240 H610"/>
+  <rect class="part" x="300" y="98" width="130" height="44" rx="4"/>
+  <rect class="part" x="300" y="218" width="130" height="44" rx="4"/>
+  <text x="365" y="90" text-anchor="middle" class="label">R₁ = 10 Ω</text>
+  <text x="365" y="210" text-anchor="middle" class="label">R₂ = 40 Ω</text>
+  <path class="wire" d="M150 147 V160 M150 200 V218 M128 160 H172 M136 200 H164"/>
+  <text x="82" y="187" class="label">6 V</text>
+</svg>

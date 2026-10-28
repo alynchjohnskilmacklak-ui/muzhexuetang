@@ -7,6 +7,11 @@ import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
 export const dynamic = 'force-dynamic'
 
+// A non-null token marks account deactivation performed by this student
+// lifecycle. Manual account deactivation clears currentSessionToken, so a
+// later student reactivation cannot silently undo an administrator decision.
+const AUTO_DISABLED_PARENT_SESSION_TOKEN = 'system-disabled-no-current-student'
+
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -30,6 +35,8 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
         mainTeacherId: status === 'INACTIVE' ? null : undefined,
       },
     })
+
+    const parentIds = [...new Set([updated.parentId, updated.parentUserId].filter((parentId): parentId is string => Boolean(parentId)))].sort()
 
     if (status === 'INACTIVE') {
       await tx.enrollment.updateMany({
@@ -59,7 +66,6 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
         }
       }
 
-      const parentIds = [updated.parentId, updated.parentUserId].filter((parentId): parentId is string => Boolean(parentId))
       if (parentIds.length) {
         await tx.notification.deleteMany({
           where: {
@@ -74,24 +80,68 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
       }
     }
 
+    // Parent credentials are shared across siblings. Serialize status changes
+    // for each household, then disable only when no linked student remains
+    // eligible for the current term. Lock order is stable for inconsistent
+    // legacy parentId/parentUserId pairs.
+    if (parentIds.length && (status === 'INACTIVE' || status === 'ACTIVE')) {
+      const activeTerm = await tx.academicTerm.findFirst({
+        where: { division: updated.division, status: 'ACTIVE' },
+        select: { id: true },
+        orderBy: { startDate: 'desc' },
+      })
+
+      for (const parentId of parentIds) {
+        await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${parentId} FOR UPDATE`
+        const parentAccount = await tx.user.findFirst({
+          where: { id: parentId, role: 'parent', division: updated.division },
+          select: { id: true, status: true, currentSessionToken: true },
+        })
+        if (!parentAccount) continue
+
+        // Match the login validity policy: when there is no active term, keep
+        // existing parent accounts available rather than locking out a cohort.
+        const hasCurrentStudent = !activeTerm || Boolean(await tx.student.findFirst({
+          where: {
+            division: updated.division,
+            OR: [{ parentId }, { parentUserId: parentId }],
+            status: { notIn: ['INACTIVE', 'ARCHIVED'] },
+            deletedAt: null,
+            termMemberships: { some: { termId: activeTerm.id, status: 'ACTIVE' } },
+          },
+          select: { id: true },
+        }))
+
+        if (status === 'INACTIVE' && !hasCurrentStudent && parentAccount.status === 'active') {
+          await tx.user.updateMany({
+            where: { id: parentId, role: 'parent', division: updated.division, status: 'active' },
+            data: { status: 'disabled', currentSessionToken: AUTO_DISABLED_PARENT_SESSION_TOKEN },
+          })
+        } else if (
+          status === 'ACTIVE'
+          && hasCurrentStudent
+          && parentAccount.status === 'disabled'
+          && parentAccount.currentSessionToken !== null
+        ) {
+          // Only restore accounts disabled by student lifecycle (including old
+          // versions, which left a session token in place). Manual disables
+          // clear the token and remain disabled until an administrator acts.
+          await tx.user.updateMany({
+            where: {
+              id: parentId,
+              role: 'parent',
+              division: updated.division,
+              status: 'disabled',
+              currentSessionToken: { not: null },
+            },
+            data: { status: 'active', currentSessionToken: null },
+          })
+        }
+      }
+    }
+
     return updated
   })
-
-  // If student goes inactive, disable linked parent account
-  if (status === 'INACTIVE' && student.parentUserId) {
-    await prisma.user.update({
-      where: { id: student.parentUserId },
-      data: { status: 'disabled' },
-    })
-  }
-
-  // If student is reactivated, reactivate linked parent account
-  if (status === 'ACTIVE' && student.parentUserId) {
-    await prisma.user.update({
-      where: { id: student.parentUserId },
-      data: { status: 'active' },
-    })
-  }
 
   const userId = (session.user as { id: string }).id
   await prisma.activityLog.create({

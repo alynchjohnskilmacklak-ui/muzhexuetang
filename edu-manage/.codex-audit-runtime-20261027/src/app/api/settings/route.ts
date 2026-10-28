@@ -1,0 +1,43 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
+import { getCurrentUser } from '@/lib/get-user'
+import { apiHandler } from '@/lib/api-handler'
+import { parseSettingsUpdate } from '@/lib/settings-schema'
+
+export const dynamic = 'force-dynamic'
+
+// GET /api/settings — 获取机构信息
+export const GET = apiHandler(async () => {
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+
+
+  const prisma = await getRequestPrisma()
+  let config = await prisma.systemConfig.findUnique({ where: { id: 'singleton' } })
+  if (!config) {
+    config = await prisma.systemConfig.create({ data: { id: 'singleton' } })
+  }
+  return NextResponse.json(config)
+})
+
+// PATCH /api/settings — 更新机构信息
+export const PATCH = apiHandler(async (request: NextRequest) => {
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+ 
+  const prisma = await getRequestPrisma()
+  if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+
+  let body: ReturnType<typeof parseSettingsUpdate>
+  try { body = parseSettingsUpdate(await request.json()) }
+  catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : '设置格式无效' }, { status: 400 }) }
+  const config = await prisma.$transaction(async tx => {
+    const saved = await tx.systemConfig.upsert({
+      where: { id: 'singleton' }, create: { id: 'singleton', ...body }, update: body,
+    })
+    await tx.activityLog.create({ data: { userId: user.id, action: '更新了机构信息', detail: '修改了系统配置' } })
+    return saved
+  })
+
+  return NextResponse.json(config)
+})

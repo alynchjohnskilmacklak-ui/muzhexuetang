@@ -169,3 +169,112 @@ export async function getQywxUserIdByMobile(mobile: string): Promise<string | nu
     return null
   }
 }
+
+/* ===================== 家长通道：学员联系（客户联系）群发 =====================
+ * 通道说明：家长微信被企业成员添加为「学员」（外部联系人）后，系统调用
+ * externalcontact/add_msg_template 创建企业群发，由该成员在企业微信
+ * 「群发助手」中确认发送，家长在微信内接收（每日每家长上限 1 条，防骚扰硬限制）。
+ * token 使用自建应用 secret（应用需在「学员联系-可调用接口的应用」列表中）。
+ */
+
+/** 拉取某企业成员名下的学员（外部联系人）列表 */
+export async function listQywxExternalIdsByMember(userid: string): Promise<string[]> {
+  if (!qywxEnabled()) return []
+  try {
+    const token = await getToken()
+    const res = await fetch(`${QYWX_API}/externalcontact/list?access_token=${encodeURIComponent(token)}&userid=${encodeURIComponent(userid)}`, { cache: 'no-store' })
+    const data = await res.json()
+    if (data.errcode !== 0) return []
+    return (data.external_userid as string[]) || []
+  } catch (e: unknown) {
+    Sentry.captureException(e, { extra: { location: 'qywx-list-external' } })
+    return []
+  }
+}
+
+/** 获取外部联系人（学员）详情：名称、头像、type=1 微信用户、unionid 等 */
+export async function getQywxExternalDetail(externalUserId: string): Promise<{ name?: string; type?: number; unionid?: string } | null> {
+  if (!qywxEnabled()) return null
+  try {
+    const token = await getToken()
+    const res = await fetch(`${QYWX_API}/externalcontact/get?access_token=${encodeURIComponent(token)}&external_userid=${encodeURIComponent(externalUserId)}`, { cache: 'no-store' })
+    const data = await res.json()
+    if (data.errcode !== 0) return null
+    return { name: data.name, type: data.type, unionid: data.unionid }
+  } catch (e: unknown) {
+    Sentry.captureException(e, { extra: { location: 'qywx-external-detail' } })
+    return null
+  }
+}
+
+/** 获取客户联系使用范围内的企业成员 userid 列表 */
+export async function listQywxFollowUsers(): Promise<string[]> {
+  if (!qywxEnabled()) return []
+  try {
+    const token = await getToken()
+    const res = await fetch(`${QYWX_API}/externalcontact/get_follow_user_list?access_token=${encodeURIComponent(token)}`, { cache: 'no-store' })
+    const data = await res.json()
+    if (data.errcode !== 0) return []
+    return (data.follow_user as string[]) || []
+  } catch (e: unknown) {
+    Sentry.captureException(e, { extra: { location: 'qywx-follow-users' } })
+    return []
+  }
+}
+
+/** 按企业成员手机号反查企微成员 userid（用于确定群发 sender） */
+export async function getQywxMemberUserIdByMobile(mobile: string): Promise<string | null> {
+  return getQywxUserIdByMobile(mobile)
+}
+
+/**
+ * 家长通道群发：externalcontact/add_msg_template（link 卡片）
+ * 创建后需 sender 成员在企业微信「群发助手」确认发送，家长微信才可收到。
+ * @returns 成功时返回 { msgid }；失败返回 { error, rawCode, rawMsg }
+ */
+export async function sendQywxParentMass(
+  senderUserid: string,
+  externalUserIds: string[],
+  opts: { title: string; desc?: string; url: string; picUrl?: string },
+): Promise<QywxPushResult & { msgid?: string }> {
+  if (!qywxEnabled()) return { success: false, channel: 'parent', error: '企微通道未开启' }
+  if (!senderUserid || !externalUserIds.length) return { success: false, channel: 'parent', error: '缺少发送成员或学员列表' }
+  try {
+    const link: Record<string, string> = { title: opts.title, url: opts.url }
+    if (opts.desc) link.desc = opts.desc
+    if (opts.picUrl) link.picurl = opts.picUrl
+    const result = await postWithToken('/externalcontact/add_msg_template', {
+      chat_type: 'single',
+      external_userid: externalUserIds,
+      sender: senderUserid,
+      msgtype: 'link',
+      link,
+    })
+    if (result.ok) {
+      const msgid = (result as { msgid?: string }).msgid
+      return { success: true, channel: 'parent', msgid }
+    }
+    return { success: false, channel: 'parent', error: result.errmsg || '创建群发失败', rawCode: result.errcode, rawMsg: result.errmsg }
+  } catch (e: unknown) {
+    Sentry.captureException(e, { extra: { location: 'qywx-parent-mass' } })
+    return { success: false, channel: 'parent', error: (e as Error).message }
+  }
+}
+
+/** 查询群发任务发送结果（externalcontact/get_group_send_result） */
+export async function getQywxGroupSendResult(msgid: string): Promise<{ status?: string; failList?: Array<{ external_userid: string; userid: string }> } | null> {
+  if (!qywxEnabled()) return null
+  try {
+    const token = await getToken()
+    const res = await fetch(`${QYWX_API}/externalcontact/get_group_send_result?access_token=${encodeURIComponent(token)}&msgid=${encodeURIComponent(msgid)}`, { cache: 'no-store' })
+    const data = await res.json()
+    if (data.errcode !== 0) return null
+    return {
+      status: (data.status as string) || undefined,
+      failList: data.fail_list as Array<{ external_userid: string; userid: string }> | undefined,
+    }
+  } catch (e: unknown) {
+    Sentry.captureException(e, { extra: { location: 'qywx-group-result' } })
+    return null
+  }
+}

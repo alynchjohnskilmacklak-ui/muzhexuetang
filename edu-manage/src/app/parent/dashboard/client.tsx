@@ -86,7 +86,6 @@ export function ParentDashboardClient({
   parentUserId,
   students,
   initialActiveChildId,
-  studentTeachers,
   studentTopTeacher,
   todaySchedules,
   todayClassLessons,
@@ -95,8 +94,6 @@ export function ParentDashboardClient({
   latestPost,
   latestClassroomFeedback,
   latestFeedbackByStudent = {},
-  monthMoods,
-  monthClassroomFeedbacks,
   attendanceRate,
   studentStats = {},
   classHoursByStudent: _classHoursByStudent = {},
@@ -106,7 +103,6 @@ export function ParentDashboardClient({
 }: DashboardProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const today = new Date()
   const dailyQuote = getDailyQuote()
   const childIdFromUrl = searchParams.get('childId') || ''
   const [activeChildId, setActiveChildId] = useState(() =>
@@ -115,7 +111,7 @@ export function ParentDashboardClient({
   const [welcomeMounted, setWelcomeMounted] = useState(false)
   const [welcomeVisible, setWelcomeVisible] = useState(false)
   const [weeklyReady, setWeeklyReady] = useState(false)
-  const { data: unreadData } = useSWR('/api/parent/unread-counts', fetcher, {
+  const { data: unreadData, error: unreadError } = useSWR('/api/parent/unread-counts', fetcher, {
     refreshInterval: 30_000,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
@@ -153,8 +149,6 @@ export function ParentDashboardClient({
     }
   }, [activeStudent?.id, parentUserId])
 
-  const activeTeacherNames = activeStudent?.id ? studentTeachers[activeStudent.id] || [] : []
-  const teacherDisplay = activeTeacherNames.length ? activeTeacherNames.join('、') : '待分配'
   const topTeacher = activeStudent?.id ? studentTopTeacher?.[activeStudent.id] : null
   const topTier = topTeacher?.tierLevel ? resolveTier(topTeacher.tierLevel) : null
   const topTierLabel = topTier ? TIER_THEME[topTier].label : ''
@@ -192,7 +186,6 @@ export function ParentDashboardClient({
   const activeNextLessons = students.length <= 1 || !activeChildId
     ? nextUpcomingLessons
     : nextUpcomingLessons.filter(lesson => lesson.studentIds.includes(activeChildId))
-  const upcomingNextLesson = activeNextLessons[0] || null
   const activeNotifications = students.length <= 1 || !activeChildId
     ? notifications
     : notifications.filter(notification => !notification.studentId || notification.studentId === activeChildId)
@@ -201,10 +194,9 @@ export function ParentDashboardClient({
     : todayFeedbacks.filter(feedback => feedback.studentIds?.includes(activeChildId))
   const visibleUnreadCount = activeNotifications.filter(notification => !notification.read).length
   const unreadCount = Number(unreadData?.notifications ?? visibleUnreadCount)
-  // 待处理通知 = 全类别未读合计（试卷+表现+通知+反馈+留言），与侧栏"一键已读"口径一致
-  const totalUnread = unreadData
-    ? Number(unreadData.papers ?? 0) + Number(unreadData.posts ?? 0) + Number(unreadData.notifications ?? 0) + Number(unreadData.feedbacks ?? 0) + Number(unreadData.messages ?? 0)
-    : unreadCount
+  // 使用服务端去重后的总数，通知记录与对应的试卷/表现/反馈不重复计数。
+  const serverTotalUnread = Number(unreadData?.total)
+  const totalUnread = Number.isFinite(serverTotalUnread) && serverTotalUnread >= 0 ? serverTotalUnread : unreadCount
   const activeLesson = todayLessons.find(lesson => lessonStatus(lesson) === '上课中')
   const pendingLesson = todayLessons.find(lesson => lessonStatus(lesson) === '待老师确认')
   const nextLesson = todayLessons.find(lesson => lessonStatus(lesson) === '待上课')
@@ -403,6 +395,7 @@ export function ParentDashboardClient({
 
       <section className="parent-dashboard-section" aria-labelledby="parent-notifications-title">
         <div className="parent-dashboard-section__head"><h2 id="parent-notifications-title">待办与通知</h2><button type="button" onClick={() => router.push('/parent/notifications')}>查看全部</button></div>
+        {unreadError && <Text type="secondary" role="status">{unreadData ? '未读统计更新失败，数字可能滞后' : '未读统计暂不可用，当前数字按已加载通知显示'}</Text>}
         {activeNotifications.length ? <div className="parent-notice-list">{activeNotifications.slice(0, 3).map(notification => { const meta = NOTIFICATION_META[notification.relatedType || ''] || NOTIFICATION_META[notification.type] || NOTIFICATION_META.SYSTEM; return <button type="button" key={notification.id} onClick={() => openNotification(notification)}><span style={{ color: notification.read ? 'var(--color-ink-subtle)' : meta.color, background: notification.read ? 'var(--color-surface-3)' : meta.bg }}>{meta.icon}</span><div><strong>{notification.title}</strong><small>{new Date(notification.createdAt).toLocaleString('zh-CN')}</small></div>{!notification.read && <i />}</button> })}</div> : <Text type="secondary">暂无通知</Text>}
       </section>
     </div>

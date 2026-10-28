@@ -777,7 +777,7 @@ body {
   /* 右侧表单区域全宽 */
   .login-right {
     width: 100% !important;
-    padding: 18px 14px 36px !important;
+    padding: 6px 14px 24px !important;
     min-height: auto !important;
   }
 
@@ -790,7 +790,7 @@ body {
   }
 
   .login-card {
-    padding: 26px 20px !important;
+    padding: 12px 20px !important;
     border-radius: 16px !important;
   }
 

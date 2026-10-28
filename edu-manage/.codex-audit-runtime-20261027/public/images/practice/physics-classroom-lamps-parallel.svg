@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="330" viewBox="0 0 760 330" role="img" aria-labelledby="title desc">
+  <title id="title">教室两盏灯并联且由干路开关控制</title>
+  <desc id="desc">两盏灯分别连接在同一对节点之间；开关位于分支之前的干路中。</desc>
+  <rect width="760" height="330" fill="#fff"/>
+  <style>
+    .wire{fill:none;stroke:#1a1a1a;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+    .symbol{fill:#fff;stroke:#1a1a1a;stroke-width:4}
+    .label{font:22px sans-serif;fill:#171717}
+    .caption{font:24px sans-serif;font-weight:700;fill:#171717}
+  </style>
+  <text x="380" y="36" text-anchor="middle" class="caption">教室照明电路</text>
+  <path class="wire" d="M115 90 H245 M291 90 H620 V270 H115 V90"/>
+  <circle class="symbol" cx="245" cy="90" r="5"/><circle class="symbol" cx="291" cy="90" r="5"/><path class="wire" d="M245 90 H291"/>
+  <text x="268" y="72" text-anchor="middle" class="label">S</text>
+  <path class="wire" d="M370 90 V150 M370 200 V270 M540 90 V150 M540 200 V270"/>
+  <circle class="symbol" cx="370" cy="175" r="24"/><path class="wire" d="M354 159 L386 191 M386 159 L354 191"/>
+  <circle class="symbol" cx="540" cy="175" r="24"/><path class="wire" d="M524 159 L556 191 M556 159 L524 191"/>
+  <text x="370" y="229" text-anchor="middle" class="label">L₁</text>
+  <text x="540" y="229" text-anchor="middle" class="label">L₂</text>
+  <path class="wire" d="M115 150 V164 M115 196 V270"/><path class="wire" d="M98 164 H132 M105 196 H125"/>
+  <text x="88" y="187" text-anchor="end" class="label">电源</text>
+</svg>

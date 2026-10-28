@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="430" viewBox="0 0 760 430" role="img" aria-labelledby="title desc">
+  <title id="title">伏安法测电阻电路图</title>
+  <desc id="desc">电源、开关、电阻 Rx、电流表和滑动变阻器串联，电压表并联在 Rx 两端。</desc>
+  <rect width="760" height="430" rx="24" fill="#fff"/>
+  <g fill="none" stroke="#364454" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 100H230M288 100H338M428 100H560V164M560 276V350H495M425 350H250M150 350V262M150 188V100"/>
+    <path d="M230 100l36-18"/>
+    <rect x="338" y="78" width="90" height="44" rx="3" fill="#f6f8fa"/>
+    <path d="M560 164v112"/>
+    <path d="M535 182h50M535 258h50"/>
+    <path d="M150 188v74M136 208h28M140 242h20"/>
+    <path d="M250 350h34"/>
+    <path d="M495 350a35 35 0 1 0-70 0a35 35 0 1 0 70 0" fill="#fff"/>
+    <path d="M338 100V230H355M428 100V230H410" stroke="#356fbd"/>
+    <circle cx="382" cy="230" r="27" fill="#fff" stroke="#356fbd"/>
+    <path d="M368 350h70"/>
+    <path d="M150 350v-20M150 350v20"/>
+  </g>
+  <path d="M545 285l30-30" stroke="#e8784a" stroke-width="4" stroke-linecap="round"/>
+  <path d="m570 254 2 12-12-2" fill="none" stroke="#e8784a" stroke-width="3"/>
+  <g font-family="Microsoft YaHei, Noto Sans SC, sans-serif" font-size="20" font-weight="700" text-anchor="middle">
+    <text x="383" y="107" fill="#263446">Rx</text>
+    <text x="382" y="237" fill="#356fbd">V</text>
+    <text x="460" y="357" fill="#263446">A</text>
+    <text x="606" y="226" fill="#263446">滑动变阻器</text>
+    <text x="109" y="229" fill="#263446">电源</text>
+    <text x="256" y="75" fill="#263446">S</text>
+  </g>
+  <text x="170" y="180" font-family="Microsoft YaHei, Noto Sans SC, sans-serif" font-size="17" fill="#536272">+</text>
+  <text x="170" y="282" font-family="Microsoft YaHei, Noto Sans SC, sans-serif" font-size="17" fill="#536272">−</text>
+  <text x="378" y="397" font-family="Microsoft YaHei, Noto Sans SC, sans-serif" font-size="16" fill="#718092" text-anchor="middle">A 与 Rx 串联；V 并联在 Rx 两端</text>
+</svg>

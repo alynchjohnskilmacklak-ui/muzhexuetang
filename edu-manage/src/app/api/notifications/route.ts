@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
-import { sendWxMessage, buildFeedbackContent, buildSafeHomeContent, buildPushPayload } from '@/lib/wxpusher'
+import { buildFeedbackContent, buildSafeHomeContent } from '@/lib/wxpusher'
 import { visibleNotificationWhere } from '@/lib/business-visibility'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { createNotification } from '@/lib/notifications'
+import { qywxEnabled, sendQywxParentMass } from '@/lib/qywx'
+import { buildDailyDigest } from '@/lib/daily-digest'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +37,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
   return NextResponse.json({ records, total })
 })
 
+/** 企微群发错误码 → 语义化状态 */
+function massErrorStatus(rawCode?: number): { status: string; error: string } {
+  if (rawCode === 60019) return { status: 'limit_today', error: '该家长今日接收企微群发已达上限，已并入/明日重发' }
+  if (rawCode === 84061) return { status: 'no_bind', error: '家长微信未添加为企微学员（外部联系人）' }
+  return { status: 'failed', error: '企微群发创建失败' }
+}
+
 export const POST = apiHandler(async (req: NextRequest) => {
   const session = await auth()
   if (!session?.user || !['admin', 'teacher'].includes(session.user.role)) {
@@ -55,7 +64,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   const student = await prisma.student.findFirst({
     where: { id: studentId },
-    include: { parent: { select: { id: true, wxpusherUid: true } } },
+    include: { parent: { select: { id: true, wxpusherUid: true, qywxExternalUserId: true, qywxSenderUserId: true } } },
   })
   if (!student) return NextResponse.json({ error: '学员不存在' }, { status: 404 })
 
@@ -86,10 +95,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
   }
 
   const parentUserId = student.parent?.id || student.parentId || student.parentUserId
-  const wxpusherUid = student.parent?.wxpusherUid
+  const qywxExternalUserId = student.parent?.qywxExternalUserId
+  const qywxSenderUserId = student.parent?.qywxSenderUserId
 
   let pushStatus = 'none'
   let pushError: string | null = null
+  let qywxMsgId: string | null = null
   const notificationTitle = type === 'wxpusher_feedback'
     ? '课堂反馈通知'
     : type === 'wxpusher_safe'
@@ -112,18 +123,40 @@ export const POST = apiHandler(async (req: NextRequest) => {
     pushStatus: 'none',
   })
 
-  // Handle WxPusher push
-  if (type === 'wxpusher_feedback' || type === 'wxpusher_safe') {
-    if (!wxpusherUid) {
+  // 家长推送：企业微信「学员联系」群发（同日合并策略，替代已失效的 wxpusher）
+  if (qywxEnabled()) {
+    if (!qywxExternalUserId) {
       pushStatus = 'no_bind'
+      pushError = '家长微信未添加为企微学员，请先在企业微信「学员联系-加学员」中添加该家长'
     } else {
-      const { content: msgContent, summary } = buildPushPayload(type, student.name)
-      const result = await sendWxMessage(wxpusherUid, msgContent, summary)
-      if (result.success) {
-        pushStatus = 'sent'
+      // 同日合并：当天已为该学生创建过企微群发 → 不重复建任务，避免触发每家长每日 1 条上限
+      const todayStart = new Date()
+      todayStart.setHours(0, 0, 0, 0)
+      const existingMass = await prisma.notification.findFirst({
+        where: {
+          studentId: student.id,
+          qywxMsgId: { not: null },
+          createdAt: { gte: todayStart },
+        },
+        select: { id: true, title: true },
+        orderBy: { createdAt: 'desc' },
+      })
+      if (existingMass) {
+        pushStatus = 'merged_today'
+        pushError = `今日已生成企微汇总卡片（${existingMass.title}），本条已并入，请明日再单独发送`
       } else {
-        pushStatus = 'failed'
-        pushError = result.error || null
+        const digest = await buildDailyDigest(prisma, student.id, student.name)
+        const senderUserid = qywxSenderUserId || process.env.QYWX_MASS_SENDER || 'RenWenTao'
+        const result = await sendQywxParentMass(senderUserid, [qywxExternalUserId], digest)
+        if (result.success && result.msgid) {
+          pushStatus = 'pending_confirm'
+          qywxMsgId = result.msgid
+          pushError = '已生成企微群发任务，请在企微「群发助手」确认发送'
+        } else {
+          const mapped = massErrorStatus(result.rawCode)
+          pushStatus = mapped.status
+          pushError = mapped.error + (result.error ? `（${result.error}）` : '')
+        }
       }
     }
 
@@ -132,9 +165,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
       data: {
         pushStatus,
         pushError,
+        qywxMsgId,
         attempts: { increment: 1 },
         sentAt: pushStatus === 'sent' ? new Date() : undefined,
-        lastError: pushStatus === 'failed' ? pushError : undefined,
+        lastError: pushStatus === 'failed' || pushStatus === 'limit_today' || pushStatus === 'merged_today' ? pushError : undefined,
       },
     })
   }
@@ -150,5 +184,5 @@ export const POST = apiHandler(async (req: NextRequest) => {
     },
   })
 
-  return NextResponse.json({ ...notification, pushStatus, pushError }, { status: 201 })
+  return NextResponse.json({ ...notification, pushStatus, pushError, qywxMsgId }, { status: 201 })
 })

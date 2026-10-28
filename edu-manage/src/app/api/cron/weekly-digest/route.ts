@@ -12,42 +12,57 @@ const DIGEST_TYPE = 'WEEKLY_DIGEST'
 
 async function runDigest(db: typeof prisma, now: Date) {
   const { weekKey, start, end } = localWeekRange(now)
+  const weeklyActivityWhere = {
+    createdAt: { gte: start, lt: end },
+    deletedAt: null,
+    type: { not: DIGEST_TYPE },
+    OR: [{ relatedType: null }, { relatedType: { not: DIGEST_TYPE } }],
+  }
 
-  // 上周收到过通知的用户（排除已删除）
+  // 仅给家长生成周报，并排除周报自身，避免周报在下一周期被当成新活动。
   const recipients = await db.notification.findMany({
-    where: { createdAt: { gte: start, lt: end }, deletedAt: null },
+    where: { ...weeklyActivityWhere, user: { is: { role: 'parent' } } },
     select: { userId: true },
     distinct: ['userId'],
   })
 
   let created = 0
   for (const { userId } of recipients) {
-    // 幂等：该周已有周报则跳过
-    const existing = await db.notification.findFirst({
-      where: { userId, relatedType: DIGEST_TYPE, relatedId: weekKey, deletedAt: null },
-      select: { id: true },
-    })
-    if (existing) continue
+    // Serialize the check-and-create pair across cron invocations and app replicas.
+    // Read committed makes the post-lock lookup observe a concurrent transaction's commit.
+    // PostgreSQL releases this transaction-scoped lock on commit or rollback.
+    const didCreate = await db.$transaction(async (tx) => {
+      await tx.$queryRaw`WITH advisory_lock AS MATERIALIZED (
+        SELECT pg_advisory_xact_lock(hashtext('edu-manage.weekly-digest'), hashtext(${userId} || ':' || ${weekKey}))
+      ) SELECT 1 AS locked FROM advisory_lock`
 
-    const counts = await db.notification.groupBy({
-      by: ['relatedType'],
-      where: { userId, createdAt: { gte: start, lt: end }, deletedAt: null },
-      _count: { _all: true },
-    })
+      const existing = await tx.notification.findFirst({
+        where: { userId, relatedType: DIGEST_TYPE, relatedId: weekKey, deletedAt: null },
+        select: { id: true },
+      })
+      if (existing) return false
 
-    const content = buildDigestContent(start, end, counts.map((row) => ({ relatedType: row.relatedType, count: row._count._all })))
-    if (!content) continue
+      const counts = await tx.notification.groupBy({
+        by: ['relatedType'],
+        where: { ...weeklyActivityWhere, userId },
+        _count: { _all: true },
+      })
 
-    await createNotification(db, {
-      userId,
-      type: DIGEST_TYPE,
-      relatedType: DIGEST_TYPE,
-      relatedId: weekKey,
-      title: `上周学习周报（${start.getMonth() + 1}月${start.getDate()}日-${end.getMonth() + 1}月${end.getDate()}日）`,
-      content,
-      href: '/parent/notifications',
-    })
-    created += 1
+      const content = buildDigestContent(start, end, counts.map((row) => ({ relatedType: row.relatedType, count: row._count._all })))
+      if (!content) return false
+
+      await createNotification(tx, {
+        userId,
+        type: DIGEST_TYPE,
+        relatedType: DIGEST_TYPE,
+        relatedId: weekKey,
+        title: `上周学习周报（${start.getMonth() + 1}月${start.getDate()}日-${end.getMonth() + 1}月${end.getDate()}日）`,
+        content,
+        href: '/parent/notifications',
+      })
+      return true
+    }, { isolationLevel: 'ReadCommitted' })
+    if (didCreate) created += 1
   }
 
   return { weekKey, recipients: recipients.length, created }

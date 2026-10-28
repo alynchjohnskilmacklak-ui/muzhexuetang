@@ -1,0 +1,3 @@
+SELECT count(*) AS total, count(t.id) AS valid_teacher, count(*) - count(t.id) AS dangling FROM "TeacherMessage" m LEFT JOIN "Teacher" t ON t.id = m."teacherId";
+SELECT column_name, is_nullable FROM information_schema.columns WHERE table_name = 'TeacherMessage' AND column_name = 'teacherId';
+SELECT tc.constraint_name FROM information_schema.table_constraints tc WHERE tc.table_name = 'TeacherMessage' AND tc.constraint_type = 'FOREIGN KEY';

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="330" viewBox="0 0 880 330" role="img" aria-labelledby="title desc">
+  <title id="title">两组三角形的对应边与夹角</title>
+  <desc id="desc">左侧三角形ABC标有AB为4厘米、AC为6厘米，右侧三角形DEF标有DE为2厘米、DF为3厘米，顶角A与D用相同弧线标记。</desc>
+  <rect width="880" height="330" fill="#fff"/>
+  <style>
+    .shape{fill:none;stroke:#222;stroke-width:4;stroke-linejoin:round}
+    .mark{fill:none;stroke:#e8784a;stroke-width:4;stroke-linecap:round}
+    .label{font:22px sans-serif;fill:#171717}
+    .measure{font:20px sans-serif;fill:#171717}
+    .name{font:25px sans-serif;font-weight:700;fill:#171717}
+  </style>
+  <path class="shape" d="M170 60 L65 260 L315 260 Z"/>
+  <path class="shape" d="M600 60 L548 160 L673 160 Z"/>
+  <path class="mark" d="M154 91 Q170 99 184 91 M587 84 Q600 91 613 84"/>
+  <text x="170" y="43" text-anchor="middle" class="label">A</text>
+  <text x="48" y="282" text-anchor="middle" class="label">B</text>
+  <text x="332" y="282" text-anchor="middle" class="label">C</text>
+  <text x="600" y="43" text-anchor="middle" class="label">D</text>
+  <text x="531" y="184" text-anchor="middle" class="label">E</text>
+  <text x="690" y="184" text-anchor="middle" class="label">F</text>
+  <text x="88" y="142" transform="rotate(-62 88 142)" class="measure">AB=4 cm</text>
+  <text x="253" y="139" transform="rotate(58 253 139)" class="measure">AC=6 cm</text>
+  <text x="548" y="103" transform="rotate(-62 548 103)" text-anchor="end" class="measure">DE=2 cm</text>
+  <text x="652" y="105" transform="rotate(58 652 105)" class="measure">DF=3 cm</text>
+  <text x="436" y="126" text-anchor="middle" class="name">∠A = ∠D</text>
+</svg>

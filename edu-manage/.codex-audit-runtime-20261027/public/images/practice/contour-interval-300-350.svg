@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="260" viewBox="0 0 700 260" role="img" aria-labelledby="title desc">
+  <title id="title">相邻等高线标注300米和350米</title>
+  <desc id="desc">两条相邻的等高线分别标注300米、350米，中间没有其他等高线。</desc>
+  <rect width="700" height="260" rx="18" fill="#fff"/>
+  <path d="M70 196C145 147 183 123 255 98S382 60 458 81 568 120 634 165" fill="none" stroke="#4b8b67" stroke-width="5"/>
+  <path d="M70 135C145 98 198 82 267 64S389 39 465 56 571 86 634 112" fill="none" stroke="#4b8b67" stroke-width="5"/>
+  <rect x="199" y="112" width="98" height="34" rx="8" fill="#fff" stroke="#d4e3d8"/><text x="248" y="136" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#315d40">300米</text>
+  <rect x="405" y="45" width="98" height="34" rx="8" fill="#fff" stroke="#d4e3d8"/><text x="454" y="69" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#315d40">350米</text>
+  <path d="M315 99V142" stroke="#4376a8" stroke-width="3" stroke-dasharray="6 5"/><path d="M307 106L315 96L323 106M307 135L315 145L323 135" fill="none" stroke="#4376a8" stroke-width="3"/>
+  <text x="350" y="221" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#555">相邻两条等高线，中间没有其他等高线</text>
+</svg>
