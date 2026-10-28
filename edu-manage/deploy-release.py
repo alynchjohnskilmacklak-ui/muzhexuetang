@@ -178,9 +178,9 @@ def build_image(target, image, tag, dry_run, no_cache=False):
             % (BUILDER, target, '--no-cache ' if no_cache else '', NPM_REGISTRY, image, tag)
         )
     else:
-        # Docker Desktop 内建构建：与 buildx 同产出本地镜像（legacy builder 走内置 BuildKit）
+        # Docker Desktop 内建构建（legacy builder）：不支持 --progress/--load，默认产出本地镜像
         cmd = (
-            'docker build --progress=plain --load --target %s '
+            'docker build --target %s '
             '%s--build-arg NPM_REGISTRY=%s -t %s:%s .'
             % (target, '--no-cache ' if no_cache else '', NPM_REGISTRY, image, tag)
         )
@@ -205,6 +205,30 @@ def export_tar(image, tag, dry_run):
         f.write(digest)
     log("  导出 %s（%.1fMB，sha256=%s…%s）" % (tar, os.path.getsize(tar) / 1048576, digest[:16], digest[-6:]))
     return tar, digest
+
+
+def local_image_id(image, tag):
+    """返回本地镜像 ID（不含 sha256: 前缀），不存在返回 None。"""
+    code, out, _ = run_local_capture(
+        "docker image inspect %s:%s --format '{{.Id}}'" % (image, tag),
+        timeout=30,
+    )
+    if code != 0 or not out.strip():
+        return None
+    return out.strip().replace("sha256:", "")
+
+
+def run_local_capture(cmd, timeout=120):
+    import subprocess as _sp
+    p = _sp.run(
+        cmd.split() if not isinstance(cmd, list) else cmd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=timeout,
+    )
+    return p.returncode, p.stdout, p.stderr
 
 
 def deploy_remote(tars, tag, dry_run, skip_upload=False):
@@ -520,8 +544,48 @@ def main():
     ap.add_argument("--skip-build", action="store_true", help="复用 release/ 已有 tar，跳过本地构建")
     ap.add_argument("--skip-upload", action="store_true", help="仅在目标机已有同 tag 镜像时跳过上传/load；会先比较本地和服务器镜像 ID")
     ap.add_argument("--no-cache", action="store_true", help="强制全量重建（不推荐，默认走构建缓存）")
+    ap.add_argument("--auto", action="store_true", help="自动复用：本地镜像已存在且服务器同 tag 镜像 ID 一致时跳过构建/导出/上传，仅做标签切换、迁移与重启；任一不一致则自动全量构建发布")
     ap.add_argument("--dry-run", action="store_true", help="只打印命令，不执行")
     args = ap.parse_args()
+
+    if args.auto:
+        images = [APP_IMAGE] + ([MIGRATOR_IMAGE] if (args.migrator or args.migrator_only) else [])
+        local_ids = {i: local_image_id(i, args.tag) for i in images}
+        missing = [i for i in images if not local_ids[i]]
+        if missing:
+            log("  [auto] 本地缺镜像 %s，将执行构建" % ", ".join(missing))
+            args.skip_build = False
+        else:
+            log("  [auto] 本地镜像已存在（%s），跳过构建" % ", ".join(images))
+            args.skip_build = True
+            if args.dry_run:
+                log("  [auto][dry-run] 跳过服务器镜像探测，将走上传路径")
+            else:
+                try:
+                    probe = paramiko.SSHClient()
+                    probe.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    probe.connect(HOST, username=USER, password=PWD, timeout=20, banner_timeout=20, auth_timeout=20,
+                                  look_for_keys=True, allow_agent=True)
+                    remote_diffs = []
+                    for i in images:
+                        code, rid, _ = ssh_run(
+                            probe, "docker image inspect %s:%s --format '{{.Id}}'" % (i, args.tag), timeout=20
+                        )
+                        rid = rid.strip().replace("sha256:", "") if code == 0 else ""
+                        if not rid:
+                            remote_diffs.append(i)
+                            continue
+                        if rid != local_ids[i]:
+                            remote_diffs.append(i)
+                    probe.close()
+                    if not remote_diffs:
+                        args.skip_upload = True
+                        log("  [auto] 服务器同 tag 镜像 ID 全部一致，跳过上传/load")
+                    else:
+                        log("  [auto] 服务器镜像与本地不一致（%s），将执行上传" % ", ".join(remote_diffs))
+                except Exception as e:
+                    log("  [auto] 服务器镜像探测失败（%s），将执行上传" % e)
+
     if args.skip_upload and not args.skip_build:
         ap.error("--skip-upload 需要同时指定 --skip-build")
     if args.migrator_only and args.migrator:
@@ -558,13 +622,27 @@ def main():
     else:
         tar = os.path.join(RELEASE_DIR, "%s-%s.tar" % (APP_IMAGE, tag))
         if not os.path.exists(tar):
-            raise SystemExit("--skip-build 但找不到 " + tar)
-        digest = open(tar + ".sha256").read().strip()
-        tars.append((tar, digest))
+            if args.auto and local_image_id(APP_IMAGE, tag):
+                log("  [auto] 发布 tar 缺失但本地镜像存在，重新导出 %s" % os.path.basename(tar))
+                tar, digest = export_tar(APP_IMAGE, tag, args.dry_run)
+                tars.append((tar, digest))
+            else:
+                raise SystemExit("--skip-build 但找不到 " + tar)
+        else:
+            digest = open(tar + ".sha256").read().strip()
+            tars.append((tar, digest))
         if args.migrator:
             tar2 = os.path.join(RELEASE_DIR, "%s-%s.tar" % (MIGRATOR_IMAGE, tag))
-            digest2 = open(tar2 + ".sha256").read().strip()
-            tars.append((tar2, digest2))
+            if not os.path.exists(tar2):
+                if args.auto and local_image_id(MIGRATOR_IMAGE, tag):
+                    log("  [auto] 发布 tar 缺失但本地镜像存在，重新导出 %s" % os.path.basename(tar2))
+                    tar2, digest2 = export_tar(MIGRATOR_IMAGE, tag, args.dry_run)
+                    tars.append((tar2, digest2))
+                else:
+                    raise SystemExit("--skip-build 但找不到 " + tar2)
+            else:
+                digest2 = open(tar2 + ".sha256").read().strip()
+                tars.append((tar2, digest2))
 
     if args.dry_run:
         log("  [dry-run] 部署 tars: " + ", ".join(t for t, _ in tars))
