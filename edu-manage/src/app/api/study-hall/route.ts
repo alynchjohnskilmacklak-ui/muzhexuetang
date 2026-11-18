@@ -11,6 +11,7 @@ import {
   isScheduledDate, isoWeekday, parseDateKey,
 } from '@/lib/study-hall/domain'
 import { canRecordStudyHallClass } from '@/lib/study-hall/access'
+import { createNotification } from '@/lib/notifications'
 import {
   COMPLETED_ATTENDANCE_STATUSES,
   STUDY_HALL_REWARD,
@@ -299,7 +300,7 @@ export const PATCH = apiHandler(async (request: NextRequest) => {
       const content = `${studyDate}${session ? ` ${session.label}` : ''}：${updatesHomework ? homeworkItems.join('；') || (contentType === 'LESSON' ? '老师已更新今日讲解内容' : '老师已更新作业情况') : attendanceLabel}`.slice(0, 180)
       const old = await tx.notification.findFirst({ where: { userId: parentUserId, relatedType: 'STUDY_HALL_HOMEWORK', relatedId: entry.id, status: 'ACTIVE' }, select: { id: true } })
       const data = { title, content, type: 'STUDY_HALL_HOMEWORK', href: `/parent/study-hall?date=${studyDate}&entryId=${entry.id}`, link: '/parent/study-hall', studentId, senderId: user.id, read: false, readAt: null, pushStatus: parentAccount?.wxpusherUid ? 'pending' : 'none', pushError: null }
-      notification = old ? await tx.notification.update({ where: { id: old.id }, data }) : await tx.notification.create({ data: { userId: parentUserId, relatedType: 'STUDY_HALL_HOMEWORK', relatedId: entry.id, ...data } })
+      notification = old ? await tx.notification.update({ where: { id: old.id }, data }) : await createNotification(tx, { userId: parentUserId, relatedType: 'STUDY_HALL_HOMEWORK', relatedId: entry.id, ...data })
     }
     return { entry, notification, reward }
   })

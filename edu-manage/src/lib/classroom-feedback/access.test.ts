@@ -6,6 +6,8 @@ import {
   canViewFeedback,
   hasRequiredLessonContent,
   hasMeaningfulFeedbackContent,
+  feedbackStudentLimitError,
+  MAX_STUDENTS_PER_FEEDBACK,
   redactFeedbackForParent,
   resolveTeacherFeedbackCreationScope,
 } from './access'
@@ -18,6 +20,13 @@ const sharedFeedback = {
 }
 
 describe('classroom feedback P0 access rules', () => {
+  it('uses the same five-student maximum for every teacher feedback entry point', () => {
+    expect(MAX_STUDENTS_PER_FEEDBACK).toBe(5)
+    expect(feedbackStudentLimitError('teacher', 5)).toBeNull()
+    expect(feedbackStudentLimitError('teacher', 6)).toBe('一次最多反馈5名学生')
+    expect(feedbackStudentLimitError('admin', 6)).toBeNull()
+  })
+
   it('allows only the linked student feedback for a parent', () => {
     expect(canViewFeedback({ id: 'parent-a', role: 'parent' }, sharedFeedback, ['student-a'])).toBe(true)
     expect(canViewFeedback({ id: 'parent-a', role: 'parent' }, {
@@ -95,10 +104,95 @@ describe('classroom feedback P0 access rules', () => {
     })).resolves.toMatchObject({ allowed: false, students: [] })
   })
 
+  it('rejects a teacher with a different assigned subject on a lesson', async () => {
+    const prisma = {
+      classLesson: {
+        findFirst: vi.fn(async () => ({
+          id: 'lesson-english',
+          teacherId: null,
+          subject: '英语',
+          groupId: 'group-a',
+          termId: 'term-a',
+          intensiveMode: 'NORMAL',
+          group: {
+            id: 'group-a',
+            teacherId: 'teacher-primary',
+            termId: 'term-a',
+            intensiveMode: 'NORMAL',
+            course: { type: 'GROUP', subject: '英语' },
+            teacherAssignments: [{ subject: '数学' }],
+            enrollments: [{
+              studentId: 'student-a',
+              subjects: ['英语'],
+              student: { id: 'student-a', name: '学员甲', parentId: null, parentUserId: null },
+            }],
+          },
+          lessonStudents: [],
+        })),
+      },
+      classGroup: { findFirst: vi.fn() },
+      student: { findMany: vi.fn() },
+    } as unknown as PrismaClient
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-math',
+      classLessonId: 'lesson-english',
+      requestedStudentIds: ['student-a'],
+      requestedSubject: '英语',
+    })).resolves.toMatchObject({ allowed: false, reason: 'lesson', students: [] })
+  })
+
+  it('requires student-only feedback to match both the teacher assignment and enrollment subject', async () => {
+    const prisma = {
+      classLesson: { findFirst: vi.fn() },
+      classGroup: { findFirst: vi.fn(async () => null) },
+      student: {
+        findMany: vi.fn(async () => [{
+          id: 'student-a',
+          name: '学员甲',
+          parentId: null,
+          parentUserId: null,
+          enrollments: [{
+            subjects: ['英语'],
+            group: {
+              teacherId: 'teacher-primary',
+              course: { subject: '英语' },
+              teacherAssignments: [{ subject: '英语' }],
+            },
+          }],
+        }]),
+      },
+    } as unknown as PrismaClient
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-a',
+      requestedStudentIds: ['student-a'],
+      requestedSubject: '数学',
+    })).resolves.toMatchObject({ allowed: false, students: [] })
+
+    await expect(resolveTeacherFeedbackCreationScope(prisma, {
+      teacherId: 'teacher-a',
+      requestedStudentIds: ['student-a'],
+      requestedSubject: '英语',
+    })).resolves.toMatchObject({ allowed: true, students: [{ id: 'student-a' }] })
+  })
+
   it('redacts every other student and rating from a parent DTO', () => {
+    const knowledgeCard = {
+      edition: '冀教版',
+      grade: '初一',
+      subject: '数学',
+      topic: '一元一次方程',
+      definition: '只含有一个未知数，且未知数的次数都是1、等号两边都是整式的方程，叫做一元一次方程。',
+      formulas: ['ax+b=0（a≠0）', '移项时改变符号'],
+      example: { question: '解方程 x+2=5', steps: ['两边同时减2', '计算得到x=3', '代回原式检验'], answer: 'x=3' },
+      tips: ['移项时记得变号', '解完后代回检验'],
+      verified: false,
+    }
     const result = redactFeedbackForParent({
       id: 'feedback-1',
       studentIds: ['student-a', 'student-b', 'student-c'],
+      knowledgeCard,
       students: [{ id: 'student-a', name: 'A' }, { id: 'student-b', name: 'B' }],
       studentRatings: [
         { studentId: 'student-a', rating: 'GREAT' },
@@ -110,6 +204,7 @@ describe('classroom feedback P0 access rules', () => {
     expect(result.studentIds).toEqual(['student-a'])
     expect(result.students).toEqual([{ id: 'student-a', name: 'A' }])
     expect(result.studentRatings).toEqual([{ studentId: 'student-a', rating: 'GREAT' }])
+    expect(result.knowledgeCard).toEqual(knowledgeCard)
     expect(JSON.stringify(result)).not.toContain('student-b')
     expect(JSON.stringify(result)).not.toContain('student-c')
   })
@@ -257,5 +352,41 @@ describe('classroom feedback image access', () => {
       ['feedback-study-hall.jpg'],
     )
     expect(unrelatedParentAccess.get('feedback-study-hall.jpg')?.allowed).toBe(false)
+  })
+
+  it('does not treat an unrelated FileAsset as public feedback media', async () => {
+    const prisma = {
+      fileAsset: {
+        findMany: vi.fn(async () => [{
+          id: 'asset-private',
+          storageKey: 'admin-private/report.pdf',
+          url: '/api/uploads/admin-private/report.pdf',
+          previewUrl: null,
+          thumbnailUrl: null,
+          ownerType: 'admin_material',
+          feedbackId: null,
+          uploadedById: 'admin-user',
+        }]),
+      },
+      classroomFeedback: {
+        findMany: vi.fn(async () => [{
+          id: 'feedback-1',
+          teacherId: 'teacher-a',
+          status: 'PUBLISHED',
+          studentIds: ['student-a'],
+          imageUrls: ['admin-private/report.pdf'],
+          classLesson: { teacherId: 'teacher-a' },
+        }]),
+      },
+      studyHallHomeworkEntry: { findMany: vi.fn(async () => []) },
+      student: { findMany: vi.fn(async () => [{ id: 'student-a' }]) },
+    } as unknown as PrismaClient
+
+    const access = await canAccessFeedbackImage(
+      prisma,
+      { id: 'parent-unrelated', role: 'parent' },
+      ['admin-private/report.pdf'],
+    )
+    expect(access.get('admin-private/report.pdf')).toMatchObject({ allowed: false, reason: 'forbidden' })
   })
 })

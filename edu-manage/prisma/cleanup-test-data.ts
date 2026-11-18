@@ -110,18 +110,6 @@ async function main() {
   const testCourseIds = testCourses.map((c) => c.id)
   console.log(`  找到 ${testCourseIds.length} 个测试课程: ${testCourses.map((c) => c.name).join(', ') || '(无)'}`)
 
-  // 找到关联的 Schedule（关联测试教师或测试课程）
-  const testSchedules = await prisma.schedule.findMany({
-    where: {
-      OR: [
-        { teacherId: { in: testTeacherIds } },
-        { courseId: { in: testCourseIds } },
-      ],
-    },
-    select: { id: true },
-  })
-  const testScheduleIds = testSchedules.map((s) => s.id)
-
   // 找到关联的 ClassGroup（关联测试教师或测试课程）
   const testGroups = await prisma.classGroup.findMany({
     where: {
@@ -157,7 +145,6 @@ async function main() {
   const allTeacherIds = testTeacherIds
   const allStudentIds = testStudentIds
   const allCourseIds = testCourseIds
-  const allScheduleIds = testScheduleIds
   const allGroupIds = testGroupIds
   const allLessonIds = testLessonIds
   const allEnrollmentIds = testEnrollmentIds
@@ -187,7 +174,6 @@ async function main() {
   const attWhere: Record<string, unknown>[] = []
   if (allLessonIds.length) attWhere.push({ lessonId: { in: allLessonIds } })
   if (allStudentIds.length) attWhere.push({ studentId: { in: allStudentIds } })
-  if (allScheduleIds.length) attWhere.push({ scheduleId: { in: allScheduleIds } })
   if (attWhere.length) {
     const c = await prisma.attendance.deleteMany({ where: { OR: attWhere } })
     console.log(`  [3/20] Attendance: ${c.count}`)
@@ -204,12 +190,6 @@ async function main() {
     const c = await prisma.fee.deleteMany({ where: { studentId: { in: allStudentIds } } })
     console.log(`  [5/20] Fee: ${c.count}`)
   } else console.log('  [5/20] Fee: 跳过')
-
-  // 6. ScheduleStudent
-  if (allScheduleIds.length) {
-    const c = await prisma.scheduleStudent.deleteMany({ where: { scheduleId: { in: allScheduleIds } } })
-    console.log(`  [6/20] ScheduleStudent: ${c.count}`)
-  } else console.log('  [6/20] ScheduleStudent: 跳过')
 
   // 7. 成绩维度
   if (allStudentIds.length) {
@@ -344,12 +324,6 @@ async function main() {
     const c = await prisma.classGroup.deleteMany({ where: { id: { in: allGroupIds } } })
     console.log(`  [23/26] ClassGroup: ${c.count}`)
   } else console.log('  [23/26] ClassGroup: 跳过')
-
-  // 22. 排课
-  if (allScheduleIds.length) {
-    const c = await prisma.schedule.deleteMany({ where: { id: { in: allScheduleIds } } })
-    console.log(`  [24/28] Schedule: ${c.count}`)
-  } else console.log('  [24/28] Schedule: 跳过')
 
   // 23. 课程
   if (allCourseIds.length) {

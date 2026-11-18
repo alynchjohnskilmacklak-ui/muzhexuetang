@@ -6,6 +6,7 @@ import { addDays, format } from 'date-fns'
 import { apiHandler } from '@/lib/api-handler'
 import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 
 const WEEK_DAYS = new Set(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'])
 
@@ -179,6 +180,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
       where: { groupId: id, status: 'ACTIVE', deletedAt: null },
       select: { studentId: true, subjects: true },
     })
+    const affectedStudentIds = new Set<string>()
     if (snapshotStudents.length) {
       const snapshotLessons = await tx.classLesson.findMany({
         where: { groupId: id, status: { in: ['SCHEDULED', 'IN_PROGRESS'] }, isManual: false, deletedAt: null },
@@ -189,6 +191,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
           .filter((student) => enrollmentIncludesSubject(student.subjects, lesson.subject))
           .map((student) => ({ lessonId: lesson.id, studentId: student.studentId })),
       )
+      snapshotRows.forEach((row) => affectedStudentIds.add(row.studentId))
       if (snapshotRows.length) {
         await tx.classLessonStudent.createMany({ data: snapshotRows, skipDuplicates: true })
       }
@@ -210,8 +213,28 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     await tx.activityLog.create({
       data: { userId: user.id, action: '生成课次', detail: `${group.name} 共${dates.length}节` },
     })
-    return createdCount
+    const createdLessons = await tx.classLesson.findMany({
+      where: {
+        groupId: id,
+        lessonDate: { in: dates },
+        status: 'SCHEDULED',
+        isManual: false,
+        deletedAt: null,
+      },
+      select: { id: true },
+    })
+    const change = await recordCourseChangeEvent(tx, {
+      eventType: 'LESSON_SERIES_REGENERATED',
+      actorUserId: user.id,
+      groupId: id,
+      lessonIds: [...oldIds, ...createdLessons.map((lesson) => lesson.id)],
+      studentIds: [...affectedStudentIds],
+      title: '班级课表已更新',
+      summary: `${group.name}已重新生成未来课表：新增/保留 ${createdCount} 节，替换原有 ${oldIds.length} 节安排，请查看最新课表。`,
+      notifyParents: group.status === 'ACTIVE',
+    })
+    return { count: createdCount, changeEventId: change.event.id, notifiedParents: change.recipientCount }
   }, { timeout: 30_000 })
 
-  return NextResponse.json({ count: created, dates: dates.map(d => format(d, 'yyyy-MM-dd')) })
+  return NextResponse.json({ ...created, dates: dates.map(d => format(d, 'yyyy-MM-dd')) })
 })

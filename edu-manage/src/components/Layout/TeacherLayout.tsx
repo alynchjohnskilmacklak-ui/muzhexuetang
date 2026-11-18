@@ -4,13 +4,14 @@ import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Avatar, Badge, Button, Dropdown, Form, Input, Layout, Menu, Modal, Spin, Tooltip } from 'antd'
+import { Badge, Button, Dropdown, Form, Input, Layout, Menu, Spin, Tooltip } from 'antd'
 import useSWR from 'swr'
 import {
   CalendarOutlined,
   AppstoreOutlined,
   CheckSquareOutlined,
   CoffeeOutlined,
+  CrownOutlined,
   DashboardOutlined,
   DollarOutlined,
   ExperimentOutlined,
@@ -29,17 +30,19 @@ import {
   QuestionCircleOutlined,
   ReadOutlined,
   TeamOutlined,
-  UserOutlined,
 } from '@ant-design/icons'
 import { signOut } from 'next-auth/react'
 import { toast } from 'sonner'
-import { normalizeAvatarUrl } from '@/lib/upload-url'
+import { DEFAULT_TEACHER_AVATAR, getTeacherAvatarUrl } from '@/lib/teacher-avatars'
+import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useKickListener } from '@/hooks/useKickListener'
 import { useSessionPing } from '@/hooks/useSessionPing'
 import { PASSWORD_MIN_LENGTH, validatePassword } from '@/lib/password-policy'
 import { clearSensitiveBrowserStorage } from '@/lib/client-sensitive-storage'
 import { MobileLayout, type MobileNavItem } from './MobileLayout'
+import { LayoutHydrationFallback } from './LayoutHydrationFallback'
 import { resolveTier, TIER_APP } from '@/constants/teacher-tier'
 
 const { Sider, Content, Header } = Layout
@@ -47,7 +50,7 @@ const { Sider, Content, Header } = Layout
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 interface TeacherData {
-  teacher: { id: string; name: string; avatar?: string | null; tierLevel?: string | null }
+  teacher: { id: string; name: string; gender?: string | null; avatar?: string | null; tierLevel?: string | null }
   badges: { unsubmitted: number; unpublished: number; unread: number; unreadMessages: number }
 }
 
@@ -60,6 +63,7 @@ const navItems: NavItem[] = [
   { key: '/teacher/dashboard', icon: <DashboardOutlined />, label: '工作台' },
   { key: 'teaching-group', icon: <CalendarOutlined />, label: '教学工作', children: [
     { key: '/teacher/teaching-schedule', icon: <CalendarOutlined />, label: '我的课表' },
+    { key: '/teacher/intensive', icon: <CrownOutlined />, label: 'VIP课程预约' },
     { key: '/teacher/lesson-previews', icon: <FileTextOutlined />, label: '讲义预告' },
     { key: '/teacher/attendance', icon: <CheckSquareOutlined />, label: '考勤录入', badgeKey: 'unsubmitted' },
     { key: '/teacher/feedback', icon: <MessageOutlined />, label: '我的反馈', badgeKey: 'unpublished' },
@@ -207,7 +211,7 @@ export function TeacherLayout({ children, initialData }: { children: React.React
     })),
   }))
 
-  if (isMobile === null) return <div aria-hidden="true" style={{ minHeight: '100dvh', background: appTheme.mainBg }} />
+  if (isMobile === null) return <LayoutHydrationFallback />
 
   if (isMobile) {
     return (
@@ -326,7 +330,13 @@ export function TeacherLayout({ children, initialData }: { children: React.React
               } },
             ] }} trigger={['click']}>
               <button type="button" aria-label="打开用户菜单" style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: 0, border: 0, background: 'transparent' }}>
-                <Avatar size={30} src={normalizeAvatarUrl(data.teacher.avatar) || ((data.teacher as {gender?:string}).gender === 'F' || (data.teacher as {gender?:string}).gender === '女' ? '/avatars/teacher-female.png' : '/avatars/teacher-male.png')} icon={<UserOutlined />} style={{ backgroundColor: 'var(--color-role-teacher)', objectFit: 'cover' }} />
+                <CachedAvatarImage
+                  src={getTeacherAvatarUrl(data.teacher.avatar, data.teacher.gender, data.teacher.id)}
+                  fallbackSrc={getTeacherAvatarUrl(null, data.teacher.gender, data.teacher.id) || DEFAULT_TEACHER_AVATAR}
+                  alt={data.teacher.name}
+                  loading="eager"
+                  style={{ width: 30, height: 30, flexShrink: 0, borderRadius: '50%', objectFit: 'cover', background: 'var(--color-role-teacher)' }}
+                />
                 <span style={{ fontSize: 13, color: appTheme.headerFg, whiteSpace: 'nowrap' }}>{data.teacher.name}</span>
               </button>
             </Dropdown>
@@ -340,13 +350,12 @@ export function TeacherLayout({ children, initialData }: { children: React.React
         </Content>
       </Layout>
 
-      <Modal
+      <BrandModal
         open={changingPwd}
         onCancel={() => { setChangingPwd(false); pwdForm.resetFields() }}
         title="修改密码"
         footer={null}
         width={400}
-        centered
         destroyOnClose
       >
         <Form form={pwdForm} layout="vertical" onFinish={handleChangePwd} style={{ marginTop: 16 }}>
@@ -368,12 +377,12 @@ export function TeacherLayout({ children, initialData }: { children: React.React
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <Button onClick={() => { setChangingPwd(false); pwdForm.resetFields() }}>取消</Button>
             <Button type="primary" htmlType="submit" loading={pwdSubmitting}
-              style={{ background: '#E8784A', border: 'none', borderRadius: 8 }}>
+              style={{ background: 'var(--color-primary)', border: 'none', borderRadius: 8 }}>
               确认修改
             </Button>
           </div>
         </Form>
-      </Modal>
+      </BrandModal>
     </Layout>
   )
 }

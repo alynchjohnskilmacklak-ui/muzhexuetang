@@ -3,6 +3,7 @@ import { format } from 'date-fns'
 import { apiHandler } from '@/lib/api-handler'
 import { getStudentProfile } from '@/lib/student-profile'
 import { assertTeacherOwnsStudent, requireCurrentTeacher, TEACHER_LOG_ACTIONS } from '@/lib/teacher-portal'
+import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -166,19 +167,17 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
     })
     const parentId = existing.student.parentId || existing.student.parentUserId
     if (parentId) {
-      await tx.notification.create({
-        data: {
-          userId: parentId,
-          title: `${teacher.name}老师发布了阶段学情小结`,
-          content: `${existing.student.name} · 学习档案已更新`,
-          type: 'STAGE_SUMMARY',
-          link: '/parent/archive',
-          href: '/parent/archive',
-          relatedType: 'StageSummary',
-          relatedId: id,
-          studentId: existing.studentId,
-          senderId: user.id,
-        },
+      await createNotification(tx, {
+        userId: parentId,
+        title: `${teacher.name}老师发布了阶段学情小结`,
+        content: `${existing.student.name} · 学习档案已更新`,
+        type: 'STAGE_SUMMARY',
+        link: '/parent/archive',
+        href: '/parent/archive',
+        relatedType: 'StageSummary',
+        relatedId: id,
+        studentId: existing.studentId,
+        senderId: user.id,
       })
     }
     await tx.activityLog.create({

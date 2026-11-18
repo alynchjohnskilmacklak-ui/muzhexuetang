@@ -31,25 +31,6 @@ export const ALERT_TYPES = {
   NO_LOGIN: 'NO_LOGIN',
 } as const
 
-export function isTeacherRole(role?: string | null) {
-  return String(role || '').toLowerCase() === 'teacher'
-}
-
-export function isAdminRole(role?: string | null) {
-  return String(role || '').toLowerCase() === 'admin'
-}
-
-export async function getCurrentTeacher() {
-  try {
-    const user = await requireTeacherUser()
-    const teacher = await user.prisma.teacher.findUnique({ where: { id: user.teacherId } })
-    return teacher ? { user, teacher, prisma: user.prisma } : null
-  } catch (error) {
-    if (error instanceof AuthError) return null
-    throw error
-  }
-}
-
 export async function requireCurrentTeacher() {
   const user = await requireTeacherUser()
   const teacher = await user.prisma.teacher.findUnique({ where: { id: user.teacherId } })

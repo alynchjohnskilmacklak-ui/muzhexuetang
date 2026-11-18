@@ -1,5 +1,7 @@
 import type { Prisma } from '@prisma/client'
 import { TEACHER_LOG_ACTIONS } from '@/lib/teacher-log-actions'
+import { groupFeedbackNotificationRecipients } from './notifications'
+import { createNotification } from '@/lib/notifications'
 
 type FeedbackStudent = {
   id: string
@@ -75,20 +77,27 @@ export async function createClassroomFeedbackWithSideEffects(
   }
 
   if (input.status === 'PUBLISHED') {
-    for (const student of input.students) {
-      const parentUserId = student.parentId || student.parentUserId
-      if (!parentUserId) continue
-      await tx.notification.create({
-        data: {
-          userId: parentUserId,
-          type: 'CLASSROOM_FEEDBACK',
-          title: `${input.teacherName}老师发布了${input.notificationLabel || '课堂反馈'}`,
-          content: `${student.name}: ${input.notificationContent}`.slice(0, 80),
-          link: '/parent/class-feedback',
-          relatedType: 'CLASSROOM_FEEDBACK',
-          relatedId: created.id,
-          href: `/parent/class-feedback/${created.id}`,
-        },
+    const recipients = groupFeedbackNotificationRecipients(input.students)
+    if (recipients.length) {
+      await tx.feedbackParentReadReceipt.createMany({
+        data: recipients.map(({ parentUserId }) => ({
+          feedbackId: created.id,
+          parentUserId,
+        })),
+        skipDuplicates: true,
+      })
+    }
+    for (const { parentUserId, students } of recipients) {
+      await createNotification(tx, {
+        userId: parentUserId,
+        type: 'CLASSROOM_FEEDBACK',
+        title: `${input.teacherName}老师发布了${input.notificationLabel || '课堂反馈'}`,
+        content: `${students.map((student) => student.name).join('、')}: ${input.notificationContent}`.slice(0, 80),
+        studentId: students.length === 1 ? students[0].id : null,
+        link: '/parent/class-feedback',
+        relatedType: 'CLASSROOM_FEEDBACK',
+        relatedId: created.id,
+        href: `/parent/class-feedback/${created.id}`,
       })
     }
   }

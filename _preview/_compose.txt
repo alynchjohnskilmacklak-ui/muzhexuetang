@@ -1,0 +1,231 @@
+﻿========================================================================
+compose.production.yaml
+========================================================================
+name: edu-manage
+
+services:
+  redis:
+    image: public.ecr.aws/docker/library/redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    mem_limit: 192m
+    networks:
+      - internal
+
+  db:
+    image: public.ecr.aws/docker/library/postgres:15-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: edu_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: postgres
+      TZ: Asia/Shanghai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-databases.sql:/docker-entrypoint-initdb.d/10-init-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edu_admin -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    mem_limit: 512m
+    shm_size: 128m
+    networks:
+      - internal
+
+  app:
+    image: edu-manage-app:latest
+    build:
+      context: .
+      target: runner
+      args:
+        NPM_REGISTRY: https://registry.npmmirror.com
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://edu_admin:${POSTGRES_PASSWORD}@db:5432/muzhe_chuzhong?schema=public
+      DATABASE_URL_JUNIOR: postgresql://edu_admin:${POSTGRES_PASSWORD}@db:5432/muzhe_chuzhong?schema=public
+      DATABASE_URL_SENIOR: postgresql://edu_admin:${POSTGRES_PASSWORD}@db:5432/muzhe_gaozhong?schema=public
+      DUAL_DB: "true"
+      APP_TIMEZONE: Asia/Shanghai
+      TZ: Asia/Shanghai
+      APP_ROOT: /app
+      BACKUP_DIR: /data/backups/edu-manage
+      BACKUP_SCRIPT: /app/scripts/backup-now.sh
+      UPLOAD_DIR: /app/public/uploads
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - 127.0.0.1:3000:3000
+    volumes:
+      - /srv/edu-manage/shared/public/uploads:/app/public/uploads
+      - /srv/edu-manage/shared/public/services:/app/public/services
+      - /srv/edu-manage/shared/public/marketing:/app/public/marketing
+      - /srv/edu-manage/shared/public/business-assets:/app/public/business-assets
+      - /srv/edu-manage/shared/public/volunteer/docs:/app/public/volunteer/docs
+      - /data/backups/edu-manage:/data/backups/edu-manage
+      - next_cache:/app/.next/cache
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    mem_limit: 900m
+    networks:
+      - internal
+
+  migrate:
+    image: edu-manage-migrator:latest
+    build:
+      context: .
+      target: migrator
+      args:
+        NPM_REGISTRY: https://registry.npmmirror.com
+    profiles: ["tools"]
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://edu_admin:${POSTGRES_PASSWORD}@db:5432/muzhe_chuzhong?schema=public
+      DATABASE_URL_JUNIOR: postgresql://edu_admin:${POSTGRES_PASSWORD}@db:5432/muzhe_chuzhong?schema=public
+      DATABASE_URL_SENIOR: postgresql://edu_admin:${POSTGRES_PASSWORD}@db:5432/muzhe_gaozhong?schema=public
+      DUAL_DB: "true"
+      SKIP_PRISMA_GENERATE: "1"
+      TZ: Asia/Shanghai
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal
+
+volumes:
+  postgres_data:
+  next_cache:
+
+networks:
+  internal:
+    driver: bridge
+
+========================================================================
+Dockerfile.runtime
+========================================================================
+# Fast, deployment-only runtime extension for an already verified application image.
+# Keep BASE_IMAGE immutable/tagged before overwriting edu-manage-app:latest.
+ARG BASE_IMAGE=edu-manage-app:base
+FROM ${BASE_IMAGE}
+
+USER root
+RUN sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends jq postgresql-client \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY --chown=node:node scripts/backup-now.sh ./scripts/backup-now.sh
+COPY --chown=node:node scripts/backup-db.sh ./scripts/backup-db.sh
+COPY --chown=node:node scripts/backup-uploads.sh ./scripts/backup-uploads.sh
+
+USER node
+
+========================================================================
+Dockerfile（前 60 行）
+========================================================================
+FROM public.ecr.aws/docker/library/node:22-bookworm-slim AS base
+RUN sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources
+
+FROM base AS deps
+WORKDIR /app
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates openssl \
+  && rm -rf /var/lib/apt/lists/*
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+COPY package.json package-lock.json ./
+RUN npm config set registry "${NPM_REGISTRY}" \
+  && npm ci --no-audit --no-fund
+
+FROM deps AS builder
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS=--max-old-space-size=1536
+ENV DATABASE_URL=postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder
+ENV DATABASE_URL_JUNIOR=postgresql://placeholder:placeholder@127.0.0.1:5432/junior
+ENV DATABASE_URL_SENIOR=postgresql://placeholder:placeholder@127.0.0.1:5432/senior
+COPY . .
+RUN npx prisma generate
+RUN npm run build
+
+FROM base AS migrator
+WORKDIR /app
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates openssl postgresql-client \
+  && rm -rf /var/lib/apt/lists/*
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+COPY prisma ./prisma
+COPY scripts/migrate-all.sh ./scripts/migrate-all.sh
+ENV NODE_ENV=production
+ENV SKIP_PRISMA_GENERATE=1
+CMD ["bash", "scripts/migrate-all.sh"]
+
+FROM base AS runner
+WORKDIR /app
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates jq openssl postgresql-client \
+  && rm -rf /var/lib/apt/lists/*
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+ENV NODE_OPTIONS=--max-old-space-size=640
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+COPY --from=builder --chown=node:node /app/public ./public
+COPY --from=builder --chown=node:node /app/scripts/backup-now.sh ./scripts/backup-now.sh
+COPY --from=builder --chown=node:node /app/scripts/backup-db.sh ./scripts/backup-db.sh
+COPY --from=builder --chown=node:node /app/scripts/backup-uploads.sh ./scripts/backup-uploads.sh
+USER node
+EXPOSE 3000
+CMD ["node", "server.js"]
+
+========================================================================
+source 目录内容
+========================================================================
+total 704
+drwxr-x---  9 root root   4096 Sep 12 16:53 .
+drwxr-x---  6 root root   4096 Sep 13 14:30 ..
+-rw-rw-rw-  1 root root   2083 Sep  1 16:00 AGENTS.md
+-rw-rw-rw-  1 root root     11 May 15 12:27 CLAUDE.md
+-rw-r--r--  1 root root   3571 Sep 12 13:39 compose.production.yaml
+drwxrwxrwx  3 root root   4096 Sep 11 21:57 data
+-rw-rw-rw-  1 root root   2026 Sep  1 15:10 DEPLOY.md
+-rw-rw-rw-  1 root root  14750 Jun 16 22:48 DESIGN.md
+drwxrwxrwx  3 root root   4096 Sep 11 21:57 docker
+-rw-r--r--  1 root root   2152 Sep 11 22:53 Dockerfile
+-rw-r--r--  1 root root    670 Sep 12 12:49 Dockerfile.runtime
+-rw-rw-rw-  1 root root    322 Sep 11 21:55 .dockerignore
+-rw-------  1 root root   2134 Sep 11 22:53 .env
+-rw-rw-rw-  1 root root    848 Aug 27 13:52 eslint.config.mjs
+-rw-rw-rw-  1 root root    846 Sep  1 12:07 .gitignore
+-rw-rw-rw-  1 root root   4138 Sep  7 23:09 next.config.ts
+-rw-rw-rw-  1 root root    288 Sep  7 23:10 next-env.d.ts
+-rw-rw-rw-  1 root root      4 May 15 18:02 .nvmrc
+-rw-rw-rw-  1 root root   3875 Sep  1 15:50 package.json
+-rw-rw-rw-  1 root root 545424 Sep  1 15:52 package-lock.json
+-rw-rw-rw-  1 root root      0 Sep  8 15:16 pkg_err.txt
+-rw-rw-rw-  1 root root  14577 Sep  8 15:21 pkg_out.txt
+-rw-rw-rw-  1 root root     94 May 15 12:25 postcss.config.mjs
+drwxrwxrwx  4 root root   4096 Sep 11 21:57 prisma
+-rw-rw-rw-  1 root root   5681 Aug 25 15:57 PRODUCT.md
+drwxrwxrwx  9 root root   4096 Oct  3 15:20 public
+-rw-rw-rw-  1 root root   2325 May 21 17:05 README.md
+drwx---r-x  2 root root   4096 Sep 20 21:50 release
+drwxrwxrwx  3 root root   4096 Sep 12 14:15 scripts

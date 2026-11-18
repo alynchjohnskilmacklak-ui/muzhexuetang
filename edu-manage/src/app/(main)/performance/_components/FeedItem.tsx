@@ -1,10 +1,12 @@
 ﻿'use client'
 
-import { Avatar, Button, Card, Image as AntImage, Popconfirm, Rate, Space, Tag } from 'antd'
-import { DeleteOutlined, UserOutlined } from '@ant-design/icons'
+import { Button, Card, Image as AntImage, Popconfirm, Rate, Space, Tag } from 'antd'
+import { DeleteOutlined } from '@ant-design/icons'
 
 import { MOOD_META, PERFORMANCE_BADGES, RATING_LABELS } from '@/lib/mood-meta'
-import { normalizeAvatarUrl, normalizeUploadUrl } from '@/lib/upload-url'
+import { normalizeUploadUrl } from '@/lib/upload-url'
+import { CachedAvatarImage } from '@/components/Common/CachedAvatarImage'
+import { getTeacherAvatarUrl } from '@/lib/teacher-avatars'
 
 type FeedPost = {
   id: string
@@ -16,7 +18,7 @@ type FeedPost = {
   ratings?: Record<string, number> | null
   createdAt: string
   student?: { name: string; grade?: string | null }
-  teacher?: { name: string; avatar?: string | null }
+  teacher?: { id?: string; name: string; avatar?: string | null; gender?: string | null }
   comments?: Array<{ content: string; author?: { name: string } }>
   badges?: Array<{ badgeType: string }>
 }
@@ -37,7 +39,12 @@ export function FeedItem({ post, onDelete }: { post: FeedPost; onDelete?: (id: s
         <div style={{ minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
             <Space align="center">
-              <Avatar src={normalizeAvatarUrl(post.teacher?.avatar) || undefined} icon={<UserOutlined />} style={{ background: '#E8784A' }} />
+              <CachedAvatarImage
+                src={getTeacherAvatarUrl(post.teacher?.avatar, post.teacher?.gender, post.teacher?.id ?? post.teacher?.name)}
+                fallbackSrc={getTeacherAvatarUrl(null, post.teacher?.gender, post.teacher?.id ?? post.teacher?.name)}
+                alt={post.teacher?.name || '老师'}
+                style={{ width: 32, height: 32, flexShrink: 0, borderRadius: '50%', objectFit: 'cover', background: 'var(--color-primary)' }}
+              />
               <div>
                 <div style={{ color: '#1F2329', fontWeight: 700 }}>{post.teacher?.name || '老师'}</div>
                 <div style={{ color: '#98A2B3', fontSize: 12 }}>

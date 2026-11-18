@@ -1,9 +1,10 @@
+import { apiHandler } from '@/lib/api-handler'
 import { auth } from '@/lib/auth'
 import { sessionEmitter } from '@/lib/session-events'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export const GET = apiHandler(async () => {
   const session = await auth()
   const user = session?.user as { id?: string } | undefined
 
@@ -52,4 +53,4 @@ export async function GET() {
       'X-Accel-Buffering': 'no',
     },
   })
-}
+})

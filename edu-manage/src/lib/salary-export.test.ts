@@ -27,24 +27,41 @@ const input: SalaryExportInput = {
 }
 
 describe('salary export workbook', () => {
+  it('preserves settled historical money and exports zero pending balance with batch receipts', () => {
+    const settledAt = new Date('2026-07-18T10:00:00+08:00')
+    const buffer = writeSalaryExportWorkbook({ ...input, rows: input.rows.map(row => ({ ...row, pending: false, settledAt, settlementBatchId: 'batch-fixture' })), settlements: [{ at: settledAt, amount: 45, batchId: 'batch-fixture' }] })
+    const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true })
+    const summary = XLSX.utils.sheet_to_json<Array<string | number>>(workbook.Sheets['工资总览'], { header: 1 })
+    expect(summary.find(row => row[0] === '待结算金额')?.[2]).toBe(0)
+    expect(summary.find(row => row[0] === '已结算应发金额')?.[2]).toBe(45)
+    const audit = XLSX.utils.sheet_to_json<Array<string | number>>(workbook.Sheets['全部流水审计'], { header: 1 })
+    expect(audit[6]).toContain('结算状态')
+    expect(audit.flat()).toContain('已结算')
+    expect(audit.flat()).toContain('batch-fixture')
+    expect(audit.flat()).toContain('tx-1')
+    const receipts = XLSX.utils.sheet_to_json<Array<string | number>>(workbook.Sheets['工资结算记录'], { header: 1 })
+    expect(receipts.flat()).toContain('batch-fixture')
+  })
   it('contains summary, subject summary, and detailed transaction sheets', () => {
     const buffer = writeSalaryExportWorkbook(input)
     const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true })
     expect(workbook.SheetNames).toEqual(['工资总览', '小班课时明细', '小班反馈明细', '个性化课时明细', '个性化反馈明细', '管理调整明细', '按科目汇总', '全部流水审计'])
 
     const summaryRows = XLSX.utils.sheet_to_json<Array<string | number>>(workbook.Sheets['工资总览'], { header: 1 })
+    expect(summaryRows[0]).toContain('牧哲学堂 · 工资总览')
+    expect(String(summaryRows[1]?.[0])).toContain('牧哲学堂教育管理系统导出')
     expect(summaryRows.flat()).toContain('合计')
     expect(summaryRows.flat()).toContain(45)
     expect(summaryRows.flat()).toContain('小班课课时工资')
     expect(summaryRows.flat()).toContain('个性化课程反馈奖励')
 
     const detailRows = XLSX.utils.sheet_to_json<Array<string | number>>(workbook.Sheets['全部流水审计'], { header: 1 })
-    expect(detailRows[3]).toContain('详细说明')
-    expect(detailRows[3]).toContain('工资分类')
+    expect(detailRows[6]).toContain('详细说明')
+    expect(detailRows[6]).toContain('工资分类')
     expect(detailRows.flat()).toContain('张三、李四')
     expect(detailRows.flat()).toContain('feedback-1')
-    expect(detailRows[3]).toContain('有效反馈数')
-    expect(detailRows[3]).toContain('计薪小时')
+    expect(detailRows[6]).toContain('有效反馈数')
+    expect(detailRows[6]).toContain('计薪小时')
   })
 
   it('separates lesson, feedback, intensive and management transactions', () => {

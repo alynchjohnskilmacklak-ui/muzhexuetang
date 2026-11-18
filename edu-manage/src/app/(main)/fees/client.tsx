@@ -1,11 +1,12 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import {
-  App, Button, Card, Col, DatePicker,
-  Form, Input, InputNumber, Modal, Popconfirm, Row, Select, Space,
-  Statistic, Table, Tag, Typography,
+  Alert, App, Button, Card, Col, DatePicker,
+  Form, Input, InputNumber, Popconfirm, Row, Select, Space,
+  Spin, Statistic, Table, Tag, Typography,
 } from 'antd'
 import {
   DeleteOutlined, DownloadOutlined, EditOutlined,
@@ -15,6 +16,7 @@ import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSession } from 'next-auth/react'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const { Text } = Typography
 const { RangePicker } = DatePicker
@@ -119,14 +121,14 @@ export function FeesClient() {
   params.set('page', String(page))
   params.set('limit', String(pageSize))
 
-  const { data, isLoading, mutate } = useSWR<FeeListData>(
+  const { data, error: feesError, isLoading, mutate } = useSWR<FeeListData>(
     sessionStatus === 'authenticated' ? `/api/fees?${params.toString()}` : null,
     fetcher,
     { refreshInterval: 0, revalidateOnFocus: false },
   )
 
   // Student aggregate
-  const { data: studentAgg } = useSWR<StudentAggregate>(
+  const { data: studentAgg, isLoading: studentAggLoading } = useSWR<StudentAggregate>(
     selectedStudent ? `/api/fees?studentId=${selectedStudent}&aggregate=true&division=${selectedStudentDivision}` : null,
     fetcher,
   )
@@ -315,7 +317,7 @@ export function FeesClient() {
       const a = document.createElement('a')
       a.href = url
       const range = dateRange ? `${dateRange[0].format('YYYYMMDD')}_${dateRange[1].format('YYYYMMDD')}` : 'all'
-      a.download = `收费台账_${division === 'all' ? '全部' : division}_${range}.csv`
+      a.download = `牧哲学堂_收费台账_${division === 'all' ? '全部' : division}_${range}.csv`
       a.click()
       URL.revokeObjectURL(url)
       message.success({ content: '导出完成', key: 'export' })
@@ -371,13 +373,13 @@ export function FeesClient() {
       {/* Filters */}
       <Card size="small" style={{ marginBottom: 12 }}>
         <Space wrap>
-          <Select value={division} onChange={(v) => { setDivision(v); setPage(1) }} options={divisionOptions} style={{ width: 100 }} />
-          <Select allowClear placeholder="收费类型" value={type} onChange={(v) => { setType(v); setPage(1) }}
+          <AdaptiveSelect value={division} onChange={(v) => { setDivision(v); setPage(1) }} options={divisionOptions} style={{ width: 100 }} />
+          <AdaptiveSelect allowClear placeholder="收费类型" value={type} onChange={(v) => { setType(v); setPage(1) }}
             options={(feeTypes || []).map((t: { name: string }) => ({ label: t.name, value: t.name }))}
             style={{ width: 110 }} />
-          <Select allowClear placeholder="校区" value={campus} onChange={(v) => { setCampus(v); setPage(1) }}
+          <AdaptiveSelect allowClear placeholder="校区" value={campus} onChange={(v) => { setCampus(v); setPage(1) }}
             options={campusOptions} style={{ width: 120 }} />
-          <Select allowClear showSearch placeholder="搜索学生" value={studentSearch || undefined}
+          <AdaptiveSelect allowClear showSearch placeholder="搜索学生" value={studentSearch || undefined}
             onSearch={handleStudentSearch} onChange={(v) => { setStudentSearch(v || ''); setPage(1) }}
             onDropdownVisibleChange={(open) => { if (open) void handleStudentSearch('') }}
             filterOption={false} options={studentOptions} loading={searchingStudents}
@@ -393,6 +395,17 @@ export function FeesClient() {
           <Button icon={<DownloadOutlined />} onClick={handleExport}>导出</Button>
         </Space>
       </Card>
+
+      {/* Error */}
+      {feesError && (
+        <Alert
+          type="error"
+          showIcon
+          message={feesError instanceof Error ? feesError.message : '收费数据加载失败'}
+          action={<Button size="small" onClick={() => void mutate()}>重试</Button>}
+          style={{ marginBottom: 12 }}
+        />
+      )}
 
       {/* Table */}
       <Card size="small">
@@ -433,7 +446,7 @@ export function FeesClient() {
       )}
 
       {/* Entry Modal */}
-      <Modal
+      <BrandModal
         title={editingId ? '编辑收费记录' : '录入收费'}
         open={modalOpen}
         onOk={handleSubmit}
@@ -444,7 +457,7 @@ export function FeesClient() {
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="studentId" label="学生" rules={[{ required: true, message: '请选择学生' }]}>
-            <Select showSearch placeholder="按名字搜索学生" filterOption={false}
+            <AdaptiveSelect showSearch placeholder="按名字搜索学生" filterOption={false}
               onSearch={handleStudentSearch}
               onDropdownVisibleChange={(open) => { if (open) void handleStudentSearch('') }}
               notFoundContent={searchingStudents ? '正在加载学生…' : '没有匹配的学生'}
@@ -456,7 +469,7 @@ export function FeesClient() {
           <Row gutter={12}>
             <Col xs={24} sm={12}>
               <Form.Item name="type" label="收费类型" rules={[{ required: true }]}>
-                <Select placeholder="选择类型" options={
+                <AdaptiveSelect placeholder="选择类型" options={
                   (feeTypes || []).map((t: { name: string }) => ({ label: t.name, value: t.name }))
                 } />
               </Form.Item>
@@ -495,17 +508,17 @@ export function FeesClient() {
             <Input.TextArea rows={2} placeholder="可选备注" />
           </Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
 
       {/* Student Aggregate Modal */}
-      <Modal
+      <BrandModal
         title={studentAgg ? `${studentAgg.student.name} — 收费汇总` : '学生收费汇总'}
         open={studentModalOpen}
         onCancel={() => { setStudentModalOpen(false); setSelectedStudent(null) }}
         footer={null}
         width={700}
       >
-        {studentAgg && (
+        {studentAgg ? (
           <>
             <Row gutter={12} style={{ marginBottom: 16 }}>
               <Col span={8}><Statistic title="累计金额" value={studentAgg.totalAmount} prefix="¥" /></Col>
@@ -526,8 +539,12 @@ export function FeesClient() {
               pagination={false}
             />
           </>
-        )}
-      </Modal>
+        ) : studentAggLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '56px 0' }}>
+            <Spin size="large" />
+          </div>
+        ) : null}
+      </BrandModal>
     </div>
   )
 }

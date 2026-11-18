@@ -1,4 +1,5 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
@@ -22,6 +23,7 @@ import {
 import dayjs from 'dayjs'
 import { getMealPeriodDates, getSummerTeachingDayCount } from '@/lib/meal-attendance-period'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { applyWatermark, drawBrandHeader } from '@/lib/export-brand'
 
 const { Text, Title } = Typography
 
@@ -122,18 +124,42 @@ export function StudentMealLedger() {
     if (!reportRef.current || !data?.student) return
     setExporting(true)
     try {
-      const html2canvas = (await import('html2canvas')).default
-      const canvas = await html2canvas(reportRef.current, {
-        backgroundColor: '#faf8f5',
-        scale: 2,
-        useCORS: true,
+      // modern-screenshot 基于浏览器原生渲染（SVG foreignObject），兼容 color-mix/oklch 等现代 CSS
+      const { domToPng } = await import('modern-screenshot')
+      const dataUrl = await Promise.race([
+        domToPng(reportRef.current, {
+          backgroundColor: '#faf8f5',
+          scale: 2,
+          type: 'image/png',
+        }),
+        new Promise<never>((_, rej) =>
+          setTimeout(() => rej(new Error('EXPORT_TIMEOUT_20S')), 20000),
+        ),
+      ])
+      const img = new Image()
+      img.src = dataUrl
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = () => reject(new Error('导出图片解码失败'))
       })
+      // 合成画布：顶部品牌条 + 底部原内容 + 斜向水印（不改动原画布内容与文件名）
+      const out = document.createElement('canvas')
+      out.width = img.naturalWidth
+      out.height = img.naturalHeight + 74
+      const octx = out.getContext('2d')
+      if (!octx) throw new Error('无法创建导出画布')
+      const barH = await drawBrandHeader(octx, out.width, '就餐记录')
+      octx.drawImage(img, 0, barH)
+      applyWatermark(octx, out.width, out.height)
       const link = document.createElement('a')
       link.download = `${data.student.name}_暑期就餐记录.png`
-      link.href = canvas.toDataURL('image/png')
+      link.href = out.toDataURL('image/png')
       link.click()
       message.success('就餐记录图片已生成')
-    } catch {
+    } catch (e) {
+      console.error('[exportImage]', e)
+      ;(window as unknown as { __exportErr?: string }).__exportErr =
+        e instanceof Error ? e.message : String(e)
       message.error('图片生成失败，请稍后重试')
     } finally {
       setExporting(false)
@@ -206,7 +232,7 @@ export function StudentMealLedger() {
             <Text type="secondary">逐日勾选就餐情况，休息日已自动标明；可生成适合打印和微信发送的图片。</Text>
           </div>
           <Space wrap style={{ width: isMobile ? '100%' : 'auto' }}>
-            <Select
+            <AdaptiveSelect
               showSearch
               value={studentId || undefined}
               placeholder="选择学生"

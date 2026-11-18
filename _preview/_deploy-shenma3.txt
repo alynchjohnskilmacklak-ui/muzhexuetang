@@ -1,0 +1,18 @@
+﻿本地: 68 B  sha=e076a26aec41e454  bytes=b'shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_1791014736'
+  上传校验通过 e076a26aec41e454
+  已覆盖两处，68 B 
+
+  shared : e076a26aec41e454  OK
+  source : e076a26aec41e454  OK
+  容器内 : e076a26aec41e454  OK
+  公网   : e076a26aec41e454  OK
+
+  公网内容: 'shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_1791014736'
+  期望内容: 'shenma-site-verification:3f17ed1785b9a82fd4176b64ecffb169_1791014736'
+  一致: ✓
+  HTTP 200
+
+  首页 meta: <meta name="shenma-site-verification" content="3f17ed1785b9a82fd4176b64ecffb169_1791014088"/>
+  首页 sha : 97e36b12acf9a5cc (应 97e36b12acf9a5cc)
+
+★★ 现在去神马点「验证」

@@ -1,0 +1,163 @@
+﻿========================================================================
+1) 完整 nginx 配置（看 80 端口这台 server 怎么处理）
+========================================================================
+1	server {
+     2	    listen 80;
+     3	    server_name 101.200.191.201;
+     4	
+     5	    client_max_body_size 210m;
+     6	
+     7	    location / {
+     8	        proxy_pass http://127.0.0.1:3000;
+     9	        proxy_http_version 1.1;
+    10	        proxy_set_header Host $host;
+    11	        proxy_set_header X-Real-IP $remote_addr;
+    12	        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    13	        proxy_set_header X-Forwarded-Proto $scheme;
+    14	        proxy_read_timeout 300s;
+    15	        proxy_send_timeout 300s;
+    16	        proxy_buffering off;
+    17	    }
+    18	}
+    19	
+    20	server {
+    21	    listen 80;
+    22	    server_name muzhexuetang.xyz www.muzhexuetang.xyz;
+    23	
+    24	    location ^~ /.well-known/acme-challenge/ {
+    25	        root /var/www/certbot;
+    26	    }
+    27	
+    28	    location / {
+    29	        return 301 https://$host$request_uri;
+    30	    }
+    31	}
+    32	
+    33	server {
+    34	    listen 443 ssl http2;
+    35	    server_name muzhexuetang.xyz www.muzhexuetang.xyz;
+    36	
+    37	    ssl_certificate /etc/letsencrypt/live/muzhexuetang.xyz/fullchain.pem;
+    38	    ssl_certificate_key /etc/letsencrypt/live/muzhexuetang.xyz/privkey.pem;
+    39	    include /etc/letsencrypt/options-ssl-nginx.conf;
+    40	    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    41	
+    42	    client_max_body_size 210m;
+    43	
+    44	    location ^~ /about-images/ {
+    45	        proxy_pass http://127.0.0.1:3000;
+    46	        proxy_http_version 1.1;
+    47	        proxy_set_header Host $host;
+    48	        proxy_set_header X-Real-IP $remote_addr;
+    49	        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    50	        proxy_set_header X-Forwarded-Proto $scheme;
+    51	        proxy_hide_header Cache-Control;
+    52	        add_header Cache-Control "public, max-age=2592000, immutable" always;
+    53	    }
+    54	
+    55	    # Next 构建产物（带内容 hash），保留强缓存
+    56	    location /_next/static/ {
+    57	        proxy_pass http://127.0.0.1:3000;
+    58	        proxy_http_version 1.1;
+    59	        proxy_set_header Host $host;
+    60	        proxy_set_header X-Real-IP $remote_addr;
+    61	        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    62	        proxy_set_header X-Forwarded-Proto $scheme;
+    63	    }
+    64	
+    65	    # 页面 HTML / API：禁止缓存，避免微信内核缓存旧版页面
+    66	    location / {
+    67	        proxy_pass http://127.0.0.1:3000;
+    68	        proxy_http_version 1.1;
+    69	        proxy_set_header Host $host;
+    70	        proxy_set_header X-Real-IP $remote_addr;
+    71	        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    72	        proxy_set_header X-Forwarded-Proto $scheme;
+    73	        proxy_read_timeout 300s;
+    74	        proxy_send_timeout 300s;
+    75	        proxy_buffering off;
+    76	        add_header Cache-Control "no-store" always;
+    77	    }
+    78	}
+
+========================================================================
+2) 用 IP + 各种 Host 头复现 301（找出触发条件）
+========================================================================
+  IP + Host=IP           200 ->
+  IP + Host=裸域           301 -> https://muzhexuetang.xyz/shenma-site-verification.txt
+  裸域 HTTP                301 -> https://muzhexuetang.xyz/shenma-site-verification.txt
+  www HTTP               301 -> https://www.muzhexuetang.xyz/shenma-site-verification.txt
+  裸域 HTTPS               200 ->
+  www HTTPS              200 ->
+
+========================================================================
+3) 模拟神马那个 UA（Chrome 27 / Win 6.2），看是否被特殊处理
+========================================================================
+  http://101.200.191.201/shenma-site-verification.txt          200 ->
+  http://muzhexuetang.xyz/shenma-site-verification.txt         301 -> https://muzhexuetang.xyz/shenma-site-verification.txt
+
+========================================================================
+4) 神马 IP 那两条 301 的完整原始日志
+========================================================================
+140.205.85.36 - - [03/Oct/2026:15:54:49 +0800] "GET / HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.33 - - [03/Oct/2026:15:54:49 +0800] "GET / HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.18 - - [03/Oct/2026:16:03:58 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.30 - - [03/Oct/2026:16:03:58 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.48 - - [03/Oct/2026:16:05:39 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.2 - - [03/Oct/2026:16:05:40 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+
+========================================================================
+5) 未加 -L 时 301 的 Location 具体是什么
+========================================================================
+HTTP/1.1 200 OK
+
+Server: nginx/1.18.0 (Ubuntu)
+
+Date: Sat, 03 Oct 2026 08:06:49 GMT
+
+Content-Type: text/plain; charset=UTF-8
+
+Content-Length: 68
+
+Connection: keep-alive
+
+X-Content-Type-Options: nosniff
+
+X-Frame-Options: DENY
+
+Referrer-Policy: strict-origin-when-cross-origin
+
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.aliyuncs.com https://*.aliyuncs.com.cn https://wxpusher.zjiecode.com; font-src 'self' data:; connect-src 'self' https://api.moonshot.cn https://api.deepseek.com https://wxpusher.zjiecode.com https://*.aliyuncs.com https://*.aliyuncs.com.cn; frame-src 'self' https://phet.colorado.edu https://www.geogebra.org https://www.desmos.com https://www.falstad.com https://chemcollective.org; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
+
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+========================================================================
+6) nginx error.log 最近有无 TLS/握手报错
+========================================================================
+2026/10/03 13:33:59 [emerg] 1071496#1071496: no host in ":80" of the "listen" directive in /etc/nginx/sites-enabled/edu-manage.conf:3
+2026/10/03 13:34:21 [emerg] 1071769#1071769: no host in ":443" of the "listen" directive in /etc/nginx/sites-enabled/edu-manage.conf:37
+2026/10/03 13:34:21 [emerg] 1071772#1071772: no host in ":443" of the "listen" directive in /etc/nginx/sites-enabled/edu-manage.conf:37
+2026/10/03 13:34:34 [notice] 1071948#1071948: signal process started
+2026/10/03 13:40:04 [crit] 1071949#1071949: *104166 SSL_do_handshake() failed (SSL: error:0A00006C:SSL routines::bad key share) while SSL handshaking, client: 45.138.12.51, server: 0.0.0.0:443
+2026/10/03 13:49:01 [crit] 1071949#1071949: *104543 SSL_do_handshake() failed (SSL: error:0A00006C:SSL routines::bad key share) while SSL handshaking, client: 212.102.40.218, server: 0.0.0.0:443
+2026/10/03 13:59:02 [error] 1071950#1071950: *104774 recv() failed (104: Unknown error) while reading response header from upstream, client: 111.53.198.24, server: muzhexuetang.xyz, request: "GET /api/auth/session-ping HTTP/1.1", upstream: "http://127.0.0.1:3000/api/auth/session-ping", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/dashboard?division=JUNIOR"
+2026/10/03 13:59:06 [error] 1071949#1071949: *104825 recv() failed (104: Unknown error) while reading response header from upstream, client: 111.53.198.24, server: muzhexuetang.xyz, request: "GET /api/parent/unread-counts HTTP/1.1", upstream: "http://127.0.0.1:3000/api/parent/unread-counts", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/parent/archive"
+2026/10/03 13:59:08 [error] 1071950#1071950: *104774 recv() failed (104: Unknown error) while reading response header from upstream, client: 111.53.198.24, server: muzhexuetang.xyz, request: "GET /api/messages/unread-count HTTP/1.1", upstream: "http://127.0.0.1:3000/api/messages/unread-count", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/dashboard?division=JUNIOR"
+2026/10/03 13:59:08 [error] 1071950#1071950: *104775 recv() failed (104: Unknown error) while reading response header from upstream, client: 111.53.198.24, server: muzhexuetang.xyz, request: "GET /api/dashboard?division=JUNIOR&termId=cmtiej14s000u5vcgsmi92umi HTTP/1.1", upstream: "http://127.0.0.1:3000/api/dashboard?division=JUNIOR&termId=cmtiej14s000u5vcgsmi92umi", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/dashboard?division=JUNIOR"
+2026/10/03 13:59:12 [error] 1071950#1071950: *104749 upstream prematurely closed connection while reading upstream, client: 111.53.198.24, server: muzhexuetang.xyz, request: "GET /api/auth/kick-events HTTP/1.1", upstream: "http://127.0.0.1:3000/api/auth/kick-events", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/parent/archive"
+2026/10/03 13:59:12 [error] 1071949#1071949: *104641 upstream prematurely closed connection while reading upstream, client: 111.53.198.24, server: muzhexuetang.xyz, request: "GET /api/auth/kick-events HTTP/1.1", upstream: "http://127.0.0.1:3000/api/auth/kick-events", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/dashboard?division=JUNIOR"
+2026/10/03 13:59:13 [error] 1071950#1071950: *104775 connect() failed (111: Unknown error) while connecting to upstream, client: 111.53.198.24, server: muzhexuetang.xyz, request: "GET /api/dashboard?division=JUNIOR&termId=cmtiej14s000u5vcgsmi92umi HTTP/1.1", upstream: "http://127.0.0.1:3000/api/dashboard?division=JUNIOR&termId=cmtiej14s000u5vcgsmi92umi", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/dashboard?division=JUNIOR"
+2026/10/03 14:19:04 [notice] 1100792#1100792: signal process started
+2026/10/03 14:19:33 [notice] 1101236#1101236: signal process started
+2026/10/03 14:34:05 [crit] 1101237#1101237: *106011 SSL_do_handshake() failed (SSL: error:0A00006C:SSL routines::bad key share) while SSL handshaking, client: 212.102.40.218, server: 0.0.0.0:443
+2026/10/03 15:48:55 [error] 1101237#1101237: *106753 recv() failed (104: Unknown error) while reading response header from upstream, client: 111.53.198.13, server: muzhexuetang.xyz, request: "GET /api/parent/unread-counts HTTP/2.0", upstream: "http://127.0.0.1:3000/api/parent/unread-counts", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/parent/archive?studentId=cmtmx2rnv0002dddb4ienhctt&tab=timeline"
+2026/10/03 15:48:55 [error] 1101237#1101237: *106753 recv() failed (104: Unknown error) while reading response header from upstream, client: 111.53.198.13, server: muzhexuetang.xyz, request: "GET /api/exam-papers?mine=true HTTP/2.0", upstream: "http://127.0.0.1:3000/api/exam-papers?mine=true", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/parent/archive?studentId=cmtmx2rnv0002dddb4ienhctt&tab=grades"
+2026/10/03 15:49:01 [error] 1101237#1101237: *106753 recv() failed (104: Unknown error) while reading response header from upstream, client: 111.53.198.13, server: muzhexuetang.xyz, request: "GET /api/parent/materials?grade=%E5%88%9D%E4%B8%80 HTTP/2.0", upstream: "http://127.0.0.1:3000/api/parent/materials?grade=%E5%88%9D%E4%B8%80", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/parent/archive?studentId=cmtmx2rnv0002dddb4ienhctt&tab=materials"
+2026/10/03 15:49:01 [error] 1101237#1101237: *106753 recv() failed (104: Unknown error) while reading response header from upstream, client: 111.53.198.13, server: muzhexuetang.xyz, request: "GET /api/parent/materials/lesson-previews HTTP/2.0", upstream: "http://127.0.0.1:3000/api/parent/materials/lesson-previews", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/parent/archive?studentId=cmtmx2rnv0002dddb4ienhctt&tab=materials"
+2026/10/03 15:49:02 [error] 1101237#1101237: *106753 recv() failed (104: Unknown error) while reading response header from upstream, client: 111.53.198.13, server: muzhexuetang.xyz, request: "GET /api/parent/materials/lesson-previews HTTP/2.0", upstream: "http://127.0.0.1:3000/api/parent/materials/lesson-previews", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/parent/archive?studentId=cmtmx2rnv0002dddb4ienhctt&tab=materials"
+2026/10/03 15:49:04 [error] 1101237#1101237: *106753 upstream prematurely closed connection while reading upstream, client: 111.53.198.13, server: muzhexuetang.xyz, request: "GET /api/auth/kick-events HTTP/2.0", upstream: "http://127.0.0.1:3000/api/auth/kick-events", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/parent/dashboard"
+2026/10/03 15:49:05 [error] 1101237#1101237: *106753 recv() failed (104: Unknown error) while reading response header from upstream, client: 111.53.198.13, server: muzhexuetang.xyz, request: "GET /api/parent/unread-counts HTTP/2.0", upstream: "http://127.0.0.1:3000/api/parent/unread-counts", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/parent/archive?studentId=cmtmx2rnv0002dddb4ienhctt&tab=materials"
+2026/10/03 15:49:05 [error] 1101237#1101237: *106753 recv() failed (104: Unknown error) while reading response header from upstream, client: 111.53.198.13, server: muzhexuetang.xyz, request: "GET /api/parent/materials?grade=%E5%88%9D%E4%BA%8C HTTP/2.0", upstream: "http://127.0.0.1:3000/api/parent/materials?grade=%E5%88%9D%E4%BA%8C", host: "muzhexuetang.xyz", referrer: "https://muzhexuetang.xyz/parent/archive?studentId=cmtmx2rnv0002dddb4ienhctt&tab=materials"
+2026/10/03 15:50:11 [crit] 1101237#1101237: *107011 SSL_do_handshake() failed (SSL: error:0A00006C:SSL routines::bad key share) while SSL handshaking, client: 20.163.59.59, server: 0.0.0.0:443

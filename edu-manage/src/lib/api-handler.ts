@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { checkRateLimit } from './rate-limit'
+import { getTrustedClientIp } from './request-ip'
 import { ValidationError } from './api-validate'
 import { AuthError } from './auth/guards'
 
@@ -17,6 +18,69 @@ function getBodyLimit(path: string): number {
   return 5 * 1024 * 1024  // 默认 5MB
 }
 
+const SENSITIVE_QUERY_PARAM = /(?:token|secret|password|passwd|authorization|auth|api[_-]?key|signature|credential|(?:^|[_-])code(?:$|[_-]))/i
+
+function sanitizeSensitiveQueryText(value: string): string {
+  return value.replace(/([?&])([^=&#\s]+)=([^&#\s]*)/g, (match, separator: string, key: string) => {
+    let decodedKey = key
+    try {
+      decodedKey = decodeURIComponent(key.replace(/\+/g, ' '))
+    } catch {
+      // Keep the encoded key; the matcher still catches ordinary sensitive names.
+    }
+    return SENSITIVE_QUERY_PARAM.test(decodedKey) ? `${separator}${key}=[REDACTED]` : match
+  })
+}
+
+/** Keep request paths useful in logs without persisting bearer credentials. */
+export function sanitizeUrlForLog(value?: string | null): string | undefined {
+  if (!value) return undefined
+  try {
+    const url = new URL(value)
+    url.username = ''
+    url.password = ''
+    const sanitizedParams = new URLSearchParams()
+    for (const [key, value] of url.searchParams) {
+      sanitizedParams.append(key, SENSITIVE_QUERY_PARAM.test(key) ? '[REDACTED]' : value)
+    }
+    url.search = sanitizedParams.toString()
+    // Fragments are not sent to the server and should not be copied into logs.
+    url.hash = ''
+    return url.toString()
+  } catch {
+    // Never fall back to the original value: it may contain a secret in a
+    // malformed URL that would otherwise be copied into error telemetry.
+    return '[invalid request URL]'
+  }
+}
+
+function sanitizeErrorForLog(error: unknown, seen = new WeakSet<object>(), depth = 0): unknown {
+  if (depth > 5) return '[error cause omitted]'
+  if (error !== null && (typeof error === 'object' || typeof error === 'function')) {
+    if (seen.has(error)) return '[circular error]'
+    seen.add(error)
+  }
+  if (error instanceof Error) {
+    const safeError = new Error(sanitizeSensitiveQueryText(error.message))
+    safeError.name = error.name
+    if (error.stack) safeError.stack = sanitizeSensitiveQueryText(error.stack)
+    if ('cause' in error && error.cause !== undefined) {
+      Object.defineProperty(safeError, 'cause', {
+        value: sanitizeErrorForLog(error.cause, seen, depth + 1),
+        configurable: true,
+      })
+    }
+    return safeError
+  }
+  if (typeof error === 'string') return sanitizeSensitiveQueryText(error)
+  try {
+    const serialized = JSON.stringify(error)
+    return serialized === undefined ? '[unserializable error]' : JSON.parse(sanitizeSensitiveQueryText(serialized))
+  } catch {
+    return '[unserializable error]'
+  }
+}
+
 /**
  * 包装 API 路由，统一捕获未处理的异常、限流、请求体大小检查。
  * 生产环境只返回通用错误信息，不暴露堆栈或数据库结构。
@@ -26,9 +90,7 @@ export function apiHandler<Args extends unknown[]>(handler: (...args: Args) => P
     try {
       const req = args[0] as NextRequest | undefined
       if (req?.url) {
-        const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-          || req.headers.get('x-real-ip')
-          || '0.0.0.0'
+        const ip = getTrustedClientIp(req.headers)
         const url = new URL(req.url)
         const path = url.pathname
 
@@ -68,11 +130,13 @@ export function apiHandler<Args extends unknown[]>(handler: (...args: Args) => P
       if (err instanceof ValidationError) {
         return NextResponse.json({ error: err.message }, { status: 400 })
       }
-      Sentry.captureException(err, { extra: { url: (args[0] as NextRequest)?.url } })
+      const requestUrl = sanitizeUrlForLog((args[0] as NextRequest)?.url)
+      const safeError = sanitizeErrorForLog(err)
+      Sentry.captureException(safeError, { extra: { url: requestUrl } })
       const isDev = process.env.NODE_ENV !== 'production'
       const message = isDev && err instanceof Error ? err.message : '服务器错误，请稍后重试'
       const req = args[0] as NextRequest | undefined
-      console.error('[API Error]', req?.url, err)
+      console.error('[API Error]', sanitizeUrlForLog(req?.url), safeError)
       return NextResponse.json({ error: message }, { status: 500 })
     }
   }

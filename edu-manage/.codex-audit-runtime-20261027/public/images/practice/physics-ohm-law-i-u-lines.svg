@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="420" viewBox="0 0 700 420" role="img" aria-labelledby="title desc">
+  <title id="title">两个定值电阻的I-U图线</title>
+  <desc id="desc">横轴为电压U，纵轴为电流I。图线A和图线B均经过原点，图线A比图线B更陡。</desc>
+  <rect width="700" height="420" fill="#fff"/>
+  <style>
+    .axis{fill:none;stroke:#222;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .tick{stroke:#555;stroke-width:2}
+    .line{fill:none;stroke:#e8784a;stroke-width:5;stroke-linecap:round}
+    .label{font:25px sans-serif;fill:#171717}
+    .lineLabel{font:25px sans-serif;font-weight:700;fill:#171717}
+    .small{font:16px sans-serif;fill:#666}
+  </style>
+  <path class="axis" d="M110 330 H620 M110 330 V48"/>
+  <path class="axis" d="M620 330 l-12 -7 v14 z M110 48 l-7 12 h14 z" fill="#222"/>
+  <g class="tick">
+    <path d="M190 326 V334 M270 326 V334 M350 326 V334 M430 326 V334 M510 326 V334 M590 326 V334"/>
+    <path d="M106 250 H114 M106 170 H114 M106 90 H114"/>
+  </g>
+  <path class="line" d="M110 330 L230 90"/>
+  <path class="line" d="M110 330 L590 90"/>
+  <text x="635" y="340" class="label">U/V</text>
+  <text x="88" y="42" class="label">I/A</text>
+  <text x="238" y="80" class="lineLabel">A</text>
+  <text x="572" y="78" class="lineLabel">B</text>
+  <text x="88" y="355" class="small">O</text>
+</svg>

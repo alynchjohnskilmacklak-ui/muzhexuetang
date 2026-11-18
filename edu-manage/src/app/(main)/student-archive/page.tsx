@@ -1,27 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import useSWR from 'swr'
-import { Card, Empty, Select, Space, Spin, Table, Tag, Typography } from 'antd'
-import { CheckCircleOutlined, CloseCircleOutlined, FileSearchOutlined } from '@ant-design/icons'
+import { Empty, Spin } from 'antd'
+import {
+  CheckCircleOutlined, CloseCircleOutlined, FileSearchOutlined, BookOutlined,
+  MessageOutlined, FileTextOutlined, TrophyOutlined, SearchOutlined,
+} from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
-
-const { Text } = Typography
+import { StudentAvatar } from '@/components/Common/StudentAvatar'
 
 type CompletenessItem = {
   studentId: string
   name: string
   grade: string | null
+  gender?: string | null
   mainTeacherName: string | null
-  hasGrade: boolean
+  hasPractice: boolean
   hasFeedback: boolean
   hasSummary: boolean
   missingCount: number
 }
 
 type CompletenessPayload = {
-  summary: { noGrade: number; noFeedback: number; noSummary: number }
+  summary: { noPractice: number; noFeedback: number; noSummary: number }
   items: CompletenessItem[]
 }
 
@@ -31,106 +34,247 @@ const fetcher = (url: string) => fetch(url).then(async (res) => {
   return data
 })
 
-function StatusDot({ ok, text }: { ok: boolean; text: string }) {
+const GRADE_ORDER = ['初一', '初二', '初三', '高一', '高二', '高三', '个性化']
+
+function AvatarBlock({ name, gender, size = 40 }: { name: string; gender?: string | null; size?: number }) {
+  return <StudentAvatar name={name} gender={gender} size={size} />
+}
+
+function MissingTag({ ok, label, missingLabel }: { ok: boolean; label: string; missingLabel: string }) {
   return (
-    <Tag
-      color={ok ? 'green' : 'red'}
-      icon={ok ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
-      style={{ borderRadius: 9999 }}
-    >
-      {ok ? `${text}齐` : `缺${text}`}
-    </Tag>
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', gap: 4,
+      fontSize: 11.5, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
+      color: ok ? '#1D7A52' : '#C2413C',
+      background: ok ? 'rgba(29,154,98,.1)' : 'rgba(194,65,60,.09)',
+      border: `1px solid ${ok ? 'rgba(29,154,98,.28)' : 'rgba(194,65,60,.25)'}`,
+    }}>
+      {ok ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+      {ok ? `${label}齐` : `缺${missingLabel}`}
+    </div>
   )
 }
 
 export default function StudentArchiveDashboardPage() {
   const [months, setMonths] = useState(1)
+  const [statusFilter, setStatusFilter] = useState<'all' | 'noPractice' | 'noFeedback' | 'noSummary' | 'complete'>('all')
+  const [search, setSearch] = useState('')
   const { data, isLoading } = useSWR<CompletenessPayload>(`/api/admin/profile-completeness?months=${months}`, fetcher)
 
-  return (
-    <PageLayout title="学情资料检查" subtitle="按月查看成绩、课堂反馈与阶段小结是否有记录；无记录不等于漏填，请结合实际课程核对">
-      <Space direction="vertical" size={16} style={{ width: '100%' }}>
-        <Card bordered={false} style={{ borderRadius: 8, border: '1px solid #EEE7E1' }}>
-          <Space wrap style={{ width: '100%', justifyContent: 'space-between' }}>
-            <Space size={12} wrap>
-              {[
-                { label: '本期无成绩', value: data?.summary.noGrade ?? 0, color: '#E8784A' },
-                { label: '本期无反馈', value: data?.summary.noFeedback ?? 0, color: '#534AB7' },
-                { label: '本期无小结', value: data?.summary.noSummary ?? 0, color: '#E24B4A' },
-              ].map((item) => (
-                <div key={item.label} style={{ minWidth: 140 }}>
-                  <Text type="secondary" style={{ fontSize: 12 }}>{item.label}</Text>
-                  <div style={{ fontSize: 28, fontWeight: 800, color: item.color }}>{item.value}</div>
-                </div>
-              ))}
-            </Space>
-            <Select
-              value={months}
-              onChange={setMonths}
-              style={{ width: 128 }}
-              options={[
-                { label: '近 1 个月', value: 1 },
-                { label: '近 3 个月', value: 3 },
-                { label: '近 6 个月', value: 6 },
-                { label: '近 12 个月', value: 12 },
-              ]}
-            />
-          </Space>
-        </Card>
+  const items = data?.items ?? []
+  const filtered = useMemo(() => {
+    let result = items
+    if (statusFilter === 'noPractice') result = result.filter((item) => !item.hasPractice)
+    if (statusFilter === 'noFeedback') result = result.filter((item) => !item.hasFeedback)
+    if (statusFilter === 'noSummary') result = result.filter((item) => !item.hasSummary)
+    if (statusFilter === 'complete') result = result.filter((item) => item.missingCount === 0)
+    if (search.trim()) result = result.filter((item) => item.name.includes(search.trim()))
+    return [...result].sort((a, b) => {
+      const ga = GRADE_ORDER.indexOf(a.grade || ''), gb = GRADE_ORDER.indexOf(b.grade || '')
+      if ((ga === -1 ? 99 : ga) !== (gb === -1 ? 99 : gb)) return (ga === -1 ? 99 : ga) - (gb === -1 ? 99 : gb)
+      return b.missingCount - a.missingCount
+    })
+  }, [items, statusFilter, search])
 
-        <Card bordered={false} style={{ borderRadius: 8, border: '1px solid #EEE7E1' }}>
-          {isLoading ? (
-            <div style={{ textAlign: 'center', padding: 64 }}><Spin size="large" /></div>
-          ) : !data?.items.length ? (
-            <Empty description="暂无学员数据" />
-          ) : (
-            <Table<CompletenessItem>
-              rowKey="studentId"
-              dataSource={data.items}
-              scroll={{ x: 'max-content' }}
-              pagination={{ pageSize: 20 }}
-              columns={[
-                {
-                  title: '学员',
-                  dataIndex: 'name',
-                  render: (_, record) => (
-                    <Space direction="vertical" size={0}>
-                      <Link href={`/students/${record.studentId}#learning`} style={{ fontWeight: 700, color: '#1F2329' }}>
-                        {record.name}
-                      </Link>
-                      <Text type="secondary" style={{ fontSize: 12 }}>{record.grade || '未设年级'}</Text>
-                    </Space>
-                  ),
-                },
-                {
-                  title: '主教师',
-                  dataIndex: 'mainTeacherName',
-                  render: (value) => value || <Text type="secondary">未分配</Text>,
-                },
-                {
-                  title: '完整度',
-                  render: (_, record) => (
-                    <Space wrap>
-                      <StatusDot ok={record.hasGrade} text="成绩" />
-                      <StatusDot ok={record.hasFeedback} text="反馈" />
-                      <StatusDot ok={record.hasSummary} text="小结" />
-                    </Space>
-                  ),
-                },
-                {
-                  title: '操作',
-                  width: 130,
-                  render: (_, record) => (
-                    <Link href={`/students/${record.studentId}#learning`}>
-                      <FileSearchOutlined /> 查看学情
-                    </Link>
-                  ),
-                },
-              ]}
-            />
-          )}
-        </Card>
-      </Space>
+  const summary = data?.summary ?? { noPractice: 0, noFeedback: 0, noSummary: 0 }
+  const total = items.length
+  const completeCount = items.filter((item) => item.missingCount === 0).length
+
+  const statCards = [
+    { key: 'noPractice', label: '本期未做题', value: summary.noPractice, color: '#E8784A', icon: <FileTextOutlined />, note: total ? `占学员 ${Math.round((summary.noPractice / total) * 100)}%` : '暂无数据' },
+    { key: 'noFeedback', label: '本期无反馈', value: summary.noFeedback, color: '#7C5CFF', icon: <MessageOutlined />, note: total ? `占学员 ${Math.round((summary.noFeedback / total) * 100)}%` : '暂无数据' },
+    { key: 'noSummary', label: '本期无小结', value: summary.noSummary, color: '#D9534F', icon: <BookOutlined />, note: total ? `占学员 ${Math.round((summary.noSummary / total) * 100)}%` : '暂无数据' },
+    { key: 'complete', label: '资料齐全学员', value: completeCount, color: '#1D9E75', icon: <TrophyOutlined />, note: total ? `完成率 ${Math.round((completeCount / total) * 100)}%` : '暂无数据' },
+  ]
+
+  const filterButtons = [
+    { key: 'all', label: '全部' },
+    { key: 'noPractice', label: '未做题' },
+    { key: 'noFeedback', label: '缺反馈' },
+    { key: 'noSummary', label: '缺小结' },
+    { key: 'complete', label: '齐全' },
+  ] as const
+
+  return (
+    <PageLayout
+      title="学情资料检查"
+      subtitle="按月核对做题练习、课堂反馈与阶段小结的记录情况，优先处理红色缺项"
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {/* 统计卡 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 10 }}>
+          {statCards.map((card) => (
+            <div
+              key={card.key}
+              style={{
+                borderRadius: 16, padding: '14px 14px',
+                background: card.key === 'complete'
+                  ? 'linear-gradient(150deg,#17352F,#0E5E4E)'
+                  : '#fff',
+                border: card.key === 'complete' ? '1px solid rgba(201,164,92,.5)' : '1px solid #F0E9DF',
+                boxShadow: '0 4px 14px rgba(58,50,39,.06)',
+                position: 'relative', overflow: 'hidden',
+              }}
+            >
+              {card.key === 'complete' && (
+                <div style={{ position: 'absolute', top: -30, right: -20, width: 110, height: 110, borderRadius: '50%', background: 'radial-gradient(circle, rgba(242,227,182,.25), transparent 70%)', pointerEvents: 'none' }} />
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: 12, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 17,
+                  background: card.key === 'complete'
+                    ? 'linear-gradient(145deg,#F2E3B6,#D8BC7C)'
+                    : `${card.color}15`,
+                  color: card.key === 'complete' ? '#123C35' : card.color,
+                }}>{card.icon}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 23, fontWeight: 800, color: card.key === 'complete' ? '#F2E3B6' : '#1F2329', lineHeight: 1.15, fontVariantNumeric: 'tabular-nums' }}>{card.value}</div>
+                  <div style={{ fontSize: 11.5, color: card.key === 'complete' ? 'rgba(245,241,232,.65)' : '#98A2B3', marginTop: 1 }}>{card.label}</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 11, color: card.key === 'complete' ? 'rgba(242,227,182,.75)' : '#B8B2A8', marginTop: 8 }}>{card.note}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* 工具条 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {filterButtons.map((button) => (
+              <button
+                key={button.key}
+                onClick={() => setStatusFilter(button.key)}
+                style={{
+                  fontFamily: 'inherit', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                  padding: '5px 12px', borderRadius: 999,
+                  border: statusFilter === button.key ? '1px solid #0E5E4E' : '1px solid #E5DFD6',
+                  color: statusFilter === button.key ? '#fff' : '#6B7280',
+                  background: statusFilter === button.key ? 'linear-gradient(135deg,#0E5E4E,#123C35)' : '#fff',
+                }}
+              >{button.label}</button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative' }}>
+              <SearchOutlined style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: '#98A2B3' }} />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="搜索学员姓名"
+                style={{
+                  fontFamily: 'inherit', fontSize: 13, padding: '6px 10px 6px 28px', borderRadius: 10,
+                  border: '1px solid #E5DFD6', outline: 'none', width: 150, background: '#fff',
+                }}
+              />
+            </div>
+            <select
+              value={months}
+              onChange={(event) => setMonths(Number(event.target.value))}
+              style={{
+                fontFamily: 'inherit', fontSize: 13, padding: '6px 10px', borderRadius: 10,
+                border: '1px solid #E5DFD6', background: '#fff', color: '#1F2329', outline: 'none',
+              }}
+            >
+              <option value={1}>近 1 个月</option>
+              <option value={3}>近 3 个月</option>
+              <option value={6}>近 6 个月</option>
+              <option value={12}>近 12 个月</option>
+            </select>
+          </div>
+        </div>
+
+        {/* 学员卡片列表 */}
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: 64 }}><Spin size="large" /></div>
+        ) : filtered.length === 0 ? (
+          <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #F0E9DF', padding: 40 }}>
+            <Empty description={items.length === 0 ? '暂无学员数据' : '没有符合筛选条件的学员'} />
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {filtered.map((item) => {
+              const complete = item.missingCount === 0
+              return (
+                <div
+                  key={item.studentId}
+                  style={{
+                    borderRadius: 16, overflow: 'hidden',
+                    background: complete ? '#fff' : '#FFFDF9',
+                    border: complete ? '1px solid #F0E9DF' : '1px solid rgba(232,120,74,.35)',
+                    boxShadow: complete ? '0 3px 12px rgba(58,50,39,.05)' : '0 4px 14px rgba(232,120,74,.08)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 14px 10px' }}>
+                    <AvatarBlock name={item.name} gender={item.gender} />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 14.5, fontWeight: 800, color: '#1F2329' }}>{item.name}</span>
+                        {item.grade && (
+                          <span style={{
+                            fontSize: 10.5, fontWeight: 700, padding: '1px 7px', borderRadius: 999,
+                            color: '#0E5E4E', background: 'rgba(14,94,78,.08)', border: '1px solid rgba(14,94,78,.25)',
+                          }}>{item.grade}</span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#98A2B3', marginTop: 2 }}>
+                        主教师：{item.mainTeacherName || '未分配'}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                        <span style={{ fontSize: 11, color: '#98A2B3' }}>完整度</span>
+                        <span style={{ fontSize: 16, fontWeight: 800, color: complete ? '#1D9E75' : '#E8784A', fontVariantNumeric: 'tabular-nums' }}>
+                          {3 - item.missingCount}/3
+                        </span>
+                      </div>
+                      <div style={{ width: 72, height: 5, borderRadius: 999, background: 'rgba(152,162,179,.15)', overflow: 'hidden', marginTop: 4 }}>
+                        <div style={{
+                          height: '100%', width: `${((3 - item.missingCount) / 3) * 100}%`, borderRadius: 999,
+                          background: complete ? 'linear-gradient(90deg,#1D9E75,#27A644)' : 'linear-gradient(90deg,#E8784A,#D9534F)',
+                        }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '0 14px 12px' }}>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      <MissingTag ok={item.hasPractice} label="做题" missingLabel="做题" />
+                      <MissingTag ok={item.hasFeedback} label="反馈" missingLabel="反馈" />
+                      <MissingTag ok={item.hasSummary} label="小结" missingLabel="小结" />
+                    </div>
+                  </div>
+
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    padding: '8px 14px', borderTop: '1px solid #F4EFE8', background: 'rgba(247,245,241,.6)',
+                  }}>
+                    {!item.hasPractice && (
+                      <Link
+                        href="/grades"
+                        style={{
+                          fontSize: 12, fontWeight: 700, color: '#C2413C', textDecoration: 'none',
+                          display: 'inline-flex', alignItems: 'center', gap: 5, flex: 1, justifyContent: 'center',
+                          padding: '6px 10px', borderRadius: 10,
+                          border: '1px solid rgba(194,65,60,.3)', background: '#fff',
+                        }}
+                      >去题库统计</Link>
+                    )}
+                    <Link
+                      href={`/students/${item.studentId}#learning`}
+                      style={{
+                        fontSize: 12, fontWeight: 700, color: '#0E5E4E', textDecoration: 'none',
+                        display: 'inline-flex', alignItems: 'center', gap: 5, flex: item.hasPractice ? 1 : 1.2, justifyContent: 'center',
+                        padding: '6px 10px', borderRadius: 10,
+                        border: '1px solid rgba(14,94,78,.3)', background: '#fff',
+                      }}
+                    ><FileSearchOutlined /> 查看学情</Link>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </PageLayout>
   )
 }

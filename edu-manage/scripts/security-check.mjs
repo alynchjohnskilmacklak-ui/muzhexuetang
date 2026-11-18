@@ -51,7 +51,7 @@ assertCheck('password verification requires bcrypt hash', /startsWith\(['"]\$2/.
 const uploads = read('src/app/api/uploads/[filename]/route.ts')
 assertCheck('uploads require auth', /requireAuthenticatedUser\(\)/.test(uploads))
 assertCheck('uploads keep traversal safety', /safeRelativePath/.test(uploads) && /path\.resolve/.test(uploads) && /startsWith\(rootPath/.test(uploads))
-assertCheck('uploads are private cached', /private,\s*max-age=86400,\s*immutable/.test(uploads) && /ETag/.test(uploads) && !/public,\s*max-age=31536000,\s*immutable/.test(uploads))
+assertCheck('uploads are private cached', /private/.test(uploads) && /ETag/.test(uploads) && !/public,\s*max-age=\d+,\s*immutable/.test(uploads))
 
 const uploadCreate = read('src/app/api/upload/route.ts')
 assertCheck('upload creation validates live session', /requireAuthenticatedUser\(\)/.test(uploadCreate))

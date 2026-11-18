@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import { requireAdminUser } from '@/lib/teacher-portal'
@@ -5,17 +6,12 @@ import { getRequestDivision } from '@/lib/division'
 import { classifySalaryBucket, type SalaryBucket } from '@/lib/salary-bucket'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { TRASH_RETENTION_DAYS } from '@/lib/data-correction/trash'
+import { salaryPeriodStart, pendingSalaryTransactions } from '@/lib/salary-settlement'
 
 export const dynamic = 'force-dynamic'
 
-function salaryPeriodStart(period: string) {
-  const now = new Date()
-  if (period === 'week') return new Date(now.getTime() - 7 * 86400000)
-  if (period === 'all') return new Date(0)
-  return new Date(now.getFullYear(), now.getMonth(), 1)
-}
 
-export async function GET(req: NextRequest) {
+export const GET = apiHandler(async (req: NextRequest) => {
   try {
     const adminUser = await requireAdminUser()
     const prisma = adminUser.prisma
@@ -45,7 +41,7 @@ export async function GET(req: NextRequest) {
     const [teachers, summaryTransactions, feedbackAggregates] = await Promise.all([
       prisma.teacher.findMany({
         where: { status: 'ACTIVE', division },
-        select: { id: true, name: true, avatar: true },
+        select: { id: true, name: true, avatar: true, gender: true },
         orderBy: { createdAt: 'asc' },
       }),
       prisma.teacherSalaryTransaction.findMany({
@@ -72,6 +68,7 @@ export async function GET(req: NextRequest) {
     ])
 
     const contextTransactions = summaryTransactions
+    const pendingIds = new Set(pendingSalaryTransactions(summaryTransactions).map(item => item.id))
     const lessonIds = [...new Set(contextTransactions.map((item) => item.lessonId).filter((id): id is string => Boolean(id)))]
     const feedbackIds = [...new Set(contextTransactions.map((item) => item.feedbackId).filter((id): id is string => Boolean(id)))]
     const [salaryLessons, salaryFeedbacks] = await Promise.all([
@@ -109,16 +106,26 @@ export async function GET(req: NextRequest) {
         description: item.description,
       })
 
-    const summaryMap = new Map<string, { teacherId: string; name: string; avatar: string | null; lesson: number; feedback: number; adjustment: number; smallClass: number; intensive: number; feedbackCount: number; rewardCount: number; total: number }>()
+    const summaryMap = new Map<string, { teacherId: string; name: string; avatar: string | null; gender: string | null; lesson: number; feedback: number; adjustment: number; smallClass: number; intensive: number; feedbackCount: number; rewardCount: number; recordCount: number; pendingCount: number; total: number; settledAt: Date | null; settledTotal: number }>()
     const studyHallRewardCount = new Map<string, number>()
     for (const teacher of teachers) {
       if (!teacherId || teacher.id === teacherId) {
-        summaryMap.set(teacher.id, { teacherId: teacher.id, name: teacher.name, avatar: teacher.avatar, lesson: 0, feedback: 0, adjustment: 0, smallClass: 0, intensive: 0, feedbackCount: 0, rewardCount: 0, total: 0 })
+        summaryMap.set(teacher.id, { teacherId: teacher.id, name: teacher.name, avatar: teacher.avatar, gender: teacher.gender, lesson: 0, feedback: 0, adjustment: 0, smallClass: 0, intensive: 0, feedbackCount: 0, rewardCount: 0, recordCount: 0, pendingCount: 0, total: 0, settledAt: null, settledTotal: 0 })
       }
     }
     for (const item of summaryTransactions) {
       const row = summaryMap.get(item.teacherId)
       if (!row) continue
+      if (item.type === 'SALARY_SETTLEMENT') {
+        if (!row.settledAt || item.createdAt > row.settledAt) {
+          row.settledAt = item.createdAt
+          row.settledTotal = item.amount
+        }
+        continue
+      }
+      row.recordCount += 1
+      if (!pendingIds.has(item.id)) continue
+      row.pendingCount += 1
       const amount = item.amount
       if (item.type === 'LESSON_PAY' || item.type === 'LESSON_PAY_ADJUSTMENT') row.lesson += amount
       if (['FEEDBACK_BONUS', 'STUDY_HALL_BONUS', 'STUDY_HALL_ATTENDANCE'].includes(item.type)) {
@@ -165,8 +172,10 @@ export async function GET(req: NextRequest) {
       adjustment: Number(row.adjustment.toFixed(2)),
       smallClass: Number(row.smallClass.toFixed(2)),
       intensive: Number(row.intensive.toFixed(2)),
+      settledTotal: Number(row.settledTotal.toFixed(2)),
       total: Number(row.total.toFixed(2)),
-    }))
+      settledAt: row.settledAt ? row.settledAt.toISOString() : null,
+    })).sort((a, b) => b.recordCount - a.recordCount || b.total - a.total || a.name.localeCompare(b.name, 'zh-Hans-CN'))
     const filteredTransactions = bucket === 'ALL'
       ? summaryTransactions
       : summaryTransactions.filter((item) => salaryBucket(item) === bucket)
@@ -190,6 +199,9 @@ export async function GET(req: NextRequest) {
         amount: item.amount,
         description: item.description,
         lessonDate: item.lessonDate?.toISOString() ?? null,
+        settledAt: item.settledAt?.toISOString() ?? null,
+        settlementBatchId: item.settlementBatchId,
+        settlementStatus: item.type === 'SALARY_SETTLEMENT' ? 'RECEIPT' : pendingIds.has(item.id) ? 'PENDING' : 'SETTLED',
         createdAt: item.createdAt.toISOString(),
       })),
       teachers,
@@ -201,9 +213,9 @@ export async function GET(req: NextRequest) {
     console.error('[admin:salary:get]', error)
     return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
-}
+})
 
-export async function POST(req: NextRequest) {
+export const POST = apiHandler(async (req: NextRequest) => {
   try {
     const adminUser = await requireAdminUser()
     const division = getRequestDivision(adminUser, req.nextUrl.searchParams.get('division'))
@@ -248,9 +260,9 @@ export async function POST(req: NextRequest) {
     console.error('[admin:salary:post]', error)
     return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
-}
+})
 
-export async function DELETE(req: NextRequest) {
+export const DELETE = apiHandler(async (req: NextRequest) => {
   try {
     const adminUser = await requireAdminUser()
     const division = getRequestDivision(adminUser, req.nextUrl.searchParams.get('division'))
@@ -315,4 +327,4 @@ export async function DELETE(req: NextRequest) {
     console.error('[admin:salary:delete]', error)
     return NextResponse.json({ error: '服务器错误，请稍后重试' }, { status: 500 })
   }
-}
+})

@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react'
 import NextImage from 'next/image'
 import useSWR from 'swr'
-import { Button, Modal, Skeleton } from 'antd'
+import { Button, Skeleton } from 'antd'
 import { DownloadOutlined, EyeOutlined, FileImageOutlined, FilePdfOutlined, FilePptOutlined, FileWordOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { materialFileLabel } from '@/lib/material-format'
 import { downloadMaterialFile, loadMaterialPreview, type MaterialPreviewResult } from '@/lib/material-preview-client'
 import { PdfCanvasViewer } from '@/components/Common/PdfCanvasViewer'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 interface HistoryMaterial {
   id: string
@@ -111,13 +112,13 @@ export function ParentLessonPreviewHistory() {
         <div className="preview-history__empty"><FileWordOutlined /><strong>还没有周末课讲义</strong><span>老师发布后会自动显示在这里。</span></div>
       )}
 
-      <Modal title={viewerTitle} open={!!viewer} footer={null} onCancel={() => setViewer(null)} width="95vw" style={{ top: 10 }} styles={{ body: { padding: 0 } }}>
+      <BrandModal title={viewerTitle} open={!!viewer} footer={null} onCancel={() => setViewer(null)} width="95vw" style={{ top: 10 }} styles={{ body: { padding: 0 } }}>
         {viewer?.type === 'pdf'
           ? <PdfCanvasViewer url={viewer.url || undefined} data={viewer.data} title={viewerTitle} />
           : viewer?.type === 'image'
           ? <div className="preview-history__image"><NextImage src={viewer.url} alt={viewerTitle} width={1200} height={800} unoptimized /></div>
           : viewer && <iframe src={viewer.url} title={viewerTitle} className="preview-history__frame" />}
-      </Modal>
+      </BrandModal>
 
       <style jsx>{`
         .preview-history { width: 100%; max-width: 820px; margin: 0 auto; }

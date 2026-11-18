@@ -5,6 +5,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { isUserDisabled } from '@/lib/user-status'
 import { parseUserAgent } from '@/lib/device'
 import { recordDailySessionAccess } from '@/lib/login-records'
+import { getTrustedClientIp } from '@/lib/request-ip'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,10 +37,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
   let accessRecorded = false
   if (request.nextUrl.searchParams.get('recordAccess') === '1' && user.email) {
     const userAgent = request.headers.get('user-agent') || ''
-    const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-      || request.headers.get('x-real-ip')
-      || '未知'
+    const ip = getTrustedClientIp(request.headers)
     const { device, os, browser } = parseUserAgent(userAgent)
     try {
       accessRecorded = await recordDailySessionAccess(

@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import useSWR from 'swr'
-import { Button, Card, Input, Modal, Segmented, Space, Tag, Typography } from 'antd'
+import { Button, Card, Input, Segmented, Space, Tag, Typography } from 'antd'
 import { CalendarOutlined, CheckOutlined, CloseOutlined, ReloadOutlined, UserOutlined } from '@ant-design/icons'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -9,6 +9,7 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { fmtDate, fmtDateTime } from '@/lib/format-date'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -201,7 +202,7 @@ export default function TeacherLeavePage() {
         )}
       </Card>
 
-      <Modal
+      <BrandModal
         open={!!action}
         title={action?.status === 'approved' ? '批准请假' : '驳回请假'}
         onCancel={() => {
@@ -225,7 +226,7 @@ export default function TeacherLeavePage() {
             />
           </div>
         )}
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

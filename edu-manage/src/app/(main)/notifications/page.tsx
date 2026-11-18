@@ -45,6 +45,40 @@ export default function AdminNotificationsPage() {
   const [form] = Form.useForm()
   const [pushType, setPushType] = useState<string>('system')
   const [detailModal, setDetailModal] = useState<{ open: boolean; record: NotificationRecord | null }>({ open: false, record: null })
+  const [bindOpen, setBindOpen] = useState(false)
+  const [bindData, setBindData] = useState<{ parents: Array<{ id: string; name: string; phone: string | null; children: string[] }>; contacts: Array<{ external_userid: string; name: string; member: string }> }>({ parents: [], contacts: [] })
+  const [bindLoading, setBindLoading] = useState(false)
+
+  const openBindDrawer = async () => {
+    setBindOpen(true)
+    setBindLoading(true)
+    try {
+      const res = await fetch('/api/qywx/bind-management')
+      const data = await res.json()
+      if (data.parents) setBindData({ parents: data.parents, contacts: data.contacts || [] })
+      else message.error(data.error || '加载失败')
+    } catch { message.error('加载绑定信息失败') } finally { setBindLoading(false) }
+  }
+
+  const handleBind = async (userId: string, externalUserId: string, senderUserId: string) => {
+    try {
+      const res = await fetch('/api/qywx/bind-management', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, externalUserId, senderUserId }),
+      })
+      if (res.ok) { message.success('绑定成功'); openBindDrawer(); fetchStudents() }
+      else message.error('绑定失败')
+    } catch { message.error('绑定失败') }
+  }
+
+  const handleUnbind = async (userId: string) => {
+    try {
+      const res = await fetch(`/api/qywx/bind-management?userId=${userId}`, { method: 'DELETE' })
+      if (res.ok) { message.success('已解除绑定'); openBindDrawer(); fetchStudents() }
+      else message.error('解除失败')
+    } catch { message.error('解除失败') }
+  }
 
   const fetchStudents = useCallback(async () => {
     const res = await fetch('/api/notifications/students')
@@ -151,7 +185,7 @@ export default function AdminNotificationsPage() {
     <div style={{ minHeight: '100vh', backgroundColor: '#faf8f5', padding: 24, maxWidth: 1200, margin: '0 auto' }}>
       <Title level={4} style={{ marginBottom: 4 }}>消息通知</Title>
       <Text type="secondary" style={{ fontSize: 13, display: 'block', marginBottom: 20 }}>
-        向家长发送系统通知或微信提醒
+        向家长发送系统通知或企业微信汇总卡片
       </Text>
 
       <Row gutter={16} style={{ marginBottom: 20 }}>
@@ -164,6 +198,11 @@ export default function AdminNotificationsPage() {
             <Card><Statistic title={item.title} value={item.value} /></Card>
           </Col>
         ))}
+        <Col xs={24} style={{ textAlign: 'right', marginBottom: -12 }}>
+          <Button icon={<SearchOutlined />} onClick={openBindDrawer} loading={bindLoading && bindOpen} style={{ borderRadius: 8 }}>
+            家长绑定管理
+          </Button>
+        </Col>
       </Row>
 
       <Tabs
@@ -282,20 +321,20 @@ export default function AdminNotificationsPage() {
                         <Radio value="wxpusher_feedback" disabled={hasUnboundSelected}>
                           <Text>课堂反馈微信推送</Text>
                           <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
-                            【牧哲学堂】{previewName}的课堂反馈已上传至牧哲学堂客户端，请家长查收。
+                            通过企业微信发送汇总卡片到家长微信（每家长每日 1 条，多条自动合并为当日汇总）
                           </Text>
                         </Radio>
                         <Radio value="wxpusher_safe" disabled={hasUnboundSelected}>
                           <Text>平安回家微信推送</Text>
                           <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
-                            【牧哲学堂】{previewName}已经平安前往回家的路上。
+                            通过企业微信发送汇总卡片到家长微信（每家长每日 1 条，多条自动合并为当日汇总）
                           </Text>
                         </Radio>
                       </Radio.Group>
                     </div>
 
                     {hasUnboundSelected && pushType !== 'system' && (
-                      <Alert type="warning" showIcon message="当前选择中存在未绑定微信的家长，无法发送微信通知" style={{ marginBottom: 12, borderRadius: 8 }} />
+                      <Alert type="warning" showIcon message="所选学员中存在家长微信未添加为企微学员，无法接收微信推送（请在企业微信「学员联系-加学员」中添加后重试）" style={{ marginBottom: 12, borderRadius: 8 }} />
                     )}
 
                     <Button
@@ -347,7 +386,25 @@ export default function AdminNotificationsPage() {
                           {record.lastError && <span style={{ fontSize: 11, color: '#c41d7f' }} title={record.lastError}>{record.lastError.slice(0, 20)}{record.lastError.length > 20 ? '…' : ''}</span>}
                         </Space>
                       )
-                      if (value === 'no_bind') return <Tag color="warning">未绑定</Tag>
+                      if (value === 'no_bind') return <Tag color="warning">未加学员</Tag>
+                      if (value === 'pending_confirm') return (
+                        <Space direction="vertical" size={0}>
+                          <Tag color="processing">待企微确认</Tag>
+                          <span style={{ fontSize: 11, color: '#62666d' }}>在企微群发助手中确认发送</span>
+                        </Space>
+                      )
+                      if (value === 'merged_today') return (
+                        <Space direction="vertical" size={0}>
+                          <Tag color="purple">今日已合并</Tag>
+                          <span style={{ fontSize: 11, color: '#62666d' }}>已并入当日汇总卡片</span>
+                        </Space>
+                      )
+                      if (value === 'limit_today') return (
+                        <Space direction="vertical" size={0}>
+                          <Tag color="orange">今日已达上限</Tag>
+                          <span style={{ fontSize: 11, color: '#62666d' }}>明日自动重试</span>
+                        </Space>
+                      )
                       return <span>{value}</span>
                     },
                   },
@@ -376,7 +433,53 @@ export default function AdminNotificationsPage() {
         ]}
       />
       <Drawer
-        title={detailModal.record?.title || '通知详情'}
+        title="家长微信绑定管理"
+        open={bindOpen}
+        onClose={() => setBindOpen(false)}
+        width={640}
+        loading={bindLoading}
+        extra={<Button onClick={() => setBindOpen(false)}>关闭</Button>}
+      >
+        <Alert
+          type="info"
+          showIcon
+          style={{ borderRadius: 8, marginBottom: 16 }}
+          message="绑定说明"
+          description="在企业微信「学员联系-加学员」中将家长微信添加为学员后，家长出现在下方「企微学员候选」中。为家长账号选择对应学员完成关联，之后发送微信通知即可送达。每个学员只能绑定一个家长账号。"
+        />
+        {bindData.parents.length === 0 && bindData.contacts.length === 0 && (
+          <div style={{ textAlign: 'center', padding: 24, color: '#9a8e7a' }}>
+            暂无可绑定数据：所有家长均已绑定，或企微中暂无可添加的学员
+          </div>
+        )}
+        {bindData.parents.map((parent) => (
+          <Card
+            key={parent.id}
+            size="small"
+            style={{ marginBottom: 8, borderRadius: 10 }}
+            title={<span>{parent.name}（{parent.children.join('、') || '无在读学生'}）</span>}
+            extra={<Text type="secondary" style={{ fontSize: 12 }}>{parent.phone || '无手机号'}</Text>}
+          >
+            <Space style={{ width: '100%' }} direction="vertical" size={4}>
+              <Select
+                placeholder="选择企微学员"
+                style={{ width: '100%' }}
+                getPopupContainer={() => document.body}
+                options={bindData.contacts.map((c) => ({
+                  label: `${c.name}（${c.member}）`,
+                  value: `${c.external_userid}::${c.member}`,
+                }))}
+                onChange={(value) => {
+                  const [externalUserId, senderUserId] = value.split('::')
+                  handleBind(parent.id, externalUserId, senderUserId)
+                }}
+              />
+              <Text type="secondary" style={{ fontSize: 11 }}>选择后自动完成绑定；如需解除，请先在企微中删除该学员或联系技术人员</Text>
+            </Space>
+          </Card>
+        ))}
+      </Drawer>
+      <Drawer
         open={detailModal.open}
         onClose={() => setDetailModal({ open: false, record: null })}
         extra={<Button onClick={() => setDetailModal({ open: false, record: null })}>关闭</Button>}

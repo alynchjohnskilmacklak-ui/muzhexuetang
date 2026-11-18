@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
@@ -9,6 +9,7 @@ export const GET = apiHandler(async () => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
  
+  if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
   const prisma = await getRequestPrisma()
   const config = await prisma.roleConfig.upsert({
     where: { id: 'singleton' },
@@ -18,18 +19,10 @@ export const GET = apiHandler(async () => {
   return NextResponse.json(config)
 })
 
-export const PATCH = apiHandler(async (request: NextRequest) => {
+export const PATCH = apiHandler(async () => {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
  
-  const prisma = await getRequestPrisma()
   if (user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
-  const body = await request.json()
-  const config = await prisma.roleConfig.upsert({
-    where: { id: 'singleton' },
-    create: { id: 'singleton', ...body },
-    update: body,
-  })
-  await prisma.activityLog.create({ data: { userId: user.id, action: '更新了角色权限设置' } })
-  return NextResponse.json(config)
+  return NextResponse.json({ error: '此配置尚未接入业务执行，暂不允许修改；当前规则由服务端权限和业务事件控制' }, { status: 409 })
 })

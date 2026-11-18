@@ -2,14 +2,17 @@
 
 import useSWR from 'swr'
 import { useParams } from 'next/navigation'
-import { Card, Tag, Timeline, Statistic, Row, Col, List, Button, message, Typography } from 'antd'
+import { Alert, Card, Tag, Timeline, Statistic, Row, Col, List, Button, message, Typography } from 'antd'
 import { CheckCircleOutlined, FileTextOutlined, StarOutlined, LoginOutlined } from '@ant-design/icons'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { useDivision } from '@/contexts/DivisionContext'
 
 const { Text } = Typography
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = (url: string) => fetch(url).then(async (r) => {
+  if (!r.ok) throw new Error(`教师日志详情加载失败（HTTP ${r.status}）`)
+  return r.json()
+})
 
 const ACTION_COLORS: Record<string, string> = {
   ATTENDANCE_SUBMIT: '#1D9E75', ATTENDANCE_MISSING: '#D4537E', PAPER_UPLOAD: '#f5a623', PAPER_PUBLISH: '#E8784A',
@@ -33,7 +36,7 @@ type TeacherLogDetail = {
 export default function TeacherLogDetailPage() {
   const { teacherId } = useParams()
   const { division } = useDivision()
-  const { data, isLoading, mutate } = useSWR<TeacherLogDetail>(`/api/teacher-logs/${teacherId}?period=month&division=${division}`, fetcher)
+  const { data, error, isLoading, mutate } = useSWR<TeacherLogDetail>(`/api/teacher-logs/${teacherId}?period=month&division=${division}`, fetcher)
 
   const handleResolve = async (alertId: string) => {
     const response = await fetch(`/api/teacher-logs/alerts?division=${division}`, {
@@ -48,6 +51,12 @@ export default function TeacherLogDetailPage() {
     message.success('预警已处理')
     void mutate()
   }
+
+  if (error) return (
+    <PageLayout title="教师操作日志">
+      <Alert type="error" showIcon message="教师日志详情加载失败" description={error.message || '请稍后重试'} />
+    </PageLayout>
+  )
 
   if (isLoading || !data) return <PageLayout title="加载中..."><div /></PageLayout>
 

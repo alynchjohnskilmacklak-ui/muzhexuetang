@@ -34,7 +34,8 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
 
   const body = await req.json()
   const content = typeof body.content === 'string' ? body.content.trim() : ''
-  if (!content) return NextResponse.json({ error: '回复内容不能为空' }, { status: 400 })
+  const attachments = Array.isArray(body.attachments) ? body.attachments : []
+  if (!content && attachments.length === 0) return NextResponse.json({ error: '回复内容不能为空' }, { status: 400 })
   if (content.length > 2000) return NextResponse.json({ error: '回复内容不能超过2000字' }, { status: 400 })
 
   const isParent = user.role === 'parent'
@@ -51,6 +52,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         authorName: user.name || user.role,
         role: user.role,
         content,
+        attachments: attachments.length > 0 ? attachments : undefined,
         isReadByParent: isParent,
         isReadByTeacher: !isParent,
       },

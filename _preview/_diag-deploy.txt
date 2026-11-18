@@ -1,0 +1,89 @@
+﻿=== 1) 找 compose 文件 ===
+/opt/edu-manage-docker/source/compose.production.yaml
+/opt/edu-manage-docker/build-current-term-subject-fix-20260913/compose.production.yaml
+/opt/edu-manage-docker/build-photo-fix-20260913-1312/compose.production.yaml
+
+=== 2) 容器来自哪个 compose 项目 ===
+edu-manage | /opt/edu-manage-docker/source | /opt/edu-manage-docker/source/compose.production.yaml | service=app
+
+=== 3) 当前镜像 ===
+edu-manage-app:charts                                a3972f3e4552       1.09GB          359MB        
+edu-manage-app:charts-v2                             c68f07af3b01       1.09GB          359MB        
+edu-manage-app:charts-v3                             7df7bfb91890       1.09GB          360MB   U    
+edu-manage-app:compliance-fix                        c0b064732164        893MB          275MB        
+edu-manage-app:fix-services                          c49da953fe1f        893MB          275MB        
+edu-manage-app:home-dark                             a11f00fc3009        893MB          275MB        
+edu-manage-app:home-dark2                            6cd3eb1a7159        893MB          275MB        
+edu-manage-app:home-fixed                            70bd50d7f02c        893MB          275MB        
+edu-manage-app:latest                                7df7bfb91890       1.09GB          360MB   U    
+edu-manage-app:pre-charts-backup                     c0b064732164        893MB          275MB
+
+=== 4) /opt/edu-manage-docker 目录结构（两层） ===
+total 60
+drwxr-x---  6 root root  4096 Sep 13 14:30 .
+drwxr-xr-x  4 root root  4096 Sep 11 21:51 ..
+drwxrwxrwx 10 root root  4096 Sep 12 18:22 build-current-term-subject-fix-20260913
+drwxrwxrwx 10 root root  4096 Sep 12 18:22 build-photo-fix-20260913-1312
+-rw-r--r--  1 root root 35939 Sep 12 14:15 image-opt-rollback-20260912.tar.gz
+drwxr-xr-x  4 root root  4096 Sep 12 13:12 migration
+drwxr-x---  9 root root  4096 Sep 12 16:53 source
+---
+/opt/edu-manage-docker/migration/restore-docker-final.sh
+/opt/edu-manage-docker/migration/restore-docker-precopy.sh
+/opt/edu-manage-docker/source/Dockerfile
+/opt/edu-manage-docker/source/compose.production.yaml
+/opt/edu-manage-docker/source/Dockerfile.runtime
+/opt/edu-manage-docker/build-current-term-subject-fix-20260913/Dockerfile
+/opt/edu-manage-docker/build-current-term-subject-fix-20260913/compose.production.yaml
+/opt/edu-manage-docker/build-current-term-subject-fix-20260913/Dockerfile.runtime
+/opt/edu-manage-docker/build-photo-fix-20260913-1312/Dockerfile
+/opt/edu-manage-docker/build-photo-fix-20260913-1312/compose.production.yaml
+/opt/edu-manage-docker/build-photo-fix-20260913-1312/Dockerfile.runtime
+
+=== 5) /srv/edu-manage 结构 ===
+total 12
+drwxr-xr-x 3 root root 4096 Sep 11 21:51 .
+drwxr-xr-x 3 root root 4096 Sep 11 21:51 ..
+drwxr-xr-x 4 root root 4096 Sep 12 13:13 shared
+--- shared/public:
+total 28
+drwxr-xr-x  7 1000 1000 4096 Sep  1 15:03 .
+drwxr-xr-x  4 root root 4096 Sep 12 13:13 ..
+drwxr-xr-x  2 1000 1000 4096 Sep  1 15:03 business-assets
+drwxrwxrwx  3 1000 1000 4096 Aug 27 14:10 marketing
+drwxrwxrwx 10 1000 1000 4096 Aug 27 14:10 services
+drwxr-xr-x  3 1000 1000 4096 Oct  2 22:02 uploads
+drwxr-xr-x  3 1000 1000 4096 Sep  1 15:03 volunteer
+
+=== 6) nginx 配置里 / 与 /about 到底指哪（含最近备份的差异） ===
+7:    location / {
+8:        proxy_pass http://127.0.0.1:3000;
+24:    location ^~ /.well-known/acme-challenge/ {
+25:        root /var/www/certbot;
+28:    location / {
+44:    location ^~ /about-images/ {
+45:        proxy_pass http://127.0.0.1:3000;
+56:    location /_next/static/ {
+57:        proxy_pass http://127.0.0.1:3000;
+66:    location / {
+67:        proxy_pass http://127.0.0.1:3000;
+
+=== 7) 今天新增的 nginx 备份差异（谁改的） ===
+14,15d13
+<         proxy_set_header Upgrade $http_upgrade;
+<         proxy_set_header Connection "upgrade";
+36c34
+<     listen 443 ssl;
+---
+>     listen 443 ssl http2;
+75,76d72
+<         proxy_set_header Upgrade $http_upgrade;
+<         proxy_set_header Connection "upgrade";
+83d78
+<
+
+=== 8) 最近修改过的部署脚本 ===
+(无)
+
+=== 9) docker-entrypoint.sh 内容 ===
+(未找到)

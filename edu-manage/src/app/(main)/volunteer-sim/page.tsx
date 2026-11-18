@@ -1,11 +1,13 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import NextImage from 'next/image'
 import {
-  Button, Checkbox, Collapse, Divider, Form, InputNumber, Modal, Select,
+  Button, Checkbox, Collapse, Divider, Form, InputNumber, Select,
   Spin, Switch, Tag, Tooltip, Typography,
 } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import {
   ArrowLeftOutlined, TrophyOutlined,
   CloseOutlined, FilePdfOutlined, FormOutlined, ShareAltOutlined, SwapOutlined,
@@ -14,6 +16,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { seniorSchoolNameMatches } from '@/lib/volunteer-school-names'
+import { applyWatermark, domToCanvas, drawBrandHeader } from '@/lib/export-brand'
 import {
   CONTROL_LINES_2025,
   getAllocationLine,
@@ -680,14 +683,22 @@ export default function VolunteerSimPage() {
     if (!el) return
     try {
       setExportingPdf(true)
-      const html2canvas = (await import('html2canvas')).default
       const { jsPDF } = await import('jspdf')
-      const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
-      const img = canvas.toDataURL('image/png')
+      // modern-screenshot 兼容 color-mix/oklch 等现代 CSS；顶部叠加品牌条 + 全图水印
+      const canvas = await domToCanvas(el, { scale: 2, backgroundColor: '#ffffff' })
+      const out = document.createElement('canvas')
+      out.width = canvas.width
+      out.height = canvas.height + 74
+      const octx = out.getContext('2d')
+      if (!octx) throw new Error('无法创建导出画布')
+      const barH = await drawBrandHeader(octx, out.width, '志愿方案')
+      octx.drawImage(canvas, 0, barH)
+      applyWatermark(octx, out.width, out.height)
+      const img = out.toDataURL('image/png')
       const pdf = new jsPDF('p', 'mm', 'a4')
       const pageW = 210
       const pageH = 297
-      const imgH = (canvas.height * pageW) / canvas.width
+      const imgH = (out.height * pageW) / out.width
       let heightLeft = imgH
       let position = 0
       pdf.addImage(img, 'PNG', 0, position, pageW, imgH)
@@ -712,9 +723,17 @@ export default function VolunteerSimPage() {
     if (!el) return
     try {
       setExportingPoster(true)
-      const html2canvas = (await import('html2canvas')).default
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true })
-      canvas.toBlob((blob) => {
+      const canvas = await domToCanvas(el, { scale: 2 })
+      // 合成画布：顶部品牌条 + 底部原海报 + 斜向水印（不改动原画布内容与文件名）
+      const out = document.createElement('canvas')
+      out.width = canvas.width
+      out.height = canvas.height + 74
+      const octx = out.getContext('2d')
+      if (!octx) throw new Error('无法创建导出画布')
+      const barH = await drawBrandHeader(octx, out.width, '志愿模拟海报')
+      octx.drawImage(canvas, 0, barH)
+      applyWatermark(octx, out.width, out.height)
+      out.toBlob((blob) => {
         if (!blob) return
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -920,7 +939,7 @@ export default function VolunteerSimPage() {
                   rules={[{ required: true, message: '请选择初中' }]}
                   style={{ marginBottom: 0 }}
                 >
-                  <Select
+                  <AdaptiveSelect
                     placeholder="选择新乐初中"
                     size="large"
                     showSearch
@@ -1248,7 +1267,7 @@ export default function VolunteerSimPage() {
       )}
 
       {/* School Detail Modal */}
-      <Modal
+      <BrandModal
         title={null}
         open={!!detailSchool}
         onCancel={() => setDetailSchool(null)}
@@ -1470,7 +1489,7 @@ export default function VolunteerSimPage() {
             </div>
           )
         })()}
-      </Modal>
+      </BrandModal>
 
       {/* Bottom sticky volunteer basket — safe area for mobile */}
       {submitted && (
@@ -2254,7 +2273,7 @@ function MobileFilterBar({
 
       {/* Type + Location + Switch row */}
       <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        <Select
+        <AdaptiveSelect
           size="small"
           value={filterType || undefined}
           onChange={v => setFilterType(v || '全部')}
@@ -2264,7 +2283,7 @@ function MobileFilterBar({
             ...TYPE_OPTIONS.filter(t => t !== '全部').map(t => ({ label: t, value: t })),
           ]}
         />
-        <Select
+        <AdaptiveSelect
           size="small"
           value={filterLocation || undefined}
           onChange={v => setFilterLocation(v || '全部')}

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import NextImage from 'next/image'
 import {
-  Button, Input, Modal, Popconfirm, Select, Skeleton, Space,
+  Button, Input, Popconfirm, Select, Skeleton, Space,
   Tabs, Tag, Typography,
 } from 'antd'
 import {
@@ -18,6 +18,7 @@ import {
   materialFileLabel,
 } from '@/lib/material-format'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 const { Title, Text } = Typography
@@ -236,11 +237,11 @@ export default function TeacherMaterialsPage() {
         </div>
       )}
 
-      <Modal title="资料预览" open={!!previewUrl} footer={null} onCancel={() => setPreviewUrl(null)} width="90vw" style={{ top: 20 }} styles={{ body: { padding: 0 } }}>
+      <BrandModal title="资料预览" open={!!previewUrl} footer={null} onCancel={() => setPreviewUrl(null)} width="90vw" style={{ top: 20 }} styles={{ body: { padding: 0 } }}>
         {previewUrl && previewType === 'pdf' && <iframe src={previewUrl} title="PDF预览" style={{ width: '100%', height: '80vh', border: 0 }} />}
         {previewUrl && previewType === 'word' && <iframe src={previewUrl} title="Word预览" style={{ width: '100%', height: '80vh', border: 0 }} />}
         {previewUrl && previewType === 'image' && <div style={{ textAlign: 'center', padding: 16 }}><NextImage src={previewUrl} alt="资料预览" width={1200} height={800} unoptimized style={{ width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: '78vh', objectFit: 'contain' }} /></div>}
-      </Modal>
+      </BrandModal>
 
       <style jsx>{`
         .teacher-materials-page {

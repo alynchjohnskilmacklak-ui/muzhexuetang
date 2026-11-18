@@ -8,6 +8,9 @@ import {
   assertCanAccessStudent,
   type SessionUser,
 } from '@/lib/auth/guards'
+import { resolveTeacherForUser } from '@/lib/performance'
+import { teacherCanAccessParentMessage } from '@/lib/parent-message-access'
+import { extractUploadStorageKey } from '@/lib/upload-url'
 export {
   canUseUploadType,
   normalizeUploadType,
@@ -49,6 +52,29 @@ export async function assertCanAccessFileAsset(
   const role = String(actor.role || '').toLowerCase()
   if (role === 'admin' || file.visibility === 'PUBLIC' || file.uploadedById === actor.id) return
 
+  const isMessageAsset = file.ownerType === 'parent_message' || file.visibility === 'MESSAGE_PARTICIPANTS'
+  if (isMessageAsset) {
+    if (file.ownerType !== 'parent_message' || file.visibility !== 'MESSAGE_PARTICIPANTS' || !file.studentId) {
+      throw new AuthError('无权访问该文件')
+    }
+    if (role === 'parent') {
+      await assertCanAccessStudent(actor, file.studentId)
+      return
+    }
+    if (role === 'teacher') {
+      const teacherId = actor.teacherId || (await resolveTeacherForUser(actor, actor.prisma))?.id
+      if (!teacherId || !(await teacherCanAccessParentMessage(actor.prisma, {
+        feedbackId: null,
+        studentId: file.studentId,
+        teacherId: null,
+      }, teacherId))) {
+        throw new AuthError('无权访问该文件')
+      }
+      return
+    }
+    throw new AuthError('无权访问该文件')
+  }
+
   if (role === 'parent' && file.visibility !== 'PARENT_VISIBLE') {
     throw new AuthError('无权访问该文件')
   }
@@ -59,6 +85,12 @@ export async function assertCanAccessFileAsset(
   if (file.ownerType === 'admin_material') {
     if (role === 'teacher' && file.visibility === 'TEACHER_VISIBLE') return
     if (role === 'parent' && file.visibility === 'PARENT_VISIBLE') return
+  }
+
+  // 菜品图片：所有已登录用户可见（家长/教师都能看到菜单配图）
+  if (file.ownerType === 'meal_image') {
+    if (role === 'parent' && file.visibility === 'PARENT_VISIBLE') return
+    if (role === 'teacher') return
   }
 
   if (file.studentId) {
@@ -75,6 +107,45 @@ export async function assertCanAccessFileAsset(
   }
 
   throw new AuthError('无权访问该文件')
+}
+
+/** Resolve an uploaded object back to its FileAsset policy before serving it. */
+export async function assertCanAccessStoredFileAsset(actor: UploadActor, value: string) {
+  const key = extractUploadStorageKey(value)
+  if (!key) throw new AuthError('文件不存在', 404)
+  const identifiers = [...new Set([
+    value.trim(),
+    key,
+    `/api/uploads/${encodeURIComponent(key)}`,
+    `/uploads/${key}`,
+  ].filter(Boolean))]
+  const file = await actor.prisma.fileAsset.findFirst({
+    where: {
+      deletedAt: null,
+      OR: [
+        { storageKey: { in: identifiers } },
+        { url: { in: identifiers } },
+        { previewUrl: { in: identifiers } },
+        { thumbnailUrl: { in: identifiers } },
+      ],
+    },
+    select: {
+      ownerType: true,
+      visibility: true,
+      uploadedById: true,
+      studentId: true,
+      lessonId: true,
+      postId: true,
+      feedbackId: true,
+    },
+  })
+  if (!file) throw new AuthError('文件不存在或无权访问', 404)
+  // Feedback assets use the stricter per-student feedback relationship check,
+  // including unpublished drafts and the study-hall compatibility path.
+  if (file.ownerType.toLowerCase() === 'feedback' || file.feedbackId) {
+    throw new AuthError('无权访问该文件')
+  }
+  await assertCanAccessFileAsset(actor, file)
 }
 
 /**

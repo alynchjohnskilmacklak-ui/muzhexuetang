@@ -5,6 +5,7 @@ import { parentLinkedStudentWhere, parentVisibleExamPaperWhere, parentVisiblePer
 import { apiHandler } from '@/lib/api-handler'
 import { summarizeParentMessageWorkflow } from '@/lib/parent-message-workflow'
 import { unreadNotificationWhere } from '@/lib/notification-read-state'
+import { parentUnreadClassroomFeedbackWhere, standaloneParentNotificationWhere, sumParentUnreadItems } from '@/lib/parent-unread'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +24,7 @@ export const GET = apiHandler(async () => {
     })
   ).map(student => student.id)
 
-  const [papers, posts, notifications, feedbacks, studyHallHomework, messageRows] = await Promise.all([
+  const [papers, posts, notifications, standaloneNotifications, feedbacks, studyHallHomework, messageRows, notificationByType] = await Promise.all([
     prisma.examPaper.count({
       where: {
         ...parentVisibleExamPaperWhere(user.id),
@@ -34,17 +35,23 @@ export const GET = apiHandler(async () => {
       where: {
         ...parentVisiblePerformancePostWhere(user.id),
         isReadByParent: false,
-        visibility: 'PARENT_ONLY',
+        visibility: { in: ['PARENT_ONLY', 'CLASS_PUBLIC'] },
       },
     }),
     prisma.notification.count({
       where: { userId: user.id, ...unreadNotificationWhere, ...visibleNotificationWhere },
     }),
+    prisma.notification.count({
+      where: {
+        userId: user.id,
+        ...unreadNotificationWhere,
+        ...visibleNotificationWhere,
+        ...standaloneParentNotificationWhere,
+      },
+    }),
     prisma.classroomFeedback.count({
       where: {
-        status: 'PUBLISHED',
-        parentReadAt: null,
-        studentIds: { hasSome: activeStudentIds },
+        ...parentUnreadClassroomFeedbackWhere(user.id, activeStudentIds),
       },
     }),
     prisma.notification.count({
@@ -69,11 +76,23 @@ export const GET = apiHandler(async () => {
         },
       },
     }),
+    prisma.notification.groupBy({
+      by: ['relatedType'],
+      where: { userId: user.id, ...unreadNotificationWhere, ...visibleNotificationWhere },
+      _count: { _all: true },
+    }),
   ])
 
   const messages = summarizeParentMessageWorkflow(messageRows).unreadForParent
+  const total = sumParentUnreadItems({ papers, posts, notifications: standaloneNotifications, feedbacks, messages })
 
-  return NextResponse.json({ papers, posts, notifications, feedbacks, studyHallHomework, messages }, {
-    headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
+  // 未读通知按类型分组（key 为 relatedType 或 '__NONE__'，值为计数）
+  const notificationsByType = Object.fromEntries(
+    notificationByType.map((row) => [row.relatedType || '__NONE__', row._count._all]),
+  )
+
+  // studyHallHomework 是 notifications 的子集，保留单独字段供专题角标使用，但总数只计一次。
+  return NextResponse.json({ papers, posts, notifications, standaloneNotifications, notificationsByType, feedbacks, studyHallHomework, messages, total }, {
+    headers: { 'Cache-Control': 'private, no-store, max-age=0' },
   })
 })

@@ -3,12 +3,13 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
-import { Avatar, Button, Card, Input, Segmented, Tag, Typography } from 'antd'
+import { Button, Card, Input, Segmented, Tag, Typography } from 'antd'
 import { FileTextOutlined, ProfileOutlined, SearchOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { formatPercent } from '@/lib/format'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { StudentAvatar } from '@/components/Common/StudentAvatar'
 
 const { Title, Text } = Typography
 const fetcher = async (url: string) => {
@@ -46,13 +47,6 @@ type TeacherStudent = {
       teacherAssignments?: Array<{ subject?: string | null }>
     } | null
   }>
-}
-
-function avatarColor(name: string) {
-  const palette = ['#E8784A', '#534AB7', '#1D9E75', '#5B8FF9', '#f5a623', '#8892f0', '#FF6B6B']
-  let h = 0
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) | 0
-  return palette[Math.abs(h) % palette.length]
 }
 
 function getStatusChip(student: TeacherStudent) {
@@ -98,7 +92,6 @@ export default function TeacherStudentsPage() {
   const renderStudentCard = (student: TeacherStudent, index: number) => {
     const taughtHours = Number(student.taughtHours || 0)
     const status = getStatusChip(student)
-    const initial = (student.name || '?')[0]
     const gradeGender = [student.grade, student.gender].filter(Boolean).join(' · ')
     const subjects = [
       ...new Set(
@@ -122,16 +115,11 @@ export default function TeacherStudentsPage() {
           animationDelay: `${Math.min(index, 8) * 40}ms`,
         }}
         styles={{ body: { padding: isMobile ? 12 : 14 } }}
-        onClick={() => router.push(studyHallOnly ? '/teacher/study-hall' : `/teacher/student/${student.id}`)}
+        onClick={() => router.push(studyHallOnly ? '/teacher/study-hall' : `/teacher/students/${student.id}`)}
       >
         {/* Row 1: Avatar + Name + Grade·Gender + Status Chip */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-          <Avatar
-            size={36}
-            style={{ background: avatarColor(student.name || ''), flexShrink: 0, fontSize: 16, fontWeight: 600 }}
-          >
-            {initial}
-          </Avatar>
+          <StudentAvatar gender={student.gender} name={student.name} size={36} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <Text strong style={{ fontSize: 15 }}>{student.name}</Text>
             {student.membershipLevel && (
@@ -203,23 +191,31 @@ export default function TeacherStudentsPage() {
             icon={<ProfileOutlined />}
             onClick={(e) => {
               e.stopPropagation()
-              router.push(studyHallOnly ? '/teacher/study-hall' : `/teacher/student/${student.id}`)
+              router.push(`/teacher/feedback?studentId=${student.id}`)
             }}
-            style={{ flex: 1, background: '#E8784A', borderColor: '#E8784A' }}
+            style={{
+              flex: 1,
+              height: isMobile ? 34 : 30,
+              borderRadius: 8,
+              fontWeight: 600,
+              background: status.text === '未反馈' ? 'linear-gradient(135deg,#F0875B,#E8784A)' : 'rgba(232,120,74,.12)',
+              borderColor: status.text === '未反馈' ? '#E8784A' : 'rgba(232,120,74,.25)',
+              color: status.text === '未反馈' ? '#fff' : '#C2572C',
+            }}
           >
-            {studyHallOnly ? '作业班工作台' : '工作台'}
+            {status.text === '未反馈' ? '去反馈' : '写反馈'}
           </Button>
-          {!studyHallOnly && <Button
+          <Button
             size="small"
             icon={<FileTextOutlined />}
             onClick={(e) => {
               e.stopPropagation()
-              router.push(`/teacher/students/${student.id}`)
+              router.push(studyHallOnly ? '/teacher/study-hall' : `/teacher/students/${student.id}`)
             }}
-            style={{ flex: 1 }}
+            style={{ flex: 1, height: isMobile ? 34 : 30, borderRadius: 8 }}
           >
-            档案
-          </Button>}
+            查看详情
+          </Button>
         </div>
       </Card>
     )

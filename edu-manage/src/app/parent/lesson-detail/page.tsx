@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 export default async function LessonDetailPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ teacher?: string; course?: string; childId?: string; time?: string; room?: string }>
+  searchParams?: Promise<{ teacher?: string; course?: string; childId?: string; time?: string; room?: string; date?: string }>
 }) {
   const session = await auth()
   if (!session?.user) redirect('/login')
@@ -24,6 +24,7 @@ export default async function LessonDetailPage({
   const childId = params?.childId || ''
   const timeParam = params?.time || ''
   const roomParam = params?.room || ''
+  const lessonDateParam = params?.date || ''
 
   const db = await getRequestPrisma()
   const studentIds = (
@@ -75,7 +76,25 @@ export default async function LessonDetailPage({
 
   let feedback = null
   if (teacher) {
-    if (courseClean) {
+    // 如果指定了课程日期，按日期+老师+课程名精确查询这节课的反馈
+    if (lessonDateParam) {
+      const dayStart = new Date(lessonDateParam)
+      dayStart.setHours(0, 0, 0, 0)
+      const dayEnd = new Date(lessonDateParam)
+      dayEnd.setHours(23, 59, 59, 999)
+      feedback = await db.classroomFeedback.findFirst({
+        where: {
+          ...visibilityWhere,
+          teacherId: teacher.id,
+          createdAt: { gte: dayStart, lte: dayEnd },
+          ...(courseClean ? {
+            classLesson: { is: { group: { is: { course: { is: { name: { contains: courseClean } } } } } } },
+          } : {}),
+        },
+        include,
+        orderBy: { createdAt: 'desc' },
+      })
+    } else if (courseClean) {
       feedback = await db.classroomFeedback.findFirst({
         where: {
           ...visibilityWhere,
@@ -86,7 +105,7 @@ export default async function LessonDetailPage({
         orderBy: { createdAt: 'desc' },
       })
     }
-    if (!feedback) {
+    if (!feedback && !lessonDateParam) {
       feedback = await db.classroomFeedback.findFirst({
         where: { ...visibilityWhere, teacherId: teacher.id },
         include,
@@ -101,6 +120,7 @@ export default async function LessonDetailPage({
   if (feedback) {
     const redacted = redactFeedbackForParent(feedback, scopedStudentIds)
     feedbackForParent = {
+      id: feedback.id,
       ...(redacted as Record<string, unknown>),
       knowledgeDetail: parseStoredKnowledgeCard((feedback as unknown as { knowledgeCard?: unknown }).knowledgeCard),
     } as unknown as ReturnType<typeof redactFeedbackForParent>
@@ -141,6 +161,7 @@ export default async function LessonDetailPage({
       course={courseClean}
       time={timeParam}
       room={roomParam}
+      lessonDate={lessonDateParam || ''}
       feedback={feedbackForParent ? JSON.parse(JSON.stringify(feedbackForParent)) : null}
       imageUrls={imageUrls}
       signedThumbnails={signedThumbnails}

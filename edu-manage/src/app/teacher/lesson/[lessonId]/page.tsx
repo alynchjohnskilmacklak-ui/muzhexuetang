@@ -9,6 +9,7 @@ import { CardSkeleton } from '@/components/Parent/CardSkeleton'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { PullToRefresh } from '@/components/PullToRefresh'
 import { resolveMembership, MEMBERSHIP_THEME } from '@/constants/membership'
+import { StudentAvatar } from '@/components/Common/StudentAvatar'
 
 const { Text } = Typography
 
@@ -17,6 +18,8 @@ type Tone = 'blue' | 'orange' | 'red' | 'green' | 'purple' | 'brown' | 'dark'
 interface DashboardLessonStudent {
   id: string
   name: string
+  gender?: string | null
+  photoUrl?: string | null
   grade?: string | null
   school?: string | null
   membershipLevel?: string | null
@@ -43,6 +46,8 @@ interface DashboardLesson {
 interface DashboardData {
   teacher: { id: string; name: string }
   todayLessons: DashboardLesson[]
+  nextLessons?: DashboardLesson[]
+  nextLessonDate?: string | null
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
@@ -53,6 +58,13 @@ const STATUS_META: Record<string, { label: string; bg: string; color: string }> 
   '已完成': { label: '已结束', bg: '#F1F1F2', color: '#8B8B8B' },
   '已考勤': { label: '已结束', bg: '#F1F1F2', color: '#8B8B8B' },
   '待考勤': { label: '待考勤', bg: '#F1F1F2', color: '#8B8B8B' },
+}
+
+function formatLessonDate(dateKey?: string | null) {
+  if (!dateKey) return new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })
+  const [year, month, day] = dateKey.split('-').map(Number)
+  const weekday = ['日', '一', '二', '三', '四', '五', '六'][new Date(Date.UTC(year, month - 1, day)).getUTCDay()]
+  return `${month}月${day}日 · 周${weekday}`
 }
 
 function MembershipBadge({ level }: { level?: string | null }) {
@@ -91,9 +103,13 @@ export default function TeacherLessonDetailPage() {
     keepPreviousData: true,
   })
 
+  const isUpcomingLesson = Boolean(
+    data?.todayLessons?.length === 0 && data?.nextLessons?.some((lesson) => (lesson.lessonId || lesson.id) === lessonId),
+  )
   const lesson = useMemo(() => {
-    if (!data?.todayLessons) return null
-    return data.todayLessons.find((l) => (l.lessonId || l.id) === lessonId) || null
+    if (!data) return null
+    return [...(data.todayLessons || []), ...(data.nextLessons || [])]
+      .find((item) => (item.lessonId || item.id) === lessonId) || null
   }, [data, lessonId])
 
   if (isLoading) return <CardSkeleton rows={5} />
@@ -125,8 +141,8 @@ export default function TeacherLessonDetailPage() {
       {/* 单课 hero：参照家长端课程详情页 */}
       <div className="lesson-detail__hero">
         <div className="lesson-detail__hero-top">
-          <span className="lesson-detail__hero-tag">今日课程</span>
-          <span className="lesson-detail__hero-date"><CalendarOutlined /> {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })}</span>
+          <span className="lesson-detail__hero-tag">{isUpcomingLesson ? '下次课程' : '今日课程'}</span>
+          <span className="lesson-detail__hero-date"><CalendarOutlined /> {isUpcomingLesson ? formatLessonDate(data.nextLessonDate) : formatLessonDate()}</span>
         </div>
         <div className="lesson-detail__hero-title">{lesson.courseName.replace('牧哲学堂', '')} · {lesson.groupName.replace('牧哲学堂', '')}</div>
         <div className="lesson-detail__hero-tags">
@@ -156,7 +172,7 @@ export default function TeacherLessonDetailPage() {
                 className="teacher-today-student-chip"
                 onClick={() => router.push(`/teacher/feedback?lessonId=${lesson.lessonId || lesson.id}&studentId=${student.id}`)}
               >
-                <span className="teacher-today-student-chip__avatar">{student.name.slice(0, 1)}</span>
+                <StudentAvatar photoUrl={student.photoUrl} gender={student.gender} name={student.name} size={30} className="teacher-today-student-chip__avatar" />
                 <span className="teacher-today-student-chip__body">
                   <span className="teacher-today-student-chip__name">
                     {student.name}

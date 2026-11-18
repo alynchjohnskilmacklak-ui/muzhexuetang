@@ -8,6 +8,7 @@ import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 import { chinaClock } from '@/lib/enrollment-subject-change'
 import { getLocalDayRange, localDateColumnValue, localDateKey } from '@/lib/date/local-day'
 import { hasTimeOverlap } from '@/lib/schedule-conflict'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 
 export const dynamic = 'force-dynamic'
 
@@ -121,23 +122,22 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
     }
     const totalLessons = await tx.classLesson.count({ where: { groupId: id, status: { notIn: ['CANCELLED', 'POSTPONED'] }, deletedAt: null } })
     await tx.classGroup.update({ where: { id }, data: { totalLessons } })
-    const parentIds = [...new Set(group.enrollments
-      .filter((enrollment) => studentIdSet.has(enrollment.studentId))
-      .map((enrollment) => enrollment.student.parentId || enrollment.student.parentUserId)
-      .filter((parentId): parentId is string => Boolean(parentId)))]
-    if (group.status === 'ACTIVE' && parentIds.length) {
-      await tx.notification.createMany({ data: parentIds.map((parentId) => ({
-        userId: parentId, type: 'SCHEDULE_CHANGE', title: `${group.name}新增上课`,
-        content: `${date} ${startTime}-${endTime} ${subject}，请查看最新课表。`,
-        href: '/parent/schedule', relatedType: 'ClassLesson', relatedId: created.id,
-      })) })
-    }
+    const change = await recordCourseChangeEvent(tx, {
+      eventType: 'MAKEUP_ADDED',
+      actorUserId: user.id,
+      groupId: id,
+      lessonIds: [created.id],
+      studentIds,
+      title: `${group.name}新增上课`,
+      summary: `${date} ${startTime}-${endTime} ${subject}，请查看最新课表。`,
+      notifyParents: group.status === 'ACTIVE',
+    })
     await tx.activityLog.create({ data: {
       userId: user.id, action: '临时加课', entityType: 'ClassLesson', entityId: created.id,
       detail: `${group.name} ${date} ${startTime}-${endTime} ${subject}，${studentIds.length}名学员${note ? `；原因：${note}` : ''}`,
       metadata: { groupId: id, studentCount: studentIds.length, note },
     } })
-    return { id: created.id, studentCount: studentIds.length, notifiedParents: parentIds.length }
+    return { id: created.id, studentCount: studentIds.length, notifiedParents: change.recipientCount, changeEventId: change.event.id }
   }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
 
   try {

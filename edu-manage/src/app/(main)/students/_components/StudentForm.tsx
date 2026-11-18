@@ -1,8 +1,10 @@
-﻿'use client'
+'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useState, useEffect } from 'react'
-import { Modal, Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, Typography } from 'antd'
+import { Form, Input, Select, InputNumber, Steps, message, Row, Col, Button, Space, Typography } from 'antd'
 import { UserOutlined, PhoneOutlined, BookOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
 import { MEMBERSHIP_OPTIONS } from '@/constants/membership'
@@ -79,7 +81,7 @@ export function StudentForm({
   const stepFields: Record<number, string[]> = {
     0: ['name'],
     1: ['phone', 'parentName', 'parentPhone'],
-    2: ['mainTeacherId', 'remainHours'],
+    2: ['mainTeacherId'],
   }
 
   const handleNext = async () => {
@@ -105,6 +107,7 @@ export function StudentForm({
     setLoading(true)
     try {
       const values = form.getFieldsValue(true)
+      delete values.remainHours
       if (!values.name || String(values.name).trim().length === 0) {
         setCurrent(0)
         message.error('请输入姓名')
@@ -150,12 +153,12 @@ export function StudentForm({
       <Button onClick={onClose}>取消</Button>
       {current > 0 && <Button onClick={() => setCurrent(c => c - 1)}>上一步</Button>}
       {current < 2 && (
-        <Button type="primary" onClick={handleNext} style={{ background: '#E87545', borderColor: '#E8784A' }}>
+        <Button type="primary" onClick={handleNext} style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>
           下一步
         </Button>
       )}
       {current === 2 && (
-        <Button type="primary" onClick={handleFinish} loading={loading} style={{ background: '#E87545', borderColor: '#E8784A' }}>
+        <Button type="primary" onClick={handleFinish} loading={loading} style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>
           {mode === 'edit' ? '保存' : '添加学员'}
         </Button>
       )}
@@ -163,7 +166,7 @@ export function StudentForm({
   )
 
   return (
-    <Modal
+    <BrandModal
       title={mode === 'edit' ? '编辑学员' : '新增学员'}
       open={open}
       onCancel={onClose}
@@ -187,7 +190,7 @@ export function StudentForm({
             </Col>
             <Col span={12}>
               <Form.Item name="gender" label="性别">
-                <Select options={[{ label: '男', value: '男' }, { label: '女', value: '女' }]} placeholder="选填" allowClear />
+                <AdaptiveSelect options={[{ label: '男', value: '男' }, { label: '女', value: '女' }]} placeholder="选填" allowClear />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -219,7 +222,7 @@ export function StudentForm({
             </Col>
             <Col span={12}>
               <Form.Item name="source" label="来源渠道">
-                <Select options={SOURCE_OPTIONS.map(s => ({ label: s, value: s }))} placeholder="选填" allowClear />
+                <AdaptiveSelect options={SOURCE_OPTIONS.map(s => ({ label: s, value: s }))} placeholder="选填" allowClear />
               </Form.Item>
             </Col>
             <Col span={24}>
@@ -234,8 +237,15 @@ export function StudentForm({
         {current === 1 && (
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="phone" label="学员电话">
-                <Input type="tel" inputMode="numeric" placeholder="选填" />
+              <Form.Item
+                name="phone"
+                label="学员手机号"
+                rules={mode === 'create' ? [
+                  { required: true, message: '请输入学员手机号' },
+                  { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的11位手机号' },
+                ] : []}
+              >
+                <Input type="tel" inputMode="numeric" placeholder={mode === 'create' ? '请输入11位手机号（必填）' : '选填'} />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -255,7 +265,7 @@ export function StudentForm({
             </Col>
             {mode === 'create' && <Col span={24}>
               <Form.Item name="existingParentUserId" label="绑定已有家长账号" extra="家里已有孩子在读时，直接选择同一账号。不选则按家长手机号匹配；无法安全识别时会提示确认。">
-                <Select
+                <AdaptiveSelect
                   showSearch
                   allowClear
                   placeholder="搜索家长姓名或登录邮箱（选填）"
@@ -269,7 +279,7 @@ export function StudentForm({
             </Col>}
             {mode === 'create' && selectedParentId && knownChildren.length > 0 && <Col span={24}>
               <Form.Item name="reuseExistingStudentId" label="沿用已有学员档案（跨运营批次）" extra="如果是已有孩子进入新批次，选原档案，历史记录将保留；如果是家中另一名孩子，保持不选。">
-                <Select
+                <AdaptiveSelect
                   allowClear
                   placeholder="新孩子请保持不选"
                   options={knownChildren.map((child) => ({ value: child.id, label: `${child.name}${child.grade ? ` · ${child.grade}` : ''}${child.birthYear ? ` · ${child.birthYear}年生` : ''}${knownChildren.filter((other) => other.name === child.name).length > 1 ? ` · 档案${child.id.slice(-4)}` : ''}` }))}
@@ -287,32 +297,27 @@ export function StudentForm({
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="mainTeacherId" label="主教老师">
-                <Select placeholder="选填" allowClear
+                <AdaptiveSelect placeholder="选填" allowClear
                   options={teachers.map(t => ({ label: `${t.name}（${t.subjects}）`, value: t.id }))} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="remainHours" label="初始课时余额">
-                <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
               </Form.Item>
             </Col>
             {mode === 'edit' && (
               <Col span={12}>
                 <Form.Item name="status" label="学员状态">
-                  <Select options={STATUS_OPTIONS} />
+                  <AdaptiveSelect options={STATUS_OPTIONS} />
                 </Form.Item>
               </Col>
             )}
             <Col span={12}>
               <Form.Item name="membershipLevel" label="会员等级">
-                <Select options={MEMBERSHIP_OPTIONS} />
+                <AdaptiveSelect options={MEMBERSHIP_OPTIONS} />
               </Form.Item>
             </Col>
             <Col span={24}>
               <Form.List name="studyHallMemberships">{(fields, { add, remove }) => <Space direction="vertical" style={{ width: '100%' }}>
                 <div><Text strong>作业班报名</Text><br /><Text type="secondary">选择实际班级并填写购买天数；到勤一天扣一天。</Text></div>
                 {fields.map((field) => <Row key={field.key} gutter={8} align="middle">
-                  <Col xs={14} sm={16}><Form.Item {...field} name={[field.name, 'classId']} rules={[{ required: true, message: '请选择作业班' }]}><Select showSearch optionFilterProp="label" placeholder="选择晚托或周末班" options={studyClasses.map((item) => ({ value: item.id, label: `${item.name} · ${item.scheduleType === 'WEEKEND' ? '周末班' : '晚托'} · ${item.gradeScope?.join('、') || '不限年级'}` }))} /></Form.Item></Col>
+                  <Col xs={14} sm={16}><Form.Item {...field} name={[field.name, 'classId']} rules={[{ required: true, message: '请选择作业班' }]}><AdaptiveSelect showSearch optionFilterProp="label" placeholder="选择晚托或周末班" options={studyClasses.map((item) => ({ value: item.id, label: `${item.name} · ${item.scheduleType === 'WEEKEND' ? '周末班' : '晚托'} · ${item.gradeScope?.join('、') || '不限年级'}` }))} /></Form.Item></Col>
                   <Col xs={8} sm={6}><Form.Item {...field} name={[field.name, 'purchasedDays']} rules={[{ required: true, message: '填写天数' }]}><InputNumber min={1} max={366} precision={0} addonAfter="天" placeholder="天数" style={{ width: '100%' }} /></Form.Item></Col>
                   <Col xs={2}><Button type="text" danger icon={<MinusCircleOutlined />} onClick={() => remove(field.name)} aria-label="移除作业班" /></Col>
                 </Row>)}
@@ -322,6 +327,6 @@ export function StudentForm({
           </Row>
         )}
       </Form>
-    </Modal>
+    </BrandModal>
   )
 }

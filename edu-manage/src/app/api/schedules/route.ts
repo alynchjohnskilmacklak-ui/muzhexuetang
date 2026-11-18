@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { validateScheduleStudentCount } from '@/lib/schedule-class-type'
@@ -10,6 +11,7 @@ import { intensiveStudentCountError, toIntensiveTeachingType } from '@/lib/inten
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getRequestDivision } from '@/lib/division'
 import { Prisma } from '@prisma/client'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 
 export const dynamic = 'force-dynamic'
 
@@ -212,6 +214,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
           })
         }
       }
+      for (const studentId of dedupedStudentIds) {
+        await syncStudentHourSnapshot(tx, studentId)
+      }
 
       // Create ClassLesson
       const lesson = await tx.classLesson.create({
@@ -247,6 +252,16 @@ export const POST = apiHandler(async (req: NextRequest) => {
           skipDuplicates: true,
         })
       }
+
+      await recordCourseChangeEvent(tx, {
+        eventType: 'LESSON_CREATED',
+        actorUserId: session.user.id,
+        groupId: group.id,
+        lessonIds: [lesson.id],
+        studentIds: dedupedStudentIds,
+        title: '课程安排已更新',
+        summary: `${startDate} ${startTimeVal}-${endTimeVal}，${title}已安排，请查看最新课表。`,
+      })
 
       return lesson
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })

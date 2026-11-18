@@ -1,0 +1,3 @@
+SELECT column_name, is_nullable FROM information_schema.columns WHERE table_name = ''TeacherMessage'' AND column_name = ''teacherId'';
+SELECT tc.constraint_name, tc.constraint_type FROM information_schema.table_constraints tc WHERE tc.table_name = ''TeacherMessage'' AND tc.constraint_type = ''FOREIGN KEY'';
+SELECT migration_name FROM _prisma_migrations WHERE migration_name = ''20261027170000_add_teacher_message_relation'';

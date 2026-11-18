@@ -7,6 +7,7 @@ import { promisify } from 'util'
 import fs from 'fs'
 import path from 'path'
 import { resolveBackupDirectory } from '@/lib/backup-id'
+import { buildRestoreConnection } from '@/lib/backup-restore-plan'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,37 +33,16 @@ function findDump(backupDir: string, keyword: string): string {
   const files = fs.readdirSync(backupDir)
   const dump = files.find((f) => f.includes(keyword) && f.endsWith('.dump'))
   if (!dump) throw new Error(`备份目录中找不到包含 "${keyword}" 的 .dump 文件`)
-  return path.join(backupDir, dump)
+  const resolved = fs.realpathSync(path.join(backupDir, dump))
+  if (!resolved.startsWith(fs.realpathSync(backupDir) + path.sep) || !fs.statSync(resolved).isFile()) throw new Error('备份文件路径无效')
+  return resolved
 }
 
 async function restoreOne(dumpPath: string, dbUrl: string): Promise<void> {
-  const connection = new URL(dbUrl)
-  if (!['postgres:', 'postgresql:'].includes(connection.protocol)) {
-    throw new Error('数据库连接协议无效')
-  }
-
-  const database = decodeURIComponent(connection.pathname.replace(/^\//, ''))
-  if (!connection.hostname || !database || !connection.username) {
-    throw new Error('数据库连接配置不完整')
-  }
-
-  const sslMode = connection.searchParams.get('sslmode')
-  const env = {
-    ...process.env,
-    PGPASSWORD: decodeURIComponent(connection.password),
-    ...(sslMode ? { PGSSLMODE: sslMode } : {}),
-  }
-  await execFileAsync('pg_restore', [
-    '--clean',
-    '--if-exists',
-    '--no-owner',
-    '--no-acl',
-    '--host', connection.hostname,
-    '--port', connection.port || '5432',
-    '--username', decodeURIComponent(connection.username),
-    '--dbname', database,
-    dumpPath,
-  ], { timeout: 600_000, env, windowsHide: true })
+  const plan = buildRestoreConnection(dbUrl, dumpPath)
+  await execFileAsync('pg_restore', plan.args, {
+    timeout: 600_000, env: { ...process.env, ...plan.env }, windowsHide: true,
+  })
 }
 
 export const POST = apiHandler(async (req: NextRequest) => {
@@ -93,45 +73,49 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '备份目录不存在' }, { status: 400 })
   }
 
-  if (targetDivision === 'BOTH') {
-    // 初中部
-    const juniorDump = findDump(resolved, 'chuzhong')
-    const juniorUrl = loadEnv('DATABASE_URL_JUNIOR')
-    if (!juniorUrl) return NextResponse.json({ error: '未找到初中部数据库连接(DATABASE_URL_JUNIOR)' }, { status: 500 })
-    await restoreOne(juniorDump, juniorUrl)
-
-    // 高中部
-    const seniorDump = findDump(resolved, 'gaozhong')
-    const seniorUrl = loadEnv('DATABASE_URL_SENIOR')
-    if (!seniorUrl) return NextResponse.json({ error: '未找到高中部数据库连接(DATABASE_URL_SENIOR)' }, { status: 500 })
-    await restoreOne(seniorDump, seniorUrl)
-
-    await createActivityLog(auth.userId, 'MANUAL_RESTORE', 'System', 'restore', {
-      backupDir: resolved,
-      divisions: ['JUNIOR', 'SENIOR'],
-    })
-  } else if (targetDivision === 'SENIOR') {
-    const dumpPath = findDump(resolved, 'gaozhong')
-    const dbUrl = loadEnv('DATABASE_URL_SENIOR')
-    if (!dbUrl) return NextResponse.json({ error: '未找到高中部数据库连接(DATABASE_URL_SENIOR)' }, { status: 500 })
-    await restoreOne(dumpPath, dbUrl)
-
-    await createActivityLog(auth.userId, 'MANUAL_RESTORE', 'System', 'restore', {
-      backupDir: resolved,
-      division: 'SENIOR',
-    })
-  } else {
-    // JUNIOR (default)
-    const dumpPath = findDump(resolved, 'chuzhong')
-    const dbUrl = loadEnv('DATABASE_URL_JUNIOR')
-    if (!dbUrl) return NextResponse.json({ error: '未找到初中部数据库连接(DATABASE_URL_JUNIOR)' }, { status: 500 })
-    await restoreOne(dumpPath, dbUrl)
-
-    await createActivityLog(auth.userId, 'MANUAL_RESTORE', 'System', 'restore', {
-      backupDir: resolved,
-      division: 'JUNIOR',
-    })
+  const divisions = targetDivision === 'BOTH' ? ['JUNIOR', 'SENIOR'] : [targetDivision]
+  const targets: { division: string; dumpPath: string; dbUrl: string }[] = []
+  const targetKeys = new Set<string>()
+  // Validate every target before the first destructive command.
+  try {
+    for (const division of divisions) {
+      const dumpPath = findDump(resolved, division === 'JUNIOR' ? 'chuzhong' : 'gaozhong')
+      const dbUrl = loadEnv(division === 'JUNIOR' ? 'DATABASE_URL_JUNIOR' : 'DATABASE_URL_SENIOR')
+      if (!dbUrl) throw new Error(division === 'JUNIOR' ? '未配置初中部数据库连接' : '未配置高中部数据库连接')
+      const plan = buildRestoreConnection(dbUrl, dumpPath)
+      if (targetKeys.has(plan.targetKey)) throw new Error('两个学部不能指向同一个恢复数据库')
+      targetKeys.add(plan.targetKey)
+      await execFileAsync('pg_restore', ['--list', dumpPath], { timeout: 60_000, windowsHide: true })
+      targets.push({ division, dumpPath, dbUrl })
+    }
+  } catch {
+    return NextResponse.json({ error: '恢复前检查失败：请检查所有目标学部的备份文件、数据库配置及 pg_restore 工具；未执行覆盖' }, { status: 400 })
   }
 
-  return NextResponse.json({ success: true, message: '数据已恢复' })
+  const completedDivisions: string[] = []
+  for (const target of targets) {
+    try {
+      await restoreOne(target.dumpPath, target.dbUrl)
+      completedDivisions.push(target.division)
+    } catch {
+      await createActivityLog(auth.userId, 'MANUAL_RESTORE_FAILED', 'System', 'restore', {
+        backupDir: resolved, completedDivisions, failedDivision: target.division,
+      }).catch(() => undefined)
+      return NextResponse.json({
+        success: false, partial: completedDivisions.length > 0, completedDivisions,
+        failedDivision: target.division,
+        error: completedDivisions.length
+          ? '部分学部已恢复，当前学部未确认恢复成功，已启用单事务保护。请勿整批重试，请核对数据库状态及已完成范围。'
+          : '未确认恢复成功，已启用单事务保护。请核对数据库状态和日志，不要立即重复恢复。',
+      }, { status: 500 })
+    }
+  }
+  try {
+    await createActivityLog(auth.userId, 'MANUAL_RESTORE', 'System', 'restore', {
+      backupDir: resolved, divisions: completedDivisions,
+    })
+  } catch {
+    return NextResponse.json({ success: true, completedDivisions, warning: '数据已恢复，但操作日志写入失败，请人工记录本次恢复' })
+  }
+  return NextResponse.json({ success: true, completedDivisions, message: '数据已恢复' })
 })

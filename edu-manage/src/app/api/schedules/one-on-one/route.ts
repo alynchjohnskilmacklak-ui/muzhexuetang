@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 import { getCurrentUser } from '@/lib/get-user'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
 import { revalidatePath } from 'next/cache'
@@ -7,6 +8,7 @@ import { revalidatePath } from 'next/cache'
 import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 
 export const dynamic = 'force-dynamic'
 
@@ -133,6 +135,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             status: 'ACTIVE',
           },
         })
+        await syncStudentHourSnapshot(tx, studentId)
       }
 
       // 3. Create ClassLesson
@@ -165,6 +168,16 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
       await tx.classLessonStudent.create({
         data: { lessonId: lesson.id, studentId },
+      })
+
+      await recordCourseChangeEvent(tx, {
+        eventType: 'LESSON_CREATED',
+        actorUserId: user.id,
+        groupId: group.id,
+        lessonIds: [lesson.id],
+        studentIds: [studentId],
+        title: '一对一课程已安排',
+        summary: `${date} ${startTime}-${endTime}，${subject}课程已安排，请查看最新课表。`,
       })
 
       return lesson

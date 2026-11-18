@@ -19,6 +19,14 @@ describe('selectParentMembership', () => {
     })
   })
 
+  it('maps a historical student record ID to the current child identity', () => {
+    expect(selectParentMembership([
+      { id: 'current-child', recordIds: ['old-child', 'current-child'], name: '学生乙', membershipLevel: 'SVIP' },
+    ], 'old-child')).toEqual({
+      activeChildId: 'current-child', studentName: '学生乙', membershipLevel: 'SVIP',
+    })
+  })
+
   it('uses a neutral theme when no child is linked', () => {
     expect(selectParentMembership([])).toEqual({
       activeChildId: '', studentName: '', membershipLevel: 'NORMAL',

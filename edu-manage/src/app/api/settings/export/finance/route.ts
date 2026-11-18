@@ -5,6 +5,8 @@ import { apiHandler } from '@/lib/api-handler'
 import { getRequestDivision } from '@/lib/division'
 import { requireAdminUser } from '@/lib/auth/guards'
 import { createActivityLog } from '@/lib/data-admin/entities-server'
+import { brandXlsxBufferOnServer } from '@/lib/export-xlsx-brand-server'
+import { copyXlsxAsArrayBuffer } from '@/lib/export-xlsx-brand'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,15 +38,16 @@ export const GET = apiHandler(async (request: NextRequest) => {
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, '财务报表')
 
-  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
+  const rawBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
+  const buf = await brandXlsxBufferOnServer(new Uint8Array(rawBuffer))
   await createActivityLog(user.id, 'EXPORT_FINANCE', 'FinanceReport', String(year), {
     division,
     rowCount: rows.length,
   })
-  return new NextResponse(buf, {
+  return new NextResponse(copyXlsxAsArrayBuffer(buf), {
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="财务报表-${year}.xlsx"`,
+      'Content-Disposition': `attachment; filename="牧哲学堂_财务报表-${year}.xlsx"`,
       'Cache-Control': 'no-store, private',
       'X-Content-Type-Options': 'nosniff',
     },

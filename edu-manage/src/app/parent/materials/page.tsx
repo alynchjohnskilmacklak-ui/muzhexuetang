@@ -1,13 +1,21 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Select, Skeleton, Typography } from 'antd'
+import { Button, Select, Skeleton, Typography, message } from 'antd'
 import { DownloadOutlined, EyeOutlined } from '@ant-design/icons'
 import { GRADE_SUBJECTS, GRADES, SUBJECT_COLORS } from '@/data/subjects'
 import { fmtDate } from '@/lib/format-date'
 import { materialFileLabel } from '@/lib/material-format'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 import { useRouter } from 'next/navigation'
+import { normalizeTextbookGrade } from '@/lib/classroom-feedback/textbook-editions'
+import { rememberParentChild } from '@/lib/parent-child-preference'
+import dynamic from 'next/dynamic'
+
+const PracticeBank = dynamic(() => import('./PracticeBank').then((mod) => mod.PracticeBank), {
+  ssr: false,
+  loading: () => <Skeleton.Node active style={{ width: '100%', height: 200 }} />,
+})
 
 const { Title, Text } = Typography
 
@@ -95,32 +103,45 @@ function bookCoverStyle(subject: string) {
 
 export default function ParentMaterialsPage() {
   const router = useRouter()
+  const [view, setView] = useState<'list' | 'covers'>('list')
   const [selectedGrade, setSelectedGrade] = useState<string>('')
   const [selectedSubject, setSelectedSubject] = useState<string>('')
   const [selectedType, setSelectedType] = useState<string>('')
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(true)
+  const [children, setChildren] = useState<Array<{ id: string; name: string; grade: string | null }>>([])
+  const [activeChildId, setActiveChildId] = useState('')
 
   // 默认选中当前孩子所在年级：URL ?childId= > cookie mz_parent_active_child > 第一个孩子
   useEffect(() => {
     const resolveDefaultGrade = async () => {
       try {
         const res = await fetch('/api/parent/today')
+        if (!res.ok) throw new Error('孩子信息加载失败')
         const data = await res.json()
-        const students: Array<{ student: { id: string; grade: string | null } }> = data.students || []
+        const students: Array<{ student: { id: string; name: string; grade: string | null } }> = data.students || []
         if (!students.length) { setLoading(false); return }
+        setChildren(students.map((item) => item.student))
         const params = new URLSearchParams(window.location.search)
         const childId = params.get('childId')
           || (document.cookie.match(/(?:^|;\s*)mz_parent_active_child=([^;]*)/)?.[1] || '')
           || students[0].student.id
+        // 读取 URL 参数 type，如果是 EXERCISE 自动选中题库tab
+        const typeParam = params.get('type')
+        if (typeParam) {
+          setSelectedType(typeParam)
+        }
         const active = students.find((item) => item.student.id === childId)?.student || students[0].student
+        rememberParentChild(active.id)
+        setActiveChildId(active.id)
         if (active.grade) {
-          setSelectedGrade(active.grade)
+          setSelectedGrade(normalizeTextbookGrade(active.grade))
         } else {
           setLoading(false)
         }
       } catch {
         setLoading(false)
+        message.error('孩子信息加载失败，请刷新页面重试')
       }
     }
     resolveDefaultGrade()
@@ -130,13 +151,20 @@ export default function ParentMaterialsPage() {
     if (!selectedGrade) return
     const fetchMaterials = async () => {
       setLoading(true)
-      const params = new URLSearchParams({ grade: selectedGrade })
-      if (selectedSubject) params.set('subject', selectedSubject)
-      if (selectedType) params.set('materialType', selectedType)
-      const res = await fetch(`/api/parent/materials?${params}`)
-      const data = await res.json()
-      setMaterials(data.materials || [])
-      setLoading(false)
+      try {
+        const params = new URLSearchParams({ grade: selectedGrade })
+        if (selectedSubject) params.set('subject', selectedSubject)
+        if (selectedType) params.set('materialType', selectedType)
+        const res = await fetch(`/api/parent/materials?${params}`)
+        if (!res.ok) throw new Error('学习资料加载失败')
+        const data = await res.json()
+        setMaterials(data.materials || [])
+      } catch {
+        setMaterials([])
+        message.error('学习资料加载失败，请稍后刷新重试')
+      } finally {
+        setLoading(false)
+      }
     }
     fetchMaterials()
   }, [selectedGrade, selectedSubject, selectedType])
@@ -175,6 +203,26 @@ export default function ParentMaterialsPage() {
         ))}
       </div>
 
+      {selectedType === 'EXERCISE' && selectedGrade && (
+        <PracticeBank
+          key={`${activeChildId}:${selectedGrade}:${selectedSubject}`}
+          grade={selectedGrade}
+          subject={selectedSubject}
+          linkedChildren={children}
+          initialChildId={activeChildId}
+          onChildChange={(childId, grade) => {
+            setActiveChildId(childId)
+            rememberParentChild(childId)
+            setSelectedGrade(normalizeTextbookGrade(grade))
+            setSelectedSubject('')
+          }}
+        />
+      )}
+
+      {selectedType !== 'EXERCISE' && <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <Button aria-pressed={view === 'list'} type={view === 'list' ? 'primary' : 'default'} onClick={() => setView('list')} style={{ minHeight: 44 }}>资料列表</Button>
+        <Button aria-pressed={view === 'covers'} type={view === 'covers' ? 'primary' : 'default'} onClick={() => setView('covers')} style={{ minHeight: 44 }}>封面预览</Button>
+      </div>}
       {loading ? (
         <div className="materials-grid">
           <Skeleton.Node active style={{ width: '100%', height: 170 }} />
@@ -182,15 +230,19 @@ export default function ParentMaterialsPage() {
           <Skeleton.Node active style={{ width: '100%', height: 170 }} />
           <Skeleton.Node active style={{ width: '100%', height: 170 }} />
         </div>
-      ) : materials.length === 0 ? (
+      ) : materials.length === 0 && selectedType !== 'EXERCISE' ? (
         <div className="materials-empty">
           <GuidedEmpty title={selectedSubject ? '当前科目还没有资料' : '还没有学习资料'} description={selectedSubject ? '老师上传的对应科目讲义会显示在这里，可以先查看全部科目或课堂反馈。' : '老师准备的讲义和练习会显示在这里，帮助孩子课后复习。'} actionLabel={selectedSubject ? '查看全部科目' : '看看课堂反馈'} onAction={() => selectedSubject ? setSelectedSubject('') : router.push('/parent/class-feedback')} />
         </div>
-      ) : (
-        <div className="materials-grid">
+      ) : materials.length > 0 ? (
+        <div className={view === 'list' ? 'materials-list' : 'materials-grid'}>
           {materials.map((material) => (
             <div key={material.id} className="book-card">
-              <div className="book-cover" style={bookCoverStyle(material.subject)} onClick={() => handleView(material)}>
+              {view === 'list' ? <div className="material-row">
+                <div style={{ minWidth: 0, flex: 1 }}><strong>{material.title}</strong><div className="material-row-meta">{material.grade} · {material.subject} · {materialFileLabel(material.fileType)}</div><div className="material-row-meta">{material.teacher?.name || COPY.teacher} · {fmtDate(material.createdAt)}</div></div>
+                <Button onClick={() => handleView(material)} style={{ minHeight: 44 }}>预览</Button>
+                <Button aria-label={`下载${material.title}`} icon={<DownloadOutlined />} onClick={() => handleDownload(material)} style={{ minHeight: 44, minWidth: 44 }} />
+              </div> : <><div className="book-cover" role="button" tabIndex={0} aria-label={`预览${material.title}`} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleView(material) } }} style={bookCoverStyle(material.subject)} onClick={() => handleView(material)}>
                 <div className="book-spine" />
                 <div className="book-cover-inner">
                   <span className="book-topic">{material.subject}</span>
@@ -202,7 +254,7 @@ export default function ParentMaterialsPage() {
                   </div>
                 </div>
                 <div className="book-hint"><EyeOutlined /> {COPY.tapToPreview}</div>
-              </div>
+              </div></>}
               <div className="book-meta">
                 <Text className="book-meta-text" ellipsis={{ tooltip: material.teacher?.name ? `${material.teacher.name} \u00b7 ${fmtDate(material.createdAt)}` : `${COPY.teacher} \u00b7 ${fmtDate(material.createdAt)}` }}>
                   {material.teacher?.name || COPY.teacher} · {fmtDate(material.createdAt)}
@@ -212,12 +264,17 @@ export default function ParentMaterialsPage() {
             </div>
           ))}
         </div>
-      )}
+      ) : null}
 
       <style jsx>{`
         .parent-materials-page {
           width: 100%;
+          max-width: 100%;
         }
+        .materials-list { display: grid; gap: 10px; }
+        .materials-list .book-meta { display: none; }
+        .material-row { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 14px; background: var(--color-surface-1); border: 1px solid var(--color-hairline); color: var(--color-ink); overflow-wrap: anywhere; }
+        .material-row-meta { color: var(--color-ink-muted); font-size: 12px; margin-top: 5px; }
 
         .materials-header {
           margin-bottom: 12px;
@@ -256,6 +313,7 @@ export default function ParentMaterialsPage() {
 
         .type-tab {
           flex: 0 0 auto;
+          min-height: 44px;
           padding: 7px 16px;
           border-radius: 999px;
           border: 1px solid rgba(0,0,0,.10);
@@ -437,8 +495,8 @@ export default function ParentMaterialsPage() {
 
         .book-download {
           flex: 0 0 auto;
-          width: 34px;
-          height: 34px;
+          width: 44px;
+          height: 44px;
           color: #8a6f5c !important;
         }
 

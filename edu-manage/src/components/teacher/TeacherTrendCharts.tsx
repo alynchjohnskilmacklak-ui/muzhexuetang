@@ -82,7 +82,7 @@ export function TeacherTrendCharts({ attendanceWeekTrend = [], salaryTrend = [] 
             ],
           },
         },
-        label: { show: true, position: 'top' as const, color: '#1D9E75', fontSize: isMobile ? 10 : 11, formatter: '{c}%' },
+        label: { show: true, position: 'top' as const, color: '#137A5A', fontSize: isMobile ? 10 : 11, formatter: '{c}%' },
       },
     ],
   }
@@ -162,7 +162,7 @@ export function TeacherTrendCharts({ attendanceWeekTrend = [], salaryTrend = [] 
         styles={{ body: { padding: isMobile ? 14 : 18 } }}
         title={(
           <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ width: 30, height: 30, borderRadius: 10, background: '#E9F7F0', color: '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
+            <span style={{ width: 30, height: 30, borderRadius: 10, background: '#E9F7F0', color: '#137A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
               <LineChartOutlined />
             </span>
             <span style={{ fontSize: 14.5, fontWeight: 700, color: '#1A1201' }}>本月到课率趋势</span>

@@ -20,7 +20,9 @@ describe('postAttendanceHours', () => {
       enrollment: {
         findUnique: vi.fn().mockResolvedValue({ usedHours: 2 }),
         update: vi.fn().mockResolvedValue({}),
+        findMany: vi.fn().mockResolvedValue([]),
       },
+      student: { update: vi.fn().mockResolvedValue({}) },
       attendance: { update: vi.fn().mockResolvedValue({}) },
       hourTransaction: { create: vi.fn().mockResolvedValue({}) },
     }
@@ -44,7 +46,9 @@ describe('postAttendanceHours', () => {
           remainHours -= data.remainHours.decrement
           return { count: 1 }
         }),
+        findMany: vi.fn(async () => [{ remainHours, totalHours: 10 }]),
       },
+      student: { update: vi.fn().mockResolvedValue({}) },
       attendance: { update: vi.fn().mockResolvedValue({}) },
       hourTransaction: { create: vi.fn().mockResolvedValue({}) },
     }
@@ -56,6 +60,9 @@ describe('postAttendanceHours', () => {
     })
     expect(tx.hourTransaction.create).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({ amount: -1.5, type: 'ATTENDANCE_DEDUCT' }),
+    }))
+    expect(tx.student.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: { remainHours: 3.5, totalHours: 10 },
     }))
   })
 })

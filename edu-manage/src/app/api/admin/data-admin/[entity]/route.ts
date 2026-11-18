@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
@@ -10,13 +11,12 @@ import {
 import { createActivityLog } from '@/lib/data-admin/entities-server'
 import { getRequestDivision } from '@/lib/division'
 import { getDynamicModel } from '@/lib/data-admin/dynamic-model'
+import { getDataAdminDivisionScope } from '@/lib/data-admin/division-scope'
 
 const ALLOWED_ENTITIES = Object.keys(DATA_ADMIN_ENTITIES)
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ entity: string }> },
-) {
+export const GET = apiHandler(async (req: NextRequest,
+  { params }: { params: Promise<{ entity: string }> },) => {
 
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') {
@@ -42,14 +42,10 @@ export async function GET(
 
   const where: Record<string, unknown> = {}
 
-  const studentLinked = ['exam-papers', 'notifications', 'materials', 'performance-posts', 'enrollments', 'attendances', 'classroom-feedbacks'] as EntityKey[]
-  if (studentLinked.includes(entityKey)) {
-    where.student = { division }
-  } else {
-    Object.assign(where, { division })
-  }
+  Object.assign(where, getDataAdminDivisionScope(entityKey, division))
 
   if (!includeDeleted) {
+    if (!['teachers', 'meals'].includes(entityKey)) where.deletedAt = null
     const scMap: Record<EntityKey, { field: string; deletedValue: string } | undefined> = {
       students: { field: 'status', deletedValue: 'INACTIVE' },
       teachers: { field: 'status', deletedValue: 'RESIGNED' },
@@ -107,12 +103,10 @@ export async function GET(
     console.error('data-admin GET error:', error)
     return NextResponse.json({ error: '查询失败' }, { status: 500 })
   }
-}
+})
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ entity: string }> },
-) {
+export const POST = apiHandler(async (req: NextRequest,
+  { params }: { params: Promise<{ entity: string }> },) => {
 
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') {
@@ -144,4 +138,4 @@ export async function POST(
     console.error('data-admin POST error:', error)
     return NextResponse.json({ error: '创建失败' }, { status: 500 })
   }
-}
+})

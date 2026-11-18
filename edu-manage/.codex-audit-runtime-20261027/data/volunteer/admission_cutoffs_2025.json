@@ -1,0 +1,72 @@
+[
+  {
+    "year": 2025,
+    "schoolName": "新乐市新伏羲中学(新乐)",
+    "baseName": "新乐市新伏羲中学",
+    "regionLabel": "新乐",
+    "regionType": "XINLE",
+    "yiTong": null,
+    "tongZhao": 660,
+    "source": "2025普通高中录取分数线.xlsx"
+  },
+  {
+    "year": 2025,
+    "schoolName": "新乐市新伏羲中学(其他县区)",
+    "baseName": "新乐市新伏羲中学",
+    "regionLabel": "其他县区",
+    "regionType": "OTHER_COUNTY",
+    "yiTong": null,
+    "tongZhao": 474,
+    "source": "2025普通高中录取分数线.xlsx"
+  },
+  {
+    "year": 2025,
+    "schoolName": "一中实验学校(市内五区)",
+    "baseName": "一中实验学校",
+    "regionLabel": "市内五区",
+    "regionType": "URBAN_5",
+    "yiTong": 742,
+    "tongZhao": 741,
+    "source": "2025普通高中录取分数线.xlsx"
+  },
+  {
+    "year": 2025,
+    "schoolName": "一中实验学校(其他县区)",
+    "baseName": "一中实验学校",
+    "regionLabel": "其他县区",
+    "regionType": "OTHER_COUNTY",
+    "yiTong": 744,
+    "tongZhao": 741,
+    "source": "2025普通高中录取分数线.xlsx"
+  },
+  {
+    "year": 2025,
+    "schoolName": "一中实验学校(高新区)",
+    "baseName": "一中实验学校",
+    "regionLabel": "高新区",
+    "regionType": "HIGH_TECH",
+    "yiTong": null,
+    "tongZhao": 709,
+    "source": "2025普通高中录取分数线.xlsx"
+  },
+  {
+    "year": 2025,
+    "schoolName": "精英中学(市内五区)",
+    "baseName": "精英中学",
+    "regionLabel": "市内五区",
+    "regionType": "URBAN_5",
+    "yiTong": 778,
+    "tongZhao": 747,
+    "source": "2025普通高中录取分数线.xlsx"
+  },
+  {
+    "year": 2025,
+    "schoolName": "精英中学(其他县区)",
+    "baseName": "精英中学",
+    "regionLabel": "其他县区",
+    "regionType": "OTHER_COUNTY",
+    "yiTong": 775,
+    "tongZhao": 743,
+    "source": "2025普通高中录取分数线.xlsx"
+  }
+]

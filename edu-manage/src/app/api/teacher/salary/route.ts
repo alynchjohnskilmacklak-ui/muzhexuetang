@@ -2,15 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireCurrentTeacher } from '@/lib/teacher-portal'
 import { apiHandler } from '@/lib/api-handler'
 import { classifySalaryBucket } from '@/lib/salary-bucket'
+import { salaryPeriodStart, pendingSalaryTransactions } from '@/lib/salary-settlement'
 
 export const dynamic = 'force-dynamic'
 
-function salaryPeriodStart(period: string) {
-  const now = new Date()
-  if (period === 'week') return new Date(now.getTime() - 7 * 86400000)
-  if (period === 'all') return new Date(0)
-  return new Date(now.getFullYear(), now.getMonth(), 1)
-}
 
 export const GET = apiHandler(async (req: NextRequest) => {
     const { teacher, prisma } = await requireCurrentTeacher()
@@ -69,18 +64,23 @@ export const GET = apiHandler(async (req: NextRequest) => {
         description: item.description,
       })
 
+    const settlement = transactions
+      .filter((item) => item.type === 'SALARY_SETTLEMENT')
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0] ?? null
+    const earnTransactions = pendingSalaryTransactions(transactions)
+    const pendingIds = new Set(earnTransactions.map(item => item.id))
     const lessonPayTypes = new Set(['LESSON_PAY', 'LESSON_PAY_ADJUSTMENT'])
-    const totalLesson = transactions.filter((item) => lessonPayTypes.has(item.type)).reduce((sum, item) => sum + item.amount, 0)
     const rewardTypes = new Set(['FEEDBACK_BONUS', 'STUDY_HALL_BONUS', 'STUDY_HALL_ATTENDANCE'])
-    const totalFeedback = transactions.filter((item) => rewardTypes.has(item.type)).reduce((sum, item) => sum + item.amount, 0)
-    const totalAdjustment = transactions
+    const totalLesson = earnTransactions.filter((item) => lessonPayTypes.has(item.type)).reduce((sum, item) => sum + item.amount, 0)
+    const totalFeedback = earnTransactions.filter((item) => rewardTypes.has(item.type)).reduce((sum, item) => sum + item.amount, 0)
+    const totalAdjustment = earnTransactions
       .filter((item) => !lessonPayTypes.has(item.type) && !rewardTypes.has(item.type))
       .reduce((sum, item) => sum + item.amount, 0)
-    const total = transactions.reduce((sum, item) => sum + item.amount, 0)
-    const totalSmallClass = transactions
+    const total = earnTransactions.reduce((sum, item) => sum + item.amount, 0)
+    const totalSmallClass = earnTransactions
       .filter((item) => salaryBucket(item) === 'SMALL_CLASS')
       .reduce((sum, item) => sum + item.amount, 0)
-    const totalIntensive = transactions
+    const totalIntensive = earnTransactions
       .filter((item) => salaryBucket(item) === 'INTENSIVE')
       .reduce((sum, item) => sum + item.amount, 0)
     const typeLabel = (type: string) => {
@@ -89,6 +89,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       if (type === 'FEEDBACK_BONUS') return '反馈奖励'
       if (type === 'STUDY_HALL_BONUS') return '作业登记奖励'
       if (type === 'STUDY_HALL_ATTENDANCE') return '晚托考勤奖励'
+      if (type === 'SALARY_SETTLEMENT') return '工资结算'
       if (type === 'manual_adjust') return '薪资调整'
       return '其他调整'
     }
@@ -97,11 +98,17 @@ export const GET = apiHandler(async (req: NextRequest) => {
       period,
       term: activeTerm,
       total: Number(total.toFixed(2)),
+      pendingCount: earnTransactions.length,
       totalSmallClass: Number(totalSmallClass.toFixed(2)),
       totalIntensive: Number(totalIntensive.toFixed(2)),
       totalLesson: Number(totalLesson.toFixed(2)),
       totalFeedback: Number(totalFeedback.toFixed(2)),
       totalAdjustment: Number(totalAdjustment.toFixed(2)),
+      settled: settlement ? {
+        amount: Number(settlement.amount.toFixed(2)),
+        at: settlement.createdAt.toISOString(),
+        description: settlement.description,
+      } : null,
       transactions: transactions.map((item) => ({
         id: item.id,
         type: item.type,
@@ -110,6 +117,9 @@ export const GET = apiHandler(async (req: NextRequest) => {
         amount: item.amount,
         description: item.description,
         lessonDate: item.lessonDate?.toISOString() ?? null,
+        settledAt: item.settledAt?.toISOString() ?? null,
+        settlementBatchId: item.settlementBatchId,
+        settlementStatus: item.type === 'SALARY_SETTLEMENT' ? 'RECEIPT' : pendingIds.has(item.id) ? 'PENDING' : 'SETTLED',
         createdAt: item.createdAt.toISOString(),
       })),
     })

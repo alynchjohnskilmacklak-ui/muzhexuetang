@@ -1,10 +1,13 @@
-﻿'use client'
+'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import useSWR from 'swr'
 import { useParams, useRouter } from 'next/navigation'
-import { Alert, Button, Card, Checkbox, Col, Dropdown, Empty, Input, InputNumber, message, Modal, Popconfirm, Progress, Row, Select, Space, Statistic, Table, Tag } from 'antd'
-import { ArrowLeftOutlined, CalendarOutlined, DeleteOutlined, MoreOutlined, PlusOutlined, ReloadOutlined, TeamOutlined, UserSwitchOutlined } from '@ant-design/icons'
+import { Alert, Button, Card, Checkbox, Col, Empty, Input, InputNumber, message, Popconfirm, Progress, Row, Select, Space, Table, Tag } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
+import { ArrowLeftOutlined, BookOutlined, CalendarOutlined, CheckOutlined, ClockCircleOutlined, DeleteOutlined, EnvironmentOutlined, PlusOutlined, ReloadOutlined, TeamOutlined, UserSwitchOutlined } from '@ant-design/icons'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { PageLayout } from '@/components/Layout/PageLayout'
@@ -20,6 +23,13 @@ const fetcher = async (url: string) => {
   const res = await fetch(url)
   if (!res.ok) throw new Error('加载失败')
   return res.json()
+}
+
+const LESSON_STATUS_LABEL: Record<string, string> = {
+  SCHEDULED: '已排课',
+  IN_PROGRESS: '上课中',
+  COMPLETED: '已完成',
+  CANCELLED: '已取消',
 }
 
 export default function CourseGroupDetailPage() {
@@ -155,8 +165,13 @@ export default function CourseGroupDetailPage() {
     .map((teacher: Record<string, unknown>) => ({ label: String(teacher.name || '未命名老师'), value: teacher.id as string }))
   const replaceNewTeacherName = teacherList.find((teacher: Record<string, unknown>) => teacher.id === replaceNewTeacherId)?.name || '新老师'
   const teacherTeam = Array.isArray(group?.teacherAssignments) && group.teacherAssignments.length
-    ? group.teacherAssignments.map((item: Record<string, unknown>) => (item.teacher as Record<string, unknown>)?.name).filter(Boolean).join('、')
-    : group?.teacher?.name
+    ? group.teacherAssignments.map((item: Record<string, unknown>) => {
+        const tName = (item.teacher as Record<string, unknown> | undefined)?.name as string
+        const subject = item.subject as string | undefined
+        return tName ? `${tName}${subject ? `(${subject})` : ''}` : ''
+      }).filter(Boolean).join('、')
+    : (group?.teacher as Record<string, unknown> | undefined)?.name
+  const courseColor = String((group?.course as Record<string, unknown> | undefined)?.color || '') || '#e8784a'
   const isHistoricalTerm = Boolean(group?.term && group.term.status !== 'ACTIVE')
 
   const handleStartGroup = async () => {
@@ -434,40 +449,10 @@ export default function CourseGroupDetailPage() {
   return (
     <PageLayout
       title={group.name}
-      subtitle={`${group.course?.name || ''} / 授课团队：${teacherTeam || '未分配'} / ${isIntensive ? '上课地点灵活安排' : group.room?.name || '未分配教室'}`}
-      actions={isMobile ? (
-        <Dropdown
-          trigger={['click']}
-          menu={{
-            items: [
-              { key: 'change-teacher', icon: <UserSwitchOutlined />, label: '更换老师', disabled: isHistoricalTerm, onClick: openReplaceTeacher },
-              { key: 'regenerate', icon: <ReloadOutlined />, label: '重新生成课表', disabled: isHistoricalTerm, onClick: handleRegenerateLessons },
-              { key: 'back', icon: <ArrowLeftOutlined />, label: '返回课程管理', onClick: () => router.push('/courses') },
-              {
-                key: 'delete',
-                icon: <DeleteOutlined />,
-                label: '删除班级',
-                danger: true,
-                disabled: isHistoricalTerm,
-                onClick: () => {
-                  Modal.confirm({
-                    title: '确定删除这个班级？',
-                    content: '删除后班级会归档，不再出现在课程和排课列表。',
-                    okText: '确认删除',
-                    cancelText: '取消',
-                    okButtonProps: { danger: true },
-                    onOk: handleDeleteGroup,
-                  })
-                },
-              },
-            ],
-          }}
-        >
-          <Button icon={<MoreOutlined />} />
-        </Dropdown>
-      ) : (
+      subtitle={`${group.course?.name || ''} · ${isIntensive ? '个性化课程' : '精品班课'}`}
+      actions={isMobile ? undefined : (
         <Space wrap>
-          <Button type="primary" icon={<PlusOutlined />} disabled={isHistoricalTerm} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a' }}>添加学员</Button>
+          <Button type="primary" icon={<PlusOutlined />} disabled={isHistoricalTerm} onClick={() => setEnrollOpen(true)} style={{ background: 'var(--color-primary)' }}>添加学员</Button>
           {group.status === 'WAITING' && <Button type="primary" disabled={isHistoricalTerm} loading={starting} onClick={handleStartGroup} style={{ background: '#27a644' }}>开班并通知家长</Button>}
           <Button icon={<UserSwitchOutlined />} disabled={isHistoricalTerm} onClick={openReplaceTeacher}>更换老师</Button>
           {!isIntensive && <Button icon={<CalendarOutlined />} disabled={isHistoricalTerm} onClick={() => setManualLessonOpen(true)}>临时加课</Button>}
@@ -485,27 +470,123 @@ export default function CourseGroupDetailPage() {
           type="info"
           message={`正在查看历史批次：${group.term?.name || '历史批次'}`}
           description="历史班级、课次、考勤、反馈和工资仅供核对；如需新增或修改，请先在数据总览切换到当前运营批次。"
-          style={{ marginBottom: 16 }}
+          style={{ marginBottom: 16, borderRadius: 12 }}
         />
       )}
+
+      {/* 班级 HERO 卡 */}
+      <div style={{
+        borderRadius: 18, overflow: 'hidden', marginBottom: 16,
+        border: '1px solid rgba(201,164,92,.5)',
+        background: 'linear-gradient(150deg,#17352F 0%,#0E5E4E 55%,#0B4B40 100%)',
+        boxShadow: '0 10px 26px rgba(18,60,53,.2)',
+        color: '#F5F1E8', position: 'relative',
+      }}>
+        <div style={{ position: 'absolute', top: -46, right: -30, width: 170, height: 170, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,164,92,.22), transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ padding: '16px 16px 14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 13, minWidth: 0 }}>
+            <div style={{
+              width: 54, height: 54, borderRadius: 16, flexShrink: 0,
+              background: `linear-gradient(145deg, ${courseColor}33, ${courseColor}14)`,
+              border: `1px solid ${courseColor}55`,
+              color: '#F2E3B6', display: 'grid', placeItems: 'center',
+              fontSize: 23, fontWeight: 800,
+            }}>{String(group.course?.subject || '?')[0]}</div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 16, fontWeight: 800, color: '#F5F1E8' }}>{group.name as string}</span>
+                <StatusTag status={String(group.status || '-')} />
+              </div>
+              <div style={{ marginTop: 4, fontSize: 12, color: 'rgba(245,241,232,.75)' }}>
+                {group.course?.name as string}{group.course?.grade ? ` · ${group.course.grade}` : ''}
+              </div>
+            </div>
+          </div>
+
+          {/* 授课团队 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+            <span style={{ fontSize: 11, color: 'rgba(242,227,182,.7)', flexShrink: 0 }}>授课团队</span>
+            {teacherAssignments.length ? teacherAssignments.map((item: Record<string, unknown>, i: number) => {
+              const tName = (item.teacher as Record<string, unknown> | undefined)?.name as string
+              const subject = item.subject as string | undefined
+              return (
+                <span key={i} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '3px 9px', borderRadius: 999, whiteSpace: 'nowrap',
+                  background: 'rgba(255,255,255,.09)', border: '1px solid rgba(242,227,182,.28)',
+                  fontSize: 11.5, color: '#F5F1E8', fontWeight: 600,
+                }}>
+                  {tName || '未分配'}
+                  {subject && <span style={{ color: '#F2E3B6', fontWeight: 700 }}>{subject}</span>}
+                </span>
+              )
+            }) : <span style={{ fontSize: 11.5, color: 'rgba(245,241,232,.6)' }}>未分配</span>}
+          </div>
+
+          {/* 信息格 */}
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(4, minmax(0,1fr))', gap: 6, marginTop: 12 }}>
+            <DetailChip icon={<BookOutlined />} text={isIntensive ? (group.teachingType === 'ONE_ON_TWO' ? '一对二' : group.teachingType === 'ONE_ON_THREE' ? '一对三' : '一对一') : (group.course?.type === 'ONE_ON_ONE' ? '1对1' : group.course?.type === 'SMALL_GROUP' ? '小组课' : '班课')} />
+            <DetailChip icon={<ClockCircleOutlined />} text={group.lessonStartTime as string || '—'} />
+            <DetailChip icon={<EnvironmentOutlined />} text={isIntensive ? '地点灵活' : group.room?.name as string || '未分配'} />
+            <DetailChip icon={<TeamOutlined />} text={`在读 ${enrollments.length} 人`} />
+          </div>
+          {isIntensive && (
+            <div style={{
+              marginTop: 10, padding: '8px 11px', borderRadius: 10,
+              background: 'rgba(255,255,255,.07)', border: '1px solid rgba(242,227,182,.2)',
+              fontSize: 11.5, color: 'rgba(245,241,232,.8)', lineHeight: 1.6,
+            }}>
+              个性化课程按实际授课累计：教师约课并完成考勤后，由管理员审核实际授课时间，再计入学生课时和教师工资。
+            </div>
+          )}
+        </div>
+        <div style={{ padding: '0 16px 14px' }}>
+          <Progress
+            percent={total ? Math.round((completed / total) * 100) : 0}
+            strokeColor="#F2E3B6"
+            trailColor="rgba(255,255,255,.12)"
+            size="small"
+            format={() => (
+              <span style={{ color: 'rgba(245,241,232,.8)', fontSize: 12, whiteSpace: 'nowrap' }}>
+                已上 {completed}/{total} 节 · {total ? Math.round((completed / total) * 100) : 0}%
+              </span>
+            )}
+          />
+        </div>
+      </div>
+
       {isMobile && (
-        <Space.Compact block style={{ marginBottom: 16 }}>
-          <Button type="primary" icon={<PlusOutlined />} disabled={isHistoricalTerm} onClick={() => setEnrollOpen(true)} style={{ background: '#e8784a', flex: 1 }}>添加学员</Button>
-          {!isIntensive && <Button icon={<CalendarOutlined />} disabled={isHistoricalTerm} onClick={() => setManualLessonOpen(true)} style={{ flex: 1 }}>临时加课</Button>}
-          {group.status === 'WAITING' && <Button type="primary" disabled={isHistoricalTerm} loading={starting} onClick={handleStartGroup} style={{ background: '#27a644', flex: 1 }}>开班通知</Button>}
-        </Space.Compact>
+        <>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+            <Button size="small" icon={<UserSwitchOutlined />} disabled={isHistoricalTerm} onClick={openReplaceTeacher}>更换老师</Button>
+            {group.status === 'WAITING' && (
+              <Button size="small" icon={<ReloadOutlined />} disabled={isHistoricalTerm} onClick={handleRegenerateLessons}>重新生成课表</Button>
+            )}
+            <Button size="small" icon={<ArrowLeftOutlined />} onClick={() => router.push('/courses')}>返回课程管理</Button>
+            <Popconfirm title="确定删除这个班级？" description="删除后班级会归档，不再出现在课程和排课列表。" onConfirm={handleDeleteGroup}>
+              <Button size="small" danger disabled={isHistoricalTerm} icon={<DeleteOutlined />}>删除班级</Button>
+            </Popconfirm>
+          </div>
+          <Space.Compact block style={{ marginBottom: 16 }}>
+          <Button type="primary" icon={<PlusOutlined />} disabled={isHistoricalTerm} onClick={() => setEnrollOpen(true)} style={{ background: 'var(--color-primary)', flex: 1 }}>添加学员</Button>
+            {!isIntensive && <Button icon={<CalendarOutlined />} disabled={isHistoricalTerm} onClick={() => setManualLessonOpen(true)} style={{ flex: 1 }}>临时加课</Button>}
+            {group.status === 'WAITING' && <Button type="primary" disabled={isHistoricalTerm} loading={starting} onClick={handleStartGroup} style={{ background: '#27a644', flex: 1 }}>开班通知</Button>}
+          </Space.Compact>
+        </>
       )}
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col xs={12} lg={6}><Metric title="在读人数" value={enrollments.length} /></Col>
+        <Col xs={12} lg={6}><Metric title="在读人数" value={enrollments.length} icon={<TeamOutlined />} grad="linear-gradient(145deg,#27a644,#15804F)" /></Col>
         {isIntensive ? (
           <>
-            <Col xs={12} lg={6}><Metric title="已安排课次" value={intensiveScheduled} /></Col>
-            <Col xs={12} lg={6}><Metric title="已审核课次" value={intensiveApproved} /></Col>
+            <Col xs={12} lg={6}><Metric title="已安排课次" value={intensiveScheduled} icon={<CalendarOutlined />} grad="linear-gradient(145deg,#FFB84D,#E8784A)" /></Col>
+            <Col xs={12} lg={6}><Metric title="已审核课次" value={intensiveApproved} icon={<CheckOutlined />} grad="linear-gradient(145deg,#4C8DFF,#2f6fdb)" /></Col>
             <Col xs={12} lg={6}>
               <Metric
                 title="待审核课次"
                 value={intensivePendingReview}
+                icon={<ClockCircleOutlined />}
+                grad="linear-gradient(145deg,#F6654F,#e03e2d)"
                 actionLabel={!isHistoricalTerm && intensivePendingReview > 0 ? '立即审核' : undefined}
                 onAction={isHistoricalTerm ? undefined : () => openLessonReview()}
               />
@@ -513,28 +594,12 @@ export default function CourseGroupDetailPage() {
           </>
         ) : (
           <>
-            <Col xs={12} lg={6}><Metric title="总课次" value={total} /></Col>
-            <Col xs={12} lg={6}><Metric title="已上课次" value={completed} /></Col>
-            <Col xs={12} lg={6}><Metric title="剩余课次" value={Math.max(0, total - completed)} /></Col>
+            <Col xs={12} lg={6}><Metric title="总课次" value={total} icon={<BookOutlined />} grad="linear-gradient(145deg,#4C8DFF,#2f6fdb)" /></Col>
+            <Col xs={12} lg={6}><Metric title="已上课次" value={completed} icon={<CheckOutlined />} grad="linear-gradient(145deg,#27a644,#15804F)" /></Col>
+            <Col xs={12} lg={6}><Metric title="剩余课次" value={Math.max(0, total - completed)} icon={<ReloadOutlined />} grad="linear-gradient(145deg,#FFB84D,#E8784A)" /></Col>
           </>
         )}
       </Row>
-
-      <Card bordered={false} style={{ borderRadius: 8, marginBottom: 16, background: '#ffffff', border: '1px solid #EEE7E1' }}>
-        {isIntensive ? (
-          <Alert
-            type="info"
-            showIcon
-            message="个性化课程按实际授课累计"
-            description="不设置固定总课次。教师约课并完成考勤后，由管理员审核实际授课时间，再计入学生课时和教师工资。"
-          />
-        ) : (
-          <Space direction="vertical" style={{ width: '100%' }}>
-            <div style={{ color: '#98A2B3' }}>课程进度</div>
-            <Progress percent={total ? Math.round((completed / total) * 100) : 0} strokeColor="#E8784A" />
-          </Space>
-        )}
-      </Card>
 
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={10}>
@@ -555,38 +620,63 @@ export default function CourseGroupDetailPage() {
               </Space>
             )}
             bordered={false}
-            style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}
+            style={{ borderRadius: 16, background: '#ffffff', border: '1px solid #F0E9DF', boxShadow: '0 4px 14px rgba(58,50,39,.04)' }}
           >
             {!enrollments.length ? <Empty description="暂无学员，先添加学员后再开班通知" image={Empty.PRESENTED_IMAGE_SIMPLE} /> : (
-              <Space direction="vertical" style={{ width: '100%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {enrollments.map((enrollment: Record<string, unknown>) => {
                   const student = enrollment.student as Record<string, unknown> | undefined
                   const studentSubjects = Array.isArray(enrollment.subjects) ? (enrollment.subjects as string[]) : []
+                  const remainingText = formatRemaining(Number(enrollment.remainHours ?? 0), group.course?.type || null, Number(group.lessonMinutes || 40)).text
                   return (
-                    <div key={enrollment.id as string} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #EEE7E1' }}>
+                    <div key={enrollment.id as string} style={{
+                      display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '11px 12px', borderRadius: 14,
+                      background: '#FCFAF7', border: '1px solid #F0E9DF',
+                    }}>
+                      <div style={{
+                        width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+                        background: `linear-gradient(145deg, ${courseColor}26, ${courseColor}0D)`,
+                        border: `1px solid ${courseColor}40`,
+                        color: courseColor, display: 'grid', placeItems: 'center',
+                        fontSize: 16, fontWeight: 800,
+                      }}>
+                        {String(student?.name || '?')[0]}
+                      </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ color: '#1F2329' }}>{student?.name as string}</div>
-                        <div style={{ color: '#98A2B3', fontSize: 12, marginBottom: studentSubjects.length ? 4 : 0 }}>
-                          {student?.grade as string || '-'} / 剩余 {formatRemaining(Number(enrollment.remainHours ?? 0), group.course?.type || null, Number(group.lessonMinutes || 40)).text}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                          <span style={{ color: '#1F2329', fontWeight: 700, fontSize: 13.5 }}>{student?.name as string}</span>
+                          <span style={{
+                            fontSize: 11, fontWeight: 700, padding: '1px 8px', borderRadius: 999, whiteSpace: 'nowrap',
+                            color: '#123C35', background: 'linear-gradient(135deg,#F2E3B6,#D8BC7C)',
+                          }}>剩余 {remainingText}</span>
+                        </div>
+                        <div style={{ color: '#98A2B3', fontSize: 11.5, marginTop: 3 }}>
+                          {student?.grade as string || '-'} · 在读
                         </div>
                         {studentSubjects.length > 0 && (
-                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                            {studentSubjects.map((s) => <Tag key={s} color="geekblue" style={{ margin: 0, fontSize: 12 }}>{s}</Tag>)}
+                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 5 }}>
+                            {studentSubjects.map((s) => (
+                              <span key={s} style={{
+                                fontSize: 11, fontWeight: 600, padding: '1px 8px', borderRadius: 999,
+                                color: courseColor, background: `${courseColor}14`, border: `1px solid ${courseColor}30`,
+                              }}>{s}</span>
+                            ))}
                           </div>
                         )}
                       </div>
-                      <Space size={4}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
                         <Button size="small" type="text" onClick={() => {
                           setSubjectTarget({ studentId: enrollment.studentId as string, name: student?.name as string || '', subjects: studentSubjects })
-                        }} disabled={isHistoricalTerm}>调整学科</Button>
+                        }} disabled={isHistoricalTerm} style={{ fontSize: 11.5 }}>调整学科</Button>
                         <Popconfirm title="确定把该学员移出班级？" onConfirm={() => handleRemoveStudent(enrollment.id as string)}>
-                          <Button size="small" danger type="text" disabled={isHistoricalTerm}>移出</Button>
+                          <Button size="small" danger type="text" disabled={isHistoricalTerm} style={{ fontSize: 11.5 }}>移出</Button>
                         </Popconfirm>
-                      </Space>
+                      </div>
                     </div>
                   )
                 })}
-              </Space>
+              </div>
             )}
           </Card>
         </Col>
@@ -618,7 +708,7 @@ export default function CourseGroupDetailPage() {
                   dataIndex: 'status',
                   render: (value: string, row: Record<string, unknown>) => (
                     <Space size={4}>
-                      <Tag>{value}</Tag>
+                      <Tag>{LESSON_STATUS_LABEL[value] || value}</Tag>
                       {row.isManual === true && <Tag color="orange">临时</Tag>}
                       {isIntensive && row.intensiveReviewStatus === 'PENDING' && <Tag color="orange">待审核</Tag>}
                       {isIntensive && row.intensiveReviewStatus === 'APPROVED' && <Tag color="green">已审核</Tag>}
@@ -661,7 +751,7 @@ export default function CourseGroupDetailPage() {
       {manualLessonOpen && (
         <ManualLessonModal initialGroupId={params.id} onClose={() => setManualLessonOpen(false)} onSuccess={() => mutate()} />
       )}
-      <Modal
+      <BrandModal
         title="取消本次课"
         open={Boolean(cancelLessonId)}
         onCancel={() => setCancelLessonId('')}
@@ -672,9 +762,9 @@ export default function CourseGroupDetailPage() {
       >
         <p>只能取消尚未开始且没有考勤、反馈或结算记录的课次。系统保留取消记录并通知相关家长。</p>
         <Input.TextArea aria-label="停课原因" placeholder="例如：国庆假期调整" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} maxLength={200} showCount rows={3} />
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title="审核个性化课程"
         open={Boolean(selectedReview)}
         onCancel={() => {
@@ -684,7 +774,6 @@ export default function CourseGroupDetailPage() {
         }}
         footer={null}
         width={isMobile ? 'calc(100vw - 24px)' : 620}
-        centered
         destroyOnHidden
       >
         {selectedReview && (
@@ -761,9 +850,9 @@ export default function CourseGroupDetailPage() {
             </Row>
           </Space>
         )}
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title="添加学员到班级"
         open={enrollOpen}
         onCancel={handleCloseEnrollModal}
@@ -773,7 +862,7 @@ export default function CourseGroupDetailPage() {
         cancelText="取消"
       >
         <Space direction="vertical" style={{ width: '100%' }} size={14}>
-          <Select
+          <AdaptiveSelect
             allowClear
             placeholder="按年级筛选"
             value={studentGrade || undefined}
@@ -800,7 +889,7 @@ export default function CourseGroupDetailPage() {
           {students.length > 0 && availableStudents.length === 0 && (
             <Alert type="info" showIcon message="该班所有已找到的学员均已报名" />
           )}
-          <Select
+          <AdaptiveSelect
             mode="multiple"
             showSearch
             optionFilterProp="label"
@@ -836,8 +925,8 @@ export default function CourseGroupDetailPage() {
             style={{ width: '100%' }}
           />
         </Space>
-      </Modal>
-      <Modal
+      </BrandModal>
+      <BrandModal
         title="更换任课老师"
         open={replaceOpen}
         onCancel={() => setReplaceOpen(false)}
@@ -878,7 +967,7 @@ export default function CourseGroupDetailPage() {
           </div>
           {replaceOldTeacherId && (
             <>
-              <Select
+              <AdaptiveSelect
                 placeholder="更换为"
                 value={replaceNewTeacherId}
                 onChange={setReplaceNewTeacherId}
@@ -921,9 +1010,9 @@ export default function CourseGroupDetailPage() {
             </Button>
           </div>
         </Space>
-      </Modal>
+      </BrandModal>
 
-      <Modal
+      <BrandModal
         title="添加任课老师"
         open={addTeacherOpen}
         onCancel={() => setAddTeacherOpen(false)}
@@ -934,7 +1023,7 @@ export default function CourseGroupDetailPage() {
         okButtonProps={{ style: { background: '#e8784a', borderColor: '#e8784a' } }}
       >
         <Space direction="vertical" style={{ width: '100%' }} size={14}>
-          <Select
+          <AdaptiveSelect
             placeholder="选择老师"
             value={addTeacherId}
             onChange={setAddTeacherId}
@@ -946,7 +1035,7 @@ export default function CourseGroupDetailPage() {
             virtual={false}
             getPopupContainer={(trigger) => trigger.parentElement || document.body}
           />
-          <Select
+          <AdaptiveSelect
             placeholder="选择科目"
             value={addTeacherSubject || undefined}
             onChange={setAddTeacherSubject}
@@ -957,7 +1046,7 @@ export default function CourseGroupDetailPage() {
             仅补入对应表，不自动排课。排课请用&ldquo;新增上课日&rdquo;或重新生成课表。
           </div>
         </Space>
-      </Modal>
+      </BrandModal>
       {subjectTarget && (
         <SubjectChangeModal
           key={subjectTarget.studentId}
@@ -980,19 +1069,67 @@ function Metric({
   value,
   actionLabel,
   onAction,
+  icon,
+  grad,
 }: {
   title: string
   value: number
   actionLabel?: string
   onAction?: () => void
+  icon?: ReactNode
+  grad?: string
 }) {
   return (
     <Card
       bordered={false}
-      style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}
-      extra={actionLabel ? <Button type="link" size="small" onClick={onAction}>{actionLabel}</Button> : null}
+      style={{ borderRadius: 16, background: '#ffffff', border: '1px solid #F0E9DF', boxShadow: '0 4px 14px rgba(58,50,39,.05)' }}
+      extra={actionLabel ? <Button type="link" size="small" onClick={onAction} style={{ color: '#e03e2d' }}>{actionLabel}</Button> : null}
     >
-      <Statistic title={<span style={{ color: '#98A2B3' }}>{title}</span>} value={value} valueStyle={{ color: '#1F2329' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+        {icon && (
+          <div style={{
+            width: 40, height: 40, borderRadius: 13, flexShrink: 0,
+            background: grad || 'linear-gradient(145deg,#4C8DFF,#2f6fdb)',
+            color: '#fff', display: 'grid', placeItems: 'center', fontSize: 16,
+            boxShadow: '0 4px 10px rgba(58,50,39,.12)',
+          }}>{icon}</div>
+        )}
+        <div style={{ minWidth: 0 }}>
+          <div style={{ color: '#1F2329', fontSize: 23, fontWeight: 800, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{value}</div>
+          <div style={{ color: '#98A2B3', fontSize: 12, marginTop: 1 }}>{title}</div>
+        </div>
+      </div>
     </Card>
+  )
+}
+
+function StatusTag({ status }: { status: string }) {
+  const map: Record<string, { text: string; fg: string; bg: string; border: string }> = {
+    ACTIVE: { text: '进行中', fg: '#1D9E75', bg: 'rgba(29,158,117,.12)', border: 'rgba(29,158,117,.35)' },
+    WAITING: { text: '待开班', fg: '#E8590C', bg: 'rgba(232,89,12,.12)', border: 'rgba(232,89,12,.35)' },
+    COMPLETED: { text: '已结束', fg: '#2f6fdb', bg: 'rgba(47,111,219,.12)', border: 'rgba(47,111,219,.35)' },
+  }
+  const s = map[status] || { text: status, fg: '#98A2B3', bg: 'rgba(152,162,179,.12)', border: 'rgba(152,162,179,.35)' }
+  return (
+    <span style={{
+      fontSize: 11, fontWeight: 700, padding: '2px 9px', borderRadius: 999, whiteSpace: 'nowrap',
+      color: s.fg, background: s.bg, border: `1px solid ${s.border}`,
+    }}>{s.text}</span>
+  )
+}
+
+function DetailChip({ icon, text }: { icon: ReactNode; text: string }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 5, minWidth: 0,
+      padding: '6px 9px', borderRadius: 10,
+      background: 'rgba(255,255,255,.08)', border: '1px solid rgba(242,227,182,.2)',
+    }}>
+      <span style={{ color: '#F2E3B6', fontSize: 11, flexShrink: 0 }}>{icon}</span>
+      <span style={{
+        fontSize: 11.5, fontWeight: 600, color: '#F5F1E8',
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+      }}>{text}</span>
+    </div>
   )
 }

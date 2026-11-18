@@ -7,7 +7,7 @@ async function audit(label: string, prisma: PrismaClient) {
   const students = await prisma.student.findMany({
     where: { deletedAt: null },
     select: {
-      id: true, name: true, grade: true, gender: true, birthYear: true,
+      id: true, identityId: true, name: true, grade: true, gender: true, birthYear: true,
       parentId: true, parentUserId: true, parentPhone: true, updatedAt: true,
       termMemberships: { select: { grade: true, status: true, joinedAt: true, term: { select: { status: true, startDate: true, name: true } } } },
     },

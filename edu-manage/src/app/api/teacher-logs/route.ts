@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminUser, TEACHER_LOG_ACTIONS, todayRange, weekRange } from '@/lib/teacher-portal'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
@@ -16,7 +17,7 @@ function groupBy<T>(arr: T[], key: (item: T) => string): Map<string, T[]> {
   return m
 }
 
-export async function GET(req: NextRequest) {
+export const GET = apiHandler(async (req: NextRequest) => {
   try {
     const admin = await requireAdminUser()
     const { prisma } = admin
@@ -167,4 +168,4 @@ export async function GET(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
-}
+})

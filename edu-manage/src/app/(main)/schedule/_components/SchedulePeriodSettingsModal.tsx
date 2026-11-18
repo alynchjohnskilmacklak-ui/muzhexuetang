@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Input, Modal, Select, Space, Typography, message } from 'antd'
+import { Button, Input, Select, Space, Typography, message } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { DeleteOutlined, PlusOutlined, UndoOutlined } from '@ant-design/icons'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { SchedulePeriod, SCHEDULE_PERIODS } from '@/lib/schedule-periods'
@@ -57,7 +58,7 @@ export function SchedulePeriodSettingsModal({ open, periods, onClose, onSaved }:
   }
 
   return (
-    <Modal
+    <BrandModal
       title="时间段设置"
       open={open}
       onCancel={onClose}
@@ -126,6 +127,6 @@ export function SchedulePeriodSettingsModal({ open, periods, onClose, onSaved }:
       >
         添加时间段
       </Button>
-    </Modal>
+    </BrandModal>
   )
 }

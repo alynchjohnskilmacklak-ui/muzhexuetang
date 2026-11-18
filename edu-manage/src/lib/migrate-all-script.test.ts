@@ -9,10 +9,15 @@ describe('dual database migration safety', () => {
     expect(script).toContain('failed_migrations "$url"')
   })
 
-  it('only auto-recovers the exact known StageSummary failure', () => {
-    expect(script).toContain('if [ "$failed" != "$KNOWN_STAGE_MIGRATION" ]')
+  it('only auto-recovers allowlisted migrations after exact schema checks', () => {
+    expect(script).toContain('case "$failed" in')
+    expect(script).toContain('"$KNOWN_STAGE_MIGRATION")')
+    expect(script).toContain('"$KNOWN_EMPTY_TEACHER_MESSAGE_MIGRATION")')
+    expect(script).toContain('"$KNOWN_FEEDBACK_IDENTITY_MIGRATION")')
     expect(script).toContain('automatic recovery refused')
     expect(script).toContain('stage_summary_table_exists "$url"')
+    expect(script).toContain('empty_teacher_message_table_matches_migration "$url"')
+    expect(script).toContain('feedback_identity_retry_schema_matches_migration "$url"')
   })
 
   it('does not retry arbitrary prisma migrate deploy failures', () => {

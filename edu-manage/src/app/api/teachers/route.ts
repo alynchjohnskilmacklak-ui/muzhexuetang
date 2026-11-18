@@ -10,6 +10,8 @@ import { getRequestDivision } from '@/lib/division'
 import { generateTemporaryPassword } from '@/lib/temporary-password'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { resolveTier, TIER_RANK } from '@/constants/teacher-tier'
+import { normalizeLoginPhone } from '@/lib/login-accounts'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,15 +47,31 @@ export const GET = apiHandler(async (req: NextRequest) => {
     ]
   }
 
-  const [teachers, total] = await Promise.all([
+  const [tierRows, total] = await Promise.all([
     prisma.teacher.findMany({
       where,
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
+      select: { id: true, tierLevel: true, createdAt: true },
     }),
     prisma.teacher.count({ where }),
   ])
+
+  // Rank the full filtered set before pagination so a lower-tier record from a
+  // newer creation date cannot appear ahead of a higher-tier record on page 2.
+  const pageTeacherIds = tierRows
+    .sort((a, b) =>
+      TIER_RANK[resolveTier(b.tierLevel)] - TIER_RANK[resolveTier(a.tierLevel)] ||
+      b.createdAt.getTime() - a.createdAt.getTime() ||
+      a.id.localeCompare(b.id),
+    )
+    .slice((page - 1) * limit, page * limit)
+    .map((teacher) => teacher.id)
+  const pageTeachers = pageTeacherIds.length
+    ? await prisma.teacher.findMany({ where: { id: { in: pageTeacherIds } } })
+    : []
+  const pageTeacherById = new Map(pageTeachers.map((teacher) => [teacher.id, teacher]))
+  const teachers = pageTeacherIds
+    .map((id) => pageTeacherById.get(id))
+    .filter((teacher): teacher is (typeof pageTeachers)[number] => Boolean(teacher))
 
   const teacherIds = teachers.map((teacher) => teacher.id)
   const [groupStudentRows, scopedLessonRows] = teacherIds.length
@@ -155,11 +173,13 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     const name = typeof body.name === 'string' ? body.name.trim() : ''
-    const phone = typeof body.phone === 'string' ? body.phone.trim() : ''
+    const rawPhone = typeof body.phone === 'string' ? body.phone.trim() : ''
+    const phone = rawPhone ? normalizeLoginPhone(rawPhone) : ''
     const subjects = typeof body.subjects === 'string' ? body.subjects.trim() : ''
 
     if (!name) return NextResponse.json({ error: '姓名不能为空', field: 'name' }, { status: 400 })
-    if (!phone) return NextResponse.json({ error: '手机号不能为空', field: 'phone' }, { status: 400 })
+    if (!rawPhone) return NextResponse.json({ error: '手机号不能为空', field: 'phone' }, { status: 400 })
+    if (!phone) return NextResponse.json({ error: '请输入正确的11位中国大陆手机号', field: 'phone' }, { status: 400 })
     if (!subjects) return NextResponse.json({ error: '至少选择一个授课科目', field: 'subjects' }, { status: 400 })
     if (typeof body.bio === 'string' && body.bio.length > 500) {
       return NextResponse.json({ error: '个人介绍最多填写500字', field: 'bio' }, { status: 400 })
@@ -186,7 +206,13 @@ export async function POST(req: NextRequest) {
       division: getRequestDivision(session.user as Record<string, unknown> | undefined, body.division),
     }
 
-    const existingTeacher = await prisma.teacher.findUnique({ where: { phone } })
+    const teacherPhoneCandidates = await prisma.teacher.findMany({
+      where: { phone: { contains: phone.slice(-4) } },
+      select: { id: true, name: true, phone: true, status: true },
+    })
+    const existingTeacher = teacherPhoneCandidates.find((teacher) =>
+      teacher.status !== 'RESIGNED' && normalizeLoginPhone(teacher.phone) === phone,
+    )
     if (existingTeacher && existingTeacher.status !== 'RESIGNED') {
       return NextResponse.json({
         error: `手机号 ${phone} 已绑定在职教师“${existingTeacher.name}”，请修改手机号或编辑已有教师档案`,

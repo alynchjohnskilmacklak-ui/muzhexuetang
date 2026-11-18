@@ -8,7 +8,7 @@ export default function NotFound() {
         <Image src="/images/logo.jpg" alt="牧哲学堂" width={160} height={44} style={{ objectFit: 'contain' }} />
         <h1 style={{ margin: '22px 0 8px', color: '#1A1201', fontSize: 26 }}>页面走丢了</h1>
         <p style={{ margin: '0 0 24px', color: '#7A6E60', lineHeight: 1.7 }}>你访问的页面不存在或已被移动</p>
-        <Link href="/" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 10, background: '#E8784A', color: '#fff', textDecoration: 'none', fontWeight: 700 }}>返回首页</Link>
+        <Link href="/" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 10, background: 'var(--color-primary)', color: 'var(--color-on-primary)', textDecoration: 'none', fontWeight: 700 }}>返回首页</Link>
       </section>
     </main>
   )

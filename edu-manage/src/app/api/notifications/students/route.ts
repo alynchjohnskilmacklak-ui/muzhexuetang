@@ -17,7 +17,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const students = await prisma.student.findMany({
     where: { status: { not: 'INACTIVE' }, division },
     include: {
-      parent: { select: { wxpusherUid: true } },
+      parent: { select: { wxpusherUid: true, qywxExternalUserId: true } },
       enrollments: {
         where: { status: 'ACTIVE', group: { status: { not: 'ARCHIVED' }, course: { isActive: true } } },
         include: { group: { include: { room: { select: { id: true, name: true } } } } },
@@ -33,7 +33,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
       name: s.name,
       grade: s.grade || '未设置年级',
       parentName: s.parentName,
-      wxBound: !!s.parent?.wxpusherUid,
+      wxBound: !!s.parent?.qywxExternalUserId,
       roomId: roomEntry?.group.room?.id || null,
       roomName: roomEntry?.group.room?.name || '未分配班级',
     }

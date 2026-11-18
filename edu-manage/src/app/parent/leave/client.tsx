@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { ResponsiveTable } from '@/components/Layout/ResponsiveTable'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { rememberParentChild } from '@/lib/parent-child-preference'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -23,9 +24,10 @@ function leaveStatusMeta(status: string) {
 }
 
 export function ParentLeaveClient({
-  students, upcomingSchedules, leaveRequests,
+  students, upcomingSchedules, leaveRequests, initialSelectedStudentId,
 }: {
-  students: { id: string; name: string }[]
+  students: { id: string; name: string; membershipLevel?: string | null }[]
+  initialSelectedStudentId: string
   upcomingSchedules: { id: string; title: string; startTime: string; studentIds: string[] }[]
   leaveRequests: {
     id: string
@@ -41,7 +43,7 @@ export function ParentLeaveClient({
   const [form] = Form.useForm()
   const [submitting, setSubmitting] = useState(false)
   const [requests, setRequests] = useState(leaveRequests)
-  const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || '')
+  const [selectedStudentId, setSelectedStudentId] = useState<string>(initialSelectedStudentId || students[0]?.id || '')
   const isMobile = useIsMobile() ?? false
 
   useEffect(() => {
@@ -73,10 +75,11 @@ export function ParentLeaveClient({
         }),
       })
       if (res.ok) {
-        toast.success('请假通知已发送给老师和管理员')
-        form.resetFields()
         const data = await res.json()
-        setRequests((prev) => [data, ...prev])
+        toast.success(data.reused ? '该申请已保存，请查看处理状态，无需重复提交' : data.teacherNotified === false ? '请假申请已保存并通知管理员，教师账号尚未关联，请联系机构确认' : '请假申请已保存，老师和管理员可查看')
+        form.resetFields()
+        form.setFieldValue('studentId', selectedStudentId)
+        setRequests((prev) => [data, ...prev.filter((item) => item.id !== data.id)])
       } else {
         const data = await res.json()
         toast.error(data.error || '提交失败，请重试')
@@ -100,7 +103,7 @@ export function ParentLeaveClient({
       </Text>
 
       <Card title="提交请假通知" style={{ marginBottom: 24 }}>
-        <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" initialValues={{ studentId: initialSelectedStudentId || students[0]?.id }}>
           <Form.Item name="studentId" label="子女" rules={students.length === 1 ? [] : [{ required: true, message: '请选择子女' }]}>
             {students.length === 1 ? (
               <>
@@ -111,7 +114,14 @@ export function ParentLeaveClient({
               <Select
                 placeholder="选择子女"
                 getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
-                onChange={(value) => setSelectedStudentId(value)}
+                onChange={(value) => {
+                  setSelectedStudentId(value)
+                  form.setFieldValue('lessonId', undefined)
+                  rememberParentChild(value, students.find((student) => student.id === value)?.membershipLevel)
+                  const params = new URLSearchParams(window.location.search)
+                  params.set('childId', value)
+                  window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`)
+                }}
                 options={students.map((student) => ({ label: student.name, value: student.id }))}
               />
             )}
@@ -147,7 +157,7 @@ export function ParentLeaveClient({
             block
             loading={submitting}
             onClick={handleSubmit}
-            style={{ background: '#E8784A', borderColor: '#E8784A', borderRadius: 8, height: 44 }}
+            style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', borderRadius: 8, height: 44 }}
           >
             发送请假通知
           </Button>

@@ -20,7 +20,7 @@ export default function FeedbackPerformancePage() {
       <Tabs
         activeKey={tab}
         onChange={setTab}
-        destroyInactiveTabPane
+        destroyOnHidden
         items={[
           { key: 'feedback', label: '课堂反馈', children: <FeedbackTab /> },
           { key: 'performance', label: '表现动态', children: <PerformanceTab /> },

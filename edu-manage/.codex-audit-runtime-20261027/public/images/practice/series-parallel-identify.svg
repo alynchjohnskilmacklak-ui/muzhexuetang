@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" role="img" aria-labelledby="title desc">
+  <title id="title">串联与并联电路图</title>
+  <desc id="desc">甲电路中两个灯泡在同一条电流路径上；乙电路中两个灯泡分别接在两条支路上。</desc>
+  <rect width="900" height="330" rx="20" fill="#fffdf9" stroke="#e8e2d9" />
+  <path d="M450 28v274" stroke="#e8e2d9" stroke-width="2" />
+
+  <g fill="#1a1201" font-family="Microsoft YaHei, Noto Sans SC, sans-serif" text-anchor="middle">
+    <text x="248" y="42" font-size="22" font-weight="700">甲</text>
+    <text x="650" y="42" font-size="22" font-weight="700">乙</text>
+  </g>
+
+  <g fill="none" stroke="#5a4e3a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 甲：一个回路，L₁ 和 L₂ 顺次经过。 -->
+    <path d="M84 82H221M275 82h26M355 82h47v206H84V190M84 132V82" />
+    <circle cx="248" cy="82" r="27" fill="#fffdf9" />
+    <circle cx="328" cy="82" r="27" fill="#fffdf9" />
+    <path d="m233 67 30 30m0-30-30 30m80-30 30 30m0-30-30 30" />
+    <path d="M64 146h40m-29 27h18" stroke-width="5" />
+
+    <!-- 乙：L₁、L₂ 分别位于连接相同两个节点的支路。 -->
+    <path d="M498 82H800V288H498V190M498 132V82" />
+    <path d="M606 82v52m0 56v98M708 82v52m0 56v98" />
+    <circle cx="606" cy="161" r="27" fill="#fffdf9" />
+    <circle cx="708" cy="161" r="27" fill="#fffdf9" />
+    <path d="m591 146 30 30m0-30-30 30m87-30 30 30m0-30-30 30" />
+    <path d="M478 146h40m-29 27h18" stroke-width="5" />
+  </g>
+
+  <g fill="#5a4e3a" font-family="Microsoft YaHei, Noto Sans SC, sans-serif" font-size="17" text-anchor="middle">
+    <text x="248" y="140">L₁</text>
+    <text x="328" y="140">L₂</text>
+    <text x="649" y="168">L₁</text>
+    <text x="751" y="168">L₂</text>
+  </g>
+</svg>

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, type Prisma } from '@prisma/client'
 
 type DivisionKey = 'JUNIOR' | 'SENIOR'
 
@@ -17,6 +17,28 @@ function createClient(url: string | undefined): PrismaClient {
   const client = new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
     datasources: { db: { url: url ?? '' } },
+  })
+  client.$use(async (params, next) => {
+    const startedAt = Date.now()
+    let outcome: 'success' | 'failure' = 'success'
+    try {
+      return await next(params)
+    } catch (error) {
+      outcome = 'failure'
+      throw error
+    } finally {
+      const durationMs = Date.now() - startedAt
+      // Keep only model/action/timing metadata; never log SQL, values, or errors.
+      if (outcome === 'failure' || durationMs >= 500 || Math.random() <= 0.01) {
+        console.info('[db-performance]', JSON.stringify({
+          model: params.model || 'raw',
+          operation: params.action,
+          durationMs,
+          outcome,
+          at: new Date().toISOString(),
+        }))
+      }
+    }
   })
   const softDeleteModels = new Set([
     'Student', 'Course', 'ClassGroup', 'ClassLesson', 'Enrollment', 'ExamPaper', 'StudyMaterial', 'StudyHallClass', 'FileAsset',

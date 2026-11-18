@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { checkScheduleConflict } from '@/lib/schedule-conflict'
@@ -11,6 +12,7 @@ import { cancelScheduledLesson, CancelLessonError } from '@/lib/cancel-class-les
 import { chinaClock } from '@/lib/enrollment-subject-change'
 import { getLocalDayRange, localDateColumnValue, localDateKey } from '@/lib/date/local-day'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,6 +50,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         group: {
           select: {
             termId: true,
+            status: true,
             roomId: true,
             intensiveMode: true,
             teachingType: true,
@@ -149,7 +152,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: '时间冲突', conflicts: allConflicts }, { status: 409 })
     }
 
-    const lesson = await prisma.$transaction(async (tx) => {
+    const outcome = await prisma.$transaction(async (tx) => {
       const activeTeacher = effectiveTeacherId && await tx.teacher.findFirst({
         where: { id: effectiveTeacherId, division: existing.division, status: 'ACTIVE' },
         select: { id: true },
@@ -216,9 +219,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           })
         }
         }
+
+        const affectedEnrollments = await tx.enrollment.findMany({
+          where: { groupId: existing.groupId },
+          select: { studentId: true },
+        })
+        for (const studentId of new Set(affectedEnrollments.map((enrollment) => enrollment.studentId))) {
+          await syncStudentHourSnapshot(tx, studentId)
+        }
       }
 
-      return tx.classLesson.update({
+      const updatedLesson = await tx.classLesson.update({
         where: { id },
         data: lessonData,
         include: {
@@ -233,11 +244,32 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           teacher: { select: { id: true, name: true } },
         },
       })
+      const changed = existing.lessonDate.getTime() !== targetDate.getTime()
+        || existing.startTime !== effectiveStart
+        || existing.endTime !== effectiveEnd
+        || existing.teacherId !== effectiveTeacherId
+        || (roomId !== undefined && roomId !== existing.group.roomId)
+        || (studentIds !== undefined && [...existing.lessonStudents.map((row) => row.studentId)].sort().join(',') !== [...effectiveStudentIds].sort().join(','))
+      let changeEventId: string | null = null
+      if (changed) {
+        const change = await recordCourseChangeEvent(tx, {
+          eventType: 'LESSON_RESCHEDULED',
+          actorUserId: user.id,
+          groupId: existing.groupId,
+          lessonIds: [id],
+          studentIds: effectiveStudentIds,
+          title: '课程安排已调整',
+          summary: `课程已调整至 ${effectiveDate} ${effectiveStart}-${effectiveEnd}，请查看最新课表。`,
+          notifyParents: existing.group.status === 'ACTIVE',
+        })
+        changeEventId = change.event.id
+      }
+      return { lesson: updatedLesson, changeEventId }
     })
 
     revalidatePath('/schedule')
     revalidatePath('/teacher/schedule')
-    return NextResponse.json({ success: true, lesson })
+    return NextResponse.json({ success: true, ...outcome })
   } catch (e: unknown) {
     const routeError = e as { status?: number; message?: string; conflicts?: unknown }
     if (routeError.status) {

@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Button, Card, Empty, Input, List, Modal, QRCode, Space, Tag, Typography } from 'antd'
+import { Button, Card, Empty, Input, List, QRCode, Space, Tag, Typography } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { CopyOutlined, LinkOutlined, ReloadOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
 import { toast } from 'sonner'
@@ -90,7 +91,7 @@ export default function ParentAccessPage() {
         </Card>
       </Space>
 
-      <Modal open={Boolean(issued)} title="家长一次性激活入口" footer={null} onCancel={() => setIssued(null)} width={isMobile ? 'calc(100vw - 24px)' : 480}>
+      <BrandModal open={Boolean(issued)} title="家长一次性激活入口" footer={null} onCancel={() => setIssued(null)} width={isMobile ? 'calc(100vw - 24px)' : 480}>
         {issued && <Space direction="vertical" align="center" size={16} style={{ width: '100%', textAlign: 'center' }}>
           <QRCode value={issued.activationUrl} size={isMobile ? 220 : 260} color="#1a1201" />
           <div><Title level={4} style={{ margin: 0 }}>{issued.parent.name || '家长'}</Title><Text type="secondary">{issued.parent.email}</Text></div>
@@ -99,7 +100,7 @@ export default function ParentAccessPage() {
           <Button type="primary" size="large" icon={<CopyOutlined />} block onClick={copyLink}>复制链接发到微信</Button>
           <Text type="secondary">重新生成会立即作废旧链接；不会修改家长当前密码。</Text>
         </Space>}
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

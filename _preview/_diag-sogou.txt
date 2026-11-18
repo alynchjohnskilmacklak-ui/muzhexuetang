@@ -1,0 +1,45 @@
+﻿=== 1) /app/public 是否挂载点 ===
+770 746 252:3 /srv/edu-manage/shared/public/services /app/public/services rw,relatime - ext4 /dev/vda3 rw
+772 746 252:3 /srv/edu-manage/shared/public/marketing /app/public/marketing rw,relatime - ext4 /dev/vda3 rw
+783 746 252:3 /srv/edu-manage/shared/public/uploads /app/public/uploads rw,relatime - ext4 /dev/vda3 rw
+784 746 252:3 /srv/edu-manage/shared/public/shenma-site-verification.txt /app/public/shenma-site-verification.txt rw,relatime - ext4 /dev/vda3 rw
+798 746 252:3 /srv/edu-manage/shared/public/about.html /app/public/about.html rw,relatime - ext4 /dev/vda3 rw
+800 746 252:3 /srv/edu-manage/shared/public/home.html /app/public/home.html rw,relatime - ext4 /dev/vda3 rw
+807 746 252:3 /srv/edu-manage/shared/public/business-assets /app/public/business-assets rw,relatime - ext4 /dev/vda3 rw
+808 746 252:3 /srv/edu-manage/shared/public/volunteer/docs /app/public/volunteer/docs rw,relatime - ext4 /dev/vda3 rw
+
+=== 2) 容器内 /app/public 现有验证文件 ===
+-rwxrwxrwx  1 node node      85 Sep  6 23:12 BingSiteAuth.xml
+-rwxrwxrwx  1 node node      20 Sep 20 14:44 ByteDanceVerify.html
+-rwxrwxrwx  1 node node      33 Sep  6 21:03 baidu_verify_codeva-LcCyyIUZRF.html
+-rw-r--r--  1 root root      68 Oct  3 16:06 shenma-site-verification.txt
+
+=== 3) https 取搜狗文件时的真实响应 ===
+HTTP/2 307 
+
+server: nginx/1.18.0 (Ubuntu)
+
+date: Sat, 03 Oct 2026 08:16:10 GMT
+
+x-content-type-options: nosniff
+
+x-frame-options: DENY
+
+referrer-policy: strict-origin-when-cross-origin
+
+permissions-policy: camera=(), microphone=(), geolocation=()
+
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.aliyuncs.com https://*.aliyuncs.com.cn https://wxpusher.zjiecode.com; font-src 'self' data:; connect-src 'self' https://api.moonshot.cn https://api.deepseek.com https://wxpusher.zjiecode.com https://*.aliyuncs.com https://*.aliyuncs.com.cn; frame-src 'self' https://phet.colorado.edu https://www.geogebra.org https://www.desmos.com https://www.falstad.com https://chemcollective.org; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
+
+=== 4) 三个平台验证文件在 http/https 的实际表现 ===
+  sogousiteverification.txt              http=[200 10]  https=[307 6]
+  shenma-site-verification.txt           http=[200 68]  https=[200 68]
+  baidu_verify_codeva-LcCyyIUZRF.html    http=[301 178]  https=[200 33]
+  BingSiteAuth.xml                       http=[301 178]  https=[200 85]
+  ByteDanceVerify.html                   http=[301 178]  https=[200 20]
+
+=== 5) 当前 80 端口新增的例外 ===
+30:    location = /shenma-site-verification.txt {
+36:    location = /robots.txt {
+42:    location = /sitemap.xml {
+48:    location = /sogousiteverification.txt {

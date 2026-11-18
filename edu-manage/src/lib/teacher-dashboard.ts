@@ -1,12 +1,12 @@
 import { getRequestPrisma } from '@/lib/prisma'
 import type { PrismaClient } from '@prisma/client'
-import { teacherLessonScopeWhere, teacherStudentWhere, todayRange, weekRange } from '@/lib/teacher-portal'
+import { teacherLessonScopeWhere, teacherStudentWhere, weekRange } from '@/lib/teacher-portal'
 import { visibleStudentWhere } from '@/lib/business-visibility'
 import { minutesToHours, roundHours } from '@/lib/hours'
 import { buildLatestFeedbackDateByStudent } from '@/lib/teacher-feedback-freshness'
 import { hasSubmittedLessonAttendance } from '@/lib/attendance-submission'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
-import { localDateColumnValue, todayLocal } from '@/lib/date/local-day'
+import { localDateColumnValue, localDateKey } from '@/lib/date/local-day'
 import { attendanceKey, isoWeekday } from '@/lib/study-hall/domain'
 
 function atTime(date: Date, time: string) {
@@ -44,7 +44,6 @@ function daysSince(date?: Date | null) {
 export async function getTeacherDashboardData(teacherId: string, prismaClient?: PrismaClient, teacherUserId?: string) {
   const prisma = prismaClient ?? await getRequestPrisma()
   const now = new Date()
-  const { start: today, end: todayEnd } = todayRange(now)
   const { start: weekStart, end: weekEnd } = weekRange(now)
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
   const teacher = await prisma.teacher.findUnique({ where: { id: teacherId }, select: { division: true, user: { select: { id: true } } } })
@@ -52,13 +51,16 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
   const termId = activeTerm?.id || '__NO_ACTIVE_TERM__'
   const lessonWhere = await teacherLessonScopeWhere(prisma, teacherId, termId)
   const studentWhere = teacherStudentWhere(teacherId, termId)
-  const todayKey = todayLocal()
+  const todayKey = localDateKey(now)
   const todayDate = localDateColumnValue(todayKey)
+  const today = todayDate
+  const todayEnd = new Date(todayDate.getTime() + 86400000)
   const todayWeekday = isoWeekday(todayKey)
   const resolvedTeacherUserId = teacherUserId || teacher?.user?.id
 
   const [
     todayLessons,
+    nextLessonCandidate,
     weekLessons,
     monthLessons,
     students,
@@ -89,6 +91,11 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
         classroomFeedbacks: { where: { teacherId, status: 'PUBLISHED' }, select: { id: true } },
       },
       orderBy: { startTime: 'asc' },
+    }),
+    prisma.classLesson.findFirst({
+      where: { ...lessonWhere, lessonDate: { gte: todayEnd } },
+      select: { lessonDate: true },
+      orderBy: [{ lessonDate: 'asc' }, { startTime: 'asc' }],
     }),
     prisma.classLesson.findMany({
       where: { ...lessonWhere, lessonDate: { gte: weekStart, lt: weekEnd } },
@@ -196,6 +203,33 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     }),
   ])
 
+  const nextLessonDate = nextLessonCandidate ? localDateKey(nextLessonCandidate.lessonDate) : null
+  const nextLessonDateStart = nextLessonDate ? localDateColumnValue(nextLessonDate) : null
+  const nextLessonDateEnd = nextLessonDateStart
+    ? new Date(nextLessonDateStart.getTime() + 86400000)
+    : null
+  const nextDayLessons = todayLessons.length === 0 && nextLessonDateStart && nextLessonDateEnd
+    ? await prisma.classLesson.findMany({
+        where: { ...lessonWhere, lessonDate: { gte: nextLessonDateStart, lt: nextLessonDateEnd } },
+        include: {
+          group: {
+            include: {
+              course: true,
+              room: true,
+              enrollments: {
+                where: { status: 'ACTIVE', student: visibleStudentWhere },
+                include: { student: { select: { id: true, name: true, grade: true, school: true, membershipLevel: true } } },
+              },
+            },
+          },
+          attendances: true,
+          lessonStudents: { select: { studentId: true } },
+          classroomFeedbacks: { where: { teacherId, status: 'PUBLISHED' }, select: { id: true } },
+        },
+        orderBy: { startTime: 'asc' },
+      })
+    : []
+
   const publishedClassroomFeedbacks = students.length
     ? await prisma.classroomFeedback.findMany({
         where: {
@@ -237,7 +271,7 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
     return covered
   }
 
-  const decoratedTodayLessons = todayLessons.map((lesson) => {
+  const decorateLesson = (lesson: typeof todayLessons[number]) => {
     const expectedStudentIds = lesson.group.intensiveMode === 'INTENSIVE'
       ? lesson.lessonStudents.map((student) => student.studentId)
       : lesson.group.enrollments.map((enrollment) => enrollment.student.id)
@@ -269,7 +303,9 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
         : lesson.classroomFeedbacks.length > 0,
       feedbackId: lesson.classroomFeedbacks[0]?.id || null,
     }
-  })
+  }
+  const decoratedTodayLessons = todayLessons.map(decorateLesson)
+  const decoratedNextLessons = nextDayLessons.map(decorateLesson)
 
   const endedTodayLessons = todayLessons.filter((lesson) => atTime(lesson.lessonDate, lesson.endTime) < now)
   const attendanceSubmittedFor = (lesson: typeof todayLessons[number]) => {
@@ -593,6 +629,8 @@ export async function getTeacherDashboardData(teacherId: string, prismaClient?: 
       pendingStudyHallHomework,
     },
     todayLessons: decoratedTodayLessons,
+    nextLessons: decoratedNextLessons,
+    nextLessonDate,
     todos,
     feedbackTasks,
     weekCompletion: {

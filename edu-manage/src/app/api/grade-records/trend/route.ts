@@ -3,6 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { assertCanAccessStudent } from '@/lib/auth/guards'
 import { apiHandler } from '@/lib/api-handler'
+import { getRequestDivision } from '@/lib/division'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
@@ -16,9 +17,34 @@ export const GET = apiHandler(async (req: NextRequest) => {
   if (!studentId || !groupId) {
     return NextResponse.json({ error: '请指定学员和班级' }, { status: 400 })
   }
+  if (user.role === 'teacher' && !user.teacherId) {
+    return NextResponse.json({ error: '教师账号未绑定教师档案' }, { status: 403 })
+  }
 
   // 归属校验：家长只能看自己孩子，教师只能看自己学生，管理员不受限。
   await assertCanAccessStudent({ ...user, prisma }, studentId)
+
+  // The student check above does not authorize an arbitrary groupId. Require
+  // this student to have a persisted enrollment in the requested group, and
+  // require teachers to teach that same group before exposing its averages.
+  const teacherScope = user.role === 'teacher'
+    ? {
+        OR: [
+          { teacherId: user.teacherId! },
+          { teacherAssignments: { some: { teacherId: user.teacherId! } } },
+        ],
+      }
+    : {}
+  const group = await prisma.classGroup.findFirst({
+    where: {
+      id: groupId,
+      division: getRequestDivision(user),
+      enrollments: { some: { studentId, deletedAt: null } },
+      ...teacherScope,
+    },
+    select: { id: true },
+  })
+  if (!group) return NextResponse.json({ error: '无权访问该班级成绩' }, { status: 404 })
 
   // Get all assessments for this group
   const assessments = await prisma.assessment.findMany({

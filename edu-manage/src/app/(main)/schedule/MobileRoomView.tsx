@@ -68,7 +68,7 @@ export function MobileRoomView({
           style={{ padding: '6px 16px', borderRadius: 8, border: '1px solid #EEE7E1', background: '#fff', cursor: 'pointer', fontSize: 12 }}>今天</button>
         {onNewCourseClick && (
           <button onClick={onNewCourseClick}
-            style={{ marginLeft: 'auto', padding: '7px 18px', borderRadius: 8, background: '#E8784A', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            style={{ marginLeft: 'auto', padding: '7px 18px', borderRadius: 8, background: 'var(--color-primary)', color: 'var(--color-on-primary)', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
             + 临时加课
           </button>
         )}

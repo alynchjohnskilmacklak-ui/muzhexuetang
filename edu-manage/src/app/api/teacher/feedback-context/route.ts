@@ -47,7 +47,7 @@ export const GET = apiHandler(async () => {
       enrollments: {
         where: { status: 'ACTIVE' },
         include: {
-          student: { select: { id: true, name: true, grade: true, school: true, remainHours: true } },
+          student: { select: { id: true, name: true, grade: true, gender: true, school: true, remainHours: true } },
         },
       },
       classLessons: {
@@ -180,6 +180,7 @@ export const GET = apiHandler(async () => {
         id: e.student.id,
         name: e.student.name,
         grade: e.student.grade,
+        gender: e.student.gender,
         school: e.student.school,
         remainHours: g.intensiveMode === 'INTENSIVE' ? e.remainHours : e.student.remainHours,
         attendanceRate: attRate,

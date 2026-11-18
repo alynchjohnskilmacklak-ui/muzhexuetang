@@ -96,7 +96,7 @@ interface AttendanceMonthData {
 }
 
 interface DashboardData {
-  teacher: { id: string; name: string; avatar?: string | null; subjects?: string | null; tierLevel?: string | null }
+  teacher: { id: string; name: string; gender?: string | null; avatar?: string | null; subjects?: string | null; tierLevel?: string | null }
   heroStats: {
     todayLessons: number
     pendingAttendance: number
@@ -108,6 +108,8 @@ interface DashboardData {
     pendingStudyHallHomework?: number
   }
   todayLessons: DashboardLesson[]
+  nextLessons?: DashboardLesson[]
+  nextLessonDate?: string | null
   todos: DashboardTask[]
   weekCompletion: {
     attendance: CompletionItem
@@ -155,6 +157,15 @@ const LESSON_STATUS_META: Record<string, { label: string; bg: string; color: str
 const quickIcons = [<CheckCircleOutlined key="attendance" />, <CalendarOutlined key="schedule" />, <FileDoneOutlined key="salary" />, <RobotOutlined key="sim" />, <MessageOutlined key="feedback" />, <MessageOutlined key="messages" />, <TeamOutlined key="students" />, <CalendarOutlined key="preview" />]
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
+function formatScheduleDate(dateKey?: string | null) {
+  if (!dateKey) return ''
+  const [year, month, day] = dateKey.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  if (Number.isNaN(date.getTime())) return ''
+  const weekday = ['日', '一', '二', '三', '四', '五', '六'][date.getUTCDay()]
+  return `${month}月${day}日 · 周${weekday}`
+}
+
 function getGreeting() {
   const hour = new Date().getHours()
   if (hour < 12) return '早上好'
@@ -170,7 +181,10 @@ function dateText() {
 function EChart({ option, height = 190 }: { option: echarts.EChartsOption; height?: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const optionRef = useRef(option)
-  optionRef.current = option
+  useEffect(() => {
+    optionRef.current = option
+    if (ref.current) echarts.getInstanceByDom(ref.current)?.setOption(option, { notMerge: true })
+  }, [option])
   useEffect(() => {
     if (!ref.current) return
     const chart = echarts.init(ref.current)
@@ -187,13 +201,13 @@ function EChart({ option, height = 190 }: { option: echarts.EChartsOption; heigh
 
 /** 本月课酬图表：4 周课时 + 课酬双柱 */
 function SalaryChart({ month }: { month?: MonthData }) {
-  const weeks = month?.weeks || []
+  const weeks = useMemo(() => month?.weeks ?? [], [month?.weeks])
   const option = useMemo<echarts.EChartsOption>(() => ({
     tooltip: {
       trigger: 'axis',
       backgroundColor: '#16241F',
       borderWidth: 0,
-      textStyle: { color: '#F5F1E8', fontSize: 11 },
+      textStyle: { color: '#F5F1E8', fontSize: 12 },
       axisPointer: { type: 'shadow' },
     },
     legend: {
@@ -201,7 +215,7 @@ function SalaryChart({ month }: { month?: MonthData }) {
       top: 0,
       itemWidth: 10,
       itemHeight: 10,
-      textStyle: { color: '#8D806F', fontSize: 11 },
+      textStyle: { color: '#756A58', fontSize: 12 },
     },
     grid: { left: 4, right: 4, top: 26, bottom: 4, containLabel: true },
     xAxis: {
@@ -209,20 +223,20 @@ function SalaryChart({ month }: { month?: MonthData }) {
       data: weeks.map((w) => w.label),
       axisTick: { show: false },
       axisLine: { lineStyle: { color: '#E7DFD3' } },
-      axisLabel: { color: '#8D806F', fontSize: 11 },
+      axisLabel: { color: '#756A58', fontSize: 12 },
     },
     yAxis: [
       {
         type: 'value',
         name: '课时',
-        nameTextStyle: { color: '#8D806F', fontSize: 10 },
+        nameTextStyle: { color: '#756A58', fontSize: 12 },
         splitLine: { lineStyle: { color: '#F0E9DD', type: 'dashed' } },
-        axisLabel: { color: '#A89C8A', fontSize: 10 },
+        axisLabel: { color: '#756A58', fontSize: 11 },
       },
       {
         type: 'value',
         splitLine: { show: false },
-        axisLabel: { color: '#A89C8A', fontSize: 10, formatter: (v: number) => `${v >= 0 ? '' : '-'}¥${Math.abs(v)}` },
+        axisLabel: { color: '#756A58', fontSize: 11, formatter: (v: number) => `${v >= 0 ? '' : '-'}¥${Math.abs(v)}` },
       },
     ],
     series: [
@@ -249,15 +263,15 @@ function SalaryChart({ month }: { month?: MonthData }) {
 
 /** 出勤趋势图表：4 周出勤率柱状 */
 function AttendanceChart({ month }: { month?: AttendanceMonthData }) {
-  const weeks = month?.weeks || []
+  const weeks = useMemo(() => month?.weeks ?? [], [month?.weeks])
   const option = useMemo<echarts.EChartsOption>(() => ({
     tooltip: {
       trigger: 'axis',
       backgroundColor: '#16241F',
       borderWidth: 0,
       textStyle: { color: '#F5F1E8', fontSize: 11 },
-      formatter: (params: any) => {
-        const item = params[0]
+      formatter: (params: unknown) => {
+        const item = (Array.isArray(params) ? params[0] : params) as { name?: string; value?: unknown }
         return `${item.name}<br/>出勤率：${item.value == null ? '暂无课程' : item.value + '%'}`
       },
     },
@@ -291,7 +305,7 @@ function AttendanceChart({ month }: { month?: AttendanceMonthData }) {
           color: '#123C35',
           fontWeight: 700,
           fontSize: 11,
-          formatter: (p: any) => (p.value == null ? '' : p.value + '%'),
+          formatter: (p: { value?: unknown }) => (p.value == null ? '' : String(p.value) + '%'),
         },
       },
     ],
@@ -368,7 +382,7 @@ export default function TeacherDashboardPage() {
     revalidateOnFocus: true,
   })
   const { data: messageUnreadData } = useSWR<{ count: number }>('/api/messages/unread-count', fetcher, {
-    refreshInterval: 5_000,
+    refreshInterval: 30_000,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
   })
@@ -384,7 +398,11 @@ export default function TeacherDashboardPage() {
   if (isLoading) return <CardSkeleton rows={3} />
   if (!data?.teacher) return <BrandEmpty title="未找到教师信息" icon={<UserOutlined />} />
 
-  const { teacher, heroStats, todayLessons, weekCompletion, monthlyStats, attendanceByMonth, salaryByMonth, quickActions } = data
+  const { teacher, heroStats, todayLessons, nextLessons = [], nextLessonDate, weekCompletion, monthlyStats, attendanceByMonth, salaryByMonth, quickActions } = data
+  const showingUpcoming = todayLessons.length === 0 && nextLessons.length > 0
+  const scheduleLessons = todayLessons.length > 0 ? todayLessons : nextLessons
+  const scheduleDateLabel = showingUpcoming ? formatScheduleDate(nextLessonDate) : ''
+  const scheduleHref = todayLessons.length > 0 ? '/teacher/today-lessons' : '/teacher/teaching-schedule'
   const tier = resolveTier(teacher.tierLevel)
   const tierTheme = TIER_THEME[tier]
   const heroItems = [
@@ -447,17 +465,19 @@ export default function TeacherDashboardPage() {
               <button
                 type="button"
                 className="teacher-dashboard-section-link"
-                onClick={() => router.push('/teacher/today-lessons')}
+                onClick={() => router.push(scheduleHref)}
               >
-                <span>今日课程</span>
-                <small>点击查看详细课程安排 ›</small>
+                <span>{showingUpcoming ? '下次课程' : '今日课程'}</span>
+                <small>{scheduleDateLabel ? `${scheduleDateLabel} · 查看课表 ›` : '点击查看详细课程安排 ›'}</small>
               </button>
             }
           >
-            {todayLessons.length ? (
+            {scheduleLessons.length ? (
               <div className="teacher-today-schedule-grid">
-                {todayLessons.map(lesson => {
+                {scheduleLessons.map(lesson => {
                   const meta = LESSON_STATUS_META[lesson.statusLabel] || LESSON_STATUS_META['待考勤']
+                  const courseName = lesson.courseName.replace('牧哲学堂', '')
+                  const groupName = lesson.groupName.replace('牧哲学堂', '')
                   return (
                     <button
                       key={lesson.id}
@@ -470,7 +490,7 @@ export default function TeacherDashboardPage() {
                         <span className="teacher-today-schedule-item__time">{lesson.time}</span>
                         <span className="teacher-today-schedule-item__status" style={{ color: meta.color, background: meta.bg }}>{meta.label}</span>
                       </div>
-                      <strong className="teacher-today-schedule-item__title">{lesson.courseName.replace('牧哲学堂', '')} · {lesson.groupName.replace('牧哲学堂', '')}</strong>
+                      <strong className="teacher-today-schedule-item__title">{groupName === courseName ? groupName : `${groupName} · ${courseName}`}</strong>
                       <small className="teacher-today-schedule-item__meta">{lesson.room} · {lesson.studentCount}人{lesson.hasFeedback ? ' · 已发反馈' : ' · 未发反馈'}</small>
                     </button>
                   )
@@ -478,7 +498,7 @@ export default function TeacherDashboardPage() {
               </div>
             ) : (
               <div>
-                <BrandEmpty title="今日暂无课程" hint="可以整理课堂反馈、上传试卷或查看学生学习情况" icon={<CalendarOutlined />} />
+                <BrandEmpty title="今日暂无课程" hint="本期暂无后续课次，可打开完整课表核对安排。" icon={<CalendarOutlined />} />
                 <div className="teacher-dashboard-empty-actions">
                   <Button onClick={() => router.push('/teacher/students')}>查看我的学生</Button>
                   <Button onClick={() => router.push('/teacher/papers')}>上传试卷</Button>

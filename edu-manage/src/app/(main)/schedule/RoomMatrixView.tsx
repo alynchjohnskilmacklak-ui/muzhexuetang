@@ -68,7 +68,7 @@ export function RoomMatrixView({
           style={{ border: '0.5px solid var(--color-border, #EEE7E1)', borderRadius: 6, background: '#fff', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>今天</button>
         {onNewCourseClick && (
           <button onClick={onNewCourseClick}
-            style={{ marginLeft: 'auto', padding: '7px 18px', borderRadius: 6, background: '#E8784A', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            style={{ marginLeft: 'auto', padding: '7px 18px', borderRadius: 6, background: 'var(--color-primary)', color: 'var(--color-on-primary)', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
             + 排课
           </button>
         )}

@@ -1,16 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { Modal, Button, Upload, Table, message, Alert, Typography } from 'antd'
+import { Button, Upload, Table, message, Alert, Typography } from 'antd'
 import { DownloadOutlined, InboxOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
+import { BrandModal } from '@/components/Common/BrandModal'
 import * as XLSX from 'xlsx'
+import { brandXlsxBufferInBrowser } from '@/lib/export-xlsx-brand'
 
 const { Dragger } = Upload
 
-const TEMPLATE_HEADERS = ['姓名', '性别', '年级', '学校', '家长姓名', '家长手机']
+const TEMPLATE_HEADERS = ['姓名', '手机号', '性别', '年级', '学校', '家长姓名', '家长手机']
 const TEMPLATE_DATA = [
-  ['张三', '男', '高一', '石家庄一中', '张爸爸', '13800001111'],
-  ['李四', '女', '初三', '衡水中学', '李妈妈', '13900002222'],
+  ['张三', '13800001111', '男', '高一', '石家庄一中', '张爸爸', '13900001111'],
+  ['李四', '13800002222', '女', '初三', '衡水中学', '李妈妈', '13900002222'],
 ]
 
 export function ImportModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -28,7 +30,9 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
       const errs: string[] = []
       data.forEach((row, i) => {
         if (!row['姓名']) errs.push(`第${i + 2}行：姓名为空`)
-        if (row['家长手机'] && !/^\d{11}$/.test(row['家长手机'])) errs.push(`第${i + 2}行：手机格式错误`)
+        if (!row['手机号']) errs.push(`第${i + 2}行：学员手机号不能为空`)
+        else if (!/^1[3-9]\d{9}$/.test(String(row['手机号']).trim())) errs.push(`第${i + 2}行：学员手机号格式错误`)
+        if (row['家长手机'] && !/^1[3-9]\d{9}$/.test(String(row['家长手机']).trim())) errs.push(`第${i + 2}行：家长手机格式错误`)
       })
       setRows(data)
       setErrors(errs)
@@ -49,6 +53,7 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: row['姓名'],
+            phone: row['手机号'],
             gender: row['性别'] || null,
             grade: row['年级'] || null,
             school: row['学校'] || null,
@@ -83,16 +88,38 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
     onClose()
   }
 
-  const downloadTemplate = () => {
+  const downloadWorkbook = async (workbook: XLSX.WorkBook, filename: string) => {
+    const rawBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' }) as ArrayBuffer
+    const brandedBuffer = await brandXlsxBufferInBrowser(new Uint8Array(rawBuffer))
+    const downloadBuffer = brandedBuffer.buffer.slice(
+      brandedBuffer.byteOffset,
+      brandedBuffer.byteOffset + brandedBuffer.byteLength,
+    ) as ArrayBuffer
+    const blob = new Blob([downloadBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = filename
+    anchor.click()
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+
+  const downloadTemplate = async () => {
     const ws = XLSX.utils.aoa_to_sheet([TEMPLATE_HEADERS, ...TEMPLATE_DATA])
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, '学员导入模板')
-    XLSX.writeFile(wb, '学员导入模板.xlsx')
+    try {
+      await downloadWorkbook(wb, '牧哲学堂_学员导入模板.xlsx')
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '模板下载失败，请重试')
+    }
   }
 
   const columns = TEMPLATE_HEADERS.map(h => ({ title: h, dataIndex: h, key: h }))
 
-  const downloadCredentials = () => {
+  const downloadCredentials = async () => {
     const ws = XLSX.utils.json_to_sheet(credentials.map((item) => ({
       家长姓名: item.name,
       登录账号: item.email,
@@ -101,11 +128,15 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
     })))
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, '新建家长账号')
-    XLSX.writeFile(wb, `家长初始账号_${new Date().toISOString().slice(0, 10)}.xlsx`)
+    try {
+      await downloadWorkbook(wb, `牧哲学堂_家长初始账号_${new Date().toISOString().slice(0, 10)}.xlsx`)
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '账号表下载失败，请重试')
+    }
   }
 
   return (
-    <Modal
+    <BrandModal
       title={credentials.length ? '保存新建家长账号' : '批量导入学员'}
       open={open}
       onCancel={handleClose}
@@ -150,7 +181,7 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
       <Dragger accept=".xlsx,.xls" beforeUpload={handleParse} maxCount={1} style={{ marginBottom: 16 }}>
         <p className="ant-upload-drag-icon"><InboxOutlined /></p>
         <p className="ant-upload-text">点击或拖拽 xlsx 文件上传</p>
-        <p className="ant-upload-hint">支持 .xlsx / .xls 格式</p>
+        <p className="ant-upload-hint">支持 .xlsx / .xls 格式；学员手机号必填，家长手机选填</p>
       </Dragger>
 
       {errors.length > 0 && (
@@ -164,6 +195,6 @@ export function ImportModal({ open, onClose }: { open: boolean; onClose: () => v
       )}
         </>
       )}
-    </Modal>
+    </BrandModal>
   )
 }

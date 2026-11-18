@@ -1,0 +1,217 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
+import { getCurrentUser } from '@/lib/get-user'
+import { visibleClassGroupWhere } from '@/lib/business-visibility'
+import { addDays, format } from 'date-fns'
+import { apiHandler } from '@/lib/api-handler'
+import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+
+const WEEK_DAYS = new Set(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'])
+
+function normalizeRecurringDays(value: unknown) {
+  if (!Array.isArray(value)) return []
+  return value.filter((day): day is string => typeof day === 'string' && WEEK_DAYS.has(day))
+}
+
+function normalizeTemplate(value: unknown) {
+  if (!Array.isArray(value)) return []
+  return value
+    .map((item, index) => {
+      if (!item || typeof item !== 'object') return null
+      const entry = item as Record<string, unknown>
+      const teacherId = typeof entry.teacherId === 'string' ? entry.teacherId : ''
+      const subject = typeof entry.subject === 'string' ? entry.subject.trim() : ''
+      const startTime = typeof entry.startTime === 'string' ? entry.startTime : ''
+      const endTime = typeof entry.endTime === 'string' ? entry.endTime : ''
+      if (!teacherId || !subject || !startTime || !endTime) return null
+      return { teacherId, subject, startTime, endTime, order: Number(entry.order || index + 1) }
+    })
+    .filter((item): item is { teacherId: string; subject: string; startTime: string; endTime: string; order: number } => Boolean(item))
+    .sort((a, b) => a.order - b.order)
+}
+
+export const POST = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  const user = await getCurrentUser()
+  if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
+
+  const { id } = await params
+  if (!await isClassGroupInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能重新生成课表' }, { status: 409 })
+  }
+  const body = await req.json()
+  const { startDate, recurringDays, totalLessons, lessonStartTime, lessonMinutes, totalDays } = body
+  const scheduleTemplate = normalizeTemplate(body.scheduleTemplate)
+
+  const group = await prisma.classGroup.findFirst({
+    where: { id, ...visibleClassGroupWhere },
+    include: {
+      course: true,
+      teacherAssignments: { orderBy: { createdAt: 'asc' } },
+      classLessons: {
+        where: { status: { notIn: ['CANCELLED', 'POSTPONED'] } },
+        select: {
+          lessonDate: true,
+          teacherId: true,
+          subject: true,
+          startTime: true,
+          endTime: true,
+        },
+      },
+    },
+  })
+  if (!group) return NextResponse.json({ error: '班级不存在' }, { status: 404 })
+  if (group.intensiveMode === 'INTENSIVE') {
+    return NextResponse.json({
+      error: '个性化课程不生成固定课表，请由教师逐次约课，或由管理员进行历史补录。',
+    }, { status: 409 })
+  }
+  if (group.status !== 'WAITING') {
+    return NextResponse.json({
+      error: '进行中班级不能重新生成整张课表，请使用“调整上课日”修改未来安排，避免覆盖历史课次。',
+    }, { status: 409 })
+  }
+
+  // DATE columns use UTC midnight. Weekday calculation must stay in UTC so
+  // deployments in different server timezones generate the same weekdays.
+  const start = startDate ? new Date(`${startDate}T00:00:00.000Z`) : group.startDate
+  const requestDays = normalizeRecurringDays(recurringDays)
+  const days = requestDays.length ? requestDays : group.recurringDays
+  const mins = lessonMinutes || group.lessonMinutes || 45
+  const total = Number(totalDays || totalLessons || group.course.totalLessons || group.totalLessons)
+  const startTime = lessonStartTime || group.lessonStartTime
+
+  if (!days.length) return NextResponse.json({ error: '请选择上课日期' }, { status: 400 })
+  if (!total || total <= 0) return NextResponse.json({ error: '请设置总课次数' }, { status: 400 })
+  if (total > 365) return NextResponse.json({ error: '单次最多安排 365 天课次' }, { status: 400 })
+
+  const dates: Date[] = []
+  let cursor = new Date(start)
+  const dayMap: Record<string, number> = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 }
+  const targetDays = days.map((d: string) => dayMap[d] ?? -1).filter((d: number) => d >= 0)
+
+  while (dates.length < total) {
+    if (targetDays.includes(cursor.getUTCDay())) {
+      dates.push(new Date(cursor))
+    }
+    cursor = addDays(cursor, 1)
+    if (dates.length === 0 && cursor.getTime() > addDays(start, 365).getTime()) break
+  }
+
+  const endTime = (t: string, m: number) => {
+    const [h, min] = t.split(':').map(Number)
+    const totalMin = h * 60 + min + m
+    return `${String(Math.floor(totalMin / 60)).padStart(2, '0')}:${String(totalMin % 60).padStart(2, '0')}`
+  }
+
+  const assignments = group.teacherAssignments.length
+    ? group.teacherAssignments
+    : [{ teacherId: group.teacherId, subject: group.course.subject }]
+  const lessonsByDay = new Map<number, typeof group.classLessons>()
+  for (const lesson of group.classLessons) {
+    const key = new Date(lesson.lessonDate).setHours(0, 0, 0, 0)
+    const current = lessonsByDay.get(key) || []
+    current.push(lesson)
+    lessonsByDay.set(key, current)
+  }
+  const inferredTemplate = [...lessonsByDay.values()]
+    .sort((left, right) => right.length - left.length)[0]
+    ?.map((lesson, index) => ({
+      teacherId: lesson.teacherId || group.teacherId,
+      subject: lesson.subject || group.course.subject,
+      startTime: lesson.startTime,
+      endTime: lesson.endTime,
+      order: index + 1,
+    })) || []
+  const dailyTemplate = scheduleTemplate.length
+    ? scheduleTemplate
+    : inferredTemplate.length
+      ? inferredTemplate
+    : assignments.slice(0, 1).map((assignment) => ({
+        teacherId: assignment.teacherId,
+        subject: assignment.subject || group.course.subject,
+        startTime,
+        endTime: endTime(startTime, mins),
+        order: 1,
+      }))
+
+  // 分批创建，每批最多50条，防止数据库超时
+  const allData = dates.flatMap((d) => dailyTemplate.map((slot) => ({
+    groupId: id,
+    teacherId: slot.teacherId,
+    subject: slot.subject,
+    lessonDate: d,
+    startTime: slot.startTime,
+    endTime: slot.endTime,
+    status: 'SCHEDULED' as const,
+    division: group.division,
+  })))
+
+  if (allData.length > 250) {
+    return NextResponse.json({ error: `课次总数 ${allData.length} 节超过单次上限 250 节，请减少上课日/天数/每天节次` }, { status: 400 })
+  }
+
+  const BATCH_SIZE = 50
+  const created = await prisma.$transaction(async (tx) => {
+    // All validation and schedule construction above must finish before any old
+    // lessons are removed. The replacement itself is atomic so a failed batch
+    // cannot leave the class without its previous timetable.
+    const oldLessons = await tx.classLesson.findMany({
+      where: { groupId: id, status: { not: 'COMPLETED' }, isManual: false },
+      select: { id: true },
+    })
+    const oldIds = oldLessons.map((lesson) => lesson.id)
+    if (oldIds.length) {
+      await tx.attendance.deleteMany({ where: { lessonId: { in: oldIds } } })
+      await tx.classLesson.deleteMany({ where: { id: { in: oldIds } } })
+    }
+
+    let createdCount = 0
+    for (let i = 0; i < allData.length; i += BATCH_SIZE) {
+      const batch = allData.slice(i, i + BATCH_SIZE)
+      const result = await tx.classLesson.createMany({ data: batch, skipDuplicates: true })
+      createdCount += result.count
+    }
+
+    // Snapshot the active roster in the same transaction as lesson creation.
+    const snapshotStudents = await tx.enrollment.findMany({
+      where: { groupId: id, status: 'ACTIVE', deletedAt: null },
+      select: { studentId: true, subjects: true },
+    })
+    if (snapshotStudents.length) {
+      const snapshotLessons = await tx.classLesson.findMany({
+        where: { groupId: id, status: { in: ['SCHEDULED', 'IN_PROGRESS'] }, isManual: false, deletedAt: null },
+        select: { id: true, subject: true },
+      })
+      const snapshotRows = snapshotLessons.flatMap((lesson) =>
+        snapshotStudents
+          .filter((student) => enrollmentIncludesSubject(student.subjects, lesson.subject))
+          .map((student) => ({ lessonId: lesson.id, studentId: student.studentId })),
+      )
+      if (snapshotRows.length) {
+        await tx.classLessonStudent.createMany({ data: snapshotRows, skipDuplicates: true })
+      }
+    }
+
+    const activeLessonCount = await tx.classLesson.count({
+      where: { groupId: id, status: { not: 'CANCELLED' }, deletedAt: null },
+    })
+    await tx.classGroup.update({
+      where: { id },
+      data: {
+        totalLessons: activeLessonCount,
+        lessonStartTime: startTime,
+        lessonMinutes: mins,
+        recurringDays: days,
+        startDate: start,
+      },
+    })
+    await tx.activityLog.create({
+      data: { userId: user.id, action: '生成课次', detail: `${group.name} 共${dates.length}节` },
+    })
+    return createdCount
+  }, { timeout: 30_000 })
+
+  return NextResponse.json({ count: created, dates: dates.map(d => format(d, 'yyyy-MM-dd')) })
+})

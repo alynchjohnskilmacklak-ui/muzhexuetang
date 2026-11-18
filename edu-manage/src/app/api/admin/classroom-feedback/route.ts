@@ -9,6 +9,7 @@ import { normalizeLessonContent } from '@/lib/classroom-feedback/access'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 
 import { apiHandler } from '@/lib/api-handler'
+import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,7 +45,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
         ],
       },
       include: {
-        teacher: { select: { id: true, name: true } },
+        teacher: { select: { id: true, name: true, tierLevel: true, subjects: true, avatar: true } },
         classLesson: {
           include: {
             group: { include: { course: { select: { name: true, subject: true } } } },
@@ -63,7 +64,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
         group: { termId: selectedTerm?.id || '__NO_SELECTED_TERM__' },
       },
       include: {
-        teacher: { select: { id: true, name: true } },
+        teacher: { select: { id: true, name: true, tierLevel: true, subjects: true, avatar: true } },
         group: {
           include: {
             course: { select: { name: true, subject: true } },
@@ -106,13 +107,19 @@ export const GET = apiHandler(async (req: NextRequest) => {
           .map((studentId) => studentMap.get(studentId)?.name)
           .filter(Boolean)
           .join('、') || '未知学生',
+        teacherId: feedback.teacherId,
         teacherName: feedback.teacher.name,
+        classGroupName: feedback.classLesson?.group?.name || null,
+        courseName: feedback.classLesson?.group?.course?.name || null,
         lessonContent: feedback.lessonContent?.slice(0, 120) || null,
+        summary: feedback.summary?.slice(0, 200) || null,
         subject: feedback.classLesson?.subject
           ?? feedback.classLesson?.group?.course?.subject
           ?? '-',
         date: (feedback.classLesson?.lessonDate ?? feedback.createdAt).toISOString(),
+        createdAt: feedback.createdAt.toISOString(),
         tags: feedback.tags,
+        imageCount: feedback.imageUrls.length,
         hasImage: feedback.imageUrls.length > 0,
         status: feedback.status,
       })),
@@ -198,17 +205,15 @@ export const POST = apiHandler(async (req: NextRequest) => {
         for (const student of studentsData) {
           const parentUserId = student.parentId || student.parentUserId
           if (!parentUserId) continue
-          await tx.notification.create({
-            data: {
-              userId: parentUserId,
-              type: 'CLASSROOM_FEEDBACK',
-              title: `${teacher.name.endsWith('老师') ? teacher.name : `${teacher.name}老师`}发布了课堂反馈`,
-              content: `${student.name}: ${summary || knowledgePoints?.join('、') || '课堂资料已更新'}`.slice(0, 80),
-              link: '/parent/class-feedback',
-              relatedType: 'CLASSROOM_FEEDBACK',
-              relatedId: created.id,
-              href: `/parent/class-feedback/${created.id}`,
-            },
+          await createNotification(tx, {
+            userId: parentUserId,
+            type: 'CLASSROOM_FEEDBACK',
+            title: `${teacher.name.endsWith('老师') ? teacher.name : `${teacher.name}老师`}发布了课堂反馈`,
+            content: `${student.name}: ${summary || knowledgePoints?.join('、') || '课堂资料已更新'}`.slice(0, 80),
+            link: '/parent/class-feedback',
+            relatedType: 'CLASSROOM_FEEDBACK',
+            relatedId: created.id,
+            href: `/parent/class-feedback/${created.id}`,
           })
         }
       }

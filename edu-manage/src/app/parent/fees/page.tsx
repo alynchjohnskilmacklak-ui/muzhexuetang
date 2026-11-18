@@ -2,7 +2,10 @@ import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ParentFeesClient } from './client'
-import { parentActiveStudentWhere } from '@/lib/business-visibility'
+import { parentLinkedStudentWhere } from '@/lib/business-visibility'
+import { findParentChild, getParentChildren } from '@/lib/parent-children'
+import { cookies } from 'next/headers'
+import { PARENT_ACTIVE_CHILD_COOKIE } from '@/constants/membership'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,10 +16,13 @@ export default async function ParentFeesPage({ searchParams }: { searchParams?: 
   const db = await getRequestPrisma()
   const userId = (session.user as { id: string }).id
   const params = await searchParams
-  const childId = params?.childId || ''
-  const studentWhere = childId
-    ? { ...parentActiveStudentWhere(userId), id: childId }
-    : parentActiveStudentWhere(userId)
+  const children = await getParentChildren(db, userId)
+  const remembered = (await cookies()).get(PARENT_ACTIVE_CHILD_COOKIE)?.value
+  const requested = params?.childId
+  const child = findParentChild(children, requested || remembered || null)
+  if (requested && requested !== 'all' && !child) redirect('/parent/fees')
+  const activeChild = requested === 'all' ? null : child || children[0] || null
+  const studentWhere = { ...parentLinkedStudentWhere(userId), id: { in: activeChild?.recordIds || children.flatMap((item) => item.recordIds) } }
 
   const fees = await db.fee.findMany({
     where: { deletedAt: null, student: studentWhere, OR: [{ courseId: null }, { course: { isActive: true } }] },
@@ -39,12 +45,12 @@ export default async function ParentFeesPage({ searchParams }: { searchParams?: 
   const totalPaid = fees.filter(f => f.status === 'paid').reduce((s, f) => s + f.amount, 0)
   const totalPending = fees.filter(f => f.status === 'pending').reduce((s, f) => s + f.amount, 0)
 
-  const studentNames = [...new Set(fees.map(f => f.student.name))]
 
   return (
     <ParentFeesClient
       feeData={feeData}
-      studentNames={studentNames}
+      linkedChildren={children}
+      activeChildId={activeChild?.id || 'all'}
       totalPaid={totalPaid}
       totalPending={totalPending}
     />

@@ -4,7 +4,7 @@ import { apiHandler } from '@/lib/api-handler'
 import { getLocalDayRange, localDateKey } from '@/lib/date/local-day'
 import { checkScheduleConflict, type ConflictInfo } from '@/lib/schedule-conflict'
 import { requireCurrentTeacher, teacherLessonWhere } from '@/lib/teacher-portal'
-import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 import {
   calculatePlannedMinutes,
   canTeacherEditIntensiveLesson,
@@ -16,7 +16,10 @@ export const dynamic = 'force-dynamic'
 
 async function getOwnedLesson(id: string) {
   const context = await requireCurrentTeacher()
-  const activeTerm = await getActiveAcademicTerm(context.prisma, context.teacher.division)
+  const activeTerms = await context.prisma.academicTerm.findMany({
+    where: { division: context.teacher.division, status: 'ACTIVE' },
+    select: { id: true },
+  })
   const lesson = await context.prisma.classLesson.findFirst({
     where: {
       id,
@@ -24,7 +27,7 @@ async function getOwnedLesson(id: string) {
       group: {
         intensiveMode: 'INTENSIVE',
         status: { not: 'ARCHIVED' },
-        termId: activeTerm?.id || '__NO_ACTIVE_TERM__',
+        termId: activeTerms.length ? { in: activeTerms.map((term) => term.id) } : '__NO_ACTIVE_TERM__',
       },
     },
     include: {
@@ -126,12 +129,22 @@ export const PATCH = apiHandler(async (
         metadata: { oldSchedule, newSchedule: { lessonDate, startTime, endTime }, source: 'TEACHER' },
       },
     })
+    await recordCourseChangeEvent(tx, {
+      eventType: 'LESSON_RESCHEDULED',
+      actorUserId: user.id,
+      groupId: lesson.groupId,
+      lessonIds: [lesson.id],
+      studentIds,
+      title: '教师调整了课程时间',
+      summary: `课程从 ${oldSchedule.lessonDate} ${oldSchedule.startTime}-${oldSchedule.endTime} 调整到 ${lessonDate} ${startTime}-${endTime}。`,
+    })
     return true
   })
   if (!changed) return NextResponse.json({ error: '课次状态已变化，请刷新后重试' }, { status: 409 })
 
   revalidatePath('/teacher/intensive')
   revalidatePath('/teacher/schedule')
+  revalidatePath('/parent/schedule')
   return NextResponse.json({ success: true })
 })
 
@@ -169,11 +182,21 @@ export const DELETE = apiHandler(async (
         metadata: { groupId: lesson.groupId, source: 'TEACHER' },
       },
     })
+    await recordCourseChangeEvent(tx, {
+      eventType: 'LESSON_CANCELLED',
+      actorUserId: user.id,
+      groupId: lesson.groupId,
+      lessonIds: [lesson.id],
+      studentIds: lesson.lessonStudents.map((item) => item.studentId),
+      title: '教师取消了课程',
+      summary: `${localDateKey(lesson.lessonDate)} ${lesson.startTime}-${lesson.endTime} 的课程已取消。`,
+    })
     return true
   })
   if (!changed) return NextResponse.json({ error: '课次状态已变化，请刷新后重试' }, { status: 409 })
 
   revalidatePath('/teacher/intensive')
   revalidatePath('/teacher/schedule')
+  revalidatePath('/parent/schedule')
   return NextResponse.json({ success: true })
 })

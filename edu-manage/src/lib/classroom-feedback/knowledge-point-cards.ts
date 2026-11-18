@@ -12,6 +12,19 @@ export type KnowledgePointCard = {
   source?: string
 }
 
+/** Treat an incomplete model card as a recoverable generation failure, not a finished explanation. */
+export function hasCompleteKnowledgePointCard(card: KnowledgePointCard | null | undefined): boolean {
+  if (!card) return false
+  if (card.verified) return true
+  return card.topic.trim().length >= 2
+    && card.definition.trim().length >= 24
+    && card.formulas.length >= 2
+    && Boolean(card.example?.question.trim())
+    && (card.example?.steps.length || 0) >= 3
+    && Boolean(card.example?.answer.trim())
+    && (card.tips?.length || 0) >= 2
+}
+
 // Only teaching materials checked by staff may be added here with verified: true.
 // A model response must never set this flag or claim to quote a textbook.
 const VERIFIED_CARDS: KnowledgePointCard[] = []

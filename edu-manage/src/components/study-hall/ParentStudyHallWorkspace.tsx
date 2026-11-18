@@ -9,7 +9,7 @@ import { useSearchParams } from 'next/navigation'
 import { LearningRecordSwitcher } from '@/components/Parent/LearningRecordSwitcher'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
-import { ResponsiveDialog } from '@/components/Common/ResponsiveDialog'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { protectedUploadFallback } from '@/lib/upload-url'
 import { groupByRelativeDate } from '@/lib/date/group-relative'
 
@@ -129,7 +129,7 @@ export function ParentStudyHallWorkspace() {
         </section>)}
       </div>}
     </Card>
-    <ResponsiveDialog open={Boolean(selectedEntry)} title={`${selectedStudent?.name || '学员'} · ${selectedEntry?.classRecord.studyClass.name || '晚托作业'}`} onClose={() => setSelectedEntryId(null)} footer={null} width={680} mobileHeight="92dvh" bodyStyle={{ padding: isMobile ? 14 : 20 }}>
+    <BrandModal open={Boolean(selectedEntry)} title={`${selectedStudent?.name || '学员'} · ${selectedEntry?.classRecord.studyClass.name || '晚托作业'}`} onClose={() => setSelectedEntryId(null)} footer={null} width={680} mobileHeight="92dvh" bodyStyle={{ padding: isMobile ? 14 : 20 }}>
       {selectedEntry && <Space direction="vertical" size={14} style={{ width: '100%' }}>
         <Space wrap>
           <Tag color={(STATUS_META[selectedEntry.homeworkStatus] || STATUS_META.NOT_RECORDED).color}>{(STATUS_META[selectedEntry.homeworkStatus] || STATUS_META.NOT_RECORDED).label}</Tag>
@@ -147,6 +147,6 @@ export function ParentStudyHallWorkspace() {
         {!new Set([...(selectedEntry.beforeImageUrls || []), ...(selectedEntry.afterImageUrls || []), ...(selectedEntry.lessonImageUrls || []), ...selectedEntry.imageUrls]).size && <Alert type="info" showIcon message="老师本次没有上传照片" description="文字反馈和登记信息仍可正常查看。" />}
         <Text type="secondary" style={{ fontSize: 12 }}>登记教师：{selectedEntry.classRecord.recordedBy.name}</Text>
       </Space>}
-    </ResponsiveDialog>
+    </BrandModal>
   </div>
 }

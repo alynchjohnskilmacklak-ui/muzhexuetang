@@ -1,9 +1,11 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useEffect, useMemo, useState } from 'react'
 import { format, addDays, startOfWeek } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import { Spin, Empty, Input, Modal, Select, Typography, message } from 'antd'
+import { Spin, Empty, Input, Select, Typography, message } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { SwapOutlined } from '@ant-design/icons'
 import useSWR from 'swr'
 import { findSchedulePeriod, PERIOD_HEIGHTS, PERIOD_BG, SchedulePeriod } from '@/lib/schedule-periods'
@@ -232,7 +234,7 @@ export function TeacherWeekView({
         >本周</button>
 
         <div style={{ marginLeft: 'auto', width: 220 }}>
-          <Select
+          <AdaptiveSelect
             showSearch
             placeholder="选择教师"
             style={{ width: '100%' }}
@@ -410,7 +412,7 @@ export function TeacherWeekView({
           )}
         </div>
       )}
-      <Modal
+      <BrandModal
         title="调整课次"
         open={!!moveDialog}
         onCancel={() => !moveBusy && setMoveDialog(null)}
@@ -432,7 +434,7 @@ export function TeacherWeekView({
           </label>
           <label style={{ display: 'grid', gap: 6 }}>
             <Text strong>目标节次</Text>
-            <Select
+            <AdaptiveSelect
               value={moveDialog?.periodId}
               onChange={(periodId) => setMoveDialog((current) => current ? { ...current, periodId } : current)}
               options={periods.filter((period) => period.type === 'CLASS').map((period) => ({
@@ -442,7 +444,7 @@ export function TeacherWeekView({
             />
           </label>
         </div>
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

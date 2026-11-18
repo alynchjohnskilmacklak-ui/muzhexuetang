@@ -1,9 +1,11 @@
 'use client'
+import { AdaptiveSelect } from '@/components/AdaptiveSelect';
 
 import { useState } from 'react'
 import useSWR from 'swr'
 import dayjs from 'dayjs'
-import { Alert, DatePicker, Input, Modal, Select, Space, Tag, message } from 'antd'
+import { Alert, DatePicker, Input, Select, Space, Tag, message } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 import { useDivision } from '@/contexts/DivisionContext'
@@ -79,7 +81,7 @@ export function ManualLessonModal({ initialGroupId, initialDate, onClose, onSucc
   }
 
   return (
-    <Modal
+    <BrandModal
       title="为现有班级临时加课"
       open
       onCancel={onClose}
@@ -95,7 +97,7 @@ export function ManualLessonModal({ initialGroupId, initialDate, onClose, onSucc
         {groupsError && <Alert type="error" showIcon message="班级列表加载失败，请重新打开。" />}
         <div>
           <div style={{ marginBottom: 6 }}>班级</div>
-          <Select
+          <AdaptiveSelect
             showSearch={!isMobile}
             optionFilterProp="label"
             placeholder="选择已有班级"
@@ -118,7 +120,7 @@ export function ManualLessonModal({ initialGroupId, initialDate, onClose, onSucc
           <>
             <div>
               <div style={{ marginBottom: 6 }}>科目与任课教师</div>
-              <Select
+              <AdaptiveSelect
                 placeholder="选择本次课的学科和老师"
                 value={assignmentKey || undefined}
                 onChange={setAssignmentKey}
@@ -150,6 +152,6 @@ export function ManualLessonModal({ initialGroupId, initialDate, onClose, onSucc
           </>
         )}
       </Space>
-    </Modal>
+    </BrandModal>
   )
 }

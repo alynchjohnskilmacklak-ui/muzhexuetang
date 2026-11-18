@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>edu-manage 代码审查仪表盘 · 2026-09-01</title>
+</head>
+<body style="margin:0;background:#F4F3EE;color:#1A1B1C;font-family:'PingFang SC','Segoe UI',Roboto,Arial,sans-serif;line-height:1.6;padding:24px 16px;">
+<div style="max-width:1080px;margin:0 auto;box-sizing:border-box;">
+
+  <!-- 头部 -->
+  <div style="margin-bottom:20px;">
+    <div style="font-size:12px;color:#6B7280;letter-spacing:.5px;">CODE REVIEW DASHBOARD</div>
+    <h1 style="font-size:24px;margin:4px 0 6px;font-weight:700;">edu-manage 代码审查仪表盘</h1>
+    <div style="font-size:13px;color:#6B7280;">2026-09-01 · Next.js 16 + React 19 + Prisma 双库 · 719 源文件 / 240 API 路由 / 84 模型 / 58 迁移 · 结论均经实跑与代码现读</div>
+  </div>
+
+  <!-- 总体结论 -->
+  <div style="background:#fff;border:.5px solid rgba(0,0,0,.08);border-radius:14px;padding:16px 18px;margin-bottom:16px;box-sizing:border-box;">
+    <div style="font-size:15px;font-weight:600;margin-bottom:6px;">总体判断</div>
+    <div style="font-size:13.5px;color:#374151;">工程基本功属上游：<b>strict TS、645 文件 0 个 any、SQL 全参数化、资金链路乐观锁/幂等、统一错误脱敏</b>都到位。当前主要矛盾不是写法，而是 <b style="color:#B42318;">依赖 critical 漏洞、未提交的整改、一处跨库越权与收费-课时断链</b>，以及鉴权多口径、Float 精度、巨石组件等结构债。</div>
+  </div>
+
+  <!-- 健康基线 -->
+  <div style="font-size:14px;font-weight:600;margin:18px 0 10px;">一、实测健康基线</div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;">
+    <div style="flex:1 1 150px;min-width:140px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-left:4px solid #2E9E5B;border-radius:10px;padding:10px 12px;">
+      <div style="font-size:12px;color:#6B7280;">tsc --noEmit</div><div style="font-size:17px;font-weight:700;color:#2E9E5B;">0 错误</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:140px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-left:4px solid #2E9E5B;border-radius:10px;padding:10px 12px;">
+      <div style="font-size:12px;color:#6B7280;">ESLint</div><div style="font-size:17px;font-weight:700;color:#2E9E5B;">0 错误</div><div style="font-size:11px;color:#9AA0A6;">2 警告在参考目录</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:140px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-left:4px solid #2E9E5B;border-radius:10px;padding:10px 12px;">
+      <div style="font-size:12px;color:#6B7280;">类型纪律</div><div style="font-size:17px;font-weight:700;color:#2E9E5B;">0 any / 0 ts-ignore</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:140px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-left:4px solid #2E9E5B;border-radius:10px;padding:10px 12px;">
+      <div style="font-size:12px;color:#6B7280;">原生 SQL</div><div style="font-size:17px;font-weight:700;color:#2E9E5B;">全参数化</div><div style="font-size:11px;color:#9AA0A6;">无注入面</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:140px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-left:4px solid #D97706;border-radius:10px;padding:10px 12px;">
+      <div style="font-size:12px;color:#6B7280;">单元测试</div><div style="font-size:17px;font-weight:700;color:#D97706;">354 / 355 通过</div><div style="font-size:11px;color:#9AA0A6;">1 个红灯待修</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:140px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-left:4px solid #B42318;border-radius:10px;padding:10px 12px;">
+      <div style="font-size:12px;color:#6B7280;">npm audit</div><div style="font-size:17px;font-weight:700;color:#B42318;">15 个漏洞</div><div style="font-size:11px;color:#9AA0A6;">3 critical / 8 high</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:140px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-left:4px solid #B42318;border-radius:10px;padding:10px 12px;">
+      <div style="font-size:12px;color:#6B7280;">Git 工作区</div><div style="font-size:17px;font-weight:700;color:#B42318;">~90 文件未提交</div><div style="font-size:11px;color:#9AA0A6;">含 2 个未跟踪迁移</div>
+    </div>
+    <div style="flex:1 1 150px;min-width:140px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-left:4px solid #2E9E5B;border-radius:10px;padding:10px 12px;">
+      <div style="font-size:12px;color:#6B7280;">apiHandler 覆盖</div><div style="font-size:17px;font-weight:700;color:#2E9E5B;">218 / 240</div><div style="font-size:11px;color:#9AA0A6;">90.8%，22 个待补</div>
+    </div>
+  </div>
+
+  <!-- 优先级分布 + 领域分布 -->
+  <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:18px;">
+    <div style="flex:1 1 320px;min-width:280px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-radius:14px;padding:16px;box-sizing:border-box;">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px;">二、问题按优先级（共 29 项）</div>
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px;"><span style="color:#B42318;font-weight:600;">P0 红线 · 本周</span><span>5</span></div>
+        <div style="height:14px;background:#F3F1EA;border-radius:7px;overflow:hidden;"><div style="height:100%;width:17%;background:#B42318;border-radius:7px;"></div></div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px;"><span style="color:#D97706;font-weight:600;">P1 本迭代</span><span>9</span></div>
+        <div style="height:14px;background:#F3F1EA;border-radius:7px;overflow:hidden;"><div style="height:100%;width:31%;background:#E8A33D;border-radius:7px;"></div></div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px;"><span style="color:#2F6FB0;font-weight:600;">P2 排期治理</span><span>8</span></div>
+        <div style="height:14px;background:#F3F1EA;border-radius:7px;overflow:hidden;"><div style="height:100%;width:28%;background:#5B93C8;border-radius:7px;"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px;"><span style="color:#6B7280;font-weight:600;">P3 卫生项</span><span>7</span></div>
+        <div style="height:14px;background:#F3F1EA;border-radius:7px;overflow:hidden;"><div style="height:100%;width:24%;background:#9CA3AF;border-radius:7px;"></div></div>
+      </div>
+    </div>
+
+    <div style="flex:1 1 320px;min-width:280px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-radius:14px;padding:16px;box-sizing:border-box;">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px;">三、问题按领域归属</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:96px;color:#4B5563;">安全/鉴权</span><div style="flex:1;height:12px;background:#F3F1EA;border-radius:6px;overflow:hidden;"><div style="height:100%;width:100%;background:#B42318;border-radius:6px;"></div></div><span style="width:20px;text-align:right;font-weight:600;">9</span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:96px;color:#4B5563;">工程化/流程</span><div style="flex:1;height:12px;background:#F3F1EA;border-radius:6px;overflow:hidden;"><div style="height:100%;width:89%;background:#D97706;border-radius:6px;"></div></div><span style="width:20px;text-align:right;font-weight:600;">8</span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:96px;color:#4B5563;">前端/可维护</span><div style="flex:1;height:12px;background:#F3F1EA;border-radius:6px;overflow:hidden;"><div style="height:100%;width:67%;background:#5B93C8;border-radius:6px;"></div></div><span style="width:20px;text-align:right;font-weight:600;">6</span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:96px;color:#4B5563;">数据模型</span><div style="flex:1;height:12px;background:#F3F1EA;border-radius:6px;overflow:hidden;"><div style="height:100%;width:44%;background:#7C9EB2;border-radius:6px;"></div></div><span style="width:20px;text-align:right;font-weight:600;">4</span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:96px;color:#4B5563;">资金一致性</span><div style="flex:1;height:12px;background:#F3F1EA;border-radius:6px;overflow:hidden;"><div style="height:100%;width:22%;background:#2E9E5B;border-radius:6px;"></div></div><span style="width:20px;text-align:right;font-weight:600;">2</span></div>
+      </div>
+      <div style="font-size:11.5px;color:#9AA0A6;margin-top:10px;">合计 29 项，每项仅归一个主领域；明细见 Markdown 报告。</div>
+    </div>
+  </div>
+
+  <!-- P0 清单 -->
+  <div style="font-size:14px;font-weight:600;margin:22px 0 10px;">四、P0 红线五项（优先处理）</div>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div style="background:#fff;border:.5px solid rgba(180,35,24,.25);border-left:4px solid #B42318;border-radius:10px;padding:12px 14px;">
+      <div style="font-size:13.5px;font-weight:700;">P0-1 依赖漏洞 15 个，含 next-auth 等 3 个 critical</div>
+      <div style="font-size:12.5px;color:#4B5563;margin-top:3px;">next 8 条 high（中间件绕过/SSRF）、sharp、pdfjs、postcss；xlsx 无官方修复需替换。8-25 时还是 0，属近一周新披露。</div>
+    </div>
+    <div style="background:#fff;border:.5px solid rgba(180,35,24,.25);border-left:4px solid #B42318;border-radius:10px;padding:12px 14px;">
+      <div style="font-size:13.5px;font-weight:700;">P0-2 测试套件当前红灯</div>
+      <div style="font-size:12.5px;color:#4B5563;margin-top:3px;">migrate-all-script.test.ts:19 断言与重构后的 migrate-all.sh 失配，npm test 退出码 1。</div>
+    </div>
+    <div style="background:#fff;border:.5px solid rgba(180,35,24,.25);border-left:4px solid #B42318;border-radius:10px;padding:12px 14px;">
+      <div style="font-size:13.5px;font-weight:700;">P0-3 约 90 文件改动未提交，含资金/安全核心与 2 个未跟踪迁移</div>
+      <div style="font-size:12.5px;color:#4B5563;margin-top:3px;">扣课时乐观锁、薪资幂等、Redis 限流等整改全在工作区，有误丢/线上不一致风险。</div>
+    </div>
+    <div style="background:#fff;border:.5px solid rgba(180,35,24,.25);border-left:4px solid #B42318;border-radius:10px;padding:12px 14px;">
+      <div style="font-size:13.5px;font-weight:700;">P0-4 fees/[id] 跨学部越权（旧 S-01 仍在）</div>
+      <div style="font-size:12.5px;color:#4B5563;margin-top:3px;">fees/[id]/route.ts:11 从 URL query 取 division 且无 sessionMark，初中管理员带 ?division=SENIOR 可改删高中库收费。</div>
+    </div>
+    <div style="background:#fff;border:.5px solid rgba(180,35,24,.25);border-left:4px solid #B42318;border-radius:10px;padding:12px 14px;">
+      <div style="font-size:13.5px;font-weight:700;">P0-5 收费入账不联动课时（旧 F-06 仍在）</div>
+      <div style="font-size:12.5px;color:#4B5563;margin-top:3px;">POST /api/fees 只写缴费台账，不更新 Enrollment.remainHours / HourTransaction，钱账与课时账脱节。</div>
+    </div>
+  </div>
+
+  <!-- 路线图 -->
+  <div style="font-size:14px;font-weight:600;margin:22px 0 10px;">五、整改路线</div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;">
+    <div style="flex:1 1 160px;min-width:150px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-top:4px solid #B42318;border-radius:10px;padding:12px;">
+      <div style="font-size:12.5px;font-weight:700;color:#B42318;">当天</div>
+      <div style="font-size:12px;color:#4B5563;margin-top:4px;">恢复测试全绿；整改分主题提交、补跟踪两个迁移。</div>
+    </div>
+    <div style="flex:1 1 160px;min-width:150px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-top:4px solid #D97706;border-radius:10px;padding:12px;">
+      <div style="font-size:12.5px;font-weight:700;color:#D97706;">本周</div>
+      <div style="font-size:12px;color:#4B5563;margin-top:4px;">升级 critical/high 依赖并回归；修跨库越权与收费联动课时。</div>
+    </div>
+    <div style="flex:1 1 160px;min-width:150px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-top:4px solid #5B93C8;border-radius:10px;padding:12px;">
+      <div style="font-size:12.5px;font-weight:700;color:#2F6FB0;">两周</div>
+      <div style="font-size:12px;color:#4B5563;margin-top:4px;">统一鉴权口径、补 22 路由 apiHandler、Redis 限流 + Nginx XFF、补 cron、搭 CI。</div>
+    </div>
+    <div style="flex:1 1 160px;min-width:150px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-top:4px solid #7C9EB2;border-radius:10px;padding:12px;">
+      <div style="font-size:12.5px;font-weight:700;color:#4B7289;">本月</div>
+      <div style="font-size:12px;color:#4B5563;margin-top:4px;">Float→Decimal、状态 enum 化、补外键索引、合并家长字段。</div>
+    </div>
+    <div style="flex:1 1 160px;min-width:150px;background:#fff;border:.5px solid rgba(0,0,0,.08);border-top:4px solid #9CA3AF;border-radius:10px;padding:12px;">
+      <div style="font-size:12.5px;font-weight:700;color:#6B7280;">持续</div>
+      <div style="font-size:12px;color:#4B5563;margin-top:4px;">拆巨石组件、统一数据获取、样式 token 收口、补高风险集成测试。</div>
+    </div>
+  </div>
+
+  <div style="font-size:11.5px;color:#9AA0A6;margin-top:18px;text-align:center;">完整证据（文件/行号、历史问题复检、逐项建议）见同目录 code-review-2026-09-01.md</div>
+
+</div>
+</body>
+</html>

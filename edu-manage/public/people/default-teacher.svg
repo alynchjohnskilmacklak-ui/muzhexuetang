@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFB84D"/>
+      <stop offset="100%" stop-color="#E8784A"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF7E8"/>
+      <stop offset="100%" stop-color="#F2DCA6"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="60" fill="url(#bg)"/>
+  <!-- 学士帽 -->
+  <path d="M60 30 L92 42 L60 54 L28 42 Z" fill="url(#cap)"/>
+  <path d="M44 48 L44 60 Q60 68 76 60 L76 48 L60 54.5 Z" fill="url(#cap)" opacity="0.92"/>
+  <line x1="92" y1="42" x2="92" y2="58" stroke="#FFF7E8" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="92" cy="60.5" r="3" fill="#FFF7E8"/>
+  <!-- 肩线 -->
+  <path d="M38 96 Q38 78 60 78 Q82 78 82 96 L82 100 L38 100 Z" fill="url(#cap)" opacity="0.95"/>
+</svg>

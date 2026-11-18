@@ -1,0 +1,12 @@
+Browser tab: 3, Title: "牧哲学堂", URL: "http://localhost:3000/parent/vip".
+1 AXWebArea 牧哲学堂, URL: localhost:3000/parent/vip
+	2 container
+		3 container admin-root
+			4 button 打开AI助手
+				5 image AI助手
+				6 text ›
+			7 container Notifications alt+T
+			8 container 网站备案信息
+				9 text © 2026 牧哲学堂 冀ICP备2026028285号
+
+The focused UI element is 1 AXWebArea 牧哲学堂, URL: localhost:3000/parent/vip

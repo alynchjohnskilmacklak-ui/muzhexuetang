@@ -25,7 +25,8 @@ export function parseLoginPreference(raw: string | null): RememberedLoginPrefere
   try {
     const value = JSON.parse(raw) as Partial<RememberedLoginPreference>
     const email = typeof value.email === 'string' ? value.email.trim().toLowerCase() : ''
-    if (!email || !email.includes('@')) return null
+    const phoneDigits = email.replace(/\D/g, '').replace(/^0086/, '').replace(/^86(?=1\d{10}$)/, '')
+    if (!email || (!email.includes('@') && !/^1[3-9]\d{9}$/.test(phoneDigits))) return null
     if (!value.role || !LOGIN_ROLES.has(value.role)) return null
     if (!value.division || !LOGIN_DIVISIONS.has(value.division)) return null
     return { email, role: value.role, division: value.division }

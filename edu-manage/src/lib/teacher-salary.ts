@@ -257,17 +257,6 @@ export function toFeedbackCourseBucket(value: unknown): FeedbackCourseBucket {
   return value === 'ONE_ON_ONE' ? 'ONE_ON_ONE' : 'GROUP'
 }
 
-export function resolveFeedbackCourseBucket(feedback: {
-  feedbackCourseType?: string | null
-  classLesson?: { group?: { intensiveMode?: string | null; course?: { type?: string | null } | null } | null } | null
-}): FeedbackCourseBucket {
-  if (feedback.classLesson?.group?.intensiveMode === 'INTENSIVE') return 'ONE_ON_ONE'
-  const lessonCourseType = feedback.classLesson?.group?.course?.type
-  if (lessonCourseType === 'ONE_ON_ONE') return 'ONE_ON_ONE'
-  if (lessonCourseType) return 'GROUP'
-  return toFeedbackCourseBucket(feedback.feedbackCourseType)
-}
-
 type FeedbackRewardContext = {
   courseBucket: FeedbackCourseBucket
   courseKey: string
@@ -400,34 +389,6 @@ async function resolveFeedbackRewardContext(opts: {
   }
   const teacher = await prisma.teacher.findUnique({ where: { id: opts.teacherId }, select: { division: true } })
   return { ...rewardContextFromCourse(null, opts.feedbackCourseType, { division: teacher?.division }), isIntensive: false }
-}
-
-export async function resolveFeedbackCourseBucketFromContext(opts: {
-  lessonId?: string | null
-  groupId?: string | null
-  feedbackCourseType?: string | null
-  prismaClient?: PrismaClient | Prisma.TransactionClient
-}): Promise<FeedbackCourseBucket> {
-  const prisma = opts.prismaClient ?? await getRequestPrisma()
-  if (opts.lessonId) {
-    const lesson = await prisma.classLesson.findUnique({
-      where: { id: opts.lessonId },
-      select: { group: { select: { intensiveMode: true, course: { select: { type: true } } } } },
-    })
-    if (lesson?.group?.intensiveMode === 'INTENSIVE') return 'ONE_ON_ONE'
-    const type = lesson?.group?.course?.type
-    if (type) return toFeedbackCourseBucket(type)
-  }
-  if (opts.groupId) {
-    const group = await prisma.classGroup.findUnique({
-      where: { id: opts.groupId },
-      select: { intensiveMode: true, course: { select: { type: true } } },
-    })
-    if (group?.intensiveMode === 'INTENSIVE') return 'ONE_ON_ONE'
-    const type = group?.course?.type
-    if (type) return toFeedbackCourseBucket(type)
-  }
-  return toFeedbackCourseBucket(opts.feedbackCourseType)
 }
 
 function feedbackBucketLabel(bucket: FeedbackCourseBucket) {

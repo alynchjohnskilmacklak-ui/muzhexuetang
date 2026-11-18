@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
-import { parentActiveStudentWhere } from '@/lib/business-visibility'
+import { activeEnrollmentWhere, visibleClassLessonWhere } from '@/lib/business-visibility'
+import { findParentChild, getParentChildren } from '@/lib/parent-children'
 import { getRequestDivision } from '@/lib/division'
 import { getAccessibleParentMessageWhere } from '@/lib/parent-message-access'
 import { getParentMessageWorkflowState } from '@/lib/parent-message-workflow'
@@ -20,7 +21,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const status = searchParams.get('status') || undefined
   const division = getRequestDivision(user, searchParams.get('division'))
 
-  let where = await getAccessibleParentMessageWhere(prisma, user, division)
+  let where = getAccessibleParentMessageWhere(user, division)
   if (!where) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   if (status) {
     if (where.OR) {
@@ -36,8 +37,8 @@ export const GET = apiHandler(async (req: NextRequest) => {
       where,
       include: {
         parent: { select: { id: true, name: true } },
-        student: { select: { id: true, name: true } },
-        teacher: { select: { id: true, name: true } },
+        student: { select: { id: true, name: true, grade: true, gender: true } },
+        teacher: { select: { id: true, name: true, avatar: true, gender: true } },
         feedback: {
           select: {
             id: true,
@@ -56,8 +57,10 @@ export const GET = apiHandler(async (req: NextRequest) => {
           },
         },
         replies: {
-          orderBy: { createdAt: 'asc' },
-          take: 50,
+          // List rows only need a latest-message preview. Fetch the full
+          // conversation from /api/messages/:id when a user opens it.
+          orderBy: { createdAt: 'desc' },
+          take: 1,
         },
       },
       orderBy: { updatedAt: 'desc' },
@@ -119,22 +122,18 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!content) return NextResponse.json({ error: '请填写问题内容' }, { status: 400 })
   if (content.length > 2000) return NextResponse.json({ error: '内容不能超过2000字' }, { status: 400 })
   if (!studentId) return NextResponse.json({ error: '请选择关联学员，系统将自动匹配任课教师' }, { status: 400 })
+  const child = findParentChild(await getParentChildren(prisma, user.id), studentId)
+  if (!child) return NextResponse.json({ error: '无权为该学员创建留言' }, { status: 403 })
 
   // 验证 studentId 属于当前家长
-  if (studentId) {
-    const owned = await prisma.student.count({
-      where: { id: studentId, ...parentActiveStudentWhere(user.id) },
-    })
-    if (owned === 0) return NextResponse.json({ error: '无权为该学员创建留言' }, { status: 403 })
-  }
 
   // 默认优先最近课次教师，其次当前班级教师；家长可在这些任课教师中手动调整。
   if (studentId) {
     const [recentLesson, enrollments] = await Promise.all([
       prisma.classLesson.findFirst({
         where: {
-          status: { not: 'CANCELLED' },
-          group: { enrollments: { some: { studentId, status: 'ACTIVE' } } },
+          ...visibleClassLessonWhere,
+          group: { ...visibleClassLessonWhere.group, enrollments: { some: { ...activeEnrollmentWhere, studentId: { in: child.recordIds } } } },
         },
         orderBy: [{ lessonDate: 'desc' }, { startTime: 'desc' }],
         select: {
@@ -151,9 +150,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
       }),
       prisma.enrollment.findMany({
         where: {
-          studentId,
-          status: 'ACTIVE',
-          group: { status: { not: 'ARCHIVED' } },
+          ...activeEnrollmentWhere,
+          studentId: { in: child.recordIds },
         },
         select: {
           group: {
@@ -196,7 +194,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const created = await tx.parentMessage.create({
       data: {
         parentId: user.id,
-        studentId,
+        studentId: child.id,
         teacherId,
         subject,
         title,
@@ -213,8 +211,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
       },
       include: {
         parent: { select: { id: true, name: true } },
-        student: { select: { id: true, name: true } },
-        teacher: { select: { id: true, name: true } },
+        student: { select: { id: true, name: true, grade: true, gender: true } },
+        teacher: { select: { id: true, name: true, avatar: true, gender: true } },
         feedback: { select: { id: true, createdAt: true } },
         replies: { orderBy: { createdAt: 'asc' } },
       },

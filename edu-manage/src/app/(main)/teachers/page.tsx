@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Row, Col, Input, Select, Button, Space, Empty, Spin, Card, Statistic, Alert, Pagination, Modal, Form, message } from 'antd'
-import { PlusOutlined, SearchOutlined, TeamOutlined, TrophyOutlined, ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons'
+import { Row, Col, Input, Select, Button, Space, Empty, Spin, Card, Pagination, Form, message } from 'antd'
+import { PlusOutlined, SearchOutlined, TeamOutlined, TrophyOutlined, ClockCircleOutlined, CalendarOutlined, CrownOutlined, IdcardOutlined } from '@ant-design/icons'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { TeacherCard } from './_components/TeacherCard'
 import { TeacherForm } from './_components/TeacherForm'
@@ -90,39 +91,74 @@ export default function TeachersPage() {
   const actions = !isMobile ? (
     <Space>
       <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditData(null); setFormOpen(true) }}
-        style={{ background: '#E8784A', borderColor: '#E8784A' }}>添加教师</Button>
+        style={{ background: 'linear-gradient(135deg,#0E5E4E,#0B4B40)', borderColor: '#0E5E4E', boxShadow: '0 3px 10px rgba(14,94,78,.25)' }}>添加教师</Button>
     </Space>
   ) : null
 
+  const statCards = [
+    { key: 'total', title: '在职教师档案', value: String(stats.total), icon: <IdcardOutlined />, color: '#C9A45C', main: true },
+    { key: 'type', title: '全职 / 兼职', value: `${stats.fullTime} / ${stats.partTime}`, icon: <ClockCircleOutlined />, color: '#0E5E4E', main: false },
+    { key: 'rating', title: '平均满意度', value: String(stats.avgRating), icon: <TrophyOutlined />, color: '#B98A2F', main: false },
+    { key: 'todo', title: '待排课', value: '0', icon: <CalendarOutlined />, color: '#185FA5', main: false },
+  ]
+
   return (
     <PageLayout title="教师管理" subtitle="管理教师档案、排课与考核" actions={actions}>
-      <Alert
-        showIcon
-        type={term?.status === 'ARCHIVED' ? 'info' : 'success'}
-        message={term ? `当前数据范围：${term.name}` : '尚未选择运营批次'}
-        description={term?.status === 'ARCHIVED'
-          ? '正在查看历史批次。教师档案永久保留；教师卡片中的学员数、课次和授课数据仅统计该历史批次。'
-          : '教师档案为全局资料，不会因换期开班而重复创建；教师卡片中的学员数、课次和授课数据跟随当前运营批次。'}
-        style={{ marginBottom: 20 }}
-      />
-      <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
-        <Col xs={12} sm={6}><Card bordered style={{ borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
-          <Statistic title="在职教师档案" value={stats.total} prefix={<TeamOutlined style={{ color: '#27a644' }} />} valueStyle={{ color: '#1F2329' }} />
-        </Card></Col>
-        <Col xs={12} sm={6}><Card bordered style={{ borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
-          <Statistic title="全职 / 兼职" value={`${stats.fullTime} / ${stats.partTime}`} prefix={<ClockCircleOutlined style={{ color: '#E8784A' }} />} valueStyle={{ color: '#1F2329', fontSize: 20 }} />
-        </Card></Col>
-        <Col xs={12} sm={6}><Card bordered style={{ borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
-          <Statistic title="平均满意度" value={stats.avgRating} prefix={<TrophyOutlined style={{ color: '#f5a623' }} />} suffix="⭐" valueStyle={{ color: '#1F2329' }} />
-        </Card></Col>
-        <Col xs={12} sm={6}><Card bordered style={{ borderRadius: 12 }} styles={{ body: { padding: 20 } }}>
-          <Statistic title="待排课" value={0} prefix={<CalendarOutlined style={{ color: '#828fff' }} />} valueStyle={{ color: '#1F2329' }} />
-        </Card></Col>
-      </Row>
+      {/* 品牌概览 Hero 区 */}
+      <div style={{
+        borderRadius: 18, padding: isMobile ? 18 : 24, marginBottom: 16,
+        background: 'linear-gradient(135deg,#123C35 0%,#0E5E4E 55%,#0B4B40 100%)',
+        boxShadow: '0 6px 22px rgba(14,94,78,.22)',
+        color: '#F7F3E8', position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', right: -30, top: -40, fontSize: 160, opacity: .07, transform: 'rotate(-12deg)' }}><TeamOutlined /></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+          <CrownOutlined style={{ color: '#C9A45C', fontSize: 15 }} />
+          <span style={{ fontSize: isMobile ? 12 : 13, letterSpacing: 2, color: 'rgba(242,227,182,.9)' }}>牧哲学堂 · 师资团队</span>
+        </div>
+        <div style={{ fontSize: isMobile ? 26 : 34, fontWeight: 800, lineHeight: 1.2 }}>
+          {stats.total} 位教师 <span style={{ fontSize: isMobile ? 15 : 18, fontWeight: 500, color: 'rgba(247,243,232,.75)' }}>在岗护航每一节课</span>
+        </div>
+        <div style={{ marginTop: 8, fontSize: isMobile ? 12 : 13, color: 'rgba(247,243,232,.72)', lineHeight: 1.6 }}>
+          教师档案为全局资料，不会因换期开班而重复创建；卡片中的学员数、课次与授课数据跟随当前运营批次。
+        </div>
+        {term && (
+          <span style={{ display: 'inline-block', marginTop: 10, padding: '4px 12px', borderRadius: 999, background: 'rgba(201,164,92,.16)', border: '1px solid rgba(201,164,92,.35)', color: '#F2E3B6', fontSize: 11.5, fontWeight: 600 }}>
+            当前数据范围：{term.name}
+          </span>
+        )}
+      </div>
+
+      {/* 品牌统计卡 */}
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0,1fr))' : 'repeat(4, minmax(0,1fr))', gap: 10, marginBottom: 20 }}>
+        {statCards.map(item => item.main ? (
+          <div key={item.key} style={{
+            gridColumn: isMobile ? 'span 2' : undefined,
+            borderRadius: 16, padding: '16px 18px',
+            background: 'linear-gradient(135deg,#FAF8F4,#F3EEE3)', border: '1px solid #E7DFCE',
+            boxShadow: '0 2px 10px rgba(23,47,41,.06)',
+            display: 'flex', alignItems: 'center', gap: 14,
+          }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,#C9A45C,#B98A2F)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, boxShadow: '0 3px 10px rgba(185,138,47,.3)' }}>{item.icon}</div>
+            <div>
+              <div style={{ fontSize: 11.5, color: '#8A6B2F', fontWeight: 600, marginBottom: 2 }}>{item.title}</div>
+              <div style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: '#0B4B40', fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{item.value}</div>
+            </div>
+          </div>
+        ) : (
+          <div key={item.key} style={{ borderRadius: 16, padding: '14px 16px', background: '#fff', border: '1px solid #EDE9E1', boxShadow: '0 2px 8px rgba(23,47,41,.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
+              <span style={{ width: 26, height: 26, borderRadius: 8, background: item.color + '14', color: item.color, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>{item.icon}</span>
+              <span style={{ fontSize: 11, color: '#667085', fontWeight: 600 }}>{item.title}</span>
+            </div>
+            <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color: '#17352F', fontVariantNumeric: 'tabular-nums' }}>{item.value}</div>
+          </div>
+        ))}
+      </div>
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
         <Input placeholder="搜索姓名、手机、科目…" prefix={<SearchOutlined style={{ color: '#98A2B3' }} />}
-          value={search} onChange={e => { setSearch(e.target.value); setPage(1) }} style={{ width: isMobile ? '100%' : 260 }} allowClear />
+          value={search} onChange={e => { setSearch(e.target.value); setPage(1) }} style={{ width: isMobile ? '100%' : 260, borderRadius: 999 }} allowClear />
         <Select placeholder="全部类型" value={filterType} onChange={value => { setFilterType(value); setPage(1) }} allowClear style={{ width: isMobile ? '100%' : 120 }}
           options={[{ label: '全职', value: 'FULL_TIME' }, { label: '兼职', value: 'PART_TIME' }, { label: '离职', value: 'RESIGNED' }]} />
         <Select placeholder="按科目筛选" value={filterSubject} onChange={value => { setFilterSubject(value); setPage(1) }} allowClear style={{ width: isMobile ? '100%' : 120 }}
@@ -158,7 +194,7 @@ export default function TeachersPage() {
 
       <TeacherForm open={formOpen} onClose={() => { setFormOpen(false); setEditData(null); fetchTeachers() }} initialData={editData} mode={editData ? 'edit' : 'create'} />
       <DeleteConfirmModal open={!!deleteTarget} teacherId={deleteTarget?.id || null} teacherName={deleteTarget?.name || ''} onClose={() => setDeleteTarget(null)} onDeleted={fetchTeachers} />
-      <Modal
+      <BrandModal
         title={messageTarget?.type === 'praise'
           ? `表扬 · ${String(messageTarget?.teacher?.name || '')}`
           : `提醒 · ${String(messageTarget?.teacher?.name || '')}`}
@@ -212,7 +248,7 @@ export default function TeachersPage() {
             />
           </Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
     </PageLayout>
   )
 }

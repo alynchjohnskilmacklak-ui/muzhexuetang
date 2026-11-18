@@ -1,10 +1,11 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminUser } from '@/lib/teacher-portal'
 import { getRequestDivision } from '@/lib/division'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: NextRequest) {
+export const GET = apiHandler(async (req: NextRequest) => {
   try {
     const admin = await requireAdminUser()
     const division = getRequestDivision(admin, req.nextUrl.searchParams.get('division'))
@@ -17,4 +18,4 @@ export async function GET(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
-}
+})

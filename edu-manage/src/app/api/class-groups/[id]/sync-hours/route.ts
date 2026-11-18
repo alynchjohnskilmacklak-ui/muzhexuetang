@@ -3,6 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { roundHours } from '@/lib/hours'
 import { hoursPerLesson } from '@/lib/lesson-units'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 import { apiHandler } from '@/lib/api-handler'
 import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
 
@@ -96,17 +97,7 @@ export const POST = apiHandler(async (
     }
 
     for (const studentId of [...new Set(toUpdate.map((enrollment) => enrollment.studentId))]) {
-      const allActive = await tx.enrollment.findMany({
-        where: { studentId, status: 'ACTIVE' },
-        select: { remainHours: true, totalHours: true },
-      })
-      await tx.student.update({
-        where: { id: studentId },
-        data: {
-          remainHours: allActive.reduce((sum, item) => sum + Number(item.remainHours || 0), 0),
-          totalHours: allActive.reduce((sum, item) => sum + Number(item.totalHours || 0), 0),
-        },
-      })
+      await syncStudentHourSnapshot(tx, studentId)
     }
 
     await tx.activityLog.create({

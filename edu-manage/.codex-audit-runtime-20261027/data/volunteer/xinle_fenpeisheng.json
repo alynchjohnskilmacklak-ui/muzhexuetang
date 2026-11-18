@@ -1,0 +1,74 @@
+{
+ "note": "给新乐有分配生名额的学校(含新乐一中),共17所",
+ "total": 17,
+ "schools": [
+  {
+   "schoolName": "新乐一中",
+   "xinleFenpeiQuota": 1130
+  },
+  {
+   "schoolName": "河北辛集中学",
+   "xinleFenpeiQuota": 54
+  },
+  {
+   "schoolName": "河北正定中学",
+   "xinleFenpeiQuota": 67
+  },
+  {
+   "schoolName": "石家庄实验中学",
+   "xinleFenpeiQuota": 50
+  },
+  {
+   "schoolName": "石家庄第二实验中学",
+   "xinleFenpeiQuota": 51
+  },
+  {
+   "schoolName": "石家庄二中实验学校",
+   "xinleFenpeiQuota": 33
+  },
+  {
+   "schoolName": "河北正中实验中学",
+   "xinleFenpeiQuota": 76
+  },
+  {
+   "schoolName": "河北联邦外国语学校",
+   "xinleFenpeiQuota": 37
+  },
+  {
+   "schoolName": "石家庄润德学校",
+   "xinleFenpeiQuota": 20
+  },
+  {
+   "schoolName": "石家庄精英中学",
+   "xinleFenpeiQuota": 33
+  },
+  {
+   "schoolName": "石家庄一中实验学校",
+   "xinleFenpeiQuota": 17
+  },
+  {
+   "schoolName": "石家庄敬业中学",
+   "xinleFenpeiQuota": 21
+  },
+  {
+   "schoolName": "石家庄金石高级中学",
+   "xinleFenpeiQuota": 75
+  },
+  {
+   "schoolName": "石家庄卓越中学（东校区）",
+   "xinleFenpeiQuota": 56
+  },
+  {
+   "schoolName": "石家庄卓越中学（西校区）",
+   "xinleFenpeiQuota": 75
+  },
+  {
+   "schoolName": "石家庄精英新华中学",
+   "xinleFenpeiQuota": 24
+  },
+  {
+   "schoolName": "行唐县启明中学",
+   "xinleFenpeiQuota": 11
+  }
+ ]
+}

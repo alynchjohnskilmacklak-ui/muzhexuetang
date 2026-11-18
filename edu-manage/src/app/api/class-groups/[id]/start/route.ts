@@ -1,12 +1,14 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
+import { createManyNotifications } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
-export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export const POST = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
   if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
 
@@ -54,15 +56,13 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
         .filter((parentId): parentId is string => Boolean(parentId)))]
 
       if (parentIds.length) {
-        await tx.notification.createMany({
-          data: parentIds.map((parentId) => ({
-            userId: parentId,
-            type: 'CLASS_START',
-            href: '/parent/schedule',
-            title: `${group.name} 已开班`,
-            content: `课程：${group.course.name}；首次上课：${firstLesson.lessonDate.toLocaleDateString('zh-CN')} ${firstLesson.startTime}-${firstLesson.endTime}；授课团队：${teacherNames}${group.room?.name ? `；教室：${group.room.name}` : ''}。`,
-          })),
-        })
+        await createManyNotifications(tx, parentIds.map((parentId) => ({
+          userId: parentId,
+          type: 'CLASS_START',
+          href: '/parent/schedule',
+          title: `${group.name} 已开班`,
+          content: `课程：${group.course.name}；首次上课：${firstLesson.lessonDate.toLocaleDateString('zh-CN')} ${firstLesson.startTime}-${firstLesson.endTime}；授课团队：${teacherNames}${group.room?.name ? `；教室：${group.room.name}` : ''}。`,
+        })))
       }
 
       await tx.activityLog.create({
@@ -91,4 +91,4 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : '开班失败' }, { status: 400 })
   }
-}
+})

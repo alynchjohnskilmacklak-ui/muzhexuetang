@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import useSWR from 'swr'
 import {
-  Button, Card, Form, Image, Input, Modal, Select, Skeleton, Space,
+  Button, Card, Form, Image, Input, Select, Skeleton, Space,
   Tag, Typography, Upload, List,
 } from 'antd'
 import {
@@ -12,6 +12,7 @@ import {
 import type { UploadFile, UploadProps } from 'antd'
 import { toast } from 'sonner'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -112,7 +113,7 @@ export function TeacherPapersClient() {
           <Text type="secondary" style={{ fontSize: 13 }}>上传批改后的试卷，推送给家长查看</Text>
         </div>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}
-          style={{ background: '#E8784A', borderColor: '#E8784A', borderRadius: 8 }}>
+          style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)', borderRadius: 8 }}>
           新建试卷
         </Button>
       </div>
@@ -194,7 +195,7 @@ export function TeacherPapersClient() {
       )}
 
       {/* Create/Edit Modal */}
-      <Modal title="新建试卷" open={modalOpen} onCancel={() => { setModalOpen(false); setFileList([]); form.resetFields() }}
+      <BrandModal title="新建试卷" open={modalOpen} onCancel={() => { setModalOpen(false); setFileList([]); form.resetFields() }}
         width={640} confirmLoading={submitting} okText="保存草稿" destroyOnClose
         footer={() => (
           <Space>
@@ -263,11 +264,11 @@ export function TeacherPapersClient() {
             <TextArea rows={3} placeholder="可选填" />
           </Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
 
-      <Modal open={previewOpen} footer={null} onCancel={() => setPreviewOpen(false)} width={800}>
+      <BrandModal open={previewOpen} title={null} footer={null} onCancel={() => setPreviewOpen(false)} width={800}>
         <Image src={previewUrl} alt="试卷图片预览" style={{ width: '100%' }} preview={false} />
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

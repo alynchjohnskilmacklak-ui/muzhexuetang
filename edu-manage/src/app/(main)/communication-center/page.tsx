@@ -16,16 +16,16 @@ export default function CommunicationCenterPage() {
   return (
     <PageLayout
       title="沟通中心"
-      subtitle="家长留言 · 通知发送 · 家校公告统一管理"
+      subtitle="家长私信 · 通知发送 · 课堂与档案评论"
     >
       <Tabs
         activeKey={tab}
         onChange={setTab}
-        destroyInactiveTabPane
+        destroyOnHidden={false}
         items={[
           { key: 'messages', label: '家长留言', children: <ParentMessagesTab /> },
           { key: 'notifications', label: '通知发送', children: <NotificationsTab /> },
-          { key: 'communications', label: '家校公告', children: <CommunicationsTab /> },
+          { key: 'communications', label: '课堂与档案评论', children: <CommunicationsTab /> },
         ]}
       />
     </PageLayout>

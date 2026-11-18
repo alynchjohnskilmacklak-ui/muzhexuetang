@@ -7,7 +7,7 @@ export async function getParentChildren(prisma: PrismaClient, parentId: string) 
   const rows = await prisma.student.findMany({
     where: parentLinkedStudentWhere(parentId),
     select: {
-      id: true, name: true, grade: true, gender: true, birthYear: true, updatedAt: true,
+      id: true, identityId: true, name: true, grade: true, gender: true, birthYear: true, updatedAt: true, membershipLevel: true,
       termMemberships: {
         select: {
           grade: true, status: true, joinedAt: true,
@@ -24,6 +24,7 @@ export async function getParentChildren(prisma: PrismaClient, parentId: string) 
       id: student.id,
       name: student.name,
       grade: student.grade,
+      membershipLevel: student.membershipLevel,
       termName: currentTermLabel(student),
       recordIds,
     }
@@ -34,4 +35,21 @@ export function findParentChild<T extends { id: string; recordIds: string[] }>(c
   // 严格匹配：studentId 缺失或不属于该家长时返回 null，由调用方给出明确错误；
   // 不再静默回退到第一个孩子，避免多孩子切换传错 ID 时展示错误孩子的数据。
   return children.find((child) => requested && child.recordIds.includes(requested)) || null
+}
+
+export function resolveParentChildSelection<T extends { id: string; recordIds: string[] }>(
+  children: T[],
+  requestedChildId: string,
+  storedChildId: string,
+) {
+  const selectedChild = requestedChildId === 'all'
+    ? null
+    : findParentChild(children, requestedChildId || storedChildId)
+      || (!requestedChildId ? children[0] ?? null : null)
+  const invalidChild = Boolean(requestedChildId && requestedChildId !== 'all' && !selectedChild)
+  const studentIds = invalidChild ? [] : requestedChildId === 'all'
+    ? children.flatMap((child) => child.recordIds)
+    : selectedChild?.recordIds || []
+
+  return { selectedChild, invalidChild, studentIds }
 }

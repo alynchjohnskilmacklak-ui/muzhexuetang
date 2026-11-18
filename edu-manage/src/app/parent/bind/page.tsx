@@ -12,7 +12,7 @@ export default async function BindPage() {
   const db = await getRequestPrisma()
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { wxpusherUid: true, name: true },
+    select: { qywxExternalUserId: true, name: true, phone: true },
   })
-  return <BindWxClient bound={!!user?.wxpusherUid} userName={user?.name || ''} />
+  return <BindWxClient bound={!!user?.qywxExternalUserId} userName={user?.name || ''} phone={user?.phone || ''} />
 }

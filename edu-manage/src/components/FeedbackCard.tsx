@@ -1,5 +1,5 @@
 export const MOODS = [
-  { value: 'GREAT', label: '非常棒', emoji: '🌟', color: '#1D9E75' },
+  { value: 'GREAT', label: '非常棒', emoji: '🌟', color: '#137A5A' },
   { value: 'GOOD', label: '不错', emoji: '😊', color: '#534AB7' },
   { value: 'OKAY', label: '一般', emoji: '😐', color: '#D97706' },
   { value: 'NEEDS_ATTENTION', label: '需关注', emoji: '⚠️', color: '#D4537E' },

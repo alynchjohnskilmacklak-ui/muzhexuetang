@@ -1,0 +1,949 @@
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  color: var(--color-ink);
+}
+
+.overviewMobile {
+  gap: 18px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-xl);
+}
+
+.metric {
+  min-width: 0;
+  padding: 15px 18px 14px;
+  border-right: 1px solid var(--color-hairline);
+}
+
+.metric:last-child {
+  border-right: 0;
+}
+
+.metricLabel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+}
+
+.metricValue {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.metricNeutral {
+  color: var(--color-ink);
+}
+
+.metricWarning {
+  color: var(--color-warning-text);
+}
+
+.metricDone {
+  color: var(--color-success-action);
+}
+
+.teacherSection {
+  min-width: 0;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.sectionHeading h2 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.sectionHeading > span {
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.teacherList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.teacherRow {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.85fr) minmax(300px, 1fr) 20px;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  min-height: 82px;
+  padding: 13px 16px;
+  color: var(--color-ink);
+  text-align: left;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.teacherRow:hover {
+  border-color: var(--color-hairline-strong);
+  box-shadow: 0 4px 12px rgba(26, 18, 1, 0.06);
+  transform: translateY(-1px);
+}
+
+.teacherRow:focus-visible {
+  outline: 3px solid var(--color-primary-focus);
+  outline-offset: 2px;
+}
+
+.teacherIdentity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.avatarFrame {
+  display: grid;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  place-items: center;
+  background: var(--color-surface-3);
+  border-radius: 50%;
+}
+
+.teacherAvatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+.teacherNameBlock {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 3px;
+}
+
+.teacherNameBlock strong {
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 16px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teacherNameBlock > span {
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.teacherProgress {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.progressItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.progressItem strong {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.progressLabel {
+  font-size: 12px;
+}
+
+.progressComplete {
+  color: var(--color-success-action);
+  background: var(--color-success-bg);
+}
+
+.progressPending {
+  color: var(--color-warning-text);
+  background: var(--color-warning-bg);
+}
+
+.rowArrow {
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+}
+
+.loadingCard,
+.emptyCard {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-xl);
+}
+
+.emptyCard :global(.ant-card-body) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.emptyCard strong {
+  color: var(--color-ink);
+  font-size: 14px;
+}
+
+.emptyCard span {
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+}
+
+.emptyIcon {
+  margin-bottom: 3px;
+  color: var(--color-ink-subtle);
+  font-size: 20px;
+}
+
+@media (max-width: 767px) {
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metric {
+    padding: 12px 14px;
+  }
+
+  .metric:nth-child(2) {
+    border-right: 0;
+  }
+
+  .metric:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  .metricValue {
+    font-size: 22px;
+  }
+
+  .teacherRow {
+    grid-template-columns: minmax(0, 1fr) 16px;
+    gap: 12px;
+    min-height: 0;
+    padding: 13px;
+  }
+
+  .teacherProgress {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-hairline-tertiary);
+  }
+
+  .progressItem {
+    flex: 1 1 0;
+    justify-content: center;
+    gap: 5px;
+    padding-inline: 7px;
+  }
+
+  .rowArrow {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 359px) {
+  .progressItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+  }
+}
+
+.detailPage {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  color: var(--color-ink);
+}
+
+.detailPageMobile {
+  gap: 12px;
+}
+
+.detailToolbar {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.backButton {
+  color: var(--color-ink-muted);
+  border-color: var(--color-hairline-strong);
+  border-radius: 8px;
+}
+
+.backButton:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.detailSummary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.7fr);
+  align-items: center;
+  overflow: hidden;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-xl);
+}
+
+.detailTeacher {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px 20px;
+}
+
+.detailAvatarFrame {
+  display: grid;
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+  place-items: center;
+  background: var(--color-surface-3);
+  border-radius: 50%;
+}
+
+.detailAvatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 24%;
+}
+
+.detailTeacherInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 5px;
+}
+
+.detailTeacherNameLine {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.detailTeacherNameLine h2 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.tierBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 1px 8px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.detailTeacherMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.summaryStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-self: stretch;
+  border-left: 1px solid var(--color-hairline);
+}
+
+.summaryCell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 12px 8px;
+  border-right: 1px solid var(--color-hairline-tertiary);
+}
+
+.summaryCell:last-child {
+  border-right: 0;
+}
+
+.summaryCell strong {
+  color: var(--color-ink);
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.summaryCell strong.summaryNeedsAction {
+  color: var(--color-warning-text);
+}
+
+.summaryCell span {
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.lessonsSection {
+  min-width: 0;
+}
+
+.lessonsSection > .sectionHeading {
+  margin-bottom: 10px;
+}
+
+.lessonList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lessonCard {
+  min-width: 0;
+  padding: 17px 18px 16px;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-xl);
+}
+
+.lessonHeader {
+  display: grid;
+  grid-template-columns: 76px minmax(150px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.lessonTime {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 9px;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.lessonTitleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.lessonTitleBlock h3 {
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lessonTitleBlock > span {
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.lessonStatuses {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 27px;
+  padding: 3px 8px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.statusComplete {
+  color: var(--color-success-action);
+  background: var(--color-success-bg);
+}
+
+.statusPending {
+  color: var(--color-warning-text);
+  background: var(--color-warning-bg);
+}
+
+.feedbackCallout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 11px 12px;
+  border-radius: var(--radius-lg);
+}
+
+.feedbackPendingCallout {
+  flex-direction: column;
+  gap: 4px;
+  color: var(--color-warning-text);
+  background: var(--color-warning-bg);
+}
+
+.feedbackPendingCallout strong,
+.feedbackSummaryCallout strong {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.feedbackPendingCallout span {
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.feedbackSummaryCallout {
+  color: var(--color-success-action);
+  background: var(--color-success-bg);
+}
+
+.feedbackSummaryCallout > div {
+  min-width: 0;
+}
+
+.feedbackSummaryCallout p {
+  margin: 4px 0 0;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.revokeButton {
+  flex: 0 0 auto;
+  border-radius: var(--radius-md);
+}
+
+.studentSection {
+  margin-top: 16px;
+}
+
+.studentHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.studentHeading > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.studentHeading > span:last-child {
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.studentList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.studentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  min-height: 48px;
+  padding: 6px 9px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-hairline-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.studentIdentity,
+.studentActions {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 6px;
+}
+
+.studentIdentity strong {
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memberBadge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.memberSvip {
+  color: var(--color-brand-gold);
+  background: var(--color-brand-gold-bg);
+  border: 1px solid var(--color-brand-gold-fill);
+  font-weight: 700;
+}
+
+.memberVip {
+  color: var(--color-brand-orange);
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-brand-orange);
+  font-weight: 600;
+}
+
+.memberRegular {
+  color: var(--color-ink-muted);
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-hairline-strong);
+}
+
+.studentActions {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
+
+.hoursDeducted {
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.attendanceButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 54px;
+  min-height: 34px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.attendanceButton:focus-visible {
+  outline: 3px solid var(--color-primary-focus);
+  outline-offset: 2px;
+}
+
+.attendanceButton:disabled {
+  color: var(--color-ink-subtle);
+  background: var(--color-surface-3);
+  cursor: not-allowed;
+}
+
+.attendanceButton[data-status='present'],
+.attendanceButton[data-status='makeup'] {
+  color: var(--color-success-action);
+  background: var(--color-success-bg);
+}
+
+.attendanceButton[data-status='leave'] {
+  color: var(--color-warning-text);
+  background: var(--color-warning-bg);
+}
+
+.attendanceButton[data-status='absent'] {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.noStudents {
+  margin: 0;
+  padding: 12px;
+  color: var(--color-ink-subtle);
+  background: var(--color-surface-2);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.detailEmpty {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-xl);
+}
+
+.detailEmpty :global(.ant-card-body) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 16px;
+}
+
+.adjustDialog h2 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 18px;
+}
+
+.adjustDialog > p {
+  margin: 8px 0 14px;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.statusOptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.statusOption {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 72px;
+  padding: 10px 11px;
+  text-align: left;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.statusOption[data-active='true'] {
+  border-width: 2px;
+}
+
+.statusOption[data-tone='present'] strong,
+.statusOption[data-tone='makeup'] strong {
+  color: var(--color-success-action);
+}
+
+.statusOption[data-tone='leave'] strong {
+  color: var(--color-warning-text);
+}
+
+.statusOption[data-tone='absent'] strong {
+  color: var(--color-error);
+}
+
+.statusOption[data-tone='present'][data-active='true'],
+.statusOption[data-tone='makeup'][data-active='true'] {
+  background: var(--color-success-bg);
+  border-color: var(--color-success-action);
+}
+
+.statusOption[data-tone='leave'][data-active='true'] {
+  background: var(--color-warning-bg);
+  border-color: var(--color-warning);
+}
+
+.statusOption[data-tone='absent'][data-active='true'] {
+  background: var(--color-error-bg);
+  border-color: var(--color-error);
+}
+
+.statusOption strong {
+  font-size: 13px;
+}
+
+.statusOption span {
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.statusOption:focus-visible {
+  outline: 3px solid var(--color-primary-focus);
+  outline-offset: 2px;
+}
+
+.adjustDialog > p.attendanceWarning {
+  margin: 12px 0 0;
+  color: var(--color-error);
+}
+
+.revokeTitle {
+  color: var(--color-ink);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.revokeDialogCopy p {
+  margin: 0 0 8px;
+  color: var(--color-ink-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.revokeDialogCopy > span {
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+}
+
+@media (max-width: 767px) {
+  .detailSummary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detailTeacher {
+    padding: 15px;
+  }
+
+  .summaryStrip {
+    min-height: 70px;
+    border-top: 1px solid var(--color-hairline);
+    border-left: 0;
+  }
+
+  .lessonCard {
+    padding: 14px 13px 13px;
+  }
+
+  .lessonHeader {
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 9px 11px;
+  }
+
+  .lessonStatuses {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    padding-top: 3px;
+  }
+
+  .studentList {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+}
+
+@media (max-width: 390px) {
+  .studentRow {
+    gap: 6px;
+    padding-inline: 7px;
+  }
+
+  .studentIdentity,
+  .studentActions {
+    gap: 4px;
+  }
+
+  .hoursDeducted {
+    font-size: 12px;
+  }
+
+  .attendanceButton {
+    min-width: 49px;
+    padding-inline: 6px;
+  }
+
+  .feedbackSummaryCallout {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 359px) {
+  .detailAvatarFrame {
+    flex-basis: 52px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .lessonTitleBlock h3 {
+    white-space: normal;
+  }
+
+  .statusOptions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -10,6 +10,7 @@ import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
 import { cancelScheduledLesson, CancelLessonError } from '@/lib/cancel-class-lesson'
 import { chinaClock } from '@/lib/enrollment-subject-change'
 import { getLocalDayRange, localDateColumnValue, localDateKey } from '@/lib/date/local-day'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser()
@@ -196,8 +197,55 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
       }
     }
 
+    const scheduleChanged = record.lessonDate.getTime() !== lesson.lessonDate.getTime()
+      || record.startTime !== lesson.startTime
+      || record.endTime !== lesson.endTime
+      || record.teacherId !== lesson.teacherId
+      || record.subject !== lesson.subject
+    let eventId: string | null = null
+    if (scheduleChanged) {
+      let affectedStudentIds = (await tx.classLessonStudent.findMany({ where: { lessonId: id }, select: { studentId: true } }))
+        .map((row) => row.studentId)
+      if (!affectedStudentIds.length) {
+        const enrollments = await tx.enrollment.findMany({
+          where: { groupId: lesson.groupId, status: 'ACTIVE', deletedAt: null },
+          select: { studentId: true, subjects: true },
+        })
+        affectedStudentIds = enrollments
+          .filter((enrollment) => enrollmentIncludesSubject(enrollment.subjects, record.subject))
+          .map((enrollment) => enrollment.studentId)
+      }
+      const oldDay = localDateKey(lesson.lessonDate)
+      const nextDay = localDateKey(record.lessonDate)
+      const changes = [
+        oldDay !== nextDay || lesson.startTime !== record.startTime || lesson.endTime !== record.endTime
+          ? `时间由${oldDay} ${lesson.startTime}-${lesson.endTime}调整为${nextDay} ${record.startTime}-${record.endTime}`
+          : '',
+        lesson.subject !== record.subject ? `学科由${lesson.subject || '未设置'}调整为${record.subject || '未设置'}` : '',
+        lesson.teacherId !== record.teacherId ? '任课教师已调整' : '',
+      ].filter(Boolean)
+      const change = await recordCourseChangeEvent(tx, {
+        eventType: 'LESSON_RESCHEDULED',
+        actorUserId: user.id,
+        groupId: lesson.groupId,
+        lessonIds: [id],
+        studentIds: affectedStudentIds,
+        title: `${lesson.group.name}课程安排已调整`,
+        summary: `${changes.join('；')}，请查看家长端最新课表。`,
+        notifyParents: lesson.group.status === 'ACTIVE',
+      })
+      eventId = change.event.id
+    }
+
     await tx.activityLog.create({
-      data: { userId: user.id, action: '调课', detail: lesson.group.name, entityType: 'ClassLesson', entityId: id },
+      data: {
+        userId: user.id,
+        action: '调课',
+        detail: lesson.group.name,
+        entityType: 'ClassLesson',
+        entityId: id,
+        metadata: eventId ? { courseChangeEventId: eventId } : undefined,
+      },
     })
     return record
   })

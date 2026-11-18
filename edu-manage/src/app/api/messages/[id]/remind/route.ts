@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/get-user'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getAccessibleParentMessageWhere } from '@/lib/parent-message-access'
 import { resolveUserForTeacher } from '@/lib/teacher-account-binding'
+import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,7 +20,7 @@ export const POST = apiHandler(async (
 
   const prisma = await getRequestPrisma()
   const { id } = await params
-  const accessWhere = await getAccessibleParentMessageWhere(prisma, user, user.division)
+  const accessWhere = getAccessibleParentMessageWhere(user, user.division)
   if (!accessWhere) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const message = await prisma.parentMessage.findFirst({
@@ -63,24 +64,21 @@ export const POST = apiHandler(async (
     })
   }
 
-  await prisma.$transaction([
-    prisma.notification.create({
-      data: {
-        userId: teacherAccount.id,
-        senderId: user.id,
-        studentId: message.studentId,
-        type: 'PARENT_MESSAGE_REMINDER',
-        title: '管理员提醒您回复家长',
-        content: message.student?.name
-          ? `请及时处理${message.student.name}家长的留言：“${message.title}”。`
-          : `请及时处理家长留言：“${message.title}”。`,
-        link: '/teacher/messages',
-        href: '/teacher/messages',
-        relatedType: 'PARENT_MESSAGE',
-        relatedId: message.id,
-      },
-    }),
-    prisma.activityLog.create({
+  await prisma.$transaction(async (tx) => {
+    await createNotification(tx, {
+      userId: teacherAccount.id,
+      senderId: user.id,
+      studentId: message.studentId,
+      type: 'PARENT_MESSAGE_REMINDER',
+      title: '管理员提醒您回复家长',
+      content: message.student?.name
+        ? `请及时处理${message.student.name}家长的留言：“${message.title}”。`
+        : `请及时处理家长留言：“${message.title}”。`,
+      href: '/teacher/messages',
+      relatedType: 'PARENT_MESSAGE',
+      relatedId: message.id,
+    })
+    await tx.activityLog.create({
       data: {
         userId: user.id,
         action: '督促教师回复家长留言',
@@ -88,8 +86,8 @@ export const POST = apiHandler(async (
         entityType: 'ParentMessage',
         entityId: message.id,
       },
-    }),
-  ])
+    })
+  })
 
   return NextResponse.json({ reminded: true })
 })

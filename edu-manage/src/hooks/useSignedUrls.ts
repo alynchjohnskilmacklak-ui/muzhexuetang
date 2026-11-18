@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { protectedUploadFallback } from '@/lib/upload-url'
+import { reportApiPerformance } from '@/lib/client-performance'
 
 const LOADING_IMAGE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23f5f2ee'/%3E%3Ctext x='48' y='48' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='12'%3E加载中%3C/text%3E%3C/svg%3E"
@@ -63,6 +64,7 @@ export function useSignedUrls(keys: string[] | undefined, initialUrls?: Record<s
 
     setLoading(true)
     setError(false)
+    const startedAt = performance.now()
     const batches = Array.from(
       { length: Math.ceil(missingKeys.length / SIGN_BATCH_SIZE) },
       (_, index) => missingKeys.slice(index * SIGN_BATCH_SIZE, (index + 1) * SIGN_BATCH_SIZE),
@@ -78,6 +80,7 @@ export function useSignedUrls(keys: string[] | undefined, initialUrls?: Record<s
       return data?.urls || {}
     }))
       .then((maps) => {
+        reportApiPerformance('/api/uploads/sign', performance.now() - startedAt, 'success')
         const resolvedMap = Object.assign({}, ...maps) as Record<string, string>
         const expiresAt = Date.now() + SIGNED_URL_CACHE_TTL
         for (const [key, url] of Object.entries(resolvedMap)) {
@@ -86,6 +89,7 @@ export function useSignedUrls(keys: string[] | undefined, initialUrls?: Record<s
         if (!cancelled) setUrlMap({ ...cachedMap, ...resolvedMap })
       })
       .catch(() => {
+        reportApiPerformance('/api/uploads/sign', performance.now() - startedAt, 'failure')
         if (!cancelled) {
           setUrlMap(cachedMap)
           setError(true)

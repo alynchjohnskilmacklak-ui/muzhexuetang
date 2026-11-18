@@ -12,9 +12,10 @@ import {
   IdcardOutlined,
   RightOutlined,
 } from '@ant-design/icons'
-import { Button, Drawer, Modal, Progress, Typography } from 'antd'
+import { Button, Drawer, Progress, Typography } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const { Text, Title } = Typography
 const GUIDE_VERSION = 'v2'
@@ -65,13 +66,13 @@ const GUIDE_STEPS = [
   },
   {
     section: '家校沟通',
-    title: '我的留言：向老师咨询并查看回复',
-    entry: '点击首页“去留言”，或在菜单“消息沟通”中选择“我的留言”。',
+    title: '家校沟通：向老师咨询并查看回复',
+    entry: '在菜单“家校服务”中选择“家校沟通”，或从孩子的课堂反馈发起咨询。',
     description: '如需了解课堂表现、作业或其他学习情况，可在对应留言中继续沟通。',
     details: ['查看自己已发送的留言', '查看教师或管理员的最新回复', '继续追问，并确认消息是否已经查看'],
     tip: '涉及具体课堂的问题，建议从对应课堂反馈详情发起留言，老师更容易确认是哪一次课程。',
     path: '/parent/messages',
-    action: '打开我的留言',
+    action: '打开家校沟通',
     icon: <CommentOutlined />,
   },
   {
@@ -271,7 +272,7 @@ export function ParentUsageGuideDrawerExtra({ parentUserId }: { parentUserId?: s
           {guideBody}
         </Drawer>
       ) : (
-        <Modal
+        <BrandModal
           title="牧哲学堂家长端使用指南"
           open
           onCancel={closeGuide}
@@ -280,7 +281,7 @@ export function ParentUsageGuideDrawerExtra({ parentUserId }: { parentUserId?: s
           destroyOnHidden
         >
           {guideBody}
-        </Modal>
+        </BrandModal>
       ))}
     </>
   )

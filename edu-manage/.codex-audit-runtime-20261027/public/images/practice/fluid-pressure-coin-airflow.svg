@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="280" viewBox="0 0 760 280" role="img" aria-labelledby="title desc">
+  <title id="title">硬币上方气流与挡板示意图</title>
+  <desc id="desc">气流从硬币上方由左向右流动，硬币被抬起并越过右侧挡板。原创示意图，不按比例。</desc>
+  <rect width="760" height="280" rx="18" fill="#fff"/>
+  <path d="M72 226H692" stroke="#343434" stroke-width="4"/>
+  <path d="M597 226V108H630V226" fill="#e9e5df" stroke="#343434" stroke-width="4"/>
+  <text x="612" y="94" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#333">挡板</text>
+  <ellipse cx="290" cy="205" rx="53" ry="14" fill="#e8784a" stroke="#9b4527" stroke-width="3"/>
+  <path d="M237 204V190C237 182 261 175 290 175S343 182 343 190V204" fill="#f4a17d" stroke="#9b4527" stroke-width="3"/>
+  <ellipse cx="290" cy="190" rx="53" ry="14" fill="#f7b08d" stroke="#9b4527" stroke-width="3"/>
+  <text x="290" y="250" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#333">硬币</text>
+  <path d="M126 122H442M126 145H442M126 168H442" stroke="#4376a8" stroke-width="4" stroke-linecap="round" marker-end="url(#blueArrow)"/>
+  <text x="286" y="98" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#315d84">快速气流</text>
+  <path d="M290 171C294 154 298 143 309 133" fill="none" stroke="#e8784a" stroke-width="4" stroke-dasharray="7 6" marker-end="url(#arrow)"/>
+  <text x="479" y="137" font-family="sans-serif" font-size="18" fill="#555">气流方向</text>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#e8784a"/></marker>
+    <marker id="blueArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#4376a8"/></marker>
+  </defs>
+  <text x="380" y="270" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#777">示意图（不按比例）</text>
+</svg>

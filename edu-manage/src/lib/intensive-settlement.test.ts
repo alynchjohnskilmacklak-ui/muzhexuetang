@@ -70,6 +70,10 @@ function createSettlementHarness(mode: 'INTENSIVE' | 'NORMAL' = 'INTENSIVE') {
         enrollment.remainHours -= data.remainHours.decrement
         return enrollment
       },
+      findMany: async () => [],
+    },
+    student: {
+      update: async () => ({}),
     },
     hourTransaction: {
       create: async (input: unknown) => {

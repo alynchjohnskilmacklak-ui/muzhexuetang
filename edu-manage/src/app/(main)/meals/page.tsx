@@ -2,10 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Alert, Button, Card, Col, DatePicker, Form, Input, Modal, Row, Statistic, Switch,
-  Table, Tabs, Tag, Typography, message,
+  Alert, Button, Card, Col, DatePicker, Form, Input, Row, Statistic, Switch,
+  Table, Tabs, Tag, Typography, Upload, message,
 } from 'antd'
-import { DownOutlined, DownloadOutlined, EditOutlined, ReloadOutlined, UpOutlined } from '@ant-design/icons'
+import { BrandModal } from '@/components/Common/BrandModal'
+import {
+  DownOutlined, DownloadOutlined, EditOutlined, InboxOutlined, ReloadOutlined, UpOutlined,
+} from '@ant-design/icons'
 import dayjs, { Dayjs } from 'dayjs'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useDivision } from '@/contexts/DivisionContext'
@@ -23,6 +26,8 @@ type MealTemplate = {
   dinner: string | null
   snack: string | null
   note: string | null
+  image: string | null
+  description: string | null
   allowDouble?: boolean
   startDate?: string | null
   endDate?: string | null
@@ -55,6 +60,90 @@ type MealSummary = {
 function mondayOf(value: Dayjs) {
   const offset = value.day() === 0 ? 6 : value.day() - 1
   return value.startOf('day').subtract(offset, 'day')
+}
+
+/** 菜品图片上传组件：支持预览、替换、删除，上传到 /api/upload（meal-image 类型，家长可见） */
+function MealImageUpload({
+  value, onChange,
+}: {
+  value?: string | null
+  onChange?: (v: string | null) => void
+}) {
+  const [uploading, setUploading] = useState(false)
+
+  const handleUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      message.error('请选择图片文件')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      message.error('图片不能超过 5MB')
+      return
+    }
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('uploadType', 'meal-image')
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || '上传失败')
+      // 优先用缩略图，列表加载更快
+      onChange?.(data.url)
+      message.success('图片已上传')
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : '上传失败')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  if (value) {
+    return (
+      <div>
+        <div style={{
+          borderRadius: 12, overflow: 'hidden', border: '1px solid #EEE7E1',
+        }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={value}
+            alt="菜品照片"
+            style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <Upload
+            showUploadList={false}
+            accept="image/*"
+            beforeUpload={(f) => { void handleUpload(f); return false }}
+          >
+            <Button size="small" icon={<EditOutlined />} loading={uploading}>替换图片</Button>
+          </Upload>
+          <Button size="small" danger onClick={() => onChange?.(null)}>删除</Button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <Upload.Dragger
+      showUploadList={false}
+      accept="image/*"
+      disabled={uploading}
+      beforeUpload={(f) => { void handleUpload(f); return false }}
+      style={{ borderRadius: 12 }}
+    >
+      <p className="ant-upload-drag-icon">
+        <InboxOutlined style={{ color: uploading ? '#bbb' : '#2E6B50' }} />
+      </p>
+      <p className="ant-upload-text" style={{ fontSize: 13 }}>
+        {uploading ? '上传中…' : '点击或拖拽上传菜品照片'}
+      </p>
+      <p className="ant-upload-hint" style={{ fontSize: 11 }}>
+        支持 JPG / PNG / WebP，建议不超过 5MB
+      </p>
+    </Upload.Dragger>
+  )
 }
 
 export default function MealsPage() {
@@ -162,6 +251,8 @@ export default function MealsPage() {
       lunch: template?.lunch,
       allowDouble: template?.allowDouble !== false,
       note: template?.note,
+      description: template?.description,
+      imageUrl: template?.image || null,
       dateRange: template?.startDate || template?.endDate
         ? [template.startDate ? dayjs(template.startDate) : null, template.endDate ? dayjs(template.endDate) : null]
         : null,
@@ -176,8 +267,12 @@ export default function MealsPage() {
         method: templateEditing?.template ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...values,
           weekday: templateEditing?.weekday,
+          lunch: values.lunch,
+          allowDouble: values.allowDouble,
+          note: values.note || null,
+          description: values.description || null,
+          image: values.imageUrl || null,
           startDate: values.dateRange?.[0] ? values.dateRange[0].format('YYYY-MM-DD') : null,
           endDate: values.dateRange?.[1] ? values.dateRange[1].format('YYYY-MM-DD') : null,
         }),
@@ -207,13 +302,14 @@ export default function MealsPage() {
       ])),
       ['合计', '', groupedTotal, '', ''],
     ]
-    const blob = new Blob([`\uFEFF${rows.map((row) => row.map(csvCell).join(',')).join('\r\n')}`], {
+    const csvLines = rows.map((row) => row.map(csvCell).join(','))
+    const blob = new Blob([`\uFEFF${csvLines.join('\r\n')}`], {
       type: 'text/csv;charset=utf-8',
     })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `就餐汇总-${today}.csv`
+    link.download = `牧哲学堂_就餐汇总-${today}.csv`
     link.click()
     URL.revokeObjectURL(url)
   }
@@ -446,11 +542,25 @@ export default function MealsPage() {
         },
       ]} />
 
-      <Modal title="设置周期菜单" open={!!templateEditing} onCancel={() => setTemplateEditing(null)} onOk={saveTemplate} confirmLoading={saving}>
+      <BrandModal title="设置周期菜单" open={!!templateEditing} onCancel={() => setTemplateEditing(null)} onOk={saveTemplate} confirmLoading={saving} width={isMobile ? 340 : 480}>
         <Form form={templateForm} layout="vertical">
           <Form.Item name="lunch" label="午餐菜品（如：红烧肉）" rules={[{ required: true, message: '请填写午餐' }]}>
             <Input placeholder="填写今日菜品" />
           </Form.Item>
+
+          {/* 菜品照片上传 */}
+          <Form.Item name="imageUrl" label="菜品照片（家长端可查看）">
+            <MealImageUpload />
+          </Form.Item>
+
+          {/* 菜品详细介绍 */}
+          <Form.Item name="description" label="菜品详细介绍">
+            <Input.TextArea
+              rows={3}
+              placeholder="可填写食材搭配、营养说明，例如：新鲜五花肉搭配土豆，荤素均衡，主食米饭管够"
+            />
+          </Form.Item>
+
           <Form.Item name="allowDouble" label="是否允许双倍米饭" valuePropName="checked">
             <Switch checkedChildren="允许" unCheckedChildren="不允许" />
           </Form.Item>
@@ -461,7 +571,7 @@ export default function MealsPage() {
             <DatePicker.RangePicker style={{ width: '100%' }} />
           </Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

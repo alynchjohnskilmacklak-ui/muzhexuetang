@@ -64,11 +64,13 @@ export function resolveMembership(level?: string | null): MembershipLevel {
 }
 
 /** A stored child ID is only a preference, never proof that the parent may see that child. */
-export function selectParentMembership<T extends { id: string; name: string; membershipLevel?: string | null }>(
+export function selectParentMembership<T extends { id: string; name: string; membershipLevel?: string | null; recordIds?: readonly string[] }>(
   linkedStudents: T[],
   preferredChildId?: string | null,
 ) {
-  const activeStudent = linkedStudents.find((student) => student.id === preferredChildId) ?? linkedStudents[0]
+  const activeStudent = linkedStudents.find((student) =>
+    student.id === preferredChildId || student.recordIds?.includes(preferredChildId || ''),
+  ) ?? linkedStudents[0]
   return {
     activeChildId: activeStudent?.id ?? '',
     studentName: activeStudent?.name ?? '',
@@ -159,9 +161,9 @@ export const MEMBERSHIP_BENEFITS: Record<MembershipLevel, {
 
 // ---- 家长端权益卡底部引导条 ----
 export const MEMBERSHIP_UPGRADE: Record<MembershipLevel, { text: string; href: string }> = {
-  NORMAL: { text: '升级 VIP · 享优先排课与专属服务', href: '/parent/membership' },
-  VIP: { text: '再进一步 · 解锁 SVIP 深度陪伴', href: '/parent/membership' },
-  SVIP: { text: '您已享有最高级别服务', href: '/parent/membership' },
+  NORMAL: { text: '升级 VIP · 享优先排课与专属服务', href: '/parent/benefits' },
+  VIP: { text: '再进一步 · 解锁 SVIP 深度陪伴', href: '/parent/benefits' },
+  SVIP: { text: '您已享有最高级别服务', href: '/parent/benefits' },
 }
 
 // ---- 家长端首页头图等级主题（深墨绿 + 哑光金边 + 光带氛围）----

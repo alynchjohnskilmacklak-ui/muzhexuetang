@@ -8,6 +8,8 @@ import { getRequestDivision } from '@/lib/division'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
 import { resolveTeacherForUser } from '@/lib/performance'
+import { brandXlsxBufferOnServer } from '@/lib/export-xlsx-brand-server'
+import { copyXlsxAsArrayBuffer } from '@/lib/export-xlsx-brand'
 
 export const GET = apiHandler(async (req: NextRequest) => {
   const user = await getCurrentUser()
@@ -71,12 +73,13 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const ws = XLSX.utils.json_to_sheet(rows)
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, '考勤记录')
-  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
+  const rawBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
+  const buf = await brandXlsxBufferOnServer(new Uint8Array(rawBuffer))
 
-  return new Response(buf, {
+  return new Response(copyXlsxAsArrayBuffer(buf), {
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="考勤_${new Date().toISOString().slice(0, 10)}.xlsx"`,
+      'Content-Disposition': `attachment; filename="牧哲学堂_考勤_${new Date().toISOString().slice(0, 10)}.xlsx"`,
     },
   })
 })

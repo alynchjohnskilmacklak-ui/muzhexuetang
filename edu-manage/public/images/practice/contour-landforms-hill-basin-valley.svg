@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="300" viewBox="0 0 900 300" role="img" aria-labelledby="title desc">
+  <title id="title">山顶、盆地和山谷的等高线示意</title>
+  <desc id="desc">三个小图分别显示闭合等高线数值向内增大的山顶、数值向内减小的盆地，以及尖端指向高处的山谷。</desc>
+  <rect width="900" height="300" rx="18" fill="#fff"/>
+  <g font-family="sans-serif" fill="#333" text-anchor="middle">
+    <text x="150" y="34" font-size="21">山顶</text><text x="450" y="34" font-size="21">盆地</text><text x="750" y="34" font-size="21">山谷</text>
+  </g>
+  <g fill="none" stroke="#4b8b67" stroke-width="4">
+    <ellipse cx="150" cy="156" rx="108" ry="83"/><ellipse cx="150" cy="156" rx="76" ry="58"/><ellipse cx="150" cy="156" rx="42" ry="31"/>
+    <ellipse cx="450" cy="156" rx="108" ry="83"/><ellipse cx="450" cy="156" rx="76" ry="58"/><ellipse cx="450" cy="156" rx="42" ry="31"/>
+    <path d="M650 81Q690 99 710 132Q727 156 750 159Q774 156 792 132Q813 98 850 81"/><path d="M650 116Q692 130 715 151Q731 165 750 168Q770 165 785 151Q810 130 850 116"/><path d="M650 205Q692 185 715 171Q731 162 750 158Q770 162 785 171Q810 185 850 205"/>
+  </g>
+  <g fill="#fff" stroke="#d4e3d8">
+    <rect x="127" y="57" width="46" height="24" rx="5"/><rect x="127" y="82" width="46" height="24" rx="5"/><rect x="127" y="109" width="46" height="24" rx="5"/>
+    <rect x="427" y="57" width="46" height="24" rx="5"/><rect x="427" y="82" width="46" height="24" rx="5"/><rect x="427" y="109" width="46" height="24" rx="5"/>
+  </g>
+  <g font-family="sans-serif" font-size="17" fill="#315d40" text-anchor="middle">
+    <text x="150" y="78">300</text><text x="150" y="103">400</text><text x="150" y="130">500</text>
+    <text x="450" y="78">500</text><text x="450" y="103">400</text><text x="450" y="130">300</text>
+  </g>
+  <path d="M750 171V96" stroke="#4376a8" stroke-width="3" stroke-dasharray="7 5"/><path d="M741 107L750 94L759 107" fill="none" stroke="#4376a8" stroke-width="3"/>
+  <text x="750" y="237" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#315d84">V形尖端指向高处</text>
+  <text x="450" y="277" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#777">等高线示意图；疏密表示坡度，数值表示海拔</text>
+</svg>

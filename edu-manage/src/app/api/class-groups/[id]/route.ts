@@ -8,6 +8,8 @@ import { apiHandler } from '@/lib/api-handler'
 import { isClassGroupInActiveTerm, resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { getActiveAcademicTerm } from '@/lib/academic-term'
 import { softDeleteEntity } from '@/lib/data-correction/trash'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
 
 export const dynamic = 'force-dynamic'
 
@@ -134,9 +136,23 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
   const group = await prisma.$transaction(async (tx) => {
     const previous = await tx.classGroup.findUnique({
       where: { id },
-      select: { id: true, name: true, teacherId: true, teacher: { select: { id: true, name: true } } },
+      select: {
+        id: true, name: true, teacherId: true, roomId: true,
+        teacher: { select: { id: true, name: true } },
+        teacherAssignments: { select: { teacherId: true, subject: true, role: true } },
+      },
     })
     if (!previous) throw new Error('CLASS_GROUP_NOT_FOUND')
+    const nextAssignments = normalizedAssignments.map((item, index) => ({
+      teacherId: item.teacherId,
+      subject: item.subject || null,
+      role: index === 0 ? 'PRIMARY' : 'SUBJECT',
+    }))
+    const assignmentKey = (items: Array<{ teacherId: string; subject: string | null; role: string }>) => JSON.stringify(
+      [...items].sort((a, b) => `${a.subject || ''}:${a.role}:${a.teacherId}`.localeCompare(`${b.subject || ''}:${b.role}:${b.teacherId}`)),
+    )
+    const teacherAssignmentChanged = Boolean(primaryTeacherId && primaryTeacherId !== previous.teacherId)
+      || (normalizedAssignments.length > 0 && assignmentKey(nextAssignments) !== assignmentKey(previous.teacherAssignments))
 
     const updated = await tx.classGroup.update({
       where: { id },
@@ -243,6 +259,15 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
           where: { userId: { in: parentIds }, link: { in: ['/parent/performance', '/parent/grades', '/parent/schedule'] } },
         })
       }
+      await recordCourseChangeEvent(tx, {
+        eventType: 'CLASS_ARCHIVED',
+        actorUserId: user.id,
+        groupId: id,
+        lessonIds,
+        studentIds: activeEnrollments.map((enrollment) => enrollment.studentId),
+        title: '班级课程已归档',
+        summary: `${updated.name}已归档，未完成的后续课程已取消。`,
+      })
       // 清除学员 mainTeacher 引用（如无其他该教师班级）
       for (const enr of activeEnrollments) {
         const student = await tx.student.findUnique({ where: { id: enr.studentId }, select: { mainTeacherId: true } })
@@ -268,6 +293,7 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
             data: { status: 'TRIAL', remainHours: 0, totalHours: 0, mainTeacherId: null },
           })
         }
+        await syncStudentHourSnapshot(tx, enr.studentId)
       }
       await tx.activityLog.create({
         data: { userId: user.id, action: '归档班级', detail: `${updated.name}，清理 ${activeEnrollments.length} 名学员报名及课时` },
@@ -297,6 +323,29 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
         }
       }
       await tx.activityLog.create({ data: { userId: user.id, action: '编辑班级', detail: updated.name } })
+      if (teacherAssignmentChanged || (roomId !== undefined && roomId !== previous.roomId)) {
+        const [scheduledLessons, activeEnrollments] = await Promise.all([
+          tx.classLesson.findMany({
+            where: { groupId: id, status: 'SCHEDULED', deletedAt: null },
+            select: { id: true },
+          }),
+          tx.enrollment.findMany({
+            where: { groupId: id, status: 'ACTIVE', deletedAt: null },
+            select: { studentId: true },
+          }),
+        ])
+        await recordCourseChangeEvent(tx, {
+          eventType: teacherAssignmentChanged ? 'TEACHER_ASSIGNMENT_CHANGED' : 'CLASS_ROOM_CHANGED',
+          actorUserId: user.id,
+          groupId: id,
+          lessonIds: scheduledLessons.map((lesson) => lesson.id),
+          studentIds: activeEnrollments.map((enrollment) => enrollment.studentId),
+          title: teacherAssignmentChanged ? '班级任课安排已调整' : '班级上课地点已调整',
+          summary: teacherAssignmentChanged
+            ? `${updated.name}的任课安排已更新，请查看最新课程表。`
+            : `${updated.name}的上课地点已更新，请查看最新课程表。`,
+        })
+      }
     }
 
     return updated

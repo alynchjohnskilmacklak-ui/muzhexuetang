@@ -7,6 +7,7 @@ type TermMembership = {
 
 type ParentStudent = {
   id: string
+  identityId: string
   name: string
   gender: string | null
   birthYear: number | null
@@ -16,13 +17,9 @@ type ParentStudent = {
 }
 
 function sameIdentity(left: ParentStudent, right: ParentStudent) {
-  const leftActiveTerms = left.termMemberships.filter((membership) => membership.status === 'ACTIVE' && membership.term.status === 'ACTIVE')
-  const rightActiveTerms = right.termMemberships.filter((membership) => membership.status === 'ACTIVE' && membership.term.status === 'ACTIVE')
-  // Two simultaneously enrolled records may be two different children with the same name.
-  if (leftActiveTerms.some((first) => rightActiveTerms.some((second) => first.term.startDate.getTime() === second.term.startDate.getTime()))) return false
-  return left.name.trim().toLocaleLowerCase('zh-CN') === right.name.trim().toLocaleLowerCase('zh-CN')
-    && (!left.birthYear || !right.birthYear || left.birthYear === right.birthYear)
-    && (!left.gender || !right.gender || left.gender === right.gender)
+  // Names and demographic fields are not identity keys: siblings and homonyms
+  // can share them. Historical records merge only after an explicit identity link.
+  return Boolean(left.identityId) && left.identityId === right.identityId
 }
 
 function latestMembership(student: ParentStudent) {

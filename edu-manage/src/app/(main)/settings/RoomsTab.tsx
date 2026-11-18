@@ -1,49 +1,52 @@
 'use client'
 
 import useSWR from 'swr'
-import { Card, Table, Button, Modal, Form, Input, InputNumber, Space, Popconfirm, message } from 'antd'
+import { fetchJson } from '@/lib/fetch-json'
+import { saveSettingsRequest } from '@/lib/settings-client'
+import { Alert, Card, Table, Button, Form, Input, InputNumber, Space, Popconfirm, message } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = (url: string) => fetchJson(url)
 
 export function RoomsTab() {
-  const { data, isLoading, mutate } = useSWR('/api/rooms', fetcher)
+  const { data, error, isLoading, mutate } = useSWR('/api/rooms', fetcher)
   const [open, setOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState<{ id: string; name: string; capacity: number; type: string } | null>(null)
   const [form] = Form.useForm()
 
   const handleSubmit = async (values: { name: string; capacity: number; type: string }) => {
+    if (saving) return
+    setSaving(true)
+    try {
     if (editing) {
-      await fetch(`/api/rooms/${editing.id}`, {
+      if (!await saveSettingsRequest(`/api/rooms/${editing.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
-      })
+      })) return
       message.success('教室已更新')
     } else {
-      await fetch('/api/rooms', {
+      if (!await saveSettingsRequest('/api/rooms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
-      })
+      })) return
       message.success('教室已添加')
     }
     setOpen(false)
     setEditing(null)
     form.resetFields()
     mutate()
+    } finally { setSaving(false) }
   }
 
   const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/rooms/${id}`, { method: 'DELETE' })
-    if (!res.ok) {
-      const err = await res.json()
-      message.error(err.error || '删除失败')
-    } else {
-      message.success('教室已删除')
-      mutate()
-    }
+    if (!await saveSettingsRequest(`/api/rooms/${id}`, { method: 'DELETE' })) return
+    message.success('已删除')
+    void mutate()
   }
 
   const columns = [
@@ -63,26 +66,27 @@ export function RoomsTab() {
   ]
 
   return (
-    <Card bordered={false} style={{ borderRadius: 10 }}>
+    <Card bordered={false} style={{ borderRadius: 14 }}>
+      {error && <Alert type="error" showIcon message="加载失败，请重试" description={error.message} action={<Button onClick={() => mutate()}>重试</Button>} style={{ marginBottom: 16 }} />}
       <Button
         type="primary"
         icon={<PlusOutlined />}
-        style={{ marginBottom: 16, background: '#E8784A' }}
+        style={{ marginBottom: 16,  }}
         onClick={() => { setEditing(null); form.resetFields(); setOpen(true) }}
       >添加教室</Button>
-      <Table columns={columns} dataSource={data || []} rowKey="id" loading={isLoading} pagination={false} />
-      <Modal
+      <Table columns={columns} dataSource={Array.isArray(data) ? data : []} scroll={{ x: 480 }} rowKey="id" loading={isLoading} pagination={false} />
+      <BrandModal
         title={editing ? '编辑教室' : '添加教室'}
         open={open}
-        onCancel={() => { setOpen(false); setEditing(null) }}
-        onOk={() => form.submit()}
+        onCancel={() => { if (!saving) { setOpen(false); setEditing(null) } }}
+        confirmLoading={saving} maskClosable={!saving} closable={!saving} onOk={() => form.submit()}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item name="name" label="名称" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="capacity" label="容量"><InputNumber min={1} style={{ width: '100%' }} /></Form.Item>
           <Form.Item name="type" label="类型"><Input /></Form.Item>
         </Form>
-      </Modal>
+      </BrandModal>
     </Card>
   )
 }

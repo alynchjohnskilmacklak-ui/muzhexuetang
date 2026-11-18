@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth'
 import { getRequestDivision } from '@/lib/division'
 import bcrypt from 'bcryptjs'
 import { generateTemporaryPassword } from '@/lib/temporary-password'
+import { normalizeLoginPhone } from '@/lib/login-accounts'
 
 export const dynamic = 'force-dynamic'
 
@@ -83,6 +84,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const credentials: Array<{ name: string; role: 'parent'; email: string; initialPassword: string }> = []
 
     for (const row of rows) {
+      const rawPhone = (row.phone || '').trim()
+      const phone = rawPhone ? normalizeLoginPhone(rawPhone) : ''
+      if (!rawPhone || !phone) {
+        results.push({ name: row.name, status: 'failed', error: rawPhone ? '学员手机号格式错误' : '学员手机号不能为空' })
+        continue
+      }
       try {
         const issued = await prisma.$transaction(async (tx) => {
           let parentUserId: string | null = null
@@ -122,7 +129,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
               grade: row.grade || null,
               school: row.school || null,
               gender: row.gender || null,
-              phone: row.phone || null,
+              phone,
               parentName: row.parentName || null,
               parentPhone: row.parentPhone || null,
               parentUserId,
@@ -146,11 +153,20 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const credentials: Array<{ name: string; role: 'teacher'; email: string; initialPassword: string }> = []
 
   for (const row of rows) {
+    const rawPhone = (row.phone || '').trim()
+    const phone = rawPhone ? normalizeLoginPhone(rawPhone) : ''
+    if (!rawPhone || !phone) {
+      results.push({ name: row.name, status: 'failed', error: rawPhone ? '手机号格式错误' : '手机号不能为空' })
+      continue
+    }
     try {
-      const phone = row.phone || ''
       const email = `${phone}@tea.com`
 
-      const existingTeacher = phone ? await prisma.teacher.findUnique({ where: { phone } }) : null
+      const phoneCandidates = await prisma.teacher.findMany({
+        where: { phone: { contains: phone.slice(-4) } },
+        select: { phone: true },
+      })
+      const existingTeacher = phoneCandidates.find((teacher) => normalizeLoginPhone(teacher.phone) === phone)
       if (existingTeacher) {
         results.push({ name: row.name, status: 'skipped', error: '手机号已存在' })
         continue

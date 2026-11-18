@@ -45,13 +45,18 @@ export function parseAiArticleResponse(
     if (!sections) throw new Error(`第 ${index + 1} 位学生的反馈缺少三段式内容，请重试`)
     if (/S\d+/.test(sections[0])) throw new Error('共同学习内容不应包含学生个人信息，请重试')
     if (forbidden.test(body)) throw new Error('豆包生成了不合适的称呼或承诺，请重试')
-    if (selected.some((_, otherIndex) => otherIndex !== index && body.includes(`S${otherIndex + 1}`))) {
+    if ([...body.matchAll(/S\d+(?:同学)?/g)].some((match) => match[0].replace(/同学$/, '') !== key)) {
       throw new Error('生成内容混入其他学生标记，请重试')
     }
     if (!student.observation && /未记录|没有记录|暂无.*观察|没有.{0,8}观察记录|暂无.{0,8}观察|尚未.{0,6}观察|未提供.{0,4}观察|暂不展开|先不展开|不展开个人表现|个人表现方面.{0,6}描述/.test(sections[1])) {
       throw new Error('AI 生成了“未记录/不展开”等回避性表述，请重试')
     }
-    const named = body.replaceAll(`${key}同学`, `${student.name}同学`).replaceAll(key, `${student.name}同学`)
+    const normalizeStudentReference = (value: string) => value
+      .replace(new RegExp(`${key}(?!\\d)(?:同学)?`, 'g'), `${student.name}同学`)
+      .replace(/孩子(?![们])/g, `${student.name}同学`)
+    const named = ARTICLE_HEADINGS
+      .map((heading, sectionIndex) => `${heading}：${normalizeStudentReference(sections[sectionIndex])}`)
+      .join('\n')
     if (!named.includes(`${student.name}同学`)) throw new Error('反馈缺少学生姓名，请重试')
     return { studentId: student.id, studentName: student.name, article: named }
   })

@@ -1,16 +1,23 @@
+import type { Prisma } from '@prisma/client'
 import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
+import { PARENT_ACTIVE_CHILD_COOKIE } from '@/constants/membership'
+import { resolveParentChildId } from '@/lib/parent-child-selection'
 import { ParentScheduleClient } from './client'
 import {
   parentActiveEnrollmentWhere,
   parentActiveStudentWhere,
   parentLinkedStudentWhere,
   parentVisibleLessonWhere,
+  visibleClassGroupWhere,
+  visibleTeacherWhere,
 } from '@/lib/business-visibility'
 import { normalizeSchedulePeriods } from '@/lib/schedule-periods'
 import { calculateIntensiveDeductHours } from '@/lib/intensive-class'
 import { localDateColumnValue, todayLocal } from '@/lib/date/local-day'
+import { mergeDuplicateStudents } from '@/lib/merge-students'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,21 +26,52 @@ function localDateKey(value: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
-export default async function ParentSchedulePage({ searchParams }: { searchParams?: Promise<{ week?: string }> }) {
+export default async function ParentSchedulePage({ searchParams }: { searchParams?: Promise<{ week?: string; childId?: string; studentId?: string }> }) {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
   const userId = (session.user as { id: string }).id
   const db = await getRequestPrisma()
 
+  // The child picker may merge a student's historical batch records so their
+  // learning history stays available. Schedule entitlements must use only the
+  // active academic term, otherwise an old active enrollment can surface a VIP
+  // card and lessons in the newly selected batch.
+  const currentTermEnrollmentWhere = {
+    ...parentActiveEnrollmentWhere(userId),
+    group: { is: {
+      ...visibleClassGroupWhere,
+      term: { is: { status: 'ACTIVE' as const } },
+    } },
+  } satisfies Prisma.EnrollmentWhereInput
+  const currentTermVisibleLessonWhere = {
+    ...parentVisibleLessonWhere(userId),
+    group: { is: {
+      ...visibleClassGroupWhere,
+      teacher: visibleTeacherWhere,
+      enrollments: { some: currentTermEnrollmentWhere },
+    } },
+  } satisfies Prisma.ClassLessonWhereInput
+
   const [students, config] = await Promise.all([db.student.findMany({
     where: parentActiveStudentWhere(userId),
+    distinct: ['id'],
     select: {
       id: true,
+      identityId: true,
       name: true,
       grade: true,
+      membershipLevel: true,
+      updatedAt: true,
+      termMemberships: {
+        select: {
+          status: true,
+          joinedAt: true,
+          term: { select: { id: true, status: true, startDate: true } },
+        },
+      },
       enrollments: {
-        where: { status: 'ACTIVE', group: { intensiveMode: 'INTENSIVE', status: { not: 'ARCHIVED' } } },
+        where: currentTermEnrollmentWhere,
         select: {
           id: true,
           totalHours: true,
@@ -43,10 +81,14 @@ export default async function ParentSchedulePage({ searchParams }: { searchParam
             select: {
               id: true,
               name: true,
+              termId: true,
               intensiveMode: true,
               teachingType: true,
+              recurringDays: true,
+              lessonStartTime: true,
+              status: true,
               course: { select: { name: true, subject: true } },
-              teacher: { select: { name: true } },
+              teacher: { select: { id: true, name: true, avatar: true, gender: true, tierLevel: true, bio: true, education: true, university: true, major: true, subjects: true } },
             },
           },
         },
@@ -55,7 +97,8 @@ export default async function ParentSchedulePage({ searchParams }: { searchParam
   }), db.systemConfig.findUnique({ where: { id: 'singleton' }, select: { schedulePeriods: true } })])
 
   const today = new Date(`${todayLocal()}T00:00:00.000Z`)
-  const requestedWeek = (await searchParams)?.week
+  const params = await searchParams
+  const requestedWeek = params?.week
   const parsedWeek = typeof requestedWeek === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(requestedWeek)
     ? new Date(`${requestedWeek}T00:00:00.000Z`)
     : null
@@ -73,7 +116,7 @@ export default async function ParentSchedulePage({ searchParams }: { searchParam
 
   const lessons = await db.classLesson.findMany({
     where: {
-      ...parentVisibleLessonWhere(userId),
+      ...currentTermVisibleLessonWhere,
       lessonDate: { gte: monday, lt: nextMonday },
     },
     include: {
@@ -93,7 +136,7 @@ export default async function ParentSchedulePage({ searchParams }: { searchParam
       deletedAt: null,
       status: 'CANCELLED',
       lessonDate: { gte: monday, lt: nextMonday },
-      group: { deletedAt: null, status: { not: 'ARCHIVED' }, enrollments: { some: parentActiveEnrollmentWhere(userId) } },
+       group: { is: { ...visibleClassGroupWhere, term: { is: { status: 'ACTIVE' as const } }, enrollments: { some: currentTermEnrollmentWhere } } },
     },
     include: {
       _count: { select: { lessonStudents: true } },
@@ -169,6 +212,19 @@ export default async function ParentSchedulePage({ searchParams }: { searchParam
 
   const allowedStudentIds = new Set(students.map((student) => student.id))
   const linkedStudentIds = [...allowedStudentIds]
+  const mergedStudents = mergeDuplicateStudents(students).map((student) => ({
+    id: student.id,
+    identityId: student.identityId,
+    name: student.name,
+    grade: student.grade,
+    membershipLevel: student.membershipLevel,
+    recordIds: student.recordIds,
+    currentTermId: student.currentTermId,
+    currentTermRecordIds: student.currentTermRecordIds,
+    enrollments: student.enrollments,
+  }))
+  const rememberedChildId = (await cookies()).get(PARENT_ACTIVE_CHILD_COOKIE)?.value
+  const initialSelectedStudentId = resolveParentChildId(mergedStudents, [params?.childId, params?.studentId, rememberedChildId])
   const historyGroupIds = [...new Set(historyLessons.map((lesson) => lesson.groupId))]
   const unlinkedFeedbacks = historyGroupIds.length && linkedStudentIds.length
     ? await db.classroomFeedback.findMany({
@@ -275,7 +331,8 @@ export default async function ParentSchedulePage({ searchParams }: { searchParam
 
   return (
     <ParentScheduleClient
-      students={JSON.parse(JSON.stringify(students))}
+      students={JSON.parse(JSON.stringify(mergedStudents))}
+      initialSelectedStudentId={initialSelectedStudentId}
       lessons={JSON.parse(JSON.stringify(lessons))}
       cancelledLessons={JSON.parse(JSON.stringify(cancelledLessons))}
       weekStart={mondayKey}

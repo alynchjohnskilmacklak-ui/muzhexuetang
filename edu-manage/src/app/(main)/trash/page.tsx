@@ -37,7 +37,7 @@ export default function TrashPage() {
   const [type, setType] = useState('all')
   const [busyId, setBusyId] = useState<string | null>(null)
   const { data, mutate, isLoading } = useSWR(`/api/admin/trash?type=${type}`, fetcher, {
-    refreshInterval: 5000,
+    refreshInterval: 0,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
   })

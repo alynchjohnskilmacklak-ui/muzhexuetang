@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const mocks = vi.hoisted(() => ({ validateLoginAccount: vi.fn(), hasCurrentParentStudent: vi.fn() }))
+const mocks = vi.hoisted(() => ({ validateLoginAccount: vi.fn(), hasCurrentParentStudent: vi.fn(), resolveLoginIdentifier: vi.fn() }))
 
 vi.mock('@/lib/login-accounts', () => ({
   validateLoginAccount: mocks.validateLoginAccount,
+  resolveLoginIdentifier: mocks.resolveLoginIdentifier,
 }))
 vi.mock('@/lib/prisma', () => ({ getPrismaForDivision: () => ({}) }))
 vi.mock('@/lib/parent-account-validity', () => ({
@@ -17,6 +18,7 @@ import { resetCredentialRateLimitsForTests } from '@/lib/login-rate-limit'
 describe('authoritative credential authentication', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.resolveLoginIdentifier.mockImplementation(async (email: string) => ({ ok: true, email }))
     mocks.hasCurrentParentStudent.mockResolvedValue(true)
     resetCredentialRateLimitsForTests()
   })
@@ -56,6 +58,7 @@ describe('authoritative credential authentication', () => {
       { persistUser: true, recordAttempt: true, recordSuccess: true },
       expect.objectContaining({ ip: '127.0.0.1' }),
       'JUNIOR',
+      'email',
     )
   })
 

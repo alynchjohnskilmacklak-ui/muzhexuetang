@@ -28,6 +28,8 @@ export default async function ParentMealsPage() {
     sideDish: menu.sideDish,
     allowDouble: menu.allowDouble,
     notes: menu.notes,
+    image: menu.image,
+    description: menu.description,
     source: 'date',
   }]))
   for (const template of templates) {

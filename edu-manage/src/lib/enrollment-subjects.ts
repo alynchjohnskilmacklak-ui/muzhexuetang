@@ -6,9 +6,12 @@ export function normalizeEnrollmentSubjects(value: unknown): string[] {
     .filter(Boolean))]
 }
 
-/** Empty means legacy “all subjects”; every newly edited enrollment stores an explicit list. */
+/**
+ * 学科归属判定：subjects 为空 = 未报名任何学科（不再兼容放行全部学科）。
+ * 历史空数据已由 scripts/backfill-enrollment-subjects.ts 按班级学科全集补全。
+ */
 export function enrollmentIncludesSubject(subjects: string[], subject: string | null | undefined) {
-  if (subjects.length === 0) return true
+  if (subjects.length === 0) return false
   return Boolean(subject && subjects.includes(subject))
 }
 

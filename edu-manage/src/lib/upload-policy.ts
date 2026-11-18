@@ -1,14 +1,14 @@
-export type UploadType = 'teacher-feedback' | 'parent-upload' | 'admin-material' | 'avatar' | 'generic'
+export type UploadType = 'teacher-feedback' | 'parent-upload' | 'admin-material' | 'avatar' | 'meal-image' | 'parent-message' | 'generic'
 
 const ROLE_UPLOAD_TYPES: Record<string, ReadonlySet<UploadType>> = {
-  admin: new Set(['teacher-feedback', 'parent-upload', 'admin-material', 'avatar', 'generic']),
-  teacher: new Set(['teacher-feedback', 'avatar', 'generic']),
-  parent: new Set(['parent-upload', 'avatar', 'generic']),
+  admin: new Set(['teacher-feedback', 'parent-upload', 'admin-material', 'avatar', 'meal-image', 'parent-message', 'generic']),
+  teacher: new Set(['teacher-feedback', 'avatar', 'meal-image', 'parent-message', 'generic']),
+  parent: new Set(['parent-upload', 'avatar', 'parent-message', 'generic']),
 }
 
 export function normalizeUploadType(value: unknown): UploadType | null {
   if (value == null || value === '') return 'generic'
-  if (value === 'teacher-feedback' || value === 'parent-upload' || value === 'admin-material' || value === 'avatar') {
+  if (value === 'generic' || value === 'teacher-feedback' || value === 'parent-upload' || value === 'admin-material' || value === 'avatar' || value === 'meal-image' || value === 'parent-message') {
     return value
   }
   return null
@@ -23,13 +23,15 @@ export function ownerTypeForUpload(uploadType: UploadType, role: string): string
   if (uploadType === 'parent-upload') return 'parent_upload'
   if (uploadType === 'admin-material') return 'admin_material'
   if (uploadType === 'avatar') return 'avatar'
+  if (uploadType === 'meal-image') return 'meal_image'
+  if (uploadType === 'parent-message') return 'parent_message'
   if (role === 'teacher') return 'teacher_upload'
   if (role === 'parent') return 'parent_upload'
   return 'admin_material'
 }
 
 export function uploadRequiresImage(uploadType: UploadType): boolean {
-  return uploadType === 'teacher-feedback' || uploadType === 'avatar'
+  return uploadType === 'teacher-feedback' || uploadType === 'avatar' || uploadType === 'meal-image' || uploadType === 'parent-message'
 }
 
 export function uploadAllowsDocument(uploadType: UploadType): boolean {

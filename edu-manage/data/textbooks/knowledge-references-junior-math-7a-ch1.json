@@ -1,0 +1,117 @@
+{
+  "schema": "junior-textbook-knowledge-reference-v1",
+  "coverageStatus": "PARTIAL_DRAFT",
+  "notes": [
+    "This is an internal reference for AI feedback, not a published or fully reviewed textbook catalog.",
+    "Class notes and the teacher's explicit topic take priority over these summaries.",
+    "Only the listed current-catalog entry IDs are covered. The history sidebar entry in this chapter has no reference yet."
+  ],
+  "collections": [
+    {
+      "subject": "数学",
+      "grade": "初一",
+      "volumeTitle": "七年级上册",
+      "edition": "冀教版2024",
+      "reviewStatus": "DRAFT_NEEDS_SUBJECT_REVIEW",
+      "sourceReference": "牧哲学堂本地教师资料《第一章 有理数知识归纳与题型突破（14类题型清单）（教师版）》；章节条目与 data/textbooks/current-junior-textbook-catalog-2026.json 的冀教版2024目录对应。",
+      "records": [
+    {
+      "entryId": "数学-七年级上册-2024-directory-1",
+      "entryTitle": "一 有理数",
+      "knowledgePoints": [
+        { "title": "本章知识主线", "content": "从正数、负数和数轴建立有理数的直观认识，再学习大小比较、相反数、绝对值及有理数的基本运算。" },
+        { "title": "运算与检验", "content": "有理数运算先判断运算顺序和符号，再计算绝对值；可用估算、逆运算或重新分组检验结果，但不能随意交换减法和除法的顺序。" }
+      ]
+    },
+    {
+      "entryId": "数学-七年级上册-2024-directory-2",
+      "entryTitle": "1 正数和负数",
+      "knowledgePoints": [
+        { "title": "相反意义的量", "content": "同一问题中先约定一个方向或状态为正，与它相反的量记为负；正负号表示相对约定的方向，不直接表示好坏或大小。" },
+        { "title": "零的意义", "content": "0 既不是正数也不是负数，可以表示基准或分界值。判断正负要看量相对约定基准的方向，不能只看生活用语。" }
+      ]
+    },
+    {
+      "entryId": "数学-七年级上册-2024-directory-3",
+      "entryTitle": "2 数轴",
+      "knowledgePoints": [
+        { "title": "数轴三要素", "content": "数轴是一条规定了原点、正方向和单位长度的直线；画图或读数时，单位长度必须一致，正方向不能中途改变。" },
+        { "title": "点与数的对应", "content": "数轴上的点从左到右对应的数依次增大。两个点到原点距离相等且分居原点两侧时，它们表示一对相反数。" }
+      ]
+    },
+    {
+      "entryId": "数学-七年级上册-2024-directory-4",
+      "entryTitle": "3 绝对值与相反数",
+      "knowledgePoints": [
+        { "title": "相反数", "content": "只有符号不同的两个数互为相反数，互为相反数的和为 0；0 的相反数仍是 0。求一个数的相反数，是对整个数取相反数。" },
+        { "title": "绝对值", "content": "|a| 表示数轴上表示 a 的点到原点的距离，所以 |a|≥0。正数的绝对值是它本身，负数的绝对值是它的相反数，0 的绝对值是 0。" }
+      ]
+    },
+    {
+      "entryId": "数学-七年级上册-2024-directory-5",
+      "entryTitle": "4 有理数的大小",
+      "knowledgePoints": [
+        { "title": "用数轴比较", "content": "在数轴上，右边的数大于左边的数；正数大于 0，0 大于负数，正数大于负数。" },
+        { "title": "比较两个负数", "content": "两个负数比较大小时，绝对值较大的数反而较小。例如 |-8|>|-3|，所以 -8<-3。" }
+      ]
+    },
+    {
+      "entryId": "数学-七年级上册-2024-directory-6",
+      "entryTitle": "5 有理数的加法",
+      "knowledgePoints": [
+        { "title": "同号与异号相加", "content": "同号两数相加，符号不变，绝对值相加；异号两数相加，绝对值相减，结果取绝对值较大那个加数的符号。" },
+        { "title": "加法中的零与检验", "content": "一个数与 0 相加仍得这个数。异号相加时，先判断结果符号再算绝对值差，可减少符号错误。" }
+      ]
+    },
+    {
+      "entryId": "数学-七年级上册-2024-directory-7",
+      "entryTitle": "6 有理数的减法",
+      "knowledgePoints": [
+        { "title": "减法转化为加法", "content": "减去一个数，等于加上这个数的相反数：a-b=a+(-b)。例如 3-(-2)=3+2=5。" },
+        { "title": "先确定减数的相反数", "content": "做有理数减法时，先把减法改写为加法，并将减数变为相反数，再按加法法则运算；不能只把减号改成加号而保留原减数。" }
+      ]
+    },
+    {
+      "entryId": "数学-七年级上册-2024-directory-9",
+      "entryTitle": "7 有理数的加减混合运算",
+      "knowledgePoints": [
+        { "title": "统一成加法", "content": "先把每一次减法转成加上减数的相反数，再利用加法交换律、结合律调整运算顺序，例如 5-3+(-2)=5+(-3)+(-2)。" },
+        { "title": "括号与符号", "content": "去括号要看括号前的符号；括号前是减号时，括号内各项都要变号。减去一个负数等于加上对应的正数。" }
+      ]
+    },
+    {
+      "entryId": "数学-七年级上册-2024-directory-10",
+      "entryTitle": "8 有理数的乘法",
+      "knowledgePoints": [
+        { "title": "积的符号与绝对值", "content": "两数相乘，同号得正、异号得负，积的绝对值等于因数绝对值的积；任何数与 0 相乘都得 0。" },
+        { "title": "多个因数的符号", "content": "多个非零有理数相乘，负因数个数为偶数时积为正，为奇数时积为负；先统计负因数个数，再计算绝对值。" }
+      ]
+    },
+    {
+      "entryId": "数学-七年级上册-2024-directory-11",
+      "entryTitle": "9 有理数的除法",
+      "knowledgePoints": [
+        { "title": "除法转化", "content": "除以一个非零数，等于乘这个数的倒数；计算时先确定符号，再计算绝对值。" },
+        { "title": "零与除数", "content": "0 除以非零数得 0；除数不能为 0。写出除法转化式时，要同时标明除数不为 0 的条件。" }
+      ]
+    },
+    {
+      "entryId": "数学-七年级上册-2024-directory-12",
+      "entryTitle": "10 有理数的乘方",
+      "knowledgePoints": [
+        { "title": "乘方表示重复乘法", "content": "a^n 表示 n 个 a 相乘，其中 a 是底数，n 是指数。底数为负数时要特别看括号，(-2)^2=4，而 -2^2=-(2^2)=-4。" },
+        { "title": "负数乘方的符号", "content": "负数的奇数次幂为负，偶数次幂为正；正数的正整数次幂为正，0 的正整数次幂为 0。" }
+      ]
+    },
+    {
+      "entryId": "数学-七年级上册-2024-directory-13",
+      "entryTitle": "11 有理数的混合运算",
+      "knowledgePoints": [
+        { "title": "运算顺序", "content": "有括号时先算括号内，再算乘方，再算乘除，最后算加减；同级运算按从左到右的顺序进行。" },
+        { "title": "保留运算结构", "content": "可以利用运算律简化计算，但只能对适用的加法、乘法进行交换或结合；减法和除法不能任意换位或改组。" }
+      ]
+    }
+      ]
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import NextImage from 'next/image'
-import { Button, Card, Select, Tag, Typography, Progress, Spin, Modal, Image, Space } from 'antd'
+import { Button, Card, Select, Tag, Typography, Progress, Spin, Space } from 'antd'
 import {
   FileTextOutlined, MessageOutlined, HeartOutlined, TrophyOutlined,
   RiseOutlined, FlagOutlined, BookOutlined, CheckCircleOutlined,
@@ -11,7 +11,7 @@ import {
   SmileOutlined, MinusOutlined, WarningOutlined,
 } from '@ant-design/icons'
 import { toast } from 'sonner'
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import dynamic from 'next/dynamic'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { StudentProfile } from '@/lib/student-profile'
@@ -19,13 +19,15 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSignedUrls } from '@/hooks/useSignedUrls'
 import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
 import { fmtDate } from '@/lib/format-date'
-import { formatFriendlyTime } from '@/lib/date/relative'
 import type { FeedbackImageVariant } from '@/lib/file-asset-variants'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
 import { HoursLeaderboard } from '@/components/Parent/HoursLeaderboard'
 import { ParentLessonPreviewHistory } from '@/components/Parent/ParentLessonPreviewHistory'
 import { MOOD_META, PERFORMANCE_BADGES } from '@/lib/mood-meta'
 import { formatRemaining } from '@/lib/lesson-units'
+import { exportReportPdf } from '@/lib/export-report-pdf'
+import { MathText } from '@/app/parent/materials/MathText'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const ReactECharts = dynamic(() => import('echarts-for-react'), {
   ssr: false,
@@ -142,14 +144,14 @@ function FeedbackDetail({ detail }: { detail?: FeedbackDetailData }) {
             <div style={{ marginBottom: 8 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: '#8A6D3B', marginBottom: 3 }}>公式或方法</div>
               {kCard.formulas.map((formula, i) => (
-                <div key={i} style={{ fontSize: 12, lineHeight: 1.7, color: '#4B5563', whiteSpace: 'pre-wrap' }}>{formula}</div>
+                <div key={i} style={{ fontSize: 12, lineHeight: 1.7, color: '#4B5563', whiteSpace: 'pre-wrap' }}><MathText text={formula} /></div>
               ))}
             </div>
           )}
           {kCard.definition && (
             <div style={{ marginBottom: 8 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: '#8A6D3B', marginBottom: 3 }}>知识讲解</div>
-              <Paragraph style={{ fontSize: 12, lineHeight: 1.8, marginBottom: 0, color: '#4B5563', whiteSpace: 'pre-wrap' }}>{kCard.definition}</Paragraph>
+              <div style={{ fontSize: 12, lineHeight: 1.8, color: '#4B5563' }}><MathText text={kCard.definition} /></div>
             </div>
           )}
           {kCard.tips && kCard.tips.length > 0 && (
@@ -164,11 +166,11 @@ function FeedbackDetail({ detail }: { detail?: FeedbackDetailData }) {
             <div>
               <div style={{ fontSize: 12, fontWeight: 600, color: '#8A6D3B', marginBottom: 3 }}>示例</div>
               <div style={{ fontSize: 12, lineHeight: 1.7, color: '#4B5563' }}>
-                {kCard.example.question && <div style={{ marginBottom: 3 }}>题目：{kCard.example.question}</div>}
+                {kCard.example.question && <div style={{ marginBottom: 3 }}>题目：<MathText text={kCard.example.question} /></div>}
                 {(kCard.example.steps?.length ?? 0) > 0 && kCard.example.steps.map((step, i) => (
-                  <div key={i} style={{ marginBottom: 2 }}>{i + 1}. {step}</div>
+                  <div key={i} style={{ marginBottom: 2 }}>{i + 1}. <MathText text={step} /></div>
                 ))}
-                {kCard.example.answer && <div style={{ marginTop: 3 }}>答案：{kCard.example.answer}</div>}
+                {kCard.example.answer && <div style={{ marginTop: 3 }}>答案：<MathText text={kCard.example.answer} /></div>}
               </div>
             </div>
           )}
@@ -203,6 +205,20 @@ function TimelineImageStrip({ images }: { images: TimelineImage[] }) {
   )
 }
 
+function ReportFeedback({ item }: { item: TimelineItem }) {
+  const photos = (item.images || []).map(normalizeTimelineImage)
+  const { urls, loading, error } = useSignedUrls(photos.map((photo) => photo.originalUrl))
+  return <section data-report-pending={loading || error ? 'true' : 'false'} style={{ marginBottom: 16, fontSize: 14, lineHeight: 1.8, overflowWrap: 'anywhere' }}>
+    <h3 style={{ fontSize: 15 }}>{fmtDate(item.date)} · {item.teacherSubject || '课堂反馈'} · {item.teacher || '任课老师'}</h3>
+    {item.detail?.lessonContent && <p style={{ whiteSpace: 'pre-wrap' }}><strong>本节学习内容：</strong>{item.detail.lessonContent}</p>}
+    {item.detail?.comment && <p style={{ whiteSpace: 'pre-wrap' }}><strong>个人课堂反馈：</strong>{item.detail.comment}</p>}
+    <FeedbackDetail detail={item.detail} />
+    {!item.detail && <p>{item.sub}</p>}
+    {error && <p role="alert">课堂照片加载失败，请关闭报告后重试，暂不导出缺图报告。</p>}
+    {urls.map((url, index) => <NextImage key={`${photos[index].originalUrl}-${index}`} src={url} alt={`课堂照片 ${index + 1}`} width={800} height={600} unoptimized loading="eager" style={{ display: 'block', width: '100%', height: 'auto', maxHeight: 380, objectFit: 'contain', marginBlock: 10 }} />)}
+  </section>
+}
+
 
 
 export function ParentArchiveClient({ initial }: { initial: InitialData }) {
@@ -217,16 +233,10 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   const [showAllTimeline, setShowAllTimeline] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
   const [downloading, setDownloading] = useState(false)
-  const [detailItem, setDetailItem] = useState<TimelineItem | null>(null)
   const [activeTab, setActiveTab] = useState<string>(searchParams.get('tab') && TABS.some(t => t.key === searchParams.get('tab')) ? (searchParams.get('tab') as string) : 'overview')
   const [selectedGrade, setSelectedGrade] = useState('初一')
-  const detailImages: ReturnType<typeof normalizeTimelineImage>[] = Array.isArray(detailItem?.images)
-    ? detailItem.images.map(normalizeTimelineImage)
-    : []
-  const { urls: signedDetailThumbnails } = useSignedUrls(detailImages.map(image => image.thumbnailUrl || image.previewUrl || image.originalUrl))
-  const { urls: signedDetailPreviews } = useSignedUrls(detailImages.map(image => image.previewUrl || image.thumbnailUrl || image.originalUrl))
 
-  const query = studentId ? `/api/parent/profile?studentId=${studentId}&months=${months}` : null
+  const query = studentId ? `/api/parent/profile?studentId=${studentId}&months=${months}${reportOpen ? '&includeReport=1' : ''}` : null
   const { data, isLoading } = useSWR<{ children: InitialData['children']; activeStudentId: string; profile: StudentProfile | null }>(query, fetcher, {
     revalidateOnFocus: true, dedupingInterval: 30_000,
     onError: () => toast.error('加载档案失败，请刷新重试'),
@@ -255,8 +265,39 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   } | undefined
 
   const moodQuery = studentId ? `/api/performance?studentId=${studentId}&limit=50` : null
-  const { data: moodData } = useSWR(moodQuery, fetcher, { revalidateOnFocus: true, dedupingInterval: 60_000 })
-  const moodPosts = useMemo(() => Array.isArray((moodData as { posts?: Array<{ mood: string; createdAt: string }> } | undefined)?.posts) ? (moodData as { posts: Array<{ mood: string; createdAt: string }> }).posts : [], [moodData])
+  const { mutate: mutateGlobal } = useSWRConfig()
+  const { data: moodData, mutate: mutateMood } = useSWR<{
+    posts?: Array<{ id: string; mood: string; createdAt: string; isReadByParent: boolean }>
+  }>(moodQuery, fetcher, { revalidateOnFocus: true, dedupingInterval: 60_000 })
+  const requestedPerformanceReads = useRef(new Set<string>())
+  const moodPosts = useMemo(() => Array.isArray(moodData?.posts) ? moodData.posts : [], [moodData])
+
+  useEffect(() => {
+    const postIds = (moodData?.posts || [])
+      .filter((post) => !post.isReadByParent && !requestedPerformanceReads.current.has(post.id))
+      .map((post) => post.id)
+    if (!postIds.length) return
+    postIds.forEach((id) => requestedPerformanceReads.current.add(id))
+
+    void (async () => {
+      try {
+        const response = await fetch('/api/performance/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ postIds }),
+        })
+        if (!response.ok) throw new Error('Unable to mark performance posts as read')
+        const idSet = new Set(postIds)
+        await mutateMood((current) => current ? {
+          ...current,
+          posts: (current.posts || []).map((post) => idSet.has(post.id) ? { ...post, isReadByParent: true } : post),
+        } : current, { revalidate: false })
+        await mutateGlobal('/api/parent/unread-counts')
+      } catch {
+        postIds.forEach((id) => requestedPerformanceReads.current.delete(id))
+      }
+    })()
+  }, [moodData, mutateMood, mutateGlobal])
 
   const papersQuery = activeTab === 'grades' ? '/api/exam-papers?mine=true' : null
   const { data: papersData } = useSWR<{ papers: Paper[] }>(papersQuery, fetcher, { revalidateOnFocus: true, dedupingInterval: 60_000 })
@@ -328,6 +369,12 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   const feedbackId = searchParams.get('feedbackId')
   const postId = searchParams.get('postId')
   const focusDate = searchParams.get('date')
+  const openEntryDetail = useCallback((item: TimelineItem) => {
+    try {
+      sessionStorage.setItem('muzhe-archive-entry', JSON.stringify({ item, studentId: studentId || null }))
+    } catch { /* sessionStorage 不可用时忽略 */ }
+    router.push('/parent/archive/entry')
+  }, [router, studentId])
   useEffect(() => {
     const timeline = profile?.record?.timeline || []
     if (!timeline.length) return
@@ -343,17 +390,20 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
     const key = timelineKey(target, targetIndex)
     setActiveTab('timeline')
     setTimeFilter('')
-    window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       timelineRefs.current[key]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      if (feedbackId || postId) setDetailItem(target)
+      if (feedbackId && target.refType === 'feedback' && target.refId) {
+        router.push(`/parent/class-feedback/${target.refId}${studentId ? `?childId=${studentId}` : ''}`)
+        return
+      }
+      if (postId) openEntryDetail(target)
     }, 160)
-  }, [feedbackId, postId, focusDate, profile])
+    return () => window.clearTimeout(timer)
+  }, [feedbackId, postId, focusDate, profile, openEntryDetail, router, studentId])
 
   const handleTimelineClick = (item: TimelineItem) => {
-    if (item.images?.length) { setDetailItem(item); return }
-    if (item.refType === 'feedback' && item.refId) { setDetailItem(item); return }
-    if (item.refType === 'paper' && item.refId) { setDetailItem(item); return }
-    if (item.refType === 'post' && item.refId) { setDetailItem(item); return }
+    if (item.refType === 'feedback' && item.refId) { router.push(`/parent/class-feedback/${item.refId}${studentId ? `?childId=${studentId}` : ''}`); return }
+    openEntryDetail(item)
   }
 
   const switchTab = (key: string) => {
@@ -369,28 +419,11 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
     if (!reportRef.current || !profile) return
     setDownloading(true)
     try {
-      const html2canvas = (await import('html2canvas')).default
-      const { jsPDF } = await import('jspdf')
-      const canvas = await html2canvas(reportRef.current, { scale: 2, backgroundColor: '#ffffff', useCORS: true })
-      const img = canvas.toDataURL('image/png')
-      const pdf = new jsPDF('p', 'mm', 'a4')
-      const pageW = 210, pageH = 297
-      const imgW = pageW, imgH = (canvas.height * imgW) / canvas.width
-      let left = imgH, pos = 0
-      pdf.addImage(img, 'PNG', 0, pos, imgW, imgH)
-      left -= pageH
-      while (left > 0) { pos = left - imgH; pdf.addPage(); pdf.addImage(img, 'PNG', 0, pos, imgW, imgH); left -= pageH }
-      pdf.save(`${profile.identity.name}-学情报告-${months}个月.pdf`)
+      await exportReportPdf(reportRef.current, `${profile.identity.name}-学情报告-${months}个月.pdf`)
       toast.success('学情报告已下载')
-    } catch { toast.error('生成报告失败，请重试') }
+    } catch (error) { toast.error(error instanceof Error ? error.message : '生成报告失败，请重试') }
     finally { setDownloading(false) }
   }, [profile, months])
-
-  if (!initial.children.length) {
-    return <Card bordered={false} style={{ borderRadius: 14, textAlign: 'center', minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <GuidedEmpty title="还没有绑定孩子" description="绑定孩子后，课堂反馈、成绩和成长记录会汇总到这里，方便长期查看变化。" actionLabel="去个人中心核对" onAction={() => router.push('/parent/profile')} />
-    </Card>
-  }
 
   const loadingMask = isLoading && <div style={{ textAlign: 'center', padding: 40 }}><Spin size="large" /></div>
 
@@ -428,6 +461,11 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
   }, [moodPosts])
 
   const earnedBadgeTypes = new Set((highlights?.badgesByType || []).map(item => item.type))
+  if (!initial.children.length) {
+    return <Card bordered={false} style={{ borderRadius: 14, textAlign: 'center', minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <GuidedEmpty title="还没有绑定孩子" description="绑定孩子后，课堂反馈、成绩和成长记录会汇总到这里，方便长期查看变化。" actionLabel="去个人中心核对" onAction={() => router.push('/parent/profile')} />
+    </Card>
+  }
 
   return (
     <div style={{ width: '100%', maxWidth: isMobile ? '100%' : 860, margin: '0 auto', padding: '0 4px' }}>
@@ -457,18 +495,18 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
       {/* Tab bar：卡片式 Tab，选中橙色高亮，带一句微说明 */}
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '2px 0 14px', scrollbarWidth: 'none' }}>
         {TABS.map(tab => (
-          <button key={tab.key} type="button" onClick={() => switchTab(tab.key)} aria-selected={activeTab === tab.key}
+          <button key={tab.key} type="button" onClick={() => switchTab(tab.key)} aria-pressed={activeTab === tab.key}
             style={{
               flexShrink: 0, border: '1px solid', padding: '8px 12px', borderRadius: 13, fontSize: 12.5, cursor: 'pointer',
               background: activeTab === tab.key ? '#FFF8F2' : '#fff',
-              borderColor: activeTab === tab.key ? '#E8784A' : '#EFEBE5',
+              borderColor: activeTab === tab.key ? 'var(--color-primary)' : '#EFEBE5',
               color: activeTab === tab.key ? '#C2541F' : '#6B6560',
               fontWeight: activeTab === tab.key ? 700 : 600,
               boxShadow: activeTab === tab.key ? '0 4px 12px rgba(232,120,74,.14)' : 'none',
               display: 'flex', alignItems: 'center', gap: 6, transition: 'all .15s',
             }}>
             <span>{tab.icon}</span>{tab.label}
-            <small style={{ fontSize: 10, color: activeTab === tab.key ? '#C2541F' : '#A39C93', fontWeight: 400 }}>{tab.hint}</small>
+            <small style={{ fontSize: 10, color: activeTab === tab.key ? '#C2541F' : 'var(--color-ink-subtle)', fontWeight: 400 }}>{tab.hint}</small>
           </button>
         ))}
       </div>
@@ -497,7 +535,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                   </div>
                 </div>
                 <Button type="primary" icon={<FileTextOutlined />} onClick={() => setReportOpen(true)}
-                  style={{ borderRadius: 10, background: '#E8784A', border: 'none', padding: '8px 20px', fontSize: 13.5, height: 'auto', width: '100%', marginTop: 13 }}>
+                  style={{ borderRadius: 10, background: 'var(--color-primary)', border: 'none', padding: '8px 20px', fontSize: 13.5, height: 'auto', width: '100%', marginTop: 13 }}>
                   查看本期学情报告
                 </Button>
               </Card>
@@ -538,7 +576,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                 ) : weeklyHours && weeklyHours.some(w => w.hours > 0) ? (
                   <>
                     <Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 4 }}>本月累计上课 {weeklyHours.reduce((a, w) => a + w.hours, 0).toFixed(1)} 小时，按周记录如下：</Text>
-                    <ReactECharts style={{ height: 150, marginTop: 8 }} option={{ tooltip: { trigger: 'axis', formatter: (p: any) => { const i = p?.[0]?.dataIndex ?? 0; const w = weeklyHours[i]; return `${w.week}（${w.range}）<br/>上课 ${w.hours} 小时` } }, grid: { left: 34, right: 12, top: 18, bottom: 26 }, xAxis: { type: 'category', data: weeklyHours.map(w => w.week), axisLabel: { fontSize: 9 } }, yAxis: { type: 'value', name: 'h', axisLabel: { fontSize: 9 } }, series: [{ type: 'bar', data: weeklyHours.map(w => w.hours), itemStyle: { color: '#534AB7', borderRadius: [4, 4, 0, 0] }, barMaxWidth: 22 }] }} opts={{ renderer: 'svg' }} />
+                    <ReactECharts style={{ height: 150, marginTop: 8 }} option={{ tooltip: { trigger: 'axis', formatter: (p: unknown) => { const i = Array.isArray(p) && typeof p[0]?.dataIndex === 'number' ? p[0].dataIndex : 0; const w = weeklyHours[i]; return `${w.week}（${w.range}）<br/>上课 ${w.hours} 小时` } }, grid: { left: 34, right: 12, top: 18, bottom: 26 }, xAxis: { type: 'category', data: weeklyHours.map(w => w.week), axisLabel: { fontSize: 9 } }, yAxis: { type: 'value', name: 'h', axisLabel: { fontSize: 9 } }, series: [{ type: 'bar', data: weeklyHours.map(w => w.hours), itemStyle: { color: '#534AB7', borderRadius: [4, 4, 0, 0] }, barMaxWidth: 22 }] }} opts={{ renderer: 'svg' }} />
                   </>
                 ) : (
                   <div style={{ marginTop: 12, padding: '16px 0', textAlign: 'center', fontSize: 12.5, color: '#9A8E7A', background: '#FAF8F5', borderRadius: 10 }}>本月暂无课时记录，上课后将自动生成趋势</div>
@@ -717,7 +755,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                           <Text strong style={{ fontSize: 13, display: 'block' }} ellipsis={{ tooltip: material.title }}>{material.title}</Text>
                           <Text type="secondary" style={{ fontSize: 11 }}>{material.subject} · {material.grade} · {fmtDate(material.createdAt)}</Text>
                         </div>
-                        <Button size="small" type="primary" icon={<DownloadOutlined />} onClick={() => window.open(`/api/materials/${material.id}/view?download=1`, '_blank')} style={{ background: '#E8784A', border: 'none', flexShrink: 0 }}>下载</Button>
+                        <Button size="small" type="primary" icon={<DownloadOutlined />} onClick={() => window.open(`/api/materials/${material.id}/view?download=1`, '_blank')} style={{ background: 'var(--color-primary)', border: 'none', flexShrink: 0 }}>下载</Button>
                       </div>
                     ))}
                   </div>
@@ -734,7 +772,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                 <Card bordered={false} style={{ borderRadius: 14, border: '1px solid rgba(0,0,0,.06)', marginBottom: 13 }}>
                   <Text strong style={{ fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 6 }}><ClockCircleOutlined style={{ color: '#E8784A' }} />本月上课情况</Text>
                   <Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 4 }}>累计上课 {weeklyHours.reduce((a, w) => a + w.hours, 0).toFixed(1)} 小时，共 {weeklyHours.filter(w => w.hours > 0).length} 周有课。</Text>
-                  <ReactECharts style={{ height: 200, marginTop: 8 }} option={{ tooltip: { trigger: 'axis', formatter: (p: any) => { const i = p?.[0]?.dataIndex ?? 0; const w = weeklyHours[i]; return `${w.week}（${w.range}）<br/>上课 ${w.hours} 小时` } }, grid: { left: 36, right: 12, top: 18, bottom: 26 }, xAxis: { type: 'category', data: weeklyHours.map(w => w.week), axisLabel: { fontSize: 10 } }, yAxis: { type: 'value', name: 'h', axisLabel: { fontSize: 10 } }, series: [{ type: 'bar', data: weeklyHours.map(w => w.hours), itemStyle: { color: '#E8784A', borderRadius: [5, 5, 0, 0] }, barMaxWidth: 28 }] }} opts={{ renderer: 'svg' }} />
+                  <ReactECharts style={{ height: 200, marginTop: 8 }} option={{ tooltip: { trigger: 'axis', formatter: (p: unknown) => { const i = Array.isArray(p) && typeof p[0]?.dataIndex === 'number' ? p[0].dataIndex : 0; const w = weeklyHours[i]; return `${w.week}（${w.range}）<br/>上课 ${w.hours} 小时` } }, grid: { left: 36, right: 12, top: 18, bottom: 26 }, xAxis: { type: 'category', data: weeklyHours.map(w => w.week), axisLabel: { fontSize: 10 } }, yAxis: { type: 'value', name: 'h', axisLabel: { fontSize: 10 } }, series: [{ type: 'bar', data: weeklyHours.map(w => w.hours), itemStyle: { color: '#E8784A', borderRadius: [5, 5, 0, 0] }, barMaxWidth: 28 }] }} opts={{ renderer: 'svg' }} />
                 </Card>
               )}
 
@@ -810,26 +848,12 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
         </>
       )}
 
-      {/* Image detail Modal */}
-      <Modal open={!!detailItem} onCancel={() => setDetailItem(null)} footer={null} width="min(560px, 92vw)" title={detailItem?.title || '详情'}>
-        {detailItem && (
-          <div>
-            {detailImages.length > 0 && <Image.PreviewGroup><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 12 }}>{detailImages.map((image, i: number) => <Image key={`${image.originalUrl}-${i}`} src={signedDetailThumbnails[i]} preview={{ src: signedDetailPreviews[i] }} alt="" style={{ borderRadius: 8, objectFit: 'cover', width: '100%', height: 120 }} fallback="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='120'%3E%3Crect width='140' height='120' fill='%23f5f2ee'/%3E%3Ctext x='70' y='60' text-anchor='middle' dominant-baseline='middle' fill='%239a8e7a' font-size='12'%3E图片加载失败%3C/text%3E%3C/svg%3E" />)}</div></Image.PreviewGroup>}
-            <Paragraph style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detailItem.sub || detailItem.title}</Paragraph>
-            {detailItem.teacher && <Tag style={{ borderRadius: 9999, marginTop: 4 }}>{formatTeacherLabel(detailItem)}</Tag>}
-            {detailItem.date && <div style={{ marginTop: 8 }}><Text type="secondary" style={{ fontSize: 11 }}>{formatFriendlyTime(detailItem.date)}</Text></div>}
-            <FeedbackDetail detail={detailItem.detail} />
-            {detailItem.refType === 'paper' && detailItem.refId && <Button type="link" onClick={() => { setDetailItem(null); switchTab('grades') }} style={{ padding: 0, marginTop: 8 }}>查看试卷详情</Button>}
-          </div>
-        )}
-      </Modal>
-
       {/* C1+C2: Expanded report Modal with PDF download */}
-      <Modal open={reportOpen} onCancel={() => setReportOpen(false)} width="min(650px, 92vw)" title="本期学情报告"
+      <BrandModal open={reportOpen} onCancel={() => setReportOpen(false)} width="min(650px, 92vw)" title="本期学情报告"
         styles={{ body: { maxHeight: '68vh', overflowY: 'auto', padding: 16 } }}
         footer={<div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <Button onClick={() => setReportOpen(false)}>关闭</Button>
-          <Button type="primary" icon={<DownloadOutlined />} loading={downloading} onClick={downloadReport} style={{ background: '#E8784A', border: 'none' }}>下载 PDF</Button>
+          <Button type="primary" icon={<DownloadOutlined />} disabled={!profile || isLoading} loading={downloading} onClick={downloadReport} style={{ background: 'var(--color-primary)', border: 'none' }}>下载 PDF</Button>
         </div>}>
         {profile && (
           <div ref={reportRef} style={{ padding: 16, background: '#ffffff', color: '#1F2329', fontFamily: 'sans-serif' }}>
@@ -876,7 +900,7 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                   {profile.study.mastery.reviewPct > 0 && <div style={{ width: `${profile.study.mastery.reviewPct}%`, background: '#EF9F27' }} />}
                   {profile.study.mastery.weakPct > 0 && <div style={{ width: `${profile.study.mastery.weakPct}%`, background: '#E24B4A' }} />}
                 </div>
-                <div style={{ fontSize: 10, color: '#7A869A', display: 'flex', gap: 16 }}>
+                <div style={{ fontSize: 12, color: '#7A869A', display: 'flex', gap: 16 }}>
                   <span>▪ 已掌握 {profile.study.mastery.masteredPct}%</span>
                   <span>▪ 需复习 {profile.study.mastery.reviewPct}%</span>
                   <span>▪ 薄弱 {profile.study.mastery.weakPct}%</span>
@@ -942,9 +966,11 @@ export function ParentArchiveClient({ initial }: { initial: InitialData }) {
                 {profile.profileCase.teacherSummary.suggestions && <div style={{ fontSize: 12, color: '#4B5563', marginTop: 6 }}>建议：{profile.profileCase.teacherSummary.suggestions}</div>}
               </div>
             )}
+            <h2 style={{ fontSize: 17 }}>本期完整课堂反馈与课堂照片</h2>
+            {profile.record.reportFeedbacks.map((item, index) => <ReportFeedback key={item.refId || index} item={item} />)}
           </div>
         )}
-      </Modal>
+      </BrandModal>
     </div>
   )
 }

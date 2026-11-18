@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { PrismaClient } from '@prisma/client'
 import { getRequestPrisma } from '@/lib/prisma'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 import { auth } from '@/lib/auth'
 import { apiHandler } from '@/lib/api-handler'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
@@ -228,12 +229,39 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
     }
 
     await prisma.$transaction(async (tx) => {
+      const affectedLessons = await tx.classLesson.findMany({
+        where: { teacherId: id, status: { notIn: ['COMPLETED', 'CANCELLED'] } },
+        select: { id: true, groupId: true },
+      })
+      const affectedGroupIds = [...new Set(affectedLessons.map((lesson) => lesson.groupId).filter((groupId): groupId is string => Boolean(groupId)))]
+      const [rosterRows, enrollmentRows] = affectedGroupIds.length
+        ? await Promise.all([
+            tx.classLessonStudent.findMany({ where: { lessonId: { in: affectedLessons.map((lesson) => lesson.id) } }, select: { lessonId: true, studentId: true } }),
+            tx.enrollment.findMany({ where: { groupId: { in: affectedGroupIds }, status: 'ACTIVE' }, select: { groupId: true, studentId: true } }),
+          ])
+        : [[], []]
       await tx.teacher.update({ where: { id }, data: { status: 'RESIGNED' } })
       await tx.student.updateMany({ where: { mainTeacherId: id }, data: { mainTeacherId: transferTo } })
       await tx.course.updateMany({ where: { teacherId: id }, data: { teacherId: transferTo } })
       await tx.classGroupTeacher.updateMany({ where: { teacherId: id }, data: { teacherId: transferTo } })
       await tx.classGroup.updateMany({ where: { teacherId: id, status: { not: 'ARCHIVED' } }, data: { teacherId: transferTo } })
       await tx.classLesson.updateMany({ where: { teacherId: id, status: { notIn: ['COMPLETED', 'CANCELLED'] } }, data: { teacherId: transferTo } })
+      for (const groupId of affectedGroupIds) {
+        const lessonIds = affectedLessons.filter((lesson) => lesson.groupId === groupId).map((lesson) => lesson.id)
+        const studentIds = [...new Set([
+          ...rosterRows.filter((row) => lessonIds.includes(row.lessonId)).map((row) => row.studentId),
+          ...enrollmentRows.filter((row) => row.groupId === groupId).map((row) => row.studentId),
+        ])]
+        await recordCourseChangeEvent(tx, {
+          eventType: 'TEACHER_REPLACED',
+          actorUserId: userId || 'system',
+          groupId,
+          lessonIds,
+          studentIds,
+          title: '课程任课教师已调整',
+          summary: `${teacher.name}离职，后续课程已转交给${replacement.name}，请查看最新课表。`,
+        })
+      }
     })
 
     if (userId) {
@@ -262,6 +290,17 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
   }
 
   await prisma.$transaction(async (tx) => {
+    const affectedLessons = await tx.classLesson.findMany({
+      where: { teacherId: id, status: { notIn: ['COMPLETED', 'CANCELLED'] } },
+      select: { id: true, groupId: true },
+    })
+    const affectedGroupIds = [...new Set(affectedLessons.map((lesson) => lesson.groupId).filter((groupId): groupId is string => Boolean(groupId)))]
+    const [rosterRows, enrollmentRows] = affectedGroupIds.length
+      ? await Promise.all([
+          tx.classLessonStudent.findMany({ where: { lessonId: { in: affectedLessons.map((lesson) => lesson.id) } }, select: { lessonId: true, studentId: true } }),
+          tx.enrollment.findMany({ where: { groupId: { in: affectedGroupIds }, status: 'ACTIVE' }, select: { groupId: true, studentId: true } }),
+        ])
+      : [[], []]
     await tx.teacher.update({ where: { id }, data: { status: 'RESIGNED' } })
     await tx.student.updateMany({ where: { mainTeacherId: id }, data: { mainTeacherId: null } })
     await tx.course.updateMany({ where: { teacherId: id }, data: { isActive: false } })
@@ -274,6 +313,20 @@ export const DELETE = apiHandler(async (req: NextRequest, { params }: { params: 
     if (affectedParentIds.length) {
       await tx.notification.deleteMany({
         where: { userId: { in: affectedParentIds }, link: { in: ['/parent/performance', '/parent/grades', '/parent/schedule'] } },
+      })
+    }
+    for (const groupId of affectedGroupIds) {
+      const lessonIds = affectedLessons.filter((lesson) => lesson.groupId === groupId).map((lesson) => lesson.id)
+      const groupEnrollmentStudentIds = enrollmentRows.filter((row) => row.groupId === groupId).map((row) => row.studentId)
+      const groupRosterStudentIds = rosterRows.filter((row) => lessonIds.includes(row.lessonId)).map((row) => row.studentId)
+      await recordCourseChangeEvent(tx, {
+        eventType: 'TEACHER_COURSES_CANCELLED',
+        actorUserId: userId || 'system',
+        groupId,
+        lessonIds,
+        studentIds: [...new Set([...groupEnrollmentStudentIds, ...groupRosterStudentIds])],
+        title: '教师离职，后续课程已调整',
+        summary: `${teacher.name}离职，该班级尚未完成的课程安排已取消；请联系管理老师重新安排。`,
       })
     }
   })

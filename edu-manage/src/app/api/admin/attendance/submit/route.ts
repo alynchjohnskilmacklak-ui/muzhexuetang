@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
-import { calculateAttendanceDeductHours } from '@/lib/attendance-hours'
+import { calculateAttendanceDeductHours, termKindToBillingMode } from '@/lib/attendance-hours'
 import { createLessonPayInTransaction } from '@/lib/teacher-salary'
 import { postAttendanceHours } from '@/lib/attendance-hour-posting'
-import { normalizeAttendanceRecordStatus } from '@/lib/attendance-status'
+import { parseAttendanceRecordStatus } from '@/lib/attendance-status'
 import { resolveIntensiveActualMinutes } from '@/lib/intensive-class'
 import { createIntensiveLessonPayInTransaction } from '@/lib/intensive-settlement'
 import { isClassLessonInActiveTerm } from '@/lib/admin-term-scope'
@@ -42,6 +42,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
       group: {
         include: {
           course: true,
+          term: { select: { kind: true } },
           teacher: { select: { id: true, name: true } },
           teacherAssignments: { select: { teacherId: true, subject: true } },
           enrollments: {
@@ -143,7 +144,10 @@ export const POST = apiHandler(async (req: NextRequest) => {
       const enrollment = enrollmentByStudentId.get(studentId)
       if (!enrollment) continue
 
-      const status = normalizeAttendanceRecordStatus(record.status)
+      const status = parseAttendanceRecordStatus(record.status)
+      if (!status) {
+        throw new Error(`INVALID_ATTENDANCE_STATUS_${String(record.status)}`)
+      }
       const actualMinutes = isIntensive ? intensiveActualMinutes : Number(record.actualMinutes) || null
       processedCount += 1
       if (status === 'PRESENT') presentCount += 1
@@ -166,6 +170,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           lessonMinutes: lesson.group.lessonMinutes,
           actualMinutes,
           intensiveMode: lesson.group.intensiveMode,
+          billingMode: termKindToBillingMode(lesson.group.term?.kind),
         })
         if (hoursDeducted > 0 && (!attendance.hoursDeducted || attendance.hoursDeducted <= 0)) {
           const posting = await postAttendanceHours(tx, {
@@ -243,7 +248,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           actualMinutes: Number(intensiveActualMinutes),
           attendanceSnapshot: validRecords.map((record) => ({
             studentId: record.studentId,
-            status: normalizeAttendanceRecordStatus(record.status),
+            status: parseAttendanceRecordStatus(record.status) || 'PRESENT',
           })),
           teacherNote: '管理员直接登记并审核',
           status: 'APPROVED',

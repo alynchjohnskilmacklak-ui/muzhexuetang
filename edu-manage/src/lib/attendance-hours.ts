@@ -6,10 +6,19 @@ export function isSmallClassCourse(courseType?: CourseType | string | null) {
   return courseType !== 'ONE_ON_ONE'
 }
 
-export function shouldDeductAttendanceHours(status: string) {
+/** 计费模式：MONTHLY = 按月计费（暑假班，无论来不来都算课时）；PER_HOUR = 按课时计费（周末课，没来不扣）。 */
+export type AttendanceBillingMode = 'MONTHLY' | 'PER_HOUR'
+
+/** 学期 kind → 计费模式：WEEKEND 按课时收费；其余（SUMMER/REGULAR/WINTER/OTHER/null）保持按月/现状。 */
+export function termKindToBillingMode(kind?: string | null): AttendanceBillingMode {
+  return kind === 'WEEKEND' ? 'PER_HOUR' : 'MONTHLY'
+}
+
+export function shouldDeductAttendanceHours(status: string, billingMode: AttendanceBillingMode = 'MONTHLY') {
   const normalized = String(status || '').toUpperCase()
   if (normalized === 'PRESENT') return true
-  if (normalized === 'ABSENT') return true
+  // 按课时收费的周末课：学生没来（ABSENT）不扣课时；按月计费班（暑假班等）无论来不来都算课时
+  if (normalized === 'ABSENT') return billingMode === 'MONTHLY'
   // LEAVE always deducts — for one-on-one, a makeup request gives a free session later
   if (normalized === 'LEAVE') return true
 
@@ -33,14 +42,15 @@ export function calculateAttendanceDeductHours(params: {
   lessonMinutes: number
   actualMinutes?: number | null
   intensiveMode?: string | null
+  billingMode?: AttendanceBillingMode
 }) {
-  const { status, courseType, lessonMinutes, actualMinutes, intensiveMode } = params
+  const { status, courseType, lessonMinutes, actualMinutes, intensiveMode, billingMode } = params
 
   if (intensiveMode === 'INTENSIVE') {
     return calculateIntensiveDeductHours(status, Number(actualMinutes) || lessonMinutes)
   }
 
-  if (!shouldDeductAttendanceHours(status)) return 0
+  if (!shouldDeductAttendanceHours(status, billingMode)) return 0
 
   if (courseType === 'ONE_ON_ONE') {
     return minutesToHours(Number(actualMinutes) || lessonMinutes)

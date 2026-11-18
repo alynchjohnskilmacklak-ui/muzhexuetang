@@ -10,6 +10,7 @@ datasource db {
 model User {
   id                  String    @id @default(cuid())
   email               String    @unique
+  phone               String?   @unique
   password            String
   name                String
   role                String    @default("parent")
@@ -17,6 +18,9 @@ model User {
   avatar              String?
   status              String    @default("active")
   wxpusherUid         String?
+  qywxUserId          String?
+  qywxExternalUserId  String?
+  qywxSenderUserId    String?
   teacherId           String?   @unique
   currentSessionToken String?
   lastLoginAt         DateTime?
@@ -41,6 +45,7 @@ model User {
   loginRecords             LoginRecord[]
   passwordResetTokens      PasswordResetToken[]
   uploadedMaterials        StudyMaterial[]         @relation("MaterialUploader")
+  adminUploadedMaterials   StudyMaterial[]         @relation("MaterialAdminUploader")
   parentMessages           ParentMessage[]         @relation("ParentMessages")
   createdAcademicTerms     AcademicTerm[]          @relation("AcademicTermCreator")
   issuedActivationTokens   ParentActivationToken[] @relation("ActivationTokenIssuer")
@@ -51,12 +56,14 @@ model User {
   studyHallClassRecords    StudyHallClassRecord[]  @relation("StudyHallClassRecorder")
   studyHallSessions        StudyHallSession[]      @relation("StudyHallSessionTeacher")
   createdStudyHallClosures StudyHallClosure[]      @relation("StudyHallClosureCreator")
+  feedbackReadReceipts     FeedbackParentReadReceipt[]
 
   @@index([division, status])
 }
 
 model Student {
   id              String    @id @default(cuid())
+  identityId      String    @default(cuid())
   name            String
   gender          String?
   birthYear       Int?
@@ -81,11 +88,13 @@ model Student {
   parentId        String?
   mainTeacherId   String?
   division        String    @default("JUNIOR")
+  deletedAt       DateTime?
+  deletedById     String?
+  deletionBatchId String?
 
   parent              User?                    @relation(fields: [parentId], references: [id])
   mainTeacher         Teacher?                 @relation(fields: [mainTeacherId], references: [id])
   fees                Fee[]
-  schedules           ScheduleStudent[]
   enrollments         Enrollment[]
   classLessonStudents ClassLessonStudent[]
   attendances         Attendance[]
@@ -115,6 +124,9 @@ model Student {
   @@index([parentId])
   @@index([mainTeacherId])
   @@index([division, status])
+  @@index([deletedAt])
+  @@index([deletionBatchId])
+  @@index([identityId])
 }
 
 model Teacher {
@@ -146,7 +158,6 @@ model Teacher {
   user User?
 
   courses            Course[]
-  schedules          Schedule[]
   students           Student[]
   classGroups        ClassGroup[]
   classGroupTeachers ClassGroupTeacher[]
@@ -160,10 +171,13 @@ model Teacher {
   activityLogs       ActivityLog[]
   alerts             TeacherAlert[]
   classroomFeedbacks ClassroomFeedback[]
+  feedbackDraft      TeacherFeedbackDraft?
   mealReports        MealReport[]
   salaryConfigs      TeacherSalaryConfig[]
   salaryTransactions TeacherSalaryTransaction[]
   parentMessages     ParentMessage[]            @relation("TeacherMessages")
+  // 教师门户站内消息：教师被硬删除时 teacherId 置空，消息正文保留作历史记录。
+  portalMessages     TeacherMessage[]           @relation("TeacherPortalMessages")
 
   @@index([division])
   @@index([division, status])
@@ -177,24 +191,26 @@ enum CourseType {
 }
 
 model Course {
-  id             String     @id @default(cuid())
-  name           String
-  subject        String
-  grade          String?
-  type           CourseType @default(GROUP)
-  level          String?
-  lessonMinutes  Int        @default(90)
-  totalLessons   Int?
-  pricePerLesson Float?
-  color          String     @default("#E8784A")
-  isActive       Boolean    @default(true)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id              String     @id @default(cuid())
+  name            String
+  subject         String
+  grade           String?
+  type            CourseType @default(GROUP)
+  level           String?
+  lessonMinutes   Int        @default(90)
+  totalLessons    Int?
+  pricePerLesson  Float?
+  color           String     @default("#E8784A")
+  isActive        Boolean    @default(true)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+  deletedById     String?
+  deletionBatchId String?
 
   teacherId   String?
   division    String       @default("JUNIOR")
   teacher     Teacher?     @relation(fields: [teacherId], references: [id])
-  schedules   Schedule[]
   fees        Fee[]
   classGroups ClassGroup[]
 
@@ -202,6 +218,7 @@ model Course {
   @@index([teacherId])
   @@index([division])
   @@index([division, isActive])
+  @@index([deletedAt])
 }
 
 enum GroupStatus {
@@ -248,6 +265,9 @@ model ClassGroup {
   teachingType     IntensiveTeachingType?
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
+  deletedAt        DateTime?
+  deletedById      String?
+  deletionBatchId  String?
 
   enrollments        Enrollment[]
   classLessons       ClassLesson[]
@@ -259,6 +279,8 @@ model ClassGroup {
   @@index([roomId])
   @@index([division, status])
   @@index([termId, status])
+  @@index([deletedAt])
+  @@index([deletionBatchId])
 }
 
 model ClassGroupTeacher {
@@ -319,20 +341,27 @@ model ClassLesson {
   settlementStatus      SettlementStatus      @default(UNSETTLED)
   intensiveReviewStatus IntensiveReviewStatus @default(NOT_REQUIRED)
   createdAt             DateTime              @default(now())
+  deletedAt             DateTime?
+  deletedById           String?
+  deletionBatchId       String?
 
   attendances           Attendance[]
   performancePosts      PerformancePost[]
   examPapers            ExamPaper[]
   classroomFeedbacks    ClassroomFeedback[]
+  leaveRequests         LeaveRequest[]
   lessonStudents        ClassLessonStudent[]
   settlementAdjustments LessonSettlementAdjustment[]
   intensiveReviews      IntensiveLessonReview[]
+  lessonPreviewMaterial StudyMaterial?               @relation("LessonPreviewMaterial")
 
   @@index([lessonDate, status])
   @@index([status, lessonDate])
   @@index([teacherId, lessonDate])
   @@index([groupId, lessonDate])
   @@index([division, lessonDate])
+  @@index([deletedAt])
+  @@index([deletionBatchId])
 }
 
 model IntensiveLessonReview {
@@ -394,16 +423,20 @@ enum EnrollStatus {
 }
 
 model Enrollment {
-  id          String       @id @default(cuid())
-  studentId   String
-  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  groupId     String
-  group       ClassGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  enrolledAt  DateTime     @default(now())
-  totalHours  Float        @default(0)
-  usedHours   Float        @default(0)
-  remainHours Float        @default(0)
-  status      EnrollStatus @default(ACTIVE)
+  id              String       @id @default(cuid())
+  studentId       String
+  student         Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  groupId         String
+  group           ClassGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  enrolledAt      DateTime     @default(now())
+  totalHours      Float        @default(0)
+  usedHours       Float        @default(0)
+  remainHours     Float        @default(0)
+  subjects        String[]     @default([])
+  status          EnrollStatus @default(ACTIVE)
+  deletedAt       DateTime?
+  deletedById     String?
+  deletionBatchId String?
 
   attendances      Attendance[]
   hourTransactions HourTransaction[]
@@ -413,27 +446,31 @@ model Enrollment {
   @@index([groupId, status])
   @@index([studentId, status])
   @@index([studentId, status, remainHours])
+  @@index([deletedAt])
+  @@index([deletionBatchId])
 }
 
 model HourTransaction {
-  id           String   @id @default(cuid())
-  studentId    String
-  enrollmentId String?
-  lessonId     String?
-  scheduleId   String?
-  amount       Float
-  beforeHours  Float?
-  afterHours   Float?
-  type         String
-  reason       String?
-  operatorId   String?
-  createdAt    DateTime @default(now())
+  id              String    @id @default(cuid())
+  studentId       String
+  enrollmentId    String?
+  lessonId        String?
+  amount          Float
+  beforeHours     Float?
+  afterHours      Float?
+  type            String
+  reason          String?
+  operatorId      String?
+  createdAt       DateTime  @default(now())
+  deletedAt       DateTime?
+  deletionBatchId String?
 
   student    Student     @relation(fields: [studentId], references: [id])
   enrollment Enrollment? @relation(fields: [enrollmentId], references: [id])
 
   @@index([studentId, createdAt])
   @@index([enrollmentId])
+  @@index([deletedAt])
 }
 
 enum AttStatus {
@@ -444,30 +481,30 @@ enum AttStatus {
 }
 
 model Attendance {
-  id            String       @id @default(cuid())
-  lessonId      String?
-  lesson        ClassLesson? @relation(fields: [lessonId], references: [id])
-  studentId     String
-  student       Student      @relation(fields: [studentId], references: [id])
-  enrollmentId  String?
-  enrollment    Enrollment?  @relation(fields: [enrollmentId], references: [id])
-  scheduleId    String?
-  schedule      Schedule?    @relation(fields: [scheduleId], references: [id])
-  status        AttStatus    @default(PRESENT)
-  actualMinutes Int?
-  hoursDeducted Float        @default(0)
-  notifySent    Boolean      @default(false)
-  createdAt     DateTime     @default(now())
+  id              String       @id @default(cuid())
+  lessonId        String?
+  lesson          ClassLesson? @relation(fields: [lessonId], references: [id])
+  studentId       String
+  student         Student      @relation(fields: [studentId], references: [id])
+  enrollmentId    String?
+  enrollment      Enrollment?  @relation(fields: [enrollmentId], references: [id])
+  status          AttStatus    @default(PRESENT)
+  actualMinutes   Int?
+  hoursDeducted   Float        @default(0)
+  notifySent      Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  deletedAt       DateTime?
+  deletionBatchId String?
 
   makeupRequest MakeupRequest?
 
-  @@unique([scheduleId, studentId])
   @@unique([lessonId, studentId], name: "attendance_lesson_student_unique")
   @@index([lessonId, status])
   @@index([enrollmentId])
   @@index([studentId, lessonId])
   @@index([studentId, createdAt])
   @@index([createdAt])
+  @@index([deletedAt])
 }
 
 enum MakeupStatus {
@@ -518,22 +555,25 @@ model Assessment {
 }
 
 model GradeRecord {
-  id           String        @id @default(cuid())
-  termId       String?
-  term         AcademicTerm? @relation(fields: [termId], references: [id], onDelete: SetNull)
-  assessmentId String
-  assessment   Assessment    @relation(fields: [assessmentId], references: [id])
-  studentId    String
-  student      Student       @relation(fields: [studentId], references: [id])
-  score        Float
-  comment      String?
-  notifySent   Boolean       @default(false)
-  createdAt    DateTime      @default(now())
+  id              String        @id @default(cuid())
+  termId          String?
+  term            AcademicTerm? @relation(fields: [termId], references: [id], onDelete: SetNull)
+  assessmentId    String
+  assessment      Assessment    @relation(fields: [assessmentId], references: [id])
+  studentId       String
+  student         Student       @relation(fields: [studentId], references: [id])
+  score           Float
+  comment         String?
+  notifySent      Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  deletedAt       DateTime?
+  deletionBatchId String?
 
   dimensions DimensionScore[]
   highlights ClassHighlight[]
 
   @@index([termId, createdAt])
+  @@index([deletedAt])
 }
 
 model DimensionScore {
@@ -560,66 +600,25 @@ model ClassHighlight {
   createdAt      DateTime     @default(now())
 }
 
-model Schedule {
-  id                    String    @id @default(cuid())
-  courseId              String
-  teacherId             String
-  title                 String
-  startTime             DateTime
-  endTime               DateTime
-  isRecurring           Boolean   @default(false)
-  recurrence            String?
-  status                String    @default("scheduled")
-  notes                 String?
-  color                 String?
-  roomId                String?
-  classType             String    @default("SMALL_CLASS")
-  attendanceSubmittedAt DateTime?
-  hoursDeductedAt       DateTime?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  course        Course            @relation(fields: [courseId], references: [id])
-  teacher       Teacher           @relation(fields: [teacherId], references: [id])
-  room          Room?             @relation(fields: [roomId], references: [id])
-  students      ScheduleStudent[]
-  attendances   Attendance[]
-  leaveRequests LeaveRequest[]
-
-  @@index([startTime, status])
-  @@index([teacherId, startTime])
-  @@index([roomId, startTime])
-}
-
-model ScheduleStudent {
-  id         String   @id @default(cuid())
-  scheduleId String
-  studentId  String
-  createdAt  DateTime @default(now())
-
-  schedule Schedule @relation(fields: [scheduleId], references: [id])
-  student  Student  @relation(fields: [studentId], references: [id])
-
-  @@unique([scheduleId, studentId])
-}
-
 model Fee {
-  id        String    @id @default(cuid())
-  termId    String?
-  division  String    @default("JUNIOR")
-  studentId String
-  courseId  String?
-  amount    Float
-  type      String
-  status    String    @default("pending")
-  paidAt    DateTime?
-  dueDate   DateTime?
-  hours     Float? // 课时数(资料费等可为空/0)
-  campus    String? // 校区
-  operator  String? // 经办人
-  notes     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  termId          String?
+  division        String    @default("JUNIOR")
+  studentId       String
+  courseId        String?
+  amount          Float
+  type            String
+  status          String    @default("pending")
+  paidAt          DateTime?
+  dueDate         DateTime?
+  hours           Float? // 课时数(资料费等可为空/0)
+  campus          String? // 校区
+  operator        String? // 经办人
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  deletionBatchId String?
 
   student Student       @relation(fields: [studentId], references: [id])
   course  Course?       @relation(fields: [courseId], references: [id])
@@ -627,6 +626,7 @@ model Fee {
 
   @@index([status, paidAt])
   @@index([studentId, createdAt])
+  @@index([deletedAt])
   @@index([createdAt])
   @@index([division])
   @@index([termId, paidAt])
@@ -643,7 +643,6 @@ model Room {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  schedules   Schedule[]
   classGroups ClassGroup[]
 
   @@index([status])
@@ -681,40 +680,48 @@ model TeacherAlert {
 }
 
 model DeletedRecord {
-  id          String   @id @default(cuid())
-  entityType  String
-  entityId    String
-  entityName  String?
-  payload     Json
-  deletedById String?
-  reason      String?
-  createdAt   DateTime @default(now())
+  id              String    @id @default(cuid())
+  entityType      String
+  entityId        String
+  entityName      String?
+  payload         Json
+  deletedById     String?
+  reason          String?
+  createdAt       DateTime  @default(now())
+  deletionBatchId String?   @unique
+  termId          String?
+  impact          Json?
+  expiresAt       DateTime?
 
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@index([expiresAt])
 }
 
 model Notification {
-  id          String    @id @default(cuid())
-  userId      String
-  title       String
-  content     String
-  type        String    @default("INFO")
-  link        String?
-  relatedType String?
-  relatedId   String?
-  href        String?
-  read        Boolean   @default(false)
-  readAt      DateTime?
-  status      String    @default("ACTIVE")
-  studentId   String?
-  senderId    String?
-  pushStatus  String    @default("none")
-  pushError   String?
-  attempts    Int       @default(0)
-  lastError   String?
-  sentAt      DateTime?
-  createdAt   DateTime  @default(now())
+  id              String    @id @default(cuid())
+  userId          String
+  title           String
+  content         String
+  type            String    @default("INFO")
+  link            String?
+  relatedType     String?
+  relatedId       String?
+  href            String?
+  read            Boolean   @default(false)
+  readAt          DateTime?
+  status          String    @default("ACTIVE")
+  studentId       String?
+  senderId        String?
+  pushStatus      String    @default("none")
+  pushError       String?
+  attempts        Int       @default(0)
+  lastError       String?
+  qywxMsgId       String?
+  sentAt          DateTime?
+  createdAt       DateTime  @default(now())
+  deletedAt       DateTime?
+  deletionBatchId String?
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   student Student? @relation(fields: [studentId], references: [id])
@@ -724,6 +731,7 @@ model Notification {
   @@index([userId, read])
   @@index([relatedType, relatedId])
   @@index([studentId, createdAt])
+  @@index([deletedAt])
 }
 
 enum PostType {
@@ -746,29 +754,31 @@ enum Visibility {
 }
 
 model PerformancePost {
-  id             String        @id @default(cuid())
-  termId         String?
-  term           AcademicTerm? @relation(fields: [termId], references: [id], onDelete: SetNull)
-  studentId      String
-  student        Student       @relation(fields: [studentId], references: [id])
-  teacherId      String
-  teacher        Teacher       @relation(fields: [teacherId], references: [id])
-  classLessonId  String?
-  classLesson    ClassLesson?  @relation(fields: [classLessonId], references: [id])
-  type           PostType      @default(DAILY)
-  mood           MoodLevel     @default(GOOD)
-  content        String
-  images         String[]
-  tags           String[]
-  ratings        Json?
-  visibility     Visibility    @default(PARENT_ONLY)
-  isPinned       Boolean       @default(false)
-  isRead         Boolean       @default(false)
-  isReadByParent Boolean       @default(false)
-  notifySent     Boolean       @default(false)
-  deletedAt      DateTime?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id              String        @id @default(cuid())
+  termId          String?
+  term            AcademicTerm? @relation(fields: [termId], references: [id], onDelete: SetNull)
+  studentId       String
+  student         Student       @relation(fields: [studentId], references: [id])
+  teacherId       String
+  teacher         Teacher       @relation(fields: [teacherId], references: [id])
+  classLessonId   String?
+  classLesson     ClassLesson?  @relation(fields: [classLessonId], references: [id])
+  type            PostType      @default(DAILY)
+  mood            MoodLevel     @default(GOOD)
+  content         String
+  images          String[]
+  tags            String[]
+  ratings         Json?
+  visibility      Visibility    @default(PARENT_ONLY)
+  isPinned        Boolean       @default(false)
+  isRead          Boolean       @default(false)
+  isReadByParent  Boolean       @default(false)
+  notifySent      Boolean       @default(false)
+  deletedAt       DateTime?
+  deletedById     String?
+  deletionBatchId String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   reactions PostReaction[]
   comments  PostComment[]
@@ -779,6 +789,7 @@ model PerformancePost {
   @@index([teacherId, createdAt])
   @@index([termId, createdAt])
   @@index([deletedAt])
+  @@index([deletionBatchId])
 }
 
 model ClassroomFeedback {
@@ -796,6 +807,7 @@ model ClassroomFeedback {
   studentIds         String[]
   lessonContent      String?       @db.Text
   knowledgePoints    String[]
+  knowledgeCard      Json?
   summary            String?       @db.Text
   mood               String?
   tags               String[]      @default([])
@@ -816,8 +828,11 @@ model ClassroomFeedback {
   notifySent         Boolean       @default(false)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
+  deletedAt          DateTime?
+  deletionBatchId    String?
 
   parentMessages ParentMessage[]
+  parentReadReceipts FeedbackParentReadReceipt[]
 
   @@index([teacherId, createdAt])
   @@index([termId, status, createdAt])
@@ -828,6 +843,57 @@ model ClassroomFeedback {
   @@index([status, parentReadAt])
   @@index([source, createdAt])
   @@index([teacherId, source, status])
+  @@index([deletedAt])
+}
+
+model TeacherFeedbackDraft {
+  teacherId String   @id
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  payload   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FeedbackParentReadReceipt {
+  feedbackId  String
+  parentUserId String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  feedback ClassroomFeedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  parent   User              @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
+
+  @@id([feedbackId, parentUserId])
+  @@index([parentUserId, readAt])
+}
+
+model ClassroomFeedbackRequest {
+  clientRequestId String   @id
+  actorUserId     String
+  payloadHash     String
+  feedbackId      String?
+  createdAt       DateTime @default(now())
+
+  @@index([actorUserId, createdAt])
+  @@index([feedbackId])
+}
+
+model CourseChangeEvent {
+  id                 String   @id @default(cuid())
+  eventType          String
+  actorUserId        String
+  groupId            String?
+  lessonIds          String[]
+  studentIds         String[]
+  title              String
+  summary            String   @db.Text
+  recipientCount     Int      @default(0)
+  notificationCount  Int      @default(0)
+  createdAt          DateTime @default(now())
+
+  @@index([groupId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([eventType, createdAt])
 }
 
 model PostReaction {
@@ -867,16 +933,19 @@ model PostBadge {
 }
 
 model AchievementBadge {
-  id          String   @id @default(cuid())
-  studentId   String
-  student     Student  @relation(fields: [studentId], references: [id])
-  teacherId   String
-  teacher     Teacher  @relation(fields: [teacherId], references: [id])
-  badgeType   String
-  description String?
-  earnedAt    DateTime @default(now())
+  id              String    @id @default(cuid())
+  studentId       String
+  student         Student   @relation(fields: [studentId], references: [id])
+  teacherId       String
+  teacher         Teacher   @relation(fields: [teacherId], references: [id])
+  badgeType       String
+  description     String?
+  earnedAt        DateTime  @default(now())
+  deletedAt       DateTime?
+  deletionBatchId String?
 
   @@index([studentId, earnedAt])
+  @@index([deletedAt])
 }
 
 model Session {
@@ -981,6 +1050,8 @@ model MealMenu {
   sideDish    String?
   allowDouble Boolean  @default(false)
   notes       String?
+  image       String?
+  description String?
   division    String   @default("JUNIOR")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -1003,6 +1074,8 @@ model MealTemplate {
   dinner      String?
   snack       String?
   note        String?
+  image       String?
+  description String?
   allowDouble Boolean   @default(true)
   isActive    Boolean   @default(true)
   startDate   DateTime?
@@ -1053,21 +1126,21 @@ model ParentMealChoice {
 }
 
 model StudentMealAttendance {
-  id         String   @id @default(cuid())
-  studentId  String
-  mealDate   DateTime @db.Date
-  division   String   @default("JUNIOR")
-  recordedBy String
-  eating     Boolean  @default(true)
-  source     String   @default("MANUAL")
-  groupId    String?
-  groupName  String?
-  lessonId   String?
-  teacherId  String?
+  id          String   @id @default(cuid())
+  studentId   String
+  mealDate    DateTime @db.Date
+  division    String   @default("JUNIOR")
+  recordedBy  String
+  eating      Boolean  @default(true)
+  source      String   @default("MANUAL")
+  groupId     String?
+  groupName   String?
+  lessonId    String?
+  teacherId   String?
   teacherName String?
-  notes      String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   student  Student @relation(fields: [studentId], references: [id])
   recorder User    @relation("MealAttendanceRecorder", fields: [recordedBy], references: [id])
@@ -1080,40 +1153,63 @@ model StudentMealAttendance {
 }
 
 model StudyMaterial {
-  id            String           @id @default(cuid())
-  title         String
-  grade         String
-  subject       String
-  fileUrl       String
-  fileName      String
-  fileSize      Int
-  fileType      String
-  description   String?
-  downloads     Int              @default(0)
-  uploadedBy    String
-  audience      MaterialAudience @default(STUDENT)
-  source        MaterialSource   @default(ADMIN)
-  status        MaterialStatus   @default(PUBLISHED)
-  teacherId     String?
-  tags          String[]         @default([])
-  isPinned      Boolean          @default(false)
-  sortOrder     Int              @default(0)
-  storageDriver String?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  id                String           @id @default(cuid())
+  title             String
+  grade             String
+  subject           String
+  fileUrl           String
+  fileName          String
+  fileSize          Int
+  fileType          String
+  materialType      MaterialType     @default(HANDOUT)
+  description       String?
+  downloads         Int              @default(0)
+  uploadedBy        String
+  audience          MaterialAudience @default(STUDENT)
+  source            MaterialSource   @default(ADMIN)
+  status            MaterialStatus   @default(PUBLISHED)
+  teacherId         String?
+  tags              String[]         @default([])
+  isPinned          Boolean          @default(false)
+  sortOrder         Int              @default(0)
+  storageDriver     String?
+  classLessonId     String?          @unique
+  isLessonPreview   Boolean          @default(false)
+  uploadedByRole    String           @default("TEACHER")
+  uploadedByAdminId String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+  deletedById       String?
+  deletionBatchId   String?
 
-  uploader User     @relation("MaterialUploader", fields: [uploadedBy], references: [id])
-  teacher  Teacher? @relation(fields: [teacherId], references: [id])
+  uploader      User         @relation("MaterialUploader", fields: [uploadedBy], references: [id])
+  adminUploader User?        @relation("MaterialAdminUploader", fields: [uploadedByAdminId], references: [id], onDelete: SetNull)
+  teacher       Teacher?     @relation(fields: [teacherId], references: [id])
+  classLesson   ClassLesson? @relation("LessonPreviewMaterial", fields: [classLessonId], references: [id], onDelete: SetNull)
 
   @@index([audience, status, grade, subject])
   @@index([teacherId, status, createdAt])
   @@index([uploadedBy, createdAt])
+  @@index([isLessonPreview, status, createdAt])
+  @@index([uploadedByRole, createdAt])
+  @@index([uploadedByAdminId, createdAt])
+  @@index([deletedAt])
 }
 
 enum MaterialAudience {
   STUDENT
   TEACHER
   BOTH
+}
+
+enum MaterialType {
+  TEXTBOOK
+  HANDOUT
+  EXERCISE
+  EXAM
+  ANSWER
+  REFERENCE
 }
 
 enum MaterialSource {
@@ -1148,32 +1244,35 @@ enum MasteryLevel {
 }
 
 model ExamPaper {
-  id             String           @id @default(cuid())
-  termId         String?
-  term           AcademicTerm?    @relation(fields: [termId], references: [id], onDelete: SetNull)
-  studentId      String
-  student        Student          @relation(fields: [studentId], references: [id])
-  teacherId      String
-  teacher        Teacher          @relation(fields: [teacherId], references: [id])
-  classLessonId  String?
-  classLesson    ClassLesson?     @relation(fields: [classLessonId], references: [id])
-  title          String
-  subject        String
-  paperDate      DateTime
-  imageUrls      String[]
-  fileUrl        String?
-  tags           String[]
-  overallComment String?
-  status         PaperStatus      @default(DRAFT)
-  isReadByParent Boolean          @default(false)
-  readAt         DateTime?
-  notifySent     Boolean          @default(false)
-  questions      PaperQuestion[]
-  reactions      PaperReaction[]
-  comments       PaperComment[]
-  weaknesses     WeaknessRecord[]
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  id              String           @id @default(cuid())
+  termId          String?
+  term            AcademicTerm?    @relation(fields: [termId], references: [id], onDelete: SetNull)
+  studentId       String
+  student         Student          @relation(fields: [studentId], references: [id])
+  teacherId       String
+  teacher         Teacher          @relation(fields: [teacherId], references: [id])
+  classLessonId   String?
+  classLesson     ClassLesson?     @relation(fields: [classLessonId], references: [id])
+  title           String
+  subject         String
+  paperDate       DateTime
+  imageUrls       String[]
+  fileUrl         String?
+  tags            String[]
+  overallComment  String?
+  status          PaperStatus      @default(DRAFT)
+  isReadByParent  Boolean          @default(false)
+  readAt          DateTime?
+  notifySent      Boolean          @default(false)
+  questions       PaperQuestion[]
+  reactions       PaperReaction[]
+  comments        PaperComment[]
+  weaknesses      WeaknessRecord[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+  deletedById     String?
+  deletionBatchId String?
 
   @@index([studentId, createdAt])
   @@index([teacherId, createdAt])
@@ -1182,6 +1281,8 @@ model ExamPaper {
   @@index([studentId, status, paperDate])
   @@index([teacherId, status, paperDate])
   @@index([termId, status, paperDate])
+  @@index([deletedAt])
+  @@index([deletionBatchId])
 }
 
 model PaperQuestion {
@@ -1222,16 +1323,20 @@ model PaperComment {
 }
 
 model LearningGoal {
-  id         String    @id @default(cuid())
-  studentId  String
-  student    Student   @relation(fields: [studentId], references: [id])
-  subject    String
-  goalDesc   String
-  deadline   DateTime?
-  note       String?
-  isAchieved Boolean   @default(false)
-  achievedAt DateTime?
-  createdAt  DateTime  @default(now())
+  id              String    @id @default(cuid())
+  studentId       String
+  student         Student   @relation(fields: [studentId], references: [id])
+  subject         String
+  goalDesc        String
+  deadline        DateTime?
+  note            String?
+  isAchieved      Boolean   @default(false)
+  achievedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  deletedAt       DateTime?
+  deletionBatchId String?
+
+  @@index([deletedAt])
 }
 
 model WeaknessRecord {
@@ -1247,24 +1352,27 @@ model WeaknessRecord {
 }
 
 model StageSummary {
-  id           String    @id @default(cuid())
-  studentId    String
-  student      Student   @relation(fields: [studentId], references: [id])
-  teacherId    String
-  teacher      Teacher   @relation(fields: [teacherId], references: [id])
-  periodStart  DateTime
-  periodEnd    DateTime
-  summary      String    @db.Text
-  suggestions  String?   @db.Text
-  dataSnapshot Json?
-  status       String    @default("DRAFT")
-  publishedAt  DateTime?
-  notifySent   Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  studentId       String
+  student         Student   @relation(fields: [studentId], references: [id])
+  teacherId       String
+  teacher         Teacher   @relation(fields: [teacherId], references: [id])
+  periodStart     DateTime
+  periodEnd       DateTime
+  summary         String    @db.Text
+  suggestions     String?   @db.Text
+  dataSnapshot    Json?
+  status          String    @default("DRAFT")
+  publishedAt     DateTime?
+  notifySent      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  deletionBatchId String?
 
   @@index([studentId, status, periodEnd])
   @@index([teacherId, createdAt])
+  @@index([deletedAt])
 }
 
 model SystemConfig {
@@ -1323,23 +1431,27 @@ model RoleConfig {
 }
 
 model LeaveRequest {
-  id         String    @id @default(cuid())
-  studentId  String
-  scheduleId String?
-  reason     String
-  leaveDate  DateTime
-  status     String    @default("pending")
-  replyNote  String?
-  repliedAt  DateTime?
-  repliedBy  String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  studentId       String
+  lessonId        String?
+  reason          String
+  leaveDate       DateTime
+  status          String    @default("pending")
+  replyNote       String?
+  repliedAt       DateTime?
+  repliedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  deletionBatchId String?
 
-  student  Student   @relation(fields: [studentId], references: [id])
-  schedule Schedule? @relation(fields: [scheduleId], references: [id])
+  student Student      @relation(fields: [studentId], references: [id])
+  lesson  ClassLesson? @relation(fields: [lessonId], references: [id], onDelete: SetNull)
 
   @@index([status, createdAt])
   @@index([studentId, createdAt])
+  @@index([lessonId])
+  @@index([deletedAt])
 }
 
 model PasswordResetToken {
@@ -1520,6 +1632,9 @@ model StudyHallClass {
   status          StudyHallClassStatus  @default(ACTIVE)
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
+  deletedAt       DateTime?
+  deletedById     String?
+  deletionBatchId String?
 
   term     AcademicTerm            @relation(fields: [termId], references: [id], onDelete: Restrict)
   teachers StudyHallClassTeacher[]
@@ -1530,6 +1645,7 @@ model StudyHallClass {
 
   @@index([termId, status])
   @@index([division, scheduleType, status])
+  @@index([deletedAt])
 }
 
 /// 教师任期保留历史；同一教师离开后可以再次回到该班。
@@ -1645,7 +1761,7 @@ model StudyHallHomeworkEntry {
   student     Student              @relation(fields: [studentId], references: [id], onDelete: Restrict)
   session     StudyHallSession?    @relation(fields: [sessionId], references: [id], onDelete: Restrict)
 
-  @@unique([classRecordId, studentId, attendanceKey])
+  @@unique([classRecordId, studentId, attendanceKey], map: "StudyHallHomeworkEntry_classRecordId_studentId_attendanceKey_ke")
   @@index([studentId, checkedIn, updatedAt])
   @@index([sessionId, checkedIn])
 }
@@ -1740,20 +1856,25 @@ model TeacherSalaryConfig {
 
 // Teacher salary transaction generated by attendance and classroom feedback.
 model TeacherSalaryTransaction {
-  id           String                      @id @default(cuid())
-  teacherId    String
-  teacher      Teacher                     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  termId       String?
-  term         AcademicTerm?               @relation(fields: [termId], references: [id], onDelete: SetNull)
-  type         String
-  amount       Float
-  lessonId     String?
-  feedbackId   String?
-  adjustmentId String?                     @unique
-  adjustment   LessonSettlementAdjustment? @relation(fields: [adjustmentId], references: [id], onDelete: Restrict)
-  description  String?
-  lessonDate   DateTime?
-  createdAt    DateTime                    @default(now())
+  id              String                      @id @default(cuid())
+  teacherId       String
+  teacher         Teacher                     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  termId          String?
+  term            AcademicTerm?               @relation(fields: [termId], references: [id], onDelete: SetNull)
+  type            String
+  amount          Float
+  lessonId        String?
+  lessonPayKey    String?                     @unique
+  feedbackId      String?
+  adjustmentId    String?                     @unique
+  adjustment      LessonSettlementAdjustment? @relation(fields: [adjustmentId], references: [id], onDelete: Restrict)
+  description     String?
+  lessonDate      DateTime?
+  settledAt       DateTime?
+  settlementBatchId String?
+  createdAt       DateTime                    @default(now())
+  deletedAt       DateTime?
+  deletionBatchId String?
 
   @@unique([feedbackId, type])
   @@index([teacherId, createdAt])
@@ -1762,6 +1883,7 @@ model TeacherSalaryTransaction {
   @@index([lessonId])
   @@index([lessonId, type])
   @@index([feedbackId])
+  @@index([deletedAt])
 }
 
 // Per-student first-feedback reward ledger. A teacher can earn once for each
@@ -1894,6 +2016,7 @@ model ParentMessageReply {
   authorName      String
   role            String
   content         String
+  attachments     Json?
   isReadByParent  Boolean       @default(false)
   isReadByTeacher Boolean       @default(false)
   createdAt       DateTime      @default(now())
@@ -1902,38 +2025,41 @@ model ParentMessageReply {
 }
 
 model FileAsset {
-  id             String    @id @default(cuid())
-  filename       String
-  originalName   String?
-  mimeType       String
-  size           Int
-  storageDriver  String    @default("local")
-  storageKey     String
-  url            String
-  previewUrl     String?
-  thumbnailUrl   String?
-  width          Int?
-  height         Int?
-  fileSize       Int?
-  ownerType      String
-  ownerId        String?
-  studentId      String?
-  lessonId       String?
-  feedbackId     String?
-  postId         String?
-  visibility     String    @default("PRIVATE")
-  uploadedById   String?
-  uploadedByRole String?
-  tenant         String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
+  id              String    @id @default(cuid())
+  filename        String
+  originalName    String?
+  mimeType        String
+  size            Int
+  storageDriver   String    @default("local")
+  storageKey      String
+  url             String
+  previewUrl      String?
+  thumbnailUrl    String?
+  width           Int?
+  height          Int?
+  fileSize        Int?
+  ownerType       String
+  ownerId         String?
+  studentId       String?
+  lessonId        String?
+  feedbackId      String?
+  postId          String?
+  visibility      String    @default("PRIVATE")
+  uploadedById    String?
+  uploadedByRole  String?
+  tenant          String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  deletedById     String?
+  deletionBatchId String?
 
   @@index([studentId])
   @@index([feedbackId])
   @@index([postId])
   @@index([ownerType, ownerId])
   @@index([tenant])
+  @@index([deletedAt])
 }
 
 model MasteryRecord {
@@ -1946,4 +2072,51 @@ model MasteryRecord {
   createdAt      DateTime @default(now())
 
   @@index([studentId, createdAt])
+}
+
+model TeacherMessage {
+  id          String    @id @default(cuid())
+  teacherId   String?
+  teacher     Teacher?  @relation("TeacherPortalMessages", fields: [teacherId], references: [id], onDelete: SetNull)
+  type        String
+  title       String
+  content     String
+  createdById String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([teacherId, readAt])
+}
+
+model PracticeResult {
+  id        String   @id @default(cuid())
+  studentId String
+  setId     String
+  score     Int
+  total     Int
+  wrongIds  String[]
+  answers   Json?    @map("answers")
+  finishedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, setId])
+  @@index([studentId])
+}
+
+// 每次提交都单独留档；PracticeResult 继续保存每个学生/题组的最新汇总，兼容现有页面。
+model PracticeAttempt {
+  id               String   @id @default(cuid())
+  studentId        String
+  setId            String
+  score            Int
+  total            Int
+  wrongIds         String[]
+  answers          Json?
+  questionSnapshot Json?
+  finishedAt       DateTime @default(now())
+  createdAt        DateTime @default(now())
+
+  @@index([studentId, finishedAt(sort: Desc)])
+  @@index([studentId, setId, finishedAt(sort: Desc)])
 }

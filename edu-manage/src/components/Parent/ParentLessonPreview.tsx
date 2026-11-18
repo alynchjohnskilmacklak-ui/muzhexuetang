@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import NextImage from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Button, Modal } from 'antd'
+import { Button } from 'antd'
 import { ClockCircleOutlined, DownloadOutlined, EyeOutlined, FileImageOutlined, FilePdfOutlined, FilePptOutlined, FileWordOutlined, HistoryOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { PdfCanvasViewer } from '@/components/Common/PdfCanvasViewer'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { materialFileLabel } from '@/lib/material-format'
 import { downloadMaterialFile, loadMaterialPreview, type MaterialPreviewResult } from '@/lib/material-preview-client'
 
@@ -129,7 +130,7 @@ export function ParentLessonPreview({ items, activeChildId }: { items: LessonPre
         </div>
       </section>
 
-      <Modal title="周末课讲义" open={!!selectedMaterial} onCancel={() => setSelectedMaterial(null)} footer={null} width={560} className="lesson-preview-detail-modal">
+      <BrandModal title="周末课讲义" open={!!selectedMaterial} onCancel={() => setSelectedMaterial(null)} footer={null} width={560} className="lesson-preview-detail-modal">
         {selectedMaterial && <>
           <div className="lesson-preview-document">
             <span className={`lesson-preview-file is-${selectedMaterial.fileType}`}><FileIcon type={selectedMaterial.fileType} /><small>{materialFileLabel(selectedMaterial.fileType)}</small></span>
@@ -149,15 +150,15 @@ export function ParentLessonPreview({ items, activeChildId }: { items: LessonPre
             <Button className="lesson-preview-online" type="primary" icon={<EyeOutlined />} loading={viewing} onClick={openViewer}>在线查看</Button>
           </div>
         </>}
-      </Modal>
+      </BrandModal>
 
-      <Modal title={viewerTitle} open={!!viewer} footer={null} onCancel={() => setViewer(null)} width="95vw" style={{ top: 10 }} styles={{ body: { padding: 0 } }}>
+      <BrandModal title={viewerTitle} open={!!viewer} footer={null} onCancel={() => setViewer(null)} width="95vw" style={{ top: 10 }} styles={{ body: { padding: 0 } }}>
         {viewer?.type === 'pdf'
           ? <PdfCanvasViewer url={viewer.url || undefined} data={viewer.data} title={viewerTitle} />
           : viewer?.type === 'image'
           ? <div className="lesson-preview-image"><NextImage src={viewer.url} alt={viewerTitle} width={1200} height={800} unoptimized /></div>
           : viewer && <iframe src={viewer.url} title={viewerTitle} className="lesson-preview-frame" />}
-      </Modal>
+      </BrandModal>
 
       <style jsx>{`
         .lesson-preview-card { padding: 4px; border-radius: var(--radius-xl); background: var(--color-brand-secure); box-shadow: var(--shadow-card); }

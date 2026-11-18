@@ -1,45 +1,36 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import {
-  Avatar, Badge, Button, Drawer, Input,
-  Select, Tag, Typography,
-} from 'antd'
-import {
-  CheckCircleOutlined, CloseOutlined,
-  MessageOutlined, SendOutlined, UserOutlined,
-} from '@ant-design/icons'
+import { Avatar, Badge, Button, Typography } from 'antd'
+import { MessageOutlined, SendOutlined, CloseOutlined, LeftOutlined, UserOutlined } from '@ant-design/icons'
 import { toast } from 'sonner'
 import { usePausableSWR } from '@/lib/use-pausable-swr'
-import { useIsMobile } from '@/hooks/useIsMobile'
-import { SUBJECT_COLORS } from '@/constants/subjects'
 import { fmtDateTime } from '@/lib/format-date'
 import { BrandEmpty } from '@/components/Parent/BrandEmpty'
 import { CardSkeleton } from '@/components/Parent/CardSkeleton'
+import { SUBJECT_COLORS } from '@/constants/subjects'
+import { STICKER_MARK, stickerPreview } from '@/constants/stickers'
+import { StickerPanel } from '@/components/Parent/StickerPanel'
+import { StickerMessageContent } from '@/components/Parent/StickerMessageContent'
+import { StudentAvatar } from '@/components/Common/StudentAvatar'
+import { uploadMessageImage } from '@/lib/client-image-upload'
 
-const { Text, Title } = Typography
-const { TextArea } = Input
-const fetcher = (url: string) => fetch(url).then(r => r.json())
+const { Text } = Typography
+const fetcher = async (url: string) => {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error('加载失败（' + response.status + '）')
+  return response.json()
+}
 
 type Reply = {
   id: string; authorName: string; role: string
   content: string; isReadByTeacher: boolean; isReadByParent: boolean; createdAt: string
+  attachments?: Array<{ url: string; name?: string; type?: string }> | null
 }
 type Message = {
   id: string; title: string; subject: string | null; status: string
   parent: { id: string; name: string }
-  student: { id: string; name: string } | null
-  feedback: {
-    id: string
-    createdAt: string
-    summary: string | null
-    overallComment: string | null
-    classLesson: {
-      lessonDate: string
-      subject: string | null
-      group: { course: { name: string; subject: string } }
-    } | null
-  } | null
+  student: { id: string; name: string; grade?: string | null; gender?: string | null } | null
   replies: Reply[]
   updatedAt: string
 }
@@ -56,16 +47,13 @@ function ChatBubble({ reply }: { reply: Reply }) {
       flexDirection: isTeacher ? 'row-reverse' : 'row',
       gap: 8, alignItems: 'flex-end', marginBottom: 16,
     }}>
-      <Avatar size={32} icon={<UserOutlined />}
-        style={{ background: isTeacher ? '#1D9E75' : '#E8784A', flexShrink: 0 }}>
-        {reply.authorName.slice(0, 1)}
-      </Avatar>
+      <Avatar size={32} icon={<UserOutlined />} style={{ background: isTeacher ? 'var(--color-success-action)' : 'var(--color-primary)', flexShrink: 0 }} />
       <div style={{ maxWidth: '70%' }}>
-        <div style={{ fontSize: 11, color: '#9a8e7a', marginBottom: 4, textAlign: isTeacher ? 'right' : 'left' }}>
+        <div style={{ fontSize: 12, color: 'var(--color-ink-subtle)', marginBottom: 4, textAlign: isTeacher ? 'right' : 'left' }}>
           {reply.authorName} · {fmtDateTime(reply.createdAt)}
         </div>
         <div style={{
-          background: isTeacher ? '#1D9E75' : '#fff',
+          background: isTeacher ? 'var(--color-success-action)' : '#fff',
           color: isTeacher ? '#fff' : '#1a1201',
           border: isTeacher ? 'none' : '1px solid rgba(0,0,0,.08)',
           borderRadius: isTeacher ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
@@ -73,15 +61,24 @@ function ChatBubble({ reply }: { reply: Reply }) {
           boxShadow: '0 2px 8px rgba(0,0,0,.06)',
           whiteSpace: 'pre-wrap', wordBreak: 'break-word',
         }}>
-          {reply.content}
+          <StickerMessageContent content={reply.content} animated style={{ width: 150, maxWidth: '100%', borderRadius: 12 }} />
+          {reply.attachments && reply.attachments.length > 0 && (
+            <div style={{ marginTop: reply.content ? 8 : 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {reply.attachments.map((att, i) => (
+                <img key={i} src={att.url} alt={att.name || '图片'}
+                  style={{ maxWidth: '100%', borderRadius: 10, cursor: 'pointer', display: 'block' }}
+                  onClick={() => window.open(att.url, '_blank')} />
+              ))}
+            </div>
+          )}
         </div>
         {isTeacher && (
-          <div style={{ marginTop: 4, fontSize: 10, color: '#9A8E7A', textAlign: 'right' }}>
+          <div style={{ marginTop: 4, fontSize: 11, color: 'var(--color-ink-subtle)', textAlign: 'right' }}>
             {reply.isReadByParent ? '家长已查看' : '家长未查看'}
           </div>
         )}
         {!isTeacher && (
-          <div style={{ marginTop: 4, fontSize: 10, color: '#9A8E7A' }}>
+          <div style={{ marginTop: 4, fontSize: 11, color: 'var(--color-ink-subtle)' }}>
             {reply.isReadByTeacher ? '已查看' : '新留言'}
           </div>
         )}
@@ -90,338 +87,275 @@ function ChatBubble({ reply }: { reply: Reply }) {
   )
 }
 
-function MessageCard({ msg, onClick, active, index }: { msg: Message; onClick: () => void; active: boolean; index: number }) {
-  const unread = unreadCount(msg)
-  const lastReply = msg.replies[msg.replies.length - 1]
-  const subjectColor = msg.subject ? SUBJECT_COLORS[msg.subject] : null
-  return (
-    <button type="button" aria-pressed={active} className="pressable stagger-item" onClick={onClick} style={{
-      display: 'block', width: '100%', textAlign: 'left', color: 'inherit', font: 'inherit',
-      background: active ? '#F0F9F5' : '#fff',
-      border: active ? '1.5px solid #1D9E75' : '1px solid rgba(0,0,0,.07)',
-      borderRadius: 12, padding: '14px 16px',
-      cursor: 'pointer', transition: 'all .18s ease', marginBottom: 8,
-      animationDelay: `${Math.min(index, 8) * 40}ms`,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
-        <Text strong style={{ flex: 1, fontSize: 14, lineHeight: 1.4 }}>{msg.title}</Text>
-        {unread > 0 && <Badge count={unread} size="small" />}
-      </div>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
-        <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#FFF6F1', color: '#E8784A', border: 'none' }}>
-          {msg.parent.name}
-        </Tag>
-        {msg.student && (
-          <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#f5f5f5', color: '#5a4e3a', border: 'none' }}>
-            {msg.student.name}
-          </Tag>
-        )}
-        {msg.feedback && (
-          <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#fff3ec', color: '#E8784A', border: 'none' }}>
-            课堂反馈留言
-          </Tag>
-        )}
-        {msg.subject && subjectColor && (
-          <Tag style={{ borderRadius: 9999, fontSize: 11, border: 'none', background: subjectColor.bg, color: subjectColor.color }}>
-            {msg.subject}
-          </Tag>
-        )}
-        <Tag style={{
-          marginLeft: 'auto', borderRadius: 9999, fontSize: 11,
-          background: msg.status === 'CLOSED' ? '#f5f5f5' : '#F0F9F5',
-          color: msg.status === 'CLOSED' ? '#999' : '#1D9E75', border: 'none',
-        }}>
-          {msg.status === 'CLOSED' ? '已关闭' : '进行中'}
-        </Tag>
-      </div>
-      {lastReply && (
-        <Text type="secondary" style={{ fontSize: 12 }} ellipsis>
-          {lastReply.role === 'parent' ? `${lastReply.authorName}：` : '我：'}{lastReply.content}
-        </Text>
-      )}
-    </button>
-  )
-}
-
 export function TeacherMessagesClient() {
-  const isMobile = useIsMobile() ?? false
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [filter, setFilter] = useState<'ALL' | 'OPEN' | 'CLOSED'>('ALL')
   const [replyText, setReplyText] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [closing, setClosing] = useState(false)
-  const [mobileViewport, setMobileViewport] = useState({ height: 0, bottomInset: 0 })
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const [showEmoji, setShowEmoji] = useState(false)
+  const [showSticker, setShowSticker] = useState(false)
+  const [pendingImage, setPendingImage] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const conversationRef = useRef<HTMLDivElement>(null)
-  const composerRef = useRef<HTMLDivElement>(null)
 
-  const { data, mutate, isLoading } = usePausableSWR('/api/messages', fetcher, {
+  const { data, mutate, isLoading, error } = usePausableSWR('/api/messages', fetcher, {
     refreshInterval: 5_000,
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
   })
-  const allMessages: Message[] = data?.messages || []
-  const messages = allMessages.filter(m => filter === 'ALL' || (filter === 'OPEN' ? m.status !== 'CLOSED' : m.status === 'CLOSED'))
-  const active = allMessages.find(m => m.id === activeId) || null
+  const {
+    data: activeDetail,
+    error: activeDetailError,
+    isLoading: activeDetailLoading,
+    mutate: mutateActiveDetail,
+  } = usePausableSWR<Message>(activeId ? `/api/messages/${activeId}` : null, fetcher, {
+    refreshInterval: 5_000,
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+  })
 
-  const scrollConversationToBottom = (behavior: ScrollBehavior = 'smooth') => {
-    const conversation = conversationRef.current
-    if (!conversation) return
-    conversation.scrollTo({ top: conversation.scrollHeight, behavior })
-  }
+  const allMessages: Message[] = data?.messages || []
+
+  // 按学生去重
+  const seenStudents = new Set<string>()
+  const messages = allMessages.filter(m => {
+    const key = m.student?.id || m.parent.id
+    if (seenStudents.has(key)) return false
+    seenStudents.add(key)
+    return true
+  })
+  const active = activeDetail?.id === activeId
+    ? activeDetail
+    : allMessages.find(m => m.id === activeId) || null
 
   useEffect(() => {
     if (!activeId) return
-    const timer = window.setTimeout(() => scrollConversationToBottom(), 100)
-    return () => window.clearTimeout(timer)
+    const t = setTimeout(() => {
+      conversationRef.current?.scrollTo({ top: conversationRef.current.scrollHeight, behavior: 'smooth' })
+    }, 100)
+    return () => clearTimeout(t)
   }, [activeId, active?.replies.length])
 
-  useEffect(() => {
-    if (!isMobile) return
-
-    const updateViewport = () => {
-      const viewport = window.visualViewport
-      const height = Math.round(viewport?.height ?? window.innerHeight)
-      const bottomInset = viewport
-        ? Math.max(0, Math.round(window.innerHeight - viewport.height - viewport.offsetTop))
-        : 0
-
-      setMobileViewport(current => (
-        current.height === height && current.bottomInset === bottomInset
-          ? current
-          : { height, bottomInset }
-      ))
-    }
-
-    updateViewport()
-    window.addEventListener('resize', updateViewport)
-    window.visualViewport?.addEventListener('resize', updateViewport)
-    window.visualViewport?.addEventListener('scroll', updateViewport)
-
-    return () => {
-      window.removeEventListener('resize', updateViewport)
-      window.visualViewport?.removeEventListener('resize', updateViewport)
-      window.visualViewport?.removeEventListener('scroll', updateViewport)
-    }
-  }, [isMobile])
-
-  useEffect(() => {
-    if (!isMobile || !activeId) return
-    const timer = window.setTimeout(() => scrollConversationToBottom('auto'), 50)
-    return () => window.clearTimeout(timer)
-  }, [activeId, isMobile, mobileViewport.height, mobileViewport.bottomInset])
-
-  const handleReplyFocus = () => {
-    const revealComposer = () => {
-      composerRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
-      scrollConversationToBottom()
-    }
-
-    window.requestAnimationFrame(revealComposer)
-    window.setTimeout(revealComposer, 300)
-  }
-
-  const handleSelect = async (id: string) => {
+  const handleSelect = (id: string) => {
     setActiveId(id)
-    await fetch(`/api/messages/${id}`)
-    mutate()
+    setShowEmoji(false)
+    setShowSticker(false)
   }
 
-  const handleReply = async () => {
-    if (!activeId || !replyText.trim()) return
+  const handleUploadImage = async (file: File) => {
+    const studentId = active?.student?.id
+    if (!studentId) {
+      toast.error('当前会话未关联学生，无法上传图片')
+      return
+    }
+    setUploading(true)
+    try {
+      setPendingImage(await uploadMessageImage(file, studentId))
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '图片上传失败，请稍后重试')
+    }
+    finally { setUploading(false) }
+  }
+
+  const handleReply = async (contentOverride?: string) => {
+    const content = contentOverride ?? replyText.trim()
+    if (!activeId || (!content && !pendingImage)) return
     setSubmitting(true)
     try {
       const res = await fetch(`/api/messages/${activeId}/reply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: replyText.trim() }),
+        body: JSON.stringify({
+          content,
+          attachments: pendingImage ? [{ url: pendingImage, type: 'image' }] : [],
+        }),
       })
       if (!res.ok) { toast.error('发送失败'); return }
-      setReplyText('')
-      toast.success('回复已发送，家长首页将显示新回复提示')
+      if (contentOverride === undefined) setReplyText('')
+      setPendingImage(null)
+      setShowEmoji(false)
+      setShowSticker(false)
+      toast.success('回复已发送')
       mutate()
+      void mutateActiveDetail()
     } catch { toast.error('网络错误') }
     finally { setSubmitting(false) }
   }
 
-  const handleClose = async () => {
-    if (!activeId) return
-    setClosing(true)
-    try {
-      await fetch(`/api/messages/${activeId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'CLOSED' }),
-      })
-      toast.success('已关闭留言')
-      mutate()
-    } catch { toast.error('操作失败') }
-    finally { setClosing(false) }
-  }
-
-  const chatPanel = (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-      {active && (
-        <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(0,0,0,.07)', background: '#fff', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <Text strong style={{ fontSize: 15, flex: 1 }}>{active.title}</Text>
-            {active.status !== 'CLOSED' && (
-              <Button size="small" onClick={handleClose} loading={closing}
-                style={{ borderRadius: 8, fontSize: 12 }}>
-                关闭留言
-              </Button>
-            )}
-          </div>
-          <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-            <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#FFF6F1', color: '#E8784A', border: 'none' }}>
-              {active.parent.name} 家长
-            </Tag>
-            {active.student && (
-              <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#f5f5f5', color: '#5a4e3a', border: 'none' }}>
-                学员：{active.student.name}
-              </Tag>
-            )}
-            {active.feedback && (
-              <Tag style={{ borderRadius: 9999, fontSize: 11, background: '#fff3ec', color: '#E8784A', border: 'none' }}>
-                {active.feedback.classLesson?.group.course.name || active.feedback.classLesson?.subject || '课堂反馈'} · {fmtDateTime(active.feedback.createdAt)}
-              </Tag>
-            )}
-          </div>
-        </div>
-      )}
-      <div ref={conversationRef} style={{
-        flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 16px',
-        background: '#faf8f5', overscrollBehavior: 'contain', scrollPaddingBottom: 88,
-      }}>
-        {!active ? (
-          <BrandEmpty title="选择一条留言查看对话" hint="家长的问题和你的回复会显示在这里，选择左侧留言即可继续沟通。" icon={<MessageOutlined />} />
-        ) : (
-          <>
-            {active.replies.map((reply, index) => <div className="stagger-item" key={reply.id} style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}><ChatBubble reply={reply} /></div>)}
-            <div ref={bottomRef} />
-          </>
-        )}
-      </div>
-      {active && active.status !== 'CLOSED' && (
-        <div ref={composerRef} style={{
-          padding: isMobile
-            ? '12px 12px calc(12px + env(safe-area-inset-bottom, 0px))'
-            : '12px 16px',
-          background: '#fff',
-          borderTop: '1px solid rgba(0,0,0,.07)', flexShrink: 0,
-          display: 'flex', gap: 8, alignItems: 'flex-end', position: 'relative', zIndex: 2,
-        }}>
-          <TextArea
-            value={replyText}
-            onChange={e => setReplyText(e.target.value)}
-            onFocus={handleReplyFocus}
-            placeholder="回复家长..."
-            autoSize={{ minRows: 1, maxRows: 4 }}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleReply() } }}
-            style={{ borderRadius: 10, flex: 1, resize: 'none' }}
-          />
-          <Button type="primary" icon={<SendOutlined />} loading={submitting}
-            disabled={!replyText.trim()} onClick={handleReply}
-            style={{ background: '#1D9E75', border: 'none', borderRadius: 10, height: 36 }}
-          />
-        </div>
-      )}
-      {active && active.status === 'CLOSED' && (
-        <div style={{ padding: '10px 16px', background: '#f9f9f9', borderTop: '1px solid rgba(0,0,0,.07)', textAlign: 'center', flexShrink: 0 }}>
-          <Text type="secondary" style={{ fontSize: 13 }}>
-            <CheckCircleOutlined style={{ marginRight: 6 }} />该留言已关闭
-          </Text>
-        </div>
-      )}
-    </div>
-  )
-
-  const filterBar = (
-    <Select value={filter} onChange={v => setFilter(v as typeof filter)}
-      style={{ width: 100, borderRadius: 8 }} size="small">
-      <Select.Option value="ALL">全部</Select.Option>
-      <Select.Option value="OPEN">进行中</Select.Option>
-      <Select.Option value="CLOSED">已关闭</Select.Option>
-    </Select>
-  )
-
   if (isLoading) return <CardSkeleton rows={3} />
-
-  if (isMobile) {
+  if (error && !data) {
     return (
-      <div style={{ padding: '0 0 80px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div>
-            <Title level={4} style={{ marginBottom: 2 }}>家长留言</Title>
-            <Text type="secondary" style={{ fontSize: 13 }}>查看并回复家长提问</Text>
-          </div>
-          {filterBar}
-        </div>
-        {messages.length === 0 ? (
-          <BrandEmpty title="还没有家长留言" hint="家长发来的问题会显示在这里，及时回复有助于减少信息遗漏。" icon={<MessageOutlined />} />
-        ) : messages.map((msg, index) => (
-          <MessageCard key={msg.id} msg={msg} index={index} onClick={() => handleSelect(msg.id)} active={false} />
-        ))}
-        <Drawer
-          open={!!activeId} onClose={() => setActiveId(null)}
-          placement="bottom"
-          height={mobileViewport.height
-            ? Math.min(720, Math.max(240, Math.round(mobileViewport.height * 0.9)))
-            : '85dvh'}
-          title={null} closable={false}
-          rootStyle={{ bottom: mobileViewport.bottomInset }}
-          bodyStyle={{ padding: 0, display: 'flex', flexDirection: 'column', height: '100%' }}
-          headerStyle={{ display: 'none' }}
-          style={{ borderRadius: '16px 16px 0 0' }}
-        >
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '12px 16px', borderBottom: '1px solid rgba(0,0,0,.07)',
-            background: '#fff', borderRadius: '16px 16px 0 0',
-          }}>
-            <Text strong>回复留言</Text>
-            <button onClick={() => setActiveId(null)} style={{
-              width: 28, height: 28, borderRadius: 8, border: '1px solid rgba(0,0,0,.1)',
-              background: '#f5f5f5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <CloseOutlined style={{ fontSize: 12 }} />
-            </button>
-          </div>
-          <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            {chatPanel}
-          </div>
-        </Drawer>
+      <div role="alert" style={{ margin: 16, padding: 16, borderRadius: 14, background: 'var(--color-surface-1)', border: '1px solid var(--color-hairline)', color: 'var(--color-ink-muted)' }}>
+        <div style={{ marginBottom: 10 }}>家校沟通加载失败，请检查网络后重试。</div>
+        <button type="button" onClick={() => void mutate()} style={{ border: 0, borderRadius: 8, padding: '7px 12px', background: 'var(--color-primary)', color: '#fff', cursor: 'pointer' }}>
+          重新加载
+        </button>
       </div>
     )
   }
 
+  const studentName = active?.student?.name || active?.parent.name || ''
+
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <div>
-          <Title level={4} style={{ marginBottom: 2 }}>家长留言</Title>
-          <Text type="secondary" style={{ fontSize: 13 }}>查看并回复家长提问</Text>
-        </div>
-        {filterBar}
+    <div style={{ paddingBottom: 80 }}>
+      {/* 顶部横幅 */}
+      <div style={{
+        background: 'linear-gradient(135deg, #0E2E2A 0%, #1D9E75 100%)',
+        padding: '24px 20px 20px', borderRadius: '0 0 24px 24px', color: '#fff',
+      }}>
+        <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>家校沟通</div>
+        <div style={{ fontSize: 13, opacity: .85 }}>家长发来的问题，及时回复保持沟通</div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 16, height: 'calc(100vh - 160px)' }}>
-        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid rgba(0,0,0,.06)', flexShrink: 0 }}>
-            <Text strong style={{ fontSize: 14, color: '#5a4e3a' }}>留言列表</Text>
-            <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>（{messages.length}条）</Text>
-          </div>
-          <div style={{ overflowY: 'auto', flex: 1, padding: '12px 12px' }}>
-            {messages.length === 0 ? (
-              <BrandEmpty title="当前筛选下没有留言" hint="可以清除筛选条件，查看其他家长留言。" icon={<MessageOutlined />} />
-            ) : messages.map((msg, index) => (
-              <MessageCard key={msg.id} msg={msg} index={index} onClick={() => handleSelect(msg.id)} active={msg.id === activeId} />
-            ))}
-          </div>
-        </div>
-        <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,.07)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          {chatPanel}
-        </div>
+
+      {/* 学生卡片列表 */}
+      <div className="teacher-message-list">
+        <Text strong style={{ fontSize: 14, color: '#5a4e3a', display: 'block' }}>
+          家校沟通（{messages.length}）
+        </Text>
+        {messages.length === 0 ? (
+          <BrandEmpty title="暂时没有沟通记录" hint="家长发来的问题会显示在这里" icon={<MessageOutlined />} />
+        ) : messages.map(msg => {
+          const unread = unreadCount(msg)
+          const lastReply = msg.replies[msg.replies.length - 1]
+          const subjectColor = msg.subject ? SUBJECT_COLORS[msg.subject] : null
+          const sName = msg.student?.name || msg.parent.name
+          const parentLabel = msg.parent.name.endsWith('家长') ? msg.parent.name : msg.parent.name + '家长'
+          return (
+            <button key={msg.student?.id || msg.parent.id} type="button"
+              className="teacher-message-card"
+              aria-label={'查看' + sName + (msg.student?.grade ? '，' + msg.student.grade : '') + '的家校沟通' + (unread ? '，' + unread + '条未读留言' : '')}
+              onClick={() => handleSelect(msg.id)}>
+              <Badge count={unread} size="small" color="var(--color-primary)" offset={[-3, 4]}>
+                <StudentAvatar photoUrl={null} gender={msg.student?.gender} name={sName} size={54} />
+              </Badge>
+              <div className="teacher-message-card__content">
+                <div className="teacher-message-card__heading">
+                  <Text strong className="teacher-message-card__student">{sName}</Text>
+                  <time className="teacher-message-card__date" dateTime={msg.updatedAt}>
+                    {(msg.updatedAt || '').slice(5, 10)}
+                  </time>
+                </div>
+                <div className="teacher-message-card__meta">
+                  <span className={'teacher-message-card__grade' + (msg.student?.grade ? '' : ' is-empty')}>
+                    {msg.student?.grade || '年级待补充'}
+                  </span>
+                  <span className="teacher-message-card__relation">{parentLabel}</span>
+                  {msg.subject && subjectColor && (
+                    <span className="teacher-message-card__subject" style={{ background: subjectColor.bg, color: subjectColor.color }}>
+                      {msg.subject}
+                    </span>
+                  )}
+                </div>
+                <div className="teacher-message-card__preview">
+                  <span className="teacher-message-card__speaker">{lastReply?.role === 'parent' ? '家长' : '我'}</span>
+                  <span className="teacher-message-card__snippet">
+                    {lastReply ? stickerPreview(lastReply.content) : '暂无沟通内容'}
+                  </span>
+                </div>
+              </div>
+            </button>
+          )
+        })}
       </div>
+
+      {/* 全屏聊天页 */}
+      {active && (
+        <div style={{
+          position: 'fixed', top: 56, left: 0, right: 0, bottom: 56, zIndex: 50,
+          background: '#faf8f5', display: 'flex', flexDirection: 'column',
+        }}>
+          {/* 聊天头部 */}
+          <div style={{
+            padding: '12px 16px', background: '#fff', borderBottom: '1px solid rgba(0,0,0,.07)',
+            display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
+          }}>
+            <button onClick={() => setActiveId(null)} style={{
+              border: 'none', background: '#f5f5f5', width: 32, height: 32, borderRadius: 10,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}><LeftOutlined /></button>
+            <StudentAvatar photoUrl={null} gender={active?.student?.gender} name={studentName} size={38} />
+            <div style={{ flex: 1 }}>
+              <Text strong style={{ fontSize: 15 }}>{studentName}</Text>
+              <div style={{ fontSize: 11, color: '#999' }}>牧哲学堂 · 家校沟通</div>
+            </div>
+          </div>
+
+          {/* 沟通提醒横幅 */}
+          <div style={{
+            padding: '8px 16px', background: '#FFF8E1', fontSize: 12, color: '#8D6E63', flexShrink: 0,
+          }}>
+            温馨提醒：请通过本平台与家长沟通，避免私下交易或私下约课，保障双方权益。
+          </div>
+
+          {/* 消息列表 */}
+          <div ref={conversationRef} style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+            {activeDetailError && activeDetail?.id !== activeId ? (
+              <div role="alert" style={{ margin: '24px auto', maxWidth: 320, textAlign: 'center', color: 'var(--color-ink-muted)' }}>
+                <div style={{ marginBottom: 10 }}>完整对话加载失败，请检查网络后重试。</div>
+                <Button onClick={() => void mutateActiveDetail()}>重新加载</Button>
+              </div>
+            ) : activeDetailLoading && activeDetail?.id !== activeId ? (
+              <div role="status" aria-live="polite" style={{ padding: 24, textAlign: 'center', color: 'var(--color-ink-subtle)' }}>正在加载完整对话…</div>
+            ) : active.replies.map((reply) => <ChatBubble key={reply.id} reply={reply} />)}
+          </div>
+
+          {/* 待发送图片预览 */}
+          {pendingImage && (
+            <div style={{ padding: '8px 12px', background: '#fff', borderTop: '1px solid rgba(0,0,0,.07)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <img src={pendingImage} alt="待发送图片预览" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8 }} />
+              <span style={{ fontSize: 12, color: '#666' }}>图片待发送</span>
+              <button onClick={() => setPendingImage(null)} style={{ marginLeft: 'auto', border: 'none', background: 'none', color: '#999', cursor: 'pointer' }}><CloseOutlined /></button>
+            </div>
+          )}
+
+          {/* 表情面板 */}
+          {showEmoji && (
+            <div style={{ padding: '8px 12px', background: '#fff', borderTop: '1px solid rgba(0,0,0,.07)', display: 'flex', gap: 6, flexWrap: 'wrap', flexShrink: 0 }}>
+              {['😀','😄','😊','🥰','😅','🤔','👍','🙏','❤️','✨','🎉','💪','📚','✅','💡'].map(e => (
+                <button key={e} onClick={() => { setReplyText(t => t + e); setShowEmoji(false) }}
+                  style={{ fontSize: 20, border: 'none', background: 'none', cursor: 'pointer', padding: 4 }}>{e}</button>
+              ))}
+            </div>
+          )}
+          {showSticker && active.status !== 'CLOSED' && (
+            <div style={{ padding: '8px 12px', background: '#fff', borderTop: '1px solid rgba(0,0,0,.07)', flexShrink: 0 }}>
+              <StickerPanel compact onPick={(sticker) => { setShowSticker(false); void handleReply(STICKER_MARK(sticker.id)) }} />
+            </div>
+          )}
+
+          {/* 输入栏 */}
+          {active.status !== 'CLOSED' && (
+            <div style={{
+              padding: '10px 12px', background: '#fff', borderTop: '1px solid rgba(0,0,0,.07)',
+              display: 'flex', gap: 8, alignItems: 'flex-end', flexShrink: 0,
+            }}>
+              <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }}
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleUploadImage(f); e.target.value = '' }} />
+              <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                style={{ width: 36, height: 36, borderRadius: 10, border: 'none', background: '#f5f5f5', cursor: 'pointer', fontSize: 18, flexShrink: 0 }}>
+                {uploading ? '...' : '🖼️'}
+              </button>
+              <button onClick={() => { setShowEmoji(v => !v); setShowSticker(false) }}
+                style={{ width: 36, height: 36, borderRadius: 10, border: 'none', background: '#f5f5f5', cursor: 'pointer', fontSize: 18, flexShrink: 0 }}>😊</button>
+              <button onClick={() => { setShowSticker(v => !v); setShowEmoji(false) }}
+                aria-label="发送小羊表情"
+                style={{ width: 36, height: 36, borderRadius: 10, border: 'none', background: showSticker ? 'var(--color-primary-bg)' : '#f5f5f5', cursor: 'pointer', fontSize: 18, flexShrink: 0 }}>🐑</button>
+              <input value={replyText} onChange={e => setReplyText(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleReply() } }}
+                placeholder="回复家长..." style={{
+                  flex: 1, border: '1px solid rgba(0,0,0,.1)', borderRadius: 10,
+                  padding: '8px 12px', fontSize: 14, outline: 'none',
+                }} />
+              <button onClick={() => handleReply()} disabled={submitting || (!replyText.trim() && !pendingImage)}
+                style={{
+                  width: 36, height: 36, borderRadius: 10, border: 'none',
+                  background: '#1D9E75', color: '#fff', cursor: 'pointer', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}><SendOutlined /></button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

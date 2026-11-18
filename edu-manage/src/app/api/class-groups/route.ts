@@ -9,6 +9,12 @@ import { getActiveAcademicTerm } from '@/lib/academic-term'
 
 export const dynamic = 'force-dynamic'
 
+const startOfTodayDate = (() => {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
+})()
+
 const WEEK_DAYS = new Set(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'])
 const INTENSIVE_STUDENT_LIMIT = {
   ONE_ON_ONE: 1,
@@ -102,7 +108,12 @@ export const GET = apiHandler(async (req: NextRequest) => {
     teacherAssignments: { include: { teacher: { select: { id: true, name: true, phone: true, subjects: true } } }, orderBy: { createdAt: 'asc' as const } },
     room: { select: { id: true, name: true } },
     enrollments: { where: activeEnrollmentWhere, include: { student: { select: { id: true, name: true } } } },
-    classLessons: { orderBy: { lessonDate: 'asc' as const } },
+    classLessons: {
+      where: { lessonDate: { gte: startOfTodayDate }, status: { not: 'CANCELLED' as const }, deletedAt: null },
+      orderBy: { lessonDate: 'asc' as const },
+      take: 1,
+      select: { lessonDate: true, startTime: true },
+    },
     _count: {
       select: {
         enrollments: { where: activeEnrollmentWhere },
@@ -116,6 +127,12 @@ export const GET = apiHandler(async (req: NextRequest) => {
     teacher: { select: { id: true, name: true } },
     teacherAssignments: { include: { teacher: { select: { id: true, name: true, subjects: true } } }, orderBy: { createdAt: 'asc' as const } },
     room: { select: { id: true, name: true } },
+    classLessons: {
+      where: { lessonDate: { gte: startOfTodayDate }, status: { not: 'CANCELLED' as const }, deletedAt: null },
+      orderBy: { lessonDate: 'asc' as const },
+      take: 1,
+      select: { lessonDate: true, startTime: true },
+    },
     _count: {
       select: {
         enrollments: { where: activeEnrollmentWhere },

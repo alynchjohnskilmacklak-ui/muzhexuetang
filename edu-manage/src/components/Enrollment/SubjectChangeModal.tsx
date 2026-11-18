@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Alert, Button, Checkbox, Input, Modal, Space, Tag, message } from 'antd'
+import { Alert, Button, Checkbox, Input, Space, Tag, message } from 'antd'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 type Preview = {
   currentSubjects: string[]
@@ -71,7 +72,7 @@ export function SubjectChangeModal({
   }
 
   return (
-    <Modal
+    <BrandModal
       title={`${studentName} · 调整报读学科`}
       open
       onCancel={onClose}
@@ -134,6 +135,6 @@ export function SubjectChangeModal({
           </div>
         )}
       </Space>
-    </Modal>
+    </BrandModal>
   )
 }

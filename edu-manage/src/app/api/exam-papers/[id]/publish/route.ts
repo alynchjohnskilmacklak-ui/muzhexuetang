@@ -3,6 +3,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { revalidatePath } from 'next/cache'
 import { apiHandler } from '@/lib/api-handler'
+import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,17 +33,15 @@ export const POST = apiHandler(async (_req: NextRequest, { params }: { params: P
 
     const notifyParentId = paper.student.parentId || paper.student.parentUserId
     if (notifyParentId) {
-      await tx.notification.create({
-        data: {
-          userId: notifyParentId,
-          type: 'EXAM_PAPER',
-          title: `${paper.teacher.name}老师上传了新试卷`,
-          content: `${paper.subject} · ${paper.title}`,
-          link: '/parent/grades',
-          relatedType: 'EXAM_PAPER',
-          relatedId: paper.id,
-          href: `/parent/archive?paperId=${paper.id}`,
-        },
+      await createNotification(tx, {
+        userId: notifyParentId,
+        type: 'EXAM_PAPER',
+        title: `${paper.teacher.name}老师上传了新试卷`,
+        content: `${paper.subject} · ${paper.title}`,
+        link: '/parent/grades',
+        relatedType: 'EXAM_PAPER',
+        relatedId: paper.id,
+        href: `/parent/archive?paperId=${paper.id}`,
       })
     }
 

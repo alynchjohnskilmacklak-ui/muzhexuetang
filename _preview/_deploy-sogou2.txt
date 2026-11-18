@@ -1,0 +1,57 @@
+﻿========================================================================
+1) 443 端口加验证文件直出（正则，覆盖所有平台）
+========================================================================
+  已插入，备份 .bak-verify443-20261003  OK 
+  /var/www/verify 内容：
+total 16
+-rw-r--r-- 1 root root 956 Oct  3 16:10 robots.txt
+-rw-r--r-- 1 root root  68 Oct  3 16:07 shenma-site-verification.txt
+-rw-r--r-- 1 root root 415 Oct  3 16:10 sitemap.xml
+-rw-r--r-- 1 root root  10 Oct  3 16:15 sogousiteverification.txt
+
+========================================================================
+2) compose 加 sogou 挂载
+========================================================================
+  已插入挂载，备份 .bak-sogou-20261003
+
+========================================================================
+3) nginx -t + reload
+========================================================================
+  nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+  RELOADED
+
+========================================================================
+4) 重建 app 容器（让 sogou 文件进容器）
+========================================================================
+Container edu-manage-app-1  Recreate
+ Container edu-manage-app-1  Recreated
+ Container edu-manage-app-1  Starting
+ Container edu-manage-app-1  Started
+  容器 running/healthy ✓（10s）
+
+========================================================================
+5) 校验：所有验证文件 http + https
+========================================================================
+  OK  sogousiteverification.txt              http=[200 10]  https=[200 10]
+  OK  shenma-site-verification.txt           http=[200 68]  https=[200 68]
+  !!  baidu_verify_codeva-LcCyyIUZRF.html    http=[301 178]  https=[404 162]
+  !!  BingSiteAuth.xml                       http=[301 178]  https=[404 162]
+  !!  ByteDanceVerify.html                   http=[301 178]  https=[404 162]
+
+  搜狗 http  内容: 'IR7MJtFx5d'
+  搜狗 https 内容: 'IR7MJtFx5d'
+  期望              'IR7MJtFx5d'
+  容器内          : 'IR7MJtFx5d'
+
+========================================================================
+6) 回归
+========================================================================
+  http robots      200 956
+  http sitemap     200 415
+  https /          200 67044
+  https /about     200 59589
+  https /login     200 33621
+  首页 sha: 97e36b12acf9a5cc  (应 97e36b12acf9a5cc)
+
+★★ 完成 —— 回搜狗点「完成验证」

@@ -9,6 +9,7 @@ import { getRequestDivision } from '@/lib/division'
 import { calculateApprovedIntensiveHours, calculateTaughtHours } from '@/lib/student-taught-hours'
 import { resolveAdminTermScope } from '@/lib/admin-term-scope'
 import { calculatePurchasedDayBalance, dateKey } from '@/lib/study-hall/domain'
+import { normalizeLoginPhone } from '@/lib/login-accounts'
 
 export const dynamic = 'force-dynamic'
 
@@ -254,7 +255,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
     const body = await req.json()
     const division = getRequestDivision(session.user as Record<string, unknown> | undefined, body.division)
     const name = typeof body.name === 'string' ? body.name.trim() : ''
+    const rawStudentPhone = typeof body.phone === 'string' ? body.phone.trim() : ''
+    const studentPhone = rawStudentPhone ? normalizeLoginPhone(rawStudentPhone) : ''
     if (!name) return NextResponse.json({ error: '姓名不能为空' }, { status: 400 })
+    if (!rawStudentPhone) return NextResponse.json({ error: '学员手机号不能为空' }, { status: 400 })
+    if (!studentPhone) return NextResponse.json({ error: '请输入正确的11位中国大陆手机号' }, { status: 400 })
 
     const userId = (session.user as { id?: string }).id
     if (!userId) return NextResponse.json({ error: '登录状态异常，请重新登录' }, { status: 401 })
@@ -344,7 +349,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           birthYear: body.birthYear ? parseInt(body.birthYear) : null,
           grade: body.grade || null,
           school: body.school || null,
-          phone: body.phone || null,
+          phone: studentPhone,
           email: body.email || null,
           parentName: body.parentName || null,
           parentPhone: body.parentPhone || null,
@@ -354,7 +359,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
           notes: body.notes || null,
           mainTeacherId: body.mainTeacherId || null,
           division,
-          remainHours: body.remainHours ? parseFloat(body.remainHours) : 0,
+          remainHours: 0,
           tags: JSON.stringify(body.tags || []),
           status: requestedStudyHallMemberships.length ? 'ACTIVE' : 'TRIAL',
           membershipLevel: body.membershipLevel || 'NORMAL',
@@ -365,6 +370,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
             data: {
               parentId: parentUser.id,
               parentUserId: parentUser.id,
+              phone: studentPhone,
               grade: body.grade || undefined,
               school: body.school || undefined,
               parentName: body.parentName || undefined,

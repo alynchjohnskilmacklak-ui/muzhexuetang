@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
-import { Modal, Select, Input, message, Typography } from 'antd'
+import { Select, Input, message, Typography } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { MobileSelect } from '@/components/MobileSelect'
 import { SCHEDULE_PERIODS } from '@/lib/schedule-periods'
 
@@ -116,7 +117,7 @@ export function OneOnOneModal({
   }
 
   return (
-    <Modal
+    <BrandModal
       title="+ 突击全能班排课"
       open={open}
       onCancel={handleClose}
@@ -125,7 +126,7 @@ export function OneOnOneModal({
       okText="保存排课"
       cancelText="取消"
       width={480}
-      okButtonProps={{ style: { background: '#E8784A', borderColor: '#E8784A' } }}
+      okButtonProps={{ style: { background: 'var(--color-primary)', borderColor: 'var(--color-primary)' } }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 8 }}>
         {/* Teacher */}
@@ -237,6 +238,6 @@ export function OneOnOneModal({
           </div>
         )}
       </div>
-    </Modal>
+    </BrandModal>
   )
 }

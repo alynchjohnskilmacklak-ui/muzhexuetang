@@ -11,7 +11,7 @@ export const GET = apiHandler(async () => {
     const dashboard = await getTeacherDashboardData(teacher.id, prisma, user.id)
 
     return NextResponse.json({
-      teacher: { id: teacher.id, name: teacher.name, avatar: teacher.avatar, subjects: teacher.subjects, tierLevel: teacher.tierLevel },
+      teacher: { id: teacher.id, name: teacher.name, gender: teacher.gender, avatar: teacher.avatar, subjects: teacher.subjects, tierLevel: teacher.tierLevel },
       ...dashboard,
       badges: {
         unsubmitted: dashboard.pendingTasks.unsubmittedAttendance,

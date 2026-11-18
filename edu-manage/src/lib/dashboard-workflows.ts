@@ -277,14 +277,6 @@ export function buildAdminExceptions(
       href: '/attendance',
     },
     {
-      key: 'renewal',
-      label: '课时不足学员',
-      description: '剩余课时较低，建议及时联系家长',
-      count: metrics.renewalWarnings,
-      priority: 'attention',
-      href: '/students?filter=lowHours',
-    },
-    {
       key: 'makeups',
       label: '待安排个性化补课',
       description: '个性化课程请假或缺勤后生成，等待重新安排',

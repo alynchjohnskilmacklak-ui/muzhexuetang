@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { requireCurrentTeacher, teacherStudentWhere } from '@/lib/teacher-portal'
+import { createNotification } from '@/lib/notifications'
 
 export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
   const prisma = await getRequestPrisma()
@@ -49,19 +50,17 @@ export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: P
 
   const parentUserId = updated.student.parentId || updated.student.parentUserId
   if (parentUserId) {
-    await prisma.notification.create({
-      data: {
-        userId: parentUserId,
-        title: status === 'approved' ? '请假申请已批准' : '请假申请未通过',
-        content: `${updated.student.name} ${new Date(updated.leaveDate).toLocaleDateString('zh-CN')} 的请假申请${status === 'approved' ? '已批准' : '未通过'}。${replyNote ? `回执：${replyNote}` : ''}`,
-        type: 'leave',
-        studentId: updated.student.id,
-        senderId: userId,
-        relatedType: 'LEAVE_REQUEST',
-        relatedId: updated.id,
-        href: '/parent/leave',
-        pushStatus: 'none',
-      },
+    await createNotification(prisma, {
+      userId: parentUserId,
+      title: status === 'approved' ? '请假申请已批准' : '请假申请未通过',
+      content: `${updated.student.name} ${new Date(updated.leaveDate).toLocaleDateString('zh-CN')} 的请假申请${status === 'approved' ? '已批准' : '未通过'}。${replyNote ? `回执：${replyNote}` : ''}`,
+      type: 'leave',
+      studentId: updated.student.id,
+      senderId: userId,
+      relatedType: 'LEAVE_REQUEST',
+      relatedId: updated.id,
+      href: '/parent/leave',
+      pushStatus: 'none',
     })
   }
 

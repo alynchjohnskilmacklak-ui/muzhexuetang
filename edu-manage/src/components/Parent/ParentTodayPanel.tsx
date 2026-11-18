@@ -23,6 +23,25 @@ type TodayLesson = {
   startTimeRaw?: string | null
   endTimeRaw?: string | null
   attendanceSubmittedAt?: string | null
+  lessonDate?: string | null
+}
+
+const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
+
+function formatLessonDate(dateValue: string | null | undefined) {
+  if (!dateValue) return ''
+  const date = new Date(dateValue)
+  if (Number.isNaN(date.getTime())) return ''
+  return `${date.getMonth() + 1}月${date.getDate()}日 · 周${WEEKDAYS[date.getDay()]}`
+}
+
+function isToday(dateValue: string | null | undefined) {
+  if (!dateValue) return false
+  const d = new Date(dateValue)
+  const today = new Date()
+  return d.getFullYear() === today.getFullYear() &&
+    d.getMonth() === today.getMonth() &&
+    d.getDate() === today.getDate()
 }
 
 function lessonStatus(lesson: TodayLesson) {
@@ -56,19 +75,38 @@ const QUICK_ACTIONS: Array<{ label: string; icon: ReactNode; href: string }> = [
 
 function withStudent(href: string, studentId?: string | null) {
   if (!studentId) return href
-  return href.includes('?') ? `${href}&studentId=${encodeURIComponent(studentId)}` : `${href}?studentId=${encodeURIComponent(studentId)}`
+  const childScoped = href.startsWith('/parent/class-feedback') || href.startsWith('/parent/practice')
+  const key = childScoped ? 'childId' : 'studentId'
+  return href.includes('?') ? `${href}&${key}=${encodeURIComponent(studentId)}` : `${href}?${key}=${encodeURIComponent(studentId)}`
 }
 
 export function ParentTodayPanel({
   lessons,
+  lessonDate,
   activeChildId,
   studentName,
 }: {
   lessons: TodayLesson[]
+  nextLesson?: TodayLesson | null
+  lessonDate?: string | null
   activeChildId?: string | null
   studentName: string
 }) {
   const router = useRouter()
+  const hasLessons = lessons.length > 0
+  const today = isToday(lessonDate)
+  const sectionTitle = hasLessons
+    ? today
+      ? `${studentName}的今日课程`
+      : `${studentName}的课程安排`
+    : `${studentName}的课程安排`
+
+  const dateLabel = hasLessons && !today && lessonDate ? formatLessonDate(lessonDate) : null
+
+  const openLesson = (lesson: TodayLesson) => {
+    const dateParam = lesson.lessonDate ? `&date=${encodeURIComponent(lesson.lessonDate)}` : ''
+    router.push(`/parent/lesson-detail?teacher=${encodeURIComponent(lesson.teacherName || '')}&course=${encodeURIComponent(lesson.title)}${activeChildId ? `&childId=${encodeURIComponent(activeChildId)}` : ''}&time=${encodeURIComponent(lesson.startTime && lesson.endTime ? `${lesson.startTime}-${lesson.endTime}` : (lesson.startTime || ''))}&room=${encodeURIComponent(lesson.roomName || '')}${dateParam}`)
+  }
 
   return (
     <>
@@ -90,12 +128,16 @@ export function ParentTodayPanel({
 
       <section className="parent-dashboard-section" aria-labelledby="parent-today-schedule-title">
         <div className="parent-dashboard-section__head">
-          <h2 id="parent-today-schedule-title">{studentName}的今日课程</h2>
-          <span className="parent-today-schedule-hint">点击课程卡片查看上课详情</span>
+          <h2 id="parent-today-schedule-title">{sectionTitle}</h2>
+          {dateLabel && <span className="parent-today-schedule-date">{dateLabel}</span>}
+          {!dateLabel && <span className="parent-today-schedule-hint">点击课程卡片查看上课详情</span>}
         </div>
-        {lessons.length === 0 ? (
-          <div className="parent-today-schedule-empty">今天没有课程安排</div>
-        ) : (
+        {dateLabel && (
+          <div style={{ fontSize: 12, color: '#999', marginTop: -8, marginBottom: 10, paddingLeft: 2 }}>
+            点击课程卡片查看上课详情
+          </div>
+        )}
+        {hasLessons ? (
           <div className="parent-today-schedule-grid">
             {lessons.map(lesson => {
               const status = lessonStatus(lesson)
@@ -105,7 +147,7 @@ export function ParentTodayPanel({
                   key={lesson.id}
                   type="button"
                   className="parent-today-schedule-item"
-                  onClick={() => router.push(`/parent/lesson-detail?teacher=${encodeURIComponent(lesson.teacherName || '')}&course=${encodeURIComponent(lesson.title)}${activeChildId ? `&childId=${encodeURIComponent(activeChildId)}` : ''}&time=${encodeURIComponent(lesson.startTime && lesson.endTime ? `${lesson.startTime}-${lesson.endTime}` : (lesson.startTime || ''))}&room=${encodeURIComponent(lesson.roomName || '')}`)}
+                  onClick={() => openLesson(lesson)}
                 >
                   <span className="parent-today-schedule-item__bar" style={{ background: meta.color }} />
                   <div className="parent-today-schedule-item__head">
@@ -118,6 +160,8 @@ export function ParentTodayPanel({
               )
             })}
           </div>
+        ) : (
+          <div className="parent-today-schedule-empty">暂无排课，可联系老师约课</div>
         )}
       </section>
     </>

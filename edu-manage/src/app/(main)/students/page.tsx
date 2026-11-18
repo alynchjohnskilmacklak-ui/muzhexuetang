@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Alert, Button, Card, Input, Modal, Select, Space, Spin, Typography, message } from 'antd'
+import { Alert, Button, Card, Input, Select, Space, Spin, Typography, message } from 'antd'
 import { ImportOutlined, PlusOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons'
 import { StudentCard } from './_components/StudentCard'
 import { StudentForm } from './_components/StudentForm'
@@ -14,6 +14,7 @@ import useSWR, { useSWRConfig } from 'swr'
 import { useRouter } from 'next/navigation'
 import { isAdminTermScopedSWRKey } from '@/lib/admin-term-scope-client'
 import { GuidedEmpty } from '@/components/Common/GuidedEmpty'
+import { BrandModal } from '@/components/Common/BrandModal'
 
 const ImportModal = dynamic(
   () => import('./_components/ImportModal').then((module) => module.ImportModal),
@@ -311,7 +312,7 @@ export default function StudentsPage() {
             const active = filterGrade === value
             const count = value === 'all' ? Object.values(gradeCounts).reduce((sum, item) => sum + item, 0) : gradeCounts[value] || 0
             return (
-              <button key={value} onClick={() => handleGradeChange(value)} style={{ width: '100%', border: 0, borderRadius: 7, padding: '8px 10px', background: active ? '#E8784A14' : 'transparent', color: active ? '#E8784A' : '#4f5662', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', fontWeight: active ? 600 : 400 }}>
+              <button key={value} onClick={() => handleGradeChange(value)} style={{ width: '100%', border: 0, borderRadius: 7, padding: '8px 10px', background: active ? '#E8784A14' : 'transparent', color: active ? 'var(--color-primary)' : '#4f5662', display: 'flex', justifyContent: 'space-between', cursor: 'pointer', fontWeight: active ? 600 : 400 }}>
                 <span>{grade}</span><span>{count}</span>
               </button>
             )
@@ -325,7 +326,7 @@ export default function StudentsPage() {
           {TYPE_FILTERS.map((item) => {
             const active = filterType === item.value
             return (
-              <button key={item.value} onClick={() => handleTypeChange(item.value)} style={{ width: '100%', border: 0, borderRadius: 7, padding: '8px 10px', background: active ? '#E8784A14' : 'transparent', color: active ? '#E8784A' : '#4f5662', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: active ? 600 : 400 }}>
+              <button key={item.value} onClick={() => handleTypeChange(item.value)} style={{ width: '100%', border: 0, borderRadius: 7, padding: '8px 10px', background: active ? '#E8784A14' : 'transparent', color: active ? 'var(--color-primary)' : '#4f5662', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: active ? 600 : 400 }}>
                 <span style={{ width: 8, height: 8, borderRadius: 99, background: item.color }} />
                 <span>{item.label}</span>
               </button>
@@ -397,7 +398,7 @@ export default function StudentsPage() {
                 aria-label="学员状态"
                 value={filterStatus || ''}
                 onChange={(event) => handleStatusChange(event.target.value || undefined)}
-                style={{ width: '100%', minWidth: 0, height: 40, padding: '0 10px', border: '1px solid #EFE3DC', borderRadius: 10, background: '#fff', color: '#1a1201' }}
+                style={{ width: '100%', minWidth: 0, height: 44, padding: '0 10px', border: '1px solid var(--color-hairline-strong)', borderRadius: 10, background: 'var(--color-surface-1)', color: 'var(--color-ink)', fontSize: 16 }}
               >
                 <option value="">全部状态</option>
                 <option value="LEAD">潜客</option><option value="TRIAL">试听</option><option value="ACTIVE">在读</option><option value="COMPLETED">结课</option><option value="INACTIVE">离校</option>
@@ -419,7 +420,7 @@ export default function StudentsPage() {
                 aria-label="年级筛选"
                 value={filterGrade === 'all' ? '' : filterGrade}
                 onChange={(event) => handleGradeChange(event.target.value || 'all')}
-                style={{ width: '100%', minWidth: 0, height: 40, padding: '0 10px', border: '1px solid #EFE3DC', borderRadius: 10, background: '#fff', color: '#1a1201' }}
+                style={{ width: '100%', minWidth: 0, height: 44, padding: '0 10px', border: '1px solid #EFE3DC', borderRadius: 10, background: '#fff', color: '#1a1201', fontSize: 16 }}
               >
                 <option value="">全部年级</option>
                 {GRADE_SELECT_OPTIONS.map((grade) => <option key={grade} value={grade}>{grade}</option>)}
@@ -432,10 +433,32 @@ export default function StudentsPage() {
                 options={GRADE_SELECT_OPTIONS.map((grade) => ({ label: grade, value: grade }))}
               />}
               {isMobile ? <select
+                aria-label="班型筛选"
+                value={filterType}
+                onChange={(event) => handleTypeChange(event.target.value)}
+                style={{ width: '100%', minWidth: 0, height: 44, padding: '0 10px', border: '1px solid var(--color-hairline-strong)', borderRadius: 10, background: 'var(--color-surface-1)', color: 'var(--color-ink)', fontSize: 16 }}
+              >
+                {TYPE_FILTERS.map((item) => <option key={item.value} value={item.value}>{item.value === 'all' ? '全部班型' : item.label}</option>)}
+              </select> : null}
+              {isMobile ? <Button
+                block
+                aria-label={`欠费预警筛选，${lowHourCount} 名学员剩余课时不超过 3 节`}
+                aria-pressed={lowHourOnly}
+                onClick={() => {
+                  const next = !lowHourOnly
+                  setLowHourOnly(next)
+                  updateUrl({ lowHour: next })
+                }}
+                icon={<WarningOutlined />}
+                style={{ minWidth: 0, minHeight: 44, paddingInline: 8, borderColor: lowHourOnly ? 'var(--color-warning)' : 'var(--color-hairline-strong)', background: lowHourOnly ? 'var(--color-warning-bg)' : 'var(--color-surface-1)', color: lowHourOnly ? 'var(--color-warning-text)' : 'var(--color-ink)' }}
+              >
+                欠费预警（{lowHourCount}）
+              </Button> : null}
+              {isMobile ? <select
                 aria-label="排序方式"
                 value={sortBy}
                 onChange={(event) => handleSortChange(event.target.value as StudentSortBy)}
-                style={{ width: '100%', minWidth: 0, height: 40, padding: '0 10px', border: '1px solid #EFE3DC', borderRadius: 10, background: '#fff', color: '#1a1201', gridColumn: '1 / -1' }}
+                style={{ width: '100%', minWidth: 0, height: 44, padding: '0 10px', border: '1px solid var(--color-hairline-strong)', borderRadius: 10, background: 'var(--color-surface-1)', color: 'var(--color-ink)', fontSize: 16, gridColumn: '1 / -1' }}
               >
                 <option value="createdAt">最近添加</option><option value="nameAsc">姓名 A-Z</option><option value="nameDesc">姓名 Z-A</option><option value="remainHoursAsc">已上课时升序</option><option value="remainHoursDesc">已上课时降序</option>
               </select> : <Select
@@ -453,7 +476,7 @@ export default function StudentsPage() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.35fr)', gap: 8, width: isMobile ? '100%' : 'auto' }}>
               <Button block={isMobile} icon={<ImportOutlined />} disabled={!canEditCurrentTerm} onClick={() => setImportOpen(true)}>导入</Button>
-              <Button block={isMobile} type="primary" icon={<PlusOutlined />} disabled={!canEditCurrentTerm} onClick={() => { setEditData(null); setFormOpen(true) }} style={{ background: '#E87545', borderColor: '#E8784A' }}>添加学员</Button>
+              <Button block={isMobile} type="primary" icon={<PlusOutlined />} disabled={!canEditCurrentTerm} onClick={() => { setEditData(null); setFormOpen(true) }} style={{ background: 'var(--color-primary)', borderColor: 'var(--color-primary)' }}>添加学员</Button>
             </div>
           </div>
 
@@ -493,7 +516,7 @@ export default function StudentsPage() {
       <StudentForm open={formOpen} onClose={handleFormClose} initialData={editData} mode={editData ? 'edit' : 'create'} />
       {importOpen && <ImportModal open onClose={() => { setImportOpen(false); fetchStudents() }} />}
 
-      <Modal title="删除学员" open={!!deleting} onCancel={() => setDeleting(null)} onOk={handleDeleteConfirm}
+      <BrandModal title="删除学员" open={!!deleting} onCancel={() => setDeleting(null)} onOk={handleDeleteConfirm}
         okText="确认删除并移入回收站" cancelText="取消" okButtonProps={{ danger: true, disabled: deletePreviewLoading || !deleteImpact }}>
         <Space direction="vertical" size={14} style={{ width: '100%' }}>
           <Text>确认删除 <Text strong>{deleting?.name as string}</Text>？</Text>
@@ -508,7 +531,7 @@ export default function StudentsPage() {
           </Card>
           <Alert className="modal-note" type="info" showIcon message="学员档案会进入回收站，30 天内可恢复；关联的班级归属会同步退出。" />
         </Space>
-      </Modal>
+      </BrandModal>
     </PageLayout>
   )
 }

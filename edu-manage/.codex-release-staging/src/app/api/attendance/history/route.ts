@@ -1,0 +1,76 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getRequestPrisma } from '@/lib/prisma'
+import { getCurrentUser } from '@/lib/get-user'
+import { visibleClassGroupWhere, visibleStudentWhere } from '@/lib/business-visibility'
+import { apiHandler } from '@/lib/api-handler'
+import { getRequestDivision } from '@/lib/division'
+import { resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { resolveTeacherForUser } from '@/lib/performance'
+
+export const GET = apiHandler(async (req: NextRequest) => {
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+
+
+  const prisma = await getRequestPrisma()
+  const { searchParams } = new URL(req.url)
+  const groupId = searchParams.get('groupId')
+  const month = searchParams.get('month')
+  const division = getRequestDivision(user, searchParams.get('division'))
+  if (user.role !== 'admin' && user.role !== 'teacher') {
+    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
+  const term = user.role === 'admin'
+    ? await resolveAdminTermScope(prisma, division, req)
+    : await getActiveAcademicTerm(prisma, division)
+  const teacher = user.role === 'teacher' ? await resolveTeacherForUser(user, prisma) : null
+  if (user.role === 'teacher' && !teacher) return NextResponse.json({ error: '未绑定教师身份' }, { status: 403 })
+
+  const groupScope: Record<string, unknown> = {
+    ...visibleClassGroupWhere,
+    termId: term?.id || '__NO_TERM__',
+  }
+  if (groupId) groupScope.id = groupId
+  if (teacher) {
+    groupScope.OR = [
+      { teacherId: teacher.id },
+      { teacherAssignments: { some: { teacherId: teacher.id } } },
+    ]
+  }
+  const where: Record<string, unknown> = user.role === 'admin' ? { division } : {}
+  where.group = groupScope
+  if (month) {
+    const [y, m] = month.split('-').map(Number)
+    where.lessonDate = { gte: new Date(y, m - 1, 1), lt: new Date(y, m, 1) }
+  }
+
+  const lessons = await prisma.classLesson.findMany({
+    where,
+    include: {
+      group: { select: { id: true, name: true, course: { select: { subject: true } } } },
+      attendances: {
+        where: { student: visibleStudentWhere },
+        include: { student: { select: { id: true, name: true } } },
+      },
+    },
+    orderBy: { lessonDate: 'desc' },
+    take: 60,
+  })
+
+  const summary = lessons.map((l) => ({
+    lessonId: l.id,
+    date: l.lessonDate,
+    startTime: l.startTime,
+    groupName: l.group.name,
+    subject: l.group.course.subject,
+    status: l.status,
+    present: l.attendances.filter((a) => a.status === 'PRESENT').length,
+    leave: l.attendances.filter((a) => a.status === 'LEAVE').length,
+    absent: l.attendances.filter((a) => a.status === 'ABSENT').length,
+    total: l.attendances.length,
+    records: l.attendances,
+  }))
+
+  return NextResponse.json(summary)
+})

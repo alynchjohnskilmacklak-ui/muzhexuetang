@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>牧哲学堂 · 三端信息架构原型</title>
+  <style>
+    :root {
+      --canvas: #faf8f5;
+      --surface: #fff;
+      --surface-soft: #f5f2ee;
+      --surface-deep: #f0ece7;
+      --inverse: #1a1201;
+      --inverse-ink: rgba(255,255,255,.9);
+      --inverse-muted: rgba(255,255,255,.66);
+      --ink: #1a1201;
+      --ink-muted: #5a4e3a;
+      --ink-subtle: #756a58;
+      --hairline: rgba(26, 18, 1, .08);
+      --hairline-strong: rgba(26, 18, 1, .14);
+      --role: #534ab7;
+      --role-soft: #f0effb;
+      --role-strong: #40379f;
+      --success: #1d9e75;
+      --success-soft: #eaf7f1;
+      --warning: #c77f00;
+      --warning-soft: #fff4d7;
+      --danger: #d83f3e;
+      --danger-soft: #fdeceb;
+      --shadow: 0 12px 34px rgba(54, 38, 15, .07);
+      --radius: 14px;
+      --control: 10px;
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html { color-scheme: light; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: #eeeae5;
+      color: var(--ink);
+      font-family: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.5;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--role) 34%, transparent);
+      outline-offset: 2px;
+    }
+    ::selection { background: var(--role-soft); color: var(--role-strong); }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-thumb { background: var(--surface-deep); border: 3px solid transparent; border-radius: 999px; background-clip: padding-box; }
+
+    .prototype-bar {
+      position: sticky;
+      inset: 0 0 auto;
+      z-index: 50;
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 10px 24px;
+      background: var(--inverse);
+      color: var(--inverse-ink);
+      box-shadow: 0 8px 24px rgba(26, 18, 1, .16);
+    }
+    .prototype-title { min-width: 220px; }
+    .prototype-title strong { display: block; font-size: 14px; letter-spacing: .01em; }
+    .prototype-title span { display: block; margin-top: 2px; color: var(--inverse-muted); font-size: 12px; }
+    .switch-group { display: flex; gap: 4px; padding: 4px; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; background: rgba(255,255,255,.06); }
+    .switch-group button {
+      min-height: 38px;
+      padding: 7px 14px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--inverse-muted);
+      font-weight: 650;
+      transition: background .18s ease, color .18s ease;
+    }
+    .switch-group button:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .switch-group button.active { background: var(--canvas); color: var(--ink); }
+    .prototype-note { margin-left: auto; color: var(--inverse-muted); font-size: 12px; text-align: right; }
+
+    .stage { min-height: calc(100vh - 68px); padding: 28px; display: grid; place-items: start center; }
+    .device {
+      width: min(1480px, 100%);
+      min-height: calc(100vh - 124px);
+      overflow: hidden;
+      border: 1px solid rgba(26,18,1,.13);
+      border-radius: 18px;
+      background: var(--canvas);
+      box-shadow: 0 24px 70px rgba(39, 28, 14, .13);
+      transition: border-radius .2s var(--ease);
+    }
+    .device.mobile {
+      width: 390px;
+      min-height: 780px;
+      max-height: calc(100vh - 118px);
+      overflow-y: auto;
+      border-radius: 28px;
+    }
+
+    .app-shell { min-height: inherit; display: grid; grid-template-columns: 220px minmax(0, 1fr); }
+    .device.mobile .app-shell { display: block; padding-bottom: 0; }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: calc(100vh - 126px);
+      min-height: 720px;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 14px;
+      border-right: 1px solid var(--hairline);
+      background: color-mix(in srgb, var(--canvas) 92%, var(--role-soft));
+    }
+    .device.mobile .sidebar { display: none; }
+    .sidebar-brand { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 8px 18px; }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 10px;
+      background: var(--role);
+      color: #fff;
+      box-shadow: 0 7px 16px rgba(26,18,1,.12);
+    }
+    .brand-mark svg { width: 20px; height: 20px; }
+    .brand-copy strong { display: block; font-size: 14px; }
+    .brand-copy span { display: block; color: var(--role-strong); font-size: 11px; font-weight: 700; }
+    .nav-label { margin: 8px 10px 6px; color: var(--ink-subtle); font-size: 11px; font-weight: 700; }
+    .nav-list { display: grid; gap: 3px; }
+    .nav-button {
+      min-height: 44px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 9px 11px;
+      border: 0;
+      border-radius: var(--control);
+      background: transparent;
+      color: var(--ink-muted);
+      text-align: left;
+      transition: background .18s ease, color .18s ease, transform .18s var(--ease);
+    }
+    .nav-button:hover { background: rgba(255,255,255,.72); color: var(--ink); transform: translateX(2px); }
+    .nav-button.active { background: var(--surface); color: var(--role-strong); font-weight: 750; box-shadow: 0 4px 16px rgba(35,25,10,.055); }
+    .nav-button svg { width: 18px; height: 18px; flex: 0 0 auto; stroke-width: 1.8; }
+    .nav-button .badge { margin-left: auto; }
+    .sidebar-foot { margin-top: auto; padding-top: 12px; }
+    .all-functions { border: 1px solid var(--hairline-strong); background: var(--surface); }
+
+    .workspace { min-width: 0; }
+    .app-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--hairline);
+      background: rgba(250,248,245,.96);
+    }
+    .device.mobile .app-topbar { height: 58px; padding: 0 14px; background: var(--surface); }
+    .mobile-brand { display: none; align-items: center; gap: 9px; min-width: 0; }
+    .device.mobile .mobile-brand { display: flex; }
+    .mobile-brand .brand-mark { width: 32px; height: 32px; border-radius: 9px; }
+    .mobile-brand strong { font-size: 14px; white-space: nowrap; }
+    .mobile-brand small { display: block; color: var(--role-strong); font-size: 10px; font-weight: 700; }
+    .search-trigger {
+      width: min(510px, 46vw);
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      border: 1px solid var(--hairline-strong);
+      border-radius: var(--control);
+      background: var(--surface);
+      color: var(--ink-subtle);
+      text-align: left;
+    }
+    .search-trigger svg { width: 18px; height: 18px; }
+    .search-trigger kbd { margin-left: auto; padding: 2px 7px; border: 1px solid var(--hairline); border-radius: 6px; background: var(--surface-soft); color: var(--ink-subtle); font-size: 11px; }
+    .device.mobile .search-trigger { width: 44px; min-height: 44px; margin-left: auto; padding: 0; justify-content: center; border: 0; background: transparent; color: var(--ink); }
+    .device.mobile .search-trigger span, .device.mobile .search-trigger kbd { display: none; }
+    .top-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .device.mobile .top-actions { margin-left: 0; }
+    .icon-button {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--hairline);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--ink-muted);
+    }
+    .icon-button svg { width: 18px; height: 18px; }
+    .profile-chip { display: flex; align-items: center; gap: 9px; padding: 4px 9px 4px 4px; border: 1px solid var(--hairline); border-radius: 11px; background: var(--surface); }
+    .avatar { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 9px; background: var(--role-soft); color: var(--role-strong); font-weight: 800; }
+    .profile-chip strong { display: block; font-size: 12px; }
+    .profile-chip span { display: block; color: var(--ink-subtle); font-size: 10px; }
+    .device.mobile .profile-chip { display: none; }
+
+    .page { padding: 26px; }
+    .device.mobile .page { padding: 16px 12px 92px; }
+    .page-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+    .page-head h1 { margin: 0; font-size: clamp(23px, 2vw, 30px); line-height: 1.18; letter-spacing: -.025em; }
+    .page-head p { margin: 7px 0 0; color: var(--ink-muted); font-size: 14px; }
+    .date-block { text-align: right; color: var(--ink-muted); font-size: 12px; }
+    .date-block strong { display: block; color: var(--ink); font-size: 14px; }
+    .device.mobile .page-head { align-items: start; margin-bottom: 18px; }
+    .device.mobile .page-head h1 { font-size: 23px; }
+    .device.mobile .date-block { display: none; }
+
+    .priority-strip {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(118px, .5fr));
+      overflow: hidden;
+      margin-bottom: 18px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 8px 26px rgba(54,38,15,.04);
+    }
+    .priority-main { padding: 20px; background: var(--role-soft); }
+    .priority-main strong { display: block; color: var(--role-strong); font-size: 16px; }
+    .priority-main p { max-width: 52ch; margin: 6px 0 14px; color: var(--ink-muted); font-size: 13px; }
+    .primary-button, .secondary-button {
+      min-height: 42px;
+      padding: 8px 14px;
+      border-radius: 9px;
+      font-weight: 700;
+    }
+    .primary-button { border: 1px solid var(--role); background: var(--role); color: #fff; }
+    .primary-button:hover { background: var(--role-strong); }
+    .secondary-button { border: 1px solid var(--hairline-strong); background: var(--surface); color: var(--ink); }
+    .priority-stat { display: grid; align-content: center; padding: 17px; border-left: 1px solid var(--hairline); }
+    .priority-stat span { color: var(--ink-subtle); font-size: 12px; }
+    .priority-stat strong { margin-top: 4px; font-size: 24px; font-variant-numeric: tabular-nums; }
+    .priority-stat small { margin-top: 2px; color: var(--ink-muted); font-size: 11px; }
+    .device.mobile .priority-strip { display: block; }
+    .device.mobile .priority-main { padding: 17px; }
+    .device.mobile .priority-stat { display: none; }
+
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(270px, .72fr); gap: 18px; }
+    .device.mobile .content-grid { display: block; }
+    .panel { border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--surface); }
+    .panel + .panel { margin-top: 16px; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 18px 12px; }
+    .panel-head h2 { margin: 0; font-size: 16px; }
+    .panel-head p { margin: 3px 0 0; color: var(--ink-subtle); font-size: 12px; }
+    .text-button { min-height: 38px; padding: 7px 9px; border: 0; border-radius: 8px; background: transparent; color: var(--role-strong); font-weight: 700; }
+    .text-button:hover { background: var(--role-soft); }
+    .task-list { padding: 0 10px 10px; }
+    .task-row {
+      min-height: 70px;
+      display: grid;
+      grid-template-columns: 40px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 9px;
+      border-top: 1px solid var(--hairline);
+    }
+    .task-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: var(--surface-soft); color: var(--ink-muted); }
+    .task-icon svg { width: 18px; height: 18px; }
+    .task-row.urgent .task-icon { background: var(--danger-soft); color: var(--danger); }
+    .task-row.notice .task-icon { background: var(--warning-soft); color: var(--warning); }
+    .task-copy strong { display: block; font-size: 14px; }
+    .task-copy span { display: block; margin-top: 3px; color: var(--ink-muted); font-size: 12px; }
+    .task-action { min-height: 38px; padding: 7px 12px; border: 1px solid var(--hairline-strong); border-radius: 8px; background: var(--surface); color: var(--ink); font-weight: 650; }
+    .task-action:hover { border-color: var(--role); color: var(--role-strong); }
+    .device.mobile .task-row { grid-template-columns: 38px minmax(0, 1fr); }
+    .device.mobile .task-action { grid-column: 2; justify-self: start; }
+
+    .schedule-list { padding: 0 10px 10px; }
+    .schedule-row { display: grid; grid-template-columns: 72px 4px minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 13px 9px; border-top: 1px solid var(--hairline); }
+    .schedule-time { font-weight: 750; font-variant-numeric: tabular-nums; }
+    .schedule-time small { display: block; color: var(--ink-subtle); font-weight: 500; }
+    .schedule-marker { width: 4px; height: 32px; border-radius: 999px; background: var(--role); }
+    .schedule-copy strong { display: block; font-size: 13px; }
+    .schedule-copy span { color: var(--ink-muted); font-size: 12px; }
+    .badge { display: inline-flex; align-items: center; min-height: 23px; padding: 2px 8px; border-radius: 999px; background: var(--surface-soft); color: var(--ink-muted); font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .badge.good { background: var(--success-soft); color: #117556; }
+    .badge.warn { background: var(--warning-soft); color: #9d6500; }
+    .badge.role { background: var(--role-soft); color: var(--role-strong); }
+
+    .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 14px 14px; }
+    .quick-action {
+      min-height: 82px;
+      padding: 12px;
+      border: 1px solid var(--hairline);
+      border-radius: 11px;
+      background: var(--canvas);
+      color: var(--ink);
+      text-align: left;
+    }
+    .quick-action:hover { border-color: color-mix(in srgb, var(--role) 35%, var(--hairline)); background: var(--role-soft); }
+    .quick-action svg { width: 19px; height: 19px; color: var(--role-strong); }
+    .quick-action strong { display: block; margin-top: 8px; font-size: 12px; }
+    .quick-action span { color: var(--ink-subtle); font-size: 10px; }
+    .health-list { padding: 0 16px 15px; }
+    .health-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-top: 1px solid var(--hairline); font-size: 12px; }
+    .health-row span:first-child { color: var(--ink-muted); }
+    .device.mobile .right-column { margin-top: 16px; }
+
+    .mobile-tabs { display: none; }
+    .device.mobile .mobile-tabs {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      z-index: 12;
+      width: 390px;
+      transform: translateX(-50%);
+      min-height: 68px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      padding: 6px max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+      border-top: 1px solid var(--hairline);
+      background: rgba(255,255,255,.98);
+    }
+    .mobile-tabs button { min-height: 54px; display: grid; place-items: center; gap: 1px; padding: 4px; border: 0; border-radius: 9px; background: transparent; color: var(--ink-subtle); font-size: 10px; }
+    .mobile-tabs button.active { color: var(--role-strong); background: var(--role-soft); font-weight: 750; }
+    .mobile-tabs svg { width: 20px; height: 20px; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: start center;
+      padding: 118px 18px 24px;
+      background: rgba(24,18,10,.36);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .2s ease, visibility .2s ease;
+    }
+    .overlay.open { opacity: 1; visibility: visible; }
+    .dialog {
+      width: min(720px, 100%);
+      max-height: min(680px, calc(100vh - 150px));
+      overflow: hidden;
+      border: 1px solid var(--hairline);
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: 0 30px 90px rgba(26,18,1,.24);
+      transform: translateY(-8px) scale(.99);
+      transition: transform .25s var(--ease);
+    }
+    .overlay.open .dialog { transform: translateY(0) scale(1); }
+    .dialog-search { display: grid; grid-template-columns: 22px minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--hairline); }
+    .dialog-search svg { width: 20px; height: 20px; color: var(--ink-subtle); }
+    .dialog-search input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 16px; }
+    .dialog-search button { min-height: 34px; padding: 4px 9px; border: 1px solid var(--hairline); border-radius: 7px; background: var(--surface-soft); color: var(--ink-muted); }
+    .function-body { max-height: 560px; overflow: auto; padding: 14px 16px 20px; }
+    .function-tip { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; color: var(--ink-muted); font-size: 12px; }
+    .function-section + .function-section { margin-top: 18px; }
+    .function-section h3 { margin: 0 0 8px; color: var(--ink-subtle); font-size: 11px; }
+    .function-list { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .function-item { min-height: 58px; display: grid; grid-template-columns: 34px minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 8px; border: 1px solid transparent; border-radius: 10px; background: transparent; text-align: left; }
+    .function-item:hover { border-color: var(--hairline); background: var(--canvas); }
+    .function-item .task-icon { width: 34px; height: 34px; border-radius: 9px; color: var(--role-strong); background: var(--role-soft); }
+    .function-item strong { display: block; font-size: 13px; }
+    .function-item span { display: block; color: var(--ink-subtle); font-size: 10px; }
+    .function-item mark { padding: 0 2px; border-radius: 3px; background: var(--warning-soft); color: inherit; }
+    .no-results { display: none; padding: 34px 12px; color: var(--ink-muted); text-align: center; }
+
+    body.preview-mobile .dialog { width: 366px; max-height: calc(100vh - 104px); }
+    body.preview-mobile .function-body { max-height: calc(100vh - 178px); }
+    body.preview-mobile .function-list { grid-template-columns: 1fr; }
+    body.preview-mobile .function-tip span:last-child { display: none; }
+
+    .toast { position: fixed; right: 24px; bottom: 24px; z-index: 120; max-width: 320px; padding: 12px 16px; border-radius: 11px; background: var(--inverse); color: var(--inverse-ink); box-shadow: var(--shadow); opacity: 0; transform: translateY(10px); pointer-events: none; transition: .22s var(--ease); }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 860px) {
+      .prototype-bar { position: relative; flex-wrap: wrap; padding: 12px; gap: 8px; }
+      .prototype-title { width: 100%; }
+      .prototype-note { display: none; }
+      .switch-group { flex: 1; }
+      .switch-group button { flex: 1; padding-inline: 8px; }
+      .stage { padding: 12px; }
+      .device:not(.mobile) { min-width: 980px; }
+      body:has(.device:not(.mobile)) .stage { overflow-x: auto; place-items: start; }
+    }
+    @media (max-width: 520px) {
+      .stage { padding: 0; }
+      .device.mobile { width: 100%; max-height: none; min-height: calc(100vh - 138px); border: 0; border-radius: 0; }
+      .device.mobile .mobile-tabs { width: 100%; }
+      .overlay { padding: 84px 10px 18px; }
+      .function-list { grid-template-columns: 1fr; }
+      .toast { right: 12px; bottom: 84px; left: 12px; max-width: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="prototype-bar">
+    <div class="prototype-title">
+      <strong>牧哲学堂 · 三端导航重构原型</strong>
+      <span>模拟数据，仅用于确认信息架构与界面方向</span>
+    </div>
+    <div class="switch-group" aria-label="切换客户端">
+      <button class="role-switch active" data-role="admin">管理端</button>
+      <button class="role-switch" data-role="teacher">教师端</button>
+      <button class="role-switch" data-role="parent">家长端</button>
+    </div>
+    <div class="switch-group" aria-label="切换设备">
+      <button class="device-switch active" data-device="desktop">电脑</button>
+      <button class="device-switch" data-device="mobile">手机</button>
+    </div>
+    <div class="prototype-note">点击导航、搜索和“全部功能”体验交互<br>键盘可使用 Ctrl / ⌘ + K</div>
+  </div>
+
+  <main class="stage">
+    <section class="device" id="device">
+      <div class="app-shell">
+        <aside class="sidebar">
+          <div class="sidebar-brand">
+            <span class="brand-mark" data-icon="book"></span>
+            <span class="brand-copy"><strong>牧哲学堂</strong><span id="roleLabel">管理端</span></span>
+          </div>
+          <div class="nav-label">工作区</div>
+          <nav class="nav-list" id="desktopNav"></nav>
+          <div class="sidebar-foot">
+            <button class="nav-button all-functions" data-open-functions><span data-icon="grid"></span><span>全部功能</span><span class="badge" id="functionCount">34</span></button>
+          </div>
+        </aside>
+
+        <div class="workspace">
+          <header class="app-topbar">
+            <div class="mobile-brand">
+              <span class="brand-mark" data-icon="book"></span>
+              <span><strong>牧哲学堂</strong><small id="mobileRoleLabel">管理端</small></span>
+            </div>
+            <button class="search-trigger" data-open-functions aria-label="搜索功能、学员、班级或操作">
+              <span data-icon="search"></span><span>搜索功能、学员、班级或操作</span><kbd>Ctrl K</kbd>
+            </button>
+            <div class="top-actions">
+              <button class="icon-button" aria-label="查看通知" data-toast="这里将打开统一消息中心"><span data-icon="bell"></span></button>
+              <div class="profile-chip"><span class="avatar" id="avatar">任</span><span><strong id="profileName">任文涛</strong><span id="profileMeta">初中部管理员</span></span></div>
+            </div>
+          </header>
+
+          <div class="page">
+            <div class="page-head">
+              <div><h1 id="pageTitle">今天先处理这些事</h1><p id="pageDesc">把异常和待办放在首页，统计数据退到第二层。</p></div>
+              <div class="date-block"><strong>9月12日 · 星期六</strong><span>新乐 · 运营第 2 周</span></div>
+            </div>
+
+            <section class="priority-strip">
+              <div class="priority-main"><strong id="priorityTitle">下午有 2 项需要确认</strong><p id="priorityText">1 个班级还未完成考勤，3 条家长留言等待回复。先处理会影响今天运营的事项。</p><button class="primary-button" id="priorityAction" data-toast="已进入今日待办队列">开始处理</button></div>
+              <div class="priority-stat"><span id="stat1Label">今日课程</span><strong id="stat1Value">12</strong><small id="stat1Note">已完成 5 节</small></div>
+              <div class="priority-stat"><span id="stat2Label">到课学员</span><strong id="stat2Value">86</strong><small id="stat2Note">预计 93 人</small></div>
+              <div class="priority-stat"><span id="stat3Label">待办事项</span><strong id="stat3Value">5</strong><small id="stat3Note">其中 2 项紧急</small></div>
+            </section>
+
+            <div class="content-grid">
+              <div class="left-column">
+                <section class="panel">
+                  <div class="panel-head"><div><h2 id="taskTitle">需要你处理</h2><p id="taskSubtitle">按影响程度排序，而不是按功能模块排列</p></div><button class="text-button" data-toast="已显示全部待办">查看全部</button></div>
+                  <div class="task-list" id="taskList"></div>
+                </section>
+                <section class="panel">
+                  <div class="panel-head"><div><h2 id="scheduleTitle">今天的教学安排</h2><p id="scheduleSubtitle">课程、地点与执行状态集中查看</p></div><button class="text-button" data-toast="已切换到完整课表">完整课表</button></div>
+                  <div class="schedule-list" id="scheduleList"></div>
+                </section>
+              </div>
+              <aside class="right-column">
+                <section class="panel">
+                  <div class="panel-head"><div><h2>常用操作</h2><p>根据当前角色与近期工作调整</p></div></div>
+                  <div class="quick-grid" id="quickGrid"></div>
+                </section>
+                <section class="panel">
+                  <div class="panel-head"><div><h2 id="healthTitle">运营提醒</h2><p>只显示需要注意的状态</p></div></div>
+                  <div class="health-list" id="healthList"></div>
+                </section>
+              </aside>
+            </div>
+          </div>
+
+          <nav class="mobile-tabs" id="mobileTabs"></nav>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="overlay" id="functionOverlay" role="dialog" aria-modal="true" aria-labelledby="functionTitle">
+    <div class="dialog">
+      <div class="dialog-search"><span data-icon="search"></span><input id="functionSearch" aria-label="搜索全部功能" placeholder="输入“考勤”“工资”“反馈”……"><button id="closeDialog">关闭</button></div>
+      <div class="function-body">
+        <div class="function-tip"><span id="functionTitle">全部功能 · 按工作目的分组</span><span>低频功能保留，但不挤占主导航</span></div>
+        <div id="functionSections"></div>
+        <div class="no-results" id="noResults">没有找到对应功能，请换一个关键词。</div>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const icons = {
+      book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z"/></svg>',
+      home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg>',
+      calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 3v4M19 3v4M3 9h18M4 5h16a1 1 0 0 1 1 1v14H3V6a1 1 0 0 1 1-1Z"/></svg>',
+      people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2M16 5.5a3 3 0 0 1 0 5.8M17 14a5 5 0 0 1 4 4.9V20"/></svg>',
+      message: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16v12H8l-4 4V4Z"/><path d="M8 8h8M8 12h5"/></svg>',
+      wallet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h16a2 2 0 0 1 2 2v10H5a2 2 0 0 1-2-2V6Z"/><path d="M3 6a3 3 0 0 1 3-3h11v3M16 11h5v4h-5a2 2 0 0 1 0-4Z"/></svg>',
+      chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20V9M10 20V4M16 20v-7M22 20H2"/></svg>',
+      settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.09A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.09A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.09A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.14.37.36.7.66.96.3.26.68.4 1.08.4H21v4h-.09A1.7 1.7 0 0 0 19.4 15Z"/></svg>',
+      grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+      search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>',
+      bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg>',
+      check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m5 12 4 4L19 6"/></svg>',
+      alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v4M12 17h.01"/></svg>',
+      file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2h8l4 4v16H6V2Z"/><path d="M14 2v5h5M9 12h6M9 16h6"/></svg>',
+      clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg>',
+      folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h7l2 2h9v11H3V6Z"/></svg>',
+      spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 2 1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2ZM19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></svg>',
+      user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>'
+    };
+
+    const commonFunctions = {
+      admin: [
+        ['教学运营', [['课程与班级','课程、班级、运营批次','book'],['排课中心','精品班、个性化课程、周总览','calendar'],['考勤管理','查看、补录、异常核对','check'],['课堂反馈','发布进度与质量检查','message'],['作业班管理','晚托与周末作业班','file']]],
+        ['学员与家校', [['学员管理','档案、报名与在读状态','people'],['学习档案','成绩、试卷、成长记录','folder'],['家长留言','集中回复家长沟通','message'],['通知中心','发布并跟踪消息','bell'],['家长激活','账号绑定与访问权限','user']]],
+        ['教师与财务', [['教师档案','任课、账户和资料','people'],['薪资管理','课时核算与确认','wallet'],['收费管理','缴费、课时与欠费','wallet'],['教师行为日志','关键操作审计','clock'],['就餐管理','人员与用餐安排','calendar']]],
+        ['数据与工具', [['数据报表','运营趋势与导出','chart'],['数据管理','备份、恢复与维护','settings'],['AI 助手','教学与运营辅助','spark'],['中考志愿','咨询、测算与学校库','folder'],['仿真教学','PhET 教学资源','book'],['回收站','恢复误删业务数据','settings']]]
+      ],
+      teacher: [
+        ['教学执行', [['我的课表','今日与本周课程','calendar'],['考勤录入','按课程快速点名','check'],['课堂反馈','待写、草稿与已发布','message'],['个性化课程','授课记录与确认','clock'],['作业班工作台','登记与检查作业','file']]],
+        ['学员与沟通', [['我的学员','统一学员工作台','people'],['家长留言','查看和回复沟通','message'],['请假审批','查看课程请假','calendar'],['讲义预告','课前资料与提醒','file']]],
+        ['资源与个人', [['试卷上传','按学员归档试卷','folder'],['学习资料','上传和管理资料','folder'],['我的薪资','课时与薪资明细','wallet'],['我的福利','教师福利服务','spark'],['就餐上报','提交用餐安排','calendar'],['AI 助手','反馈和备课辅助','spark']]]
+      ],
+      parent: [
+        ['孩子学习', [['课程表','上课时间与地点','calendar'],['课堂反馈','老师反馈与回复','message'],['成长档案','成绩、试卷和成长记录','folder'],['晚托作业','作业登记与完成情况','file'],['教师信息','查看任课教师','people']]],
+        ['家校服务', [['通知','学校通知与提醒','bell'],['我的留言','向老师或学校留言','message'],['请假','提交和查看请假','calendar'],['就餐安排','用餐日期与状态','calendar'],['课时明细','购买、消耗和剩余','clock'],['费用记录','缴费与欠费状态','wallet']]],
+        ['学习与升学工具', [['学习资料','按年级和学科查找','folder'],['讲义预告','查看课程课前资料','file'],['中考志愿','学校库与志愿咨询','folder'],['仿真教学','PhET 学习实验','book'],['AI 助手','学习问题辅助','spark'],['会员权益','查看可用服务','spark']]]
+      ]
+    };
+
+    const roleData = {
+      admin: {
+        label:'管理端', color:'#534ab7', soft:'#f0effb', strong:'#40379f', count:34, name:'任文涛', meta:'初中部管理员', avatar:'任',
+        nav:[['今日工作','home'],['教学运营','calendar'],['学员与家校','people'],['教师与财务','wallet'],['数据分析','chart'],['系统管理','settings']],
+        tabs:[['首页','home'],['教学','calendar'],['学员','people'],['消息','message'],['更多','more']],
+        title:'今天先处理这些事', desc:'把异常和待办放在首页，统计数据退到第二层。', priorityTitle:'下午有 2 项需要确认', priorityText:'1 个班级还未完成考勤，3 条家长留言等待回复。先处理会影响今天运营的事项。',
+        stats:[['今日课程','12','已完成 5 节'],['到课学员','86','预计 93 人'],['待办事项','5','其中 2 项紧急']],
+        taskTitle:'需要你处理', taskSubtitle:'按影响程度排序，而不是按功能模块排列',
+        tasks:[['urgent','考勤异常待确认','初二数学提高班 · 7 人尚未完成点名','去处理','check'],['notice','家长留言等待回复','3 条新留言，最早一条已等待 2 小时','集中回复','message'],['','教师课时待核对','本周 4 位教师的个性化课时已提交','核对课时','clock']],
+        schedule:[['14:00','90 分钟','初二数学提高班','教室 201 · 张老师','待开始'],['16:00','60 分钟','初三物理冲刺班','实验室 · 李老师','待开始'],['18:30','120 分钟','晚托作业班','自习室 · 3 位教师','进行中']],
+        quick:[['新建班级','课程与学员','people'],['安排课程','排课中心','calendar'],['发布通知','家校触达','bell'],['收费登记','费用与课时','wallet']],
+        health:[['数据库备份','今天 02:00 完成','good'],['家长账号','2 个待激活','warn'],['系统服务','全部正常','good']]
+      },
+      teacher: {
+        label:'教师端', color:'#1d9e75', soft:'#eaf7f1', strong:'#117556', count:18, name:'张老师', meta:'数学教师', avatar:'张',
+        nav:[['今日工作','home'],['课程与课表','calendar'],['我的学员','people'],['家校沟通','message'],['教学资源','folder'],['我的','user']],
+        tabs:[['首页','home'],['课表','calendar'],['考勤','check'],['反馈','message'],['更多','more']],
+        title:'张老师，下午好', desc:'今天还有 2 节课，先完成即将开始课程的准备。', priorityTitle:'14:00 的课程即将开始', priorityText:'初二数学提高班还有 20 分钟开始，讲义已上传，课后需要完成考勤与课堂反馈。',
+        stats:[['今日课程','3','已完成 1 节'],['待写反馈','4','含昨日 2 条'],['本月课时','42.5','已确认 38 小时']],
+        taskTitle:'我的教学待办', taskSubtitle:'围绕下一节课组织操作',
+        tasks:[['urgent','完成上节课考勤','初一数学基础班 · 2 名学员未确认','立即点名','check'],['notice','补写课堂反馈','昨日课程还有 2 条反馈未发布','继续填写','message'],['','家长请假待查看','王小雨申请明日下午课程请假','查看详情','calendar']],
+        schedule:[['14:00','90 分钟','初二数学提高班','教室 201 · 12 人','待开始'],['16:30','60 分钟','一对一 · 李梓涵','咨询室 2','待开始'],['19:00','120 分钟','晚托作业班','自习室 · 18 人','待开始']],
+        quick:[['课程点名','进入考勤','check'],['写课堂反馈','查看待写','message'],['上传讲义','课前资料','file'],['查看学员','统一工作台','people']],
+        health:[['本周反馈完成率','82%','warn'],['待回复留言','1 条','warn'],['薪资课时','已同步','good']]
+      },
+      parent: {
+        label:'家长端', color:'#e8784a', soft:'#fff3ec', strong:'#c95f32', count:21, name:'李女士', meta:'李梓涵家长', avatar:'李',
+        nav:[['首页','home'],['孩子学习','book'],['家校沟通','message'],['费用与服务','wallet'],['我的','user']],
+        tabs:[['首页','home'],['课表','calendar'],['学习','book'],['消息','message'],['我的','user']],
+        title:'李女士，晚上好', desc:'李梓涵今天的学习动态已经更新。', priorityTitle:'今天的课堂反馈已发布', priorityText:'数学课表现积极，老师建议今晚复习“一次函数图像”。你可以查看详情并回复老师。',
+        stats:[['今日课程','2','全部已完成'],['本周到课','4/4','暂无缺勤'],['未读消息','2','1 条需确认']],
+        taskTitle:'孩子的新动态', taskSubtitle:'课程、反馈与通知按时间集中展示',
+        tasks:[['','数学课堂反馈已更新','张老师：本节课对函数图像掌握较好','查看反馈','message'],['notice','周日课程时间调整','物理提高班调整为周日 15:00 开始','确认收到','calendar'],['','新的课前讲义','物理 · 浮力专题预习资料已上传','查看讲义','file']],
+        schedule:[['09:00','已完成','数学提高班','教室 201 · 张老师','已到课'],['14:30','已完成','英语阅读班','教室 305 · 刘老师','已到课'],['明 15:00','待开始','物理提高班','实验室 · 李老师','需确认']],
+        quick:[['查看课表','本周安排','calendar'],['成长档案','反馈与成绩','folder'],['提交请假','课程请假','calendar'],['课时明细','消耗与余额','clock']],
+        health:[['本周到课','全部正常','good'],['剩余精品课时','18.0 小时',''],['待确认通知','1 条','warn']]
+      }
+    };
+
+    let currentRole = 'admin';
+    const device = document.getElementById('device');
+    const overlay = document.getElementById('functionOverlay');
+    const search = document.getElementById('functionSearch');
+    const toast = document.getElementById('toast');
+
+    function icon(name) { return icons[name] || icons.grid; }
+    function hydrateIcons(root = document) { root.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon); }); }
+    function renderRole(role) {
+      currentRole = role;
+      const d = roleData[role];
+      document.documentElement.style.setProperty('--role', d.color);
+      document.documentElement.style.setProperty('--role-soft', d.soft);
+      document.documentElement.style.setProperty('--role-strong', d.strong);
+      document.getElementById('roleLabel').textContent = d.label;
+      document.getElementById('mobileRoleLabel').textContent = d.label;
+      document.getElementById('functionCount').textContent = d.count;
+      document.getElementById('profileName').textContent = d.name;
+      document.getElementById('profileMeta').textContent = d.meta;
+      document.getElementById('avatar').textContent = d.avatar;
+      document.getElementById('pageTitle').textContent = d.title;
+      document.getElementById('pageDesc').textContent = d.desc;
+      document.getElementById('priorityTitle').textContent = d.priorityTitle;
+      document.getElementById('priorityText').textContent = d.priorityText;
+      document.getElementById('taskTitle').textContent = d.taskTitle;
+      document.getElementById('taskSubtitle').textContent = d.taskSubtitle;
+      d.stats.forEach((s,i) => { const n=i+1; document.getElementById(`stat${n}Label`).textContent=s[0]; document.getElementById(`stat${n}Value`).textContent=s[1]; document.getElementById(`stat${n}Note`).textContent=s[2]; });
+      document.getElementById('desktopNav').innerHTML = d.nav.map((n,i) => `<button class="nav-button ${i===0?'active':''}" data-nav="${n[0]}"><span data-icon="${n[1]}"></span><span>${n[0]}</span>${i===0&&role!=='parent'?'<span class="badge role">5</span>':''}</button>`).join('');
+      document.getElementById('mobileTabs').innerHTML = d.tabs.map((n,i) => `<button class="${i===0?'active':''}" data-mobile-nav="${n[0]}"><span data-icon="${n[1]}"></span><span>${n[0]}</span></button>`).join('');
+      document.getElementById('taskList').innerHTML = d.tasks.map(t => `<div class="task-row ${t[0]}"><span class="task-icon" data-icon="${t[4]}"></span><span class="task-copy"><strong>${t[1]}</strong><span>${t[2]}</span></span><button class="task-action" data-toast="原型演示：将进入“${t[1]}”">${t[3]}</button></div>`).join('');
+      document.getElementById('scheduleList').innerHTML = d.schedule.map(s => `<div class="schedule-row"><span class="schedule-time">${s[0]}<small>${s[1]}</small></span><span class="schedule-marker"></span><span class="schedule-copy"><strong>${s[2]}</strong><span>${s[3]}</span></span><span class="badge ${s[4].includes('到课')?'good':s[4].includes('确认')?'warn':'role'}">${s[4]}</span></div>`).join('');
+      document.getElementById('quickGrid').innerHTML = d.quick.map(q => `<button class="quick-action" data-toast="原型演示：打开“${q[0]}”"><span data-icon="${q[2]}"></span><strong>${q[0]}</strong><span>${q[1]}</span></button>`).join('');
+      document.getElementById('healthList').innerHTML = d.health.map(h => `<div class="health-row"><span>${h[0]}</span><span class="badge ${h[2]||''}">${h[1]}</span></div>`).join('');
+      document.querySelectorAll('.role-switch').forEach(b => b.classList.toggle('active', b.dataset.role === role));
+      renderFunctions();
+      hydrateIcons();
+      bindDynamicActions();
+    }
+
+    function renderFunctions(query='') {
+      const normalized = query.trim().toLowerCase();
+      const synonymMap = { '工资':'薪资', '学费':'收费', '点名':'考勤', '作业':'作业班', '家长沟通':'留言' };
+      const searchTerm = synonymMap[normalized] || normalized;
+      let found = 0;
+      document.getElementById('functionSections').innerHTML = commonFunctions[currentRole].map(section => {
+        const items = section[1].filter(item => `${item[0]} ${item[1]}`.toLowerCase().includes(searchTerm));
+        found += items.length;
+        if (!items.length) return '';
+        return `<section class="function-section"><h3>${section[0]}</h3><div class="function-list">${items.map(item => `<button class="function-item" data-toast="原型演示：打开“${item[0]}”"><span class="task-icon" data-icon="${item[2]}"></span><span><strong>${highlight(item[0],normalized)}</strong><span>${highlight(item[1],normalized)}</span></span><span data-icon="more"></span></button>`).join('')}</div></section>`;
+      }).join('');
+      document.getElementById('noResults').style.display = found ? 'none' : 'block';
+      hydrateIcons(document.getElementById('functionSections'));
+      bindDynamicActions();
+    }
+    function highlight(text, query) {
+      if (!query) return text;
+      return text.replace(new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'ig'), m => `<mark>${m}</mark>`);
+    }
+    function bindDynamicActions() {
+      document.querySelectorAll('[data-toast]').forEach(el => el.onclick = () => showToast(el.dataset.toast));
+      document.querySelectorAll('[data-nav]').forEach(el => el.onclick = () => {
+        document.querySelectorAll('[data-nav]').forEach(n => n.classList.remove('active')); el.classList.add('active'); showToast(`已切换到“${el.dataset.nav}”工作区，当前原型重点展示首页`);
+      });
+      document.querySelectorAll('[data-mobile-nav]').forEach(el => el.onclick = () => {
+        if (el.dataset.mobileNav === '更多') return openFunctions();
+        document.querySelectorAll('[data-mobile-nav]').forEach(n => n.classList.remove('active')); el.classList.add('active'); showToast(`已切换到“${el.dataset.mobileNav}”`);
+      });
+    }
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+    function openFunctions() { overlay.classList.add('open'); search.value=''; renderFunctions(); setTimeout(() => search.focus(), 80); }
+    function closeFunctions() { overlay.classList.remove('open'); }
+
+    document.querySelectorAll('.role-switch').forEach(b => b.addEventListener('click', () => renderRole(b.dataset.role)));
+    document.querySelectorAll('.device-switch').forEach(b => b.addEventListener('click', () => {
+      document.querySelectorAll('.device-switch').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      const isMobile = b.dataset.device === 'mobile';
+      device.classList.toggle('mobile', isMobile);
+      document.body.classList.toggle('preview-mobile', isMobile);
+    }));
+    document.querySelectorAll('[data-open-functions]').forEach(b => b.addEventListener('click', openFunctions));
+    document.getElementById('closeDialog').addEventListener('click', closeFunctions);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeFunctions(); });
+    search.addEventListener('input', e => renderFunctions(e.target.value));
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openFunctions(); }
+      if (e.key === 'Escape') closeFunctions();
+    });
+    hydrateIcons();
+    renderRole('admin');
+  </script>
+</body>
+</html>

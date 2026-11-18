@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
@@ -14,7 +15,7 @@ function setupTokenFromRequest(request: NextRequest) {
   return request.nextUrl.searchParams.get('token') || request.headers.get('x-setup-token') || ''
 }
 
-export async function GET(request: NextRequest) {
+export const GET = apiHandler(async (request: NextRequest) => {
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Setup is disabled in production' }, { status: 404 })
   }
@@ -102,4 +103,4 @@ export async function GET(request: NextRequest) {
     const msg = e instanceof Error ? e.message : String(e)
     return NextResponse.json({ success: false, error: msg }, { status: 500 })
   }
-}
+})

@@ -9,18 +9,22 @@ import { getRequestPrisma } from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
 import { parseStoredKnowledgeCard } from '@/lib/classroom-feedback/knowledge-point-cards'
 import { createParentFeedbackMessage } from '@/lib/feedback-conversation'
+import { createNotification } from '@/lib/notifications'
 import {
   canViewFeedback,
   filterStudentRatingsForStudents,
   getParentFeedbackStudentIds,
   hasRequiredLessonContent,
   hasMeaningfulFeedbackContent,
+  feedbackStudentLimitError,
   normalizeLessonContent,
   parseFeedbackCourseType,
   redactFeedbackForParent,
   resolveTeacherFeedbackCreationScope,
 } from '@/lib/classroom-feedback/access'
 import { createClassroomFeedbackWithSideEffects } from '@/lib/classroom-feedback/create'
+import { resolveParentFeedbackReadAt } from '@/lib/classroom-feedback/read-state'
+import { createFeedbackOnce, hashFeedbackPayload, parseFeedbackClientRequestId } from '@/lib/classroom-feedback/idempotency'
 
 export const dynamic = 'force-dynamic'
 
@@ -116,10 +120,31 @@ export const GET = apiHandler(async (req: NextRequest) => {
         return student ? [student] : []
       }),
     }))
+  if (role !== 'parent') return NextResponse.json({ feedbacks: scopedFeedbacks })
+
+  const feedbackIds = scopedFeedbacks.map((feedback) => feedback.id)
+  const parentReceipts = feedbackIds.length
+    ? await prisma.feedbackParentReadReceipt.findMany({
+        where: { parentUserId: user.id, feedbackId: { in: feedbackIds } },
+        select: { feedbackId: true, readAt: true, createdAt: true },
+      })
+    : []
+  const receiptsByFeedback = new Map<string, typeof parentReceipts>()
+  for (const receipt of parentReceipts) {
+    const receipts = receiptsByFeedback.get(receipt.feedbackId) || []
+    receipts.push(receipt)
+    receiptsByFeedback.set(receipt.feedbackId, receipts)
+  }
+
   return NextResponse.json({
-    feedbacks: role === 'parent'
-      ? scopedFeedbacks.map((feedback) => redactFeedbackForParent(feedback, parentStudentIds))
-      : scopedFeedbacks,
+    feedbacks: scopedFeedbacks.map((feedback) => redactFeedbackForParent({
+      ...feedback,
+      parentReadAt: resolveParentFeedbackReadAt(feedback.parentReadAt, (receiptsByFeedback.get(feedback.id) || []).map((receipt) => ({
+        read: receipt.readAt !== null,
+        readAt: receipt.readAt,
+        createdAt: receipt.createdAt,
+      }))),
+    }, parentStudentIds)),
   })
 })
 
@@ -133,6 +158,9 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!isAdmin && !isTeacher) return NextResponse.json({ error: '无权限' }, { status: 403 })
 
   const body = await req.json()
+  const clientRequestId = parseFeedbackClientRequestId(body?.clientRequestId)
+  if (clientRequestId === false) return NextResponse.json({ error: '提交请求编号无效，请刷新页面后重试' }, { status: 400 })
+  if (isTeacher && !clientRequestId) return NextResponse.json({ error: '提交请求编号缺失，请刷新页面后重试' }, { status: 400 })
   const status = body.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT'
   const classLessonId = typeof body.classLessonId === 'string' && body.classLessonId ? body.classLessonId : null
   const rawCourseType = body.feedbackCourseType ?? body.courseType ?? body.classType
@@ -237,9 +265,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: '请选择学员' }, { status: 400 })
   }
 
-  if (isTeacher && resolvedStudentIds.length > 3) {
-    return NextResponse.json({ error: '一次最多反馈3名学生' }, { status: 400 })
-  }
+  const studentLimitError = feedbackStudentLimitError(user.role, resolvedStudentIds.length)
+  if (studentLimitError) return NextResponse.json({ error: studentLimitError }, { status: 400 })
 
   const resolvedStudentRatings = filterStudentRatingsForStudents(studentRatings, resolvedStudentIds)
 
@@ -256,8 +283,11 @@ export const POST = apiHandler(async (req: NextRequest) => {
     select: { id: true, name: true, parentId: true, parentUserId: true },
   })
 
-  const feedback = await prisma.$transaction(async (tx) => {
-    return createClassroomFeedbackWithSideEffects(tx, {
+  const feedbackResult = await prisma.$transaction(async (tx) => createFeedbackOnce(tx, {
+    clientRequestId,
+    actorUserId: user.id,
+    payloadHash: hashFeedbackPayload({ ...body, clientRequestId: undefined, resolvedStudentIds }),
+  }, () => createClassroomFeedbackWithSideEffects(tx, {
       data: {
         termId: feedbackTermId,
         teacherId,
@@ -291,11 +321,19 @@ export const POST = apiHandler(async (req: NextRequest) => {
       detailFallback: '成长反馈',
       notificationLabel: '成长反馈',
       notificationContent: overallComment || lessonContent || summary || knowledgePoints.join('、') || badge || '课堂反馈已更新',
-    })
-  })
+  })))
+  if (!feedbackResult.ok) {
+    const message = feedbackResult.conflict === 'PAYLOAD_CHANGED'
+      ? '这次提交内容与已处理的请求不同，请检查反馈记录后重新提交'
+      : feedbackResult.conflict === 'RESULT_MISSING'
+        ? '提交仍在处理中，请稍后刷新反馈列表'
+        : '提交编号已被使用，请刷新页面后重试'
+    return NextResponse.json({ error: message }, { status: 409 })
+  }
+  const feedback = feedbackResult.feedback
 
   let bonus: Awaited<ReturnType<typeof triggerFeedbackBonus>> | null = null
-  if (status === 'PUBLISHED' && !isAdmin) {
+  if (status === 'PUBLISHED' && !isAdmin && !feedbackResult.replayed) {
     bonus = await triggerFeedbackBonus(feedback.id)
     if (!bonus.success) {
       console.warn('[feedback] triggerFeedbackBonus failed:', feedback.id, bonus.error)
@@ -304,7 +342,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
 
   revalidatePath('/teacher/dashboard')
   revalidatePath('/parent/archive')
-  return NextResponse.json({ feedback, bonus }, { status: 201 })
+  return NextResponse.json({ feedback, bonus, replayed: feedbackResult.replayed }, { status: feedbackResult.replayed ? 200 : 201 })
 })
 
 // PATCH: parent reply or admin reply
@@ -315,8 +353,28 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
 
 
   const prisma = await getRequestPrisma()
-  const { id, parentReply, adminReply, markRead } = await req.json()
+  const body = await req.json()
+  const { id, parentReply, adminReply, markRead } = body
+  const edits = body.edits as {
+    summary?: string | null
+    lessonContent?: string | null
+    knowledgePoints?: string[]
+    homework?: unknown[]
+    tags?: string[]
+  } | undefined
   if (!id) return NextResponse.json({ error: '缺少反馈 ID' }, { status: 400 })
+
+  // 管理员修改正文
+  if (edits && user.role === 'admin') {
+    const updateData: Record<string, unknown> = {}
+    if (typeof edits.summary === 'string') updateData.summary = edits.summary.trim() || null
+    if (typeof edits.lessonContent === 'string') updateData.lessonContent = edits.lessonContent.trim() || null
+    if (Array.isArray(edits.knowledgePoints)) updateData.knowledgePoints = edits.knowledgePoints
+    if (Array.isArray(edits.homework)) updateData.homework = edits.homework
+    if (Array.isArray(edits.tags)) updateData.tags = edits.tags
+    await prisma.classroomFeedback.update({ where: { id }, data: updateData })
+    return NextResponse.json({ ok: true })
+  }
 
   if (user.role === 'parent' && (parentReply !== undefined || markRead === true)) {
     // Verify parent is linked to a student in this feedback
@@ -360,10 +418,16 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
       }
     }
 
-    if (markRead === true && !feedback.parentReadAt) {
-      await prisma.classroomFeedback.updateMany({
-        where: { id, parentReadAt: null },
-        data: { parentReadAt: new Date() },
+    if (markRead === true) {
+      const readAt = new Date()
+      await prisma.feedbackParentReadReceipt.upsert({
+        where: { feedbackId_parentUserId: { feedbackId: id, parentUserId: user.id } },
+        create: { feedbackId: id, parentUserId: user.id, readAt },
+        update: { readAt },
+      })
+      await prisma.notification.updateMany({
+        where: { userId: user.id, relatedType: 'CLASSROOM_FEEDBACK', relatedId: id, read: false },
+        data: { read: true, readAt },
       })
     }
 
@@ -395,17 +459,14 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
         const parentUserId = student.parentId || student.parentUserId
         if (!parentUserId || notifiedParentIds.has(parentUserId)) continue
         notifiedParentIds.add(parentUserId)
-        await prisma.notification.create({
-          data: {
-            userId: parentUserId,
-            type: 'CLASSROOM_FEEDBACK',
-            title: '老师回复了课堂反馈',
-            content: `${student.name}的课堂反馈有了新回复`,
-            link: `/parent/class-feedback/${id}`,
-            relatedType: 'CLASSROOM_FEEDBACK',
-            relatedId: id,
-            href: `/parent/class-feedback/${id}`,
-          },
+        await createNotification(prisma, {
+          userId: parentUserId,
+          type: 'CLASSROOM_FEEDBACK',
+          title: '老师回复了课堂反馈',
+          content: `${student.name}的课堂反馈有了新回复`,
+          relatedType: 'CLASSROOM_FEEDBACK',
+          relatedId: id,
+          href: `/parent/class-feedback/${id}`,
         })
       }
     }

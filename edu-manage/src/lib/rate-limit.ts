@@ -14,6 +14,7 @@ const memBuckets = new Map<string, Bucket>()
 const RATE_RULES: Array<{ prefix: string; rpm: number }> = [
   { prefix: '/api/auth/detect-role',           rpm: 5   },
   { prefix: '/api/auth/login-check',           rpm: 20  },
+  { prefix: '/api/auth/credentials',           rpm: 20  },
   { prefix: '/api/auth/login-status',          rpm: 10  },
   { prefix: '/api/auth/check-role',            rpm: 10  },
   { prefix: '/api/auth/change-password',       rpm: 5   },

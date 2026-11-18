@@ -28,6 +28,13 @@ export type FeedbackContentInput = {
 
 export const LESSON_CONTENT_MIN_LENGTH = 10
 export const LESSON_CONTENT_MAX_LENGTH = 500
+export const MAX_STUDENTS_PER_FEEDBACK = 5
+
+export function feedbackStudentLimitError(role: string, count: number) {
+  return role.toLowerCase() === 'teacher' && count > MAX_STUDENTS_PER_FEEDBACK
+    ? `一次最多反馈${MAX_STUDENTS_PER_FEEDBACK}名学生`
+    : null
+}
 
 export function normalizeLessonContent(value: unknown) {
   return nonEmptyText(value).slice(0, LESSON_CONTENT_MAX_LENGTH)
@@ -65,7 +72,7 @@ export type FeedbackCreationScope = {
 
 type FeedbackImageAccessResult = {
   allowed: boolean
-  reason: 'admin' | 'feedback' | 'study-hall' | 'unattached-owner' | 'legacy-non-feedback' | 'forbidden'
+  reason: 'admin' | 'feedback' | 'study-hall' | 'unattached-owner' | 'forbidden'
 }
 
 function normalizeRole(role: string | null | undefined) {
@@ -218,6 +225,10 @@ export async function resolveTeacherFeedbackCreationScope(
               where: { status: 'ACTIVE', student: { status: { not: 'INACTIVE' } } },
               include: { student: { select: studentSelect } },
             },
+            teacherAssignments: {
+              where: { teacherId: input.teacherId },
+              select: { subject: true },
+            },
           },
         },
         lessonStudents: { include: { student: { select: studentSelect } } },
@@ -226,9 +237,24 @@ export async function resolveTeacherFeedbackCreationScope(
     if (!lesson) {
       return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType, termId }
     }
-    // 按学科报名：普通班课也优先用课次快照（lessonStudents），未报该学科的学生不出现；
-    // 快照为空时才兜底用全班 ACTIVE 报名（兼容老数据）。
-    const lessonSubject = lesson.subject || lesson.group.course.subject
+    // A lesson with an explicit subject must match the teacher's assigned
+    // subject. Legacy groups with no assignment rows are limited to the course
+    // subject instead of inheriting every subject in the group.
+    const courseSubject = lesson.group.course.subject
+    const lessonSubject = lesson.subject || courseSubject
+    const teacherAssignments = lesson.group.teacherAssignments
+    const assignedSubjects = teacherAssignments
+      .map((assignment) => assignment.subject)
+      .filter((subject): subject is string => Boolean(subject))
+    const ownsLessonByRelationship = lesson.teacherId === input.teacherId || lesson.group.teacherId === input.teacherId
+    const ownsLessonSubject = assignedSubjects.includes(lessonSubject)
+      || (teacherAssignments.length === 0 && ownsLessonByRelationship && lessonSubject === courseSubject)
+    if (!lessonSubject
+      || !ownsLessonSubject
+      || (input.requestedSubject?.trim() && input.requestedSubject.trim() !== lessonSubject)) {
+      return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType, termId }
+    }
+    // 按学科报名：课次快照只包含该学科的在读学生；历史快照为空时才用报名学科兜底。
     const eligibleEnrollments = lesson.group.enrollments
       .filter((row) => enrollmentIncludesSubject(row.subjects, lessonSubject))
     const eligibleStudentIds = new Set(eligibleEnrollments.map((row) => row.studentId))
@@ -266,7 +292,9 @@ export async function resolveTeacherFeedbackCreationScope(
       return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType, termId }
     }
     const teacherSubjects = group.teacherAssignments.map((assignment) => assignment.subject).filter((subject): subject is string => Boolean(subject))
-    if (!teacherSubjects.length) teacherSubjects.push(group.course.subject)
+    if (!teacherSubjects.length && group.teacherAssignments.length === 0 && group.teacherId === input.teacherId) {
+      teacherSubjects.push(group.course.subject)
+    }
     const requestedSubject = input.requestedSubject?.trim() || null
     const scopedSubject = requestedSubject || (teacherSubjects.length === 1 ? teacherSubjects[0] : null)
     if (!scopedSubject || !teacherSubjects.includes(scopedSubject)) {
@@ -280,13 +308,18 @@ export async function resolveTeacherFeedbackCreationScope(
       ? 'ONE_ON_ONE'
       : 'GROUP'
   } else if (input.requestedStudentIds.length) {
-    allowedStudents = await prisma.student.findMany({
+    const requestedSubject = input.requestedSubject?.trim() || null
+    if (!requestedSubject) {
+      return { allowed: false, reason, students: [], feedbackGroupId, feedbackCourseType, termId }
+    }
+    const scopedRows = await prisma.student.findMany({
       where: {
         id: { in: input.requestedStudentIds },
         status: { not: 'INACTIVE' },
         enrollments: {
           some: {
             status: 'ACTIVE',
+            deletedAt: null,
             group: {
               status: { not: 'ARCHIVED' },
               OR: [
@@ -297,8 +330,39 @@ export async function resolveTeacherFeedbackCreationScope(
           },
         },
       },
-      select: studentSelect,
+      select: {
+        ...studentSelect,
+        enrollments: {
+          where: {
+            status: 'ACTIVE',
+            deletedAt: null,
+            group: { status: { not: 'ARCHIVED' } },
+          },
+          select: {
+            subjects: true,
+            group: {
+              select: {
+                teacherId: true,
+                course: { select: { subject: true } },
+                teacherAssignments: {
+                  where: { teacherId: input.teacherId },
+                  select: { subject: true },
+                },
+              },
+            },
+          },
+        },
+      },
     })
+    allowedStudents = scopedRows
+      .filter((student) => student.enrollments.some((enrollment) => {
+        if (!enrollmentIncludesSubject(enrollment.subjects, requestedSubject)) return false
+        const assignments = enrollment.group.teacherAssignments
+        if (assignments.length) return assignments.some((assignment) => assignment.subject === requestedSubject)
+        return enrollment.group.teacherId === input.teacherId
+          && enrollment.group.course.subject === requestedSubject
+      }))
+      .map(({ enrollments: _enrollments, ...student }) => student)
   }
 
   const requestedStudentIds = input.expandClassTarget
@@ -314,11 +378,20 @@ export async function resolveTeacherFeedbackCreationScope(
       where: {
         term: { status: 'ACTIVE' },
         status: { not: 'ARCHIVED' },
-        enrollments: { some: { status: 'ACTIVE', studentId: { in: selected.map((student) => student.id) } } },
-        OR: [
-          { teacherId: input.teacherId },
-          { teacherAssignments: { some: { teacherId: input.teacherId } } },
-        ],
+        enrollments: {
+          some: {
+            status: 'ACTIVE',
+            studentId: { in: selected.map((student) => student.id) },
+            ...(input.requestedSubject ? {
+              group: {
+                OR: [
+                  { teacherId: input.teacherId, course: { subject: input.requestedSubject } },
+                  { teacherAssignments: { some: { teacherId: input.teacherId, subject: input.requestedSubject } } },
+                ],
+              },
+            } : {}),
+          },
+        },
       },
       orderBy: { updatedAt: 'desc' },
       select: { termId: true },
@@ -371,11 +444,6 @@ export function redactFeedbackForParent<
   }
 }
 
-function looksLikeFeedbackKey(value: string) {
-  const key = extractUploadStorageKey(value)
-  return /^(feedback|teacher-feedback)(?:-|\/)/i.test(key)
-}
-
 function imageIdentifierVariants(value: string) {
   const raw = value.trim()
   const key = extractUploadStorageKey(raw)
@@ -388,8 +456,9 @@ function imageIdentifierVariants(value: string) {
 }
 
 /**
- * Authorize a batch before signing or streaming. Non-feedback assets keep their
- * existing behavior; feedback assets are always checked against feedback scope.
+ * Authorize feedback and study-hall images before signing or streaming.
+ * Generic FileAsset rows must additionally pass the visibility/ownership
+ * policy in upload-access.ts at the endpoint.
  */
 export async function canAccessFeedbackImage(
   prisma: PrismaClient,
@@ -503,11 +572,13 @@ export async function canAccessFeedbackImage(
         .filter((item): item is string => Boolean(item))
         .some((item) => [...imageIdentifierVariants(item)].some((candidate) => candidates.has(candidate)))
     ))
+    const canUseFeedbackVisibility = matchingAssets.length === 0
+      || matchingAssets.every((asset) => asset.ownerType.toLowerCase() === 'feedback')
     const matchingFeedbacks = feedbacks.filter((feedback) => (
       matchingAssets.some((asset) => asset.feedbackId === feedback.id)
       || feedback.imageUrls.some((imageUrl) => candidates.has(imageUrl))
     ))
-    if (matchingFeedbacks.some((feedback) => canViewFeedback(actor, feedback, parentStudentIds))) {
+    if (canUseFeedbackVisibility && matchingFeedbacks.some((feedback) => canViewFeedback(actor, feedback, parentStudentIds))) {
       results.set(value, { allowed: true, reason: 'feedback' })
       continue
     }
@@ -526,20 +597,20 @@ export async function canAccessFeedbackImage(
       return entry.classRecord.recordedById === actor.id
         || entry.classRecord.studyClass.teachers.some((teacher) => teacher.teacherId === actor.id)
     })
-    if (canViewStudyHallImage) {
+    if (canUseFeedbackVisibility && canViewStudyHallImage) {
       results.set(value, { allowed: true, reason: 'study-hall' })
       continue
     }
 
-    const isFeedbackAsset = matchingAssets.some((asset) => asset.ownerType === 'feedback') || looksLikeFeedbackKey(value)
     const ownsUnattachedFeedbackAsset = matchingFeedbacks.length === 0
       && normalizeRole(actor.role) === 'teacher'
       && matchingAssets.some((asset) => asset.ownerType === 'feedback' && asset.uploadedById === actor.id)
     if (ownsUnattachedFeedbackAsset) {
       results.set(value, { allowed: true, reason: 'unattached-owner' })
-    } else if (!isFeedbackAsset) {
-      results.set(value, { allowed: true, reason: 'legacy-non-feedback' })
     } else {
+      // Generic files must be checked against FileAsset.visibility and their
+      // student/lesson/post relationship by the upload endpoint. Never treat
+      // “not a feedback image” as public to every authenticated account.
       results.set(value, { allowed: false, reason: 'forbidden' })
     }
   }

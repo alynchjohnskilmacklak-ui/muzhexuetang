@@ -112,9 +112,10 @@ tar -xf /tmp/src.tar
 echo "== [3/8] npm ci =="
 __REGISTRY_LINE__
 npm ci --no-audit --no-fund 2>&1 | tail -1
-echo "== [4/8] prisma generate + next build =="
+echo "== [4/8] type-check + prisma generate + next build =="
 export DATABASE_URL='postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder'
 export PRISMA_ENGINES_MIRROR='https://registry.npmmirror.com/-/binary/prisma'
+npm run type-check
 npx prisma generate
 npm run build
 

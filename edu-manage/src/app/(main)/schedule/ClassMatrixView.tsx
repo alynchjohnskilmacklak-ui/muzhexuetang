@@ -21,17 +21,22 @@ const border = '1px solid var(--color-hairline)'
 function LessonButton({ lesson, onClick }: { lesson: ScheduleLesson; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} style={{
-      display: 'block', width: '100%', minHeight: 54, padding: '8px 10px',
-      textAlign: 'left', border, borderRadius: 10, cursor: 'pointer',
-      background: 'var(--color-primary-bg)', color: 'var(--color-ink)',
-      font: 'inherit',
+      display: 'flex', width: '100%', alignItems: 'stretch', textAlign: 'left', border, borderRadius: 12, cursor: 'pointer',
+      background: '#FAF8F4', color: 'var(--color-ink)', font: 'inherit', overflow: 'hidden', padding: 0,
     }}>
-      <span style={{ display: 'block', fontSize: 13, fontWeight: 700 }}>{lesson.subject || '未设置学科'}</span>
-      <span style={{ display: 'block', marginTop: 2, fontSize: 11, color: 'var(--color-ink-muted)' }}>
-        {lesson.teacherName} · {lesson.roomName}
-      </span>
-      <span style={{ display: 'block', marginTop: 2, fontSize: 11, color: 'var(--color-ink-subtle)' }}>
-        {lesson.startTime}–{lesson.endTime}{typeof lesson.headcount === 'number' ? ` · ${lesson.headcount}人` : ''}
+      <span style={{
+        flexShrink: 0, width: 4, background: 'linear-gradient(180deg,#0E5E4E,#C9A45C)',
+      }} />
+      <span style={{ flex: 1, minWidth: 0, padding: '9px 10px' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#17352F' }}>{lesson.subject || '未设置学科'}</span>
+          {typeof lesson.headcount === 'number' && (
+            <span style={{ marginLeft: 'auto', fontSize: 10.5, padding: '1px 7px', borderRadius: 999, background: 'rgba(14,94,78,.08)', color: '#0E5E4E', fontWeight: 700, whiteSpace: 'nowrap' }}>{lesson.headcount}人</span>
+          )}
+        </span>
+        <span style={{ display: 'block', marginTop: 3, fontSize: 11.5, color: '#667085' }}>
+          {lesson.startTime}–{lesson.endTime} · {lesson.teacherName} · {lesson.roomName}
+        </span>
       </span>
     </button>
   )
@@ -110,14 +115,35 @@ export function ClassMatrixView({
         <div style={{ display: 'grid', gap: 10 }}>
           {classes.map((group) => {
             const lessons = lessonsFor(group.id)
+            const configured = configuredSubjects(group)
+            const notToday = configured.filter((subject) => !new Set(lessons.map((l) => l.subject)).has(subject))
             return (
-              <details key={group.id} style={{ border, borderRadius: 14, background: 'var(--color-surface-1)', overflow: 'hidden' }}>
-                <summary style={{ padding: 12, cursor: 'pointer', fontSize: 14, fontWeight: 700 }}>
-                  {group.name} <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--color-ink-muted)' }}>· 今日 {lessons.length} 节</span>
-                  <GroupSubjects group={group} lessons={lessons} />
+              <details key={group.id} style={{ border: '1px solid #EDE9E1', borderRadius: 14, background: '#fff', overflow: 'hidden', boxShadow: '0 2px 8px rgba(23,47,41,.05)' }}>
+                <summary style={{ padding: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{
+                    flexShrink: 0, minWidth: 30, textAlign: 'center', padding: '5px 8px', borderRadius: 9,
+                    background: 'rgba(14,94,78,.08)', color: '#0E5E4E', fontSize: 13, fontWeight: 800,
+                  }}>
+                    {lessons.length}
+                  </span>
+                  <span style={{ minWidth: 0, flex: 1 }}>
+                    <span style={{ display: 'block', fontSize: 14, fontWeight: 700, color: '#17352F' }}>{group.name}</span>
+                    <span style={{ display: 'block', marginTop: 2, fontSize: 11, color: '#98A2B3' }}>今日课次 · {group.course?.grade || '未设年级'}</span>
+                  </span>
+                  <span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 4, justifyContent: 'flex-end', maxWidth: '45%' }}>
+                    {configured.slice(0, 3).map((subject) => {
+                      const has = lessons.some((l) => l.subject === subject)
+                      return <span key={subject} style={{ padding: '2px 7px', borderRadius: 999, fontSize: 10.5, background: has ? 'rgba(29,158,117,.1)' : 'rgba(152,162,179,.12)', color: has ? '#1D9E75' : '#98A2B3' }}>{subject}</span>
+                    })}
+                    {configured.length > 3 && <span style={{ padding: '2px 7px', borderRadius: 999, fontSize: 10.5, background: 'rgba(152,162,179,.12)', color: '#98A2B3' }}>+{configured.length - 3}</span>}
+                  </span>
                 </summary>
-                <div style={{ padding: '0 12px 12px', display: 'grid', gap: 8 }}>
-                  {lessons.length ? lessons.map((lesson) => <LessonButton key={lesson.id} lesson={lesson} onClick={() => onLessonClick(lesson)} />) : <span style={{ color: 'var(--color-ink-subtle)', fontSize: 13 }}>今日暂无排课</span>}
+                <div style={{ padding: '2px 12px 12px', display: 'grid', gap: 8 }}>
+                  {lessons.length ? lessons.map((lesson) => <LessonButton key={lesson.id} lesson={lesson} onClick={() => onLessonClick(lesson)} />) : (
+                    <div style={{ padding: '10px 0', color: '#98A2B3', fontSize: 12.5 }}>
+                      {notToday.length ? `今日未排：${notToday.join('、')}` : '今日暂无排课'}
+                    </div>
+                  )}
                 </div>
               </details>
             )

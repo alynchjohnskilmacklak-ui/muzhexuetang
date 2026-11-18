@@ -1,0 +1,44 @@
+﻿=== �޸���reload ʱ���֮������ IP �ķ��ʼ�¼ ===
+  (��û���µķ��� ���� �������֤)
+
+=== ��� 12 ����֤�ļ���ط��� ===
+101.200.191.201 - - [03/Oct/2026:16:06:49 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:06:49 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:06:49 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+101.200.191.201 - - [03/Oct/2026:16:06:49 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+101.200.191.201 - - [03/Oct/2026:16:06:49 +0800] "HEAD /shenma-site-verification.txt HTTP/1.1" 200 0 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:07:09 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:07:09 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:07:10 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:07:10 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+101.200.191.201 - - [03/Oct/2026:16:07:10 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+101.200.191.201 - - [03/Oct/2026:16:07:10 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:07:11 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+
+=== nginx ���øĶ�ȷ�ϣ�80 �˿� server �飩===
+server {
+    listen 80;
+    server_name muzhexuetang.xyz www.muzhexuetang.xyz;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # վ��ƽ̨��֤�ļ���HTTP ֱ������ 301 ��ת
+    # ԭ��������֤���� http �����Ҳ�������ת��301 �ᵼ����֤ʧ��
+    location = /shenma-site-verification.txt {
+        alias /var/www/verify/shenma-site-verification.txt;
+        default_type text/plain;
+        add_header Cache-Control "no-store" always;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name muzhexuetang.xyz www.muzhexuetang.xyz;
+
+    ssl_certificate /etc/letsencrypt/live/muzhexuetang.xyz/fullchain.pem;

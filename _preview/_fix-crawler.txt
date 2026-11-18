@@ -1,0 +1,88 @@
+﻿========================================================================
+1) 备份
+========================================================================
+  2811 /etc/nginx/sites-available/edu-manage.conf.bak-crawler-20261003
+
+========================================================================
+2) 把 sitemap.xml / robots.txt 也复制到静态目录
+========================================================================
+total 12
+-rw-r--r-- 1 root root 956 Oct  3 16:10 robots.txt
+-rw-r--r-- 1 root root  68 Oct  3 16:07 shenma-site-verification.txt
+-rw-r--r-- 1 root root 415 Oct  3 16:10 sitemap.xml
+
+========================================================================
+3) 改写 80 端口 server 块
+========================================================================
+  已写入 OK 
+
+========================================================================
+4) nginx -t + reload
+========================================================================
+  nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+  RELOADED
+
+========================================================================
+5) http 直出验证
+========================================================================
+  /robots.txt                             http=[200 956]   https=[200 956]
+  /sitemap.xml                            http=[200 415]   https=[200 415]
+  /shenma-site-verification.txt           http=[200 68]   https=[200 68]
+  /baidu_verify_codeva-LcCyyIUZRF.html    http=[301 178]   https=[200 33]
+  /BingSiteAuth.xml                       http=[301 178]   https=[200 85]
+
+========================================================================
+6) 神马 UA 走 http 的真实内容
+========================================================================
+  --- robots.txt ---
+User-Agent: *
+Allow: /
+Allow: /images/
+Allow: /marketing/
+Disallow: /api/
+Disallow: /login
+Disallow: /reset-password
+Disallow: /activate/
+Disallow: /parent/
+Disallow: /teacher/
+Disallow: /dashboard
+Disallow: /academic-terms
+Disallow: /ai
+Disallow: /attendance
+Disallow: /classroom-feedback
+Disallow: /communications
+Disallow: /courses
+Disallow: /data-admin
+Disallow: /fees
+Disallow: /grades
+Disallow:
+  --- sitemap.xml ---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>https://muzhexuetang.xyz</loc>
+<lastmod>2026-09-06T00:00:00.000Z</lastmod>
+<changefreq>monthly</changefreq>
+<priority>1</priority>
+</url>
+<url>
+<loc>https://muzhexuetang.xyz/about</loc>
+<lastmod>2026-09-07T00:00:00.000Z</lastmod>
+<changefreq>weekly</changefreq>
+<priority>0.9</priority>
+</url>
+</urlset>
+
+========================================================================
+7) 回归：其他路径 http 仍应 301，https 全部正常
+========================================================================
+  http://muzhexuetang.xyz/                     301 178  (应 301)
+  http://muzhexuetang.xyz/about                301 178  (应 301)
+  http://muzhexuetang.xyz/login                301 178  (应 301)
+  https://muzhexuetang.xyz/                        200 67044  (应 200)
+  https://muzhexuetang.xyz/about                   200 59589  (应 200)
+  https://muzhexuetang.xyz/login                   200 33621  (应 200)
+  首页 sha: 97e36b12acf9a5cc (应 97e36b12acf9a5cc)
+
+完成

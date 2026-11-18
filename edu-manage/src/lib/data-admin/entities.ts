@@ -13,6 +13,14 @@ export type EntityKey =
   | 'materials'
   | 'meals'
 
+export const DATA_ADMIN_TRASH_ENTITIES: EntityKey[] = ['students', 'class-groups', 'class-lessons', 'exam-papers', 'materials']
+export const DATA_ADMIN_BUSINESS_LINKS: Record<EntityKey, string> = {
+  students: '/students', teachers: '/teachers', 'class-groups': '/courses', 'class-lessons': '/schedule',
+  enrollments: '/students', attendances: '/attendance', 'exam-papers': '/grades',
+  'classroom-feedbacks': '/feedback-performance', 'performance-posts': '/feedback-performance',
+  notifications: '/communication-center', materials: '/materials', meals: '/meals',
+}
+
 interface EntityDef {
   label: string
   model: string
@@ -29,7 +37,7 @@ export const DATA_ADMIN_ENTITIES: Record<EntityKey, EntityDef> = {
     label: '学员',
     model: 'student',
     searchableFields: ['name', 'school', 'grade', 'parentPhone', 'phone'],
-    editableFields: ['name', 'gender', 'birthYear', 'grade', 'school', 'phone', 'email', 'parentName', 'parentPhone', 'status', 'source', 'notes', 'mainTeacherId'],
+    editableFields: ['school', 'birthYear', 'notes'],
     hiddenFields: [],
     defaultSort: { field: 'createdAt', order: 'desc' },
     filterableFields: ['status', 'grade'],
@@ -39,7 +47,7 @@ export const DATA_ADMIN_ENTITIES: Record<EntityKey, EntityDef> = {
     label: '教师',
     model: 'teacher',
     searchableFields: ['name', 'phone', 'subjects', 'email'],
-    editableFields: ['name', 'gender', 'email', 'avatar', 'employmentType', 'status', 'education', 'university', 'major', 'graduationYear', 'currentUnit', 'subjects', 'bio', 'monthlyHours'],
+    editableFields: ['education', 'university', 'major', 'graduationYear', 'currentUnit', 'bio'],
     hiddenFields: [],
     defaultSort: { field: 'createdAt', order: 'desc' },
     filterableFields: ['status', 'employmentType'],
@@ -49,7 +57,7 @@ export const DATA_ADMIN_ENTITIES: Record<EntityKey, EntityDef> = {
     label: '班级',
     model: 'classGroup',
     searchableFields: ['name'],
-    editableFields: ['name', 'roomId', 'maxStudents', 'status', 'totalLessons', 'startDate', 'endDate', 'lessonStartTime', 'lessonMinutes', 'note'],
+    editableFields: ['note'],
     hiddenFields: [],
     defaultSort: { field: 'createdAt', order: 'desc' },
     filterableFields: ['status'],
@@ -59,7 +67,7 @@ export const DATA_ADMIN_ENTITIES: Record<EntityKey, EntityDef> = {
     label: '课次',
     model: 'classLesson',
     searchableFields: ['subject'],
-    editableFields: ['status', 'cancelReason', 'note', 'lessonDate', 'startTime', 'endTime', 'teacherId'],
+    editableFields: ['note'],
     hiddenFields: [],
     defaultSort: { field: 'lessonDate', order: 'desc' },
     filterableFields: ['status'],
@@ -79,7 +87,7 @@ export const DATA_ADMIN_ENTITIES: Record<EntityKey, EntityDef> = {
     label: '考勤',
     model: 'attendance',
     searchableFields: [],
-    editableFields: ['status', 'actualMinutes', 'hoursDeducted'],
+    editableFields: [],
     hiddenFields: ['hoursDeducted'],
     defaultSort: { field: 'createdAt', order: 'desc' },
     filterableFields: ['status'],
@@ -89,7 +97,7 @@ export const DATA_ADMIN_ENTITIES: Record<EntityKey, EntityDef> = {
     label: '试卷',
     model: 'examPaper',
     searchableFields: ['title', 'subject'],
-    editableFields: ['title', 'subject', 'paperDate', 'overallComment', 'tags', 'status'],
+    editableFields: ['overallComment'],
     hiddenFields: [],
     defaultSort: { field: 'createdAt', order: 'desc' },
     filterableFields: ['status', 'subject'],
@@ -99,7 +107,7 @@ export const DATA_ADMIN_ENTITIES: Record<EntityKey, EntityDef> = {
     label: '课堂反馈',
     model: 'classroomFeedback',
     searchableFields: ['summary'],
-    editableFields: ['summary', 'homework', 'status', 'knowledgePoints'],
+    editableFields: [],
     hiddenFields: [],
     defaultSort: { field: 'createdAt', order: 'desc' },
     filterableFields: ['status', 'targetType'],
@@ -109,7 +117,7 @@ export const DATA_ADMIN_ENTITIES: Record<EntityKey, EntityDef> = {
     label: '表现动态',
     model: 'performancePost',
     searchableFields: ['content'],
-    editableFields: ['content', 'type', 'mood', 'visibility', 'isPinned'],
+    editableFields: [],
     hiddenFields: [],
     defaultSort: { field: 'createdAt', order: 'desc' },
     filterableFields: ['type', 'visibility'],
@@ -119,7 +127,7 @@ export const DATA_ADMIN_ENTITIES: Record<EntityKey, EntityDef> = {
     label: '通知',
     model: 'notification',
     searchableFields: ['title', 'content', 'type'],
-    editableFields: ['title', 'content', 'status', 'type'],
+    editableFields: [],
     hiddenFields: [],
     defaultSort: { field: 'createdAt', order: 'desc' },
     filterableFields: ['status', 'type'],
@@ -129,17 +137,17 @@ export const DATA_ADMIN_ENTITIES: Record<EntityKey, EntityDef> = {
     label: '学习资料',
     model: 'studyMaterial',
     searchableFields: ['title', 'subject'],
-    editableFields: ['title', 'grade', 'subject', 'description', 'status', 'audience', 'isPinned'],
+    editableFields: ['description'],
     hiddenFields: [],
     defaultSort: { field: 'createdAt', order: 'desc' },
     filterableFields: ['status', 'grade', 'subject', 'audience'],
     sensitiveFields: [],
   },
   meals: {
-    label: '就餐',
+    label: '就餐菜单',
     model: 'mealMenu',
     searchableFields: ['mainDish', 'sideDish'],
-    editableFields: ['mainDish', 'sideDish', 'allowDouble', 'notes'],
+    editableFields: [],
     hiddenFields: [],
     defaultSort: { field: 'weekStart', order: 'desc' },
     filterableFields: ['mealType', 'dayOfWeek'],
@@ -173,7 +181,17 @@ export function filterEditableFields(entityKey: EntityKey, data: Record<string, 
   const allowed = new Set(def.editableFields)
   const out: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(data)) {
-    if (allowed.has(key)) out[key] = value
+    if (!allowed.has(key)) throw new Error(`字段 ${key} 请通过业务页面修改`)
+    if (key === 'birthYear' || key === 'graduationYear') {
+      if (value !== null && typeof value !== 'number' && typeof value !== 'string') throw new Error('年份必须为数字')
+      const year = value === '' || value === null ? null : Number(value)
+      if (year !== null && (!Number.isInteger(year) || year < 1900 || year > new Date().getFullYear() + 10)) throw new Error('年份须为1900年至当前年份后10年之间的整数')
+      out[key] = year
+    } else {
+      if (value !== null && typeof value !== 'string') throw new Error(`字段 ${key} 必须为文本`)
+      if (typeof value === 'string' && value.length > 10000) throw new Error(`字段 ${key} 最多10000字`)
+      out[key] = value
+    }
   }
   return out
 }

@@ -1,11 +1,11 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { Button, Modal, Typography } from 'antd'
+import { Button, Typography } from 'antd'
 import { ExclamationOutlined } from '@ant-design/icons'
-import { ResponsiveDialog, type ResponsiveDialogProps } from './ResponsiveDialog'
+import { BrandModal, type BrandModalProps } from './BrandModal'
 
-export type SafeFormModalProps = Omit<ResponsiveDialogProps, 'onClose'> & {
+export type SafeFormModalProps = Omit<BrandModalProps, 'onClose'> & {
   onClose: () => void
   dirty?: boolean
   closeConfirmTitle?: string
@@ -39,7 +39,7 @@ export function SafeFormModal({
 
   return (
     <>
-      <ResponsiveDialog
+      <BrandModal
         {...dialogProps}
         confirmLoading={confirmLoading}
         onClose={requestClose}
@@ -47,13 +47,14 @@ export function SafeFormModal({
         keyboard={!confirmLoading}
         closable={!confirmLoading}
       />
-      <Modal
+      <BrandModal
         open={discardOpen}
-        centered
+        title={null}
         footer={null}
         closable={false}
         width={420}
         className="safe-form-discard-modal"
+        rootClassName="safe-form-discard-root"
         onCancel={() => setDiscardOpen(false)}
       >
         <div className="safe-form-discard-content">
@@ -65,7 +66,7 @@ export function SafeFormModal({
             <Button type="primary" onClick={confirmDiscard}>放弃修改</Button>
           </div>
         </div>
-      </Modal>
+      </BrandModal>
     </>
   )
 }

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { getRequestPrisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/get-user'
 import { apiHandler } from '@/lib/api-handler'
 import { isClassGroupInActiveTerm } from '@/lib/admin-term-scope'
+import { enrollmentIncludesSubject } from '@/lib/enrollment-subjects'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,6 +37,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         select: {
           id: true,
           name: true,
+          status: true,
           teacherId: true,
           teacher: { select: { id: true, name: true } },
         },
@@ -47,13 +51,15 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
       if (!newTeacher) throw Object.assign(new Error('新老师不存在或未在职'), { status: 400 })
 
       // a. 更新未完成课次：按 teacherId + subject 过滤
+      const lessonWhere: Prisma.ClassLessonWhereInput = {
+        groupId: id,
+        teacherId: oldTeacherId,
+        status: { notIn: ['COMPLETED', 'CANCELLED'] },
+        ...(subject !== null ? { subject } : {}),
+      }
+      const affectedLessonRows = await tx.classLesson.findMany({ where: lessonWhere, select: { id: true } })
       const affectedLessons = await tx.classLesson.updateMany({
-        where: {
-          groupId: id,
-          teacherId: oldTeacherId,
-          status: { notIn: ['COMPLETED', 'CANCELLED'] },
-          ...(subject !== null ? { subject } : {}),
-        },
+        where: lessonWhere,
         data: { teacherId: newTeacherId },
       })
 
@@ -127,6 +133,7 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         select: {
           id: true,
           studentId: true,
+          subjects: true,
           student: { select: { mainTeacherId: true } },
         },
       })
@@ -166,7 +173,34 @@ export const POST = apiHandler(async (req: NextRequest, { params }: { params: Pr
         },
       })
 
-      return { success: true, affectedLessons: affectedLessons.count, subject }
+      const rosterRows = affectedLessonRows.length
+        ? await tx.classLessonStudent.findMany({
+            where: { lessonId: { in: affectedLessonRows.map((lesson) => lesson.id) } },
+            select: { studentId: true },
+          })
+        : []
+      const affectedStudentIds = [...new Set([
+        ...rosterRows.map((row) => row.studentId),
+        ...activeEnrollments
+          .filter((enrollment) => !subject || enrollmentIncludesSubject(enrollment.subjects, subject))
+          .map((enrollment) => enrollment.studentId),
+      ])]
+      let changeEventId: string | null = null
+      if (affectedLessons.count > 0) {
+        const change = await recordCourseChangeEvent(tx, {
+          eventType: 'TEACHER_REPLACED',
+          actorUserId: user.id,
+          groupId: id,
+          lessonIds: affectedLessonRows.map((lesson) => lesson.id),
+          studentIds: affectedStudentIds,
+          title: '课程任课教师已调整',
+          summary: `${group.name}的${subjectLabel}教师已由${oldTeacher?.name || oldTeacherId}调整为${newTeacher.name}，请查看最新课表。`,
+          notifyParents: group.status === 'ACTIVE',
+        })
+        changeEventId = change.event.id
+      }
+
+      return { success: true, affectedLessons: affectedLessons.count, subject, changeEventId }
     })
 
     return NextResponse.json(result)

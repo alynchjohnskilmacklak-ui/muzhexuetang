@@ -1,0 +1,125 @@
+﻿========================================================================
+1) nginx 日志文件在哪、有多大
+========================================================================
+total 4.0M
+-rw-r----- 1 www-data adm 1.7M Oct  3 16:06 access.log
+-rw-r----- 1 www-data adm 1.7M Oct  2 23:51 access.log.1
+-rw-r----- 1 www-data adm  37K Sep 23 23:58 access.log.10.gz
+-rw-r----- 1 www-data adm  44K Sep 22 23:51 access.log.11.gz
+-rw-r----- 1 www-data adm  51K Sep 21 23:59 access.log.12.gz
+-rw-r----- 1 www-data adm  97K Sep 20 23:49 access.log.13.gz
+-rw-r----- 1 www-data adm  42K Sep 19 23:48 access.log.14.gz
+-rw-r----- 1 www-data adm  24K Oct  1 23:58 access.log.2.gz
+-rw-r----- 1 www-data adm  29K Sep 30 23:48 access.log.3.gz
+-rw-r----- 1 www-data adm  22K Sep 29 23:59 access.log.4.gz
+-rw-r----- 1 www-data adm  38K Sep 28 23:59 access.log.5.gz
+-rw-r----- 1 www-data adm  27K Sep 27 23:55 access.log.6.gz
+-rw-r----- 1 www-data adm  63K Sep 26 23:53 access.log.7.gz
+-rw-r----- 1 www-data adm  41K Sep 25 23:28 access.log.8.gz
+-rw-r----- 1 www-data adm  37K Sep 24 23:59 access.log.9.gz
+-rw-r----- 1 www-data adm  11K Oct  3 15:50 error.log
+-rw-r----- 1 www-data adm 5.4K Oct  2 23:44 error.log.1
+-rw-r----- 1 www-data adm  748 Sep 23 23:46 error.log.10.gz
+-rw-r----- 1 www-data adm  574 Sep 22 23:43 error.log.11.gz
+
+========================================================================
+2) 所有对 shenma-site-verification.txt 的访问记录（全部日志）
+========================================================================
+111.53.198.24 - - [03/Oct/2026:15:55:23 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "ShenmaSpider"
+101.200.191.201 - - [03/Oct/2026:16:00:39 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:01:12 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+111.53.198.24 - - [03/Oct/2026:16:01:19 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-CN) WindowsPowerShell/5.1.26100.9444"
+140.205.85.18 - - [03/Oct/2026:16:03:58 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.30 - - [03/Oct/2026:16:03:58 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.48 - - [03/Oct/2026:16:05:39 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.2 - - [03/Oct/2026:16:05:40 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+101.200.191.201 - - [03/Oct/2026:16:06:23 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:06:23 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:06:23 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+111.53.198.24 - - [02/Oct/2026:16:08:08 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 43 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:08:08 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 43 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:15:57 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 43 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:15:57 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 43 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:18:43 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:18:43 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:18:43 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "curl/8.21.0"
+123.58.10.199 - - [02/Oct/2026:16:18:48 +0800] "GET /shenma-site-verification.txt%60 HTTP/1.1" 404 3600 "-" "Go-http-client/1.1"
+140.205.85.27 - - [02/Oct/2026:16:20:17 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+111.53.198.24 - - [02/Oct/2026:16:21:54 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:21:54 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:21:54 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "curl/8.21.0"
+140.205.85.20 - - [02/Oct/2026:16:22:19 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.22 - - [02/Oct/2026:16:22:19 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.2 - - [02/Oct/2026:16:24:02 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.24 - - [02/Oct/2026:16:24:03 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+123.58.10.199 - - [02/Oct/2026:16:24:15 +0800] "GET /shenma-site-verification.txt%60 HTTP/1.1" 404 3600 "-" "Go-http-client/1.1"
+111.53.198.24 - - [02/Oct/2026:16:25:56 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:25:56 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:25:56 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:27:25 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:27:25 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "Mozilla/5.0 (Linux; Android 8.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.108 MQQBrowser/6.2 TBS/043807 Safari/537.36 V1_AND_SQ_7.3.10_676_YYB_D QQ/7.3.10.3345 NetType/WIFI WebP/0.3.0 Pixel/1080"
+111.53.198.24 - - [02/Oct/2026:16:27:25 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)"
+111.53.198.24 - - [02/Oct/2026:16:27:25 +0800] "HEAD /shenma-site-verification.txt HTTP/1.1" 200 0 "-" "curl/8.21.0"
+111.53.198.24 - - [02/Oct/2026:16:28:06 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 43 "-" "curl/8.21.0"
+140.205.85.31 - - [02/Oct/2026:16:30:01 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.39 - - [02/Oct/2026:16:30:01 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.36 - - [02/Oct/2026:16:30:08 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.33 - - [02/Oct/2026:16:30:10 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+
+========================================================================
+3) 日志里有没有神马/UC 的爬虫 UA
+========================================================================
+  Shenma         命中 2 次
+  shenma         命中 37 次
+  YisouSpider    命中 0
+0 次
+  UCBrowser      命中 1 次
+  sm.cn          命中 0
+0 次
+  Spider         命中 2 次
+
+========================================================================
+4) 最近 30 条访问记录（看有没有异常爬虫）
+========================================================================
+101.200.191.201 - - [03/Oct/2026:16:00:38 +0800] "GET / HTTP/2.0" 200 65612 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:00:38 +0800] "GET / HTTP/2.0" 200 65612 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:00:39 +0800] "GET / HTTP/2.0" 200 65612 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:00:39 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:01:11 +0800] "GET / HTTP/2.0" 200 67044 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:01:11 +0800] "GET / HTTP/2.0" 200 67044 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:01:12 +0800] "GET / HTTP/2.0" 200 67044 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:01:12 +0800] "GET / HTTP/2.0" 200 67044 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:01:12 +0800] "GET / HTTP/2.0" 200 67044 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:01:12 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+111.53.198.24 - - [03/Oct/2026:16:01:18 +0800] "GET / HTTP/1.1" 200 67044 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-CN) WindowsPowerShell/5.1.26100.9444"
+111.53.198.24 - - [03/Oct/2026:16:01:19 +0800] "GET / HTTP/1.1" 200 67044 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-CN) WindowsPowerShell/5.1.26100.9444"
+111.53.198.24 - - [03/Oct/2026:16:01:19 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 200 68 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-CN) WindowsPowerShell/5.1.26100.9444"
+111.53.198.24 - - [03/Oct/2026:16:01:19 +0800] "GET /about HTTP/1.1" 200 59589 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-CN) WindowsPowerShell/5.1.26100.9444"
+111.53.198.24 - - [03/Oct/2026:16:01:19 +0800] "GET /login HTTP/1.1" 200 33621 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-CN) WindowsPowerShell/5.1.26100.9444"
+45.198.224.123 - - [03/Oct/2026:16:01:54 +0800] "GET / HTTP/1.1" 200 18771 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.46"
+170.106.143.6 - - [03/Oct/2026:16:02:45 +0800] "GET /about HTTP/1.1" 499 0 "-" "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1"
+140.205.85.18 - - [03/Oct/2026:16:03:58 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.30 - - [03/Oct/2026:16:03:58 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.48 - - [03/Oct/2026:16:05:39 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+140.205.85.2 - - [03/Oct/2026:16:05:40 +0800] "GET /shenma-site-verification.txt HTTP/1.1" 301 178 "-" "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36"
+101.200.191.201 - - [03/Oct/2026:16:06:23 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:06:23 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:06:23 +0800] "GET /shenma-site-verification.txt HTTP/2.0" 200 68 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:06:24 +0800] "GET / HTTP/2.0" 200 67044 "-" "curl/7.81.0"
+101.200.191.201 - - [03/Oct/2026:16:06:24 +0800] "GET / HTTP/2.0" 200 67044 "-" "curl/7.81.0"
+59.82.83.116 - - [03/Oct/2026:16:06:31 +0800] "GET /dns-query?dns=Z1kBAAABAAAAAAAAA3d3dwRiaW5nA2NvbQAAAQAB HTTP/1.1" 307 16 "-" "Dalvik/2.1.0"
+59.82.83.116 - - [03/Oct/2026:16:06:31 +0800] "GET /login HTTP/1.1" 200 7617 "-" "Dalvik/2.1.0"
+59.82.83.116 - - [03/Oct/2026:16:06:31 +0800] "GET / HTTP/1.1" 200 18771 "-" "Dalvik/2.1.0"
+59.82.83.116 - - [03/Oct/2026:16:06:31 +0800] "GET /favicon.ico HTTP/1.1" 200 7102 "-" "Dalvik/2.1.0"
+
+========================================================================
+5) 有没有针对验证文件的 4xx/5xx
+========================================================================
+28 200
+      5 301
+      4 307
+
+========================================================================
+6) 容器内 Next.js 日志里有没有验证相关请求
+========================================================================
+(无)

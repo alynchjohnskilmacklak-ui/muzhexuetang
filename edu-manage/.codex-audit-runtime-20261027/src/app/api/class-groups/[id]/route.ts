@@ -1,0 +1,376 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
+import { Prisma } from '@prisma/client'
+import { getRequestPrisma } from '@/lib/prisma'
+import { getCurrentUser } from '@/lib/get-user'
+import { activeEnrollmentWhere, visibleClassGroupWhere } from '@/lib/business-visibility'
+import { apiHandler } from '@/lib/api-handler'
+import { isClassGroupInActiveTerm, resolveAdminTermScope } from '@/lib/admin-term-scope'
+import { getActiveAcademicTerm } from '@/lib/academic-term'
+import { softDeleteEntity } from '@/lib/data-correction/trash'
+import { recordCourseChangeEvent } from '@/lib/course-change-events'
+import { syncStudentHourSnapshot } from '@/lib/student-hour-snapshot'
+
+export const dynamic = 'force-dynamic'
+
+function normalizeTeacherAssignments(body: Record<string, unknown>) {
+  if (Array.isArray(body.teacherAssignments)) {
+    const seen = new Set<string>()
+    return body.teacherAssignments
+      .map((item) => {
+        if (!item || typeof item !== 'object') return null
+        const entry = item as Record<string, unknown>
+        const teacherId = typeof entry.teacherId === 'string' ? entry.teacherId : ''
+        const subject = typeof entry.subject === 'string' ? entry.subject.trim() : ''
+        if (!teacherId || seen.has(`${teacherId}:${subject}`)) return null
+        seen.add(`${teacherId}:${subject}`)
+        return { teacherId, subject: subject || null }
+      })
+      .filter((item): item is { teacherId: string; subject: string | null } => Boolean(item))
+  }
+
+  const teacherIds = Array.isArray(body.teacherIds)
+    ? [...new Set(body.teacherIds.filter((tid): tid is string => typeof tid === 'string' && tid.length > 0))]
+    : []
+  const teacherId = typeof body.teacherId === 'string' && body.teacherId ? body.teacherId : teacherIds[0]
+  return (teacherIds.length ? teacherIds : teacherId ? [teacherId] : []).map((id) => ({
+    teacherId: id,
+    subject: typeof body.subject === 'string' ? body.subject : null,
+  }))
+}
+
+export const GET = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  const user = await getCurrentUser()
+  if (!user) return NextResponse.json({ error: '未登录' }, { status: 401 })
+  const prisma = await getRequestPrisma()
+
+  const { id } = await params
+  const selectedTerm = user.role === 'admin'
+    ? await resolveAdminTermScope(prisma, user.division, req)
+    : await getActiveAcademicTerm(prisma, user.division)
+  if (!selectedTerm) {
+    return NextResponse.json({ error: '当前没有可查看的运营批次' }, { status: 404 })
+  }
+
+  const accessWhere: Prisma.ClassGroupWhereInput = {
+    id,
+    division: user.division,
+    termId: selectedTerm.id,
+    ...visibleClassGroupWhere,
+  }
+  if (user.role === 'teacher') {
+    if (!user.teacherId) return NextResponse.json({ error: '教师账号未绑定教师档案' }, { status: 403 })
+    accessWhere.OR = [
+      { teacherId: user.teacherId },
+      { teacherAssignments: { some: { teacherId: user.teacherId } } },
+    ]
+  } else if (user.role === 'parent') {
+    accessWhere.enrollments = {
+      some: {
+        status: 'ACTIVE',
+        student: {
+          status: { not: 'ARCHIVED' },
+          OR: [{ parentId: user.id }, { parentUserId: user.id }],
+        },
+      },
+    }
+  } else if (user.role !== 'admin') {
+    return NextResponse.json({ error: '无权限' }, { status: 403 })
+  }
+
+  const group = await prisma.classGroup.findFirst({
+    where: accessWhere,
+    include: {
+      course: true,
+      teacher: { select: { id: true, name: true, phone: true } },
+      teacherAssignments: {
+        include: { teacher: { select: { id: true, name: true, phone: true, subjects: true } } },
+        orderBy: { createdAt: 'asc' },
+      },
+      room: true,
+      term: { select: { id: true, name: true, status: true } },
+      enrollments: { where: activeEnrollmentWhere, include: { student: true }, orderBy: { enrolledAt: 'asc' } },
+      classLessons: {
+        orderBy: { lessonDate: 'asc' },
+        include: { teacher: { select: { id: true, name: true, subjects: true } } },
+      },
+      assessments: { orderBy: { assessDate: 'desc' } },
+    },
+  })
+  if (!group) return NextResponse.json({ error: '班级不存在' }, { status: 404 })
+
+  // 报名记录是学科选择的唯一事实来源。空数组仅用于兼容迁移前的全学科报名。
+  const groupSubjects = [...new Set([
+    group.course.subject,
+    ...group.teacherAssignments.map((assignment) => assignment.subject),
+    ...group.classLessons.map((lesson) => lesson.subject),
+  ].filter((subject): subject is string => Boolean(subject)))]
+  const enrollmentsWithSubjects = group.enrollments.map((e) => ({
+    ...e,
+    subjects: e.subjects.length ? e.subjects : groupSubjects,
+  }))
+
+  revalidatePath('/parent/dashboard')
+  revalidatePath('/parent/schedule')
+  revalidatePath('/parent/grades')
+  revalidatePath('/parent/performance')
+  revalidatePath('/parent/teachers')
+
+  return NextResponse.json({ ...group, enrollments: enrollmentsWithSubjects })
+})
+
+export const PATCH = apiHandler(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  const user = await getCurrentUser()
+  if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
+
+  const { id } = await params
+  if (!await isClassGroupInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能修改班级' }, { status: 409 })
+  }
+  const body = await req.json()
+  const { name, teacherId, roomId, maxStudents, status, note } = body
+  const normalizedAssignments = normalizeTeacherAssignments(body)
+  const primaryTeacherId = typeof teacherId === 'string' && teacherId ? teacherId : normalizedAssignments[0]?.teacherId
+
+  const group = await prisma.$transaction(async (tx) => {
+    const previous = await tx.classGroup.findUnique({
+      where: { id },
+      select: {
+        id: true, name: true, teacherId: true, roomId: true,
+        teacher: { select: { id: true, name: true } },
+        teacherAssignments: { select: { teacherId: true, subject: true, role: true } },
+      },
+    })
+    if (!previous) throw new Error('CLASS_GROUP_NOT_FOUND')
+    const nextAssignments = normalizedAssignments.map((item, index) => ({
+      teacherId: item.teacherId,
+      subject: item.subject || null,
+      role: index === 0 ? 'PRIMARY' : 'SUBJECT',
+    }))
+    const assignmentKey = (items: Array<{ teacherId: string; subject: string | null; role: string }>) => JSON.stringify(
+      [...items].sort((a, b) => `${a.subject || ''}:${a.role}:${a.teacherId}`.localeCompare(`${b.subject || ''}:${b.role}:${b.teacherId}`)),
+    )
+    const teacherAssignmentChanged = Boolean(primaryTeacherId && primaryTeacherId !== previous.teacherId)
+      || (normalizedAssignments.length > 0 && assignmentKey(nextAssignments) !== assignmentKey(previous.teacherAssignments))
+
+    const updated = await tx.classGroup.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(primaryTeacherId && { teacherId: primaryTeacherId }),
+        ...(roomId !== undefined && { roomId }),
+        ...(maxStudents && { maxStudents }),
+        ...(status && { status }),
+        ...(note !== undefined && { note }),
+        updatedAt: new Date(),
+      },
+    })
+
+    // 班级归档：级联清理学员报名、课时、未来课次
+    if (primaryTeacherId && primaryTeacherId !== previous.teacherId) {
+      const nextTeacher = await tx.teacher.findUnique({
+        where: { id: primaryTeacherId },
+        select: { id: true, name: true },
+      })
+      const affectedLessons = await tx.classLesson.updateMany({
+        where: {
+          groupId: id,
+          status: { notIn: ['COMPLETED', 'CANCELLED'] },
+          teacherId: previous.teacherId,
+          OR: [
+            { subject: null },
+            ...(normalizedAssignments.find((assignment) => assignment.teacherId === primaryTeacherId)?.subject
+              ? [{ subject: normalizedAssignments.find((assignment) => assignment.teacherId === primaryTeacherId)!.subject }]
+              : []),
+          ],
+        },
+        data: { teacherId: primaryTeacherId },
+      })
+      const activeEnrollments = await tx.enrollment.findMany({
+        where: { groupId: id, status: 'ACTIVE' },
+        select: { id: true, studentId: true, student: { select: { mainTeacherId: true } } },
+      })
+      for (const enrollment of activeEnrollments) {
+        if (enrollment.student.mainTeacherId !== previous.teacherId) continue
+        const oldTeacherGroupCount = await tx.enrollment.count({
+          where: {
+            studentId: enrollment.studentId,
+            groupId: { not: id },
+            status: 'ACTIVE',
+            group: {
+              status: { not: 'ARCHIVED' },
+              course: { isActive: true },
+              OR: [
+                { teacherId: previous.teacherId },
+                { teacherAssignments: { some: { teacherId: previous.teacherId } } },
+              ],
+            },
+          },
+        })
+        if (oldTeacherGroupCount === 0) {
+          await tx.student.update({ where: { id: enrollment.studentId }, data: { mainTeacherId: primaryTeacherId } })
+        }
+      }
+      await tx.activityLog.create({
+        data: {
+          userId: user.id,
+          action: '更换老师',
+          detail: `${updated.name}：${previous.teacher?.name || '未分配'} -> ${nextTeacher?.name || primaryTeacherId}，影响 ${affectedLessons.count} 节未完成课次`,
+        },
+      })
+    }
+
+    if (status === 'ARCHIVED') {
+      const activeEnrollments = await tx.enrollment.findMany({
+        where: { groupId: id, status: 'ACTIVE' },
+        select: { id: true, studentId: true, student: { select: { parentId: true, parentUserId: true } } },
+      })
+      const lessonIds = (await tx.classLesson.findMany({ where: { groupId: id }, select: { id: true } })).map((lesson) => lesson.id)
+      if (activeEnrollments.length) {
+        await tx.enrollment.updateMany({
+          where: { groupId: id, status: 'ACTIVE' },
+          data: { status: 'WITHDRAWN', remainHours: 0 },
+        })
+      }
+      await tx.classLesson.updateMany({
+        where: { groupId: id, status: { notIn: ['COMPLETED', 'CANCELLED'] } },
+        data: { status: 'CANCELLED', cancelReason: '班级已归档' },
+      })
+      if (lessonIds.length) {
+        await tx.performancePost.updateMany({
+          where: { classLessonId: { in: lessonIds }, deletedAt: null },
+          data: { deletedAt: new Date(), isReadByParent: true },
+        })
+        await tx.examPaper.updateMany({
+          where: { classLessonId: { in: lessonIds }, status: { not: 'DELETED' } },
+          data: { status: 'DELETED', isReadByParent: true },
+        })
+        await tx.classroomFeedback.updateMany({
+          where: { classLessonId: { in: lessonIds }, status: { not: 'ARCHIVED' } },
+          data: { status: 'ARCHIVED', notifySent: true },
+        })
+      }
+      const parentIds = [...new Set(activeEnrollments
+        .flatMap((enr) => [enr.student.parentId, enr.student.parentUserId])
+        .filter((parentId): parentId is string => Boolean(parentId)))]
+      if (parentIds.length) {
+        await tx.notification.deleteMany({
+          where: { userId: { in: parentIds }, link: { in: ['/parent/performance', '/parent/grades', '/parent/schedule'] } },
+        })
+      }
+      await recordCourseChangeEvent(tx, {
+        eventType: 'CLASS_ARCHIVED',
+        actorUserId: user.id,
+        groupId: id,
+        lessonIds,
+        studentIds: activeEnrollments.map((enrollment) => enrollment.studentId),
+        title: '班级课程已归档',
+        summary: `${updated.name}已归档，未完成的后续课程已取消。`,
+      })
+      // 清除学员 mainTeacher 引用（如无其他该教师班级）
+      for (const enr of activeEnrollments) {
+        const student = await tx.student.findUnique({ where: { id: enr.studentId }, select: { mainTeacherId: true } })
+        if (student?.mainTeacherId) {
+          const otherGroups = await tx.enrollment.count({
+            where: { studentId: enr.studentId, id: { not: enr.id }, status: 'ACTIVE',
+              group: { OR: [{ teacherId: student.mainTeacherId }, { teacherAssignments: { some: { teacherId: student.mainTeacherId } } }] } },
+          })
+          if (otherGroups === 0) {
+            await tx.student.update({ where: { id: enr.studentId }, data: { mainTeacherId: null } })
+          }
+        }
+        const activeClassCount = await tx.enrollment.count({
+          where: {
+            studentId: enr.studentId,
+            status: 'ACTIVE',
+            group: { status: { not: 'ARCHIVED' }, course: { isActive: true } },
+          },
+        })
+        if (activeClassCount === 0) {
+          await tx.student.update({
+            where: { id: enr.studentId },
+            data: { status: 'TRIAL', remainHours: 0, totalHours: 0, mainTeacherId: null },
+          })
+        }
+        await syncStudentHourSnapshot(tx, enr.studentId)
+      }
+      await tx.activityLog.create({
+        data: { userId: user.id, action: '归档班级', detail: `${updated.name}，清理 ${activeEnrollments.length} 名学员报名及课时` },
+      })
+    } else {
+      if (normalizedAssignments.length) {
+        await tx.classGroupTeacher.deleteMany({ where: { groupId: id } })
+        await tx.classGroupTeacher.createMany({
+          data: normalizedAssignments.map((item, index) => ({
+            groupId: id, teacherId: item.teacherId, subject: item.subject,
+            role: index === 0 ? 'PRIMARY' : 'SUBJECT',
+          })), skipDuplicates: true,
+        })
+        // Keep existing future lessons aligned with the subject-teacher map.
+        // A primary-teacher edit must never overwrite colleagues' subjects.
+        for (const assignment of normalizedAssignments) {
+          if (!assignment.subject) continue
+          await tx.classLesson.updateMany({
+            where: {
+              groupId: id,
+              subject: assignment.subject,
+              status: { notIn: ['COMPLETED', 'CANCELLED'] },
+              deletedAt: null,
+            },
+            data: { teacherId: assignment.teacherId },
+          })
+        }
+      }
+      await tx.activityLog.create({ data: { userId: user.id, action: '编辑班级', detail: updated.name } })
+      if (teacherAssignmentChanged || (roomId !== undefined && roomId !== previous.roomId)) {
+        const [scheduledLessons, activeEnrollments] = await Promise.all([
+          tx.classLesson.findMany({
+            where: { groupId: id, status: 'SCHEDULED', deletedAt: null },
+            select: { id: true },
+          }),
+          tx.enrollment.findMany({
+            where: { groupId: id, status: 'ACTIVE', deletedAt: null },
+            select: { studentId: true },
+          }),
+        ])
+        await recordCourseChangeEvent(tx, {
+          eventType: teacherAssignmentChanged ? 'TEACHER_ASSIGNMENT_CHANGED' : 'CLASS_ROOM_CHANGED',
+          actorUserId: user.id,
+          groupId: id,
+          lessonIds: scheduledLessons.map((lesson) => lesson.id),
+          studentIds: activeEnrollments.map((enrollment) => enrollment.studentId),
+          title: teacherAssignmentChanged ? '班级任课安排已调整' : '班级上课地点已调整',
+          summary: teacherAssignmentChanged
+            ? `${updated.name}的任课安排已更新，请查看最新课程表。`
+            : `${updated.name}的上课地点已更新，请查看最新课程表。`,
+        })
+      }
+    }
+
+    return updated
+  })
+
+  return NextResponse.json(group)
+})
+
+export const DELETE = apiHandler(async (_req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  const user = await getCurrentUser()
+  if (!user || user.role !== 'admin') return NextResponse.json({ error: '无权限' }, { status: 403 })
+  const prisma = await getRequestPrisma()
+
+  const { id } = await params
+  if (!await isClassGroupInActiveTerm(prisma, id)) {
+    return NextResponse.json({ error: '历史批次只允许查看，不能删除班级' }, { status: 409 })
+  }
+  const group = await prisma.classGroup.findUnique({ where: { id } })
+  if (!group) return NextResponse.json({ error: '班级不存在' }, { status: 404 })
+
+  const deleted = await softDeleteEntity(prisma, 'ClassGroup', id, user, 'delete_from_course_management')
+  revalidatePath('/parent/dashboard')
+  revalidatePath('/parent/schedule')
+  revalidatePath('/parent/grades')
+  revalidatePath('/parent/performance')
+  revalidatePath('/parent/teachers')
+  return NextResponse.json({ success: true, deleted })
+})

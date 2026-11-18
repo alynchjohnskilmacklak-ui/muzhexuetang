@@ -4,6 +4,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import NextImage from 'next/image'
+import { drawBrandHeader, applyWatermark, domToCanvas } from '@/lib/export-brand'
+
+const BRAND_BAR_HEIGHT = 74
 
 type School = {
   schoolId: string
@@ -134,16 +137,14 @@ export default function OfficialVolunteerFormPage() {
     if (!pageRef.current) return
     try {
       setExporting(true)
-      const html2canvas = (await import('html2canvas')).default
       const { jsPDF } = await import('jspdf')
-      const canvas = await html2canvas(pageRef.current, {
+      const canvas = await domToCanvas(pageRef.current, {
         scale: 2,
         backgroundColor: '#ffffff',
-        useCORS: true,
-        onclone: (documentClone) => {
-          documentClone.querySelectorAll<HTMLSelectElement>('.page select').forEach((select) => {
-            const replacement = documentClone.createElement('div')
-            const computed = documentClone.defaultView?.getComputedStyle(select)
+        onclone: (clone) => {
+          clone.querySelectorAll<HTMLSelectElement>('.page select').forEach((select) => {
+            const replacement = document.createElement('div')
+            const computed = select.ownerDocument.defaultView?.getComputedStyle(select)
             replacement.textContent = select.options[select.selectedIndex]?.text || '请选择'
             if (computed) {
               replacement.style.cssText = [
@@ -168,11 +169,20 @@ export default function OfficialVolunteerFormPage() {
           })
         },
       })
+      // 顶部叠加标准品牌条（Logo + 标题 + 品牌名），原表单内容整体下移 BRAND_BAR_HEIGHT
+      const brandCanvas = document.createElement('canvas')
+      brandCanvas.width = canvas.width
+      brandCanvas.height = canvas.height + BRAND_BAR_HEIGHT
+      const bctx = brandCanvas.getContext('2d')!
+      await drawBrandHeader(bctx, brandCanvas.width, '志愿填报模拟表')
+      bctx.drawImage(canvas, 0, BRAND_BAR_HEIGHT)
+      // 全页斜向低透明度水印（canvas 烤入，中文可正常显示）
+      applyWatermark(bctx, brandCanvas.width, brandCanvas.height)
       const pdf = new jsPDF('p', 'mm', 'a4')
       const pageWidth = 210
       const pageHeight = 297
-      const imageHeight = canvas.height * pageWidth / canvas.width
-      const image = canvas.toDataURL('image/png')
+      const imageHeight = brandCanvas.height * pageWidth / brandCanvas.width
+      const image = brandCanvas.toDataURL('image/png')
       let heightLeft = imageHeight
       let position = 0
       pdf.addImage(image, 'PNG', 0, position, pageWidth, imageHeight)

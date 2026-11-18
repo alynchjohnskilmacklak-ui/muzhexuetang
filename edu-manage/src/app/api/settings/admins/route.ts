@@ -5,6 +5,7 @@ import { getRequestPrisma } from '@/lib/prisma'
 import { apiHandler } from '@/lib/api-handler'
 import { getPasswordPolicyError } from '@/lib/password-policy'
 import { requireSuperAdmin } from '@/lib/get-user'
+import { normalizeLoginPhone } from '@/lib/login-accounts'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +28,7 @@ export const GET = apiHandler(async () => {
     select: {
       id: true,
       email: true,
+      phone: true,
       name: true,
       status: true,
       lastLoginAt: true,
@@ -47,6 +49,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
   const name = typeof body.name === 'string' ? body.name.trim() : ''
   const password = typeof body.password === 'string' ? body.password : ''
+  const rawPhone = typeof body.phone === 'string' ? body.phone.trim() : ''
+  const phone = rawPhone ? normalizeLoginPhone(rawPhone) : null
   const currentDivision = currentUser.division === 'SENIOR' ? 'SENIOR' : 'JUNIOR'
 
   if (!emailPattern.test(email)) {
@@ -55,7 +59,13 @@ export const POST = apiHandler(async (req: NextRequest) => {
   if (!name) {
     return NextResponse.json({ error: '姓名不能为空' }, { status: 400 })
   }
-  const passwordError = getPasswordPolicyError(password, { identifiers: [email, name] })
+  if (rawPhone && !phone) {
+    return NextResponse.json({ error: '请输入有效的11位中国大陆手机号' }, { status: 400 })
+  }
+  if (phone && await prisma.user.findUnique({ where: { phone }, select: { id: true } })) {
+    return NextResponse.json({ error: '该手机号已绑定其他管理账号' }, { status: 409 })
+  }
+  const passwordError = getPasswordPolicyError(password, { identifiers: [email, name, phone || ''] })
   if (passwordError) return NextResponse.json({ error: passwordError }, { status: 400 })
 
   const existing = await prisma.user.findUnique({ where: { email } })
@@ -73,10 +83,12 @@ export const POST = apiHandler(async (req: NextRequest) => {
         role: 'admin',
         status: 'active',
         division: currentDivision,
+        phone,
       },
       select: {
         id: true,
         email: true,
+        phone: true,
         name: true,
         status: true,
         createdAt: true,

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "qywxSenderUserId" TEXT;
+ALTER TABLE "Notification" ADD COLUMN IF NOT EXISTS "qywxMsgId" TEXT;

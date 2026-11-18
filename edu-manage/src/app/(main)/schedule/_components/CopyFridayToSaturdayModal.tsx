@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, DatePicker, message, Modal, Space, Tag, Alert, Descriptions, List, Divider } from 'antd'
+import { Button, DatePicker, message, Space, Tag, Alert, Descriptions, List, Divider } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { CalendarOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { useDivision } from '@/contexts/DivisionContext'
@@ -107,7 +108,7 @@ export function CopyFridayToSaturdayModal({ open, onClose, onSuccess }: Props) {
   const conflictTypes = [...new Set(conflicts.map((c) => c.type))]
 
   return (
-    <Modal
+    <BrandModal
       title="复制周五课程到周六"
       open={open}
       onCancel={handleClose}
@@ -234,6 +235,6 @@ export function CopyFridayToSaturdayModal({ open, onClose, onSuccess }: Props) {
           </>
         )}
       </Space>
-    </Modal>
+    </BrandModal>
   )
 }

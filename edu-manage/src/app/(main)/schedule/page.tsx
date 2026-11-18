@@ -3,8 +3,10 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { Card, Input, Modal, Spin, message } from 'antd'
+import { Card, Input, Spin, message } from 'antd'
+import { BrandModal } from '@/components/Common/BrandModal'
 import { format, startOfWeek } from 'date-fns'
+import useSWR from 'swr'
 import { PageLayout } from '@/components/Layout/PageLayout'
 import { ClassMatrixView } from './ClassMatrixView'
 import { SchedulePeriod } from '@/lib/schedule-periods'
@@ -12,6 +14,12 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { useSchedulePeriods } from '@/hooks/useSchedulePeriods'
 import { useDivision } from '@/contexts/DivisionContext'
 import { useSWRConfig } from 'swr'
+import {
+  ApartmentOutlined, AppstoreOutlined, CalendarOutlined, CheckCircleOutlined,
+  ClockCircleOutlined, CloseCircleOutlined, CrownOutlined, EnvironmentOutlined, HeatMapOutlined, PlusOutlined,
+  TeamOutlined,
+} from '@ant-design/icons'
+import { OneOnOneView } from './OneOnOneView'
 
 const RoomMatrixView = dynamic(() => import('./RoomMatrixView').then((module) => module.RoomMatrixView))
 const TeacherWeekView = dynamic(() => import('./TeacherWeekView').then((module) => module.TeacherWeekView))
@@ -25,11 +33,19 @@ const CopyFridayToSaturdayModal = dynamic(() => import('./_components/CopyFriday
 const ManualLessonModal = dynamic(() => import('./_components/ManualLessonModal').then((module) => module.ManualLessonModal))
 
 const VIEW_TABS = [
-  { key: 'class-matrix', label: '班级课表' },
-  { key: 'room-matrix', label: '教室矩阵' },
-  { key: 'teacher-week', label: '教师课表' },
-  { key: 'week-heatmap', label: '周总览' },
+  { key: 'class-matrix', label: '班级课表', icon: <AppstoreOutlined /> },
+  { key: 'room-matrix', label: '教室矩阵', icon: <EnvironmentOutlined /> },
+  { key: 'teacher-week', label: '教师课表', icon: <TeamOutlined /> },
+  { key: 'one-on-one', label: 'VIP课程', icon: <CrownOutlined /> },
+  { key: 'week-heatmap', label: '周总览', icon: <HeatMapOutlined /> },
 ]
+
+const fetchJson = async (url: string) => {
+  const res = await fetch(url)
+  const payload = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(payload.error || '加载失败')
+  return payload
+}
 
 export default function SchedulePage() {
   return (
@@ -72,6 +88,13 @@ function SchedulePageInner() {
   const [cancelReason, setCancelReason] = useState('')
   const [cancelling, setCancelling] = useState(false)
   const { periods, mutate: mutatePeriods } = useSchedulePeriods(division)
+
+  const { data: overviewData } = useSWR(
+    `/api/schedules/overview?division=${encodeURIComponent(division)}`,
+    fetchJson,
+    { refreshInterval: 60_000 },
+  )
+  const overview = (overviewData as { data?: Record<string, number> } | undefined)?.data
 
   const handleRoomCellClick = (_room: Record<string, unknown>, _period: SchedulePeriod) => {
     setManualLessonOpen(true)
@@ -147,9 +170,57 @@ function SchedulePageInner() {
   }
 
   return (
-    <PageLayout title="排课系统" subtitle="班级课表 · 教室矩阵 · 教师课表 · 周总览">
-      <Card bordered={false} style={{ marginBottom: 12, borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }} styles={{ body: { padding: '8px 14px' } }}>
-        <div className="mobile-scroll-x" style={{ display: 'flex', gap: 4, flexWrap: isMobile ? 'nowrap' : 'wrap', overflowX: isMobile ? 'auto' : undefined }}>
+    <PageLayout title="排课系统" subtitle="今日课次 · 教室矩阵 · 教师课表 · VIP课程 · 周总览">
+      {/* 综合概览大卡 */}
+      <div style={{
+        borderRadius: 16,
+        background: 'linear-gradient(135deg,#123C35 0%,#0E5E4E 60%,#0B4B40 100%)',
+        boxShadow: '0 8px 24px rgba(14,94,78,.18)',
+        padding: isMobile ? '14px' : '18px 22px',
+        marginBottom: 12,
+        overflow: 'hidden',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'stretch', gap: isMobile ? 10 : 24, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(242,227,182,.8)', fontSize: isMobile ? 11.5 : 13, fontWeight: 600, letterSpacing: 1 }}>
+              <CalendarOutlined /> 本周排课总览
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 6 }}>
+              <span style={{ color: '#F7F3E8', fontSize: isMobile ? 34 : 44, fontWeight: 800, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{overview?.weekTotal ?? 0}</span>
+              <span style={{ color: 'rgba(242,227,182,.7)', fontSize: isMobile ? 12 : 14, fontWeight: 600 }}>节课次</span>
+            </div>
+            <div style={{ marginTop: 6, display: 'flex', gap: isMobile ? 10 : 18, flexWrap: 'wrap', color: 'rgba(247,243,232,.72)', fontSize: isMobile ? 10.5 : 12 }}>
+              <span><CalendarOutlined style={{ marginRight: 3 }} />今日 {overview?.todayTotal ?? 0} 节</span>
+              <span><CloseCircleOutlined style={{ marginRight: 3 }} />今日取消 {overview?.todayCancelled ?? 0}</span>
+              <span><CloseCircleOutlined style={{ marginRight: 3 }} />本周取消 {overview?.weekCancelled ?? 0}</span>
+            </div>
+          </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? 'repeat(3, minmax(0,1fr))' : 'repeat(3, minmax(0,120px))',
+            gap: isMobile ? 8 : 14,
+            borderLeft: isMobile ? 'none' : '1px solid rgba(242,227,182,.22)',
+            borderTop: isMobile ? '1px solid rgba(242,227,182,.22)' : 'none',
+            paddingLeft: isMobile ? 0 : 24,
+            paddingTop: isMobile ? 10 : 0,
+            width: isMobile ? '100%' : 'auto',
+          }}>
+            {[
+              { label: '活跃教室', value: overview?.activeRooms ?? 0, icon: <EnvironmentOutlined /> },
+              { label: '上课教师', value: overview?.weekTeachers ?? 0, icon: <TeamOutlined /> },
+              { label: '运行班级', value: overview?.runningGroups ?? 0, icon: <ApartmentOutlined /> },
+            ].map((item) => (
+              <div key={item.label} style={{ display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start', gap: 4, minWidth: 0 }}>
+                <span style={{ color: 'rgba(242,227,182,.75)', fontSize: isMobile ? 11 : 12 }}>{item.icon} {item.label}</span>
+                <span style={{ color: '#F7F3E8', fontSize: isMobile ? 20 : 26, fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <Card bordered={false} style={{ marginBottom: 12, borderRadius: 14, background: '#ffffff', border: '1px solid #EDE9E1', boxShadow: '0 2px 8px rgba(23,47,41,.05)' }} styles={{ body: { padding: '10px 14px' } }}>
+        <div className="mobile-scroll-x" style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: isMobile ? 'nowrap' : 'wrap', overflowX: isMobile ? 'auto' : undefined }}>
           {VIEW_TABS.map(tab => (
             <button
               key={tab.key}
@@ -157,54 +228,62 @@ function SchedulePageInner() {
                 switchView(tab.key)
               }}
               style={{
-                padding: isMobile ? '6px 10px' : '6px 18px',
-                border: viewMode === tab.key ? '1px solid #E8784A' : '1px solid transparent',
-                borderRadius: 6,
-                background: viewMode === tab.key ? 'rgba(232,120,74,.08)' : 'transparent',
-                color: viewMode === tab.key ? '#E8784A' : 'var(--color-text-secondary, #666)',
-                fontWeight: viewMode === tab.key ? 600 : 400,
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: isMobile ? '7px 12px' : '8px 18px',
+                border: viewMode === tab.key ? '1px solid rgba(14,94,78,.45)' : '1px solid #EEE7E1',
+                borderRadius: 999,
+                background: viewMode === tab.key ? 'linear-gradient(135deg,#123C35,#0E5E4E)' : '#FAF8F4',
+                color: viewMode === tab.key ? '#F2E3B6' : '#5A6472',
+                fontWeight: viewMode === tab.key ? 700 : 500,
                 fontSize: 13,
                 cursor: 'pointer',
-                transition: 'all .15s',
+                transition: 'all .18s',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
+                boxShadow: viewMode === tab.key ? '0 3px 10px rgba(14,94,78,.25)' : 'none',
               }}
             >
+              {tab.icon}
               {tab.label}
             </button>
           ))}
           <button onClick={() => setManualLessonOpen(true)} style={{
             marginLeft: isMobile ? 0 : 'auto',
-            padding: '7px 18px',
-            borderRadius: 6,
-            background: '#E8784A',
-            color: '#fff',
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 16px',
+            borderRadius: 999,
+            background: 'linear-gradient(135deg,#0E5E4E,#0B4B40)',
+            color: '#F7F3E8',
             border: 'none',
             fontSize: 13,
-            fontWeight: 600,
+            fontWeight: 700,
             cursor: 'pointer',
             whiteSpace: 'nowrap',
             flexShrink: 0,
+            boxShadow: '0 3px 10px rgba(14,94,78,.25)',
           }}>
-            + 临时加课
+            <PlusOutlined /> 临时加课
           </button>
           <button onClick={() => setScheduleFormOpen(true)} style={{
-            padding: '7px 14px', borderRadius: 6, background: 'var(--color-surface-1)', color: 'var(--color-text)',
-            border: '1px solid var(--color-border)', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 14px', borderRadius: 999, background: '#fff', color: '#0E5E4E',
+            border: '1px solid rgba(14,94,78,.4)', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
           }}>
-              新建课次
+            <PlusOutlined /> 新建课次
           </button>
           <button onClick={() => setCopyFridayOpen(true)} style={{
-            padding: '7px 14px', borderRadius: 6, background: '#fff', color: '#1D9E75',
-            border: '1px solid #1D9E75', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 14px', borderRadius: 999, background: '#fff', color: '#1D9E75',
+            border: '1px solid #1D9E75', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
           }}>
-            周五复制到周六
+            <CheckCircleOutlined /> 周五复制到周六
           </button>
           <button onClick={() => setPeriodSettingsOpen(true)} style={{
-            padding: '7px 14px', borderRadius: 6, background: '#fff', color: '#5a4e3a',
-            border: '1px solid #EEE7E1', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 14px', borderRadius: 999, background: '#fff', color: '#8A6B2F',
+            border: '1px solid rgba(201,164,92,.55)', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
           }}>
-            时间段设置
+            <ClockCircleOutlined /> 时间段设置
           </button>
         </div>
       </Card>
@@ -223,6 +302,8 @@ function SchedulePageInner() {
           </div>
         ) : viewMode === 'teacher-week' ? (
           <TeacherWeekView onLessonClick={handleLessonClick} />
+        ) : viewMode === 'one-on-one' ? (
+          <OneOnOneView selectedDate={selectedDate} setSelectedDate={setSelectedDate} onLessonClick={handleLessonClick} />
         ) : viewMode === 'week-heatmap' ? (
           <WeekHeatmapView weekStart={weekStart} setWeekStart={setWeekStart} onCellClick={handleHeatmapCellClick} />
         ) : null}
@@ -247,7 +328,7 @@ function SchedulePageInner() {
         />
       )}
 
-      <Modal
+      <BrandModal
         title="取消本次课"
         open={Boolean(cancelLessonId)}
         onCancel={() => setCancelLessonId('')}
@@ -258,7 +339,7 @@ function SchedulePageInner() {
       >
         <p>仅能取消尚未开始、未产生考勤或结算的课次。取消后保留课次记录，并通知相关家长。</p>
         <Input.TextArea aria-label="停课原因" placeholder="请输入停课原因，例如：国庆假期调整" value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} maxLength={200} showCount rows={3} />
-      </Modal>
+      </BrandModal>
 
       {oneOnOneOpen && <OneOnOneModal open={oneOnOneOpen} onClose={() => setOneOnOneOpen(false)}
         defaultDate={oneOnOneDate} onSuccess={() => setOneOnOneOpen(false)} />}

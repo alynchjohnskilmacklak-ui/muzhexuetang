@@ -1,0 +1,26 @@
+﻿=== 1) ���� IP �Ƿ���ץ�� sitemap ===
+  ��ûץ�����ύ��������
+
+=== 2) ������� sitemap ���� ===
+111.225.149.158 [03/Oct/2026:09:08:05 /sitemap.xml 200
+111.53.198.24 [03/Oct/2026:14:18:49 /sitemap.xml 200
+111.53.198.24 [03/Oct/2026:14:18:49 /sitemap_index.xml 307
+111.53.198.24 [03/Oct/2026:14:18:49 /sitemap.txt 307
+111.53.198.24 [03/Oct/2026:14:22:08 /sitemap.xml 200
+101.200.191.201 [03/Oct/2026:15:22:41 /sitemap.xml 200
+101.200.191.201 [03/Oct/2026:15:22:41 /sitemap.xml 200
+111.53.198.24 [03/Oct/2026:15:36:17 /sitemap.xml 200
+157.55.39.202 [03/Oct/2026:15:41:51 /sitemap.xml 200
+
+=== 3) sitemap �� http �� https �ֱ��ܲ���ȡ�����ؼ��������� http��===
+python : Traceback (most recent call last):
+At line:34 char:1
++ python _chk_sitemap.py 2>&1 | Out-File '_preview\_chk-sitemap.txt' -E ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "D:\01muzhexuetang\muzhexuetang\coding\_chk_sitemap.py", line 16, in <module>
+    out, _ = run(f"curl -s -o /dev/null -w '%{{http_code}} %{{size_download}} %{{redirect_url}}' '{u}'")
+    ^^^^^^
+ValueError: too many values to unpack (expected 2)

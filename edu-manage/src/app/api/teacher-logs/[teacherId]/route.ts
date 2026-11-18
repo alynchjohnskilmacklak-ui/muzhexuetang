@@ -1,3 +1,4 @@
+import { apiHandler } from '@/lib/api-handler'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminUser, TEACHER_LOG_ACTIONS, teacherLessonScopeWhere } from '@/lib/teacher-portal'
 import { getRequestDivision } from '@/lib/division'
@@ -5,7 +6,7 @@ import { hasSubmittedAttendance, isAttendanceDue } from '@/lib/teacher-attendanc
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ teacherId: string }> }) {
+export const GET = apiHandler(async (request: NextRequest, { params }: { params: Promise<{ teacherId: string }> }) => {
   try {
     const admin = await requireAdminUser()
     const { prisma } = admin
@@ -94,4 +95,4 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   } catch {
     return NextResponse.json({ error: '无权限' }, { status: 403 })
   }
-}
+})

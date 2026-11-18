@@ -121,7 +121,7 @@ export default function VolunteerClient({ guide }: { guide: Guide }) {
       <Card bordered={false} style={{ borderRadius: 8, background: '#ffffff', border: '1px solid #EEE7E1' }}>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, minmax(0, 1fr))' : `repeat(${Math.max(steps.length, 1)}, minmax(84px, 1fr))`, gap: 8 }}>
           {steps.map((item, index) => (
-            <button key={item.id} onClick={() => selectStep(index)} style={{ border: `1px solid ${index === current ? '#E8784A' : index < current ? '#1D9E75' : '#EEE7E1'}`, background: index === current ? 'rgba(232,120,74,0.12)' : '#FCFBF9', color: '#1F2329', borderRadius: 8, padding: 10, cursor: 'pointer' }}>
+            <button key={item.id} onClick={() => selectStep(index)} style={{ border: `1px solid ${index === current ? 'var(--color-primary)' : index < current ? 'var(--color-success-action)' : '#EEE7E1'}`, background: index === current ? 'rgba(232,120,74,0.12)' : '#FCFBF9', color: '#1F2329', borderRadius: 8, padding: 10, cursor: 'pointer' }}>
               <div style={{ fontWeight: 700 }}>第{item.order}步</div>
               <div style={{ fontSize: 12, color: '#98A2B3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</div>
             </button>

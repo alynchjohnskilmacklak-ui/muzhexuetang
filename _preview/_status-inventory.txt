@@ -1,0 +1,59 @@
+﻿============================================================================
+A. 站点关键文件健康（爬虫必读）
+============================================================================
+  OK  https=[200 67044 ] http=[301 178   ] /
+  OK  https=[200 59589 ] http=[301 178   ] /about
+  OK  https=[200 956   ] http=[200 956   ] /robots.txt
+  OK  https=[200 387   ] http=[200 387   ] /sitemap.xml
+  OK  https=[200 85    ] http=[301 178   ] /BingSiteAuth.xml
+  OK  https=[200 33    ] http=[301 178   ] /baidu_verify_codeva-LcCyyIUZRF.html
+  OK  https=[200 20    ] http=[301 178   ] /ByteDanceVerify.html
+  OK  https=[200 10    ] http=[200 10    ] /sogousiteverification.txt
+  OK  https=[200 68    ] http=[200 68    ] /shenma-site-verification.txt
+  OK  https=[200 32    ] http=[200 32    ] /680d89b9953946efb802698d25294cf6.txt
+
+============================================================================
+B. 今天各引擎爬虫到访汇总（按 IP 段归类）
+============================================================================
+  百度 Baiduspider       总访问    9   首页   5   /about 0
+0
+  必应 bingbot           总访问    4   首页 0
+0   /about 0
+0
+  搜狗 Sogou             总访问    2   首页   1   /about 0
+0
+  字节 Bytespider        总访问    4   首页 0
+0   /about 0
+0
+  神马 ShenmaSpider      总访问    9   首页   3   /about 0
+0
+  Yandex               总访问    3   首页   1   /about   1
+  Google               总访问    2   首页   1   /about 0
+0
+
+============================================================================
+C. 线下遗留项确认
+============================================================================
+  1) sitemap lastmod: <lastmod>2026-10-03 <lastmod>2026-10-03
+  2) 首页 title   : <title>新乐牧哲学堂｜河北新乐文化课辅导</title>
+  3) 首页 sha     : 97e36b12acf9a5cc
+  4) /var/www/verify 文件清单:
+32 680d89b9953946efb802698d25294cf6.txt
+      33 baidu_verify_codeva-LcCyyIUZRF.html
+      85 BingSiteAuth.xml
+      20 ByteDanceVerify.html
+      956 robots.txt
+      68 shenma-site-verification.txt
+      387 sitemap.xml
+      415 sitemap.xml.bak-20261003
+      10 sogousiteverification.txt
+  5) IndexNow 脚本: -rwxr-xr-x 1203 /opt/edu-manage-docker/source/scripts/indexnow-push.sh
+  6) nginx 配置备份数: 9
+  7) compose 备份数: 3
+
+============================================================================
+D. 本地源码 vs 线上
+============================================================================
+  线上 home.html  sha: 97e36b12acf9a5cc
+  线上 about.html sha: f3f2ab6d21c32351
+  容器状态: running/healthy

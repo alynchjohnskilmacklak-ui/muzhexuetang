@@ -13,6 +13,11 @@ github-mcp-server/
 01muzhexuetang*/
 mu-zhe-smart-edu-video/
 
+# organized archive/vendor/projects (moved 2026-07-24)
+_archive/
+_vendor/
+_projects/
+
 # deploy artifacts
 edu-manage-deploy-*/
 edu-manage-deploy-*.sh

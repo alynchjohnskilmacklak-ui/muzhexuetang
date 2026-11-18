@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="牧哲学堂双面招生传单布局参考" />
+    <title>牧哲学堂双面传单布局参考</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="preview-shell">
+      <header class="editor-header">
+        <div class="editor-title">
+          <p class="preview-label">A4 双面招生传单</p>
+          <h1>牧哲学堂传单实时编辑器</h1>
+          <p>点击传单中的文字即可修改，点击图片后可在控制栏中替换。</p>
+        </div>
+
+        <div class="editor-toolbar" aria-label="传单编辑控制栏">
+          <div class="toolbar-group view-switcher" aria-label="页面显示范围">
+            <span class="control-label">显示</span>
+            <button class="view-button is-active" type="button" data-view="both">双面</button>
+            <button class="view-button" type="button" data-view="front">正面</button>
+            <button class="view-button" type="button" data-view="back">背面</button>
+          </div>
+
+          <label class="toolbar-group range-control" for="zoomControl">
+            <span class="control-label">预览</span>
+            <input id="zoomControl" type="range" min="55" max="110" value="100" />
+            <output id="zoomValue" for="zoomControl">100%</output>
+          </label>
+
+          <label class="toolbar-group range-control" for="typeControl">
+            <span class="control-label">字号</span>
+            <input id="typeControl" type="range" min="90" max="108" value="100" />
+            <output id="typeValue" for="typeControl">100%</output>
+          </label>
+
+          <label class="toolbar-group color-control" for="brandColor">
+            <span class="control-label">品牌色</span>
+            <input id="brandColor" type="color" value="#e8784a" />
+          </label>
+
+          <label class="toolbar-group hint-control" for="editHints">
+            <input id="editHints" type="checkbox" checked />
+            <span>编辑提示</span>
+          </label>
+
+          <div class="toolbar-actions">
+            <button id="replaceImage" type="button" disabled>替换图片</button>
+            <button id="saveDraft" type="button">保存草稿</button>
+            <button id="resetDraft" type="button">恢复初稿</button>
+            <button id="printFlyer" class="primary-action" type="button">打印 / PDF</button>
+          </div>
+
+          <input id="imagePicker" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" />
+          <p id="editorStatus" class="editor-status" aria-live="polite">已开启自动保存</p>
+        </div>
+      </header>
+
+      <div class="preview-grid">
+        <section class="preview-item" data-page="front" aria-label="传单正面预览">
+          <p class="side-label">正面</p>
+          <article class="sheet front-sheet">
+            <header class="brand-header">
+              <img src="./assets/logo.jpg" alt="牧哲学堂，不侈学识，唯恐志短" />
+              <div class="brand-meta">
+                <strong>晚间课业辅导营 × 周末先锋营</strong>
+                <span>新乐市长寿店</span>
+              </div>
+            </header>
+
+            <section class="front-hero">
+              <div class="hero-copy">
+                <p class="eyebrow">把学习中的问题真正解决</p>
+                <h2>每天的作业做明白<br />每周的知识学扎实</h2>
+                <p class="hero-lead">
+                  当天不会的及时讲清，本周落下的集中补齐，下周新课提前铺好，让孩子跟得上、学得懂、有信心。
+                </p>
+                <div class="hero-promise">
+                  <span>不是简单看管</span>
+                  <strong>而是带着孩子真正学会</strong>
+                </div>
+              </div>
+
+              <div class="hero-visual" aria-label="真实课堂照片">
+                <img class="hero-photo-main" src="./assets/classroom-3.png" alt="牧哲学堂真实课堂辅导场景" />
+                <img class="hero-photo-small" src="./assets/classroom-1.png" alt="学生在牧哲学堂完成课业" />
+                <div class="photo-caption">
+                  <strong>真实课堂</strong>
+                  <span>讲解、答疑、检查、反馈</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="learning-loop" aria-labelledby="loop-title">
+              <div class="section-heading">
+                <h3 id="loop-title">一套完整的学习闭环</h3>
+                <p>从当天到下一周，每个关键节点都有人负责。</p>
+              </div>
+
+              <div class="loop-grid">
+                <article class="loop-item">
+                  <span class="step-number">01</span>
+                  <div>
+                    <h4>当天问题当天清</h4>
+                    <p>课堂中没听懂、不会做的问题，当天讲解，不让疑问过夜。</p>
+                  </div>
+                </article>
+                <article class="loop-item">
+                  <span class="step-number">02</span>
+                  <div>
+                    <h4>作业不只写完</h4>
+                    <p>作业前梳理、过程中答疑、完成后检查，确保真正弄懂。</p>
+                  </div>
+                </article>
+                <article class="loop-item">
+                  <span class="step-number">03</span>
+                  <div>
+                    <h4>本周知识周周清</h4>
+                    <p>集中订正错题、查漏补缺，不让薄弱点越积越多。</p>
+                  </div>
+                </article>
+                <article class="loop-item">
+                  <span class="step-number">04</span>
+                  <div>
+                    <h4>下周新课提前学</h4>
+                    <p>先一步熟悉新知识，降低听课难度，课堂更有底气。</p>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="proof-band" aria-label="牧哲学堂服务优势">
+              <div class="proof-main">
+                <p>专业师资</p>
+                <h3><strong>1</strong> 位 211 硕士带队，<strong>6</strong> 名师范类本科教师共同负责</h3>
+                <span>负责授课、答疑、检查，不是简单看管。</span>
+              </div>
+              <div class="proof-side">
+                <p>过程看得见</p>
+                <h3>到勤、作业、课堂记录，家长端随时可查</h3>
+                <span>用真实记录代替一句“今天完成了”。</span>
+              </div>
+            </section>
+
+            <section class="assurance-band" aria-label="答疑兜底承诺">
+              <div>
+                <span>答疑有兜底</span>
+                <h3>线下教师现场解决，疑难问题转线上教师群协同解答</h3>
+              </div>
+              <p>本年级正常课业范围内，经线下、线上双重答疑仍无法解答，本月晚托费用免费。</p>
+            </section>
+
+            <footer class="front-cta">
+              <div>
+                <strong>先了解孩子的问题，再安排适合的学习方案</strong>
+                <span>时间：【填写】　地址：河北省石家庄市新乐市长寿店</span>
+              </div>
+              <div class="cta-contact">
+                <span>预约咨询</span>
+                <strong>159 3011 4500</strong>
+              </div>
+            </footer>
+          </article>
+        </section>
+
+        <section class="preview-item" data-page="back" aria-label="传单背面预览">
+          <p class="side-label">背面</p>
+          <article class="sheet back-sheet">
+            <header class="brand-header compact">
+              <img src="./assets/logo.jpg" alt="牧哲学堂，不侈学识，唯恐志短" />
+              <div class="brand-meta">
+                <strong>两大课程说明</strong>
+                <span>每天清一点，每周进一步</span>
+              </div>
+            </header>
+
+            <section class="back-intro">
+              <h2>接住孩子学习的每一个关键节点</h2>
+              <p>晚间解决“今天不会”，周末解决“本周没掌握”，共同帮助孩子稳步跟上学校进度。</p>
+            </section>
+
+            <section class="program program-evening" aria-labelledby="evening-title">
+              <div class="program-photos">
+                <img class="program-photo-main" src="./assets/classroom-1.png" alt="晚间课业辅导营真实课堂" />
+                <img class="program-photo-detail" src="./assets/classroom-2.png" alt="晚间课业辅导中的学生作业场景" />
+              </div>
+              <div class="program-copy">
+                <div class="program-title">
+                  <span>晚间课业辅导营</span>
+                  <h3 id="evening-title">当天问题，当天解决</h3>
+                </div>
+                <p class="program-lead">
+                  不是“看着写”，而是从作业前梳理、过程中答疑到完成后检查，帮助孩子把当天的问题真正弄懂。
+                </p>
+                <div class="process-list">
+                  <div><strong>作业前梳理</strong><span>明确当天知识重点和作业任务。</span></div>
+                  <div><strong>作业中答疑</strong><span>不会的题现场讲解，避免无效耗时。</span></div>
+                  <div><strong>作业后检查</strong><span>逐项核对订正，做到写完、写对、弄懂。</span></div>
+                  <div><strong>家长端反馈</strong><span>到勤、作业清单、教师说明和前后照片随时可查。</span></div>
+                </div>
+                <p class="guarantee">
+                  本年级正常课业问题经线下、线上双重答疑仍无法解答，本月晚托费用免费。
+                </p>
+              </div>
+            </section>
+
+            <section class="program program-weekend" aria-labelledby="weekend-title">
+              <div class="program-copy">
+                <div class="program-title">
+                  <span>周末先锋营</span>
+                  <h3 id="weekend-title">一周一清，提前一步</h3>
+                </div>
+                <p class="program-lead">
+                  用周末半天解决本周疑难、补齐知识漏洞，再提前熟悉下周新课，让孩子跟得上、学得顺、有底气。
+                </p>
+                <div class="process-list compact-list">
+                  <div><strong>解决本周疑难</strong><span>集中讲清本周没听懂、不会做的知识点。</span></div>
+                  <div><strong>错题讲评补缺</strong><span>找出错误原因，补齐知识薄弱点。</span></div>
+                  <div><strong>提前预习新课</strong><span>降低新课理解门槛，课堂听讲更从容。</span></div>
+                </div>
+                <div class="outcome-line">
+                  <span>知识不欠账</span><span>课堂敢回答</span><span>学习更自信</span>
+                </div>
+              </div>
+              <div class="program-photos">
+                <img class="program-photo-main" src="./assets/classroom-4.jpg" alt="周末先锋营真实课堂" />
+                <img class="program-photo-detail" src="./assets/classroom-3.png" alt="学生参加周末先锋营" />
+              </div>
+            </section>
+
+            <footer class="contact-footer">
+              <div class="contact-message">
+                <p>先补本周的洞，再铺下周的路</p>
+                <h3>让孩子每次来，都能带着结果回家。</h3>
+                <span>地址：河北省石家庄市新乐市长寿店</span>
+              </div>
+              <div class="qr-group">
+                <div class="qr-item">
+                  <img src="./assets/wechat-ren.jpg" alt="任老师微信二维码" />
+                  <span>任老师　159 3011 4500</span>
+                </div>
+                <div class="qr-item">
+                  <img src="./assets/wechat-ma.jpg" alt="马老师微信二维码" />
+                  <span>马老师　180 3126 4903</span>
+                </div>
+              </div>
+            </footer>
+          </article>
+        </section>
+      </div>
+    </main>
+    <script src="./editor.js"></script>
+  </body>
+</html>

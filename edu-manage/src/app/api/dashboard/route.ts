@@ -66,6 +66,7 @@ export const GET = apiHandler(async (req: NextRequest) => {
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1)
   const today = startOfDay(now)
   const todayEnd = addDays(today, 1)
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
   const { searchParams } = new URL(req.url)
   const division = getRequestDivision(user, searchParams.get('division'))
   const selectedTerm = await resolveAdminTermScope(prisma, division, req)
@@ -119,12 +120,12 @@ export const GET = apiHandler(async (req: NextRequest) => {
         group: scopedGroupWhere,
       },
       include: {
-        teacher: { select: { name: true } },
+        teacher: { select: { name: true, gender: true, avatar: true } },
         group: {
           include: {
             course: true,
             room: true,
-            teacher: { select: { name: true } },
+            teacher: { select: { name: true, gender: true, avatar: true } },
             enrollments: { where: activeEnrollmentWhere, select: { id: true } },
           },
         },
@@ -315,6 +316,89 @@ export const GET = apiHandler(async (req: NextRequest) => {
     .sort((a, b) => b.hours - a.hours)
     .slice(0, 8)
 
+  // ── 今日教师考勤/反馈完成情况（按教师聚合，管理者一目了然） ──
+  const todayLessonIds = todayClassLessons.map((lesson) => lesson.id)
+  const [todayFeedbackRows, studentCreatedAtRows, sixMonthClassLessons] = await Promise.all([
+    todayLessonIds.length
+      ? prisma.classroomFeedback.findMany({
+          where: { classLessonId: { in: todayLessonIds } },
+          select: { classLessonId: true, teacherId: true },
+        })
+      : Promise.resolve([] as Array<{ classLessonId: string | null; teacherId: string }>),
+    prisma.student.findMany({
+      where: { ...scopedStudentWhere, status: 'ACTIVE' },
+      select: { createdAt: true },
+    }),
+    prisma.classLesson.findMany({
+      where: {
+        ...scopedLessonWhere,
+        lessonDate: { gte: sixMonthsAgo, lt: monthEnd },
+        status: { notIn: ['CANCELLED', 'POSTPONED'] },
+        group: scopedGroupWhere,
+      },
+      select: { lessonDate: true, startTime: true, endTime: true, group: { select: { lessonMinutes: true } } },
+    }),
+  ])
+
+  const teacherComplianceMap = new Map<string, { teacherId: string; name: string; gender: string | null; avatar: string | null; todayLessons: number; attendanceDone: number; pendingAttendance: number; feedbackDone: number; pendingFeedback: number }>()
+  for (const lesson of todayClassLessons) {
+    const teacherId = lesson.teacherId ?? lesson.group.teacherId
+    if (!teacherId) continue
+    const name = lesson.teacher?.name ?? lesson.group.teacher.name ?? '未知教师'
+    const gender = lesson.teacher?.gender ?? lesson.group.teacher.gender ?? null
+    const avatar = lesson.teacher?.avatar ?? lesson.group.teacher.avatar ?? null
+    const entry = teacherComplianceMap.get(teacherId) ?? { teacherId, name, gender, avatar, todayLessons: 0, attendanceDone: 0, pendingAttendance: 0, feedbackDone: 0, pendingFeedback: 0 }
+    entry.todayLessons += 1
+    if (hasSubmittedLessonAttendance({ attendanceSubmittedAt: lesson.attendanceSubmittedAt, status: lesson.status, attendances: lesson.attendances })) {
+      entry.attendanceDone += 1
+    } else {
+      entry.pendingAttendance += 1
+    }
+    teacherComplianceMap.set(teacherId, entry)
+  }
+  const feedbackLessonIds = new Set(todayFeedbackRows.map((row) => row.classLessonId).filter((id): id is string => Boolean(id)))
+  for (const lesson of todayClassLessons) {
+    const teacherId = lesson.teacherId ?? lesson.group.teacherId
+    if (!teacherId) continue
+    const entry = teacherComplianceMap.get(teacherId)
+    if (!entry) continue
+    if (feedbackLessonIds.has(lesson.id)) entry.feedbackDone += 1
+    else entry.pendingFeedback += 1
+  }
+  const teacherCompliance = [...teacherComplianceMap.values()]
+    .map((item) => ({ ...item }))
+    .sort((a, b) => (b.pendingAttendance + b.pendingFeedback) - (a.pendingAttendance + a.pendingFeedback) || b.todayLessons - a.todayLessons)
+
+  // ── 近 6 个月学员增长 + 课时趋势（图表数据） ──
+  const monthBuckets: Array<{ key: string; label: string }> = []
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    monthBuckets.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: `${d.getMonth() + 1}月` })
+  }
+  const newStudentsByMonth = new Map<string, number>()
+  for (const row of studentCreatedAtRows) {
+    const key = `${row.createdAt.getFullYear()}-${row.createdAt.getMonth()}`
+    newStudentsByMonth.set(key, (newStudentsByMonth.get(key) || 0) + 1)
+  }
+  const classHoursByMonth = new Map<string, number>()
+  for (const lesson of sixMonthClassLessons) {
+    const key = `${lesson.lessonDate.getFullYear()}-${lesson.lessonDate.getMonth()}`
+    const hours = lesson.group.lessonMinutes > 0
+      ? lesson.group.lessonMinutes / 60
+      : hoursBetween(combineLessonDateTime(lesson.lessonDate, lesson.startTime), combineLessonDateTime(lesson.lessonDate, lesson.endTime))
+    classHoursByMonth.set(key, roundHours((classHoursByMonth.get(key) || 0) + hours))
+  }
+  let studentAccumulator = 0
+  const growthData = {
+    months: monthBuckets.map((bucket) => bucket.label),
+    newStudents: monthBuckets.map((bucket) => newStudentsByMonth.get(bucket.key) || 0),
+    totalStudents: monthBuckets.map((bucket) => {
+      studentAccumulator += newStudentsByMonth.get(bucket.key) || 0
+      return studentAccumulator
+    }),
+    classHours: monthBuckets.map((bucket) => classHoursByMonth.get(bucket.key) || 0),
+  }
+
   const classLessonSchedules = todayClassLessons.map((lesson) => {
     const start = combineLessonDateTime(lesson.lessonDate, lesson.startTime)
     const end = combineLessonDateTime(lesson.lessonDate, lesson.endTime)
@@ -392,16 +476,11 @@ export const GET = apiHandler(async (req: NextRequest) => {
       masteredRate: totalQuestionsCount > 0 ? Math.round((masteredCount / totalQuestionsCount) * 100) : 0,
       performancePostsToday,
     },
-    growthData: {
-      months: [],
-      newStudents: [],
-      totalStudents: [],
-      classHours: [],
-    },
+    growthData,
     schedules,
+    teacherCompliance,
     operatingHighlights: [
       { label: '今日待考勤', value: todayLessonsPendingAttendance, tone: 'orange', href: '/attendance' },
-      { label: '课时不足', value: renewalWarnings, tone: 'red', href: '/students?filter=lowHours' },
       { label: '未推送试卷', value: unpublishedPapers, tone: 'blue', href: '/grades' },
       { label: '家长未读沟通', value: unreadComments, tone: 'purple', href: '/communications' },
     ],

@@ -54,6 +54,11 @@ next-env.d.ts
 edu-manage-deploy.tar
 *.tar
 *.tar.gz
+/release/
+
+# generated review and export artifacts
+/.review/
+/output/
 
 # local runtime logs
 *.log
@@ -66,6 +71,9 @@ cachenpm/
 
 # temp
 tmp/
+
+# Local-only synthetic demo fixture (never commit or deploy)
+/scripts/seed-local-demo.ts
 
 # code review artifacts
 design-qa.md

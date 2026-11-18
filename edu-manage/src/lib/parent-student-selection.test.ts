@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { groupParentStudentRecords, selectLatestParentStudents } from './parent-student-selection'
 
-function student(id: string, termStart: string, termStatus: string, grade: string) {
+function student(id: string, termStart: string, termStatus: string, grade: string, identityId = 'identity-shared') {
   return {
     id,
+    identityId,
     name: '何浩辰',
     gender: null,
     birthYear: 2011,
@@ -30,7 +31,7 @@ describe('selectLatestParentStudents', () => {
 
   it('does not collapse different students with the same name and different birth years', () => {
     const first = student('first', '2026-09-01', 'ACTIVE', '初二')
-    const second = { ...student('second', '2026-09-01', 'ACTIVE', '初一'), birthYear: 2012 }
+    const second = { ...student('second', '2026-09-01', 'ACTIVE', '初一', 'identity-second'), birthYear: 2012 }
     expect(selectLatestParentStudents([first, second])).toHaveLength(2)
   })
 
@@ -45,8 +46,15 @@ describe('selectLatestParentStudents', () => {
 
   it('does not merge same-name children enrolled in the same active term', () => {
     expect(selectLatestParentStudents([
-      student('first', '2026-09-01', 'ACTIVE', '初二'),
-      student('second', '2026-09-01', 'ACTIVE', '初二'),
+      student('first', '2026-09-01', 'ACTIVE', '初二', 'identity-first'),
+      student('second', '2026-09-01', 'ACTIVE', '初二', 'identity-second'),
     ])).toHaveLength(2)
+  })
+
+  it('does not merge exact-name records until an administrator links their identity IDs', () => {
+    const first = student('first', '2025-09-01', 'ARCHIVED', '初一', 'identity-first')
+    const second = student('second', '2026-09-01', 'ACTIVE', '初二', 'identity-second')
+    expect(selectLatestParentStudents([first, second])).toHaveLength(2)
+    expect(selectLatestParentStudents([{ ...first, identityId: 'confirmed-same-child' }, { ...second, identityId: 'confirmed-same-child' }])).toHaveLength(1)
   })
 })
