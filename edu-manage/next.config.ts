@@ -45,6 +45,8 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
+    // 安全升级策略：Next.js 自动化升级仅采用安全修复版本，规避非安全变更
+    agentUpgrade: 'security',
     // 构建并行 CPU 上限：避免高核数机器上 Next 多 worker 同时构建导致内存 OOM
     cpus: buildCpus,
     optimizePackageImports: ['antd', '@ant-design/icons', 'lodash', 'date-fns'],
