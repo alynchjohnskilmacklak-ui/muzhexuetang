@@ -59,32 +59,6 @@ const BUSINESS_SLIDES = [
   { src: '/services/postgraduate-public-courses/1.png', title: '考研公共课辅导', kicker: '系统精讲 · 真题训练 · 少走弯路', tag: '高阶深造' },
 ]
 
-const SCHOOL_ADVANTAGES = [
-  {
-    icon: '🎯',
-    title: '教学精准紧凑',
-    desc: '紧贴考纲大纲与实际学情，直击必考常考易错点，不浪费学生一分钟。',
-    tag: '靶向提分',
-  },
-  {
-    icon: '👩‍🏫',
-    title: '全员真实师资',
-    desc: '授课教师全员持证上岗，线下大厅公示资质，学信网实名在线可查验。',
-    tag: '资质透明',
-  },
-  {
-    icon: '👥',
-    title: '约10人精细小班',
-    desc: '严格控制班级规模，每班配备至少4名老师全程陪学辅导、答疑督学。',
-    tag: '全员关注',
-  },
-  {
-    icon: '📱',
-    title: '数字家校闭环',
-    desc: '课堂互动、随堂提问与学情分析每节课即时触达家长，进度清晰透明。',
-    tag: '过程可视',
-  },
-]
 
 const ERROR_MESSAGES: Record<string, string> = {
   BAD_USERNAME: '账号不存在，请检查输入的账号是否正确',
@@ -225,11 +199,39 @@ function BrandLeft({ activeSlide, onSlideChange, onSwipe, preloadActive, deferIm
 }
 
 
+
+const SCHOOL_ADVANTAGES = [
+  {
+    icon: '🎯',
+    title: '教学精准紧凑',
+    desc: '紧贴考纲大纲与实际学情，直击必考常考易错点，不浪费学生一分钟。',
+    tag: '靶向提分',
+  },
+  {
+    icon: '👩‍🏫',
+    title: '全员真实师资',
+    desc: '授课教师全员持证上岗，线下大厅公示资质，学信网实名在线可查验。',
+    tag: '资质透明',
+  },
+  {
+    icon: '👥',
+    title: '约10人精细小班',
+    desc: '严格控制班级规模，每班配备至少4名老师全程陪学辅导、答疑督学。',
+    tag: '全员关注',
+  },
+  {
+    icon: '📱',
+    title: '数字家校闭环',
+    desc: '课堂互动、随堂提问与学情分析每节课即时触达家长，进度清晰透明。',
+    tag: '过程可视',
+  },
+]
+
 function BottomAdvantagesSection() {
   return (
-    <div className="login-bottom-advantages" style={{ marginTop: 28, width: '100%', maxWidth: 420 }}>
+    <div className="login-bottom-advantages" style={{ marginTop: 16, width: '100%' }}>
       {/* ── 办学优势 ── */}
-      <div style={{ textAlign: 'center', marginBottom: 14 }}>
+      <div style={{ textAlign: 'center', marginBottom: 10 }}>
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -238,14 +240,14 @@ function BottomAdvantagesSection() {
           fontWeight: 700,
           color: '#14574D',
           letterSpacing: 1.5,
-          marginBottom: 4,
+          marginBottom: 3,
           padding: '2px 10px',
           borderRadius: 999,
           background: 'rgba(20, 87, 77, 0.08)',
         }}>
           <span>✦</span> 办学特色 · MOREJOY <span>✦</span>
         </div>
-        <h3 style={{ fontSize: 17, fontWeight: 800, color: '#1a1201', margin: '2px 0 0' }}>
+        <h3 style={{ fontSize: 15, fontWeight: 800, color: '#1a1201', margin: '2px 0 0' }}>
           四大核心办学优势
         </h3>
       </div>
@@ -253,25 +255,25 @@ function BottomAdvantagesSection() {
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap: 10,
-        marginBottom: 24,
+        gap: 8,
+        marginBottom: 14,
       }}>
         {SCHOOL_ADVANTAGES.map((adv) => (
           <div
             key={adv.title}
             style={{
-              padding: '12px 10px',
-              borderRadius: 14,
-              background: '#FFFFFF',
-              border: '1px solid rgba(220, 210, 195, 0.55)',
+              padding: '10px 10px',
+              borderRadius: 12,
+              background: 'rgba(255, 255, 255, 0.92)',
+              border: '1px solid rgba(220, 210, 195, 0.65)',
               boxShadow: '0 2px 8px rgba(26, 18, 1, 0.03)',
               display: 'flex',
               flexDirection: 'column',
-              gap: 5,
+              gap: 4,
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 18 }}>{adv.icon}</span>
+              <span style={{ fontSize: 16 }}>{adv.icon}</span>
               <span style={{
                 fontSize: 10,
                 fontWeight: 700,
@@ -284,13 +286,13 @@ function BottomAdvantagesSection() {
                 {adv.tag}
               </span>
             </div>
-            <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1a1201' }}>{adv.title}</div>
-            <div style={{ fontSize: 11, color: '#7a6f61', lineHeight: 1.4 }}>{adv.desc}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#1a1201' }}>{adv.title}</div>
+            <div style={{ fontSize: 10.5, color: '#7a6f61', lineHeight: 1.4 }}>{adv.desc}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ textAlign: 'center', paddingBottom: 20, fontSize: 11.5, color: '#A89B8C' }}>
+      <div style={{ textAlign: 'center', paddingBottom: 16, fontSize: 11, color: '#A89B8C' }}>
         <span>© 2026 牧哲学堂</span>
         <span style={{ margin: '0 6px', opacity: 0.5 }}>·</span>
         <span>冀ICP备2026028285号</span>
@@ -373,15 +375,89 @@ function RightForm({
   }
 
   return (
-    <section className="login-right" style={{ flex: 1, display: 'grid', placeItems: 'center', padding: isMobile ? '12px 16px 20px' : 40, minHeight: isMobile ? '100dvh' : '100vh', width: '100%' }}>
-      <div className="login-form-shell" style={{ width: '100%', maxWidth: 420 }}>
+    <section
+      className="login-right"
+      style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        padding: isMobile ? '0 0 max(28px, env(safe-area-inset-bottom, 0px)) 0' : '40px 24px',
+        minHeight: isMobile ? '100dvh' : '100vh',
+        width: '100%',
+      }}
+    >
+      {/* 手机端置顶全宽水墨通栏：边缘无缝贴边，铺满上方 */}
+      {isMobile && (
+        <div className="login-mobile-top-banner">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/muzhe-brand-banner.jpg"
+            alt="牧哲学堂 · 不怕学浅，唯恐志短"
+            style={{
+              width: '100%',
+              maxWidth: 480,
+              height: 'auto',
+              maxHeight: 140,
+              objectFit: 'contain',
+              mixBlendMode: 'multiply',
+              filter: 'contrast(1.05) brightness(1.01)',
+              display: 'block',
+              margin: '0 auto',
+            }}
+          />
+        </div>
+      )}
+
+      <div
+        className="login-form-shell"
+        style={{
+          width: '100%',
+          maxWidth: 430,
+          margin: '0 auto',
+          padding: '0 16px',
+          boxSizing: 'border-box',
+          marginTop: isMobile ? -18 : 0,
+          position: 'relative',
+          zIndex: 10,
+        }}
+      >
+        {/* 桌面端品牌横幅：居中舒展展示 */}
+        {!isMobile && (
+          <div style={{
+            textAlign: 'center',
+            marginBottom: 20,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/muzhe-brand-banner.jpg"
+              alt="牧哲学堂 · 不怕学浅，唯恐志短"
+              style={{
+                width: 360,
+                height: 'auto',
+                maxHeight: 115,
+                objectFit: 'contain',
+                mixBlendMode: 'multiply',
+                filter: 'contrast(1.05) brightness(1.01)',
+                display: 'block',
+              }}
+            />
+          </div>
+        )}
+
         <div className="login-card" style={{
           position: 'relative',
           overflow: 'hidden',
           borderRadius: 22,
-          padding: isMobile ? '20px 18px 18px' : '36px 34px',
+          padding: isMobile ? '22px 18px 20px' : '36px 34px',
           border: '1px solid rgba(214, 180, 91, 0.35)',
-          boxShadow: '0 4px 16px -2px rgba(26, 18, 1, 0.04), 0 20px 48px -6px rgba(26, 18, 1, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
+          boxShadow: isMobile
+            ? '0 12px 32px -4px rgba(26, 18, 1, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02)'
+            : '0 4px 16px -2px rgba(26, 18, 1, 0.04), 0 20px 48px -6px rgba(26, 18, 1, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
         }}>
           {/* Magic UI · 流金光环边框 */}
           <BorderBeam
@@ -426,27 +502,29 @@ function RightForm({
 
           {/* School Badge & Header */}
           <div style={{ textAlign: 'center', marginBottom: isMobile ? 12 : 20, position: 'relative', zIndex: 1 }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: isMobile ? 44 : 52,
-              height: isMobile ? 44 : 52,
-              borderRadius: 14,
-              background: 'linear-gradient(135deg, #FFFDF9 0%, #F7EFE6 100%)',
-              border: '1px solid rgba(214, 180, 91, 0.4)',
-              boxShadow: '0 4px 14px rgba(232, 120, 74, 0.12), inset 0 1px 0 #ffffff',
-              marginBottom: isMobile ? 6 : 10,
-              padding: isMobile ? 6 : 8,
-            }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/logo-small-128.webp"
-                alt="牧哲学堂"
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              />
-            </div>
-            <div className="login-welcome-title stagger-item" style={{ fontSize: isMobile ? 19 : 21, fontWeight: 800, color: '#1a1201', letterSpacing: -0.3, lineHeight: 1.25, marginBottom: 2 }}>
+            {!isMobile && (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 52,
+                height: 52,
+                borderRadius: 14,
+                background: 'linear-gradient(135deg, #FFFDF9 0%, #F7EFE6 100%)',
+                border: '1px solid rgba(214, 180, 91, 0.4)',
+                boxShadow: '0 4px 14px rgba(232, 120, 74, 0.12), inset 0 1px 0 #ffffff',
+                marginBottom: 10,
+                padding: 8,
+              }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/logo-small-128.webp"
+                  alt="牧哲学堂"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
+              </div>
+            )}
+            <div className="login-welcome-title stagger-item" style={{ fontSize: isMobile ? 18 : 21, fontWeight: 800, color: '#1a1201', letterSpacing: -0.3, lineHeight: 1.25, marginBottom: 2 }}>
               欢迎登录牧哲学堂
             </div>
             <p className="stagger-item" style={{ fontSize: isMobile ? 12 : 13, color: '#8a7d6d', margin: 0, letterSpacing: 0.3 }}>
@@ -670,22 +748,22 @@ function RightForm({
           </form>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 14 }}>
+        <div style={{ textAlign: 'center', marginTop: isMobile ? 12 : 16 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#A09484' }}>
             <span>🔒 全程数据加密</span>
             <span style={{ opacity: 0.4 }}>•</span>
             <span>🏫 牧哲学堂数字化教务</span>
           </div>
           {!isMobile && (
-            <div style={{ marginTop: 10, fontSize: 11.5, color: '#A89B8C' }}>
+            <div style={{ marginTop: 6, fontSize: 11, color: '#A89B8C', opacity: 0.85 }}>
               <span>© 2026 牧哲学堂</span>
-              <span style={{ margin: '0 6px', opacity: 0.5 }}>·</span>
+              <span style={{ margin: '0 5px', opacity: 0.4 }}>·</span>
               <span>冀ICP备2026028285号</span>
             </div>
           )}
         </div>
 
-        {/* 3. 下面：优势在下面 */}
+        {/* 手机端核心办学优势卡片 */}
         {isMobile && <BottomAdvantagesSection />}
       </div>
 

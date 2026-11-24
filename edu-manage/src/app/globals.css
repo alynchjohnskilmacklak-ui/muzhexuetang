@@ -959,19 +959,24 @@ body {
     display: flex !important;
   }
 
-  /* 右侧表单区域全宽 */
+  /* 右侧表单区域全宽与顶部通栏流排布 */
   .login-right {
     width: 100% !important;
-    padding: 6px 14px 24px !important;
-    min-height: auto !important;
+    padding: 0 0 max(24px, env(safe-area-inset-bottom, 0px)) 0 !important;
+    min-height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
   }
 
   .login-shell {
-    min-height: auto !important;
+    min-height: 100dvh !important;
   }
 
   .login-right > div {
     max-width: 100% !important;
+    margin: 0 auto !important;
   }
 
   .login-card {
@@ -13804,11 +13809,12 @@ button:focus:not(:focus-visible) {
 }
 
 @media (max-width: 767px) {
-  .login-page > .login-shell {
+  .login-page > .login-shell,
+  .login-page.login-page--brand-background > .login-page-content .login-shell {
     display: flex !important;
-    min-height: 0 !important;
-    flex-direction: column;
-    background: var(--color-canvas) !important;
+    min-height: 100dvh !important;
+    flex-direction: column !important;
+    background: transparent !important;
   }
 
   .login-page .login-mobile-business {
@@ -13909,20 +13915,37 @@ button:focus:not(:focus-visible) {
   }
 
   .login-page .login-right {
-    display: grid;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
     width: 100% !important;
-    min-height: 0 !important;
-    flex: 0 0 auto;
-    grid-template-columns: minmax(0, 1fr);
-    place-items: start center !important;
-    padding: 4px 14px max(20px, env(safe-area-inset-bottom, 0px)) !important;
-    background: var(--color-canvas);
+    min-height: 100dvh !important;
+    flex: 1 0 auto !important;
+    padding: 0 0 max(24px, env(safe-area-inset-bottom, 0px)) 0 !important;
+    background: transparent !important;
+  }
+
+  .login-mobile-top-banner {
+    width: 100% !important;
+    position: relative;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+    padding-bottom: 22px;
+    background: linear-gradient(180deg, #FAF4EB 0%, #F5EDE1 65%, rgba(245, 237, 225, 0.45) 100%);
+    border-bottom: 1px solid rgba(214, 180, 91, 0.22);
+    box-shadow: 0 4px 16px rgba(26, 18, 1, 0.03);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
   }
 
   .login-page .login-form-shell {
-    width: 100%;
-    max-width: 440px !important;
-    justify-self: stretch;
+    width: 100% !important;
+    max-width: 430px !important;
+    margin: 0 auto !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
   }
 
   .login-page .login-card {

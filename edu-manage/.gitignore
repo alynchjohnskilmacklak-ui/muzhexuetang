@@ -46,6 +46,9 @@ next-env.d.ts
 *.db
 *.db-journal
 
+# artifacts
+artifacts/
+
 # local IDE
 .vs/
 .vs/

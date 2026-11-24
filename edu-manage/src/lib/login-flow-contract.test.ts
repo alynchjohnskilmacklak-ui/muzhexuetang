@@ -118,7 +118,7 @@ describe('login client request contract', () => {
   })
 
   it('plays the opening on each login page visit without a permanent seen flag or replay on submit', () => {
-    expect(source).toContain('const [showSplash, setShowSplash] = useState(false)')
+    expect(source).toContain('const [showSplash, setShowSplash] = useState(true)')
     expect(source).not.toContain('muzhe-login-splash-seen')
     expect(source).toContain('setShowSplash(true)')
     expect(source).not.toContain('startSplash()')

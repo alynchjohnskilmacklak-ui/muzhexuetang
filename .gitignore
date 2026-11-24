@@ -42,6 +42,7 @@ __pycache__/
 *.pyc
 
 # scratch
+_context_mode_review
 _context_mode_review/
 
 # audit, temp, backups and sensitive scratch files
